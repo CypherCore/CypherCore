@@ -328,7 +328,7 @@ namespace Game
 
                 Group group = player.GetGroup();
                 if (group)
-                    if (group.isLFGGroup() && player.GetMap().IsDungeon())
+                    if (group.IsLFGGroup() && player.GetMap().IsDungeon())
                         teleported = player.TeleportToBGEntryPoint();
             }
 
@@ -582,7 +582,7 @@ namespace Game
             {
                 if (group.IsLeader(GetPlayer().GetGUID()))
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player groupGuy = refe.GetSource();
                         if (!groupGuy)
@@ -662,7 +662,7 @@ namespace Game
             {
                 if (group.IsLeader(GetPlayer().GetGUID()))
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player groupGuy = refe.GetSource();
                         if (!groupGuy)

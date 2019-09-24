@@ -31,7 +31,7 @@ namespace Game.Chat.Commands
         [Command("", RBACPermissions.CommandLearn)]
         static bool HandleLearnCommand(StringArguments args, CommandHandler handler)
         {
-            Player targetPlayer = handler.getSelectedPlayerOrSelf();
+            Player targetPlayer = handler.GetSelectedPlayerOrSelf();
 
             if (!targetPlayer)
             {
@@ -40,7 +40,7 @@ namespace Game.Chat.Commands
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spell = handler.extractSpellIdFromLink(args);
+            uint spell = handler.ExtractSpellIdFromLink(args);
             if (spell == 0 || !Global.SpellMgr.HasSpellInfo(spell))
                 return false;
 
@@ -108,7 +108,7 @@ namespace Game.Chat.Commands
             static bool HandleLearnAllDefaultCommand(StringArguments args, CommandHandler handler)
             {
                 Player target;
-                if (!handler.extractPlayerTarget(args, out target))
+                if (!handler.ExtractPlayerTarget(args, out target))
                     return false;
 
                 target.LearnDefaultSkills();
@@ -123,7 +123,7 @@ namespace Game.Chat.Commands
             static bool HandleLearnAllCraftsCommand(StringArguments args, CommandHandler handler)
             {
                 Player target;
-                if (!handler.extractPlayerTarget(args, out target))
+                if (!handler.ExtractPlayerTarget(args, out target))
                     return false;
 
                 foreach (var skillInfo in CliDB.SkillLineStorage.Values)
@@ -144,7 +144,7 @@ namespace Game.Chat.Commands
                 //  Learns all recipes of specified profession and sets skill to max
                 //  Example: .learn all_recipes enchanting
 
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -320,14 +320,14 @@ namespace Game.Chat.Commands
                 return false;
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             string allStr = args.NextString();
             bool allRanks = !string.IsNullOrEmpty(allStr) && allStr == "all";
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

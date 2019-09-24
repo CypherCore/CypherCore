@@ -46,7 +46,7 @@ namespace Game.Entities
         public bool IsFlying() { return m_movementInfo.HasMovementFlag(MovementFlag.Flying | MovementFlag.DisableGravity); }
         public bool IsFalling()
         {
-            return m_movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.isFalling();
+            return m_movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar) || MoveSpline.IsFalling();
         }
         public virtual bool CanSwim()
         {
@@ -68,7 +68,7 @@ namespace Game.Entities
             return GetMap().IsUnderWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
-        void PropagateSpeedChange() { GetMotionMaster().propagateSpeedChange(); }
+        void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
 
         public float GetSpeed(UnitMoveType mtype)
         {
@@ -679,7 +679,7 @@ namespace Game.Entities
             }
 
             LiquidData liquid;
-            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
+            ZLiquidStatus liquidStatus = GetMap().GetLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
             isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater) || HasUnitMovementFlag(MovementFlag.Swimming);
             isInWater = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
 
@@ -759,7 +759,7 @@ namespace Game.Entities
                 return;
 
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.GetLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
@@ -1295,7 +1295,7 @@ namespace Game.Entities
                 {
                     Battleground bg = ToPlayer().GetBattleground();
                     // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
-                    if (bg && bg.isArena())
+                    if (bg && bg.IsArena())
                         pet.AddUnitFlag(UnitFlags.Stunned);
                     else
                         player.UnsummonPetTemporaryIfAny();
@@ -1636,7 +1636,7 @@ namespace Game.Entities
             if (MoveSpline.Finalized())
                 return;
 
-            MoveSpline.updateState((int)diff);
+            MoveSpline.UpdateState((int)diff);
             bool arrived = MoveSpline.Finalized();
 
             if (arrived)

@@ -27,7 +27,7 @@ namespace Game.Movement
             return MovementGeneratorType.Idle;
         }
 
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
 
         public override void Reset(Unit owner)
         {

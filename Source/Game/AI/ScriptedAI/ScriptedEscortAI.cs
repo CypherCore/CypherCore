@@ -24,14 +24,14 @@ using System.Linq;
 
 namespace Game.AI
 {
-    public class npc_escortAI : ScriptedAI
+    public class NpcEscortAI : ScriptedAI
     {
-        public npc_escortAI(Creature creature) : base(creature)
+        public NpcEscortAI(Creature creature) : base(creature)
         {
             m_uiPlayerGUID = ObjectGuid.Empty;
             m_uiWPWaitTimer = 2500;
             m_uiPlayerCheckTimer = 1000;
-            m_uiEscortState = eEscortState.None;
+            m_uiEscortState = EscortState.None;
             MaxPlayerDistance = 50;
             m_pQuestForEscort = null;
             m_bIsActiveAttacker = true;
@@ -101,7 +101,7 @@ namespace Game.AI
         {
             if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.IsTargetableForAttack() && who.IsInAccessiblePlaceFor(me))
             {
-                if (HasEscortState(eEscortState.Escorting) && AssistPlayerInCombatAgainst(who))
+                if (HasEscortState(EscortState.Escorting) && AssistPlayerInCombatAgainst(who))
                     return;
 
                 if (!me.CanFly() && me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
@@ -135,7 +135,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            if (!HasEscortState(eEscortState.Escorting) || m_uiPlayerGUID.IsEmpty() || m_pQuestForEscort == null)
+            if (!HasEscortState(EscortState.Escorting) || m_uiPlayerGUID.IsEmpty() || m_pQuestForEscort == null)
                 return;
             
             Player player = GetPlayerForEscort();
@@ -144,7 +144,7 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
                         if (member)
@@ -159,7 +159,7 @@ namespace Game.AI
 
         public override void JustRespawned()
         {
-            m_uiEscortState = eEscortState.None;
+            m_uiEscortState = EscortState.None;
 
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
@@ -185,9 +185,9 @@ namespace Game.AI
             me.CombatStop(true);
             me.SetLootRecipient(null);
 
-            if (HasEscortState(eEscortState.Escorting))
+            if (HasEscortState(EscortState.Escorting))
             {
-                AddEscortState(eEscortState.Returning);
+                AddEscortState(EscortState.Returning);
                 ReturnToLastPoint();
                 Log.outDebug(LogFilter.Scripts, "EscortAI has left combat and is now returning to last point");
             }
@@ -208,7 +208,7 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
                         if (member)
@@ -226,7 +226,7 @@ namespace Game.AI
         public override void UpdateAI(uint diff)
         {
             //Waypoint Updating
-            if (HasEscortState(eEscortState.Escorting) && !me.GetVictim() && m_uiWPWaitTimer != 0 && !HasEscortState(eEscortState.Returning))
+            if (HasEscortState(EscortState.Escorting) && !me.GetVictim() && m_uiWPWaitTimer != 0 && !HasEscortState(EscortState.Returning))
             {
                 if (m_uiWPWaitTimer <= diff)
                 {
@@ -270,7 +270,7 @@ namespace Game.AI
 
                     }
 
-                    if (!HasEscortState(eEscortState.Paused))
+                    if (!HasEscortState(EscortState.Paused))
                     {
                         var currentWp = WaypointList[CurrentWPIndex];
                         me.GetMotionMaster().MovePoint(currentWp.Id, currentWp.X, currentWp.Y, currentWp.Z);
@@ -284,7 +284,7 @@ namespace Game.AI
             }
 
             //Check if player or any member of his group is within range
-            if (HasEscortState(eEscortState.Escorting) && !m_uiPlayerGUID.IsEmpty() && !me.GetVictim() && !HasEscortState(eEscortState.Returning))
+            if (HasEscortState(EscortState.Escorting) && !m_uiPlayerGUID.IsEmpty() && !me.GetVictim() && !HasEscortState(EscortState.Returning))
             {
                 if (m_uiPlayerCheckTimer <= diff)
                 {
@@ -322,7 +322,7 @@ namespace Game.AI
 
         public override void MovementInform(MovementGeneratorType moveType, uint pointId)
         {
-            if (moveType != MovementGeneratorType.Point || !HasEscortState(eEscortState.Escorting))
+            if (moveType != MovementGeneratorType.Point || !HasEscortState(EscortState.Escorting))
                 return;
 
             //Combat start position reached, continue waypoint movement
@@ -331,7 +331,7 @@ namespace Game.AI
                 Log.outDebug(LogFilter.Scripts, "EscortAI has returned to original position before combat");
 
                 me.SetWalk(!m_bIsRunning);
-                RemoveEscortState(eEscortState.Returning);
+                RemoveEscortState(EscortState.Returning);
 
                 if (m_uiWPWaitTimer == 0)
                     m_uiWPWaitTimer = 1;
@@ -415,7 +415,7 @@ namespace Game.AI
                 return;
             }
 
-            if (HasEscortState(eEscortState.Escorting))
+            if (HasEscortState(EscortState.Escorting))
             {
                 Log.outError(LogFilter.Scripts, "EscortAI (script: {0}, creature entry: {1}) attempts to Start while already escorting", me.GetScriptName(), me.GetEntry());
                 return;
@@ -474,18 +474,18 @@ namespace Game.AI
             else
                 me.SetWalk(true);
 
-            AddEscortState(eEscortState.Escorting);
+            AddEscortState(EscortState.Escorting);
         }
 
         public void SetEscortPaused(bool on)
         {
-            if (!HasEscortState(eEscortState.Escorting))
+            if (!HasEscortState(EscortState.Escorting))
                 return;
 
             if (on)
-                AddEscortState(eEscortState.Paused);
+                AddEscortState(EscortState.Paused);
             else
-                RemoveEscortState(eEscortState.Paused);
+                RemoveEscortState(EscortState.Paused);
         }
 
         bool SetNextWaypoint(uint pointId, float x, float y, float z, float orientation)
@@ -557,8 +557,8 @@ namespace Game.AI
         public virtual void WaypointReached(uint pointId) { }
         public virtual void WaypointStart(uint pointId) { }
 
-        public bool HasEscortState(eEscortState escortState) { return m_uiEscortState.HasAnyFlag(escortState); }
-        public override bool IsEscorted() { return m_uiEscortState.HasAnyFlag(eEscortState.Escorting); }
+        public bool HasEscortState(EscortState escortState) { return m_uiEscortState.HasAnyFlag(escortState); }
+        public override bool IsEscorted() { return m_uiEscortState.HasAnyFlag(EscortState.Escorting); }
 
         public void SetMaxPlayerDistance(float newMax) { MaxPlayerDistance = newMax; }
         public float GetMaxPlayerDistance() { return MaxPlayerDistance; }
@@ -571,13 +571,13 @@ namespace Game.AI
 
         public Player GetPlayerForEscort() { return Global.ObjAccessor.GetPlayer(me, m_uiPlayerGUID); }
 
-        void AddEscortState(eEscortState escortState) { m_uiEscortState |= escortState; }
-        void RemoveEscortState(eEscortState escortState) { m_uiEscortState &= ~escortState; }
+        void AddEscortState(EscortState escortState) { m_uiEscortState |= escortState; }
+        void RemoveEscortState(EscortState escortState) { m_uiEscortState &= ~escortState; }
 
         ObjectGuid m_uiPlayerGUID;
         uint m_uiWPWaitTimer;
         uint m_uiPlayerCheckTimer;
-        eEscortState m_uiEscortState;
+        EscortState m_uiEscortState;
         float MaxPlayerDistance;
 
         Quest m_pQuestForEscort;                     //generally passed in Start() when regular escort script.
@@ -595,7 +595,7 @@ namespace Game.AI
         bool HasImmuneToNPCFlags;
     }
 
-    public enum eEscortState
+    public enum EscortState
     {
         None = 0x000,                        //nothing in progress
         Escorting = 0x001,                        //escort are in progress

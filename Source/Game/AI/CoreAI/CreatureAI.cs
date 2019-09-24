@@ -73,8 +73,8 @@ namespace Game.AI
                     if (summoner != null)
                     {
                         Unit target = summoner.GetAttackerForHelper();
-                        if (target == null && summoner.CanHaveThreatList() && !summoner.GetThreatManager().isThreatListEmpty())
-                            target = summoner.GetThreatManager().getHostilTarget();
+                        if (target == null && summoner.CanHaveThreatList() && !summoner.GetThreatManager().IsThreatListEmpty())
+                            target = summoner.GetThreatManager().GetHostilTarget();
                         if (target != null && (creature.IsFriendlyTo(summoner) || creature.IsHostileTo(target)))
                             creature.GetAI().AttackStart(target);
                     }
@@ -238,7 +238,7 @@ namespace Game.AI
 
                 return me.GetVictim() != null;
             }
-            else if (me.GetThreatManager().isThreatListEmpty())
+            else if (me.GetThreatManager().IsThreatListEmpty())
             {
                 EnterEvadeMode(EvadeReason.NoHostiles);
                 return false;

@@ -80,7 +80,7 @@ namespace Game
             GetPlayer().PrepareGossipMenu(creature, creature.GetCreatureTemplate().GossipMenuId, true);
             GetPlayer().SendPreparedGossip(creature);
 
-            creature.GetAI().sGossipHello(GetPlayer());
+            creature.GetAI().GossipHello(GetPlayer());
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest)]
@@ -164,7 +164,7 @@ namespace Game
                         var group = _player.GetGroup();
                         if (group)
                         {
-                            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                             {
                                 Player player = refe.GetSource();
 
@@ -351,7 +351,7 @@ namespace Game
                                 }
 
                                 if (creatureQGiver)
-                                    creatureQGiver.GetAI().sQuestReward(GetPlayer(), quest, packet.ItemChoiceID);
+                                    creatureQGiver.GetAI().QuestReward(GetPlayer(), quest, packet.ItemChoiceID);
                             }
                             break;
                         }
@@ -563,7 +563,7 @@ namespace Game
             Group group = sender.GetGroup();
             if (!group)
                 return;
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player receiver = refe.GetSource();
 

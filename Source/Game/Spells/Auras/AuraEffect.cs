@@ -1727,7 +1727,7 @@ namespace Game.Spells
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
                     target.FinishSpell(CurrentSpellTypes.Generic, false);
                 target.InterruptNonMeleeSpells(true);
-                target.GetHostileRefManager().deleteReferences();
+                target.GetHostileRefManager().DeleteReferences();
 
                 // stop handling the effect if it was removed by linked event
                 if (aurApp.HasRemoveMode())
@@ -2375,7 +2375,7 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
             if (caster != null && caster.IsAlive())
-                target.GetHostileRefManager().addTempThreat(GetAmount(), apply);
+                target.GetHostileRefManager().AddTempThreat(GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModTaunt)]
@@ -5237,7 +5237,7 @@ namespace Game.Spells
             {
                 Creature c = target.ToCreature();
                 if (c == null || caster == null || !Global.ScriptMgr.OnDummyEffect(caster, GetId(), GetEffIndex(), target.ToCreature()) ||
-                    !c.GetAI().sOnDummyEffect(caster, GetId(), GetEffIndex()))
+                    !c.GetAI().OnDummyEffect(caster, GetId(), GetEffIndex()))
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
             }
         }
@@ -5511,7 +5511,7 @@ namespace Game.Spells
                 HealInfo healInfo = new HealInfo(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
                 caster.HealBySpell(healInfo);
 
-                caster.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+                caster.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
                 caster.ProcSkillsAndAuras(caster, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.None, hitMask, null, null, healInfo);
             }
 
@@ -5634,7 +5634,7 @@ namespace Game.Spells
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
-            target.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+            target.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
             // %-based heal - does not proc auras
             if (GetAuraType() == AuraType.ObsModHealth)
@@ -5728,7 +5728,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.GetHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetHostileRefManager().ThreatAssist(caster, gain * 0.5f, GetSpellInfo());
 
             target.SendPeriodicAuraLog(pInfo);
         }
@@ -5756,7 +5756,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.GetHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetHostileRefManager().ThreatAssist(caster, gain * 0.5f, GetSpellInfo());
 
             target.SendPeriodicAuraLog(pInfo);
         }

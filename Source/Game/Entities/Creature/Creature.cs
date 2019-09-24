@@ -127,7 +127,7 @@ namespace Game.Entities
             SetDeathState(DeathState.Dead);
             RemoveAllAuras();
             DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-            loot.clear();
+            loot.Clear();
             uint respawnDelay = m_respawnDelay;
             if (IsAIEnabled)
                 GetAI().CorpseRemoved(respawnDelay);
@@ -1625,7 +1625,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
                 m_respawnTime = 0;
                 ResetPickPocketRefillTimer();
-                loot.clear();
+                loot.Clear();
 
                 if (m_originalEntry != GetEntry())
                     UpdateEntry(m_originalEntry);
@@ -3110,9 +3110,9 @@ namespace Game.Entities
 
             if (CanHaveThreatList())
             {
-                if (target == null && !GetThreatManager().isThreatListEmpty())
+                if (target == null && !GetThreatManager().IsThreatListEmpty())
                     // No taunt aura or taunt aura caster is dead standard target selection
-                    target = GetThreatManager().getHostilTarget();
+                    target = GetThreatManager().GetHostilTarget();
             }
             else if (!HasReactState(ReactStates.Passive))
             {

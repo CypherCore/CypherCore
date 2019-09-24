@@ -36,7 +36,7 @@ namespace Game.Chat
         static bool HandleGroupSummonCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
-            if (!handler.extractPlayerTarget(args, out target))
+            if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
             // check online security
@@ -68,7 +68,7 @@ namespace Game.Chat
                 return false;
             }
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player player = refe.GetSource();
 
@@ -100,7 +100,7 @@ namespace Game.Chat
                 }
 
                 handler.SendSysMessage(CypherStrings.Summoning, plNameLink, "");
-                if (handler.needReportToTarget(player))
+                if (handler.NeedReportToTarget(player))
                     player.SendSysMessage(CypherStrings.SummonedBy, handler.GetNameLink());
 
                 // stop flight if need
@@ -255,7 +255,7 @@ namespace Game.Chat
                 guidTarget = parseGUID;
             }
             // If not, we return false and end right away.
-            else if (!handler.extractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
+            else if (!handler.ExtractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
                 return false;
 
             // Next, we need a group. So we define a group variable.
@@ -286,7 +286,7 @@ namespace Game.Chat
             var members = groupTarget.GetMemberSlots();
 
             // To avoid a cluster fuck, namely trying multiple queries to simply get a group member count...
-            handler.SendSysMessage(CypherStrings.GroupType, (groupTarget.isRaidGroup() ? "raid" : "party"), members.Count);
+            handler.SendSysMessage(CypherStrings.GroupType, (groupTarget.IsRaidGroup() ? "raid" : "party"), members.Count);
             // ... we simply move the group type and member count print after retrieving the slots and simply output it's size.
 
             // While rather dirty codestyle-wise, it saves space (if only a little). For each member, we look several informations up.

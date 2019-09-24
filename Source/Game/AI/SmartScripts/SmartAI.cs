@@ -235,7 +235,7 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
                             Player groupGuy = groupRef.GetSource();
                             if (!groupGuy.IsInMap(player))
@@ -399,7 +399,7 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
                             Player groupGuy = groupRef.GetSource();
                             if (groupGuy.IsInMap(player) && me.GetDistance(groupGuy) <= checkDist)
@@ -800,29 +800,29 @@ namespace Game.AI
             mEvadeDisabled = disable;
         }
 
-        public override void sGossipHello(Player player)
+        public override void GossipHello(Player player)
         {
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player);
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId);
         }
 
-        public override void sGossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { }
+        public override void GossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { }
 
-        public override void sQuestAccept(Player player, Quest quest)
+        public override void QuestAccept(Player player, Quest quest)
         {
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id);
         }
 
-        public override void sQuestReward(Player player, Quest quest, uint opt)
+        public override void QuestReward(Player player, Quest quest, uint opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
 
-        public override bool sOnDummyEffect(Unit caster, uint spellId, int effIndex)
+        public override bool OnDummyEffect(Unit caster, uint spellId, int effIndex)
         {
             GetScript().ProcessEventsFor(SmartEvents.DummyEffect, caster, spellId, (uint)effIndex);
             return true;
@@ -916,7 +916,7 @@ namespace Game.AI
             GetScript().SetScript9(e, entry);
         }
 
-        public override void sOnGameEvent(bool start, ushort eventId)
+        public override void OnGameEvent(bool start, ushort eventId)
         {
             GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }

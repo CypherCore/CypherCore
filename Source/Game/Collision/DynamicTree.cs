@@ -26,42 +26,42 @@ namespace Game.Collision
             impl = new DynTreeImpl();
         }
 
-        public void insert(GameObjectModel mdl)
+        public void Insert(GameObjectModel mdl)
         {
-            impl.insert(mdl);
+            impl.Insert(mdl);
         }
 
-        public void remove(GameObjectModel mdl)
+        public void Remove(GameObjectModel mdl)
         {
-            impl.remove(mdl);
+            impl.Remove(mdl);
         }
 
-        public bool contains(GameObjectModel mdl)
+        public bool Contains(GameObjectModel mdl)
         {
-            return impl.contains(mdl);
+            return impl.Contains(mdl);
         }
 
-        public void balance()
+        public void Balance()
         {
-            impl.balance();
+            impl.Balance();
         }
 
-        public void update(uint diff)
+        public void Update(uint diff)
         {
-            impl.update(diff);
+            impl.Update(diff);
         }
 
-        public bool getIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, float maxDist)
+        public bool GetIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, float maxDist)
         {
             float distance = maxDist;
             DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
-            impl.intersectRay(ray, callback, ref distance, endPos);
-            if (callback.didHit())
+            impl.IntersectRay(ray, callback, ref distance, endPos);
+            if (callback.DidHit())
                 maxDist = distance;
-            return callback.didHit();
+            return callback.DidHit();
         }
 
-        public bool getObjectHitPos(Vector3 startPos, Vector3 endPos, ref Vector3 resultHitPos, float modifyDist, PhaseShift phaseShift)
+        public bool GetObjectHitPos(Vector3 startPos, Vector3 endPos, ref Vector3 resultHitPos, float modifyDist, PhaseShift phaseShift)
         {
             bool result = false;
             float maxDist = (endPos - startPos).magnitude();
@@ -76,7 +76,7 @@ namespace Game.Collision
             Vector3 dir = (endPos - startPos) / maxDist;              // direction with length of 1
             Ray ray = new Ray(startPos, dir);
             float dist = maxDist;
-            if (getIntersectionTime(ray, endPos, phaseShift, dist))
+            if (GetIntersectionTime(ray, endPos, phaseShift, dist))
             {
                 resultHitPos = startPos + dir * dist;
                 if (modifyDist < 0)
@@ -99,7 +99,7 @@ namespace Game.Collision
             return result;
         }
 
-        public bool isInLineOfSight(Vector3 startPos, Vector3 endPos, PhaseShift phaseShift)
+        public bool IsInLineOfSight(Vector3 startPos, Vector3 endPos, PhaseShift phaseShift)
         {
             float maxDist = (endPos - startPos).magnitude();
 
@@ -108,25 +108,25 @@ namespace Game.Collision
 
             Ray r = new Ray(startPos, (endPos - startPos) / maxDist);
             DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
-            impl.intersectRay(r, callback, ref maxDist, endPos);
+            impl.IntersectRay(r, callback, ref maxDist, endPos);
 
-            return !callback.didHit();
+            return !callback.DidHit();
         }
 
-        public float getHeight(float x, float y, float z, float maxSearchDist, PhaseShift phaseShift)
+        public float GetHeight(float x, float y, float z, float maxSearchDist, PhaseShift phaseShift)
         {
             Vector3 v = new Vector3(x, y, z + 0.5f);
             Ray r = new Ray(v, new Vector3(0, 0, -1));
             DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
-            impl.intersectZAllignedRay(r, callback, ref maxSearchDist);
+            impl.IntersectZAllignedRay(r, callback, ref maxSearchDist);
 
-            if (callback.didHit())
+            if (callback.DidHit())
                 return v.Z - maxSearchDist;
             else
                 return float.NegativeInfinity;
         }
 
-        public bool getAreaInfo(float x, float y, ref float z, PhaseShift phaseShift, out uint flags, out int adtId, out int rootId, out int groupId)
+        public bool GetAreaInfo(float x, float y, ref float z, PhaseShift phaseShift, out uint flags, out int adtId, out int rootId, out int groupId)
         {
             flags = 0;
             adtId = 0;
@@ -135,7 +135,7 @@ namespace Game.Collision
 
             Vector3 v = new Vector3(x, y, z + 0.5f);
             DynamicTreeAreaInfoCallback intersectionCallBack = new DynamicTreeAreaInfoCallback(phaseShift);
-            impl.intersectPoint(v, intersectionCallBack);
+            impl.IntersectPoint(v, intersectionCallBack);
             if (intersectionCallBack.GetAreaInfo().result)
             {
                 flags = intersectionCallBack.GetAreaInfo().flags;
@@ -159,27 +159,27 @@ namespace Game.Collision
             unbalanced_times = 0;
         }
 
-        public override void insert(GameObjectModel mdl)
+        public override void Insert(GameObjectModel mdl)
         {
-            base.insert(mdl);
+            base.Insert(mdl);
             ++unbalanced_times;
         }
 
-        public override void remove(GameObjectModel mdl)
+        public override void Remove(GameObjectModel mdl)
         {
-            base.remove(mdl);
+            base.Remove(mdl);
             ++unbalanced_times;
         }
 
-        public override void balance()
+        public override void Balance()
         {
-            base.balance();
+            base.Balance();
             unbalanced_times = 0;
         }
 
-        public void update(uint difftime)
+        public void Update(uint difftime)
         {
-            if (empty())
+            if (Empty())
                 return;
 
             rebalance_timer.Update((int)difftime);
@@ -187,7 +187,7 @@ namespace Game.Collision
             {
                 rebalance_timer.Reset(200);
                 if (unbalanced_times > 0)
-                    balance();
+                    Balance();
             }
         }
 

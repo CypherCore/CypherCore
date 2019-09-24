@@ -85,7 +85,7 @@ namespace Game.Chat
         {
             Player target;
             ObjectGuid targetGuid;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid))
                 return false;
 
             if (target != null)
@@ -103,7 +103,7 @@ namespace Game.Chat
         [CommandNonGroup("die", RBACPermissions.CommandDie)]
         static bool Die(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
 
             if (!target && handler.GetPlayer().GetTarget().IsEmpty())
             {
@@ -129,7 +129,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.extractLowGuidFromLink(args, ref guidHigh);
+                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -169,7 +169,7 @@ namespace Game.Chat
             }
             else
             {
-                obj = handler.getSelectedUnit();
+                obj = handler.GetSelectedUnit();
 
                 if (!obj)
                 {
@@ -201,8 +201,8 @@ namespace Game.Chat
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
             // 63? WHY?
-            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.x_coord;
-            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.y_coord;
+            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
+            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
 
             bool haveMap = Map.ExistMap(mapId, gridX, gridY);
             bool haveVMap = Map.ExistVMap(mapId, gridX, gridY);
@@ -237,7 +237,7 @@ namespace Game.Chat
                 zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
             LiquidData liquidStatus;
-            ZLiquidStatus status = map.getLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
+            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
 
             if (liquidStatus != null)
                 handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
@@ -281,7 +281,7 @@ namespace Game.Chat
             }
             else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
             {
-                string idStr = handler.extractKeyFromLink(args, "Hitem");
+                string idStr = handler.ExtractKeyFromLink(args, "Hitem");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
@@ -309,7 +309,7 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = handler.getSelectedPlayer();
+            Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
                 playerTarget = player;
 
@@ -377,7 +377,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string idStr = handler.extractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+            string idStr = handler.ExtractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
@@ -403,7 +403,7 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = handler.getSelectedPlayer();
+            Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
                 playerTarget = player;
 
@@ -485,7 +485,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             Player _player = handler.GetSession().GetPlayer();
@@ -501,7 +501,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                string chrNameLink = handler.playerLink(targetName);
+                string chrNameLink = handler.PlayerLink(targetName);
 
                 Map map = target.GetMap();
                 if (map.IsBattlegroundOrArena())
@@ -598,7 +598,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(null, targetGuid))
                     return false;
 
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
 
                 handler.SendSysMessage(CypherStrings.AppearingAt, nameLink);
 
@@ -632,7 +632,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             Player _player = handler.GetSession().GetPlayer();
@@ -645,7 +645,7 @@ namespace Game.Chat
 
             if (target)
             {
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
                 // check online security
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
@@ -698,8 +698,8 @@ namespace Game.Chat
                 }
 
                 handler.SendSysMessage(CypherStrings.Summoning, nameLink, "");
-                if (handler.needReportToTarget(target))
-                    target.SendSysMessage(CypherStrings.SummonedBy, handler.playerLink(_player.GetName()));
+                if (handler.NeedReportToTarget(target))
+                    target.SendSysMessage(CypherStrings.SummonedBy, handler.PlayerLink(_player.GetName()));
 
                 // stop flight if need
                 if (target.IsInFlight())
@@ -724,7 +724,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(null, targetGuid))
                     return false;
 
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
 
                 handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
 
@@ -814,7 +814,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.extractLowGuidFromLink(args, ref guidHigh);
+                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -854,7 +854,7 @@ namespace Game.Chat
             }
             else
             {
-                obj = handler.getSelectedUnit();
+                obj = handler.GetSelectedUnit();
 
                 if (!obj)
                 {
@@ -872,7 +872,7 @@ namespace Game.Chat
         static bool Recall(StringArguments args, CommandHandler handler)
         {
             Player target;
-            if (!handler.extractPlayerTarget(args, out target))
+            if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
             // check online security
@@ -905,7 +905,7 @@ namespace Game.Chat
             // save GM account without delay and output message
             if (handler.GetSession().HasPermission(RBACPermissions.CommandsSaveWithoutDelay))
             {
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
                 if (target)
                     target.SaveToDB();
                 else
@@ -938,7 +938,7 @@ namespace Game.Chat
             Player target = null;
             string playerName;
             ObjectGuid guid;
-            if (!handler.extractPlayerTarget(args, out target, out guid, out playerName))
+            if (!handler.ExtractPlayerTarget(args, out target, out guid, out playerName))
                 return false;
 
             if (handler.GetSession() != null && target == handler.GetSession().GetPlayer())
@@ -992,7 +992,7 @@ namespace Game.Chat
 
             Player player = null;
             ObjectGuid targetGUID;
-            if (!handler.extractPlayerTarget(args, out player, out targetGUID))
+            if (!handler.ExtractPlayerTarget(args, out player, out targetGUID))
                 return false;
 
             if (!player)
@@ -1161,7 +1161,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player playerTarget = handler.getSelectedPlayer();
+            Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -1201,7 +1201,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player playerTarget = handler.getSelectedPlayer();
+            Player playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -1297,7 +1297,7 @@ namespace Game.Chat
                 targetGuid = parseGUID;
             }
             // if not, then return false. Which shouldn't happen, now should it ?
-            else if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            else if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             /* The variables we extract for the command. They are
@@ -1473,7 +1473,7 @@ namespace Game.Chat
             }
 
             // Creates a chat link to the character. Returns nameLink
-            string nameLink = handler.playerLink(targetName);
+            string nameLink = handler.PlayerLink(targetName);
 
             // Returns banType, banTime, bannedBy, banreason
             PreparedStatement stmt2 = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
@@ -1632,7 +1632,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
 
             // accept only explicitly selected target (not implicitly self targeting case)
-            Creature target = !player.GetTarget().IsEmpty() ? handler.getSelectedCreature() : null;
+            Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
             if (target)
             {
                 if (target.IsPet())
@@ -1658,7 +1658,7 @@ namespace Game.Chat
         {
             string nameStr;
             string delayStr;
-            handler.extractOptFirstArg(args, out nameStr, out delayStr);
+            handler.ExtractOptFirstArg(args, out nameStr, out delayStr);
             if (string.IsNullOrEmpty(delayStr))
                 return false;
 
@@ -1670,7 +1670,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
             uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
@@ -1703,7 +1703,7 @@ namespace Game.Chat
                 long muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
                 target.GetSession().m_muteTime = muteTime;
                 stmt.AddValue(0, muteTime);
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
                 {
@@ -1726,7 +1726,7 @@ namespace Game.Chat
             stmt.AddValue(2, muteBy);
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
-            string nameLink_ = handler.playerLink(targetName);
+            string nameLink_ = handler.PlayerLink(targetName);
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld) && !target)
                 Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, handler.GetSession().GetPlayerName(), nameLink_, notSpeakTime, muteReasonStr);
@@ -1742,7 +1742,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
@@ -1780,7 +1780,7 @@ namespace Game.Chat
             if (target)
                 target.SendSysMessage(CypherStrings.YourChatEnabled);
 
-            string nameLink = handler.playerLink(targetName);
+            string nameLink = handler.PlayerLink(targetName);
 
             handler.SendSysMessage(CypherStrings.YouEnableChat, nameLink);
 
@@ -1833,7 +1833,7 @@ namespace Game.Chat
         [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
         static bool MoveGens(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -1877,9 +1877,9 @@ namespace Game.Chat
                         {
                             Unit target = null;
                             if (unit.IsTypeId(TypeId.Player))
-                                target = ((ChaseMovementGenerator<Player>)movementGenerator).target;
+                                target = ((ChaseMovementGenerator<Player>)movementGenerator).Target;
                             else
-                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).target;
+                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).Target;
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensChaseNull);
@@ -1893,9 +1893,9 @@ namespace Game.Chat
                         {
                             Unit target = null;
                             if (unit.IsTypeId(TypeId.Player))
-                                target = ((FollowMovementGenerator<Player>)movementGenerator).target;
+                                target = ((FollowMovementGenerator<Player>)movementGenerator).Target;
                             else
-                                target = ((FollowMovementGenerator<Creature>)movementGenerator).target;
+                                target = ((FollowMovementGenerator<Creature>)movementGenerator).Target;
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensFollowNull);
@@ -1941,7 +1941,7 @@ namespace Game.Chat
         [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
         static bool HandleComeToMeCommand(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.getSelectedCreature();
+            Creature caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -2000,7 +2000,7 @@ namespace Game.Chat
                 return true;
             }
 
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -2066,7 +2066,7 @@ namespace Game.Chat
 
             // non-melee damage
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellid = handler.extractSpellIdFromLink(args);
+            uint spellid = handler.ExtractSpellIdFromLink(args);
             if (spellid == 0)
                 return false;
 
@@ -2099,7 +2099,7 @@ namespace Game.Chat
 
             if (!target)
             {
-                if (!handler.extractPlayerTarget(args, out target))
+                if (!handler.ExtractPlayerTarget(args, out target))
                     return false;
             }
 
@@ -2108,7 +2108,7 @@ namespace Game.Chat
                 return false;
 
             target.CombatStop();
-            target.GetHostileRefManager().deleteReferences();
+            target.GetHostileRefManager().DeleteReferences();
             return true;
         }
 
@@ -2116,7 +2116,7 @@ namespace Game.Chat
         static bool RepairItems(StringArguments args, CommandHandler handler)
         {
             Player target;
-            if (!handler.extractPlayerTarget(args, out target))
+            if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
             // check online security
@@ -2127,7 +2127,7 @@ namespace Game.Chat
             target.DurabilityRepairAll(false, 0, false);
 
             handler.SendSysMessage(CypherStrings.YouRepairItems, handler.GetNameLink(target));
-            if (handler.needReportToTarget(target))
+            if (handler.NeedReportToTarget(target))
                 target.SendSysMessage(CypherStrings.YourItemsRepaired, handler.GetNameLink());
 
             return true;
@@ -2136,7 +2136,7 @@ namespace Game.Chat
         [CommandNonGroup("freeze", RBACPermissions.CommandFreeze)]
         static bool HandleFreezeCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer(); // Selected player, if any. Might be null.
+            Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
             int freezeDuration = 0; // Freeze Duration (in seconds)
             bool canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
             bool getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
@@ -2240,7 +2240,7 @@ namespace Game.Chat
             }
             else // If no name was entered - use target
             {
-                player = handler.getSelectedPlayer();
+                player = handler.GetSelectedPlayer();
                 if (player)
                     name = player.GetName();
             }
@@ -2344,7 +2344,7 @@ namespace Game.Chat
         [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
         static bool Possess(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
                 return false;
 
@@ -2355,7 +2355,7 @@ namespace Game.Chat
         [CommandNonGroup("unpossess", RBACPermissions.CommandUnpossess)]
         static bool UnPossess(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
                 unit = handler.GetSession().GetPlayer();
 
@@ -2367,7 +2367,7 @@ namespace Game.Chat
         [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
         static bool BindSight(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
                 return false;
 
@@ -2434,14 +2434,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string idStr = handler.extractKeyFromLink(args, "Hachievement");
+            string idStr = handler.ExtractKeyFromLink(args, "Hachievement");
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
             if (!uint.TryParse(idStr, out uint achievementId) || achievementId == 0)
                 return false;
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

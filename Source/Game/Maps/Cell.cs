@@ -25,19 +25,19 @@ namespace Game.Maps
     {
         public Cell(ICoord p)
         {
-            data.grid_x = p.x_coord / MapConst.MaxCells;
-            data.grid_y = p.y_coord / MapConst.MaxCells;
-            data.cell_x = p.x_coord % MapConst.MaxCells;
-            data.cell_y = p.y_coord % MapConst.MaxCells;
+            data.grid_x = p.X_coord / MapConst.MaxCells;
+            data.grid_y = p.Y_coord / MapConst.MaxCells;
+            data.cell_x = p.X_coord % MapConst.MaxCells;
+            data.cell_y = p.Y_coord % MapConst.MaxCells;
         }
 
         public Cell(float x, float y)
         {
             ICoord p = GridDefines.ComputeCellCoord(x, y);
-            data.grid_x = p.x_coord / MapConst.MaxCells;
-            data.grid_y = p.y_coord / MapConst.MaxCells;
-            data.cell_x = p.x_coord % MapConst.MaxCells;
-            data.cell_y = p.y_coord % MapConst.MaxCells;
+            data.grid_x = p.X_coord / MapConst.MaxCells;
+            data.grid_y = p.Y_coord / MapConst.MaxCells;
+            data.cell_x = p.X_coord % MapConst.MaxCells;
+            data.cell_y = p.Y_coord % MapConst.MaxCells;
         }
 
         public Cell(Cell cell) { data = cell.data; }
@@ -153,7 +153,7 @@ namespace Game.Maps
             //if radius is known to reach cell area more than 4x4 then we should call optimized VisitCircle
             //currently this technique works with MAX_NUMBER_OF_CELLS 16 and higher, with lower values
             //there are nothing to optimize because SIZE_OF_GRID_CELL is too big...
-            if ((area.high_bound.x_coord > (area.low_bound.x_coord + 4)) && (area.high_bound.y_coord > (area.low_bound.y_coord + 4)))
+            if ((area.high_bound.X_coord > (area.low_bound.X_coord + 4)) && (area.high_bound.Y_coord > (area.low_bound.Y_coord + 4)))
             {
                 VisitCircle(visitor, map, area.low_bound, area.high_bound);
                 return;
@@ -164,9 +164,9 @@ namespace Game.Maps
             map.Visit(this, visitor);
 
             // loop the cell range
-            for (uint x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
+                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new CellCoord(x, y);
                     //lets skip standing cell since we already visited it
@@ -183,15 +183,15 @@ namespace Game.Maps
         void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
         {
             //here is an algorithm for 'filling' circum-squared octagon
-            uint x_shift = (uint)Math.Ceiling((end_cell.x_coord - begin_cell.x_coord) * 0.3f - 0.5f);
+            uint x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
             //lets calculate x_start/x_end coords for central strip...
-            uint x_start = begin_cell.x_coord + x_shift;
-            uint x_end = end_cell.x_coord - x_shift;
+            uint x_start = begin_cell.X_coord + x_shift;
+            uint x_end = end_cell.X_coord - x_shift;
 
             //visit central strip with constant width...
             for (uint x = x_start; x <= x_end; ++x)
             {
-                for (uint y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
+                for (uint y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new CellCoord(x, y);
                     Cell r_zone = new Cell(cellCoord);
@@ -205,10 +205,10 @@ namespace Game.Maps
             if (x_shift == 0)
                 return;
 
-            uint y_start = end_cell.y_coord;
-            uint y_end = begin_cell.y_coord;
+            uint y_start = end_cell.Y_coord;
+            uint y_end = begin_cell.Y_coord;
             //now we are visiting borders of an octagon...
-            for (uint step = 1; step <= (x_start - begin_cell.x_coord); ++step)
+            for (uint step = 1; step <= (x_start - begin_cell.X_coord); ++step)
             {
                 //each step reduces strip height by 2 cells...
                 y_end += 1;
@@ -305,12 +305,12 @@ namespace Game.Maps
         {
             if (radius <= 0.0f)
             {
-                CellCoord center = (CellCoord)GridDefines.ComputeCellCoord(x, y).normalize();
+                CellCoord center = (CellCoord)GridDefines.ComputeCellCoord(x, y).Normalize();
                 return new CellArea(center, center);
             }
 
-            CellCoord centerX = (CellCoord)GridDefines.ComputeCellCoord(x - radius, y - radius).normalize();
-            CellCoord centerY = (CellCoord)GridDefines.ComputeCellCoord(x + radius, y + radius).normalize();
+            CellCoord centerX = (CellCoord)GridDefines.ComputeCellCoord(x - radius, y - radius).Normalize();
+            CellCoord centerY = (CellCoord)GridDefines.ComputeCellCoord(x + radius, y + radius).Normalize();
 
             return new CellArea(centerX, centerY);
         }

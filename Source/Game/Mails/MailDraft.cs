@@ -49,7 +49,7 @@ namespace Game.Mails
             return this;
         }
 
-        void prepareItems(Player receiver, SQLTransaction trans)
+        void PrepareItems(Player receiver, SQLTransaction trans)
         {
             if (m_mailTemplateId == 0 || !m_mailTemplateItemsNeed)
                 return;
@@ -77,7 +77,7 @@ namespace Game.Mails
             }
         }
 
-        void deleteIncludedItems(SQLTransaction trans, bool inDB = false)
+        void DeleteIncludedItems(SQLTransaction trans, bool inDB = false)
         {
             foreach (var item in m_items.Values)
             {
@@ -103,7 +103,7 @@ namespace Game.Mails
 
             if (receiver == null && rc_account == 0)                            // sender not exist
             {
-                deleteIncludedItems(trans, true);
+                DeleteIncludedItems(trans, true);
                 return;
             }
 
@@ -144,7 +144,7 @@ namespace Game.Mails
             Player pSender = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId()));
 
             if (pReceiver != null)
-                prepareItems(pReceiver, trans);                            // generate mail template items
+                PrepareItems(pReceiver, trans);                            // generate mail template items
 
             uint mailId = Global.ObjectMgr.GenerateMailID();
 
@@ -229,10 +229,10 @@ namespace Game.Mails
                     }
                 }
                 else if (!m_items.Empty())
-                    deleteIncludedItems(null);
+                    DeleteIncludedItems(null);
             }
             else if (!m_items.Empty())
-                deleteIncludedItems(null);
+                DeleteIncludedItems(null);
         }
 
         uint GetMailTemplateId() { return m_mailTemplateId; }

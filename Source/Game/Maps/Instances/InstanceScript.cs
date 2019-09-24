@@ -717,7 +717,7 @@ namespace Game.Maps
                 {
                     Group grp = player.GetGroup();
                     if (grp != null)
-                        if (grp.isLFGGroup())
+                        if (grp.IsLFGGroup())
                         {
                             Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId, instance);
                             return;

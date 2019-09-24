@@ -131,7 +131,7 @@ namespace Game.Entities
                 Group group = owner.GetGroup();
                 if (group)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player target = refe.GetSource();
                         if (target && target.IsInMap(owner) && group.SameSubGroup(owner, target))

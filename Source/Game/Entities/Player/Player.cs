@@ -731,7 +731,7 @@ namespace Game.Entities
                 {
                     m_hostileReferenceCheckTimer = 15 * Time.InMilliseconds;
                     if (!GetMap().IsDungeon())
-                        GetHostileRefManager().deleteReferencesOutOfRange(GetVisibilityRange());
+                        GetHostileRefManager().DeleteReferencesOutOfRange(GetVisibilityRange());
                 }
                 else
                     m_hostileReferenceCheckTimer -= diff;
@@ -1958,7 +1958,7 @@ namespace Game.Entities
             // remove auras that need water/land
             RemoveAurasWithInterruptFlags((apply ? SpellAuraInterruptFlags.NotAbovewater : SpellAuraInterruptFlags.NotUnderwater));
 
-            GetHostileRefManager().updateThreatTables();
+            GetHostileRefManager().UpdateThreatTables();
         }
         public void ValidateMovementInfo(MovementInfo mi)
         {
@@ -2200,13 +2200,13 @@ namespace Game.Entities
                 if (pet != null)
                 {
                     pet.SetFaction(35);
-                    pet.GetHostileRefManager().setOnlineOfflineState(false);
+                    pet.GetHostileRefManager().SetOnlineOfflineState(false);
                 }
 
                 RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
                 ResetContestedPvP();
 
-                GetHostileRefManager().setOnlineOfflineState(false);
+                GetHostileRefManager().SetOnlineOfflineState(false);
                 CombatStopWithPets();
 
                 PhasingHandler.SetAlwaysVisible(GetPhaseShift(), true);
@@ -2225,7 +2225,7 @@ namespace Game.Entities
                 if (pet != null)
                 {
                     pet.SetFaction(GetFaction());
-                    pet.GetHostileRefManager().setOnlineOfflineState(true);
+                    pet.GetHostileRefManager().SetOnlineOfflineState(true);
                 }
 
                 // restore FFA PvP Server state
@@ -2235,7 +2235,7 @@ namespace Game.Entities
                 // restore FFA PvP area state, remove not allowed for GM mounts
                 UpdateArea(m_areaUpdateId);
 
-                GetHostileRefManager().setOnlineOfflineState(true);
+                GetHostileRefManager().SetOnlineOfflineState(true);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, AccountTypes.Player);
             }
 
@@ -3652,9 +3652,9 @@ namespace Game.Entities
                 return false;
 
             Loot loot = creature.loot;
-            if (loot.isLooted()) // nothing to loot or everything looted.
+            if (loot.IsLooted()) // nothing to loot or everything looted.
                 return false;
-            if (!loot.hasItemForAll() && !loot.hasItemFor(this)) // no loot in creature for this player
+            if (!loot.HasItemForAll() && !loot.HasItemFor(this)) // no loot in creature for this player
                 return false;
 
             if (loot.loot_type == LootType.Skinning)
@@ -3680,10 +3680,10 @@ namespace Game.Entities
                     if (loot.roundRobinPlayer.IsEmpty() || loot.roundRobinPlayer == GetGUID())
                         return true;
 
-                    if (loot.hasOverThresholdItem())
+                    if (loot.HasOverThresholdItem())
                         return true;
 
-                    return loot.hasItemFor(this);
+                    return loot.HasItemFor(this);
             }
 
             return false;
@@ -4241,7 +4241,7 @@ namespace Game.Entities
             SetHealth(1);
 
             SetWaterWalking(true);
-            if (!GetSession().isLogingOut() && !HasUnitState(UnitState.Stunned))
+            if (!GetSession().IsLogingOut() && !HasUnitState(UnitState.Stunned))
                 SetRooted(false);
 
             // BG - remove insignia related
@@ -4966,7 +4966,7 @@ namespace Game.Entities
         public bool InArena()
         {
             Battleground bg = GetBattleground();
-            if (!bg || !bg.isArena())
+            if (!bg || !bg.IsArena())
                 return false;
 
             return true;
@@ -6732,7 +6732,7 @@ namespace Game.Entities
             }
 
             // not let cheating with start flight in time of logout process || while in combat || has type state: stunned || has type state: root
-            if (GetSession().isLogingOut() || IsInCombat() || HasUnitState(UnitState.Stunned) || HasUnitState(UnitState.Root))
+            if (GetSession().IsLogingOut() || IsInCombat() || HasUnitState(UnitState.Stunned) || HasUnitState(UnitState.Root))
             {
                 GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerBusy);
                 return false;
@@ -6924,7 +6924,7 @@ namespace Game.Entities
             m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
             Dismount();
             RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
-            GetHostileRefManager().setOnlineOfflineState(true);
+            GetHostileRefManager().SetOnlineOfflineState(true);
         }
 
         public void ContinueTaxiFlight()
@@ -6987,7 +6987,7 @@ namespace Game.Entities
                 Group group = GetGroup();
                 if (group)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player player = refe.GetSource();
                         if (!player)

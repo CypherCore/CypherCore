@@ -743,7 +743,7 @@ namespace Game.Scripting
         public void FinishCast(SpellCastResult result, uint? param1 = null, uint? param2 = null)
         {
             m_spell.SendCastResult(result, param1, param2);
-            m_spell.finish(result == SpellCastResult.SpellCastOk);
+            m_spell.Finish(result == SpellCastResult.SpellCastOk);
         }
 
         public void SetCustomCastResultMessage(SpellCustomErrors result)

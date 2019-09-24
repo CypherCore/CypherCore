@@ -1909,7 +1909,7 @@ namespace Game.Entities
                 else
                     GetHitSpherePointFor(new Position(ox, oy, oz), out x, out y, out z);
 
-                return GetMap().isInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f, ignoreFlags);
+                return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f, ignoreFlags);
             }
 
             return true;
@@ -2248,7 +2248,7 @@ namespace Game.Entities
                         return z;
                 }
                 LiquidData liquid_status;
-                ZLiquidStatus res = obj.GetMap().getLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+                ZLiquidStatus res = obj.GetMap().GetLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
                 if (res != 0 && liquid_status.level > helper) // water must be above ground
                 {
                     if (liquid_status.level > z) // z is underwater
@@ -2274,7 +2274,7 @@ namespace Game.Entities
             }
 
             float destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
-            bool col = Global.VMapMgr.getObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // collision occured
             if (col)
@@ -2286,7 +2286,7 @@ namespace Game.Entities
             }
 
             // check dynamic collision
-            col = GetMap().getObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // Collided with a gameobject
             if (col)

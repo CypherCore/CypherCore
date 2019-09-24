@@ -220,7 +220,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             Initialize();
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == Misc.MenuIdSylvanas && gossipListId == Misc.GossipOptionId)
             {
@@ -304,7 +304,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             Initialize();
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == Misc.MenuIdJaina && gossipListId == Misc.GossipOptionId)
             {

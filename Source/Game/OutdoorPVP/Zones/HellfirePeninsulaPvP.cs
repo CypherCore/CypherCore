@@ -178,22 +178,22 @@ namespace Game.PvP
         public override void ChangeState()
         {
             uint field = 0;
-            switch (m_OldState)
+            switch (OldState)
             {
                 case ObjectiveStates.Neutral:
                     field = HPConst.Map_N[m_TowerType];
                     break;
                 case ObjectiveStates.Alliance:
                     field = HPConst.Map_A[m_TowerType];
-                    uint alliance_towers = ((HellfirePeninsulaPvP)m_PvP).GetAllianceTowersControlled();
+                    uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
                     if (alliance_towers != 0)
-                        ((HellfirePeninsulaPvP)m_PvP).SetAllianceTowersControlled(--alliance_towers);
+                        ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(--alliance_towers);
                     break;
                 case ObjectiveStates.Horde:
                     field = HPConst.Map_H[m_TowerType];
-                    uint horde_towers = ((HellfirePeninsulaPvP)m_PvP).GetHordeTowersControlled();
+                    uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
                     if (horde_towers != 0)
-                        ((HellfirePeninsulaPvP)m_PvP).SetHordeTowersControlled(--horde_towers);
+                        ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(--horde_towers);
                     break;
                 case ObjectiveStates.NeutralAllianceChallenge:
                     field = HPConst.Map_N[m_TowerType];
@@ -212,12 +212,12 @@ namespace Game.PvP
             // send world state update
             if (field != 0)
             {
-                m_PvP.SendUpdateWorldState(field, 0);
+                PvP.SendUpdateWorldState(field, 0);
                 field = 0;
             }
             uint artkit = 21;
             uint artkit2 = HPConst.TowerArtKit_N[m_TowerType];
-            switch (m_State)
+            switch (State)
             {
                 case ObjectiveStates.Neutral:
                     field = HPConst.Map_N[m_TowerType];
@@ -227,10 +227,10 @@ namespace Game.PvP
                         field = HPConst.Map_A[m_TowerType];
                         artkit = 2;
                         artkit2 = HPConst.TowerArtKit_A[m_TowerType];
-                        uint alliance_towers = ((HellfirePeninsulaPvP)m_PvP).GetAllianceTowersControlled();
+                        uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
                         if (alliance_towers < 3)
-                            ((HellfirePeninsulaPvP)m_PvP).SetAllianceTowersControlled(++alliance_towers);
-                        m_PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_A[m_TowerType]);
+                            ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(++alliance_towers);
+                        PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_A[m_TowerType]);
                         break;
                     }
                 case ObjectiveStates.Horde:
@@ -238,10 +238,10 @@ namespace Game.PvP
                         field = HPConst.Map_H[m_TowerType];
                         artkit = 1;
                         artkit2 = HPConst.TowerArtKit_H[m_TowerType];
-                        uint horde_towers = ((HellfirePeninsulaPvP)m_PvP).GetHordeTowersControlled();
+                        uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
                         if (horde_towers < 3)
-                            ((HellfirePeninsulaPvP)m_PvP).SetHordeTowersControlled(++horde_towers);
-                        m_PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_H[m_TowerType]);
+                            ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(++horde_towers);
+                        PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_H[m_TowerType]);
                         break;
                     }
                 case ObjectiveStates.NeutralAllianceChallenge:
@@ -273,16 +273,16 @@ namespace Game.PvP
 
             // send world state update
             if (field != 0)
-                m_PvP.SendUpdateWorldState(field, 1);
+                PvP.SendUpdateWorldState(field, 1);
 
             // complete quest objective
-            if (m_State == ObjectiveStates.Alliance || m_State == ObjectiveStates.Horde)
+            if (State == ObjectiveStates.Alliance || State == ObjectiveStates.Horde)
                 SendObjectiveComplete(HPConst.CreditMarker[m_TowerType], ObjectGuid.Empty);
         }
 
         public override void FillInitialWorldStates(InitWorldStates packet)
         {
-            switch (m_State)
+            switch (State)
             {
                 case ObjectiveStates.Alliance:
                 case ObjectiveStates.AllianceHordeChallenge:

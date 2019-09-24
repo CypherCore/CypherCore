@@ -862,9 +862,9 @@ namespace Game.Loots
             foreach (var group in Groups.Values)
                 group.CheckLootRefs(store, ref_set);
         }
-        public bool addConditionItem(Condition cond)
+        public bool AddConditionItem(Condition cond)
         {
-            if (cond == null || !cond.isLoaded())//should never happen, checked at loading
+            if (cond == null || !cond.IsLoaded())//should never happen, checked at loading
             {
                 Log.outError(LogFilter.Loot, "LootTemplate.addConditionItem: condition is null");
                 return false;
@@ -918,7 +918,7 @@ namespace Game.Loots
             }
             return false;
         }
-        public bool isReference(uint id)
+        public bool IsReference(uint id)
         {
             foreach (var storeItem in Entries)
                 if (storeItem.itemid == id && storeItem.reference > 0)

@@ -39,7 +39,7 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession().GetPlayer();
 
             // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string param1 = handler.extractKeyFromLink(args, "Hcreature", "Hcreature_entry");
+            string param1 = handler.ExtractKeyFromLink(args, "Hcreature", "Hcreature_entry");
             if (string.IsNullOrEmpty(param1))
                 return false;
 
@@ -195,7 +195,7 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession().GetPlayer();
 
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameobject");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -249,7 +249,7 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            string id = handler.extractKeyFromLink(args, "Hquest");
+            string id = handler.ExtractKeyFromLink(args, "Hquest");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -312,7 +312,7 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            string id = handler.extractKeyFromLink(args, "Htaxinode");
+            string id = handler.ExtractKeyFromLink(args, "Htaxinode");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -405,7 +405,7 @@ namespace Game.Chat.Commands
             if (x == 0.0f || y == 0.0f)
                 return false;
 
-            string idStr = handler.extractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
+            string idStr = handler.ExtractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
             if (!uint.TryParse(idStr, out uint areaId))
                 areaId = player.GetZoneId();
 

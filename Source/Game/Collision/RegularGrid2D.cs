@@ -33,29 +33,29 @@ namespace Game.Collision
                 nodes[x] = new Node[CELL_NUMBER];
         }
 
-        public virtual void insert(T value)
+        public virtual void Insert(T value)
         {
-            AxisAlignedBox bounds = value.getBounds();
+            AxisAlignedBox bounds = value.GetBounds();
             Cell low = Cell.ComputeCell(bounds.Lo.X, bounds.Lo.Y);
             Cell high = Cell.ComputeCell(bounds.Hi.X, bounds.Hi.Y);
             for (int x = low.x; x <= high.x; ++x)
             {
                 for (int y = low.y; y <= high.y; ++y)
                 {
-                    Node node = getGrid(x, y);
-                    node.insert(value);
+                    Node node = GetGrid(x, y);
+                    node.Insert(value);
                     memberTable.Add(value, node);
                 }
             }
         }
 
-        public virtual void remove(T value)
+        public virtual void Remove(T value)
         {
             // Remove the member
             memberTable.Remove(value);
         }
 
-        public virtual void balance()
+        public virtual void Balance()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
             {
@@ -63,13 +63,13 @@ namespace Game.Collision
                 {
                     Node n = nodes[x][y];
                     if (n != null)
-                        n.balance();
+                        n.Balance();
                 }
             }
         }
 
-        public bool contains(T value) { return memberTable.ContainsKey(value); }
-        public bool empty() { return memberTable.Empty(); }
+        public bool Contains(T value) { return memberTable.ContainsKey(value); }
+        public bool Empty() { return memberTable.Empty(); }
 
         public struct Cell
         {
@@ -95,10 +95,10 @@ namespace Game.Collision
                 return c;
             }
 
-            public bool isValid() { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER; }
+            public bool IsValid() { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER; }
         }
 
-        Node getGrid(int x, int y)
+        Node GetGrid(int x, int y)
         {
             Cypher.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
             if (nodes[x][y] == null)
@@ -106,15 +106,15 @@ namespace Game.Collision
             return nodes[x][y];
         }
 
-        public void intersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
+        public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
         {
-            intersectRay(ray, intersectCallback, ref max_dist, ray.Origin + ray.Direction * max_dist);
+            IntersectRay(ray, intersectCallback, ref max_dist, ray.Origin + ray.Direction * max_dist);
         }
 
-        public void intersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist, Vector3 end)
+        public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist, Vector3 end)
         {
             Cell cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
-            if (!cell.isValid())
+            if (!cell.IsValid())
                 return;
 
             Cell last_cell = Cell.ComputeCell(end.X, end.Y);
@@ -123,7 +123,7 @@ namespace Game.Collision
             {
                 Node node = nodes[cell.x][cell.y];
                 if (node != null)
-                    node.intersectRay(ray, intersectCallback, ref max_dist);
+                    node.IntersectRay(ray, intersectCallback, ref max_dist);
                 return;
             }
 
@@ -166,7 +166,7 @@ namespace Game.Collision
                 Node node = nodes[cell.x][cell.y];
                 if (node != null)
                 {
-                    node.intersectRay(ray, intersectCallback, ref max_dist);
+                    node.IntersectRay(ray, intersectCallback, ref max_dist);
                 }
                 if (cell == last_cell)
                     break;
@@ -180,30 +180,30 @@ namespace Game.Collision
                     tMaxY += tDeltaY;
                     cell.y += stepY;
                 }
-            } while (cell.isValid());
+            } while (cell.IsValid());
         }
 
-        public void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
+        public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
             Cell cell = Cell.ComputeCell(point.X, point.Y);
-            if (!cell.isValid())
+            if (!cell.IsValid())
                 return;
 
             Node node = nodes[cell.x][cell.y];
             if (node != null)
-                node.intersectPoint(point, intersectCallback);
+                node.IntersectPoint(point, intersectCallback);
         }
 
         // Optimized verson of intersectRay function for rays with vertical directions
-        public void intersectZAllignedRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
+        public void IntersectZAllignedRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
         {
             Cell cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
-            if (!cell.isValid())
+            if (!cell.IsValid())
                 return;
 
             Node node = nodes[cell.x][cell.y];
             if (node != null)
-                node.intersectRay(ray, intersectCallback, ref max_dist);
+                node.IntersectRay(ray, intersectCallback, ref max_dist);
         }
 
         MultiMap<T, Node> memberTable = new MultiMap<T, Node>();

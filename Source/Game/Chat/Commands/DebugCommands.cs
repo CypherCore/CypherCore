@@ -40,7 +40,7 @@ namespace Game.Chat
                 return false;
 
             uint animId = args.NextUInt32();
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (unit)
                 unit.HandleEmoteCommand((Emote)animId);
             return true;
@@ -84,7 +84,7 @@ namespace Game.Chat
             if (!player)
                 return false;
 
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
             if (!target || !target.IsAIEnabled || target.GetAI() == null)
                 return false;
 
@@ -115,7 +115,7 @@ namespace Game.Chat
             if (conversationEntry == 0)
                 return false;
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -128,7 +128,7 @@ namespace Game.Chat
         [Command("entervehicle", RBACPermissions.CommandDebugEntervehicle)]
         static bool HandleDebugEnterVehicleCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target || !target.IsVehicle())
                 return false;
 
@@ -183,7 +183,7 @@ namespace Game.Chat
             else
                 return false;
 
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
@@ -438,10 +438,10 @@ namespace Game.Chat
         [Command("hostil", RBACPermissions.CommandDebugHostil)]
         static bool HandleDebugHostileRefListCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
-            HostileReference refe = target.GetHostileRefManager().getFirst();
+            HostileReference refe = target.GetHostileRefManager().GetFirst();
             uint count = 0;
             handler.SendSysMessage("Hostil reference list of {0} (guid {1})", target.GetName(), target.GetGUID().ToString());
             while (refe != null)
@@ -450,9 +450,9 @@ namespace Game.Chat
                 if (unit)
                 {
                     ++count;
-                    handler.SendSysMessage("   {0}.   {1}   ({2}, SpawnId: {3})  - threat {4}", count, unit.GetName(), unit.GetGUID().ToString(), unit.IsTypeId(TypeId.Unit) ? unit.ToCreature().GetSpawnId() : 0, refe.getThreat());
+                    handler.SendSysMessage("   {0}.   {1}   ({2}, SpawnId: {3})  - threat {4}", count, unit.GetName(), unit.GetGUID().ToString(), unit.IsTypeId(TypeId.Unit) ? unit.ToCreature().GetSpawnId() : 0, refe.GetThreat());
                 }
-                refe = refe.next();
+                refe = refe.Next();
             }
             handler.SendSysMessage("End of hostil reference list.");
             return true;
@@ -480,7 +480,7 @@ namespace Game.Chat
         [Command("lootrecipient", RBACPermissions.CommandDebugLootrecipient)]
         static bool HandleDebugGetLootRecipientCommand(StringArguments args, CommandHandler handler)
         {
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
             if (!target)
                 return false;
 
@@ -492,7 +492,7 @@ namespace Game.Chat
         [Command("los", RBACPermissions.CommandDebugLos)]
         static bool HandleDebugLoSCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (unit)
                 handler.SendSysMessage("Unit {0} (GuidLow: {1}) is {2}in LoS", unit.GetName(), unit.GetGUID().ToString(), handler.GetSession().GetPlayer().IsWithinLOSInMap(unit) ? "" : "not ");
             return true;
@@ -501,7 +501,7 @@ namespace Game.Chat
         [Command("moveflags", RBACPermissions.CommandDebugMoveflags)]
         static bool HandleDebugMoveflagsCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
 
@@ -621,7 +621,7 @@ namespace Game.Chat
         [Command("phase", RBACPermissions.CommandDebugPhase)]
         static bool HandleDebugPhaseCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -677,7 +677,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -700,7 +700,7 @@ namespace Game.Chat
         [Command("setvid", RBACPermissions.CommandDebugSetvid)]
         static bool HandleDebugSetVehicleIdCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target || target.IsVehicle())
                 return false;
 
@@ -751,20 +751,20 @@ namespace Game.Chat
         [Command("threat", RBACPermissions.CommandDebugThreat)]
         static bool HandleDebugThreatListCommand(StringArguments args, CommandHandler handler)
         {
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
             if (!target || target.IsTotem() || target.IsPet())
                 return false;
 
-            var threatList = target.GetThreatManager().getThreatList();
+            var threatList = target.GetThreatManager().GetThreatList();
             uint count = 0;
             handler.SendSysMessage("Threat list of {0} (guid {1})", target.GetName(), target.GetGUID().ToString());
             foreach (var refe in threatList)
             {
-                Unit unit = refe.getTarget();
+                Unit unit = refe.GetTarget();
                 if (!unit)
                     continue;
                 ++count;
-                handler.SendSysMessage("   {0}.   {1}   (guid {2})  - threat {3}", count, unit.GetName(), unit.GetGUID().ToString(), refe.getThreat());
+                handler.SendSysMessage("   {0}.   {1}   (guid {2})  - threat {3}", count, unit.GetName(), unit.GetGUID().ToString(), refe.GetThreat());
             }
             handler.SendSysMessage("End of threat list.");
             return true;
@@ -832,7 +832,7 @@ namespace Game.Chat
             if (worldStateIdStr.IsEmpty())
                 return false;
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -844,11 +844,11 @@ namespace Game.Chat
 
             if (value != 0)
             {
-                Global.WorldMgr.setWorldState(worldStateId, value);
+                Global.WorldMgr.SetWorldState(worldStateId, value);
                 target.SendUpdateWorldState(worldStateId, value);
             }
             else
-                handler.SendSysMessage($"Worldstate {worldStateId} actual value : {Global.WorldMgr.getWorldState(worldStateId)}");
+                handler.SendSysMessage($"Worldstate {worldStateId} actual value : {Global.WorldMgr.GetWorldState(worldStateId)}");
 
             return true;
         }
@@ -866,7 +866,7 @@ namespace Game.Chat
 
             uint expressionId = uint.Parse(expressionIdStr);
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -1126,7 +1126,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Unit unit = handler.getSelectedUnit();
+                Unit unit = handler.GetSelectedUnit();
                 if (!unit)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCharOrCreature);

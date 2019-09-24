@@ -94,7 +94,7 @@ namespace Game
             SendPacket(tradeUpdated);
         }
 
-        void moveItems(Item[] myItems, Item[] hisItems)
+        void MoveItems(Item[] myItems, Item[] hisItems)
         {
             Player trader = GetPlayer().GetTrader();
             if (!trader)
@@ -176,7 +176,7 @@ namespace Game
             }
         }
 
-        static void setAcceptTradeMode(TradeData myTrade, TradeData hisTrade, Item[] myItems, Item[] hisItems)
+        static void SetAcceptTradeMode(TradeData myTrade, TradeData hisTrade, Item[] myItems, Item[] hisItems)
         {
             myTrade.SetInAcceptProcess(true);
             hisTrade.SetInAcceptProcess(true);
@@ -202,13 +202,13 @@ namespace Game
             }
         }
 
-        static void clearAcceptTradeMode(TradeData myTrade, TradeData hisTrade)
+        static void ClearAcceptTradeMode(TradeData myTrade, TradeData hisTrade)
         {
             myTrade.SetInAcceptProcess(false);
             hisTrade.SetInAcceptProcess(false);
         }
 
-        static void clearAcceptTradeMode(Item[] myItems, Item[] hisItems)
+        static void ClearAcceptTradeMode(Item[] myItems, Item[] hisItems)
         {
             // clear 'in-trade' flag
             for (byte i = 0; i < (int)TradeSlots.Count; ++i)
@@ -329,7 +329,7 @@ namespace Game
 
             if (his_trade.IsAccepted())
             {
-                setAcceptTradeMode(my_trade, his_trade, myItems, hisItems);
+                SetAcceptTradeMode(my_trade, his_trade, myItems, hisItems);
 
                 Spell my_spell = null;
                 SpellCastTargets my_targets = new SpellCastTargets();
@@ -347,8 +347,8 @@ namespace Game
                     if (spellEntry == null || !his_trade.GetItem(TradeSlots.NonTraded) ||
                         (my_trade.HasSpellCastItem() && !castItem))
                     {
-                        clearAcceptTradeMode(my_trade, his_trade);
-                        clearAcceptTradeMode(myItems, hisItems);
+                        ClearAcceptTradeMode(my_trade, his_trade);
+                        ClearAcceptTradeMode(myItems, hisItems);
 
                         my_trade.SetSpell(0);
                         return;
@@ -364,8 +364,8 @@ namespace Game
                     {
                         my_spell.SendCastResult(res);
 
-                        clearAcceptTradeMode(my_trade, his_trade);
-                        clearAcceptTradeMode(myItems, hisItems);
+                        ClearAcceptTradeMode(my_trade, his_trade);
+                        ClearAcceptTradeMode(myItems, hisItems);
 
                         my_spell.Dispose();
                         my_trade.SetSpell(0);
@@ -384,8 +384,8 @@ namespace Game
                     {
                         his_trade.SetSpell(0);
 
-                        clearAcceptTradeMode(my_trade, his_trade);
-                        clearAcceptTradeMode(myItems, hisItems);
+                        ClearAcceptTradeMode(my_trade, his_trade);
+                        ClearAcceptTradeMode(myItems, hisItems);
                         return;
                     }
 
@@ -399,8 +399,8 @@ namespace Game
                     {
                         his_spell.SendCastResult(res);
 
-                        clearAcceptTradeMode(my_trade, his_trade);
-                        clearAcceptTradeMode(myItems, hisItems);
+                        ClearAcceptTradeMode(my_trade, his_trade);
+                        ClearAcceptTradeMode(myItems, hisItems);
 
                         my_spell.Dispose();
                         his_spell.Dispose();
@@ -420,12 +420,12 @@ namespace Game
                 hisCanCompleteInfo.BagResult = trader.CanStoreItems(myItems, (int)TradeSlots.TradedCount, ref hisCanCompleteInfo.ItemID);
                 myCanCompleteInfo.BagResult = GetPlayer().CanStoreItems(hisItems, (int)TradeSlots.TradedCount, ref myCanCompleteInfo.ItemID);
 
-                clearAcceptTradeMode(myItems, hisItems);
+                ClearAcceptTradeMode(myItems, hisItems);
 
                 // in case of missing space report error
                 if (myCanCompleteInfo.BagResult != InventoryResult.Ok)
                 {
-                    clearAcceptTradeMode(my_trade, his_trade);
+                    ClearAcceptTradeMode(my_trade, his_trade);
 
                     myCanCompleteInfo.Status = TradeStatus.Failed;
                     trader.GetSession().SendTradeStatus(myCanCompleteInfo);
@@ -437,7 +437,7 @@ namespace Game
                 }
                 else if (hisCanCompleteInfo.BagResult != InventoryResult.Ok)
                 {
-                    clearAcceptTradeMode(my_trade, his_trade);
+                    ClearAcceptTradeMode(my_trade, his_trade);
 
                     hisCanCompleteInfo.Status = TradeStatus.Failed;
                     SendTradeStatus(hisCanCompleteInfo);
@@ -464,7 +464,7 @@ namespace Game
                 }
 
                 // execute trade: 2. store
-                moveItems(myItems, hisItems);
+                MoveItems(myItems, hisItems);
 
                 // logging money                
                 if (HasPermission(RBACPermissions.LogGmTrade))
@@ -490,13 +490,13 @@ namespace Game
                 trader.ModifyMoney((long)my_trade.GetMoney());
 
                 if (my_spell)
-                    my_spell.prepare(my_targets);
+                    my_spell.Prepare(my_targets);
 
                 if (his_spell)
-                    his_spell.prepare(his_targets);
+                    his_spell.Prepare(his_targets);
 
                 // cleanup
-                clearAcceptTradeMode(my_trade, his_trade);
+                ClearAcceptTradeMode(my_trade, his_trade);
                 GetPlayer().SetTradeData(null);
                 trader.SetTradeData(null);
 
@@ -578,7 +578,7 @@ namespace Game
                 return;
             }
 
-            if (isLogingOut())
+            if (IsLogingOut())
             {
                 info.Status = TradeStatus.LoggingOut;
                 SendTradeStatus(info);
@@ -635,7 +635,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetSession().isLogingOut())
+            if (pOther.GetSession().IsLogingOut())
             {
                 info.Status = TradeStatus.TargetLoggingOut;
                 SendTradeStatus(info);

@@ -1034,7 +1034,7 @@ namespace Game.Entities
                     spell.SetSpellValue(pair.Key, pair.Value);
 
             spell.m_CastItem = castItem;
-            spell.prepare(targets, triggeredByAura);
+            spell.Prepare(targets, triggeredByAura);
         }
         public void CastSpell(Unit victim, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
@@ -1134,7 +1134,7 @@ namespace Game.Entities
             if (spellType == CurrentSpellTypes.Channeled)
                 spell.SendChannelUpdate(0);
 
-            spell.finish(ok);
+            spell.Finish(ok);
         }
 
         uint GetCastingTimeForBonus(SpellInfo spellProto, DamageEffectType damagetype, uint CastingTime)
@@ -1385,7 +1385,7 @@ namespace Game.Entities
             // channeled spells during channel stage (after the initial cast timer) allow movement with a specific spell attribute
             Spell spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
             if (spell)
-                if (spell.getState() != SpellState.Finished && spell.IsChannelActive())
+                if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.GetSpellInfo().IsMoveAllowedChannel())
                         return false;
 
@@ -1501,7 +1501,7 @@ namespace Game.Entities
             int overEnergize = damage - gain;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
-            victim.GetHostileRefManager().threatAssist(this, damage * 0.5f, spellInfo);
+            victim.GetHostileRefManager().ThreatAssist(this, damage * 0.5f, spellInfo);
 
             SendEnergizeSpellLog(victim, spellId, damage, overEnergize, powerType);
         }
@@ -2100,8 +2100,8 @@ namespace Game.Entities
             // generic spells are cast when they are not finished and not delayed
             var currentSpell = GetCurrentSpell(CurrentSpellTypes.Generic);
             if (currentSpell &&
-                    (currentSpell.getState() != SpellState.Finished) &&
-                    (withDelayed || currentSpell.getState() != SpellState.Delayed))
+                    (currentSpell.GetState() != SpellState.Finished) &&
+                    (withDelayed || currentSpell.GetState() != SpellState.Delayed))
             {
                 if (!skipInstant || currentSpell.GetCastTime() != 0)
                 {
@@ -2112,7 +2112,7 @@ namespace Game.Entities
             currentSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             // channeled spells may be delayed, but they are still considered cast
             if (!skipChanneled && currentSpell &&
-                (currentSpell.getState() != SpellState.Finished))
+                (currentSpell.GetState() != SpellState.Finished))
             {
                 if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
                     return true;
@@ -2833,8 +2833,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Unit, "Interrupt spell for unit {0}", GetEntry());
             Spell spell = m_currentSpells.LookupByKey(spellType);
             if (spell != null
-                && (withDelayed || spell.getState() != SpellState.Delayed)
-                && (withInstant || spell.GetCastTime() > 0 || spell.getState() == SpellState.Casting))
+                && (withDelayed || spell.GetState() != SpellState.Delayed)
+                && (withInstant || spell.GetCastTime() > 0 || spell.GetState() == SpellState.Casting))
             {
                 // for example, do not let self-stun aura interrupt itself
                 if (!spell.IsInterruptable())
@@ -2845,8 +2845,8 @@ namespace Game.Entities
                     if (IsTypeId(TypeId.Player))
                         ToPlayer().SendAutoRepeatCancel(this);
 
-                if (spell.getState() != SpellState.Finished)
-                    spell.cancel();
+                if (spell.GetState() != SpellState.Finished)
+                    spell.Cancel();
 
                 if (IsCreature() && IsAIEnabled)
                     ToCreature().GetAI().OnSpellCastInterrupt(spell.GetSpellInfo());
@@ -2867,7 +2867,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
-                if (spell.getState() == SpellState.Casting)
+                if (spell.GetState() == SpellState.Casting)
                 {
                     for (var i = 0; i < m_interruptMask.Length; ++i)
                         m_interruptMask[i] |= spell.m_spellInfo.ChannelInterruptFlags[i];
@@ -3243,7 +3243,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
-                if (spell.getState() == SpellState.Casting
+                if (spell.GetState() == SpellState.Casting
                     && Convert.ToBoolean(spell.GetSpellInfo().ChannelInterruptFlags[index] & flag)
                     && spell.GetSpellInfo().Id != except
                     && !(Convert.ToBoolean(flag & (uint)SpellAuraInterruptFlags.Move) && HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spell.GetSpellInfo())))

@@ -112,7 +112,7 @@ namespace Game.Entities
             if (_group)
             {
                 // 2. In case when player is in group, initialize variables necessary for group calculations:
-                for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
                     if (member)
@@ -258,11 +258,11 @@ namespace Game.Entities
                     if (!_isBattleground)
                     {
                         // 3.1.2. Alter group rate if group is in raid (not for Battlegrounds).
-                        bool isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsRaid() && _group.isRaidGroup();
+                        bool isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsRaid() && _group.IsRaidGroup();
                         _groupRate = Formulas.XPInGroupRate(_count, isRaid);
                     }
                     // 3.1.3. Reward each group member (even dead or corpse) within reward distance.
-                    for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player member = refe.GetSource();
                         if (member)

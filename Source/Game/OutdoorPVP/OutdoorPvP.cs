@@ -93,7 +93,7 @@ namespace Game.PvP
             Group group = killer.GetGroup();
             if (group)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player groupGuy = refe.GetSource();
 
@@ -316,9 +316,9 @@ namespace Game.PvP
         public OPvPCapturePoint(OutdoorPvP pvp)
         {
             m_team = TeamId.Neutral;
-            m_OldState = ObjectiveStates.Neutral;
-            m_State = ObjectiveStates.Neutral;
-            m_PvP = pvp;
+            OldState = ObjectiveStates.Neutral;
+            State = ObjectiveStates.Neutral;
+            PvP = pvp;
 
             m_activePlayers[0] = new HashSet<ObjectGuid>();
             m_activePlayers[1] = new HashSet<ObjectGuid>();
@@ -433,7 +433,7 @@ namespace Game.PvP
             }
             ulong spawnId = m_Creatures[type];
 
-            var bounds = m_PvP.GetMap().GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+            var bounds = PvP.GetMap().GetCreatureBySpawnIdStore().LookupByKey(spawnId);
             foreach (var creature in bounds)
             {
                 // Don't save respawn time
@@ -447,7 +447,7 @@ namespace Game.PvP
             // delete respawn time for this creature
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN);
             stmt.AddValue(0, spawnId);
-            stmt.AddValue(1, m_PvP.GetMap().GetId());
+            stmt.AddValue(1, PvP.GetMap().GetId());
             stmt.AddValue(2, 0);  // instance id, always 0 for world maps
             DB.Characters.Execute(stmt);
 
@@ -463,7 +463,7 @@ namespace Game.PvP
                 return false;
 
             ulong spawnId = m_Objects[type];
-            var bounds = m_PvP.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
+            var bounds = PvP.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
             foreach (var gameobject in bounds)
             {
                 // Don't save respawn time
@@ -545,7 +545,7 @@ namespace Game.PvP
             if (fact_diff < 0)
             {
                 // horde is in majority, but it's already horde-controlled . no change
-                if (m_State == ObjectiveStates.Horde && m_value <= -m_maxValue)
+                if (State == ObjectiveStates.Horde && m_value <= -m_maxValue)
                     return false;
 
                 if (fact_diff < -maxDiff)
@@ -556,7 +556,7 @@ namespace Game.PvP
             else
             {
                 // ally is in majority, but it's already ally-controlled . no change
-                if (m_State == ObjectiveStates.Alliance && m_value >= m_maxValue)
+                if (State == ObjectiveStates.Alliance && m_value >= m_maxValue)
                     return false;
 
                 if (fact_diff > maxDiff)
@@ -568,7 +568,7 @@ namespace Game.PvP
             float oldValue = m_value;
             uint oldTeam = m_team;
 
-            m_OldState = m_State;
+            OldState = State;
 
             m_value += fact_diff;
 
@@ -576,40 +576,40 @@ namespace Game.PvP
             {
                 if (m_value < -m_maxValue)
                     m_value = -m_maxValue;
-                m_State = ObjectiveStates.Horde;
+                State = ObjectiveStates.Horde;
                 m_team = TeamId.Horde;
             }
             else if (m_value > m_minValue) // blue
             {
                 if (m_value > m_maxValue)
                     m_value = m_maxValue;
-                m_State = ObjectiveStates.Alliance;
+                State = ObjectiveStates.Alliance;
                 m_team = TeamId.Alliance;
             }
             else if (oldValue * m_value <= 0) // grey, go through mid point
             {
                 // if challenger is ally, then n.a challenge
                 if (Challenger == Team.Alliance)
-                    m_State = ObjectiveStates.NeutralAllianceChallenge;
+                    State = ObjectiveStates.NeutralAllianceChallenge;
                 // if challenger is horde, then n.h challenge
                 else if (Challenger == Team.Horde)
-                    m_State = ObjectiveStates.NeutralHordeChallenge;
+                    State = ObjectiveStates.NeutralHordeChallenge;
                 m_team = TeamId.Neutral;
             }
             else // grey, did not go through mid point
             {
                 // old phase and current are on the same side, so one team challenges the other
-                if (Challenger == Team.Alliance && (m_OldState == ObjectiveStates.Horde || m_OldState == ObjectiveStates.NeutralHordeChallenge))
-                    m_State = ObjectiveStates.HordeAllianceChallenge;
-                else if (Challenger == Team.Horde && (m_OldState == ObjectiveStates.Alliance || m_OldState == ObjectiveStates.NeutralAllianceChallenge))
-                    m_State = ObjectiveStates.AllianceHordeChallenge;
+                if (Challenger == Team.Alliance && (OldState == ObjectiveStates.Horde || OldState == ObjectiveStates.NeutralHordeChallenge))
+                    State = ObjectiveStates.HordeAllianceChallenge;
+                else if (Challenger == Team.Horde && (OldState == ObjectiveStates.Alliance || OldState == ObjectiveStates.NeutralAllianceChallenge))
+                    State = ObjectiveStates.AllianceHordeChallenge;
                 m_team = TeamId.Neutral;
             }
 
             if (m_value != oldValue)
                 SendChangePhase();
 
-            if (m_OldState != m_State)
+            if (OldState != State)
             {
                 if (oldTeam != m_team)
                     ChangeTeam(oldTeam);
@@ -637,7 +637,7 @@ namespace Game.PvP
         public void SendObjectiveComplete(uint id, ObjectGuid guid)
         {
             uint team;
-            switch (m_State)
+            switch (State)
             {
                 case ObjectiveStates.Alliance:
                     team = 0;
@@ -714,12 +714,12 @@ namespace Game.PvP
         public float m_value;
         uint m_team;
         // objective states
-        public ObjectiveStates m_OldState { get; set; }
-        public ObjectiveStates m_State { get; set; }
+        public ObjectiveStates OldState { get; set; }
+        public ObjectiveStates State { get; set; }
         // neutral value on capture bar
         public uint m_neutralValuePct;
         // pointer to the OutdoorPvP this objective belongs to
-        public OutdoorPvP m_PvP { get; set; }
+        public OutdoorPvP PvP { get; set; }
 
         public Dictionary<uint, ulong> m_Objects = new Dictionary<uint, ulong>();
         public Dictionary<uint, ulong> m_Creatures = new Dictionary<uint, ulong>();

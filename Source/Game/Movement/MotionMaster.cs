@@ -47,10 +47,10 @@ namespace Game.Movement
 
         public void Initialize()
         {
-            while (!empty())
+            while (!Empty())
             {
-                IMovementGenerator curr = top();
-                pop();
+                IMovementGenerator curr = Top();
+                Pop();
                 if (curr != null)
                     DirectDelete(curr);
             }
@@ -77,10 +77,10 @@ namespace Game.Movement
             if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
                 return;
 
-            Cypher.Assert(!empty());
+            Cypher.Assert(!Empty());
 
             _cleanFlag |= MMCleanFlag.Update;
-            bool isMoveGenUpdateSuccess = top().Update(_owner, diff);
+            bool isMoveGenUpdateSuccess = Top().Update(_owner, diff);
             _cleanFlag &= ~MMCleanFlag.Update;
 
             if (!isMoveGenUpdateSuccess)
@@ -114,12 +114,12 @@ namespace Game.Movement
 
             _expireList = null;
 
-            if (empty())
+            if (Empty())
                 Initialize();
             else if (NeedInitTop())
                 InitTop();
             else if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Reset))
-                top().Reset(_owner);
+                Top().Reset(_owner);
 
             _cleanFlag &= ~MMCleanFlag.Reset;
         }
@@ -140,10 +140,10 @@ namespace Game.Movement
 
         public MovementGeneratorType GetCurrentMovementGeneratorType()
         {
-            if (empty())
+            if (Empty())
                 return MovementGeneratorType.Idle;
 
-            return top().GetMovementGeneratorType();
+            return Top().GetMovementGeneratorType();
         }
 
         public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
@@ -160,12 +160,12 @@ namespace Game.Movement
             return _slot[slot];
         }
 
-        public void propagateSpeedChange()
+        public void PropagateSpeedChange()
         {
             for (int i = 0; i <= _top; ++i)
             {
                 if (_slot[i] != null)
-                    _slot[i].unitSpeedChanged();
+                    _slot[i].UnitSpeedChanged();
             }
         }
 
@@ -186,7 +186,7 @@ namespace Game.Movement
 
         public void MoveIdle()
         {
-            if (empty() || !IsStatic(top()))
+            if (Empty() || !IsStatic(Top()))
                 StartMovement(staticIdleMovement, MovementSlot.Idle);
         }
 
@@ -357,7 +357,7 @@ namespace Game.Movement
             float x, y, z;
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
-            float max_height = -MoveSpline.computeFallElevation(moveTimeHalf, false, -speedZ);
+            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
             _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetObjectSize(), dist, _owner.GetAngle(srcX, srcY) + MathFunctions.PI);
 
@@ -400,7 +400,7 @@ namespace Game.Movement
                 return;
 
             float moveTimeHalf = (float)(speedZ / gravity);
-            float max_height = -MoveSpline.computeFallElevation(moveTimeHalf, false, -speedZ);
+            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
             MoveSplineInit init = new MoveSplineInit(_owner);
             init.MoveTo(x, y, z, false);
@@ -611,19 +611,19 @@ namespace Game.Movement
             StartMovement(new RotateMovementGenerator(time, direction), MovementSlot.Active);
         }
 
-        void pop()
+        void Pop()
         {
-            if (empty())
+            if (Empty())
                 return;
 
             _slot[_top] = null;
-            while (!empty() && top() == null)
+            while (!Empty() && Top() == null)
                 --_top;
         }
 
         bool NeedInitTop()
         {
-            if (empty())
+            if (Empty())
                 return false;
 
             return _initialize[_top];
@@ -631,7 +631,7 @@ namespace Game.Movement
 
         void InitTop()
         {
-            top().Initialize(_owner);
+            Top().Initialize(_owner);
             _initialize[_top] = false;
         }
 
@@ -663,29 +663,29 @@ namespace Game.Movement
 
         void DirectClean(bool reset)
         {
-            while (size() > 1)
+            while (Size() > 1)
             {
-                IMovementGenerator curr = top();
-                pop();
+                IMovementGenerator curr = Top();
+                Pop();
                 if (curr != null)
                     DirectDelete(curr);
             }
 
-            if (empty())
+            if (Empty())
                 return;
 
             if (NeedInitTop())
                 InitTop();
             else if (reset)
-                top().Reset(_owner);
+                Top().Reset(_owner);
         }
 
         void DelayedClean()
         {
-            while (size() > 1)
+            while (Size() > 1)
             {
-                IMovementGenerator curr = top();
-                pop();
+                IMovementGenerator curr = Top();
+                Pop();
                 if (curr != null)
                     DelayedDelete(curr);
             }
@@ -693,34 +693,34 @@ namespace Game.Movement
 
         void DirectExpire(bool reset)
         {
-            if (size() > 1)
+            if (Size() > 1)
             {
-                IMovementGenerator curr = top();
-                pop();
+                IMovementGenerator curr = Top();
+                Pop();
                 DirectDelete(curr);
             }
 
-            while (!empty() && top() == null)//not sure this will work
+            while (!Empty() && Top() == null)//not sure this will work
                 --_top;
 
-            if (empty())
+            if (Empty())
                 Initialize();
             else if (NeedInitTop())
                 InitTop();
             else if (reset)
-                top().Reset(_owner);
+                Top().Reset(_owner);
         }
 
         void DelayedExpire()
         {
-            if (size() > 1)
+            if (Size() > 1)
             {
-                IMovementGenerator curr = top();
-                pop();
+                IMovementGenerator curr = Top();
+                Pop();
                 DelayedDelete(curr);
             }
 
-            while (!empty() && top() == null)
+            while (!Empty() && Top() == null)
                 --_top;
         }
 
@@ -740,13 +740,13 @@ namespace Game.Movement
             _expireList.Add(curr);
         }
 
-        public bool empty() { return (_top < 0); }
+        public bool Empty() { return (_top < 0); }
 
-        int size() { return _top + 1; }
+        int Size() { return _top + 1; }
 
-        public IMovementGenerator top()
+        public IMovementGenerator Top()
         {
-            Cypher.Assert(!empty());
+            Cypher.Assert(!Empty());
             return _slot[_top];
         }
 

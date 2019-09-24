@@ -98,63 +98,63 @@ namespace Game.Maps
 
         public CellCoord(uint x, uint y)
         {
-            x_coord = x;
-            y_coord = y;
+            X_coord = x;
+            Y_coord = y;
         }
         public CellCoord(CellCoord obj)
         {
-            x_coord = obj.x_coord;
-            y_coord = obj.y_coord;
+            X_coord = obj.X_coord;
+            Y_coord = obj.Y_coord;
         }
 
         public bool IsCoordValid()
         {
-            return x_coord < Limit && y_coord < Limit;
+            return X_coord < Limit && Y_coord < Limit;
         }
-        public ICoord normalize()
+        public ICoord Normalize()
         {
-            x_coord = Math.Min(x_coord, Limit - 1);
-            y_coord = Math.Min(y_coord, Limit - 1);
+            X_coord = Math.Min(X_coord, Limit - 1);
+            Y_coord = Math.Min(Y_coord, Limit - 1);
             return this;
         }
         public uint GetId()
         {
-            return y_coord * Limit + x_coord;
+            return Y_coord * Limit + X_coord;
         }
 
-        public void dec_x(uint val)
+        public void Dec_x(uint val)
         {
-            if (x_coord > val)
-                x_coord -= val;
+            if (X_coord > val)
+                X_coord -= val;
             else
-                x_coord = 0;
+                X_coord = 0;
         }
-        public void inc_x(uint val)
+        public void Inc_x(uint val)
         {
-            if (x_coord + val < Limit)
-                x_coord += val;
+            if (X_coord + val < Limit)
+                X_coord += val;
             else
-                x_coord = Limit - 1;
+                X_coord = Limit - 1;
         }
 
-        public void dec_y(uint val)
+        public void Dec_y(uint val)
         {
-            if (y_coord > val)
-                y_coord -= val;
+            if (Y_coord > val)
+                Y_coord -= val;
             else
-                y_coord = 0;
+                Y_coord = 0;
         }
-        public void inc_y(uint val)
+        public void Inc_y(uint val)
         {
-            if (y_coord + val < Limit)
-                y_coord += val;
+            if (Y_coord + val < Limit)
+                Y_coord += val;
             else
-                y_coord = Limit - 1;
+                Y_coord = Limit - 1;
         }
 
         public static bool operator ==(CellCoord p1, CellCoord p2)
         {
-            return (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord);
+            return (p1.X_coord == p2.X_coord && p1.Y_coord == p2.Y_coord);
         }
 
         public static bool operator !=(CellCoord p1, CellCoord p2)
@@ -172,11 +172,11 @@ namespace Game.Maps
 
         public override int GetHashCode()
         {
-            return x_coord.GetHashCode() ^ y_coord.GetHashCode();
+            return X_coord.GetHashCode() ^ Y_coord.GetHashCode();
         }
 
-        public uint x_coord { get; set; }
-        public uint y_coord { get; set; }
+        public uint X_coord { get; set; }
+        public uint Y_coord { get; set; }
     }
 
     public class GridCoord : ICoord
@@ -185,58 +185,58 @@ namespace Game.Maps
 
         public GridCoord(uint x, uint y)
         {
-            x_coord = x;
-            y_coord = y;
+            X_coord = x;
+            Y_coord = y;
         }
         public GridCoord(GridCoord obj)
         {
-            x_coord = obj.x_coord;
-            y_coord = obj.y_coord;
+            X_coord = obj.X_coord;
+            Y_coord = obj.Y_coord;
         }
 
         public bool IsCoordValid()
         {
-            return x_coord < Limit && y_coord < Limit;
+            return X_coord < Limit && Y_coord < Limit;
         }
-        public ICoord normalize()
+        public ICoord Normalize()
         {
-            x_coord = Math.Min(x_coord, Limit - 1);
-            y_coord = Math.Min(y_coord, Limit - 1);
+            X_coord = Math.Min(X_coord, Limit - 1);
+            Y_coord = Math.Min(Y_coord, Limit - 1);
             return this;
         }
         public uint GetId()
         {
-            return y_coord * Limit + x_coord;
+            return Y_coord * Limit + X_coord;
         }
         
-        public void dec_x(uint val)
+        public void Dec_x(uint val)
         {
-            if (x_coord > val)
-                x_coord -= val;
+            if (X_coord > val)
+                X_coord -= val;
             else
-                x_coord = 0;
+                X_coord = 0;
         }
-        public void inc_x(uint val)
+        public void Inc_x(uint val)
         {
-            if (x_coord + val < Limit)
-                x_coord += val;
+            if (X_coord + val < Limit)
+                X_coord += val;
             else
-                x_coord = Limit - 1;
+                X_coord = Limit - 1;
         }
 
-        public void dec_y(uint val)
+        public void Dec_y(uint val)
         {
-            if (y_coord > val)
-                y_coord -= val;
+            if (Y_coord > val)
+                Y_coord -= val;
             else
-                y_coord = 0;
+                Y_coord = 0;
         }
-        public void inc_y(uint val)
+        public void Inc_y(uint val)
         {
-            if (y_coord + val < Limit)
-                y_coord += val;
+            if (Y_coord + val < Limit)
+                Y_coord += val;
             else
-                y_coord = Limit - 1;
+                Y_coord = Limit - 1;
         }
 
         public static bool operator ==(GridCoord first, GridCoord other)
@@ -244,7 +244,7 @@ namespace Game.Maps
             if (ReferenceEquals(first, other))
                 return true;
 
-            if ((object)first == null || (object)other == null)
+            if (ReferenceEquals(first, null) || ReferenceEquals(other, null))
                 return false;
 
             return first.Equals(other);
@@ -262,30 +262,30 @@ namespace Game.Maps
 
         public bool Equals(GridCoord other)
         {
-            return other.x_coord == x_coord && other.y_coord == y_coord;
+            return other.X_coord == X_coord && other.Y_coord == Y_coord;
         }
 
         public override int GetHashCode()
         {
-            return new { x_coord, y_coord }.GetHashCode();
+            return new { X_coord, Y_coord }.GetHashCode();
         }
 
 
-        public uint x_coord { get; set; }
-        public uint y_coord { get; set; }
+        public uint X_coord { get; set; }
+        public uint Y_coord { get; set; }
     }
 
     public interface ICoord
     {
         bool IsCoordValid();
-        ICoord normalize();
+        ICoord Normalize();
         uint GetId();
-        void dec_x(uint val);
-        void inc_x(uint val);
-        void dec_y(uint val);
-        void inc_y(uint val);
+        void Dec_x(uint val);
+        void Inc_x(uint val);
+        void Dec_y(uint val);
+        void Inc_y(uint val);
 
-        uint x_coord { get; set; }
-        uint y_coord { get; set; }
+        uint X_coord { get; set; }
+        uint Y_coord { get; set; }
     }
 }

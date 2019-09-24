@@ -111,7 +111,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
 
 
     [Script]
-    class npc_ruul_snowhoof : npc_escortAI
+    class npc_ruul_snowhoof : NpcEscortAI
     {
         public npc_ruul_snowhoof(Creature creature) : base(creature) { }
 
@@ -129,7 +129,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             summoned.GetAI().AttackStart(me);
         }
 
-        public override void sQuestAccept(Player player, Quest quest)
+        public override void QuestAccept(Player player, Quest quest)
         {
             if (quest.Id == QuestIds.FreedomToRuul)
             {
@@ -170,7 +170,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
     }
 
     [Script]
-    public class npc_muglash : npc_escortAI
+    public class npc_muglash : NpcEscortAI
     {
         public npc_muglash(Creature creature) : base(creature)
         {
@@ -194,7 +194,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             Player player = GetPlayerForEscort();
             if (player)
             {
-                if (HasEscortState(eEscortState.Paused))
+                if (HasEscortState(EscortState.Paused))
                 {
                     if (Convert.ToBoolean(RandomHelper.URand(0, 1)))
                         Talk(TextIds.SayMugOnGuard, player);
@@ -205,7 +205,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
 
         public override void JustDied(Unit killer)
         {
-            if (HasEscortState(eEscortState.Escorting))
+            if (HasEscortState(EscortState.Escorting))
             {
                 Player player = GetPlayerForEscort();
                 if (player)
@@ -218,7 +218,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             summoned.GetAI().AttackStart(me);
         }
 
-        public override void sQuestAccept(Player player, Quest quest)
+        public override void QuestAccept(Player player, Quest quest)
         {
             if (quest.Id == QuestIds.Vorsha)
             {
@@ -292,7 +292,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
 
             if (!me.GetVictim())
             {
-                if (HasEscortState(eEscortState.Paused) && _isBrazierExtinguished)
+                if (HasEscortState(EscortState.Paused) && _isBrazierExtinguished)
                 {
                     if (eventTimer < diff)
                     {

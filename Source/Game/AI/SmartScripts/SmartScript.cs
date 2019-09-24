@@ -392,13 +392,13 @@ namespace Game.AI
                         if (me == null)
                             break;
 
-                        var threatList = me.GetThreatManager().getThreatList();
+                        var threatList = me.GetThreatManager().GetThreatList();
                         foreach (var refe in threatList)
                         {
-                            Unit target = Global.ObjAccessor.GetUnit(me, refe.getUnitGuid());
+                            Unit target = Global.ObjAccessor.GetUnit(me, refe.GetUnitGuid());
                             if (target != null)
                             {
-                                me.GetThreatManager().modifyThreatPercent(target, e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
+                                me.GetThreatManager().ModifyThreatPercent(target, e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_THREAT_ALL_PCT: Creature guidLow {0} modify threat for unit {1}, value {2}",
                                     me.GetGUID().ToString(), target.GetGUID().ToString(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
                             }
@@ -418,7 +418,7 @@ namespace Game.AI
                         {
                             if (IsUnit(obj))
                             {
-                                me.GetThreatManager().modifyThreatPercent(obj.ToUnit(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
+                                me.GetThreatManager().ModifyThreatPercent(obj.ToUnit(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_THREAT_SINGLE_PCT: Creature guidLow {0} modify threat for unit {1}, value {2}",
                                     me.GetGUID().ToString(), obj.GetGUID().ToString(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
                             }
@@ -2913,7 +2913,7 @@ namespace Game.AI
                             Group group = player.GetGroup();
                             if (group)
                             {
-                                for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                                for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                                 {
                                     Player member = groupRef.GetSource();
                                     if (member)
@@ -3118,10 +3118,10 @@ namespace Game.AI
                     {
                         if (me != null)
                         {
-                            var threatList = me.GetThreatManager().getThreatList();
+                            var threatList = me.GetThreatManager().GetThreatList();
                             foreach (var i in threatList)
                             {
-                                Unit temp = Global.ObjAccessor.GetUnit(me, i.getUnitGuid());
+                                Unit temp = Global.ObjAccessor.GetUnit(me, i.GetUnitGuid());
                                 if (temp != null)
                                     if (e.Target.hostilRandom.maxDist == 0 || me.IsWithinCombatRange(temp, (float)e.Target.hostilRandom.maxDist))
                                         l.Add(temp);
@@ -3157,7 +3157,7 @@ namespace Game.AI
                             Group lootGroup = me.GetLootRecipientGroup();
                             if (lootGroup)
                             {
-                                for (GroupReference refe = lootGroup.GetFirstMember(); refe != null; refe = refe.next())
+                                for (GroupReference refe = lootGroup.GetFirstMember(); refe != null; refe = refe.Next())
                                 {
                                     Player recipient = refe.GetSource();
                                     if (recipient)

@@ -25,13 +25,13 @@ namespace Framework.Dynamic
         FROM _RefFrom;
 
         // Tell our refTo (target) object that we have a link
-        public virtual void targetObjectBuildLink() { }
+        public virtual void TargetObjectBuildLink() { }
 
         // Tell our refTo (taget) object, that the link is cut
-        public virtual void targetObjectDestroyLink() { }
+        public virtual void TargetObjectDestroyLink() { }
 
         // Tell our refFrom (source) object, that the link is cut (Target destroyed)
-        public virtual void sourceObjectDestroyLink() { }
+        public virtual void SourceObjectDestroyLink() { }
 
         public Reference()
         {
@@ -39,24 +39,24 @@ namespace Framework.Dynamic
         }
 
         // Create new link
-        public void link(TO toObj, FROM fromObj)
+        public void Link(TO toObj, FROM fromObj)
         {
             Cypher.Assert(fromObj != null);                                // fromObj MUST not be NULL
-            if (isValid())
-                unlink();
+            if (IsValid())
+                Unlink();
             if (toObj != null)
             {
                 _RefTo = toObj;
                 _RefFrom = fromObj;
-                targetObjectBuildLink();
+                TargetObjectBuildLink();
             }
         }
 
         // We don't need the reference anymore. Call comes from the refFrom object
         // Tell our refTo object, that the link is cut
-        public void unlink()
+        public void Unlink()
         {
-            targetObjectDestroyLink();
+            TargetObjectDestroyLink();
             Delink();
             _RefTo = null;
             _RefFrom = null;
@@ -64,38 +64,38 @@ namespace Framework.Dynamic
 
         // Link is invalid due to destruction of referenced target object. Call comes from the refTo object
         // Tell our refFrom object, that the link is cut
-        public void invalidate()                                   // the iRefFrom MUST remain!!
+        public void Invalidate()                                   // the iRefFrom MUST remain!!
         {
-            sourceObjectDestroyLink();
+            SourceObjectDestroyLink();
             Delink();
             _RefTo = null;
         }
 
-        public bool isValid()                                // Only check the iRefTo
+        public bool IsValid()                                // Only check the iRefTo
         {
             return _RefTo != null;
         }
 
-        public Reference<TO, FROM> next() { return ((Reference<TO, FROM>)GetNextElement()); }
-        public Reference<TO, FROM> prev() { return ((Reference<TO, FROM>)GetPrevElement()); }
+        public Reference<TO, FROM> Next() { return ((Reference<TO, FROM>)GetNextElement()); }
+        public Reference<TO, FROM> Prev() { return ((Reference<TO, FROM>)GetPrevElement()); }
 
-        public TO getTarget() { return _RefTo; }
+        public TO GetTarget() { return _RefTo; }
 
         public FROM GetSource() { return _RefFrom; }
     }
 
     public class RefManager<TO, FROM> : LinkedListHead where TO : class where FROM : class
     {
-        ~RefManager() { clearReferences(); }
+        ~RefManager() { ClearReferences(); }
 
-        public Reference<TO, FROM> getFirst() { return (Reference<TO, FROM>)base.GetFirstElement(); }
-        public Reference<TO, FROM> getLast() { return (Reference<TO, FROM>)base.GetLastElement(); }
+        public Reference<TO, FROM> GetFirst() { return (Reference<TO, FROM>)base.GetFirstElement(); }
+        public Reference<TO, FROM> GetLast() { return (Reference<TO, FROM>)base.GetLastElement(); }
 
-        public void clearReferences()
+        public void ClearReferences()
         {
             Reference<TO, FROM> refe;
-            while ((refe = getFirst()) != null)
-                refe.invalidate();
+            while ((refe = GetFirst()) != null)
+                refe.Invalidate();
         }
     }
 }

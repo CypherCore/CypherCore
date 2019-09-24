@@ -69,7 +69,7 @@ namespace Game.Maps
                 {
                     //z code
                     GridMaps[x][y] = null;
-                    setGrid(null, x, y);
+                    SetGrid(null, x, y);
                 }
             }
 
@@ -80,7 +80,7 @@ namespace Game.Maps
 
             GetGuidSequenceGenerator(HighGuid.Transport).Set(Global.ObjectMgr.GetGenerator(HighGuid.Transport).GetNextAfterMaxUsed());
 
-            Global.MMapMgr.loadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
+            Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
 
             Global.ScriptMgr.OnCreateMap(this);
         }
@@ -103,7 +103,7 @@ namespace Game.Maps
             if (m_parentMap == this)
                 m_childTerrainMaps = null;
 
-            Global.MMapMgr.unloadMapInstance(GetId(), i_InstanceId);
+            Global.MMapMgr.UnloadMapInstance(GetId(), i_InstanceId);
         }
 
         public static bool ExistMap(uint mapid, uint gx, uint gy)
@@ -117,7 +117,7 @@ namespace Game.Maps
 
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
-                var header = reader.Read<mapFileHeader>();
+                var header = reader.Read<MapFileHeader>();
                 if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
                     Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
@@ -130,10 +130,10 @@ namespace Game.Maps
 
         public static bool ExistVMap(uint mapid, uint gx, uint gy)
         {
-            if (Global.VMapMgr.isMapLoadingEnabled())
+            if (Global.VMapMgr.IsMapLoadingEnabled())
             {
-                LoadResult result = Global.VMapMgr.existsMap(mapid, gx, gy);
-                string name = VMapManager.getMapFileName(mapid);
+                LoadResult result = Global.VMapMgr.ExistsMap(mapid, gx, gy);
+                string name = VMapManager.GetMapFileName(mapid);
                 switch (result)
                 {
                     case LoadResult.Success:
@@ -156,7 +156,7 @@ namespace Game.Maps
             if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
                 return;
 
-            if (Global.MMapMgr.loadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy))
+            if (Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy))
                 Log.outInfo(LogFilter.Maps, "MMAP loaded name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
             else
                 Log.outInfo(LogFilter.Maps, "Could not load MMAP name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
@@ -164,11 +164,11 @@ namespace Game.Maps
 
         void LoadVMap(uint gx, uint gy)
         {
-            if (!Global.VMapMgr.isMapLoadingEnabled())
+            if (!Global.VMapMgr.IsMapLoadingEnabled())
                 return;
 
             // x and y are swapped !!
-            VMAPLoadResult vmapLoadResult = Global.VMapMgr.loadMap(GetId(), gx, gy);
+            VMAPLoadResult vmapLoadResult = Global.VMapMgr.LoadMap(GetId(), gx, gy);
             switch (vmapLoadResult)
             {
                 case VMAPLoadResult.OK:
@@ -214,7 +214,7 @@ namespace Game.Maps
             Log.outInfo(LogFilter.Maps, "Loading map {0}", filename);
             // loading data
             map.GridMaps[gx][gy] = new GridMap();
-            if (!map.GridMaps[gx][gy].loadData(filename))
+            if (!map.GridMaps[gx][gy].LoadData(filename))
                 Log.outError(LogFilter.Maps, "Error loading map file: {0}", filename);
 
             Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
@@ -236,7 +236,7 @@ namespace Game.Maps
 
                 if ((--parent.GridMapReference[gx][gy]) == 0)
                 {
-                    parent.GridMaps[gx][gy].unloadData();
+                    parent.GridMaps[gx][gy].UnloadData();
                     parent.GridMaps[gx][gy] = null;
                 }
             }
@@ -267,11 +267,11 @@ namespace Game.Maps
 
         public void AddToGrid<T>(T obj, Cell cell)where T : WorldObject
         {
-            Grid grid = getGrid(cell.GetGridX(), cell.GetGridY());
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
             switch (obj.GetTypeId())
             {
                 case TypeId.Corpse:
-                    if (grid.isGridObjectDataLoaded())
+                    if (grid.IsGridObjectDataLoaded())
                     {
                         // Corpses are a special object type - they can be added to grid via a call to AddToMap
                         // or loaded through ObjectGridLoader.
@@ -309,7 +309,7 @@ namespace Game.Maps
             if (cell == null)
                 return;
 
-            Grid grid = getGrid(cell.GetGridX(), cell.GetGridY());
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
             if (grid == null)
                 return;
 
@@ -330,7 +330,7 @@ namespace Game.Maps
             if (!p.IsCoordValid())
             {
                 Log.outError(LogFilter.Maps, "Map.SwitchGridContainers: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]",
-                    obj.GetGUID(), obj.GetPositionX(), obj.GetPositionY(), p.x_coord, p.y_coord);
+                    obj.GetGUID(), obj.GetPositionX(), obj.GetPositionY(), p.X_coord, p.Y_coord);
                 return;
             }
 
@@ -339,7 +339,7 @@ namespace Game.Maps
                 return;
 
             Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
-            Grid ngrid = getGrid(cell.GetGridX(), cell.GetGridY());
+            Grid ngrid = GetGrid(cell.GetGridX(), cell.GetGridY());
             Cypher.Assert(ngrid != null);
 
             RemoveFromGrid(obj, cell);
@@ -390,18 +390,18 @@ namespace Game.Maps
 
         void EnsureGridCreated_i(GridCoord p)
         {
-            if (getGrid(p.x_coord, p.y_coord) == null)
+            if (GetGrid(p.X_coord, p.Y_coord) == null)
             {
-                Log.outDebug(LogFilter.Maps, "Creating grid[{0}, {1}] for map {2} instance {3}", p.x_coord, p.y_coord,
+                Log.outDebug(LogFilter.Maps, "Creating grid[{0}, {1}] for map {2} instance {3}", p.X_coord, p.Y_coord,
                     GetId(), i_InstanceId);
 
-                var grid = new Grid(p.x_coord * MapConst.MaxGrids + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
+                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
                 grid.SetGridState(GridState.Idle);
-                setGrid(grid, p.x_coord, p.y_coord);
+                SetGrid(grid, p.X_coord, p.Y_coord);
 
                 //z coord
-                uint gx = (MapConst.MaxGrids - 1) - p.x_coord;
-                uint gy = (MapConst.MaxGrids - 1) - p.y_coord;
+                uint gx = (MapConst.MaxGrids - 1) - p.X_coord;
+                uint gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
                 if (GridMaps[gx][gy] == null)
                     m_parentTerrainMap.LoadMapAndVMap(gx, gy);
@@ -411,7 +411,7 @@ namespace Game.Maps
         void EnsureGridLoadedForActiveObject(Cell cell, WorldObject obj)
         {
             EnsureGridLoaded(cell);
-            Grid grid = getGrid(cell.GetGridX(), cell.GetGridY());
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
 
             // refresh grid state & timer
             if (grid.GetGridState() != GridState.Active)
@@ -426,14 +426,14 @@ namespace Game.Maps
         private bool EnsureGridLoaded(Cell cell)
         {
             EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
-            Grid grid = getGrid(cell.GetGridX(), cell.GetGridY());
+            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
 
-            if (!isGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
+            if (!IsGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
             {
                 Log.outDebug(LogFilter.Maps, "Loading grid[{0}, {1}] for map {2} instance {3}", cell.GetGridX(),
                     cell.GetGridY(), GetId(), i_InstanceId);
 
-                setGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
+                SetGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
 
                 LoadGridObjects(grid, cell);
 
@@ -513,7 +513,7 @@ namespace Game.Maps
             {
                 Log.outError(LogFilter.Maps,
                     "Map.Add: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]", obj.GetGUID(),
-                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.x_coord, cellCoord.y_coord);
+                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.X_coord, cellCoord.Y_coord);
                 return false; //Should delete object
             }
 
@@ -549,7 +549,7 @@ namespace Game.Maps
             {
                 Log.outError(LogFilter.Maps,
                     "Map.Add: Object {0} has invalid coordinates X:{1} Y:{2} grid cell [{3}:{4}]", obj.GetGUID(),
-                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.x_coord, cellCoord.y_coord);
+                    obj.GetPositionX(), obj.GetPositionY(), cellCoord.X_coord, cellCoord.Y_coord);
                 return false; //Should delete object
             }
 
@@ -580,7 +580,7 @@ namespace Game.Maps
 
         public bool IsGridLoaded(GridCoord p)
         {
-            return (getGrid(p.x_coord, p.y_coord) != null && isGridObjectDataLoaded(p.x_coord, p.y_coord));
+            return (GetGrid(p.X_coord, p.Y_coord) != null && IsGridObjectDataLoaded(p.X_coord, p.Y_coord));
         }
 
         void VisitNearbyCellsOf(WorldObject obj, Visitor gridVisitor, Visitor worldVisitor)
@@ -592,17 +592,17 @@ namespace Game.Maps
             // Update mobs/objects in ALL visible cells around object!
             CellArea area = Cell.CalculateCellArea(obj.GetPositionX(), obj.GetPositionY(), obj.GetGridActivationRange());
 
-            for (uint x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+            for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
             {
-                for (uint y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
+                for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
                     // marked cells are those that have been visited
                     // don't visit the same cell twice
                     uint cell_id = (y * MapConst.TotalCellsPerMap) + x;
-                    if (isCellMarked(cell_id))
+                    if (IsCellMarked(cell_id))
                         continue;
 
-                    markCell(cell_id);
+                    MarkCell(cell_id);
                     var pair = new CellCoord(x, y);
                     var cell = new Cell(pair);
                     cell.SetNoCreate();
@@ -614,7 +614,7 @@ namespace Game.Maps
 
         public virtual void Update(uint diff)
         {
-            _dynamicTree.update(diff);
+            _dynamicTree.Update(diff);
 
             // update worldsessions for existing players
             for (var i = 0; i < m_activePlayers.Count; ++i)
@@ -629,7 +629,7 @@ namespace Game.Maps
             }
 
             // update active cells around players and active objects
-            resetMarkedCells();
+            ResetMarkedCells();
             
             var update = new UpdaterNotifier(diff);
 
@@ -656,7 +656,7 @@ namespace Game.Maps
                 if (player.IsInCombat())
                 {
                     List<Creature> updateList = new List<Creature>();
-                    HostileReference refe = player.GetHostileRefManager().getFirst();
+                    HostileReference refe = player.GetHostileRefManager().GetFirst();
 
                     while (refe != null)
                     {
@@ -665,7 +665,7 @@ namespace Game.Maps
                             if (unit.ToCreature() && unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
                                 updateList.Add(unit.ToCreature());
 
-                        refe = refe.next();
+                        refe = refe.Next();
                     }
 
                     // Process deferred update list for player
@@ -729,29 +729,29 @@ namespace Game.Maps
             {
                 for (uint y = 0; y < MapConst.MaxGrids; ++y)
                 {
-                    Grid grid = getGrid(x, y);
+                    Grid grid = GetGrid(x, y);
                     if (grid == null)
                         continue;
 
                     if (grid.GetGridState() != GridState.Active)
                         continue;
 
-                    grid.getGridInfoRef().getRelocationTimer().TUpdate((int)diff);
-                    if (!grid.getGridInfoRef().getRelocationTimer().TPassed())
+                    grid.GetGridInfoRef().GetRelocationTimer().TUpdate((int)diff);
+                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
                         continue;
 
-                    uint gx = grid.getX();
-                    uint gy = grid.getY();
+                    uint gx = grid.GetX();
+                    uint gy = grid.GetY();
 
                     var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
-                    var cell_max = new CellCoord(cell_min.x_coord + MapConst.MaxCells, cell_min.y_coord + MapConst.MaxCells);
+                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells, cell_min.Y_coord + MapConst.MaxCells);
 
-                    for (uint xx = cell_min.x_coord; xx < cell_max.x_coord; ++xx)
+                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
                     {
-                        for (uint yy = cell_min.y_coord; yy < cell_max.y_coord; ++yy)
+                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
                         {
                             uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
-                            if (!isCellMarked(cell_id))
+                            if (!IsCellMarked(cell_id))
                                 continue;
 
                             var pair = new CellCoord(xx, yy);
@@ -776,31 +776,31 @@ namespace Game.Maps
             {
                 for (uint y = 0; y < MapConst.MaxGrids; ++y)
                 {
-                    Grid grid = getGrid(x, y);
+                    Grid grid = GetGrid(x, y);
                     if (grid == null)
                         continue;
 
                     if (grid.GetGridState() != GridState.Active)
                         continue;
 
-                    if (!grid.getGridInfoRef().getRelocationTimer().TPassed())
+                    if (!grid.GetGridInfoRef().GetRelocationTimer().TPassed())
                         continue;
 
-                    grid.getGridInfoRef().getRelocationTimer().TReset((int)diff, m_VisibilityNotifyPeriod);
+                    grid.GetGridInfoRef().GetRelocationTimer().TReset((int)diff, m_VisibilityNotifyPeriod);
 
-                    uint gx = grid.getX();
-                    uint gy = grid.getY();
+                    uint gx = grid.GetX();
+                    uint gy = grid.GetY();
 
                     var cell_min = new CellCoord(gx * MapConst.MaxCells, gy * MapConst.MaxCells);
-                    var cell_max = new CellCoord(cell_min.x_coord + MapConst.MaxCells,
-                        cell_min.y_coord + MapConst.MaxCells);
+                    var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
+                        cell_min.Y_coord + MapConst.MaxCells);
 
-                    for (uint xx = cell_min.x_coord; xx < cell_max.x_coord; ++xx)
+                    for (uint xx = cell_min.X_coord; xx < cell_max.X_coord; ++xx)
                     {
-                        for (uint yy = cell_min.y_coord; yy < cell_max.y_coord; ++yy)
+                        for (uint yy = cell_min.Y_coord; yy < cell_max.Y_coord; ++yy)
                         {
                             uint cell_id = (yy * MapConst.TotalCellsPerMap) + xx;
-                            if (!isCellMarked(cell_id))
+                            if (!IsCellMarked(cell_id))
                                 continue;
 
                             var pair = new CellCoord(xx, yy);
@@ -818,7 +818,7 @@ namespace Game.Maps
         {
             Global.ScriptMgr.OnPlayerLeaveMap(this, player);
 
-            player.GetHostileRefManager().deleteReferences(); // multithreading crashfix
+            player.GetHostileRefManager().DeleteReferences(); // multithreading crashfix
 
             bool inWorld = player.IsInWorld;
             player.RemoveFromWorld();
@@ -935,7 +935,7 @@ namespace Game.Maps
             Cell old_cell = creature.GetCurrentCell();
             var new_cell = new Cell(x, y);
 
-            if (!respawnRelocationOnFail && getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
+            if (!respawnRelocationOnFail && GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
             //! If hovering, always increase our server-side Z position
@@ -967,7 +967,7 @@ namespace Game.Maps
             Cell old_cell = go.GetCurrentCell();
 
             var new_cell = new Cell(x, y);
-            if (!respawnRelocationOnFail && getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
+            if (!respawnRelocationOnFail && GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
             // delay creature move for grid/cell to grid/cell moves
@@ -999,7 +999,7 @@ namespace Game.Maps
 
             Cell new_cell = new Cell(x, y);
 
-            if (getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
+            if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
             // delay creature move for grid/cell to grid/cell moves
@@ -1033,7 +1033,7 @@ namespace Game.Maps
             Cypher.Assert(integrity_check == old_cell);
             Cell new_cell = new Cell(x, y);
 
-            if (getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
+            if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
             // delay areatrigger move for grid/cell to grid/cell moves
@@ -1557,8 +1557,8 @@ namespace Game.Maps
 
         public bool UnloadGrid(Grid grid, bool unloadAll)
         {
-            uint x = grid.getX();
-            uint y = grid.getY();
+            uint x = grid.GetX();
+            uint y = grid.GetY();
 
             if (!unloadAll)
             {
@@ -1606,7 +1606,7 @@ namespace Game.Maps
             }
 
             Cypher.Assert(i_objectsToRemove.Empty());
-            setGrid(null, x, y);
+            SetGrid(null, x, y);
 
             uint gx = (MapConst.MaxGrids - 1) - x;
             uint gy = (MapConst.MaxGrids - 1) - y;
@@ -1615,8 +1615,8 @@ namespace Game.Maps
             if (GridMaps[gx][gy] != null)
             {
                 m_parentTerrainMap.UnloadMap(gx, gy);
-                Global.VMapMgr.unloadMap(m_parentTerrainMap.GetId(), gx, gy);
-                Global.MMapMgr.unloadMap(m_parentTerrainMap.GetId(), gx, gy);
+                Global.VMapMgr.UnloadMap(m_parentTerrainMap.GetId(), gx, gy);
+                Global.MMapMgr.UnloadMap(m_parentTerrainMap.GetId(), gx, gy);
             }
 
             Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
@@ -1651,7 +1651,7 @@ namespace Game.Maps
             {
                 for (uint y = 0; y < MapConst.MaxGrids; ++y)
                 {
-                    var grid = getGrid(x, y);
+                    var grid = GetGrid(x, y);
                     if (grid == null)
                         continue;
 
@@ -1702,7 +1702,7 @@ namespace Game.Maps
 
             GridMap grid = GridMaps[gx][gy];
             var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
-            if (childMap != null && childMap.GridMaps[gx][gy].fileExists())
+            if (childMap != null && childMap.GridMaps[gx][gy].GileExists())
                 grid = childMap.GridMaps[gx][gy];
 
             return grid;
@@ -1711,7 +1711,7 @@ namespace Game.Maps
         public bool HasGridMap(uint mapId, uint gx, uint gy)
         {
             var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
-            return childMap != null && childMap.GridMaps[gx][gy] != null && childMap.GridMaps[gx][gy].fileExists();
+            return childMap != null && childMap.GridMaps[gx][gy] != null && childMap.GridMaps[gx][gy].GileExists();
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z)
@@ -1730,7 +1730,7 @@ namespace Game.Maps
 
                 LiquidData liquid_status;
 
-                ZLiquidStatus res = getLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
+                ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
                 return res != ZLiquidStatus.NoWater ? liquid_status.level : ground_z;
             }
 
@@ -1745,7 +1745,7 @@ namespace Game.Maps
             GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
-                float gridHeight = gmap.getHeight(x, y);
+                float gridHeight = gmap.GetHeight(x, y);
                 // look from a bit higher pos to find the floor, ignore under surface case
                 if (z + 2.0f > gridHeight)
                     mapHeight = gridHeight;
@@ -1754,8 +1754,8 @@ namespace Game.Maps
             float vmapHeight = MapConst.VMAPInvalidHeightValue;
             if (checkVMap)
             {
-                if (Global.VMapMgr.isHeightCalcEnabled())
-                    vmapHeight = Global.VMapMgr.getHeight(terrainMapId, x, y, z + 2.0f, maxSearchDist);
+                if (Global.VMapMgr.IsHeightCalcEnabled())
+                    vmapHeight = Global.VMapMgr.GetHeight(terrainMapId, x, y, z + 2.0f, maxSearchDist);
                 // look from a bit higher pos to find the floor
             }
 
@@ -1783,7 +1783,7 @@ namespace Game.Maps
         {
             GridMap grid = GetGridMap(x, y);
             if (grid != null)
-                return grid.getMinHeight(x, y);
+                return grid.GetMinHeight(x, y);
 
             return -500.0f;
         }
@@ -1852,8 +1852,8 @@ namespace Game.Maps
             int drootId;
             int dgroupId;
 
-            bool hasVmapAreaInfo = Global.VMapMgr.getAreaInfo(terrainMapId, x, y, ref vmap_z, out vflags, out vadtId, out vrootId, out vgroupId);
-            bool hasDynamicAreaInfo = _dynamicTree.getAreaInfo(x, y, ref dynamic_z, phaseShift, out dflags, out dadtId, out drootId, out dgroupId);
+            bool hasVmapAreaInfo = Global.VMapMgr.GetAreaInfo(terrainMapId, x, y, ref vmap_z, out vflags, out vadtId, out vrootId, out vgroupId);
+            bool hasDynamicAreaInfo = _dynamicTree.GetAreaInfo(x, y, ref dynamic_z, phaseShift, out dflags, out dadtId, out drootId, out dgroupId);
 
             if (hasVmapAreaInfo)
             {
@@ -1890,7 +1890,7 @@ namespace Game.Maps
                 GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
                 if (gmap != null)
                 {
-                    float mapHeight = gmap.getHeight(x, y);
+                    float mapHeight = gmap.GetHeight(x, y);
                     // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
                     if (z + 2.0f > mapHeight && mapHeight > check_z)
                         return false;
@@ -1931,7 +1931,7 @@ namespace Game.Maps
             {
                 GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
                 if (gmap != null)
-                    areaId = gmap.getArea(x, y);
+                    areaId = gmap.GetArea(x, y);
 
                 // this used while not all *.map files generated (instances)
                 if (areaId == 0)
@@ -1970,17 +1970,17 @@ namespace Game.Maps
         {
             GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
-                return gmap.getTerrainType(x, y);
+                return gmap.GetTerrainType(x, y);
             return 0;
         }
 
-        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType)
         {
             LiquidData throwaway;
-            return getLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out throwaway);
+            return GetLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out throwaway);
         }
 
-        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data)
         {
             data = new LiquidData();
             var result = ZLiquidStatus.NoWater;
@@ -2050,7 +2050,7 @@ namespace Game.Maps
             if (gmap != null)
             {
                 var map_data = new LiquidData();
-                ZLiquidStatus map_result = gmap.getLiquidStatus(x, y, z, ReqLiquidType, map_data);
+                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, ReqLiquidType, map_data);
                 // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
                 if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
                 {
@@ -2070,23 +2070,23 @@ namespace Game.Maps
         {
             GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
-                return gmap.getLiquidLevel(x, y);
+                return gmap.GetLiquidLevel(x, y);
             return 0;
         }
 
-        public bool isInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
+        public bool IsInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
-            return Global.VMapMgr.isInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, this, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags)
-                   && _dynamicTree.isInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift);
+            return Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, this, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags)
+                   && _dynamicTree.IsInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift);
         }
 
-        public bool getObjectHitPos(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
+        public bool GetObjectHitPos(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
             var startPos = new Vector3(x1, y1, z1);
             var dstPos = new Vector3(x2, y2, z2);
 
             var resultPos = new Vector3();
-            bool result = _dynamicTree.getObjectHitPos(startPos, dstPos, ref resultPos, modifyDist, phaseShift);
+            bool result = _dynamicTree.GetObjectHitPos(startPos, dstPos, ref resultPos, modifyDist, phaseShift);
 
             rx = resultPos.X;
             ry = resultPos.Y;
@@ -2096,17 +2096,17 @@ namespace Game.Maps
 
         public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
-            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), _dynamicTree.getHeight(x, y, z, maxSearchDist, phaseShift));
+            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift));
         }
 
         public bool IsInWater(PhaseShift phaseShift, float x, float y, float pZ)
         {
-            return Convert.ToBoolean(getLiquidStatus(phaseShift, x, y, pZ, MapConst.MapAllLiquidTypes) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
+            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, pZ, MapConst.MapAllLiquidTypes) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
         {
-            return Convert.ToBoolean(getLiquidStatus(phaseShift, x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) & ZLiquidStatus.UnderWater);
+            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) & ZLiquidStatus.UnderWater);
         }
 
         private bool CheckGridIntegrity(Creature c, bool moved)
@@ -2214,7 +2214,7 @@ namespace Game.Maps
             player.SendPacket(packet);
         }
 
-        void setGrid(Grid grid, uint x, uint y)
+        void SetGrid(Grid grid, uint x, uint y)
         {
             if (x >= MapConst.MaxGrids || y >= MapConst.MaxGrids)
             {
@@ -2265,7 +2265,7 @@ namespace Game.Maps
                 {
                     for (uint y = 0; y < MapConst.MaxGrids; ++y)
                     {
-                        Grid grid = getGrid(x, y);
+                        Grid grid = GetGrid(x, y);
                         if (grid != null)
                             grid.Update(this, diff);
                     }
@@ -2387,33 +2387,33 @@ namespace Game.Maps
 
         public bool ActiveObjectsNearGrid(Grid grid)
         {
-            var cell_min = new CellCoord(grid.getX() * MapConst.MaxCells,
-                grid.getY() * MapConst.MaxCells);
-            var cell_max = new CellCoord(cell_min.x_coord + MapConst.MaxCells,
-                cell_min.y_coord + MapConst.MaxCells);
+            var cell_min = new CellCoord(grid.GetX() * MapConst.MaxCells,
+                grid.GetY() * MapConst.MaxCells);
+            var cell_max = new CellCoord(cell_min.X_coord + MapConst.MaxCells,
+                cell_min.Y_coord + MapConst.MaxCells);
 
             //we must find visible range in cells so we unload only non-visible cells...
             float viewDist = GetVisibilityRange();
             uint cell_range = (uint)Math.Ceiling(viewDist / MapConst.SizeofCells) + 1;
 
-            cell_min.dec_x(cell_range);
-            cell_min.dec_y(cell_range);
-            cell_max.inc_x(cell_range);
-            cell_max.inc_y(cell_range);
+            cell_min.Dec_x(cell_range);
+            cell_min.Dec_y(cell_range);
+            cell_max.Inc_x(cell_range);
+            cell_max.Inc_y(cell_range);
 
             foreach (Player pl in m_activePlayers)
             {
                 CellCoord p = GridDefines.ComputeCellCoord(pl.GetPositionX(), pl.GetPositionY());
-                if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-                    (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
+                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
                     return true;
             }
 
             foreach (WorldObject obj in m_activeNonPlayers)
             {
                 CellCoord p = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-                if ((cell_min.x_coord <= p.x_coord && p.x_coord <= cell_max.x_coord) &&
-                    (cell_min.y_coord <= p.y_coord && p.y_coord <= cell_max.y_coord))
+                if ((cell_min.X_coord <= p.X_coord && p.X_coord <= cell_max.X_coord) &&
+                    (cell_min.Y_coord <= p.Y_coord && p.Y_coord <= cell_max.Y_coord))
                     return true;
             }
 
@@ -2433,14 +2433,14 @@ namespace Game.Maps
                     float x, y, z;
                     c.GetRespawnPosition(out x, out y, out z);
                     GridCoord p = GridDefines.ComputeGridCoord(x, y);
-                    if (getGrid(p.x_coord, p.y_coord) != null)
-                        getGrid(p.x_coord, p.y_coord).incUnloadActiveLock();
+                    if (GetGrid(p.X_coord, p.Y_coord) != null)
+                        GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
                     else
                     {
                         GridCoord p2 = GridDefines.ComputeGridCoord(c.GetPositionX(), c.GetPositionY());
                         Log.outError(LogFilter.Maps,
                             "Active creature (GUID: {0} Entry: {1}) added to grid[{2}, {3}] but spawn grid[{4}, {5}] was not loaded.",
-                            c.GetGUID().ToString(), c.GetEntry(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
+                            c.GetGUID().ToString(), c.GetEntry(), p.X_coord, p.Y_coord, p2.X_coord, p2.Y_coord);
                     }
                 }
             }
@@ -2464,14 +2464,14 @@ namespace Game.Maps
                     float x, y, z;
                     c.GetRespawnPosition(out x, out y, out z);
                     GridCoord p = GridDefines.ComputeGridCoord(x, y);
-                    if (getGrid(p.x_coord, p.y_coord) != null)
-                        getGrid(p.x_coord, p.y_coord).decUnloadActiveLock();
+                    if (GetGrid(p.X_coord, p.Y_coord) != null)
+                        GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();
                     else
                     {
                         GridCoord p2 = GridDefines.ComputeGridCoord(c.GetPositionX(), c.GetPositionY());
                         Log.outDebug(LogFilter.Maps,
                             "Active creature (GUID: {0} Entry: {1}) removed from grid[{2}, {3}] but spawn grid[{4}, {5}] was not loaded.",
-                            c.GetGUID().ToString(), c.GetEntry(), p.x_coord, p.y_coord, p2.x_coord, p2.y_coord);
+                            c.GetGUID().ToString(), c.GetEntry(), p.X_coord, p.Y_coord, p2.X_coord, p2.Y_coord);
                     }
                 }
             }
@@ -2968,18 +2968,18 @@ namespace Game.Maps
         public bool IsRemovalGrid(float x, float y)
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
-            return getGrid(p.x_coord, p.y_coord) == null ||
-                   getGrid(p.x_coord, p.y_coord).GetGridState() == GridState.Removal;
+            return GetGrid(p.X_coord, p.Y_coord) == null ||
+                   GetGrid(p.X_coord, p.Y_coord).GetGridState() == GridState.Removal;
         }
 
         private bool GetUnloadLock(GridCoord p)
         {
-            return getGrid(p.x_coord, p.y_coord).getUnloadLock();
+            return GetGrid(p.X_coord, p.Y_coord).GetUnloadLock();
         }
 
         void SetUnloadLock(GridCoord p, bool on)
         {
-            getGrid(p.x_coord, p.y_coord).setUnloadExplicitLock(on);
+            GetGrid(p.X_coord, p.Y_coord).SetUnloadExplicitLock(on);
         }
 
         public void ResetGridExpiry(Grid grid, float factor = 1)
@@ -3106,17 +3106,17 @@ namespace Game.Maps
             return i_mapRecord.GetEntrancePos(out mapid, out x, out y);
         }
 
-        void resetMarkedCells()
+        void ResetMarkedCells()
         {
             marked_cells.SetAll(false);
         }
 
-        private bool isCellMarked(uint pCellId)
+        private bool IsCellMarked(uint pCellId)
         {
             return marked_cells.Get((int)pCellId);
         }
 
-        void markCell(uint pCellId)
+        void MarkCell(uint pCellId)
         {
             marked_cells.Set((int)pCellId, true);
         }
@@ -3163,22 +3163,22 @@ namespace Game.Maps
 
         void Balance()
         {
-            _dynamicTree.balance();
+            _dynamicTree.Balance();
         }
 
         public void RemoveGameObjectModel(GameObjectModel model)
         {
-            _dynamicTree.remove(model);
+            _dynamicTree.Remove(model);
         }
 
         public void InsertGameObjectModel(GameObjectModel model)
         {
-            _dynamicTree.insert(model);
+            _dynamicTree.Insert(model);
         }
 
         public bool ContainsGameObjectModel(GameObjectModel model)
         {
-            return _dynamicTree.contains(model);
+            return _dynamicTree.Contains(model);
         }
 
         public virtual uint GetOwnerGuildId(Team team = Team.Other)
@@ -3201,19 +3201,19 @@ namespace Game.Maps
             i_gridExpiry = t < MapConst.MinGridDelay ? MapConst.MinGridDelay : t;
         }
 
-        private Grid getGrid(uint x, uint y)
+        private Grid GetGrid(uint x, uint y)
         {
             return i_grids[x][y];
         }
 
-        private bool isGridObjectDataLoaded(uint x, uint y)
+        private bool IsGridObjectDataLoaded(uint x, uint y)
         {
-            return getGrid(x, y).isGridObjectDataLoaded();
+            return GetGrid(x, y).IsGridObjectDataLoaded();
         }
 
-        void setGridObjectDataLoaded(bool pLoaded, uint x, uint y)
+        void SetGridObjectDataLoaded(bool pLoaded, uint x, uint y)
         {
-            getGrid(x, y).setGridObjectDataLoaded(pLoaded);
+            GetGrid(x, y).SetGridObjectDataLoaded(pLoaded);
         }
 
         public AreaTrigger GetAreaTrigger(ObjectGuid guid)
@@ -3291,7 +3291,7 @@ namespace Game.Maps
             if (!cell.NoCreate() || IsGridLoaded(new GridCoord(x, y)))
             {
                 EnsureGridLoaded(cell);
-                getGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
+                GetGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
             }
         }
 
@@ -4414,7 +4414,7 @@ namespace Game.Maps
                     Group group = player.GetGroup();
 
                     // increase current instances (hourly limit)
-                    if (!group || !group.isLFGGroup())
+                    if (!group || !group.IsLFGGroup())
                         player.AddInstanceEnterTime(GetInstanceId(), Time.UnixTime);
 
                     // get or create an instance save for the map

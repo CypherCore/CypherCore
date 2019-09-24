@@ -380,7 +380,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                         Group group = owner.GetGroup();
                         if (group)
                         {
-                            for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
+                            for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.Next())
                             {
                                 Player member = groupRefe.GetSource();
                                 if (member)
@@ -857,7 +857,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 Group group = owner.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
+                    for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.Next())
                     {
                         Player member = groupRefe.GetSource();
                         if (member)

@@ -31,7 +31,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -67,7 +67,7 @@ namespace Game.Chat
                 return false;
 
             uint sceneId = args.NextUInt32();
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -91,7 +91,7 @@ namespace Game.Chat
             if (!uint.TryParse(args.NextString(""), out uint flags))
                 flags = (uint)SceneFlags.Unk16;
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);

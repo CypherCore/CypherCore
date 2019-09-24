@@ -95,7 +95,7 @@ namespace Game
                 player.StoreLootItem((byte)(req.LootListID - 1), loot, aeResult);
 
                 // If player is removing the last LootItem, delete the empty container.
-                if (loot.isLooted() && lguid.IsItem())
+                if (loot.IsLooted() && lguid.IsItem())
                     player.GetSession().DoLootRelease(lguid);
             }
 
@@ -185,7 +185,7 @@ namespace Game
                     Group group = player.GetGroup();
 
                     List<Player> playersNear = new List<Player>();
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player member = refe.GetSource();
                         if (!member)
@@ -232,7 +232,7 @@ namespace Game
                     loot.DeleteLootMoneyFromContainerItemDB();
 
                 // Delete container if empty
-                if (loot.isLooted() && guid.IsItem())
+                if (loot.IsLooted() && guid.IsItem())
                     player.GetSession().DoLootRelease(guid);
             }
         }
@@ -337,7 +337,7 @@ namespace Game
                     // locked doors are opened with spelleffect openlock, prevent remove its as looted
                     go.UseDoorOrButton();
                 }
-                else if (loot.isLooted() || go.GetGoType() == GameObjectTypes.FishingNode)
+                else if (loot.IsLooted() || go.GetGoType() == GameObjectTypes.FishingNode)
                 {
                     if (go.GetGoType() == GameObjectTypes.FishingHole)
                     {                                               // The fishing hole used once more
@@ -350,7 +350,7 @@ namespace Game
                     else
                         go.SetLootState(LootState.JustDeactivated);
 
-                    loot.clear();
+                    loot.Clear();
                 }
                 else
                 {
@@ -370,9 +370,9 @@ namespace Game
 
                 loot = corpse.loot;
 
-                if (loot.isLooted())
+                if (loot.IsLooted())
                 {
-                    loot.clear();
+                    loot.Clear();
                     corpse.RemoveCorpseDynamicFlag(CorpseDynFlags.Lootable);
                 }
             }
@@ -388,7 +388,7 @@ namespace Game
                 if (proto.GetFlags().HasAnyFlag(ItemFlags.IsProspectable | ItemFlags.IsMillable))
                 {
                     pItem.m_lootGenerated = false;
-                    pItem.loot.clear();
+                    pItem.loot.Clear();
 
                     uint count = pItem.GetCount();
 
@@ -400,7 +400,7 @@ namespace Game
                 }
                 else
                 {
-                    if (pItem.loot.isLooted() || !proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot)) // Only delete item if no loot or money (unlooted loot is saved to db)
+                    if (pItem.loot.IsLooted() || !proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot)) // Only delete item if no loot or money (unlooted loot is saved to db)
                         player.DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
                 }
                 return;                                             // item can be looted only single player
@@ -414,7 +414,7 @@ namespace Game
                     return;
 
                 loot = creature.loot;
-                if (loot.isLooted())
+                if (loot.IsLooted())
                 {
                     creature.RemoveDynamicFlag(UnitDynFlags.Lootable);
 
@@ -422,7 +422,7 @@ namespace Game
                     if (!creature.IsAlive())
                         creature.AllLootRemovedFromCorpse();
 
-                    loot.clear();
+                    loot.Clear();
                 }
                 else
                 {

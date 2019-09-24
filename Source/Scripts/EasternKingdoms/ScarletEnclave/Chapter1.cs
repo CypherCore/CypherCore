@@ -681,7 +681,7 @@ namespace Scripts.EasternKingdoms
     {
         public npc_salanar_the_horseman(Creature creature) : base(creature) { }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == MiscConst.GossipSalanarMenu && gossipListId == MiscConst.GossipSalanarOption)
             {
@@ -939,7 +939,7 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    class npc_scarlet_miner : npc_escortAI
+    class npc_scarlet_miner : NpcEscortAI
     {
         public npc_scarlet_miner(Creature creature) : base(creature)
         {

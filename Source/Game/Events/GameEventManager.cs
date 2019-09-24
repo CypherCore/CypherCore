@@ -113,7 +113,7 @@ namespace Game
             if (event_id < 1 || event_id >= mGameEvent.Length)
                 return;
 
-            if (!mGameEvent[event_id].isValid())
+            if (!mGameEvent[event_id].IsValid())
                 return;
 
             if (m_ActiveEvents.Contains(event_id))
@@ -137,7 +137,7 @@ namespace Game
                 }
 
                 // When event is started, set its worldstate to current time
-                Global.WorldMgr.setWorldState(event_id, Time.UnixTime);
+                Global.WorldMgr.SetWorldState(event_id, Time.UnixTime);
                 return false;
             }
             else
@@ -174,7 +174,7 @@ namespace Game
             UnApplyEvent(event_id);
 
             // When event is stopped, clean up its worldstate
-            Global.WorldMgr.setWorldState(event_id, 0);
+            Global.WorldMgr.SetWorldState(event_id, 0);
 
             if (overwrite && !serverwide_evt)
             {
@@ -1000,7 +1000,7 @@ namespace Game
                 else
                 {
                     // If event is inactive, periodically clean up its worldstate
-                    Global.WorldMgr.setWorldState(id, 0);
+                    Global.WorldMgr.SetWorldState(id, 0);
                     Log.outDebug(LogFilter.Misc, "GameEvent {0} is not active", id);
                     if (IsActiveEvent(id))
                         deactivate.Add(id);
@@ -1089,7 +1089,7 @@ namespace Game
             UpdateBattlegroundSettings();
             // If event's worldstate is 0, it means the event hasn't been started yet. In that case, reset seasonal quests.
             // When event ends (if it expires or if it's stopped via commands) worldstate will be set to 0 again, ready for another seasonal quest reset.
-            if (Global.WorldMgr.getWorldState(event_id) == 0)
+            if (Global.WorldMgr.GetWorldState(event_id) == 0)
                 Global.WorldMgr.ResetEventSeasonalQuests(event_id);
         }
 
@@ -1098,12 +1098,12 @@ namespace Game
             MultiMap<uint, ulong> creaturesByMap = new MultiMap<uint, ulong>();
 
             // go through the creatures whose npcflags are changed in the event
-            foreach (var pair in mGameEventNPCFlags[event_id])
+            foreach (var (guid, npcflag) in mGameEventNPCFlags[event_id])
             {
                 // get the creature data from the low guid to get the entry, to be able to find out the whole guid
-                CreatureData data = Global.ObjectMgr.GetCreatureData(pair.guid);
+                CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                 if (data != null)
-                    creaturesByMap.Add(data.mapid, pair.guid);
+                    creaturesByMap.Add(data.mapid, guid);
             }
 
             foreach (var key in creaturesByMap.Keys)
@@ -1234,7 +1234,7 @@ namespace Game
             foreach (var guid in mGameEventCreatureGuids[internal_event_id])
             {
                 // check if it's needed by another event, if so, don't remove
-                if (event_id > 0 && hasCreatureActiveEventExcept(guid, (ushort)event_id))
+                if (event_id > 0 && HasCreatureActiveEventExcept(guid, (ushort)event_id))
                     continue;
 
                 // Remove the creature from grid
@@ -1262,7 +1262,7 @@ namespace Game
             foreach (var guid in mGameEventGameobjectGuids[internal_event_id])
             {
                 // check if it's needed by another event, if so, don't remove
-                if (event_id > 0 && hasGameObjectActiveEventExcept(guid, (ushort)event_id))
+                if (event_id > 0 && HasGameObjectActiveEventExcept(guid, (ushort)event_id))
                     continue;
                 // Remove the gameobject from grid
                 GameObjectData data = Global.ObjectMgr.GetGOData(guid);
@@ -1347,7 +1347,7 @@ namespace Game
             }
         }
 
-        bool hasCreatureQuestActiveEventExcept(uint questId, ushort eventId)
+        bool HasCreatureQuestActiveEventExcept(uint questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1359,7 +1359,7 @@ namespace Game
             return false;
         }
 
-        bool hasGameObjectQuestActiveEventExcept(uint questId, ushort eventId)
+        bool HasGameObjectQuestActiveEventExcept(uint questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1370,7 +1370,7 @@ namespace Game
             }
             return false;
         }
-        bool hasCreatureActiveEventExcept(ulong creatureId, ushort eventId)
+        bool HasCreatureActiveEventExcept(ulong creatureId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1384,7 +1384,7 @@ namespace Game
             }
             return false;
         }
-        bool hasGameObjectActiveEventExcept(ulong goId, ushort eventId)
+        bool HasGameObjectActiveEventExcept(ulong goId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1408,7 +1408,7 @@ namespace Game
                     CreatureQuestMap.Add(pair.Item1, pair.Item2);
                 else
                 {
-                    if (!hasCreatureQuestActiveEventExcept(pair.Item2, eventId))
+                    if (!HasCreatureQuestActiveEventExcept(pair.Item2, eventId))
                     {
                         // Remove the pair(id, quest) from the multimap
                         CreatureQuestMap.Remove(pair.Item1, pair.Item2);
@@ -1422,7 +1422,7 @@ namespace Game
                     GameObjectQuestMap.Add(pair.Item1, pair.Item2);
                 else
                 {
-                    if (!hasGameObjectQuestActiveEventExcept(pair.Item2, eventId))
+                    if (!HasGameObjectQuestActiveEventExcept(pair.Item2, eventId))
                     {
                         // Remove the pair(id, quest) from the multimap
                         GameObjectQuestMap.Remove(pair.Item1, pair.Item2);
@@ -1643,7 +1643,7 @@ namespace Game
         public string description;
         public byte announce;         // if 0 dont announce, if 1 announce, if 2 take config value
 
-        public bool isValid() { return length > 0 || state > GameEventState.Normal; }
+        public bool IsValid() { return length > 0 || state > GameEventState.Normal; }
     }
 
     public class ModelEquip
@@ -1666,7 +1666,7 @@ namespace Game
         {
             foreach (var creature in objs)
                 if (creature.IsInWorld && creature.IsAIEnabled)
-                    creature.GetAI().sOnGameEvent(_activate, _eventId);
+                    creature.GetAI().OnGameEvent(_activate, _eventId);
         }
         public override void Visit(IList<GameObject> objs)
         {

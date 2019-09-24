@@ -550,7 +550,7 @@ namespace Game.Spells
                             else
                             {
                                 SendCastResult(SpellCastResult.BadImplicitTargets);
-                                finish(false);
+                                Finish(false);
                             }
                             return;
                         }
@@ -567,7 +567,7 @@ namespace Game.Spells
                             else
                             {
                                 SendCastResult(SpellCastResult.BadImplicitTargets);
-                                finish(false);
+                                Finish(false);
                             }
                             return;
                         }
@@ -582,7 +582,7 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, "Spell.SelectImplicitNearbyTargets: cannot find nearby target for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
                 SendCastResult(SpellCastResult.BadImplicitTargets);
-                finish(false);
+                Finish(false);
                 return;
             }
 
@@ -591,7 +591,7 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set NULL target, effect {effIndex}");
                 SendCastResult(SpellCastResult.BadImplicitTargets);
-                finish(false);
+                Finish(false);
                 return;
             }
 
@@ -605,7 +605,7 @@ namespace Game.Spells
                     {
                         Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
                         SendCastResult(SpellCastResult.BadImplicitTargets);
-                        finish(false);
+                        Finish(false);
                         return;
                     }
                     break;
@@ -617,7 +617,7 @@ namespace Game.Spells
                     {
                         Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
                         SendCastResult(SpellCastResult.BadImplicitTargets);
-                        finish(false);
+                        Finish(false);
                         return;
                     }
                     break;
@@ -802,14 +802,14 @@ namespace Game.Spells
                         float ground = m_caster.GetMap().GetHeight(m_caster.GetPhaseShift(), x, y, z, true, 50.0f);
                         float liquidLevel = MapConst.VMAPInvalidHeightValue;
                         LiquidData liquidData;
-                        if (m_caster.GetMap().getLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData) != 0)
+                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData) != 0)
                             liquidLevel = liquidData.level;
 
                         if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
                         {
                             SendCastResult(SpellCastResult.NotHere);
                             SendChannelUpdate(0);
-                            finish(false);
+                            Finish(false);
                             return;
                         }
 
@@ -817,7 +817,7 @@ namespace Game.Spells
                         {
                             SendCastResult(SpellCastResult.TooShallow);
                             SendChannelUpdate(0);
-                            finish(false);
+                            Finish(false);
                             return;
                         }
 
@@ -1045,7 +1045,7 @@ namespace Game.Spells
             }
         }
 
-        float tangent(float x)
+        float Tangent(float x)
         {
             x = (float)Math.Tan(x);
             if (x < 100000.0f && x > -100000.0f) return x;
@@ -1077,7 +1077,7 @@ namespace Game.Spells
 
             targets.Sort(new ObjectDistanceOrderPred(m_caster));
 
-            float b = tangent(m_targets.GetPitch());
+            float b = Tangent(m_targets.GetPitch());
             float a = (srcToDestDelta - dist2d * b) / (dist2d * dist2d);
             if (a > -0.0001f)
                 a = 0;
@@ -1424,7 +1424,7 @@ namespace Game.Spells
             return searcher.GetTarget();
         }
 
-        void prepareDataForTriggerSystem()
+        void PrepareDataForTriggerSystem()
         {
             //==========================================================================================
             // Now fill data for trigger system, need know:
@@ -1733,7 +1733,7 @@ namespace Game.Spells
             if (unit.IsAlive() != target.alive)
                 return;
 
-            if (getState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
+            if (GetState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             // Get original caster (if exist) and calculate damage/healing from him data
@@ -1869,7 +1869,7 @@ namespace Game.Spells
 
                 HealInfo healInfo = new HealInfo(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
                 caster.HealBySpell(healInfo, crit);
-                unitTarget.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
+                unitTarget.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
                 m_healing = (int)healInfo.GetEffectiveHeal();
 
                 // Do triggers for unit
@@ -2040,7 +2040,7 @@ namespace Game.Spells
                     if (unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
                         m_caster.SetInCombatState(unit.GetCombatTimer() > 0, unit);
-                        unit.GetHostileRefManager().threatAssist(m_caster, 0.0f);
+                        unit.GetHostileRefManager().ThreatAssist(m_caster, 0.0f);
                     }
                 }
             }
@@ -2323,7 +2323,7 @@ namespace Game.Spells
             return channelTargetEffectMask == 0;
         }
 
-        public void prepare(SpellCastTargets targets, AuraEffect triggeredByAura = null)
+        public void Prepare(SpellCastTargets targets, AuraEffect triggeredByAura = null)
         {
             if (m_CastItem != null)
             {
@@ -2338,7 +2338,7 @@ namespace Game.Spells
                 else
                 {
                     SendCastResult(SpellCastResult.EquippedItem);
-                    finish(false);
+                    Finish(false);
                     return;
                 }
             }
@@ -2361,14 +2361,14 @@ namespace Game.Spells
             if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastInProgress) && m_caster.IsNonMeleeSpellCast(false, true, true) && !m_castId.IsEmpty())
             {
                 SendCastResult(SpellCastResult.SpellInProgress);
-                finish(false);
+                Finish(false);
                 return;
             }
 
             if (Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, m_caster))
             {
                 SendCastResult(SpellCastResult.SpellUnavailable);
-                finish(false);
+                Finish(false);
                 return;
             }
             LoadScripts();
@@ -2404,12 +2404,12 @@ namespace Game.Spells
                 else
                     SendCastResult(result);
 
-                finish(false);
+                Finish(false);
                 return;
             }
 
             // Prepare data for triggers
-            prepareDataForTriggerSystem();
+            PrepareDataForTriggerSystem();
 
             if (m_caster.IsTypeId(TypeId.Player))
             {
@@ -2446,7 +2446,7 @@ namespace Game.Spells
                 if (m_casttime != 0 || !m_spellInfo.IsMoveAllowedChannel())
                 {
                     SendCastResult(SpellCastResult.Moving);
-                    finish(false);
+                    Finish(false);
                     return;
                 }
             }
@@ -2460,7 +2460,7 @@ namespace Game.Spells
             // @todoApply this to all casted spells if needed
             // Why check duration? 29350: channelled triggers channelled
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.CastDirectly) && (!m_spellInfo.IsChanneled() || m_spellInfo.GetMaxDuration() == 0))
-                cast(true);
+                Cast(true);
             else
             {
                 // stealth must be removed at cast starting (at show channel bar)
@@ -2491,11 +2491,11 @@ namespace Game.Spells
                 // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
                 // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
                 if (m_casttime == 0 && /*m_spellInfo.StartRecoveryTime == 0 && */ m_castItemGUID.IsEmpty() && GetCurrentContainer() == CurrentSpellTypes.Generic)
-                    cast(true);
+                    Cast(true);
             }
         }
 
-        public void cancel()
+        public void Cancel()
         {
             if (m_spellState == SpellState.Finished)
                 return;
@@ -2547,10 +2547,10 @@ namespace Game.Spells
             //set state back so finish will be processed
             m_spellState = oldState;
 
-            finish(false);
+            Finish(false);
         }
 
-        public void cast(bool skipCheck = false)
+        public void Cast(bool skipCheck = false)
         {
             Player modOwner = m_caster.GetSpellModOwner();
             Spell lastSpellMod = null;
@@ -2572,14 +2572,14 @@ namespace Game.Spells
             if (!UpdatePointers())
             {
                 // cancel the spell if UpdatePointers() returned false, something wrong happened there
-                cancel();
+                Cancel();
                 return;
             }
 
             // cancel at lost explicit target during cast
             if (!m_targets.GetObjectTargetGUID().IsEmpty() && m_targets.GetObjectTarget() == null)
             {
-                cancel();
+                Cancel();
                 return;
             }
 
@@ -2631,7 +2631,7 @@ namespace Game.Spells
                     if (m_caster.IsTypeId(TypeId.Player))
                         m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
-                    finish(false);
+                    Finish(false);
                     SetExecutedCurrently(false);
                     return;
                 }
@@ -2654,7 +2654,7 @@ namespace Game.Spells
 
                                 m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
-                                finish(false);
+                                Finish(false);
                                 SetExecutedCurrently(false);
                                 return;
                             }
@@ -2685,7 +2685,7 @@ namespace Game.Spells
                 if (m_caster.IsTypeId(TypeId.Player))
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
-                finish(false);
+                Finish(false);
                 SetExecutedCurrently(false);
                 return;
             }
@@ -2763,7 +2763,7 @@ namespace Game.Spells
             else
             {
                 // Immediate spell, no big deal
-                handle_immediate();
+                HandleImmediate();
             }
 
             CallScriptAfterCastHandlers();
@@ -2824,7 +2824,7 @@ namespace Game.Spells
                     caster.GetAI().OnSuccessfulSpellCast(GetSpellInfo());
         }
 
-        void handle_immediate()
+        void HandleImmediate()
         {
             // start channeling if applicable
             if (m_spellInfo.IsChanneled())
@@ -2878,15 +2878,15 @@ namespace Game.Spells
             TakeCastItem();
 
             if (m_spellState != SpellState.Casting)
-                finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
+                Finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
         }
 
-        public ulong handle_delayed(ulong t_offset)
+        public ulong HandleDelayed(ulong offset)
         {
             if (!UpdatePointers())
             {
                 // finish the spell if UpdatePointers() returned false, something wrong happened there
-                finish(false);
+                Finish(false);
                 return 0;
             }
 
@@ -2896,12 +2896,12 @@ namespace Game.Spells
             if (!m_launchHandled)
             {
                 ulong launchMoment = (ulong)Math.Floor(m_spellInfo.LaunchDelay * 1000.0f);
-                if (launchMoment > t_offset)
+                if (launchMoment > offset)
                     return launchMoment;
 
                 HandleLaunchPhase();
                 m_launchHandled = true;
-                if (m_delayMoment > t_offset)
+                if (m_delayMoment > offset)
                 {
                     if (single_missile)
                         return m_delayMoment;
@@ -2909,12 +2909,12 @@ namespace Game.Spells
                     next_time = m_delayMoment;
                     if ((m_UniqueTargetInfo.Count > 2 || (m_UniqueTargetInfo.Count == 1 && m_UniqueTargetInfo[0].targetGUID == m_caster.GetGUID())) || !m_UniqueGOTargetInfo.Empty())
                     {
-                        t_offset = 0; // if LaunchDelay was present then the only target that has timeDelay = 0 is m_caster - and that is the only target we want to process now
+                        offset = 0; // if LaunchDelay was present then the only target that has timeDelay = 0 is m_caster - and that is the only target we want to process now
                     }
                 }
             }
 
-            if (single_missile && t_offset == 0)
+            if (single_missile && offset == 0)
                 return m_delayMoment;
 
             if (m_caster.IsTypeId(TypeId.Player))
@@ -2922,7 +2922,7 @@ namespace Game.Spells
 
             PrepareTargetProcessing();
 
-            if (!m_immediateHandled && t_offset != 0)
+            if (!m_immediateHandled && offset != 0)
             {
                 _handle_immediate_phase();
                 m_immediateHandled = true;
@@ -2933,9 +2933,9 @@ namespace Game.Spells
             {
                 if (!ihit.processed)
                 {
-                    if (single_missile || ihit.timeDelay <= t_offset)
+                    if (single_missile || ihit.timeDelay <= offset)
                     {
-                        ihit.timeDelay = t_offset;
+                        ihit.timeDelay = offset;
                         DoAllEffectOnTarget(ihit);
                     }
                     else if (next_time == 0 || ihit.timeDelay < next_time)
@@ -2948,7 +2948,7 @@ namespace Game.Spells
             {
                 if (!ighit.processed)
                 {
-                    if (single_missile || ighit.timeDelay <= t_offset)
+                    if (single_missile || ighit.timeDelay <= offset)
                         DoAllEffectOnTarget(ighit);
                     else if (next_time == 0 || ighit.timeDelay < next_time)
                         next_time = ighit.timeDelay;
@@ -2966,7 +2966,7 @@ namespace Game.Spells
                 // spell is finished, perform some last features of the spell here
                 _handle_finish_phase();
 
-                finish(true);                                       // successfully finish spell cast
+                Finish(true);                                       // successfully finish spell cast
 
                 // return zero, spell is finished now
                 return 0;
@@ -3049,19 +3049,19 @@ namespace Game.Spells
                 m_caster.GetSpellHistory().HandleCooldowns(m_spellInfo, m_castItemEntry, this);
         }
 
-        public void update(uint difftime)
+        public void Update(uint difftime)
         {
             if (!UpdatePointers())
             {
                 // cancel the spell if UpdatePointers() returned false, something wrong happened there
-                cancel();
+                Cancel();
                 return;
             }
 
             if (!m_targets.GetUnitTargetGUID().IsEmpty() && m_targets.GetUnitTarget() == null)
             {
                 Log.outDebug(LogFilter.Spells, "Spell {0} is cancelled due to removal of target.", m_spellInfo.Id);
-                cancel();
+                Cancel();
                 return;
             }
 
@@ -3080,7 +3080,7 @@ namespace Game.Spells
                     // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
                     // however, checking what type of movement the spline is for every single spline would be really expensive
                     if (!m_caster.GetCharmerGUID().IsCreature())
-                        cancel();
+                        Cancel();
                 }
             }
 
@@ -3098,7 +3098,7 @@ namespace Game.Spells
 
                         if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat())
                             // don't CheckCast for instant spells - done in spell.prepare, skip duplicate checks, needed for range checks for example
-                            cast(m_casttime == 0);
+                            Cast(m_casttime == 0);
                         break;
                     }
                 case SpellState.Casting:
@@ -3132,7 +3132,7 @@ namespace Game.Spells
                         if (m_timer == 0)
                         {
                             SendChannelUpdate(0);
-                            finish();
+                            Finish();
                         }
                         break;
                     }
@@ -3141,7 +3141,7 @@ namespace Game.Spells
             }
         }
 
-        public void finish(bool ok = true)
+        public void Finish(bool ok = true)
         {
             if (!m_caster)
                 return;
@@ -4258,7 +4258,7 @@ namespace Game.Spells
 
                 // positive spells distribute threat among all units that are in combat with target, like healing
                 if (m_spellInfo.IsPositive())
-                    target.GetHostileRefManager().threatAssist(m_caster, threatToAdd, m_spellInfo);
+                    target.GetHostileRefManager().ThreatAssist(m_caster, threatToAdd, m_spellInfo);
                 // for negative spells threat gets distributed among affected targets
                 else
                 {
@@ -4352,7 +4352,7 @@ namespace Game.Spells
                         return SpellCastResult.DontReport;
             }
 
-            if (m_caster.IsTypeId(TypeId.Player) && Global.VMapMgr.isLineOfSightCalcEnabled())
+            if (m_caster.IsTypeId(TypeId.Player) && Global.VMapMgr.IsLineOfSightCalcEnabled())
             {
                 if (m_spellInfo.HasAttribute(SpellAttr0.OutdoorsOnly) &&
                         !m_caster.GetMap().IsOutdoors(m_caster.GetPhaseShift(), m_caster.posX, m_caster.posY, m_caster.posZ))
@@ -4878,7 +4878,7 @@ namespace Game.Spells
                                 return SpellCastResult.TargetUnskinnable;
 
                             Creature creature = m_targets.GetUnitTarget().ToCreature();
-                            if (!creature.IsCritter() && !creature.loot.isLooted())
+                            if (!creature.IsCritter() && !creature.loot.IsLooted())
                                 return SpellCastResult.TargetNotLooted;
 
                             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
@@ -6282,7 +6282,7 @@ namespace Game.Spells
             if (m_caster == null)
                 return;
 
-            if (isDelayableNoMore())                                 // Spells may only be delayed twice
+            if (IsDelayableNoMore())                                 // Spells may only be delayed twice
                 return;
 
             //check pushback reduce
@@ -6314,10 +6314,10 @@ namespace Game.Spells
 
         public void DelayedChannel()
         {
-            if (m_caster == null || !m_caster.IsTypeId(TypeId.Player) || getState() != SpellState.Casting)
+            if (m_caster == null || !m_caster.IsTypeId(TypeId.Player) || GetState() != SpellState.Casting)
                 return;
 
-            if (isDelayableNoMore())                                    // Spells may only be delayed twice
+            if (IsDelayableNoMore())                                    // Spells may only be delayed twice
                 return;
 
             //check pushback reduce
@@ -7131,11 +7131,11 @@ namespace Game.Spells
 
             return m_caster.CalculateSpellDamage(target, m_spellInfo, i, out variance, basePoint, m_castItemLevel);
         }
-        public SpellState getState()
+        public SpellState GetState()
         {
             return m_spellState;
         }
-        public void setState(SpellState state)
+        public void SetState(SpellState state)
         {
             m_spellState = state;
         }
@@ -7218,7 +7218,7 @@ namespace Game.Spells
             return m_powerCost;
         }
 
-        bool isDelayableNoMore()
+        bool IsDelayableNoMore()
         {
             if (m_delayAtDamageCount >= 2)
                 return true;
@@ -7801,11 +7801,11 @@ namespace Game.Spells
         public override bool Execute(ulong e_time, uint p_time)
         {
             // update spell if it is not finished
-            if (m_Spell.getState() != SpellState.Finished)
-                m_Spell.update(p_time);
+            if (m_Spell.GetState() != SpellState.Finished)
+                m_Spell.Update(p_time);
 
             // check spell state to process
-            switch (m_Spell.getState())
+            switch (m_Spell.GetState())
             {
                 case SpellState.Finished:
                     {
@@ -7825,7 +7825,7 @@ namespace Game.Spells
                         {
                             // run the spell handler and think about what we can do next
                             ulong t_offset = e_time - m_Spell.GetDelayStart();
-                            ulong n_offset = m_Spell.handle_delayed(t_offset);
+                            ulong n_offset = m_Spell.HandleDelayed(t_offset);
                             if (n_offset != 0)
                             {
                                 // re-add us to the queue
@@ -7840,7 +7840,7 @@ namespace Game.Spells
                             // delaying had just started, record the moment
                             m_Spell.SetDelayStart(e_time);
                             // handle effects on caster if the spell has travel time but also affects the caster in some way
-                            ulong n_offset = m_Spell.handle_delayed(0);
+                            ulong n_offset = m_Spell.HandleDelayed(0);
                             if (m_Spell.m_spellInfo.LaunchDelay != 0)
                                 Cypher.Assert(n_offset == (ulong)Math.Floor(m_Spell.m_spellInfo.LaunchDelay * 1000.0f));
                             else
@@ -7867,8 +7867,8 @@ namespace Game.Spells
         public override void Abort(ulong e_time)
         {
             // oops, the spell we try to do is aborted
-            if (m_Spell.getState() != SpellState.Finished)
-                m_Spell.cancel();
+            if (m_Spell.GetState() != SpellState.Finished)
+                m_Spell.Cancel();
         }
         public override bool IsDeletable()
         {

@@ -183,7 +183,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
             if (!me.IsInCombat())
                 return;
 
-            if (!me.GetVictim() && me.GetThreatManager().isThreatListEmpty())
+            if (!me.GetVictim() && me.GetThreatManager().IsThreatListEmpty())
             {
                 EnterEvadeMode(EvadeReason.NoHostiles);
                 return;
@@ -616,7 +616,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
                     {
                         ick.GetAI().Talk(TextIds.SayIckChase1, target);
                         ick.AddAura(GetSpellInfo().Id, target);
-                        ick.GetAI<boss_ick>().SetTempThreat(ick.GetThreatManager().getThreat(target));
+                        ick.GetAI<boss_ick>().SetTempThreat(ick.GetThreatManager().GetThreat(target));
                         ick.AddThreat(target, GetEffectValue());
                         target.AddThreat(ick, GetEffectValue());
                     }

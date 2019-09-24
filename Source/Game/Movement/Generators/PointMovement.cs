@@ -123,7 +123,7 @@ namespace Game.Movement
                 unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Point, (uint)id);
         }
 
-        public override void unitSpeedChanged()
+        public override void UnitSpeedChanged()
         {
             i_recalculateSpeed = true;
         }

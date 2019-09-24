@@ -238,7 +238,7 @@ namespace Game
             {
                 if (GetPlayer().m_taxi.RequestEarlyLanding())
                 {
-                    FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().top();
+                    FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
                     flight.LoadPath(GetPlayer(), flight.GetPath()[(int)flight.GetCurrentNode()].NodeIndex);
                     flight.Reset(GetPlayer());
                 }

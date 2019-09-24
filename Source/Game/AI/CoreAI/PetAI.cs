@@ -56,7 +56,7 @@ namespace Game.AI
                 me.GetMotionMaster().Clear();
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop();
-                me.GetHostileRefManager().deleteReferences();
+                me.GetHostileRefManager().DeleteReferences();
 
                 return;
             }
@@ -230,7 +230,7 @@ namespace Game.AI
                     SpellCastTargets targets = new SpellCastTargets();
                     targets.SetUnitTarget(target);
 
-                    spell.prepare(targets);
+                    spell.Prepare(targets);
                 }
 
                 // deleted cached Spell objects
@@ -262,14 +262,14 @@ namespace Game.AI
                 return;
 
             //owner is in group; group members filled in already (no raid . subgroupcount = whole count)
-            if (group && !group.isRaidGroup() && m_AllySet.Count == (group.GetMembersCount() + 2))
+            if (group && !group.IsRaidGroup() && m_AllySet.Count == (group.GetMembersCount() + 2))
                 return;
 
             m_AllySet.Clear();
             m_AllySet.Add(me.GetGUID());
             if (group)                                              //add group
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player target = refe.GetSource();
                     if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))

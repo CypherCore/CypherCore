@@ -29,7 +29,7 @@ namespace Game.Chat
         static bool HandlePetCreateCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            Creature creatureTarget = handler.getSelectedCreature();
+            Creature creatureTarget = handler.GetSelectedCreature();
 
             if (!creatureTarget || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
             {
@@ -106,7 +106,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId))
                 return false;
 
@@ -144,7 +144,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
 
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
@@ -186,7 +186,7 @@ namespace Game.Chat
 
         static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (target)
             {
                 if (target.IsTypeId(TypeId.Player))

@@ -43,7 +43,7 @@ namespace Game
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        bool loadMapData(string basePath, uint mapId)
+        bool LoadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
@@ -84,30 +84,30 @@ namespace Game
             }
         }
 
-        uint packTileID(uint x, uint y)
+        uint PackTileID(uint x, uint y)
         {
             return (x << 16 | y);
         }
 
-        public bool loadMap(string basePath, uint mapId, uint x, uint y)
+        public bool LoadMap(string basePath, uint mapId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
-            if (!loadMapImpl(basePath, mapId, x, y))
+            if (!LoadMapImpl(basePath, mapId, x, y))
                 return false;
 
             bool success = true;
             var childMaps = childMapData.LookupByKey(mapId);
             foreach (uint childMapId in childMaps)
-                if (!loadMapImpl(basePath, childMapId, x, y))
+                if (!LoadMapImpl(basePath, childMapId, x, y))
                     success = false;
 
             return success;
         }
 
-        bool loadMapImpl(string basePath, uint mapId, uint x, uint y)
+        bool LoadMapImpl(string basePath, uint mapId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
-            if (!loadMapData(basePath, mapId))
+            if (!LoadMapData(basePath, mapId))
                 return false;
 
             // get this mmap data
@@ -115,7 +115,7 @@ namespace Game
             Cypher.Assert(mmap.navMesh != null);
 
             // check if we already have this tile loaded
-            uint packedGridPos = packTileID(x, y);
+            uint packedGridPos = PackTileID(x, y);
             if (mmap.loadedTileRefs.ContainsKey(packedGridPos))
                 return false;
 
@@ -167,23 +167,23 @@ namespace Game
             }
         }
 
-        public bool loadMapInstance(string basePath, uint mapId, uint instanceId)
+        public bool LoadMapInstance(string basePath, uint mapId, uint instanceId)
         {
-            if (!loadMapInstanceImpl(basePath, mapId, instanceId))
+            if (!LoadMapInstanceImpl(basePath, mapId, instanceId))
                 return false;
 
             bool success = true;
             var childMaps = childMapData.LookupByKey(mapId);
             foreach (uint childMapId in childMaps)
-                if (!loadMapInstanceImpl(basePath, childMapId, instanceId))
+                if (!LoadMapInstanceImpl(basePath, childMapId, instanceId))
                     success = false;
 
             return success;
         }
 
-        bool loadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
+        bool LoadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
         {
-            if (!loadMapData(basePath, mapId))
+            if (!LoadMapData(basePath, mapId))
                 return false;
 
             MMapData mmap = loadedMMaps[mapId];
@@ -203,16 +203,16 @@ namespace Game
             return true;
         }
 
-        public bool unloadMap(uint mapId, uint x, uint y)
+        public bool UnloadMap(uint mapId, uint x, uint y)
         {
             var childMaps = childMapData.LookupByKey(mapId);
             foreach (uint childMapId in childMaps)
-                unloadMapImpl(childMapId, x, y);
+                UnloadMapImpl(childMapId, x, y);
 
-            return unloadMapImpl(mapId, x, y);
+            return UnloadMapImpl(mapId, x, y);
         }
 
-        bool unloadMapImpl(uint mapId, uint x, uint y)
+        bool UnloadMapImpl(uint mapId, uint x, uint y)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -224,7 +224,7 @@ namespace Game
             }
 
             // check if we have this tile loaded
-            uint packedGridPos = packTileID(x, y);
+            uint packedGridPos = PackTileID(x, y);
             if (!mmap.loadedTileRefs.ContainsKey(packedGridPos))
             {
                 // file may not exist, therefore not loaded
@@ -255,7 +255,7 @@ namespace Game
             return false;
         }
 
-        public bool unloadMap(uint mapId)
+        public bool UnloadMap(uint mapId)
         {
             if (!loadedMMaps.ContainsKey(mapId))
             {
@@ -286,7 +286,7 @@ namespace Game
             return true;
         }
 
-        public bool unloadMapInstance(uint mapId, uint instanceId)
+        public bool UnloadMapInstance(uint mapId, uint instanceId)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -327,8 +327,8 @@ namespace Game
             return mmap.navMeshQueries[instanceId];
         }
 
-        public uint getLoadedTilesCount() { return loadedTiles; }
-        public int getLoadedMapsCount() { return loadedMMaps.Count; }
+        public uint GetLoadedTilesCount() { return loadedTiles; }
+        public int GetLoadedMapsCount() { return loadedMMaps.Count; }
 
         Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
         uint loadedTiles;

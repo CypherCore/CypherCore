@@ -99,7 +99,7 @@ namespace Game.Arenas
         {
             base.BuildPvPLogDataPacket(out pvpLogData);
 
-            if (isRated())
+            if (IsRated())
             {
                 pvpLogData.Ratings.HasValue = true;
 
@@ -114,7 +114,7 @@ namespace Game.Arenas
 
         public override void RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool SendPacket)
         {
-            if (isRated() && GetStatus() == BattlegroundStatus.InProgress)
+            if (IsRated() && GetStatus() == BattlegroundStatus.InProgress)
             {
                 var bgPlayer = GetPlayers().LookupByKey(guid);
                 if (bgPlayer != null) // check if the player was a participant of the match, or only entered through gm command (appear)
@@ -151,7 +151,7 @@ namespace Game.Arenas
         public override void EndBattleground(Team winner)
         {
             // arena rating calculation
-            if (isRated())
+            if (IsRated())
             {
                 uint loserTeamRating = 0;
                 uint loserMatchmakerRating = 0;

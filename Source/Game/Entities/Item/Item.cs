@@ -355,7 +355,7 @@ namespace Game.Entities
                         }
 
                         // Delete the items if this is a container
-                        if (!loot.isLooted())
+                        if (!loot.IsLooted())
                             ItemContainerDeleteLootMoneyAndLootItemsFromDB();
 
                         Dispose();
@@ -642,7 +642,7 @@ namespace Game.Entities
             DeleteFromDB(trans, GetGUID().GetCounter());
 
             // Delete the items if this is a container
-            if (!loot.isLooted())
+            if (!loot.IsLooted())
                 ItemContainerDeleteLootMoneyAndLootItemsFromDB();
         }
 
@@ -1707,7 +1707,7 @@ namespace Game.Entities
         public void ItemContainerSaveLootToDB()
         {
             // Saves the money and item loot associated with an openable item to the DB
-            if (loot.isLooted()) // no money and no loot
+            if (loot.IsLooted()) // no money and no loot
                 return;
 
             SQLTransaction trans = new SQLTransaction();
@@ -1728,7 +1728,7 @@ namespace Game.Entities
             }
 
             // Save items
-            if (!loot.isLooted())
+            if (!loot.IsLooted())
             {
                 PreparedStatement stmt_items = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
                 stmt_items.AddValue(0, loot.containerID.GetCounter());
@@ -1849,7 +1849,7 @@ namespace Game.Entities
             }
 
             // Mark the item if it has loot so it won't be generated again on open
-            m_lootGenerated = !loot.isLooted();
+            m_lootGenerated = !loot.IsLooted();
 
             return m_lootGenerated;
         }

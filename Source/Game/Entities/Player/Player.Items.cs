@@ -3309,12 +3309,12 @@ namespace Game.Entities
 
         public InventoryResult CanRollForItemInLFG(ItemTemplate proto, WorldObject lootedObject)
         {
-            if (!GetGroup() || !GetGroup().isLFGGroup())
+            if (!GetGroup() || !GetGroup().IsLFGGroup())
                 return InventoryResult.Ok;    // not in LFG group
 
             // check if looted object is inside the lfg dungeon
             Map map = lootedObject.GetMap();
-            if (!Global.LFGMgr.inLfgDungeonMap(GetGroup().GetGUID(), map.GetId(), map.GetDifficultyID()))
+            if (!Global.LFGMgr.InLfgDungeonMap(GetGroup().GetGUID(), map.GetId(), map.GetDifficultyID()))
                 return InventoryResult.Ok;
 
             if (proto == null)
@@ -5138,7 +5138,7 @@ namespace Game.Entities
                                 return InventoryResult.NotInCombat;
                             Battleground bg = GetBattleground();
                             if (bg)
-                                if (bg.isArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
+                                if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                                     return InventoryResult.NotDuringArenaMatch;
                         }
 
@@ -5371,7 +5371,7 @@ namespace Game.Entities
                     return InventoryResult.NotInCombat;
                 Battleground bg = GetBattleground();
                 if (bg)
-                    if (bg.isArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
+                    if (bg.IsArena() && bg.GetStatus() == BattlegroundStatus.InProgress)
                         return InventoryResult.NotDuringArenaMatch;
             }
 
@@ -6235,7 +6235,7 @@ namespace Game.Entities
 
                 // loot was generated and respawntime has passed since then, allow to recreate loot
                 // to avoid bugs, this rule covers spawned gameobjects only
-                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.isLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
+                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
                     go.SetLootState(LootState.Ready);
 
                 if (go.GetLootState() == LootState.Ready)
@@ -6253,7 +6253,7 @@ namespace Game.Entities
 
                     if (lootid != 0)
                     {
-                        loot.clear();
+                        loot.Clear();
 
                         Group group = GetGroup();
                         bool groupRules = (group && go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0);
@@ -6274,7 +6274,7 @@ namespace Game.Entities
                     {
                         GameObjectTemplateAddon addon = go.GetTemplateAddon();
                         if (addon != null)
-                            loot.generateMoneyLoot(addon.mingold, addon.maxgold);
+                            loot.GenerateMoneyLoot(addon.mingold, addon.maxgold);
                     }
 
                     if (loot_type == LootType.Fishing)
@@ -6346,7 +6346,7 @@ namespace Game.Entities
                 if (!item.m_lootGenerated && !item.ItemContainerLoadLootFromDB())
                 {
                     item.m_lootGenerated = true;
-                    loot.clear();
+                    loot.Clear();
 
                     switch (loot_type)
                     {
@@ -6360,7 +6360,7 @@ namespace Game.Entities
                             loot.FillLoot(item.GetEntry(), LootStorage.Milling, this, true);
                             break;
                         default:
-                            loot.generateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
+                            loot.GenerateMoneyLoot(item.GetTemplate().MinMoneyLoot, item.GetTemplate().MaxMoneyLoot);
                             loot.FillLoot(item.GetEntry(), LootStorage.Items, this, true, loot.gold != 0);
 
                             // Force save the loot and money items that were just rolled
@@ -6387,7 +6387,7 @@ namespace Game.Entities
                 if (loot.loot_type == LootType.None)
                 {
                     uint pLevel = bones.loot.gold;
-                    bones.loot.clear();
+                    bones.loot.Clear();
 
                     // For AV Achievement
                     Battleground bg = GetBattleground();
@@ -6435,7 +6435,7 @@ namespace Game.Entities
                         if (creature.CanGeneratePickPocketLoot())
                         {
                             creature.StartPickPocketRefillTimer();
-                            loot.clear();
+                            loot.Clear();
 
                             uint lootid = creature.GetCreatureTemplate().PickPocketId;
                             if (lootid != 0)
@@ -6500,7 +6500,7 @@ namespace Game.Entities
                     }
                     else if (loot_type == LootType.Skinning)
                     {
-                        loot.clear();
+                        loot.Clear();
                         loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, this, true);
                         permission = PermissionTypes.Owner;
 

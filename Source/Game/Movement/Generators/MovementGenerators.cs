@@ -33,7 +33,7 @@ namespace Game.Movement
 
         public abstract MovementGeneratorType GetMovementGeneratorType();
 
-        public virtual void unitSpeedChanged() { }
+        public virtual void UnitSpeedChanged() { }
         
         // used by Evade code for select point to evade with expected restart default movement
         public virtual bool GetResetPosition(Unit u, out float x, out float y, out float z)
@@ -48,7 +48,7 @@ namespace Game.Movement
         public override void Initialize(Unit owner)
         {
             DoInitialize((T)owner);
-            isActive = true;
+            IsActive = true;
         }
         public override void Finalize(Unit owner)
         {
@@ -63,7 +63,7 @@ namespace Game.Movement
             return DoUpdate((T)owner, time_diff);
         }
 
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
 
         public abstract void DoInitialize(T owner);
         public abstract void DoFinalize(T owner);
@@ -71,21 +71,21 @@ namespace Game.Movement
         public abstract bool DoUpdate(T owner, uint time_diff);
     }
 
-    public class FollowerReference : Reference<Unit, TargetedMovementGeneratorBase>
+    public class FollowerReference : Reference<Unit, ITargetedMovementGeneratorBase>
     {
-        public override void targetObjectBuildLink()
+        public override void TargetObjectBuildLink()
         {
-            getTarget().AddFollower(this);
+            GetTarget().AddFollower(this);
         }
 
-        public override void targetObjectDestroyLink()
+        public override void TargetObjectDestroyLink()
         {
-            getTarget().RemoveFollower(this);
+            GetTarget().RemoveFollower(this);
         }
 
-        public override void sourceObjectDestroyLink()
+        public override void SourceObjectDestroyLink()
         {
-            GetSource().stopFollowing();
+            GetSource().StopFollowing();
         }
     }
 }

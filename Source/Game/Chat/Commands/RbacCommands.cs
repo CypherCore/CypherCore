@@ -269,7 +269,7 @@ namespace Game.Chat.Commands
 
             if (useSelectedPlayer)
             {
-                Player player = handler.getSelectedPlayer();
+                Player player = handler.GetSelectedPlayer();
                 if (!player)
                     return null;
 

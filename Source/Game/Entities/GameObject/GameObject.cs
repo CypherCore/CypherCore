@@ -267,7 +267,7 @@ namespace Game.Entities
             SetDisplayId(goInfo.displayId);
 
             m_model = CreateModel();
-            if (m_model != null && m_model.isMapObject())
+            if (m_model != null && m_model.IsMapObject())
                 AddFlag(GameObjectFlags.MapObject);
 
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
@@ -759,7 +759,7 @@ namespace Game.Entities
                                     return;
                         }
 
-                        loot.clear();
+                        loot.Clear();
 
                         //! If this is summoned by a spell with ie. SPELL_EFFECT_SUMMON_OBJECT_WILD, with or without owner, we check respawn criteria based on spell
                         //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
@@ -849,7 +849,7 @@ namespace Game.Entities
 
         public void GetFishLoot(Loot fishloot, Player loot_owner)
         {
-            fishloot.clear();
+            fishloot.Clear();
 
             uint zone, subzone;
             uint defaultzone = 1;
@@ -857,19 +857,19 @@ namespace Game.Entities
 
             // if subzone loot exist use it
             fishloot.FillLoot(subzone, LootStorage.Fishing, loot_owner, true, true);
-            if (fishloot.empty())
+            if (fishloot.Empty())
             {
                 //subzone no result,use zone loot
                 fishloot.FillLoot(zone, LootStorage.Fishing, loot_owner, true);
                 //use zone 1 as default, somewhere fishing got nothing,becase subzone and zone not set, like Off the coast of Storm Peaks.
-                if (fishloot.empty())
+                if (fishloot.Empty())
                     fishloot.FillLoot(defaultzone, LootStorage.Fishing, loot_owner, true, true);
             }
         }
 
         public void GetFishLootJunk(Loot fishloot, Player loot_owner)
         {
-            fishloot.clear();
+            fishloot.Clear();
 
             uint zone, subzone;
             uint defaultzone = 1;
@@ -877,11 +877,11 @@ namespace Game.Entities
 
             // if subzone loot exist use it
             fishloot.FillLoot(subzone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
-            if (fishloot.empty())  //use this becase if zone or subzone has normal mask drop, then fishloot.FillLoot return true.
+            if (fishloot.Empty())  //use this becase if zone or subzone has normal mask drop, then fishloot.FillLoot return true.
             {
                 //use zone loot
                 fishloot.FillLoot(zone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
-                if (fishloot.empty())
+                if (fishloot.Empty())
                     //use zone 1 as default
                     fishloot.FillLoot(defaultzone, LootStorage.Fishing, loot_owner, true, true, LootModes.JunkFish);
             }
@@ -1479,7 +1479,7 @@ namespace Game.Entities
                             Group group = player.GetGroup();
                             if (group)
                             {
-                                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                                 {
                                     Player member = refe.GetSource();
                                     if (member)
@@ -2376,7 +2376,7 @@ namespace Game.Entities
             if (m_model == null)
                 return;
 
-            m_model.enableCollision(enable);
+            m_model.EnableCollision(enable);
         }
 
         void UpdateModel()
@@ -2392,7 +2392,7 @@ namespace Game.Entities
             if (m_model != null)
                 GetMap().InsertGameObjectModel(m_model);
 
-            if (m_model != null && m_model.isMapObject())
+            if (m_model != null && m_model.IsMapObject())
                 AddFlag(GameObjectFlags.MapObject);
             else
                 RemoveFlag(GameObjectFlags.MapObject);

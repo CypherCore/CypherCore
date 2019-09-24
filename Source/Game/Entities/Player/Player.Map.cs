@@ -537,7 +537,7 @@ namespace Game.Entities
 
             // raid instances require the player to be in a raid group to be valid
             if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
-                if (!GetGroup() || !GetGroup().isRaidGroup())
+                if (!GetGroup() || !GetGroup().IsRaidGroup())
                     return false;
 
             Group group = GetGroup();
@@ -715,7 +715,7 @@ namespace Game.Entities
         public override void UpdateUnderwaterState(Map m, float x, float y, float z)
         {
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.GetLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);

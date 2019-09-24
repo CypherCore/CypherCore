@@ -40,7 +40,7 @@ namespace Game.Entities
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];
-        RefManager<Unit, TargetedMovementGeneratorBase> m_FollowingRefManager;
+        RefManager<Unit, ITargetedMovementGeneratorBase> m_FollowingRefManager;
         public MoveSpline MoveSpline { get; set; }
         MotionMaster i_motionMaster;
         public uint m_movementCounter;       //< Incrementing counter used in movement packets

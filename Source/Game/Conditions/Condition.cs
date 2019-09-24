@@ -267,7 +267,7 @@ namespace Game.Conditions
                         condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue2, unit.GetHealthPct(), ConditionValue1);
                     break;
                 case ConditionTypes.WorldState:
-                    condMeets = (ConditionValue2 == Global.WorldMgr.getWorldState((WorldStates)ConditionValue1));
+                    condMeets = (ConditionValue2 == Global.WorldMgr.GetWorldState((WorldStates)ConditionValue1));
                     break;
                 case ConditionTypes.PhaseId:
                     condMeets = obj.GetPhaseShift().HasPhase(ConditionValue1);
@@ -493,7 +493,7 @@ namespace Game.Conditions
             return mask;
         }
 
-        public bool isLoaded()
+        public bool IsLoaded()
         {
             return ConditionType > ConditionTypes.None || ReferenceId != 0;
         }

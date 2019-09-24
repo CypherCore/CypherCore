@@ -30,7 +30,7 @@ namespace Game.Chat.Commands
         [Command("auras", RBACPermissions.CommandListAuras)]
         static bool HandleListAurasCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.getSelectedUnit();
+            Unit unit = handler.GetSelectedUnit();
             if (!unit)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -81,7 +81,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hcreature_entry");
+            string id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -148,7 +148,7 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            string id = handler.extractKeyFromLink(args, "Hitem");
+            string id = handler.ExtractKeyFromLink(args, "Hitem");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -350,7 +350,7 @@ namespace Game.Chat.Commands
                 target = Global.ObjAccessor.FindPlayer(parseGUID);
                 targetGuid = parseGUID;
             }
-            else if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            else if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
@@ -360,7 +360,7 @@ namespace Game.Chat.Commands
             {
                 uint countMail = result.Read<uint>(0);
 
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, targetGuid.ToString());
                 handler.SendSysMessage(CypherStrings.AccountListBar);
 
@@ -385,8 +385,8 @@ namespace Game.Chat.Commands
                         uint gold = (uint)(money / MoneyConstants.Gold);
                         uint silv = (uint)(money % MoneyConstants.Gold) / MoneyConstants.Silver;
                         uint copp = (uint)(money % MoneyConstants.Gold) % MoneyConstants.Silver;
-                        string receiverStr = handler.playerLink(receiver);
-                        string senderStr = handler.playerLink(sender);
+                        string receiverStr = handler.PlayerLink(receiver);
+                        string senderStr = handler.PlayerLink(sender);
                         handler.SendSysMessage(CypherStrings.ListMailInfo1, messageId, subject, gold, silv, copp);
                         handler.SendSysMessage(CypherStrings.ListMailInfo2, senderStr, senderId, receiverStr, receiverId);
                         handler.SendSysMessage(CypherStrings.ListMailInfo3, Time.UnixTimeToDateTime(deliverTime).ToLongDateString(), Time.UnixTimeToDateTime(expireTime).ToLongDateString());
@@ -447,7 +447,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameobject_entry");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -512,7 +512,7 @@ namespace Game.Chat.Commands
         [Command("scenes", RBACPermissions.CommandListScenes)]
         static bool HandleListScenesCommand(StringArguments args, CommandHandler handler)
         {
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
                 target = handler.GetSession().GetPlayer();
 

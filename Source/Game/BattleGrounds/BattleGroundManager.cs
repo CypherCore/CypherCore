@@ -134,9 +134,9 @@ namespace Game.BattleGrounds
             header.QueueID = bg.GetQueueId();
             header.RangeMin = (byte)bg.GetMinLevel();
             header.RangeMax = (byte)bg.GetMaxLevel();
-            header.TeamSize = (byte)(bg.isArena() ? arenaType : 0);
+            header.TeamSize = (byte)(bg.IsArena() ? arenaType : 0);
             header.InstanceID = bg.GetClientInstanceID();
-            header.RegisteredMatch = bg.isRated();
+            header.RegisteredMatch = bg.IsRated();
             header.TournamentRules = false;
         }
 
@@ -267,7 +267,7 @@ namespace Game.BattleGrounds
             // create a copy of the BG template
             Battleground bg = bg_template.GetCopy();
 
-            bool isRandom = bgTypeId != originalBgTypeId && !bg.isArena();
+            bool isRandom = bgTypeId != originalBgTypeId && !bg.IsArena();
 
             bg.SetBracket(bracketEntry);
             bg.SetInstanceID(Global.MapMgr.GenerateInstanceId());
@@ -282,7 +282,7 @@ namespace Game.BattleGrounds
             bg.SetQueueId((ulong)bgTypeId | 0x1F10000000000000);
 
             // Set up correct min/max player counts for scoreboards
-            if (bg.isArena())
+            if (bg.IsArena())
             {
                 uint maxPlayersPerTeam = 0;
                 switch (arenaType)
@@ -857,8 +857,8 @@ namespace Game.BattleGrounds
 
         public BattlegroundQueue GetBattlegroundQueue(BattlegroundQueueTypeId bgQueueTypeId) { return m_BattlegroundQueues[(int)bgQueueTypeId]; }
 
-        public bool isArenaTesting() { return m_ArenaTesting; }
-        public bool isTesting() { return m_Testing; }
+        public bool IsArenaTesting() { return m_ArenaTesting; }
+        public bool IsTesting() { return m_Testing; }
 
         public BattlegroundTypeId GetBattleMasterBG(uint entry)
         {

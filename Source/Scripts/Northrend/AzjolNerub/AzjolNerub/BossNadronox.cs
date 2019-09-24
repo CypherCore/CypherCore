@@ -182,10 +182,10 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
 
         bool IsInCombatWithPlayer()
         {
-            List<HostileReference> refs = me.GetThreatManager().getThreatList();
+            List<HostileReference> refs = me.GetThreatManager().GetThreatList();
             foreach (HostileReference hostileRef in refs)
             {
-                Unit target = hostileRef.getTarget();
+                Unit target = hostileRef.GetTarget();
                 if (target)
                     if (target.IsControlledByPlayer())
                         return true;

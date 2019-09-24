@@ -37,7 +37,7 @@ namespace Game.Chat
                 return false;
 
             Player target;
-            if (!handler.extractPlayerTarget(args, out target))
+            if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
             LocaleConstant loc = handler.GetSessionDbcLocale();
@@ -76,7 +76,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             string newNameStr = args.NextString();
@@ -181,7 +181,7 @@ namespace Game.Chat
                     if (handler.HasLowerSecurity(null, targetGuid))
                         return false;
 
-                    string oldNameLink = handler.playerLink(targetName);
+                    string oldNameLink = handler.PlayerLink(targetName);
                     handler.SendSysMessage(CypherStrings.RenamePlayerGuid, oldNameLink, targetGuid.ToString());
 
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
@@ -199,7 +199,7 @@ namespace Game.Chat
         {
             string nameStr;
             string levelStr;
-            handler.extractOptFirstArg(args, out nameStr, out levelStr);
+            handler.ExtractOptFirstArg(args, out nameStr, out levelStr);
             if (string.IsNullOrEmpty(levelStr))
                 return false;
 
@@ -213,7 +213,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
             int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
@@ -230,7 +230,7 @@ namespace Game.Chat
             HandleCharacterLevel(target, targetGuid, oldlevel, newlevel, handler);
             if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including player == NULL
             {
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
             }
 
@@ -244,7 +244,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
@@ -257,7 +257,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.playerLink(targetName);
+                string oldNameLink = handler.PlayerLink(targetName);
                 stmt.AddValue(1, targetGuid.GetCounter());
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
             }
@@ -271,14 +271,14 @@ namespace Game.Chat
         {
             string playerNameStr;
             string accountName;
-            handler.extractOptFirstArg(args, out playerNameStr, out accountName);
+            handler.ExtractOptFirstArg(args, out playerNameStr, out accountName);
             if (accountName.IsEmpty())
                 return false;
 
             ObjectGuid targetGuid;
             string targetName;
             Player playerNotUsed;
-            if (!handler.extractPlayerTarget(new StringArguments(playerNameStr), out playerNotUsed, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(playerNameStr), out playerNotUsed, out targetGuid, out targetName))
                 return false;
 
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(targetGuid);
@@ -347,7 +347,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
@@ -360,7 +360,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.playerLink(targetName);
+                string oldNameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
                 stmt.AddValue(1, targetGuid.GetCounter());
             }
@@ -375,7 +375,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
@@ -389,7 +389,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.playerLink(targetName);
+                string oldNameLink = handler.PlayerLink(targetName);
                 // @todo add text into database
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
                 stmt.AddValue(1, targetGuid.GetCounter());
@@ -403,7 +403,7 @@ namespace Game.Chat
         static bool HandleCharacterReputationCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
-            if (!handler.extractPlayerTarget(args, out target))
+            if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
             LocaleConstant loc = handler.GetSessionDbcLocale();
@@ -735,7 +735,7 @@ namespace Game.Chat
         {
             string nameStr;
             string levelStr;
-            handler.extractOptFirstArg(args, out nameStr, out levelStr);
+            handler.ExtractOptFirstArg(args, out nameStr, out levelStr);
 
             // exception opt second arg: .character level $name
             if (!string.IsNullOrEmpty(levelStr) && !levelStr.IsNumber())
@@ -747,7 +747,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
             int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
@@ -765,7 +765,7 @@ namespace Game.Chat
 
             if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including chr == NULL
             {
-                string nameLink = handler.playerLink(targetName);
+                string nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
             }
 
@@ -780,7 +780,7 @@ namespace Game.Chat
                 player.InitTalentForLevel();
                 player.SetXP(0);
 
-                if (handler.needReportToTarget(player))
+                if (handler.NeedReportToTarget(player))
                 {
                     if (oldLevel == newLevel)
                         player.SendSysMessage(CypherStrings.YoursLevelProgressReset, handler.GetNameLink());

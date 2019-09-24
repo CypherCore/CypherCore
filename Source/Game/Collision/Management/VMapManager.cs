@@ -49,17 +49,17 @@ namespace Game.Collision
                 iParentMapData[pair.Value] = pair.Key;
         }
 
-        public VMAPLoadResult loadMap(uint mapId, uint x, uint y)
+        public VMAPLoadResult LoadMap(uint mapId, uint x, uint y)
         {
             var result = VMAPLoadResult.Ignored;
-            if (isMapLoadingEnabled())
+            if (IsMapLoadingEnabled())
             {
-                if (loadSingleMap(mapId, x, y))
+                if (LoadSingleMap(mapId, x, y))
                 {
                     result = VMAPLoadResult.OK;
                     var childMaps = iChildMapData.LookupByKey(mapId);
                     foreach (uint childMapId in childMaps)
-                        if (!loadSingleMap(childMapId, x, y))
+                        if (!LoadSingleMap(childMapId, x, y))
                             result = VMAPLoadResult.Error;
                 }
                 else
@@ -69,12 +69,12 @@ namespace Game.Collision
             return result;
         }
 
-        bool loadSingleMap(uint mapId, uint tileX, uint tileY)
+        bool LoadSingleMap(uint mapId, uint tileX, uint tileY)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree == null)
             {
-                string filename = VMapPath + getMapFileName(mapId);
+                string filename = VMapPath + GetMapFileName(mapId);
                 StaticMapTree newTree = new StaticMapTree(mapId);
                 if (!newTree.InitMap(filename))
                     return false;
@@ -87,79 +87,79 @@ namespace Game.Collision
             return instanceTree.LoadMapTile(tileX, tileY, this);
         }
 
-        public void unloadMap(uint mapId, uint x, uint y)
+        public void UnloadMap(uint mapId, uint x, uint y)
         {
             var childMaps = iChildMapData.LookupByKey(mapId);
             foreach (uint childMapId in childMaps)
-                unloadSingleMap(childMapId, x, y);
+                UnloadSingleMap(childMapId, x, y);
 
-            unloadSingleMap(mapId, x, y);
+            UnloadSingleMap(mapId, x, y);
         }
 
-        void unloadSingleMap(uint mapId, uint x, uint y)
+        void UnloadSingleMap(uint mapId, uint x, uint y)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
                 instanceTree.UnloadMapTile(x, y, this);
-                if (instanceTree.numLoadedTiles() == 0)
+                if (instanceTree.NumLoadedTiles() == 0)
                 {
                     iInstanceMapTrees.Remove(mapId);
                 }
             }
         }
 
-        public void unloadMap(uint mapId)
+        public void UnloadMap(uint mapId)
         {
             var childMaps = iChildMapData.LookupByKey(mapId);
             foreach (uint childMapId in childMaps)
-                unloadSingleMap(childMapId);
+                UnloadSingleMap(childMapId);
 
-            unloadSingleMap(mapId);
+            UnloadSingleMap(mapId);
         }
 
-        void unloadSingleMap(uint mapId)
+        void UnloadSingleMap(uint mapId)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
                 instanceTree.UnloadMap(this);
-                if (instanceTree.numLoadedTiles() == 0)
+                if (instanceTree.NumLoadedTiles() == 0)
                 {
                     iInstanceMapTrees.Remove(mapId);
                 }
             }
         }
 
-        public bool isInLineOfSight(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
+        public bool IsInLineOfSight(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
-            if (!isLineOfSightCalcEnabled() || Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLOS))
+            if (!IsLineOfSightCalcEnabled() || Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLOS))
                 return true;
 
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
-                Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
+                Vector3 pos1 = ConvertPositionToInternalRep(x1, y1, z1);
+                Vector3 pos2 = ConvertPositionToInternalRep(x2, y2, z2);
                 if (pos1 != pos2)
-                    return instanceTree.isInLineOfSight(pos1, pos2, ignoreFlags);
+                    return instanceTree.IsInLineOfSight(pos1, pos2, ignoreFlags);
             }
 
             return true;
         }
 
-        public bool getObjectHitPos(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
+        public bool GetObjectHitPos(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
-            if (isLineOfSightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLOS))
+            if (IsLineOfSightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLOS))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
                     Vector3 resultPos;
-                    Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
-                    Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
-                    bool result = instanceTree.getObjectHitPos(pos1, pos2, out resultPos, modifyDist);
-                    resultPos = convertPositionToInternalRep(resultPos.X, resultPos.Y, resultPos.Z);
+                    Vector3 pos1 = ConvertPositionToInternalRep(x1, y1, z1);
+                    Vector3 pos2 = ConvertPositionToInternalRep(x2, y2, z2);
+                    bool result = instanceTree.GetObjectHitPos(pos1, pos2, out resultPos, modifyDist);
+                    resultPos = ConvertPositionToInternalRep(resultPos.X, resultPos.Y, resultPos.Z);
                     rx = resultPos.X;
                     ry = resultPos.Y;
                     rz = resultPos.Z;
@@ -174,15 +174,15 @@ namespace Game.Collision
             return false;
         }
 
-        public float getHeight(uint mapId, float x, float y, float z, float maxSearchDist)
+        public float GetHeight(uint mapId, float x, float y, float z, float maxSearchDist)
         {
-            if (isHeightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapHeight))
+            if (IsHeightCalcEnabled() && !Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapHeight))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    Vector3 pos = convertPositionToInternalRep(x, y, z);
-                    float height = instanceTree.getHeight(pos, maxSearchDist);
+                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
+                    float height = instanceTree.GetHeight(pos, maxSearchDist);
                     if (float.IsInfinity(height))
                         height = MapConst.VMAPInvalidHeightValue; // No height
 
@@ -193,7 +193,7 @@ namespace Game.Collision
             return MapConst.VMAPInvalidHeightValue;
         }
 
-        public bool getAreaInfo(uint mapId, float x, float y, ref float z, out uint flags, out int adtId, out int rootId, out int groupId)
+        public bool GetAreaInfo(uint mapId, float x, float y, ref float z, out uint flags, out int adtId, out int rootId, out int groupId)
         {
             flags = 0;
             adtId = 0;
@@ -204,8 +204,8 @@ namespace Game.Collision
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    Vector3 pos = convertPositionToInternalRep(x, y, z);
-                    bool result = instanceTree.getAreaInfo(ref pos, out flags, out adtId, out rootId, out groupId);
+                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
+                    bool result = instanceTree.GetAreaInfo(ref pos, out flags, out adtId, out rootId, out groupId);
                     // z is not touched by convertPositionToInternalRep(), so just copy
                     z = pos.Z;
                     return result;
@@ -223,7 +223,7 @@ namespace Game.Collision
                 if (instanceTree != null)
                 {
                     LocationInfo info = new LocationInfo();
-                    Vector3 pos = convertPositionToInternalRep(x, y, z);
+                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
                     if (instanceTree.GetLocationInfo(pos, info))
                     {
                         floor = info.ground_Z;
@@ -239,7 +239,7 @@ namespace Game.Collision
             return false;
         }
 
-        public WorldModel acquireModelInstance(string filename, uint flags = 0)
+        public WorldModel AcquireModelInstance(string filename, uint flags = 0)
         {
             lock (LoadedModelFilesLock)
             {
@@ -248,7 +248,7 @@ namespace Game.Collision
                 if (model == null)
                 {
                     WorldModel worldmodel = new WorldModel();
-                    if (!worldmodel.readFile(VMapPath + filename))
+                    if (!worldmodel.ReadFile(VMapPath + filename))
                     {
                         Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
                         return null;
@@ -259,16 +259,16 @@ namespace Game.Collision
                     worldmodel.Flags = flags;
 
                     model = new ManagedModel();
-                    model.setModel(worldmodel);
+                    model.SetModel(worldmodel);
 
                     iLoadedModelFiles.Add(filename, model);
                 }
-                model.incRefCount();
-                return model.getModel();
+                model.IncRefCount();
+                return model.GetModel();
             }
         }
 
-        public void releaseModelInstance(string filename)
+        public void ReleaseModelInstance(string filename)
         {
             lock (LoadedModelFilesLock)
             {
@@ -279,7 +279,7 @@ namespace Game.Collision
                     Log.outError(LogFilter.Server, "VMapManager: trying to unload non-loaded file '{0}'", filename);
                     return;
                 }
-                if (model.decRefCount() == 0)
+                if (model.DecRefCount() == 0)
                 {
                     Log.outDebug(LogFilter.Maps, "VMapManager: unloading file '{0}'", filename);
                     iLoadedModelFiles.Remove(filename);
@@ -287,12 +287,12 @@ namespace Game.Collision
             }
         }
 
-        public LoadResult existsMap(uint mapId, uint x, uint y)
+        public LoadResult ExistsMap(uint mapId, uint x, uint y)
         {
             return StaticMapTree.CanLoadMap(VMapPath, mapId, x, y, this);
         }
 
-        public int getParentMapId(uint mapId)
+        public int GetParentMapId(uint mapId)
         {
             if (iParentMapData.ContainsKey(mapId))
                 return (int)iParentMapData[mapId];
@@ -300,7 +300,7 @@ namespace Game.Collision
             return -1;
         }
 
-        Vector3 convertPositionToInternalRep(float x, float y, float z)
+        Vector3 ConvertPositionToInternalRep(float x, float y, float z)
         {
             Vector3 pos = new Vector3();
             float mid = 0.5f * 64.0f * 533.33333333f;
@@ -311,17 +311,17 @@ namespace Game.Collision
             return pos;
         }
 
-        public static string getMapFileName(uint mapId)
+        public static string GetMapFileName(uint mapId)
         {
             return $"{mapId:D4}.vmtree";
         }
 
-        public void setEnableLineOfSightCalc(bool pVal) { _enableLineOfSightCalc = pVal; }
-        public void setEnableHeightCalc(bool pVal) { _enableHeightCalc = pVal; }
+        public void SetEnableLineOfSightCalc(bool pVal) { _enableLineOfSightCalc = pVal; }
+        public void SetEnableHeightCalc(bool pVal) { _enableHeightCalc = pVal; }
 
-        public bool isLineOfSightCalcEnabled() { return _enableLineOfSightCalc; }
-        public bool isHeightCalcEnabled() { return _enableHeightCalc; }
-        public bool isMapLoadingEnabled() { return _enableLineOfSightCalc || _enableHeightCalc; }
+        public bool IsLineOfSightCalcEnabled() { return _enableLineOfSightCalc; }
+        public bool IsHeightCalcEnabled() { return _enableHeightCalc; }
+        public bool IsMapLoadingEnabled() { return _enableLineOfSightCalc || _enableHeightCalc; }
 
         Dictionary<string, ManagedModel> iLoadedModelFiles = new Dictionary<string, ManagedModel>();
         Dictionary<uint, StaticMapTree> iInstanceMapTrees = new Dictionary<uint, StaticMapTree>();
@@ -341,10 +341,10 @@ namespace Game.Collision
             iRefCount = 0;
         }
 
-        public void setModel(WorldModel model) { iModel = model; }
-        public WorldModel getModel() { return iModel; }
-        public void incRefCount() { ++iRefCount; }
-        public int decRefCount() { return --iRefCount; }
+        public void SetModel(WorldModel model) { iModel = model; }
+        public WorldModel GetModel() { return iModel; }
+        public void IncRefCount() { ++iRefCount; }
+        public int DecRefCount() { return --iRefCount; }
 
         WorldModel iModel;
         int iRefCount;

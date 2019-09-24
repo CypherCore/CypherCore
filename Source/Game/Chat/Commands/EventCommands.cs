@@ -30,7 +30,7 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameevent");
+            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -45,7 +45,7 @@ namespace Game.Chat
             }
 
             GameEventData eventData = events[eventId];
-            if (!eventData.isValid())
+            if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
                 return false;
@@ -105,7 +105,7 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameevent");
+            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -120,7 +120,7 @@ namespace Game.Chat
             }
 
             GameEventData eventData = events[eventId];
-            if (!eventData.isValid())
+            if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
                 return false;
@@ -144,7 +144,7 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameevent");
+            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -159,7 +159,7 @@ namespace Game.Chat
             }
 
             GameEventData eventData = events[eventId];
-            if (!eventData.isValid())
+            if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
                 return false;

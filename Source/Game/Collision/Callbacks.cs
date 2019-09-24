@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
-using Framework.Constants;
 
 namespace Game.Collision
 {
@@ -178,12 +178,12 @@ namespace Game.Collision
         {
             if (prims[entry] == null)
                 return false;
-            bool result = prims[entry].intersectRay(ray, ref distance, pStopAtFirstHit, flags);
+            bool result = prims[entry].IntersectRay(ray, ref distance, pStopAtFirstHit, flags);
             if (result)
                 hit = true;
             return result;
         }
-        public bool didHit() { return hit; }
+        public bool DidHit() { return hit; }
 
         ModelInstance[] prims;
         bool hit;
@@ -201,7 +201,7 @@ namespace Game.Collision
             if (prims[entry] == null)
                 return;
 
-            prims[entry].intersectPoint(point, aInfo);
+            prims[entry].IntersectPoint(point, aInfo);
         }
 
         ModelInstance[] prims;
@@ -242,7 +242,7 @@ namespace Game.Collision
             return _didHit;
         }
 
-        public bool didHit() { return _didHit; }
+        public bool DidHit() { return _didHit; }
 
         bool _didHit;
         PhaseShift _phaseShift;

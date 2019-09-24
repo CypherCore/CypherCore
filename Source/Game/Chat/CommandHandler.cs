@@ -81,7 +81,7 @@ namespace Game.Chat
                 //if (!command.Name.Equals(cmd))
                     //continue;
 
-                if (!hasStringAbbr(command.Name, cmd))
+                if (!HasStringAbbr(command.Name, cmd))
                     continue;
 
                 bool match = false;
@@ -89,7 +89,7 @@ namespace Game.Chat
                 {
                     foreach (var command2 in table)
                     {
-                        if (!hasStringAbbr(command2.Name, cmd))
+                        if (!HasStringAbbr(command2.Name, cmd))
                             continue;
 
                         if (command2.Name.Equals(cmd))
@@ -180,7 +180,7 @@ namespace Game.Chat
                     if (!IsAvailable(command))
                         continue;
 
-                    if (!hasStringAbbr(command.Name, cmd))
+                    if (!HasStringAbbr(command.Name, cmd))
                         continue;
 
                     // have subcommand
@@ -236,7 +236,7 @@ namespace Game.Chat
                     continue;
 
                 // for empty subcmd show all available
-                if (!subcmd.IsEmpty() && !hasStringAbbr(command.Name, subcmd))
+                if (!subcmd.IsEmpty() && !HasStringAbbr(command.Name, subcmd))
                     continue;
 
                 if (GetSession() != null)
@@ -271,17 +271,17 @@ namespace Game.Chat
 
         public virtual bool HasPermission(RBACPermissions permission) { return _session.HasPermission(permission); }
 
-        public string extractKeyFromLink(StringArguments args, params string[] linkType)
+        public string ExtractKeyFromLink(StringArguments args, params string[] linkType)
         {
             int throwaway;
-            return extractKeyFromLink(args, linkType, out throwaway);
+            return ExtractKeyFromLink(args, linkType, out throwaway);
         }
-        public string extractKeyFromLink(StringArguments args, string[] linkType, out int found_idx)
+        public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx)
         {
             string throwaway;
-            return extractKeyFromLink(args, linkType, out found_idx, out throwaway);
+            return ExtractKeyFromLink(args, linkType, out found_idx, out throwaway);
         }
-        public string extractKeyFromLink(StringArguments args, string[] linkType, out int found_idx, out string something1)
+        public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx, out string something1)
         {
             found_idx = 0;
             something1 = null;
@@ -327,7 +327,7 @@ namespace Game.Chat
             return null;
         }
 
-        public void extractOptFirstArg(StringArguments args, out string arg1, out string arg2)
+        public void ExtractOptFirstArg(StringArguments args, out string arg1, out string arg2)
         {
             string p1 = args.NextString();
             string p2 = args.NextString();
@@ -342,9 +342,9 @@ namespace Game.Chat
             arg2 = p2;
         }
 
-        public GameTele extractGameTeleFromLink(StringArguments args)
+        public GameTele ExtractGameTeleFromLink(StringArguments args)
         {
-            string cId = extractKeyFromLink(args, "Htele");
+            string cId = ExtractKeyFromLink(args, "Htele");
             if (string.IsNullOrEmpty(cId))
                 return null;
 
@@ -354,7 +354,7 @@ namespace Game.Chat
             return Global.ObjectMgr.GetGameTele(id);
         }
 
-        public string extractQuotedArg(string str)
+        public string ExtractQuotedArg(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return null;
@@ -364,10 +364,10 @@ namespace Game.Chat
 
             return str.Replace("\"", String.Empty);
         }
-        string extractPlayerNameFromLink(StringArguments args)
+        string ExtractPlayerNameFromLink(StringArguments args)
         {
             // |color|Hplayer:name|h[name]|h|r
-            string name = extractKeyFromLink(args, "Hplayer");
+            string name = ExtractKeyFromLink(args, "Hplayer");
             if (name.IsEmpty())
                 return "";
 
@@ -376,19 +376,19 @@ namespace Game.Chat
 
             return name;
         }
-        public bool extractPlayerTarget(StringArguments args, out Player player)
+        public bool ExtractPlayerTarget(StringArguments args, out Player player)
         {
             ObjectGuid guid;
             string name;
-            return extractPlayerTarget(args, out player, out guid, out name);
+            return ExtractPlayerTarget(args, out player, out guid, out name);
         }
-        public bool extractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid)
+        public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid)
         {
             string name;
-            return extractPlayerTarget(args, out player, out playerGuid, out name);
+            return ExtractPlayerTarget(args, out player, out playerGuid, out name);
         }
 
-        public bool extractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid, out string playerName)
+        public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid, out string playerName)
         {
             player = null;
             playerGuid = ObjectGuid.Empty;
@@ -396,7 +396,7 @@ namespace Game.Chat
 
             if (!args.Empty())
             {
-                string name = extractPlayerNameFromLink(args);
+                string name = ExtractPlayerNameFromLink(args);
                 if (string.IsNullOrEmpty(name))
                 {
                     SendSysMessage(CypherStrings.PlayerNotFound);
@@ -412,7 +412,7 @@ namespace Game.Chat
             }
             else
             {
-                player = getSelectedPlayer();
+                player = GetSelectedPlayer();
                 playerGuid = player != null ? player.GetGUID() : ObjectGuid.Empty;
                 playerName = player != null ? player.GetName() : "";
             }
@@ -426,7 +426,7 @@ namespace Game.Chat
 
             return true;
         }
-        public ulong extractLowGuidFromLink(StringArguments args, ref HighGuid guidHigh)
+        public ulong ExtractLowGuidFromLink(StringArguments args, ref HighGuid guidHigh)
         {
             int type;
 
@@ -439,7 +439,7 @@ namespace Game.Chat
             // |color|Hcreature:creature_guid|h[name]|h|r
             // |color|Hgameobject:go_guid|h[name]|h|r
             // |color|Hplayer:name|h[name]|h|r
-            string idS = extractKeyFromLink(args, guidKeys, out type);
+            string idS = ExtractKeyFromLink(args, guidKeys, out type);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
@@ -489,7 +489,7 @@ namespace Game.Chat
             "Htrade",                                               // profession/skill spell
             "Hglyph",                                               // glyph
         };
-        public uint extractSpellIdFromLink(StringArguments args)
+        public uint ExtractSpellIdFromLink(StringArguments args)
         {
             // number or [name] Shift-click form |color|Henchant:recipe_spell_id|h[prof_name: recipe_name]|h|r
             // number or [name] Shift-click form |color|Hglyph:glyph_slot_id:glyph_prop_id|h[value]|h|r
@@ -498,7 +498,7 @@ namespace Game.Chat
             // number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
             int type = 0;
             string param1Str = null;
-            string idS = extractKeyFromLink(args, spellKeys, out type, out param1Str);
+            string idS = ExtractKeyFromLink(args, spellKeys, out type, out param1Str);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
@@ -538,7 +538,7 @@ namespace Game.Chat
             return 0;
         }
 
-        public Player getSelectedPlayer()
+        public Player GetSelectedPlayer()
         {
             if (_session == null)
                 return null;
@@ -550,7 +550,7 @@ namespace Game.Chat
 
             return Global.ObjAccessor.FindPlayer(selected);
         }
-        public Unit getSelectedUnit()
+        public Unit GetSelectedUnit()
         {
             if (_session == null)
                 return null;
@@ -573,14 +573,14 @@ namespace Game.Chat
 
             return Global.ObjAccessor.GetUnit(_session.GetPlayer(), selected);
         }
-        public Creature getSelectedCreature()
+        public Creature GetSelectedCreature()
         {
             if (_session == null)
                 return null;
 
             return ObjectAccessor.GetCreatureOrPetOrVehicle(_session.GetPlayer(), _session.GetPlayer().GetTarget());
         }
-        public Player getSelectedPlayerOrSelf()
+        public Player GetSelectedPlayerOrSelf()
         {
             if (_session == null)
                 return null;
@@ -639,7 +639,7 @@ namespace Game.Chat
             return searcher.GetTarget();
         }
 
-        public string playerLink(string name, bool console = false)
+        public string PlayerLink(string name, bool console = false)
         {
             return console ? name : "|cffffffff|Hplayer:" + name + "|h[" + name + "]|h|r";
         }
@@ -649,9 +649,9 @@ namespace Game.Chat
         }
         public string GetNameLink(Player obj)
         {
-            return playerLink(obj.GetName());
+            return PlayerLink(obj.GetName());
         }
-        public virtual bool needReportToTarget(Player chr)
+        public virtual bool NeedReportToTarget(Player chr)
         {
             Player pl = _session.GetPlayer();
             return pl != chr && pl.IsVisibleGloballyFor(chr);
@@ -703,7 +703,7 @@ namespace Game.Chat
             return false;
         }
 
-        bool hasStringAbbr(string name, string part)
+        bool HasStringAbbr(string name, string part)
         {
             // non "" command
             if (!name.IsEmpty())
@@ -822,8 +822,8 @@ namespace Game.Chat
             }
             else
             {
-                if (getSelectedPlayer())
-                    player = getSelectedPlayer();
+                if (GetSelectedPlayer())
+                    player = GetSelectedPlayer();
                 else
                     player = _session.GetPlayer();
 
@@ -866,7 +866,7 @@ namespace Game.Chat
             return GetCypherString(CypherStrings.ConsoleCommand);
         }
 
-        public override bool needReportToTarget(Player chr)
+        public override bool NeedReportToTarget(Player chr)
         {
             return true;
         }

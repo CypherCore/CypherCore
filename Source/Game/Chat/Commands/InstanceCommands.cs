@@ -29,7 +29,7 @@ namespace Game.Chat
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
         static bool HandleInstanceListBinds(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
@@ -76,7 +76,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 

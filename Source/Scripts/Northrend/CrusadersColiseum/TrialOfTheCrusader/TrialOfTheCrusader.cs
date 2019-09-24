@@ -1313,7 +1313,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         break;
                     case 400:
                         Talk(Texts.Stage_0_06);
-                        me.GetThreatManager().clearReferences();
+                        me.GetThreatManager().ClearReferences();
                         _updateTimer = 5 * Time.InMilliseconds;
                         _instance.SetData(DataTypes.Event, 0);
                         break;

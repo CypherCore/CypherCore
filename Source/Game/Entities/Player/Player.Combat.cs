@@ -58,7 +58,7 @@ namespace Game.Entities
             Group group = GetGroup();
             if (group)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
                     if (!player)

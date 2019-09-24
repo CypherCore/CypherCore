@@ -477,7 +477,7 @@ namespace Game.Entities
 
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
-            GetHostileRefManager().deleteReferences();
+            GetHostileRefManager().DeleteReferences();
             DeleteThreatList();
 
             if (_oldFactionId != 0)

@@ -71,17 +71,17 @@ namespace Scripts.Pets
                         continue;
                     }
                     // else compare best fit unit with current unit
-                    var triggers = unit.GetThreatManager().getThreatList();
+                    var triggers = unit.GetThreatManager().GetThreatList();
                     foreach (var reference in triggers)
                     {
                         // Try to find threat referenced to owner
-                        if (reference.getTarget() == owner)
+                        if (reference.GetTarget() == owner)
                         {
                             // Check if best fit hostile unit hs lower threat than this current unit
-                            if (highestThreat < reference.getThreat())
+                            if (highestThreat < reference.GetThreat())
                             {
                                 // If so, update best fit unit
-                                highestThreat = reference.getThreat();
+                                highestThreat = reference.GetThreat();
                                 highestThreatUnit = unit;
                                 break;
                             }
@@ -120,11 +120,11 @@ namespace Scripts.Pets
                     // Consider only units without CC
                     if (!unit.HasBreakableByDamageCrowdControlAura(unit))
                     {
-                        var triggers = unit.GetThreatManager().getThreatList();
+                        var triggers = unit.GetThreatManager().GetThreatList();
                         foreach (var reference in triggers)
                         {
                             // Try to find threat referenced to owner
-                            if (reference.getTarget() == owner)
+                            if (reference.GetTarget() == owner)
                                 return true;
                         }
                     }

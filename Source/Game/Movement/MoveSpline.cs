@@ -54,20 +54,20 @@ namespace Game.Movement
             splineIsFacingOnly = args.path.Length == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).GetLength() < 0.1f);
 
             // Check if its a stop spline
-            if (args.flags.hasFlag(SplineFlag.Done))
+            if (args.flags.HasFlag(SplineFlag.Done))
             {
-                spline.clear();
+                spline.Clear();
                 return;
             }
 
-            init_spline(args);
+            InitSpline(args);
 
             // init parabolic / animation
             // spline initialized, duration known and i able to compute parabolic acceleration
-            if (args.flags.hasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
+            if (args.flags.HasFlag(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.FadeObject))
             {
                 effect_start_time = (int)(Duration() * args.time_perc);
-                if (args.flags.hasFlag(SplineFlag.Parabolic) && effect_start_time < Duration())
+                if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < Duration())
                 {
                     float f_duration = (float)TimeSpan.FromMilliseconds(Duration() - effect_start_time).TotalSeconds;
                     vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
@@ -75,77 +75,77 @@ namespace Game.Movement
             }
         }
 
-        void init_spline(MoveSplineInitArgs args)
+        void InitSpline(MoveSplineInitArgs args)
         {
             Spline.EvaluationMode[] modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
-            if (args.flags.hasFlag(SplineFlag.Cyclic))
+            if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
-                spline.init_cyclic_spline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.isSmooth())], 0);
+                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], 0);
             }
             else
             {
-                spline.Init_Spline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.isSmooth())]);
+                spline.InitSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())]);
             }
 
             // init spline timestamps
-            if (splineflags.hasFlag(SplineFlag.Falling))
+            if (splineflags.HasFlag(SplineFlag.Falling))
             {
-                FallInitializer init = new FallInitializer(spline.getPoint(spline.first()).Z);
-                spline.initLengths(init);
+                FallInitializer init = new FallInitializer(spline.GetPoint(spline.First()).Z);
+                spline.InitLengths(init);
             }
             else
             {
                 CommonInitializer init = new CommonInitializer(args.velocity);
-                spline.initLengths(init);
+                spline.InitLengths(init);
             }
 
             // TODO: what to do in such cases? problem is in input data (all points are at same coords)
-            if (spline.length() < 1)
+            if (spline.Length() < 1)
             {
                 Log.outError(LogFilter.Unit, "MoveSpline.init_spline: zero length spline, wrong input data?");
-                spline.set_length(spline.last(), spline.isCyclic() ? 1000 : 1);
+                spline.Set_length(spline.Last(), spline.IsCyclic() ? 1000 : 1);
             }
-            point_Idx = spline.first();
+            point_Idx = spline.First();
         }
 
-        public int currentPathIdx()
+        public int CurrentPathIdx()
         {
-            int point = point_Idx_offset + point_Idx - spline.first() + (Finalized() ? 1 : 0);
-            if (isCyclic())
-                point = point % (spline.last() - spline.first());
+            int point = point_Idx_offset + point_Idx - spline.First() + (Finalized() ? 1 : 0);
+            if (IsCyclic())
+                point = point % (spline.Last() - spline.First());
             return point;
         }
 
-        public Vector3[] getPath() { return spline.getPoints(); }
-        public int timePassed() { return time_passed; }
+        public Vector3[] GetPath() { return spline.GetPoints(); }
+        public int TimePassed() { return time_passed; }
 
-        public int Duration() { return spline.length(); }
-        public int _currentSplineIdx() { return point_Idx; }
+        public int Duration() { return spline.Length(); }
+        public int CurrentSplineIdx() { return point_Idx; }
         public uint GetId() { return m_Id; }
-        public bool Finalized() { return splineflags.hasFlag(SplineFlag.Done); }
+        public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
         void _Finalize()
         {
             splineflags.SetUnsetFlag(SplineFlag.Done);
-            point_Idx = spline.last() - 1;
+            point_Idx = spline.Last() - 1;
             time_passed = Duration();
         }
-        public Vector4 computePosition(int time_point, int point_index)
+        public Vector4 ComputePosition(int time_point, int point_index)
         {            
             float u = 1.0f;
-            int seg_time = spline.length(point_index, point_index + 1);
+            int seg_time = spline.Length(point_index, point_index + 1);
             if (seg_time > 0)
-                u = (time_point - spline.length(point_index)) / (float)seg_time;
+                u = (time_point - spline.Length(point_index)) / (float)seg_time;
 
             Vector3 c;
             float orientation = initialOrientation;
             spline.Evaluate_Percent(point_index, u, out c);
 
-            if (splineflags.hasFlag(SplineFlag.Parabolic))
-                computeParabolicElevation(time_point, ref c.Z);
-            else if (splineflags.hasFlag(SplineFlag.Falling))
-                computeFallElevation(time_point, ref c.Z);
+            if (splineflags.HasFlag(SplineFlag.Parabolic))
+                ComputeParabolicElevation(time_point, ref c.Z);
+            else if (splineflags.HasFlag(SplineFlag.Falling))
+                ComputeFallElevation(time_point, ref c.Z);
 
-            if (splineflags.hasFlag(SplineFlag.Done) && facing.type != MonsterMoveType.Normal)
+            if (splineflags.HasFlag(SplineFlag.Done) && facing.type != MonsterMoveType.Normal)
             {
                 if (facing.type == MonsterMoveType.FacingAngle)
                     orientation = facing.angle;
@@ -155,14 +155,14 @@ namespace Game.Movement
             }
             else
             {
-                if (!splineflags.hasFlag(SplineFlag.OrientationFixed | SplineFlag.Falling | SplineFlag.Unknown0))
+                if (!splineflags.HasFlag(SplineFlag.OrientationFixed | SplineFlag.Falling | SplineFlag.Unknown0))
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);
                     orientation = (float)Math.Atan2(hermite.Y, hermite.X);
                 }
 
-                if (splineflags.hasFlag(SplineFlag.Backward))
+                if (splineflags.HasFlag(SplineFlag.Backward))
                     orientation = orientation - (float)Math.PI;
             }
 
@@ -170,27 +170,27 @@ namespace Game.Movement
         }
         public Vector4 ComputePosition()
         {
-            return computePosition(time_passed, point_Idx);
+            return ComputePosition(time_passed, point_Idx);
         }
         public Vector4 ComputePosition(int time_offset)
         {
             int time_point = time_passed + time_offset;
             if (time_point >= Duration())
-                return computePosition(Duration(), spline.last() - 1);
+                return ComputePosition(Duration(), spline.Last() - 1);
             if (time_point <= 0)
-                return computePosition(0, spline.first());
+                return ComputePosition(0, spline.First());
 
             // find point_index where spline.length(point_index) < time_point < spline.length(point_index + 1)
             int point_index = point_Idx;
-            while (time_point >= spline.length(point_index + 1))
+            while (time_point >= spline.Length(point_index + 1))
                 ++point_index;
 
-            while (time_point < spline.length(point_index))
+            while (time_point < spline.Length(point_index))
                 --point_index;
 
-            return computePosition(time_point, point_index);
+            return ComputePosition(time_point, point_index);
         }
-        public void computeParabolicElevation(int time_point, ref float el)
+        public void ComputeParabolicElevation(int time_point, ref float el)
         {
             if (time_point > effect_start_time)
             {
@@ -202,13 +202,13 @@ namespace Game.Movement
                 el += (t_durationf - t_passedf) * 0.5f * vertical_acceleration * t_passedf;
             }
         }
-        public void computeFallElevation(int time_point, ref float el)
+        public void ComputeFallElevation(int time_point, ref float el)
         {
-            float z_now = spline.getPoint(spline.first()).Z - computeFallElevation(MSToSec((uint)time_point), false);
+            float z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSec((uint)time_point), false);
             float final_z = FinalDestination().Z;
             el = Math.Max(z_now, final_z);
         }
-        public static float computeFallElevation(float t_passed, bool isSafeFall, float start_velocity = 0.0f)
+        public static float ComputeFallElevation(float t_passed, bool isSafeFall, float start_velocity = 0.0f)
         {
             float termVel;
             float result;
@@ -241,14 +241,14 @@ namespace Game.Movement
         }
 
         public void Interrupt() { splineflags.SetUnsetFlag(SplineFlag.Done); }
-        public void updateState(int difftime)
+        public void UpdateState(int difftime)
         {
             do
             {
-                _updateState(ref difftime);
+                UpdateState(ref difftime);
             } while (difftime > 0);
         }
-        UpdateResult _updateState(ref int ms_time_diff)
+        UpdateResult UpdateState(ref int ms_time_diff)
         {
             if (Finalized())
             {
@@ -257,22 +257,22 @@ namespace Game.Movement
             }
 
             UpdateResult result = UpdateResult.None;
-            int minimal_diff = Math.Min(ms_time_diff, segment_time_elapsed());
+            int minimal_diff = Math.Min(ms_time_diff, SegmentTimeElapsed());
             time_passed += minimal_diff;
             ms_time_diff -= minimal_diff;
 
-            if (time_passed >= next_timestamp())
+            if (time_passed >= NextTimestamp())
             {
                 ++point_Idx;
-                if (point_Idx < spline.last())
+                if (point_Idx < spline.Last())
                 {
                     result = UpdateResult.NextSegment;
                 }
                 else
                 {
-                    if (spline.isCyclic())
+                    if (spline.IsCyclic())
                     {
-                        point_Idx = spline.first();
+                        point_Idx = spline.First();
                         time_passed = time_passed % Duration();
                         result = UpdateResult.NextCycle;
                     }
@@ -287,12 +287,12 @@ namespace Game.Movement
 
             return result;
         }
-        int next_timestamp() { return spline.length(point_Idx + 1); }
-        int segment_time_elapsed() { return next_timestamp() - time_passed; }
-        public bool isCyclic() { return splineflags.hasFlag(SplineFlag.Cyclic); }
-        public bool isFalling() { return splineflags.hasFlag(SplineFlag.Falling); }
-        public bool Initialized() { return !spline.empty(); }
-        public Vector3 FinalDestination() { return Initialized() ? spline.getPoint(spline.last()) : new Vector3(); }
+        int NextTimestamp() { return spline.Length(point_Idx + 1); }
+        int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
+        public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
+        public bool IsFalling() { return splineflags.HasFlag(SplineFlag.Falling); }
+        public bool Initialized() { return !spline.Empty(); }
+        public Vector3 FinalDestination() { return Initialized() ? spline.GetPoint(spline.Last()) : new Vector3(); }
 
         #region Fields
         public MoveSplineInitArgs InitArgs;
@@ -311,7 +311,7 @@ namespace Game.Movement
         public Optional<SpellEffectExtraData> spell_effect_extra;
         #endregion
 
-        public class CommonInitializer : Initializer
+        public class CommonInitializer : IInitializer
         {
             public CommonInitializer(float _velocity)
             {
@@ -326,7 +326,7 @@ namespace Game.Movement
                 return time;
             }
         }
-        public class FallInitializer : Initializer
+        public class FallInitializer : IInitializer
         {
             public FallInitializer(float startelevation)
             {
@@ -335,10 +335,10 @@ namespace Game.Movement
             float startElevation;
             public int SetGetTime(Spline s, int i)
             {
-                return (int)(computeFallTime(startElevation - s.getPoint(i + 1).Z, false) * 1000.0f);
+                return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
             }
 
-            float computeFallTime(float path_length, bool isSafeFall)
+            float ComputeFallTime(float path_length, bool isSafeFall)
             {
                 if (path_length < 0.0f)
                     return 0.0f;
@@ -370,7 +370,7 @@ namespace Game.Movement
             NextSegment = 0x08
         }
     }
-    public interface Initializer
+    public interface IInitializer
     {
         int SetGetTime(Spline s, int i);
     }

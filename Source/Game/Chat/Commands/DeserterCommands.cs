@@ -68,7 +68,7 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -94,7 +94,7 @@ namespace Game.Chat.Commands
 
         static bool HandleDeserterRemove(StringArguments args, CommandHandler handler, bool isInstance)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

@@ -36,23 +36,23 @@ namespace Game.Combat
 
         const int ThreatUpdateInternal = 1 * Time.InMilliseconds;
 
-        public void clearReferences()
+        public void ClearReferences()
         {
-            threatContainer.clearReferences();
-            threatOfflineContainer.clearReferences();
+            threatContainer.ClearReferences();
+            threatOfflineContainer.ClearReferences();
             currentVictim = null;
             updateTimer = ThreatUpdateInternal;
         }
 
-        public void addThreat(Unit victim, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
+        public void AddThreat(Unit victim, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
         {
-            if (!isValidProcess(victim, Owner, threatSpell))
+            if (!IsValidProcess(victim, Owner, threatSpell))
                 return;
 
-            doAddThreat(victim, calcThreat(victim, Owner, threat, schoolMask, threatSpell));
+            DoAddThreat(victim, CalcThreat(victim, Owner, threat, schoolMask, threatSpell));
         }
 
-        public void doAddThreat(Unit victim, float threat)
+        public void DoAddThreat(Unit victim, float threat)
         {
             uint redirectThreadPct = victim.GetRedirectThreatPercent();
             Unit redirectTarget = victim.GetRedirectThreatTarget();
@@ -81,78 +81,78 @@ namespace Game.Combat
                 {
                     float redirectThreat = MathFunctions.CalculatePct(threat, redirectThreadPct);
                     threat -= redirectThreat;
-                    if (isValidProcess(redirectTarget, GetOwner()))
-                        _addThreat(redirectTarget, redirectThreat);
+                    if (IsValidProcess(redirectTarget, GetOwner()))
+                        AddThreat(redirectTarget, redirectThreat);
                 }
             }
 
-            _addThreat(victim, threat);
+            AddThreat(victim, threat);
         }
 
-        void _addThreat(Unit victim, float threat)
+        void AddThreat(Unit victim, float threat)
         {
-            var reff = threatContainer.addThreat(victim, threat);
+            var reff = threatContainer.AddThreat(victim, threat);
             // Ref is not in the online refs, search the offline refs next
             if (reff == null)
-                reff = threatOfflineContainer.addThreat(victim, threat);
+                reff = threatOfflineContainer.AddThreat(victim, threat);
 
             if (reff == null) // there was no ref => create a new one
             {
-                bool isFirst = threatContainer.empty();
+                bool isFirst = threatContainer.Empty();
 
                 // threat has to be 0 here
                 var hostileRef = new HostileReference(victim, this, 0);
-                threatContainer.addReference(hostileRef);
-                hostileRef.addThreat(threat); // now we add the real threat
+                threatContainer.AddReference(hostileRef);
+                hostileRef.AddThreat(threat); // now we add the real threat
                 if (victim.IsTypeId(TypeId.Player) && victim.ToPlayer().IsGameMaster())
-                    hostileRef.setOnlineOfflineState(false); // GM is always offline
+                    hostileRef.SetOnlineOfflineState(false); // GM is always offline
                 else if (isFirst)
-                    setCurrentVictim(hostileRef);
+                    SetCurrentVictim(hostileRef);
             }
         }
 
-        public void modifyThreatPercent(Unit victim, int percent)
+        public void ModifyThreatPercent(Unit victim, int percent)
         {
-            threatContainer.modifyThreatPercent(victim, percent);
+            threatContainer.ModifyThreatPercent(victim, percent);
         }
 
-        public Unit getHostilTarget()
+        public Unit GetHostilTarget()
         {
-            threatContainer.update();
-            HostileReference nextVictim = threatContainer.selectNextVictim(GetOwner().ToCreature(), getCurrentVictim());
-            setCurrentVictim(nextVictim);
-            return getCurrentVictim() != null ? getCurrentVictim().getTarget() : null;
+            threatContainer.Update();
+            HostileReference nextVictim = threatContainer.SelectNextVictim(GetOwner().ToCreature(), GetCurrentVictim());
+            SetCurrentVictim(nextVictim);
+            return GetCurrentVictim() != null ? GetCurrentVictim().GetTarget() : null;
         }
 
-        public float getThreat(Unit victim, bool alsoSearchOfflineList = false)
+        public float GetThreat(Unit victim, bool alsoSearchOfflineList = false)
         {
             float threat = 0.0f;
-            HostileReference refe = threatContainer.getReferenceByTarget(victim);
+            HostileReference refe = threatContainer.GetReferenceByTarget(victim);
             if (refe == null && alsoSearchOfflineList)
-                refe = threatOfflineContainer.getReferenceByTarget(victim);
+                refe = threatOfflineContainer.GetReferenceByTarget(victim);
             if (refe != null)
-                threat = refe.getThreat();
+                threat = refe.GetThreat();
             return threat;
         }
 
-        void tauntApply(Unit taunter)
+        void TauntApply(Unit taunter)
         {
-            HostileReference refe = threatContainer.getReferenceByTarget(taunter);
-            if (getCurrentVictim() != null && refe != null && (refe.getThreat() < getCurrentVictim().getThreat()))
+            HostileReference refe = threatContainer.GetReferenceByTarget(taunter);
+            if (GetCurrentVictim() != null && refe != null && (refe.GetThreat() < GetCurrentVictim().GetThreat()))
             {
-                if (refe.getTempThreatModifier() == 0.0f) // Ok, temp threat is unused
-                    refe.setTempThreat(getCurrentVictim().getThreat());
+                if (refe.GetTempThreatModifier() == 0.0f) // Ok, temp threat is unused
+                    refe.SetTempThreat(GetCurrentVictim().GetThreat());
             }
         }
 
-        void tauntFadeOut(Unit taunter)
+        void TauntFadeOut(Unit taunter)
         {
-            HostileReference refe = threatContainer.getReferenceByTarget(taunter);
+            HostileReference refe = threatContainer.GetReferenceByTarget(taunter);
             if (refe != null)
-                refe.resetTempThreat();
+                refe.ResetTempThreat();
         }
 
-        public void setCurrentVictim(HostileReference pHostileReference)
+        public void SetCurrentVictim(HostileReference pHostileReference)
         {
             if (pHostileReference != null && pHostileReference != currentVictim)
             {
@@ -161,58 +161,58 @@ namespace Game.Combat
             currentVictim = pHostileReference;
         }
 
-        public void processThreatEvent(ThreatRefStatusChangeEvent threatRefStatusChangeEvent)
+        public void ProcessThreatEvent(ThreatRefStatusChangeEvent threatRefStatusChangeEvent)
         {
-            threatRefStatusChangeEvent.setThreatManager(this);     // now we can set the threat manager
+            threatRefStatusChangeEvent.SetThreatManager(this);     // now we can set the threat manager
 
-            HostileReference hostilRef = threatRefStatusChangeEvent.getReference();
+            HostileReference hostilRef = threatRefStatusChangeEvent.GetReference();
 
-            switch (threatRefStatusChangeEvent.getType())
+            switch (threatRefStatusChangeEvent.GetEventType())
             {
                 case UnitEventTypes.ThreatRefThreatChange:
-                    if ((getCurrentVictim() == hostilRef && threatRefStatusChangeEvent.getFValue() < 0.0f) ||
-                        (getCurrentVictim() != hostilRef && threatRefStatusChangeEvent.getFValue() > 0.0f))
-                        setDirty(true);                             // the order in the threat list might have changed
+                    if ((GetCurrentVictim() == hostilRef && threatRefStatusChangeEvent.GetFValue() < 0.0f) ||
+                        (GetCurrentVictim() != hostilRef && threatRefStatusChangeEvent.GetFValue() > 0.0f))
+                        SetDirty(true);                             // the order in the threat list might have changed
                     break;
                 case UnitEventTypes.ThreatRefOnlineStatus:
-                    if (!hostilRef.isOnline())
+                    if (!hostilRef.IsOnline())
                     {
-                        if (hostilRef == getCurrentVictim())
+                        if (hostilRef == GetCurrentVictim())
                         {
-                            setCurrentVictim(null);
-                            setDirty(true);
+                            SetCurrentVictim(null);
+                            SetDirty(true);
                         }
                         Owner.SendRemoveFromThreatList(hostilRef);
-                        threatContainer.remove(hostilRef);
-                        threatOfflineContainer.addReference(hostilRef);
+                        threatContainer.Remove(hostilRef);
+                        threatOfflineContainer.AddReference(hostilRef);
                     }
                     else
                     {
-                        if (getCurrentVictim() != null && hostilRef.getThreat() > (1.1f * getCurrentVictim().getThreat()))
-                            setDirty(true);
-                        threatContainer.addReference(hostilRef);
-                        threatOfflineContainer.remove(hostilRef);
+                        if (GetCurrentVictim() != null && hostilRef.GetThreat() > (1.1f * GetCurrentVictim().GetThreat()))
+                            SetDirty(true);
+                        threatContainer.AddReference(hostilRef);
+                        threatOfflineContainer.Remove(hostilRef);
                     }
                     break;
                 case UnitEventTypes.ThreatRefRemoveFromList:
-                    if (hostilRef == getCurrentVictim())
+                    if (hostilRef == GetCurrentVictim())
                     {
-                        setCurrentVictim(null);
-                        setDirty(true);
+                        SetCurrentVictim(null);
+                        SetDirty(true);
                     }
                     Owner.SendRemoveFromThreatList(hostilRef);
-                    if (hostilRef.isOnline())
-                        threatContainer.remove(hostilRef);
+                    if (hostilRef.IsOnline())
+                        threatContainer.Remove(hostilRef);
                     else
-                        threatOfflineContainer.remove(hostilRef);
+                        threatOfflineContainer.Remove(hostilRef);
                     break;
             }
         }
 
 
-        public bool isNeedUpdateToClient(uint time)
+        public bool IsNeedUpdateToClient(uint time)
         {
-            if (isThreatListEmpty())
+            if (IsThreatListEmpty())
                 return false;
 
             if (time >= updateTimer)
@@ -225,27 +225,27 @@ namespace Game.Combat
         }
 
         // Reset all aggro without modifying the threatlist.
-        void resetAllAggro()
+        void ResetAllAggro()
         {
             var threatList = threatContainer.threatList;
             if (threatList.Empty())
                 return;
 
             foreach (var refe in threatList)
-                refe.setThreat(0);
+                refe.SetThreat(0);
 
-            setDirty(true);
+            SetDirty(true);
         }
-        public bool isThreatListEmpty()
+        public bool IsThreatListEmpty()
         {
-            return threatContainer.empty();
+            return threatContainer.Empty();
         }
-        public bool areThreatListsEmpty()
+        public bool IsThreatListsEmpty()
         {
-            return threatContainer.empty() && threatOfflineContainer.empty();
+            return threatContainer.Empty() && threatOfflineContainer.Empty();
         }
 
-        public HostileReference getCurrentVictim()
+        public HostileReference GetCurrentVictim()
         {
             return currentVictim;
         }
@@ -255,17 +255,17 @@ namespace Game.Combat
             return Owner;
         }
 
-        void setDirty(bool isDirty)
+        void SetDirty(bool isDirty)
         {
-            threatContainer.setDirty(isDirty);
+            threatContainer.SetDirty(isDirty);
         }
 
-        public List<HostileReference> getThreatList() { return threatContainer.getThreatList(); }
-        public List<HostileReference> getOfflineThreatList() { return threatOfflineContainer.getThreatList(); }
-        public ThreatContainer getOnlineContainer() { return threatContainer; }
+        public List<HostileReference> GetThreatList() { return threatContainer.GetThreatList(); }
+        public List<HostileReference> GetOfflineThreatList() { return threatOfflineContainer.GetThreatList(); }
+        public ThreatContainer GetOnlineContainer() { return threatContainer; }
 
         // The hatingUnit is not used yet
-        public static float calcThreat(Unit hatedUnit, Unit hatingUnit, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
+        public static float CalcThreat(Unit hatedUnit, Unit hatingUnit, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
         {
             if (threatSpell != null)
             {
@@ -287,7 +287,7 @@ namespace Game.Combat
             return hatedUnit.ApplyTotalThreatModifier(threat, schoolMask);
         }
 
-        public static bool isValidProcess(Unit hatedUnit, Unit hatingUnit, SpellInfo threatSpell = null)
+        public static bool IsValidProcess(Unit hatedUnit, Unit hatingUnit, SpellInfo threatSpell = null)
         {
             //function deals with adding threat and adding players and pets into ThreatList
             //mobs, NPCs, guards have ThreatList and HateOfflineList
@@ -337,17 +337,17 @@ namespace Game.Combat
             iDirty = false;
         }
 
-        public void clearReferences()
+        public void ClearReferences()
         {
             foreach (var reff in threatList)
             {
-                reff.unlink();
+                reff.Unlink();
             }
 
             threatList.Clear();
         }
 
-        public HostileReference getReferenceByTarget(Unit victim)
+        public HostileReference GetReferenceByTarget(Unit victim)
         {
             if (victim == null)
                 return null;
@@ -355,37 +355,37 @@ namespace Game.Combat
             ObjectGuid guid = victim.GetGUID();
             foreach (var reff in threatList)
             {
-                if (reff != null && reff.getUnitGuid() == guid)
+                if (reff != null && reff.GetUnitGuid() == guid)
                     return reff;
             }
 
             return null;
         }
 
-        public HostileReference addThreat(Unit victim, float threat)
+        public HostileReference AddThreat(Unit victim, float threat)
         {
-            var reff = getReferenceByTarget(victim);
+            var reff = GetReferenceByTarget(victim);
             if (reff != null)
-                reff.addThreat(threat);
+                reff.AddThreat(threat);
             return reff;
         }
 
-        public void modifyThreatPercent(Unit victim, int percent)
+        public void ModifyThreatPercent(Unit victim, int percent)
         {
-            HostileReference refe = getReferenceByTarget(victim);
+            HostileReference refe = GetReferenceByTarget(victim);
             if (refe != null)
-                refe.addThreatPercent(percent);
+                refe.AddThreatPercent(percent);
         }
 
-        public void update()
+        public void Update()
         {
             if (iDirty && threatList.Count > 1)
-                threatList = threatList.OrderByDescending(p => p.getThreat()).ToList();
+                threatList = threatList.OrderByDescending(p => p.GetThreat()).ToList();
 
             iDirty = false;
         }
 
-        public HostileReference selectNextVictim(Creature attacker, HostileReference currentVictim)
+        public HostileReference SelectNextVictim(Creature attacker, HostileReference currentVictim)
         {
             HostileReference currentRef = null;
             bool found = false;
@@ -398,7 +398,7 @@ namespace Game.Combat
 
                 currentRef = threatList[i];
 
-                Unit target = currentRef.getTarget();
+                Unit target = currentRef.GetTarget();
                 Cypher.Assert(target);                                     // if the ref has status online the target must be there !
 
                 // some units are prefered in comparison to others
@@ -425,17 +425,17 @@ namespace Game.Combat
                     if (currentVictim != null)                              // select 1.3/1.1 better target in comparison current target
                     {
                         // list sorted and and we check current target, then this is best case
-                        if (currentVictim == currentRef || currentRef.getThreat() <= 1.1f * currentVictim.getThreat())
+                        if (currentVictim == currentRef || currentRef.GetThreat() <= 1.1f * currentVictim.GetThreat())
                         {
-                            if (currentVictim != currentRef && attacker.CanCreatureAttack(currentVictim.getTarget()))
+                            if (currentVictim != currentRef && attacker.CanCreatureAttack(currentVictim.GetTarget()))
                                 currentRef = currentVictim;            // for second case, if currentvictim is attackable
 
                             found = true;
                             break;
                         }
 
-                        if (currentRef.getThreat() > 1.3f * currentVictim.getThreat() ||
-                            (currentRef.getThreat() > 1.1f * currentVictim.getThreat() &&
+                        if (currentRef.GetThreat() > 1.3f * currentVictim.GetThreat() ||
+                            (currentRef.GetThreat() > 1.1f * currentVictim.GetThreat() &&
                             attacker.IsWithinMeleeRange(target)))
                         {                                           //implement 110% threat rule for targets in melee range
                             found = true;                           //and 130% rule for targets in ranged distances
@@ -455,35 +455,35 @@ namespace Game.Combat
             return currentRef;
         }
 
-        public void setDirty(bool isDirty)
+        public void SetDirty(bool isDirty)
         {
             iDirty = isDirty;
         }
 
-        bool isDirty()
+        bool IsDirty()
         {
             return iDirty;
         }
 
-        public bool empty()
+        public bool Empty()
         {
             return threatList.Empty();
         }
-        public HostileReference getMostHated()
+        public HostileReference GetMostHated()
         {
             return threatList.Count == 0 ? null : threatList[0];
         }
 
-        public void remove(HostileReference hostileRef)
+        public void Remove(HostileReference hostileRef)
         {
             threatList.Remove(hostileRef);
         }
-        public void addReference(HostileReference hostileRef)
+        public void AddReference(HostileReference hostileRef)
         {
             threatList.Add(hostileRef);
         }
 
-        public List<HostileReference> getThreatList() { return threatList; }
+        public List<HostileReference> GetThreatList() { return threatList; }
 
         public List<HostileReference> threatList { get; set; }
         bool iDirty;

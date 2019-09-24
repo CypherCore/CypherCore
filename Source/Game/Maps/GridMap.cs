@@ -30,22 +30,22 @@ namespace Game.Maps
         {
             // Height level data
             _gridHeight = MapConst.InvalidHeight;
-            _gridGetHeight = getHeightFromFlat;
+            _gridGetHeight = GetHeightFromFlat;
 
             // Liquid data
             _liquidLevel = MapConst.InvalidHeight;
         }
 
-        public bool loadData(string filename)
+        public bool LoadData(string filename)
         {
-            unloadData();
+            UnloadData();
             if (!File.Exists(filename))
                 return true;
 
             _fileExists = true;
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
-                mapFileHeader header = reader.Read<mapFileHeader>();
+                MapFileHeader header = reader.Read<MapFileHeader>();
                 if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
                     Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
@@ -74,7 +74,7 @@ namespace Game.Maps
             }
         }
 
-        public void unloadData()
+        public void UnloadData()
         {
             _areaMap = null;
             m_V9 = null;
@@ -82,14 +82,14 @@ namespace Game.Maps
             _liquidEntry = null;
             _liquidFlags = null;
             _liquidMap = null;
-            _gridGetHeight = getHeightFromFlat;
+            _gridGetHeight = GetHeightFromFlat;
             _fileExists = false;
         }
 
         bool LoadAreaData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_AreaHeader areaHeader = reader.Read<map_AreaHeader>();
+            MapAreaHeader areaHeader = reader.Read<MapAreaHeader>();
             if (areaHeader.fourcc != MapConst.MapAreaMagic)
                 return false;
 
@@ -104,7 +104,7 @@ namespace Game.Maps
         bool LoadHeightData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_HeightHeader mapHeader = reader.Read<map_HeightHeader>();
+            MapHeightHeader mapHeader = reader.Read<MapHeightHeader>();
 
             if (mapHeader.fourcc != MapConst.MapHeightMagic)
                 return false;
@@ -120,25 +120,25 @@ namespace Game.Maps
                     m_uint16_V8 = reader.ReadArray<ushort>(128 * 128);
 
                     _gridIntHeightMultiplier = (mapHeader.gridMaxHeight - mapHeader.gridHeight) / 65535;
-                    _gridGetHeight = getHeightFromUint16;
+                    _gridGetHeight = GetHeightFromUint16;
                 }
                 else if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt8))
                 {
                     m_ubyte_V9 = reader.ReadBytes(129 * 129);
                     m_ubyte_V8 = reader.ReadBytes(128 * 128);
                     _gridIntHeightMultiplier = (mapHeader.gridMaxHeight - mapHeader.gridHeight) / 255;
-                    _gridGetHeight = getHeightFromUint8;
+                    _gridGetHeight = GetHeightFromUint8;
                 }
                 else
                 {
                     m_V9 = reader.ReadArray<float>(129 * 129);
                     m_V8 = reader.ReadArray<float>(128 * 128);
 
-                    _gridGetHeight = getHeightFromFloat;
+                    _gridGetHeight = GetHeightFromFloat;
                 }
             }
             else
-                _gridGetHeight = getHeightFromFlat;
+                _gridGetHeight = GetHeightFromFlat;
 
             if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightHasFlightBounds))
             {
@@ -185,7 +185,7 @@ namespace Game.Maps
         bool LoadLiquidData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_LiquidHeader liquidHeader = reader.Read<map_LiquidHeader>();
+            MapLiquidHeader liquidHeader = reader.Read<MapLiquidHeader>();
 
             if (liquidHeader.fourcc != MapConst.MapLiquidMagic)
                 return false;
@@ -210,7 +210,7 @@ namespace Game.Maps
             return true;
         }
 
-        public ushort getArea(float x, float y)
+        public ushort GetArea(float x, float y)
         {
             if (_areaMap == null)
                 return _gridArea;
@@ -222,12 +222,12 @@ namespace Game.Maps
             return _areaMap[lx * 16 + ly];
         }
 
-        float getHeightFromFlat(float x, float y)
+        float GetHeightFromFlat(float x, float y)
         {
             return _gridHeight;
         }
 
-        float getHeightFromFloat(float x, float y)
+        float GetHeightFromFloat(float x, float y)
         {
             if (m_uint16_V8 == null || m_uint16_V9 == null)
                 return _gridHeight;
@@ -293,7 +293,7 @@ namespace Game.Maps
             return a * x + b * y + c;
         }
 
-        float getHeightFromUint8(float x, float y)
+        float GetHeightFromUint8(float x, float y)
         {
             if (m_ubyte_V8 == null || m_ubyte_V9 == null)
                 return _gridHeight;
@@ -366,7 +366,7 @@ namespace Game.Maps
             }
         }
 
-        float getHeightFromUint16(float x, float y)
+        float GetHeightFromUint16(float x, float y)
         {
             if (m_uint16_V8 == null || m_uint16_V9 == null)
                 return _gridHeight;
@@ -438,7 +438,7 @@ namespace Game.Maps
             }
         }
 
-        public float getMinHeight(float x, float y)
+        public float GetMinHeight(float x, float y)
         {
             if (_minHeightPlanes == null)
                 return -500.0f;
@@ -448,8 +448,8 @@ namespace Game.Maps
             int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
             int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
 
-            float gx = x - ((int)gridCoord.x_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
-            float gy = y - ((int)gridCoord.y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gx = x - ((int)gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - ((int)gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
             uint quarterIndex = 0;
             if (Convert.ToBoolean(doubleGridY & 1))
@@ -469,7 +469,7 @@ namespace Game.Maps
             return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
         }
 
-        public float getLiquidLevel(float x, float y)
+        public float GetLiquidLevel(float x, float y)
         {
             if (_liquidMap == null)
                 return _liquidLevel;
@@ -489,7 +489,7 @@ namespace Game.Maps
         }
 
         // Why does this return LIQUID data?
-        public byte getTerrainType(float x, float y)
+        public byte GetTerrainType(float x, float y)
         {
             if (_liquidFlags == null)
                 return 0;
@@ -502,7 +502,7 @@ namespace Game.Maps
         }
 
         // Get water state on map
-        public ZLiquidStatus getLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data)
+        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data)
         {
             // Check water type (if no water return)
             if (_liquidGlobalFlags == 0 && _liquidFlags == null)
@@ -526,7 +526,7 @@ namespace Game.Maps
                 uint liqTypeIdx = liquidEntry.SoundBank;
                 if (entry < 21)
                 {
-                    var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
+                    var area = CliDB.AreaTableStorage.LookupByKey(GetArea(x, y));
                     if (area != null)
                     {
                         uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
@@ -566,7 +566,7 @@ namespace Game.Maps
             // Get water level
             float liquid_level = _liquidMap != null ? _liquidMap[lx_int * _liquidWidth + ly_int] : _liquidLevel;
             // Get ground level (sub 0.2 for fix some errors)
-            float ground_level = getHeight(x, y);
+            float ground_level = GetHeight(x, y);
 
             // Check water level and ground level
             if (liquid_level < ground_level || z < ground_level - 2)
@@ -594,14 +594,14 @@ namespace Game.Maps
             return ZLiquidStatus.AboveWater;
         }
 
-        public float getHeight(float x, float y) { return _gridGetHeight(x, y); }
+        public float GetHeight(float x, float y) { return _gridGetHeight(x, y); }
 
-        public bool fileExists() { return _fileExists; }
+        public bool GileExists() { return _fileExists; }
 
         #region Fields
-        delegate float GetHeight(float x, float y);
+        delegate float GetHeightDel(float x, float y);
 
-        GetHeight _gridGetHeight;
+        GetHeightDel _gridGetHeight;
         uint _flags;
 
         public float[] m_V9;
@@ -634,7 +634,7 @@ namespace Game.Maps
         #endregion
     }
 
-    public struct mapFileHeader
+    public struct MapFileHeader
     {
         public uint mapMagic;
         public uint versionMagic;
@@ -649,14 +649,14 @@ namespace Game.Maps
         public uint holesSize;
     }
 
-    public struct map_AreaHeader
+    public struct MapAreaHeader
     {
         public uint fourcc;
         public AreaHeaderFlags flags;
         public ushort gridArea;
     }
 
-    public struct map_HeightHeader
+    public struct MapHeightHeader
     {
         public uint fourcc;
         public HeightHeaderFlags flags;
@@ -664,7 +664,7 @@ namespace Game.Maps
         public float gridMaxHeight;
     }
 
-    public struct map_LiquidHeader
+    public struct MapLiquidHeader
     {
         public uint fourcc;
         public LiquidHeaderFlags flags;

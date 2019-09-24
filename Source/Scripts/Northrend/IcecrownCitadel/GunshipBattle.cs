@@ -645,7 +645,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     AttackStart(victim);
                 return me.GetVictim();
             }
-            else if (me.GetThreatManager().isThreatListEmpty())
+            else if (me.GetThreatManager().IsThreatListEmpty())
             {
                 EnterEvadeMode(EvadeReason.Other);
                 return false;
@@ -955,7 +955,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
@@ -1200,7 +1200,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
@@ -1358,7 +1358,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             me.SetReactState(ReactStates.Passive);
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             player.AddItem(GunshipMiscData.ItemGoblinRocketPack, 1);
             player.PlayerTalkClass.SendCloseGossip();

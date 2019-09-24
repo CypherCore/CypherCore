@@ -252,7 +252,7 @@ namespace Game.DungeonFinding
 
         public void Update(uint diff)
         {
-            if (!isOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
+            if (!IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
             long currTime = Time.UnixTime;
@@ -363,7 +363,7 @@ namespace Game.DungeonFinding
             LfgJoinResultData joinData = new LfgJoinResultData();
             List<ObjectGuid> players = new List<ObjectGuid>();
             uint rDungeonId = 0;
-            bool isContinue = grp && grp.isLFGGroup() && GetState(gguid) != LfgState.FinishedDungeon;
+            bool isContinue = grp && grp.IsLFGGroup() && GetState(gguid) != LfgState.FinishedDungeon;
 
             // Do not allow to change dungeon in the middle of a current dungeon
             if (isContinue)
@@ -400,7 +400,7 @@ namespace Game.DungeonFinding
                 else
                 {
                     byte memberCount = 0;
-                    for (GroupReference refe = grp.GetFirstMember(); refe != null && joinData.result == LfgJoinResult.Ok; refe = refe.next())
+                    for (GroupReference refe = grp.GetFirstMember(); refe != null && joinData.result == LfgJoinResult.Ok; refe = refe.Next())
                     {
                         Player plrg = refe.GetSource();
                         if (plrg)
@@ -524,7 +524,7 @@ namespace Game.DungeonFinding
                 SetState(gguid, LfgState.Rolecheck);
                 // Send update to player
                 LfgUpdateData updateData = new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons);
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player plrg = refe.GetSource();
                     if (plrg)
@@ -1201,7 +1201,7 @@ namespace Game.DungeonFinding
             LFGDungeonData dungeon = null;
             Group group = player.GetGroup();
 
-            if (group && group.isLFGGroup())
+            if (group && group.IsLFGGroup())
                 dungeon = GetLFGDungeon(GetDungeon(group.GetGUID()));
 
             if (dungeon == null)
@@ -1244,7 +1244,7 @@ namespace Game.DungeonFinding
                 if (!fromOpcode)
                 {
                     // Select a player inside to be teleported to
-                    for (GroupReference refe = group.GetFirstMember(); refe != null && mapid == 0; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null && mapid == 0; refe = refe.Next())
                     {
                         Player plrg = refe.GetSource();
                         if (plrg && plrg != player && plrg.GetMapId() == dungeon.map)
@@ -1855,7 +1855,7 @@ namespace Game.DungeonFinding
             QueuesStore.Clear();
         }
 
-        public bool isOptionEnabled(LfgOptions option)
+        public bool IsOptionEnabled(LfgOptions option)
         {
             return m_options.HasAnyFlag(option);
         }
@@ -1924,7 +1924,7 @@ namespace Game.DungeonFinding
             AddPlayerToGroup(gguid, guid);
         }
 
-        public bool selectedRandomLfgDungeon(ObjectGuid guid)
+        public bool SelectedRandomLfgDungeon(ObjectGuid guid)
         {
             if (GetState(guid) != LfgState.None)
             {
@@ -1940,7 +1940,7 @@ namespace Game.DungeonFinding
             return false;
         }
 
-        public bool inLfgDungeonMap(ObjectGuid guid, uint map, Difficulty difficulty)
+        public bool InLfgDungeonMap(ObjectGuid guid, uint map, Difficulty difficulty)
         {
             if (!guid.IsParty())
                 guid = GetGroup(guid);

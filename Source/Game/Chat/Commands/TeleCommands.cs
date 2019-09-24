@@ -35,7 +35,7 @@ namespace Game.Chat
 
             Player me = handler.GetPlayer();
 
-            GameTele tele = handler.extractGameTeleFromLink(args);
+            GameTele tele = handler.ExtractGameTeleFromLink(args);
 
             if (tele == null)
             {
@@ -88,7 +88,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -100,7 +100,7 @@ namespace Game.Chat
                 return false;
 
             // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.extractGameTeleFromLink(args);
+            GameTele tele = handler.ExtractGameTeleFromLink(args);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -123,7 +123,7 @@ namespace Game.Chat
                 return false;
             }
 
-            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player player = refe.GetSource();
                 if (!player || !player.GetSession())
@@ -142,7 +142,7 @@ namespace Game.Chat
                 }
 
                 handler.SendSysMessage(CypherStrings.TeleportingTo, plNameLink, "", tele.name);
-                if (handler.needReportToTarget(player))
+                if (handler.NeedReportToTarget(player))
                     player.SendSysMessage(CypherStrings.TeleportedToBy, nameLink);
 
                 // stop flight if need

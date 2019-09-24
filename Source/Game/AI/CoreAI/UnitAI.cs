@@ -113,17 +113,17 @@ namespace Game.AI
         // Select the targets satifying the predicate.
         public Unit SelectTarget(SelectAggroTarget targetType, uint position, ISelector selector)
         {
-            var threatlist = GetThreatManager().getThreatList();
+            var threatlist = GetThreatManager().GetThreatList();
             if (position >= threatlist.Count)
                 return null;
 
             List<Unit> targetList = new List<Unit>();
             Unit currentVictim = null;
 
-            var currentVictimReference = GetThreatManager().getCurrentVictim();
+            var currentVictimReference = GetThreatManager().GetCurrentVictim();
             if (currentVictimReference != null)
             {
-                currentVictim = currentVictimReference.getTarget();
+                currentVictim = currentVictimReference.GetTarget();
 
                 // Current victim always goes first
                 if (currentVictim && selector.Check(currentVictim))
@@ -132,10 +132,10 @@ namespace Game.AI
 
             foreach (var hostileRef in threatlist)
             {
-                if (currentVictim != null && hostileRef.getTarget() != currentVictim && selector.Check(hostileRef.getTarget()))
-                    targetList.Add(hostileRef.getTarget());
-                else if (currentVictim == null && selector.Check(hostileRef.getTarget()))
-                    targetList.Add(hostileRef.getTarget());
+                if (currentVictim != null && hostileRef.GetTarget() != currentVictim && selector.Check(hostileRef.GetTarget()))
+                    targetList.Add(hostileRef.GetTarget());
+                else if (currentVictim == null && selector.Check(hostileRef.GetTarget()))
+                    targetList.Add(hostileRef.GetTarget());
             }
 
             if (position >= targetList.Count)
@@ -178,13 +178,13 @@ namespace Game.AI
         {
             var targetList = new List<Unit>();
 
-            var threatlist = GetThreatManager().getThreatList();
+            var threatlist = GetThreatManager().GetThreatList();
             if (threatlist.Empty())
                 return targetList;
 
             foreach (var hostileRef in threatlist)
-                if (selector.Check(hostileRef.getTarget()))
-                    targetList.Add(hostileRef.getTarget());
+                if (selector.Check(hostileRef.GetTarget()))
+                    targetList.Add(hostileRef.GetTarget());
 
             if (targetList.Count < maxTargets)
                 return targetList;
@@ -368,15 +368,15 @@ namespace Game.AI
         public virtual void HealDone(Unit to, uint addhealth) { }
         public virtual void SpellInterrupted(uint spellId, uint unTimeMs) {}
 
-        public virtual void sGossipHello(Player player) { }
-        public virtual void sGossipSelect(Player player, uint menuId, uint gossipListId) { }
-        public virtual void sGossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { }
-        public virtual void sQuestAccept(Player player, Quest quest) { }
-        public virtual void sQuestSelect(Player player, Quest quest) { }
-        public virtual void sQuestComplete(Player player, Quest quest) { }
-        public virtual void sQuestReward(Player player, Quest quest, uint opt) { }
-        public virtual bool sOnDummyEffect(Unit caster, uint spellId, int effIndex) { return false; }
-        public virtual void sOnGameEvent(bool start, ushort eventId) { }
+        public virtual void GossipHello(Player player) { }
+        public virtual void GossipSelect(Player player, uint menuId, uint gossipListId) { }
+        public virtual void GossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { }
+        public virtual void QuestAccept(Player player, Quest quest) { }
+        public virtual void QuestSelect(Player player, Quest quest) { }
+        public virtual void QuestComplete(Player player, Quest quest) { }
+        public virtual void QuestReward(Player player, Quest quest, uint opt) { }
+        public virtual bool OnDummyEffect(Unit caster, uint spellId, int effIndex) { return false; }
+        public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         public static AISpellInfoType[] AISpellInfo;
 
@@ -552,9 +552,9 @@ namespace Game.AI
             if (_playerOnly && !target.IsTypeId(TypeId.Player))
                 return false;
 
-            HostileReference currentVictim = _source.GetThreatManager().getCurrentVictim();
+            HostileReference currentVictim = _source.GetThreatManager().GetCurrentVictim();
             if (currentVictim != null)
-                return target.GetGUID() != currentVictim.getUnitGuid();
+                return target.GetGUID() != currentVictim.GetUnitGuid();
 
             return target != _source.GetVictim();
         }

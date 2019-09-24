@@ -692,7 +692,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     {
         public npc_grandmother(Creature creature) : base(creature) { }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == RedRidingHood.OptionWhatPhatLewtsYouHave && gossipListId == 0)
             {
@@ -1378,7 +1378,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     {
         public npc_barnes() : base("npc_barnes") { }
 
-        class npc_barnesAI : npc_escortAI
+        class npc_barnesAI : NpcEscortAI
         {
             public npc_barnesAI(Creature creature) : base(creature)
             {
@@ -1518,7 +1518,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 base.UpdateAI(diff);
 
-                if (HasEscortState(eEscortState.Paused))
+                if (HasEscortState(EscortState.Paused))
                 {
                     if (TalkTimer <= diff)
                     {

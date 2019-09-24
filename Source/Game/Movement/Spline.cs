@@ -25,18 +25,18 @@ namespace Game.Movement
 {
     public class Spline
     {
-        public int getPointCount() { return points.Length; }
-        public Vector3 getPoint(int i) { return points[i]; }
-        public Vector3[] getPoints() { return points; }
+        public int GetPointCount() { return points.Length; }
+        public Vector3 GetPoint(int i) { return points[i]; }
+        public Vector3[] GetPoints() { return points; }
 
-        public void clear()
+        public void Clear()
         {
            Array.Clear(points, 0, points.Length);
         }
-        public int first() { return index_lo; }
-        public int last() { return index_hi; }
+        public int First() { return index_lo; }
+        public int Last() { return index_hi; }
 
-        public bool isCyclic() { return _cyclic;}
+        public bool IsCyclic() { return _cyclic;}
         
         #region Evaluate
         public void Evaluate_Percent(int Idx, float u, out Vector3 c) 
@@ -75,18 +75,18 @@ namespace Game.Movement
         #endregion
 
         #region Init
-        public void init_spline_custom(SplineRawInitializer initializer)
+        public void InitSplineCustom(SplineRawInitializer initializer)
         {
             initializer.Initialize(ref m_mode, ref _cyclic, ref points, ref index_lo, ref index_hi);
         }
-        public void init_cyclic_spline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point)
+        public void InitCyclicSpline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point)
         {
             m_mode = m;
             _cyclic = true;
 
-            Init_Spline(controls, count, m);
+            InitSpline(controls, count, m);
         }
-        public void Init_Spline(Span<Vector3> controls, int count, EvaluationMode m)
+        public void InitSpline(Span<Vector3> controls, int count, EvaluationMode m)
         {
             m_mode = m;
             _cyclic = false;
@@ -261,16 +261,16 @@ namespace Game.Movement
         }
         #endregion
 
-        public void computeIndex(float t, ref int index, ref float u)
+        public void ComputeIndex(float t, ref int index, ref float u)
         {
             //ASSERT(t >= 0.f && t <= 1.f);
-            int length_ = (int)(t * length());
-            index = computeIndexInBounds(length_);
+            int length_ = (int)(t * Length());
+            index = ComputeIndexInBounds(length_);
             //ASSERT(index < index_hi);
-            u = (length_ - length(index)) / (float)length(index, index + 1);
+            u = (length_ - Length(index)) / (float)Length(index, index + 1);
         }
 
-        int computeIndexInBounds(int length_)
+        int ComputeIndexInBounds(int length_)
         {
             // Temporary disabled: causes infinite loop with t = 1.f
             /*
@@ -317,15 +317,15 @@ namespace Game.Movement
                    + vertice[2] * weights[2] + vertice[3] * weights[3];
         }
 
-        public int length() { return lengths[index_hi];}
+        public int Length() { return lengths[index_hi];}
 
-        public int length(int first, int last) { return lengths[last] - lengths[first]; }
+        public int Length(int first, int last) { return lengths[last] - lengths[first]; }
 
-        public int length(int Idx) { return lengths[Idx]; }
+        public int Length(int Idx) { return lengths[Idx]; }
 
-        public void set_length(int i, int length) { lengths[i] = length; }
+        public void Set_length(int i, int length) { lengths[i] = length; }
 
-        public void initLengths(Initializer cacher)
+        public void InitLengths(IInitializer cacher)
         {
             int i = index_lo;
             Array.Resize(ref lengths, index_hi+1);
@@ -341,7 +341,7 @@ namespace Game.Movement
             }
         }
 
-        public void initLengths()
+        public void InitLengths()
         {
             int i = index_lo;
             int length = 0;
@@ -353,7 +353,7 @@ namespace Game.Movement
             }
         }
 
-        public bool empty() { return index_lo == index_hi;}
+        public bool Empty() { return index_lo == index_hi;}
 
         int[] lengths = new int[0];
         Vector3[] points = new Vector3[0];

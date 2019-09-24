@@ -340,7 +340,7 @@ namespace Game
                     if (!seamlessTeleport)
                     {
                         // short preparations to continue flight
-                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().top();
+                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
                         flight.Initialize(GetPlayer());
                     }
                     return;
@@ -733,7 +733,7 @@ namespace Game
                     if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                     {
                         // short preparations to continue flight
-                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().top();
+                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
 
                         flight.SetCurrentNodeAfterTeleport();
                         TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];

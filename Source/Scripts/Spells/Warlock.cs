@@ -953,7 +953,7 @@ namespace Scripts.Spells.Warlock
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
             if (target)
-                if (target.CanHaveThreatList() && target.GetThreatManager().getThreat(caster) > 0.0f)
+                if (target.CanHaveThreatList() && target.GetThreatManager().GetThreat(caster) > 0.0f)
                     caster.CastSpell(target, SpellIds.Soulshatter, true);
         }
 

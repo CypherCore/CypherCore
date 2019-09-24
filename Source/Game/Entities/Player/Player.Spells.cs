@@ -1529,7 +1529,7 @@ namespace Game.Entities
                     spell.m_fromClient = true;
                     spell.m_CastItem = item;
                     spell.SetSpellValue(SpellValueMod.BasePoint0, (int)learning_spell_id);
-                    spell.prepare(targets);
+                    spell.Prepare(targets);
                     return;
                 }
             }
@@ -1565,7 +1565,7 @@ namespace Game.Entities
                 spell.m_CastItem = item;
                 spell.m_misc.Data0 = misc[0];
                 spell.m_misc.Data1 = misc[1];
-                spell.prepare(targets);
+                spell.Prepare(targets);
                 return;
             }
 
@@ -1599,7 +1599,7 @@ namespace Game.Entities
                     spell.m_CastItem = item;
                     spell.m_misc.Data0 = misc[0];
                     spell.m_misc.Data1 = misc[1];
-                    spell.prepare(targets);
+                    spell.Prepare(targets);
                     return;
                 }
             }
@@ -1697,7 +1697,7 @@ namespace Game.Entities
             {
                 Spell spell = GetCurrentSpell(i);
                 if (spell != null)
-                    if (spell.getState() != SpellState.Delayed && !HasItemFitToSpellRequirements(spell.m_spellInfo, pItem))
+                    if (spell.GetState() != SpellState.Delayed && !HasItemFitToSpellRequirements(spell.m_spellInfo, pItem))
                         InterruptSpell(i);
             }
         }

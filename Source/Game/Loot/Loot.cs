@@ -125,12 +125,12 @@ namespace Game.Loots
 
     public class LootValidatorRef : Reference<Loot, LootValidatorRef>
     {
-        public override void targetObjectDestroyLink()
+        public override void TargetObjectDestroyLink()
         {
 
         }
 
-        public override void sourceObjectDestroyLink()
+        public override void SourceObjectDestroyLink()
         {
 
         }
@@ -138,8 +138,8 @@ namespace Game.Loots
 
     public class LootValidatorRefManager : RefManager<Loot, LootValidatorRef>
     {
-        public new LootValidatorRef getFirst() { return (LootValidatorRef)base.getFirst(); }
-        public new LootValidatorRef getLast() { return (LootValidatorRef)base.getLast(); }
+        public new LootValidatorRef GetFirst() { return (LootValidatorRef)base.GetFirst(); }
+        public new LootValidatorRef GetLast() { return (LootValidatorRef)base.GetLast(); }
     }
 
     public class Loot
@@ -224,7 +224,7 @@ namespace Game.Loots
             {
                 roundRobinPlayer = lootOwner.GetGUID();
 
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
                     if (player)   // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
@@ -429,7 +429,7 @@ namespace Game.Loots
             }
         }
 
-        public void generateMoneyLoot(uint minAmount, uint maxAmount)
+        public void GenerateMoneyLoot(uint minAmount, uint maxAmount)
         {
             if (maxAmount > 0)
             {
@@ -550,7 +550,7 @@ namespace Game.Loots
         }
 
         // return true if there is any item that is lootable for any player (not quest item, FFA or conditional)
-        public bool hasItemForAll()
+        public bool HasItemForAll()
         {
             // Gold is always lootable
             if (gold != 0)
@@ -564,7 +564,7 @@ namespace Game.Loots
         }
 
         // return true if there is any FFA, quest or conditional item for the player.
-        public bool hasItemFor(Player player)
+        public bool HasItemFor(Player player)
         {
             var lootPlayerQuestItems = GetPlayerQuestItems();
             var q_list = lootPlayerQuestItems.LookupByKey(player.GetGUID());
@@ -606,7 +606,7 @@ namespace Game.Loots
         }
 
         // return true if there is any item over the group threshold (i.e. not underthreshold).
-        public bool hasOverThresholdItem()
+        public bool HasOverThresholdItem()
         {
             for (byte i = 0; i < items.Count; ++i)
             {
@@ -812,12 +812,12 @@ namespace Game.Loots
             }
         }
 
-        public void addLootValidatorRef(LootValidatorRef pLootValidatorRef)
+        public void AddLootValidatorRef(LootValidatorRef pLootValidatorRef)
         {
             i_LootValidatorRefManager.InsertFirst(pLootValidatorRef);
         }
 
-        public void clear()
+        public void Clear()
         {
             PlayerQuestItems.Clear();
 
@@ -831,12 +831,12 @@ namespace Game.Loots
             gold = 0;
             unlootedCount = 0;
             roundRobinPlayer = ObjectGuid.Empty;
-            i_LootValidatorRefManager.clearReferences();
+            i_LootValidatorRefManager.ClearReferences();
             _itemContext = 0;
         }
 
-        public bool empty() { return items.Empty() && gold == 0; }
-        public bool isLooted() { return gold == 0 && unlootedCount == 0; }
+        public bool Empty() { return items.Empty() && gold == 0; }
+        public bool IsLooted() { return gold == 0 && unlootedCount == 0; }
 
         public void AddLooter(ObjectGuid guid) { PlayersLooting.Add(guid); }
         public void RemoveLooter(ObjectGuid guid) { PlayersLooting.Remove(guid); }

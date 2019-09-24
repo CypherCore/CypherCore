@@ -42,7 +42,7 @@ namespace Game
             foreach (var i in conditions)
             {
                 // no point of having not loaded conditions in list
-                Cypher.Assert(i.isLoaded(), "ConditionMgr.GetSearcherTypeMaskForConditionList - not yet loaded condition found in list");
+                Cypher.Assert(i.IsLoaded(), "ConditionMgr.GetSearcherTypeMaskForConditionList - not yet loaded condition found in list");
                 // group not filled yet, fill with widest mask possible
                 if (!elseGroupSearcherTypeMasks.ContainsKey(i.ElseGroup))
                     elseGroupSearcherTypeMasks[i.ElseGroup] = GridMapTypeMask.All;
@@ -79,7 +79,7 @@ namespace Game
             foreach (var condition in conditions)
             {
                 Log.outDebug(LogFilter.Condition, "ConditionMgr.IsPlayerMeetToConditionList condType: {0} val1: {1}", condition.ConditionType, condition.ConditionValue1);
-                if (condition.isLoaded())
+                if (condition.IsLoaded())
                 {
                     //! Find ElseGroup in ElseGroupStore
                     //! If not found, add an entry in the store and set to true (placeholder)
@@ -371,7 +371,7 @@ namespace Game
                     if (cond.SourceEntry != 0 && iSourceTypeOrReferenceId < 0)
                         Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in SourceEntry ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceEntry);
                 }
-                else if (!isConditionTypeValid(cond))//doesn't have reference, validate ConditionType
+                else if (!IsConditionTypeValid(cond))//doesn't have reference, validate ConditionType
                     continue;
 
                 if (iSourceTypeOrReferenceId < 0)//it is a reference template
@@ -382,7 +382,7 @@ namespace Game
                 }//end of reference templates
 
                 //if not a reference and SourceType is invalid, skip
-                if (iConditionTypeOrReference >= 0 && !isSourceTypeValid(cond))
+                if (iConditionTypeOrReference >= 0 && !IsSourceTypeValid(cond))
                     continue;
 
                 //Grouping is only allowed for some types (loot templates, gossip menus, gossip items)
@@ -416,46 +416,46 @@ namespace Game
                     switch (cond.SourceType)
                     {
                         case ConditionSourceType.CreatureLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.DisenchantLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.FishingLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.GameobjectLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.ItemLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Items.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Items.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.MailLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.MillingLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.PickpocketingLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.ProspectingLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.ReferenceLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.SkinningLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.SpellLootTemplate:
-                            valid = addToLootTemplate(cond, LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup));
+                            valid = AddToLootTemplate(cond, LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup));
                             break;
                         case ConditionSourceType.GossipMenu:
-                            valid = addToGossipMenus(cond);
+                            valid = AddToGossipMenus(cond);
                             break;
                         case ConditionSourceType.GossipMenuOption:
-                            valid = addToGossipMenuItems(cond);
+                            valid = AddToGossipMenuItems(cond);
                             break;
                         case ConditionSourceType.SpellClickEvent:
                             {
@@ -468,7 +468,7 @@ namespace Game
                                 continue;   // do not add to m_AllocatedMemory to avoid double deleting
                             }
                         case ConditionSourceType.SpellImplicitTarget:
-                            valid = addToSpellImplicitTargetConditions(cond);
+                            valid = AddToSpellImplicitTargetConditions(cond);
                             break;
                         case ConditionSourceType.VehicleSpell:
                             {
@@ -503,7 +503,7 @@ namespace Game
                                 continue;
                             }
                         case ConditionSourceType.Phase:
-                            valid = addToPhases(cond);
+                            valid = AddToPhases(cond);
                             break;
                         default:
                             break;
@@ -526,7 +526,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        bool addToLootTemplate(Condition cond, LootTemplate loot)
+        bool AddToLootTemplate(Condition cond, LootTemplate loot)
         {
             if (loot == null)
             {
@@ -534,14 +534,14 @@ namespace Game
                 return false;
             }
 
-            if (loot.addConditionItem(cond))
+            if (loot.AddConditionItem(cond))
                 return true;
 
             Log.outError(LogFilter.Sql, "{0} Item {1} not found in LootTemplate {2}.", cond.ToString(), cond.SourceEntry, cond.SourceGroup);
             return false;
         }
 
-        bool addToGossipMenus(Condition cond)
+        bool AddToGossipMenus(Condition cond)
         {
             var pMenuBounds = Global.ObjectMgr.GetGossipMenusMapBounds(cond.SourceGroup);
 
@@ -558,7 +558,7 @@ namespace Game
             return false;
         }
 
-        bool addToGossipMenuItems(Condition cond)
+        bool AddToGossipMenuItems(Condition cond)
         {
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var menuItems in pMenuItemBounds)
@@ -574,7 +574,7 @@ namespace Game
             return false;
         }
 
-        bool addToSpellImplicitTargetConditions(Condition cond)
+        bool AddToSpellImplicitTargetConditions(Condition cond)
         {
             uint conditionEffMask = cond.SourceGroup;
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry);
@@ -674,7 +674,7 @@ namespace Game
             return true;
         }
 
-        bool addToPhases(Condition cond)
+        bool AddToPhases(Condition cond)
         {
             if (cond.SourceEntry == 0)
             {
@@ -719,7 +719,7 @@ namespace Game
             return false;
         }
 
-        bool isSourceTypeValid(Condition cond)
+        bool IsSourceTypeValid(Condition cond)
         {
             switch (cond.SourceType)
             {
@@ -733,7 +733,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -750,7 +750,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -767,7 +767,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -784,7 +784,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -801,7 +801,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Items.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -818,7 +818,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -835,7 +835,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -852,7 +852,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -869,7 +869,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -886,7 +886,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -903,7 +903,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -920,7 +920,7 @@ namespace Game
 
                         LootTemplate loot = LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup);
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.isReference((uint)cond.SourceEntry))
+                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
                             return false;
@@ -1087,7 +1087,7 @@ namespace Game
             return true;
         }
 
-        bool isConditionTypeValid(Condition cond)
+        bool IsConditionTypeValid(Condition cond)
         {
             switch (cond.ConditionType)
             {
@@ -1212,7 +1212,7 @@ namespace Game
                 case ConditionTypes.ActiveEvent:
                     {
                         var events = Global.GameEventMgr.GetEventMap();
-                        if (cond.ConditionValue1 >= events.Length || !events[cond.ConditionValue1].isValid())
+                        if (cond.ConditionValue1 >= events.Length || !events[cond.ConditionValue1].IsValid())
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing event id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                             return false;
@@ -1467,7 +1467,7 @@ namespace Game
                     }
                 case ConditionTypes.WorldState:
                     {
-                        if (Global.WorldMgr.getWorldState((WorldStates)cond.ConditionValue1) == 0)
+                        if (Global.WorldMgr.GetWorldState((WorldStates)cond.ConditionValue1) == 0)
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing world state in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                             return false;
@@ -1820,15 +1820,15 @@ namespace Game
                             return false;
                         break;
                     case 3:
-                        if (!group || group.isRaidGroup())
+                        if (!group || group.IsRaidGroup())
                             return false;
                         break;
                     case 4:
-                        if (!group || !group.isRaidGroup())
+                        if (!group || !group.IsRaidGroup())
                             return false;
                         break;
                     case 5:
-                        if (group && group.isRaidGroup())
+                        if (group && group.IsRaidGroup())
                             return false;
                         break;
                     default:
@@ -2100,7 +2100,7 @@ namespace Game
                 case WorldStateExpressionValueType.WorldState:
                     {
                         uint worldStateId = buffer.ReadUInt32();
-                        value = (int)Global.WorldMgr.getWorldState(worldStateId);
+                        value = (int)Global.WorldMgr.GetWorldState(worldStateId);
                         break;
                     }
                 case WorldStateExpressionValueType.Function:

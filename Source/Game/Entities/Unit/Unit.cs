@@ -44,7 +44,7 @@ namespace Game.Entities
             UnitTypeMask = UnitTypeMask.None;
             hostileRefManager = new HostileRefManager(this);
             _spellHistory = new SpellHistory(this);
-            m_FollowingRefManager = new RefManager<Unit, TargetedMovementGeneratorBase>();
+            m_FollowingRefManager = new RefManager<Unit, ITargetedMovementGeneratorBase>();
 
             ObjectTypeId = TypeId.Unit;
             ObjectTypeMask |= TypeMask.Unit;
@@ -142,7 +142,7 @@ namespace Game.Entities
             // Having this would prevent spells from being proced, so let's crash
             Cypher.Assert(m_procDeep == 0);
 
-            if (CanHaveThreatList() && GetThreatManager().isNeedUpdateToClient(diff))
+            if (CanHaveThreatList() && GetThreatManager().IsNeedUpdateToClient(diff))
                 SendThreatListUpdate();
 
             // update combat timer only for players and pets (only pets with PetAI)
@@ -191,7 +191,7 @@ namespace Game.Entities
 
             for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
             {
-                if (GetCurrentSpell(i) != null && m_currentSpells[i].getState() == SpellState.Finished)
+                if (GetCurrentSpell(i) != null && m_currentSpells[i].GetState() == SpellState.Finished)
                 {
                     m_currentSpells[i].SetReferencedFromCurrent(false);
                     m_currentSpells[i] = null;
@@ -484,7 +484,7 @@ namespace Game.Entities
             m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map.RemoveAllObjectsInRemoveList
             CombatStop();
             DeleteThreatList();
-            GetHostileRefManager().deleteReferences();
+            GetHostileRefManager().DeleteReferences();
             GetMotionMaster().Clear(false);                    // remove different non-standard movement generators.
         }
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
@@ -1118,7 +1118,7 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Unit) || !ToPlayer().GetSession().PlayerLogout())
             {
                 HostileRefManager refManager = GetHostileRefManager();
-                HostileReference refe = refManager.getFirst();
+                HostileReference refe = refManager.GetFirst();
 
                 while (refe != null)
                 {
@@ -1127,17 +1127,17 @@ namespace Game.Entities
                     {
                         Creature creature = unit.ToCreature();
                         if (creature != null)
-                            refManager.setOnlineOfflineState(creature, creature.IsInPhase(this));
+                            refManager.SetOnlineOfflineState(creature, creature.IsInPhase(this));
                     }
 
-                    refe = refe.next();
+                    refe = refe.Next();
                 }
 
                 // modify threat lists for new phasemask
                 if (!IsTypeId(TypeId.Player))
                 {
-                    List<HostileReference> threatList = GetThreatManager().getThreatList();
-                    List<HostileReference> offlineThreatList = GetThreatManager().getOfflineThreatList();
+                    List<HostileReference> threatList = GetThreatManager().GetThreatList();
+                    List<HostileReference> offlineThreatList = GetThreatManager().GetOfflineThreatList();
 
                     // merge expects sorted lists
                     threatList.Sort();
@@ -1146,9 +1146,9 @@ namespace Game.Entities
 
                     foreach (var host in threatList)
                     {
-                        Unit unit = host.getTarget();
+                        Unit unit = host.GetTarget();
                         if (unit != null)
-                            unit.GetHostileRefManager().setOnlineOfflineState(ToCreature(), unit.IsInPhase(this));
+                            unit.GetHostileRefManager().SetOnlineOfflineState(ToCreature(), unit.IsInPhase(this));
                     }
                 }
             }
@@ -1603,7 +1603,7 @@ namespace Game.Entities
             {
                 CombatStop();
                 DeleteThreatList();
-                GetHostileRefManager().deleteReferences();
+                GetHostileRefManager().DeleteReferences();
 
                 if (IsNonMeleeSpellCast(false))
                     InterruptNonMeleeSpells(false);
@@ -1860,7 +1860,7 @@ namespace Game.Entities
 
                 // we want to shoot
                 Spell spell = new Spell(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
-                spell.prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
+                spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
                 // all went good, reset attack
                 ResetAttackTimer(WeaponAttackType.RangedAttack);
@@ -2753,7 +2753,7 @@ namespace Game.Entities
             Battleground bg = target.GetBattleground();
             if (bg != null)
             {
-                if (bg.isArena())
+                if (bg.IsArena())
                 {
                     DestroyArenaUnit destroyArenaUnit = new DestroyArenaUnit();
                     destroyArenaUnit.Guid = GetGUID();

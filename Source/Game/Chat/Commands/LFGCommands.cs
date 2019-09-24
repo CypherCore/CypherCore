@@ -33,7 +33,7 @@ namespace Game.Chat
             Player target = null;
             string playerName;
             ObjectGuid guid;
-            if (!handler.extractPlayerTarget(args, out target, out guid, out playerName))
+            if (!handler.ExtractPlayerTarget(args, out target, out guid, out playerName))
                 return false;
 
             GetPlayerInfo(handler, target);
@@ -56,7 +56,7 @@ namespace Game.Chat
                 playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
                 guidTarget = parseGUID;
             }
-            else if (!handler.extractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
+            else if (!handler.ExtractPlayerTarget(args, out playerTarget, out guidTarget, out nameTarget))
                 return false;
 
             Group groupTarget = null;
@@ -78,7 +78,7 @@ namespace Game.Chat
             }
 
             ObjectGuid guid = groupTarget.GetGUID();
-            handler.SendSysMessage(CypherStrings.LfgGroupInfo, groupTarget.isLFGGroup(), Global.LFGMgr.GetState(guid), Global.LFGMgr.GetDungeon(guid));
+            handler.SendSysMessage(CypherStrings.LfgGroupInfo, groupTarget.IsLFGGroup(), Global.LFGMgr.GetState(guid), Global.LFGMgr.GetDungeon(guid));
 
             foreach (var slot in groupTarget.GetMemberSlots())
             {

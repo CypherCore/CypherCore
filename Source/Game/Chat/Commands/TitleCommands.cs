@@ -31,7 +31,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesCurrentCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.extractKeyFromLink(args, "Htitle");
+            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
@@ -41,7 +41,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -72,7 +72,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesAddCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.extractKeyFromLink(args, "Htitle");
+            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
@@ -82,7 +82,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -114,7 +114,7 @@ namespace Game.Chat.Commands
         static bool HandleTitlesRemoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.extractKeyFromLink(args, "Htitle");
+            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
@@ -124,7 +124,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -171,7 +171,7 @@ namespace Game.Chat.Commands
 
                 ulong titles = args.NextUInt64();
 
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.NoCharSelected);

@@ -103,7 +103,7 @@ namespace Game.Movement
             move_spline.onTransport = !unit.GetTransGUID().IsEmpty();
 
             MovementFlag moveFlags = unit.m_movementInfo.GetMovementFlags();
-            if (!args.flags.hasFlag(SplineFlag.Backward))
+            if (!args.flags.HasFlag(SplineFlag.Backward))
                 moveFlags = (moveFlags & ~MovementFlag.Backward) | MovementFlag.Forward;
             else
                 moveFlags = (moveFlags & ~MovementFlag.Forward) | MovementFlag.Backward;

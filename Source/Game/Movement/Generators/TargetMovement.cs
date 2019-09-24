@@ -22,26 +22,26 @@ using System;
 
 namespace Game.Movement
 {
-    public interface TargetedMovementGeneratorBase
+    public interface ITargetedMovementGeneratorBase
     {
-        FollowerReference reftarget { get; set; }
-        void stopFollowing();
+        FollowerReference Reftarget { get; set; }
+        void StopFollowing();
     }
 
-    public abstract class TargetedMovementGeneratorMedium<T> : MovementGeneratorMedium<T>, TargetedMovementGeneratorBase where T : Unit
+    public abstract class TargetedMovementGeneratorMedium<T> : MovementGeneratorMedium<T>, ITargetedMovementGeneratorBase where T : Unit
     {
-        public FollowerReference reftarget { get; set; }
-        public Unit target
+        public FollowerReference Reftarget { get; set; }
+        public Unit Target
         {
-            get { return reftarget.getTarget(); }
+            get { return Reftarget.GetTarget(); }
         }
 
-        public void stopFollowing() { }
+        public void StopFollowing() { }
 
         protected TargetedMovementGeneratorMedium(Unit _target, float _offset = 0, float _angle = 0)
         {
-            reftarget = new FollowerReference();
-            reftarget.link(_target, this);
+            Reftarget = new FollowerReference();
+            Reftarget.Link(_target, this);
             recheckDistance = new TimeTrackerSmall();
             offset = _offset;
             angle = _angle;
@@ -51,7 +51,7 @@ namespace Game.Movement
 
         public override bool DoUpdate(T owner, uint time_diff)
         {
-            if (!reftarget.isValid() || !target.IsInWorld)
+            if (!Reftarget.IsValid() || !Target.IsInWorld)
                 return false;
 
             if (owner == null || !owner.IsAlive())
@@ -86,7 +86,7 @@ namespace Game.Movement
                 //More distance let have better performance, less distance let have more sensitive reaction at target move.
                 float allowed_dist = 0.0f;// owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
 
-                if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == target.GetGUID()))
+                if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == Target.GetGUID()))
                     allowed_dist = 1.0f; // pet following owner
                 else
                     allowed_dist = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
@@ -102,14 +102,14 @@ namespace Game.Movement
 
                 // First check distance
                 if (owner.IsTypeId(TypeId.Unit) && (owner.ToCreature().CanFly() || owner.ToCreature().CanSwim()))
-                    targetMoved = !target.IsWithinDist3d(dest.X, dest.Y, dest.Z, allowed_dist);
+                    targetMoved = !Target.IsWithinDist3d(dest.X, dest.Y, dest.Z, allowed_dist);
                 else
-                    targetMoved = !target.IsWithinDist2d(dest.X, dest.Y, allowed_dist);
+                    targetMoved = !Target.IsWithinDist2d(dest.X, dest.Y, allowed_dist);
 
 
                 // then, if the target is in range, check also Line of Sight.
                 if (!targetMoved)
-                    targetMoved = !target.IsWithinLOSInMap(owner);
+                    targetMoved = !Target.IsWithinLOSInMap(owner);
             }
 
             if (recalculateTravel || targetMoved)
@@ -118,8 +118,8 @@ namespace Game.Movement
             if (owner.MoveSpline.Finalized())
             {
                 MovementInform(owner);
-                if (angle == 0.0f && !owner.HasInArc(0.01f, target))
-                    owner.SetInFront(target);
+                if (angle == 0.0f && !owner.HasInArc(0.01f, Target))
+                    owner.SetInFront(Target);
 
                 if (!targetReached)
                 {
@@ -131,14 +131,14 @@ namespace Game.Movement
             return true;
         }
 
-        public override void unitSpeedChanged()
+        public override void UnitSpeedChanged()
         {
             recalculateTravel = true;
         }
 
         public void _setTargetLocation(T owner, bool updateDestination)
         {
-            if (!reftarget.isValid() || !target.IsInWorld)
+            if (!Reftarget.IsValid() || !Target.IsInWorld)
                 return;
 
             if (owner.HasUnitState(UnitState.NotMove))
@@ -147,7 +147,7 @@ namespace Game.Movement
             if (owner.IsMovementPreventedByCasting())
                 return;
 
-            if (owner.IsTypeId(TypeId.Unit) && !target.IsInAccessiblePlaceFor(owner.ToCreature()))
+            if (owner.IsTypeId(TypeId.Unit) && !Target.IsInAccessiblePlaceFor(owner.ToCreature()))
             {
                 owner.ToCreature().SetCannotReachTarget(true);
                 return;
@@ -161,11 +161,11 @@ namespace Game.Movement
             {
                 if (offset == 0)
                 {
-                    if (target.IsWithinDistInMap(owner, SharedConst.ContactDistance))
+                    if (Target.IsWithinDistInMap(owner, SharedConst.ContactDistance))
                         return;
 
                     // to nearest contact position
-                    target.GetContactPoint(owner, out x, out y, out z);
+                    Target.GetContactPoint(owner, out x, out y, out z);
                 }
                 else
                 {
@@ -178,7 +178,7 @@ namespace Game.Movement
                     //  be (GetCombatReach() + i_offset) away.
                     // Only applies when i_target is pet's owner otherwise pets and mobs end up
                     //   doing a "dance" while fighting
-                    if (owner.IsPet() && target.IsTypeId(TypeId.Player))
+                    if (owner.IsPet() && Target.IsTypeId(TypeId.Player))
                     {
                         dist = 1.0f;// target.GetCombatReach();
                         size = 1.0f;// target.GetCombatReach() - target.GetObjectSize();
@@ -189,11 +189,11 @@ namespace Game.Movement
                         size = owner.GetObjectSize();
                     }
 
-                    if (target.IsWithinDistInMap(owner, dist))
+                    if (Target.IsWithinDistInMap(owner, dist))
                         return;
 
                     // to at i_offset distance from target and i_angle from target facing
-                    target.GetClosePoint(out x, out y, out z, size, offset, angle);
+                    Target.GetClosePoint(out x, out y, out z, size, offset, angle);
                 }
             }
             else
@@ -235,7 +235,7 @@ namespace Game.Movement
             // Using the same condition for facing target as the one that is used for SetInFront on movement end
             // - applies to ChaseMovementGenerator mostly
             if (angle == 0.0f)
-                init.SetFacing(target);
+                init.SetFacing(Target);
 
             init.Launch();
         }
@@ -302,7 +302,7 @@ namespace Game.Movement
 
         public override bool _lostTarget(T u)
         {
-            return u.GetVictim() != target;
+            return u.GetVictim() != Target;
         }
         public override void _clearUnitStateMove(T u)
         {
@@ -318,8 +318,8 @@ namespace Game.Movement
         public override void _reachTarget(T owner)
         {
             _clearUnitStateMove(owner);
-            if (owner.IsWithinMeleeRange(target))
-                owner.Attack(target, true);
+            if (owner.IsWithinMeleeRange(Target))
+                owner.Attack(Target, true);
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().SetCannotReachTarget(false);
         }
@@ -329,7 +329,7 @@ namespace Game.Movement
             {
                 // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
                 if (unit.ToCreature().GetAI() != null)
-                    unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+                    unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Chase, (uint)Target.GetGUID().GetCounter());
             }
         }
     }
@@ -376,21 +376,21 @@ namespace Game.Movement
 
             // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
             if (unit.ToCreature().GetAI() != null)
-                unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
+                unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Follow, (uint)Target.GetGUID().GetCounter());
         }
         public override bool EnableWalking()
         {
             if (typeof(T) == typeof(Player))
                 return false;
             else
-                return reftarget.isValid() && target.IsWalking();
+                return Reftarget.IsValid() && Target.IsWalking();
         }
         public override void _updateSpeed(T owner)
         {
             if (owner.IsTypeId(TypeId.Player))
                 return;
 
-            if (!owner.IsPet() || !owner.IsInWorld || !reftarget.isValid() && target.GetGUID() != owner.GetOwnerGUID())
+            if (!owner.IsPet() || !owner.IsInWorld || !Reftarget.IsValid() && Target.GetGUID() != owner.GetOwnerGUID())
                 return;
 
             owner.UpdateSpeed(UnitMoveType.Run);

@@ -164,7 +164,7 @@ namespace Game.Movement
                 else
                     return new SplineChainResumeInfo();
             }
-            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)(me.MoveSpline._currentSplineIdx()), _msToNext);
+            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)(me.MoveSpline.CurrentSplineIdx()), _msToNext);
         }
 
         public override void Reset(Unit owner) { }

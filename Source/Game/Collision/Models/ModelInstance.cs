@@ -44,7 +44,7 @@ namespace Game.Collision
             name = spawn.name;
         }
 
-        public static bool readFromFile(BinaryReader reader, out ModelSpawn spawn)
+        public static bool ReadFromFile(BinaryReader reader, out ModelSpawn spawn)
         {
             spawn = new ModelSpawn();
 
@@ -94,7 +94,7 @@ namespace Game.Collision
             iInvScale = 1.0f / iScale;
         }
 
-        public bool intersectRay(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
+        public bool IntersectRay(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             if (iModel == null)
                 return false;
@@ -116,7 +116,7 @@ namespace Game.Collision
             return hit;
         }
 
-        public void intersectPoint(Vector3 p, AreaInfo info)
+        public void IntersectPoint(Vector3 p, AreaInfo info)
         {
             if (iModel == null)
                 return;
@@ -192,7 +192,7 @@ namespace Game.Collision
             return false;
         }
 
-        public void setUnloaded() { iModel = null; }
+        public void SetUnloaded() { iModel = null; }
 
         Matrix3 iInvRot;
         float iInvScale;

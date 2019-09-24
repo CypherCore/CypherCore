@@ -1659,10 +1659,10 @@ namespace Game.Spells
         public void _LoadSpellDiminishInfo()
         {
             SpellDiminishInfo diminishInfo = new SpellDiminishInfo();
-            diminishInfo.DiminishGroup = diminishingGroupCompute();
-            diminishInfo.DiminishReturnType = diminishingTypeCompute(diminishInfo.DiminishGroup);
-            diminishInfo.DiminishMaxLevel = diminishingMaxLevelCompute(diminishInfo.DiminishGroup);
-            diminishInfo.DiminishDurationLimit = diminishingLimitDurationCompute();
+            diminishInfo.DiminishGroup = DiminishingGroupCompute();
+            diminishInfo.DiminishReturnType = DiminishingTypeCompute(diminishInfo.DiminishGroup);
+            diminishInfo.DiminishMaxLevel = DiminishingMaxLevelCompute(diminishInfo.DiminishGroup);
+            diminishInfo.DiminishDurationLimit = DiminishingLimitDurationCompute();
 
             _diminishInfo = diminishInfo;
         }
@@ -1687,7 +1687,7 @@ namespace Game.Spells
             return _diminishInfo.DiminishDurationLimit;
         }
 
-        DiminishingGroup diminishingGroupCompute()
+        DiminishingGroup DiminishingGroupCompute()
         {
             if (IsPositive())
                 return DiminishingGroup.None;
@@ -2042,7 +2042,7 @@ namespace Game.Spells
             return DiminishingGroup.None;
         }
 
-        DiminishingReturnsType diminishingTypeCompute(DiminishingGroup group)
+        DiminishingReturnsType DiminishingTypeCompute(DiminishingGroup group)
         {
             switch (group)
             {
@@ -2057,7 +2057,7 @@ namespace Game.Spells
             }
         }
 
-        DiminishingLevels diminishingMaxLevelCompute(DiminishingGroup group)
+        DiminishingLevels DiminishingMaxLevelCompute(DiminishingGroup group)
         {
             switch (group)
             {
@@ -2070,7 +2070,7 @@ namespace Game.Spells
             }
         }
 
-        int diminishingLimitDurationCompute()
+        int DiminishingLimitDurationCompute()
         {
             // Explicit diminishing duration
             switch (SpellFamilyName)
@@ -3378,7 +3378,7 @@ namespace Game.Spells
                                                             continue;
                                                         // if non-positive trigger cast targeted to positive target this main cast is non-positive
                                                         // this will place this spell auras as debuffs
-                                                        if (_IsPositiveTarget(eff.TargetA.getTarget(), eff.TargetB.getTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
+                                                        if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
                                                             return false;
                                                     }
                                                 }
@@ -3483,7 +3483,7 @@ namespace Game.Spells
 
 
                     // non-positive targets
-                    if (!_IsPositiveTarget(effect.TargetA.getTarget(), effect.TargetB.getTarget()))
+                    if (!_IsPositiveTarget(effect.TargetA.GetTarget(), effect.TargetB.GetTarget()))
                         return false;
 
                     // negative spell if triggered spell is negative
@@ -3510,10 +3510,10 @@ namespace Game.Spells
             return true;
         }
 
-        bool _IsPositiveTarget(uint targetA, uint targetB)
+        bool _IsPositiveTarget(Targets targetA, Targets targetB)
         {
             // non-positive targets
-            switch ((Targets)targetA)
+            switch (targetA)
             {
                 case Targets.UnitNearbyEnemy:
                 case Targets.UnitEnemy:
@@ -4629,10 +4629,6 @@ namespace Game.Spells
         public Targets GetTarget()
         {
             return _target;
-        }
-        public uint getTarget()
-        {
-            return (uint)_target;
         }
 
         public SpellCastTargetFlags GetExplicitTargetMask(bool srcSet, bool dstSet)

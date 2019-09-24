@@ -32,7 +32,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -40,7 +40,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -61,7 +61,7 @@ namespace Game.Chat
         [Command("back", RBACPermissions.CommandCastBack)]
         static bool HandleCastBackCommand(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.getSelectedCreature();
+            Creature caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -69,7 +69,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -97,7 +97,7 @@ namespace Game.Chat
                 return false;
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -129,7 +129,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -137,7 +137,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -152,7 +152,7 @@ namespace Game.Chat
         [Command("target", RBACPermissions.CommandCastTarget)]
         static bool HandleCastTargetCommad(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.getSelectedCreature();
+            Creature caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -166,7 +166,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -190,7 +190,7 @@ namespace Game.Chat
         [Command("dest", RBACPermissions.CommandCastDest)]
         static bool HandleCastDestCommand(StringArguments args, CommandHandler handler)
         {
-            Unit caster = handler.getSelectedUnit();
+            Unit caster = handler.GetSelectedUnit();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -198,7 +198,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 

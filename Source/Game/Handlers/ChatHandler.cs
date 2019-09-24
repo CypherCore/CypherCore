@@ -273,7 +273,7 @@ namespace Game
                         if (!group)
                         {
                             group = GetPlayer().GetGroup();
-                            if (!group || group.isBGGroup())
+                            if (!group || group.IsBGGroup())
                                 return;
                         }
 
@@ -314,7 +314,7 @@ namespace Game
                 case ChatMsg.Raid:
                     {
                         Group group = GetPlayer().GetGroup();
-                        if (!group || !group.isRaidGroup() || group.isBGGroup())
+                        if (!group || !group.IsRaidGroup() || group.IsBGGroup())
                             return;
 
                         if (group.IsLeader(GetPlayer().GetGUID()))
@@ -330,7 +330,7 @@ namespace Game
                 case ChatMsg.RaidWarning:
                     {
                         Group group = GetPlayer().GetGroup();
-                        if (!group || !(group.isRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.isBGGroup())
+                        if (!group || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
                             return;
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);

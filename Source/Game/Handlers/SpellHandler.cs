@@ -337,7 +337,7 @@ namespace Game
             spell.m_fromClient = true;
             spell.m_misc.Data0 = cast.Cast.Misc[0];
             spell.m_misc.Data1 = cast.Cast.Misc[1];
-            spell.prepare(targets);
+            spell.Prepare(targets);
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]

@@ -569,7 +569,7 @@ namespace Game.AI
         {
             SpellCastTargets targets = new SpellCastTargets();
             targets.SetUnitTarget(spell.Item2);
-            spell.Item1.prepare(targets);
+            spell.Item1.Prepare(targets);
         }
 
         void DoRangedAttackIfReady()

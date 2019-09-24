@@ -164,7 +164,7 @@ namespace Game
                 GetPlayer().PrepareGossipMenu(unit, unit.GetCreatureTemplate().GossipMenuId, true);
                 GetPlayer().SendPreparedGossip(unit);
             }
-            unit.GetAI().sGossipHello(GetPlayer());
+            unit.GetAI().GossipHello(GetPlayer());
         }
 
         [WorldPacketHandler(ClientOpcodes.GossipSelectOption)]
@@ -222,7 +222,7 @@ namespace Game
             {
                 if (unit)
                 {
-                    unit.GetAI().sGossipSelectCode(GetPlayer(), packet.GossipID, packet.GossipIndex, packet.PromotionCode);
+                    unit.GetAI().GossipSelectCode(GetPlayer(), packet.GossipID, packet.GossipIndex, packet.PromotionCode);
                     if (!Global.ScriptMgr.OnGossipSelectCode(GetPlayer(), unit, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }
@@ -236,7 +236,7 @@ namespace Game
             {
                 if (unit != null)
                 {
-                    unit.GetAI().sGossipSelect(GetPlayer(), packet.GossipID, packet.GossipIndex);
+                    unit.GetAI().GossipSelect(GetPlayer(), packet.GossipID, packet.GossipIndex);
                     if (!Global.ScriptMgr.OnGossipSelect(GetPlayer(), unit, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex)))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }

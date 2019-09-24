@@ -22,7 +22,7 @@ using System;
 
 namespace Game.AI
 {
-    enum eFollowState
+    enum FollowState
     {
         None = 0x000,
         Inprogress = 0x001,                    //must always have this state for any follow
@@ -38,7 +38,7 @@ namespace Game.AI
         public FollowerAI(Creature creature) : base(creature)
         {
             m_uiUpdateFollowTimer = 2500;
-            m_uiFollowState = eFollowState.None;
+            m_uiFollowState = FollowState.None;
             m_pQuestForFollow = null;
         }
 
@@ -105,7 +105,7 @@ namespace Game.AI
         {
             if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.IsTargetableForAttack() && who.IsInAccessiblePlaceFor(me))
             {
-                if (HasFollowState(eFollowState.Inprogress) && AssistPlayerInCombatAgainst(who))
+                if (HasFollowState(FollowState.Inprogress) && AssistPlayerInCombatAgainst(who))
                     return;
 
                 if (!me.CanFly() && me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
@@ -139,7 +139,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            if (!HasFollowState(eFollowState.Inprogress) || m_uiLeaderGUID.IsEmpty() || m_pQuestForFollow == null)
+            if (!HasFollowState(FollowState.Inprogress) || m_uiLeaderGUID.IsEmpty() || m_pQuestForFollow == null)
                 return;
 
             // @todo need a better check for quests with time limit.
@@ -149,7 +149,7 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
                         Player member = groupRef.GetSource();
                         if (member)
@@ -164,7 +164,7 @@ namespace Game.AI
 
         public override void JustRespawned()
         {
-            m_uiFollowState = eFollowState.None;
+            m_uiFollowState = FollowState.None;
 
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
@@ -182,7 +182,7 @@ namespace Game.AI
             me.CombatStop(true);
             me.SetLootRecipient(null);
 
-            if (HasFollowState(eFollowState.Inprogress))
+            if (HasFollowState(FollowState.Inprogress))
             {
                 Log.outDebug(LogFilter.Scripts, "FollowerAI left combat, returning to CombatStartPosition.");
 
@@ -204,11 +204,11 @@ namespace Game.AI
 
         public override void UpdateAI(uint uiDiff)
         {
-            if (HasFollowState(eFollowState.Inprogress) && !me.GetVictim())
+            if (HasFollowState(FollowState.Inprogress) && !me.GetVictim())
             {
                 if (m_uiUpdateFollowTimer <= uiDiff)
                 {
-                    if (HasFollowState(eFollowState.Complete) && !HasFollowState(eFollowState.PostEvent))
+                    if (HasFollowState(FollowState.Complete) && !HasFollowState(FollowState.PostEvent))
                     {
                         Log.outDebug(LogFilter.Scripts, "FollowerAI is set completed, despawns.");
                         me.DespawnOrUnsummon();
@@ -220,11 +220,11 @@ namespace Game.AI
                     Player player = GetLeaderForFollower();
                     if (player)
                     {
-                        if (HasFollowState(eFollowState.Returning))
+                        if (HasFollowState(FollowState.Returning))
                         {
                             Log.outDebug(LogFilter.Scripts, "FollowerAI is returning to leader.");
 
-                            RemoveFollowState(eFollowState.Returning);
+                            RemoveFollowState(FollowState.Returning);
                             me.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
                             return;
                         }
@@ -232,7 +232,7 @@ namespace Game.AI
                         Group group = player.GetGroup();
                         if (group)
                         {
-                            for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                            for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                             {
                                 Player member = groupRef.GetSource();
                                 if (member && me.IsWithinDistInMap(member, 100.0f))
@@ -275,15 +275,15 @@ namespace Game.AI
 
         public override void MovementInform(MovementGeneratorType motionType, uint pointId)
         {
-            if (motionType != MovementGeneratorType.Point || !HasFollowState(eFollowState.Inprogress))
+            if (motionType != MovementGeneratorType.Point || !HasFollowState(FollowState.Inprogress))
                 return;
 
             if (pointId == 0xFFFFFF)
             {
                 if (GetLeaderForFollower())
                 {
-                    if (!HasFollowState(eFollowState.Paused))
-                        AddFollowState(eFollowState.Returning);
+                    if (!HasFollowState(FollowState.Paused))
+                        AddFollowState(FollowState.Returning);
                 }
                 else
                     me.DespawnOrUnsummon();
@@ -298,7 +298,7 @@ namespace Game.AI
                 return;
             }
 
-            if (HasFollowState(eFollowState.Inprogress))
+            if (HasFollowState(FollowState.Inprogress))
             {
                 Log.outError(LogFilter.Scenario, "FollowerAI attempt to StartFollow while already following.");
                 return;
@@ -322,7 +322,7 @@ namespace Game.AI
             me.SetNpcFlags(NPCFlags.None);
             me.SetNpcFlags2(NPCFlags2.None);
 
-            AddFollowState(eFollowState.Inprogress);
+            AddFollowState(FollowState.Inprogress);
 
             me.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
 
@@ -341,7 +341,7 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
+                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
                             Player member = groupRef.GetSource();
                             if (member &&  me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
@@ -371,24 +371,24 @@ namespace Game.AI
             }
 
             if (bWithEndEvent)
-                AddFollowState(eFollowState.PostEvent);
+                AddFollowState(FollowState.PostEvent);
             else
             {
-                if (HasFollowState(eFollowState.PostEvent))
-                    RemoveFollowState(eFollowState.PostEvent);
+                if (HasFollowState(FollowState.PostEvent))
+                    RemoveFollowState(FollowState.PostEvent);
             }
 
-            AddFollowState(eFollowState.Complete);
+            AddFollowState(FollowState.Complete);
         }
 
-        bool HasFollowState(eFollowState uiFollowState) { return (m_uiFollowState & uiFollowState) != 0; }
+        bool HasFollowState(FollowState uiFollowState) { return (m_uiFollowState & uiFollowState) != 0; }
 
-        void AddFollowState(eFollowState uiFollowState) { m_uiFollowState |= uiFollowState; }
-        void RemoveFollowState(eFollowState uiFollowState) { m_uiFollowState &= ~uiFollowState; }
+        void AddFollowState(FollowState uiFollowState) { m_uiFollowState |= uiFollowState; }
+        void RemoveFollowState(FollowState uiFollowState) { m_uiFollowState &= ~uiFollowState; }
 
         ObjectGuid m_uiLeaderGUID;
         uint m_uiUpdateFollowTimer;
-        eFollowState m_uiFollowState;
+        FollowState m_uiFollowState;
 
         Quest m_pQuestForFollow;                     //normally we have a quest
     }

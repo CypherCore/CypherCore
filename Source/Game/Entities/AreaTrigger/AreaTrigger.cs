@@ -632,8 +632,8 @@ namespace Game.Entities
 
             _movementTime = 0;
 
-            _spline.Init_Spline(splinePoints.ToArray(), splinePoints.Count, Spline.EvaluationMode.Linear);
-            _spline.initLengths();
+            _spline.InitSpline(splinePoints.ToArray(), splinePoints.Count, Spline.EvaluationMode.Linear);
+            _spline.InitLengths();
 
             // should be sent in object create packets only
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
@@ -771,9 +771,9 @@ namespace Game.Entities
             if (_movementTime >= GetTimeToTarget())
             {
                 _reachedDestination = true;
-                _lastSplineIndex = _spline.last();
+                _lastSplineIndex = _spline.Last();
 
-                Vector3 lastSplinePosition = _spline.getPoint(_lastSplineIndex);
+                Vector3 lastSplinePosition = _spline.GetPoint(_lastSplineIndex);
                 GetMap().AreaTriggerRelocation(this, lastSplinePosition.X, lastSplinePosition.Y, lastSplinePosition.Z, GetOrientation());
 
                 DebugVisualizePosition();
@@ -802,7 +802,7 @@ namespace Game.Entities
 
             int lastPositionIndex = 0;
             float percentFromLastPoint = 0;
-            _spline.computeIndex(currentTimePercent, ref lastPositionIndex, ref percentFromLastPoint);
+            _spline.ComputeIndex(currentTimePercent, ref lastPositionIndex, ref percentFromLastPoint);
 
             Vector3 currentPosition;
             _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out currentPosition);
@@ -810,7 +810,7 @@ namespace Game.Entities
             float orientation = GetOrientation();
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasFaceMovementDir))
             {
-                Vector3 nextPoint = _spline.getPoint(lastPositionIndex + 1);
+                Vector3 nextPoint = _spline.GetPoint(lastPositionIndex + 1);
                 orientation = GetAngle(nextPoint.X, nextPoint.Y);
             }
 
@@ -911,7 +911,7 @@ namespace Game.Entities
         public Vector3 GetRollPitchYaw() { return _rollPitchYaw; }
         public Vector3 GetTargetRollPitchYaw() { return _targetRollPitchYaw; }
 
-        public bool HasSplines() { return !_spline.empty(); }
+        public bool HasSplines() { return !_spline.Empty(); }
         public Spline GetSpline() { return _spline; }
         public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 

@@ -73,7 +73,7 @@ namespace Game.Maps
                 return (offX * offX) + (offY * offY);
             }
 
-            public Position sync()
+            public Position Sync()
             {
                 posX = (float)d_positionX;
                 posY = (float)d_positionY;

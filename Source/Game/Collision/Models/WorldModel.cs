@@ -128,7 +128,7 @@ namespace Game.Collision
             return true;
         }
 
-        public static WmoLiquid readFromFile(BinaryReader reader)
+        public static WmoLiquid ReadFromFile(BinaryReader reader)
         {
             WmoLiquid liquid = new WmoLiquid();
 
@@ -193,13 +193,13 @@ namespace Game.Collision
             iLiquid = null;
         }
 
-        void setLiquidData(WmoLiquid liquid)
+        void SetLiquidData(WmoLiquid liquid)
         {
             iLiquid = liquid;
             liquid = null;
         }
 
-        public bool readFromFile(BinaryReader reader)
+        public bool ReadFromFile(BinaryReader reader)
         {
             triangles.Clear();
             vertices.Clear();
@@ -237,7 +237,7 @@ namespace Game.Collision
             if (reader.ReadStringFromChars(4) != "MBIH")
                 return false;
 
-            meshTree.readFromFile(reader);
+            meshTree.ReadFromFile(reader);
 
             // write liquid data
             if (reader.ReadStringFromChars(4) != "LIQU")
@@ -245,7 +245,7 @@ namespace Game.Collision
 
             chunkSize = reader.ReadUInt32();
             if (chunkSize > 0)
-                iLiquid = WmoLiquid.readFromFile(reader);
+                iLiquid = WmoLiquid.ReadFromFile(reader);
 
             return true;
         }
@@ -256,7 +256,7 @@ namespace Game.Collision
                 return false;
 
             GModelRayCallback callback = new GModelRayCallback(triangles, vertices);
-            meshTree.intersectRay(ray, callback, ref distance, stopAtFirstHit);
+            meshTree.IntersectRay(ray, callback, ref distance, stopAtFirstHit);
             return callback.hit;
         }
 
@@ -290,7 +290,7 @@ namespace Game.Collision
             return 0;
         }
 
-        public override AxisAlignedBox getBounds() { return iBound; }
+        public override AxisAlignedBox GetBounds() { return iBound; }
 
         public uint GetMogpFlags() { return iMogpFlags; }
 
@@ -328,7 +328,7 @@ namespace Game.Collision
                 return groupModels[0].IntersectRay(ray, ref distance, stopAtFirstHit);
 
             WModelRayCallBack isc = new WModelRayCallBack(groupModels);
-            groupTree.intersectRay(ray, isc, ref distance, stopAtFirstHit);
+            groupTree.IntersectRay(ray, isc, ref distance, stopAtFirstHit);
             return isc.hit;
         }
 
@@ -339,7 +339,7 @@ namespace Game.Collision
                 return false;
 
             WModelAreaCallback callback = new WModelAreaCallback(groupModels, down);
-            groupTree.intersectPoint(p, callback);
+            groupTree.IntersectPoint(p, callback);
             if (callback.hit != null)
             {
                 info.rootId = (int)RootWMOID;
@@ -359,7 +359,7 @@ namespace Game.Collision
                 return false;
 
             WModelAreaCallback callback = new WModelAreaCallback(groupModels, down);
-            groupTree.intersectPoint(p, callback);
+            groupTree.IntersectPoint(p, callback);
             if (callback.hit != null)
             {
                 info.hitModel = callback.hit;
@@ -369,7 +369,7 @@ namespace Game.Collision
             return false;
         }
 
-        public bool readFile(string filename)
+        public bool ReadFile(string filename)
         {
             if (!File.Exists(filename))
             {
@@ -397,7 +397,7 @@ namespace Game.Collision
                 for (var i = 0; i < count; ++i)
                 {
                     GroupModel group = new GroupModel();
-                    group.readFromFile(reader);
+                    group.ReadFromFile(reader);
                     groupModels.Add(group);
                 }
 
@@ -405,7 +405,7 @@ namespace Game.Collision
                 if (reader.ReadStringFromChars(4) != "GBIH")
                     return false;
 
-                return groupTree.readFromFile(reader);
+                return groupTree.ReadFromFile(reader);
             }
         }
 

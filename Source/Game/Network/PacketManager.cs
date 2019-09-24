@@ -124,7 +124,7 @@ namespace Game.Network
         {
             methodCaller = (Action<WorldSession, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, new object[] { info });
             sessionStatus = status;
-            processingPlace = processingplace;
+            ProcessingPlace = processingplace;
             packetType = type;
         }
 
@@ -153,7 +153,7 @@ namespace Game.Network
 
         Action<WorldSession, ClientPacket> methodCaller;
         Type packetType;
-        public PacketProcessing processingPlace { get; private set; }
+        public PacketProcessing ProcessingPlace { get; private set; }
         public SessionStatus sessionStatus { get; private set; }
     }
 
@@ -179,11 +179,11 @@ namespace Game.Network
         {
             PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
             //check if packet handler is supposed to be safe
-            if (opHandle.processingPlace == PacketProcessing.Inplace)
+            if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
                 return true;
 
             //we do not process thread-unsafe packets
-            if (opHandle.processingPlace == PacketProcessing.ThreadUnsafe)
+            if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
                 return false;
 
             Player player = m_pSession.GetPlayer();
@@ -203,11 +203,11 @@ namespace Game.Network
         {
             PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
             //check if packet handler is supposed to be safe
-            if (opHandle.processingPlace == PacketProcessing.Inplace)
+            if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
                 return true;
 
             //thread-unsafe packets should be processed in World.UpdateSessions()
-            if (opHandle.processingPlace == PacketProcessing.ThreadUnsafe)
+            if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
                 return true;
 
             //no player attached? . our client! ^^

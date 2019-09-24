@@ -369,7 +369,7 @@ namespace Game
                                 }
                             }
 
-                            spell.prepare(spell.m_targets);
+                            spell.Prepare(spell.m_targets);
                         }
                         else
                         {
@@ -381,7 +381,7 @@ namespace Game
                             if (!pet.GetSpellHistory().HasCooldown(spellid))
                                 pet.GetSpellHistory().ResetCooldown(spellid, true);
 
-                            spell.finish(false);
+                            spell.Finish(false);
                             spell.Dispose();
 
                             // reset specific flags in case of spell fail. AI will reset other flags
@@ -692,7 +692,7 @@ namespace Game
                 spellPrepare.ServerCastID = spell.m_castId;
                 SendPacket(spellPrepare);
 
-                spell.prepare(targets);
+                spell.Prepare(targets);
             }
             else
             {
@@ -701,7 +701,7 @@ namespace Game
                 if (!caster.GetSpellHistory().HasCooldown(spellInfo.Id))
                     caster.GetSpellHistory().ResetCooldown(spellInfo.Id, true);
 
-                spell.finish(false);
+                spell.Finish(false);
                 spell.Dispose();
             }
         }

@@ -37,7 +37,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string id = handler.extractKeyFromLink(args, "Hgameobject");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -63,7 +63,7 @@ namespace Game.Chat
         static bool HandleGameObjectDeleteCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameobject");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -103,7 +103,7 @@ namespace Game.Chat
         static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameobject");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -219,7 +219,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-                string idStr = handler.extractKeyFromLink(args, "Hgameobject_entry");
+                string idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
@@ -328,7 +328,7 @@ namespace Game.Chat
         static bool HandleGameObjectTurnCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-            string id = handler.extractKeyFromLink(args, "Hgameobject");
+            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
@@ -401,13 +401,13 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string param1 = handler.extractKeyFromLink(args, "Hgameobject_entry");
+            string param1 = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
             if (param1.IsEmpty())
                 return false;
 
             if (param1.Equals("guid"))
             {
-                string cValue = handler.extractKeyFromLink(args, "Hgameobject");
+                string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
                 if (cValue.IsEmpty())
                     return false;
 
@@ -462,7 +462,7 @@ namespace Game.Chat
                     return false;
 
                 // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-                string idStr = handler.extractKeyFromLink(args, "Hgameobject_entry");
+                string idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
@@ -591,7 +591,7 @@ namespace Game.Chat
             static bool HandleGameObjectSetStateCommand(StringArguments args, CommandHandler handler)
             {
                 // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-                string id = handler.extractKeyFromLink(args, "Hgameobject");
+                string id = handler.ExtractKeyFromLink(args, "Hgameobject");
                 if (string.IsNullOrEmpty(id))
                     return false;
 

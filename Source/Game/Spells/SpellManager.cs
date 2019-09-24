@@ -58,13 +58,13 @@ namespace Game.Entities
                             continue;
                         }
 
-                        if (AuraEffectHandlers.ContainsKey(auraEffect.auraType))
+                        if (AuraEffectHandlers.ContainsKey(auraEffect.AuraType))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.auraType].ToString(), methodInfo.Name, auraEffect.auraType);
+                            Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.AuraType].ToString(), methodInfo.Name, auraEffect.AuraType);
                             continue;
                         }
 
-                        AuraEffectHandlers.Add(auraEffect.auraType, (AuraEffectHandler)methodInfo.CreateDelegate(typeof(AuraEffectHandler)));
+                        AuraEffectHandlers.Add(auraEffect.AuraType, (AuraEffectHandler)methodInfo.CreateDelegate(typeof(AuraEffectHandler)));
 
                     }
 
@@ -86,13 +86,13 @@ namespace Game.Entities
                             continue;
                         }
 
-                        if (SpellEffectsHandlers.ContainsKey(spellEffect.effectName))
+                        if (SpellEffectsHandlers.ContainsKey(spellEffect.EffectName))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Tried to override SpellEffectsHandler of {0} with {1} (EffectName {2}).", SpellEffectsHandlers[spellEffect.effectName].ToString(), methodInfo.Name, spellEffect.effectName);
+                            Log.outError(LogFilter.ServerLoading, "Tried to override SpellEffectsHandler of {0} with {1} (EffectName {2}).", SpellEffectsHandlers[spellEffect.EffectName].ToString(), methodInfo.Name, spellEffect.EffectName);
                             continue;
                         }
 
-                        SpellEffectsHandlers.Add(spellEffect.effectName, (SpellEffectHandler)methodInfo.CreateDelegate(typeof(SpellEffectHandler)));
+                        SpellEffectsHandlers.Add(spellEffect.EffectName, (SpellEffectHandler)methodInfo.CreateDelegate(typeof(SpellEffectHandler)));
                     }
                 }
             }
@@ -1304,11 +1304,11 @@ namespace Game.Entities
                     if (auraName == 0)
                         continue;
 
-                    if (!isTriggerAura(auraName))
+                    if (!IsTriggerAura(auraName))
                         continue;
 
-                    procSpellTypeMask |= getSpellTypeMask(auraName);
-                    if (isAlwaysTriggeredAura(auraName))
+                    procSpellTypeMask |= GetSpellTypeMask(auraName);
+                    if (IsAlwaysTriggeredAura(auraName))
                         addTriggerFlag = true;
 
                     // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
@@ -1347,7 +1347,7 @@ namespace Game.Entities
                 procEntry.ProcFlags = spellInfo.ProcFlags;
                 procEntry.SpellFamilyName = 0;
                 foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
-                    if (effect != null && effect.IsEffect() && isTriggerAura(effect.ApplyAuraName))
+                    if (effect != null && effect.IsEffect() && IsTriggerAura(effect.ApplyAuraName))
                         procEntry.SpellFamilyMask |= effect.SpellClassMask;
 
                 if (procEntry.SpellFamilyMask)
@@ -3155,7 +3155,7 @@ namespace Game.Entities
         }
         #endregion
 
-        bool isTriggerAura(AuraType type)
+        bool IsTriggerAura(AuraType type)
         {
             switch (type)
             {
@@ -3208,7 +3208,7 @@ namespace Game.Entities
             }
             return false;
         }
-        bool isAlwaysTriggeredAura(AuraType type)
+        bool IsAlwaysTriggeredAura(AuraType type)
         {
             switch (type)
             {
@@ -3227,7 +3227,7 @@ namespace Game.Entities
             }
             return false;
         }
-        ProcFlagsSpellType getSpellTypeMask(AuraType type)
+        ProcFlagsSpellType GetSpellTypeMask(AuraType type)
         {
             switch (type)
             {
@@ -3397,10 +3397,10 @@ namespace Game.Entities
     {
         public AuraEffectHandlerAttribute(AuraType type)
         {
-            auraType = type;
+            AuraType = type;
         }
 
-        public AuraType auraType { get; set; }
+        public AuraType AuraType { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
@@ -3408,10 +3408,10 @@ namespace Game.Entities
     {
         public SpellEffectHandlerAttribute(SpellEffectName effectName)
         {
-            this.effectName = effectName;
+            EffectName = effectName;
         }
 
-        public SpellEffectName effectName { get; set; }
+        public SpellEffectName EffectName { get; set; }
     }
 
     public class SpellInfoLoadHelper

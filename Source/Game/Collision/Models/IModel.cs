@@ -22,8 +22,8 @@ namespace Game.Collision
 {
     public class IModel
     {
-        public virtual Vector3 getPosition() { return default; }
-        public virtual AxisAlignedBox getBounds() { return default; }
+        public virtual Vector3 GetPosition() { return default; }
+        public virtual AxisAlignedBox GetBounds() { return default; }
 
         public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift, ModelIgnoreFlags ignoreFlags) { return false; }
         public virtual bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags) { return false; }

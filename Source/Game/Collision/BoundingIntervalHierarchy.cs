@@ -27,10 +27,10 @@ namespace Game.Collision
     {
         public BIH()
         {
-            init_empty();
+            InitEmpty();
         }
 
-        void init_empty()
+        void InitEmpty()
         {
             tree= new uint[3];
             objects = new uint[0];
@@ -38,7 +38,7 @@ namespace Game.Collision
             tree[0] = (3u << 30); // dummy leaf
         }
 
-        void buildHierarchy(List<uint> tempTree, buildData dat, BuildStats stats)
+        void BuildHierarchy(List<uint> tempTree, buildData dat, BuildStats stats)
         {
             // create space for the first node
             tempTree.Add(3u << 30); // dummy leaf
@@ -51,16 +51,16 @@ namespace Game.Collision
             gridBox.hi = bounds.Hi;
             AABound nodeBox = gridBox;
             // seed subdivide function
-            subdivide(0, (int)(dat.numPrims - 1), tempTree, dat, gridBox, nodeBox, 0, 1, stats);
+            Subdivide(0, (int)(dat.numPrims - 1), tempTree, dat, gridBox, nodeBox, 0, 1, stats);
         }
 
-        void subdivide(int left, int right, List<uint> tempTree, buildData dat, AABound gridBox, AABound nodeBox, int nodeIndex, int depth, BuildStats stats)
+        void Subdivide(int left, int right, List<uint> tempTree, buildData dat, AABound gridBox, AABound nodeBox, int nodeIndex, int depth, BuildStats stats)
         {
             if ((right - left + 1) <= dat.maxPrims || depth >= 64)
             {
                 // write leaf node
-                stats.updateLeaf(depth, right - left + 1);
-                createNode(tempTree, nodeIndex, left, right);
+                stats.UpdateLeaf(depth, right - left + 1);
+                CreateNode(tempTree, nodeIndex, left, right);
                 return;
             }
             // calculate extents
@@ -122,21 +122,21 @@ namespace Game.Collision
                     // node box is too big compare to space occupied by primitives?
                     if (1.3f * nodeNewW < nodeBoxW)
                     {
-                        stats.updateBVH2();
+                        stats.UpdateBVH2();
                         int nextIndex1 = tempTree.Count;
                         // allocate child
                         tempTree.Add(0);
                         tempTree.Add(0);
                         tempTree.Add(0);
                         // write bvh2 clip node
-                        stats.updateInner();
+                        stats.UpdateInner();
                         tempTree[nodeIndex + 0] = (uint)((axis << 30) | (1 << 29) | nextIndex1);
-                        tempTree[nodeIndex + 1] = floatToRawIntBits(nodeL);
-                        tempTree[nodeIndex + 2] = floatToRawIntBits(nodeR);
+                        tempTree[nodeIndex + 1] = FloatToRawIntBits(nodeL);
+                        tempTree[nodeIndex + 2] = FloatToRawIntBits(nodeR);
                         // update nodebox and recurse
                         nodeBox.lo[axis] = nodeL;
                         nodeBox.hi[axis] = nodeR;
-                        subdivide(left, rightOrig, tempTree, dat, gridBox, nodeBox, nextIndex1, depth + 1, stats);
+                        Subdivide(left, rightOrig, tempTree, dat, gridBox, nodeBox, nextIndex1, depth + 1, stats);
                         return;
                     }
                 }
@@ -147,8 +147,8 @@ namespace Game.Collision
                     if (prevAxis == axis && MathFunctions.fuzzyEq(prevSplit, split))
                     {
                         // we are stuck here - create a leaf
-                        stats.updateLeaf(depth, right - left + 1);
-                        createNode(tempTree, nodeIndex, left, right);
+                        stats.UpdateLeaf(depth, right - left + 1);
+                        CreateNode(tempTree, nodeIndex, left, right);
                         return;
                     }
                     if (clipL <= split)
@@ -169,8 +169,8 @@ namespace Game.Collision
                     if (prevAxis == axis && MathFunctions.fuzzyEq(prevSplit, split))
                     {
                         // we are stuck here - create a leaf
-                        stats.updateLeaf(depth, right - left + 1);
-                        createNode(tempTree, nodeIndex, left, right);
+                        stats.UpdateLeaf(depth, right - left + 1);
+                        CreateNode(tempTree, nodeIndex, left, right);
                         return;
                     }
 
@@ -201,23 +201,23 @@ namespace Game.Collision
                         {
                             // create a node with a left child
                             // write leaf node
-                            stats.updateInner();
+                            stats.UpdateInner();
                             tempTree[nodeIndex + 0] = (uint)((prevAxis << 30) | nextIndex0);
-                            tempTree[nodeIndex + 1] = floatToRawIntBits(prevClip);
-                            tempTree[nodeIndex + 2] = floatToRawIntBits(float.PositiveInfinity);
+                            tempTree[nodeIndex + 1] = FloatToRawIntBits(prevClip);
+                            tempTree[nodeIndex + 2] = FloatToRawIntBits(float.PositiveInfinity);
                         }
                         else
                         {
                             // create a node with a right child
                             // write leaf node
-                            stats.updateInner();
+                            stats.UpdateInner();
                             tempTree[nodeIndex + 0] = (uint)((prevAxis << 30) | (nextIndex0 - 3));
-                            tempTree[nodeIndex + 1] = floatToRawIntBits(float.NegativeInfinity);
-                            tempTree[nodeIndex + 2] = floatToRawIntBits(prevClip);
+                            tempTree[nodeIndex + 1] = FloatToRawIntBits(float.NegativeInfinity);
+                            tempTree[nodeIndex + 2] = FloatToRawIntBits(prevClip);
                         }
                         // count stats for the unused leaf
                         depth++;
-                        stats.updateLeaf(depth, 0);
+                        stats.UpdateLeaf(depth, 0);
                         // now we keep going as we are, with a new nodeIndex:
                         nodeIndex = nextIndex0;
                     }
@@ -245,10 +245,10 @@ namespace Game.Collision
                 tempTree.Add(0);
             }
             // write leaf node
-            stats.updateInner();
+            stats.UpdateInner();
             tempTree[nodeIndex + 0] = (uint)((axis << 30) | nextIndex);
-            tempTree[nodeIndex + 1] = floatToRawIntBits(clipL);
-            tempTree[nodeIndex + 2] = floatToRawIntBits(clipR);
+            tempTree[nodeIndex + 1] = FloatToRawIntBits(clipL);
+            tempTree[nodeIndex + 2] = FloatToRawIntBits(clipR);
             // prepare L/R child boxes
             AABound gridBoxL = gridBox;
             AABound gridBoxR = gridBox;
@@ -259,16 +259,16 @@ namespace Game.Collision
             nodeBoxR.lo[axis] = clipR;
             // recurse
             if (nl > 0)
-                subdivide(left, right, tempTree, dat, gridBoxL, nodeBoxL, nextIndex, depth + 1, stats);
+                Subdivide(left, right, tempTree, dat, gridBoxL, nodeBoxL, nextIndex, depth + 1, stats);
             else
-                stats.updateLeaf(depth + 1, 0);
+                stats.UpdateLeaf(depth + 1, 0);
             if (nr > 0)
-                subdivide(right + 1, rightOrig, tempTree, dat, gridBoxR, nodeBoxR, nextIndex + 3, depth + 1, stats);
+                Subdivide(right + 1, rightOrig, tempTree, dat, gridBoxR, nodeBoxR, nextIndex + 3, depth + 1, stats);
             else
-                stats.updateLeaf(depth + 1, 0);
+                stats.UpdateLeaf(depth + 1, 0);
         }
 
-        public bool readFromFile(BinaryReader reader)
+        public bool ReadFromFile(BinaryReader reader)
         {
             var lo = reader.Read<Vector3>();
             var hi = reader.Read<Vector3>();
@@ -283,11 +283,11 @@ namespace Game.Collision
             return true;
         }
 
-        public void build<T>(List<T> primitives, uint leafSize = 3, bool printStats = false) where T : IModel
+        public void Build<T>(List<T> primitives, uint leafSize = 3, bool printStats = false) where T : IModel
         {
             if (primitives.Count == 0)
             {
-                init_empty();
+                InitEmpty();
                 return;
             }
 
@@ -296,16 +296,16 @@ namespace Game.Collision
             dat.numPrims = (uint)primitives.Count;
             dat.indices = new uint[dat.numPrims];
             dat.primBound = new AxisAlignedBox[dat.numPrims];
-            bounds = primitives[0].getBounds();
+            bounds = primitives[0].GetBounds();
             for (int i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = (uint)i;
-                dat.primBound[i] = primitives[i].getBounds();
+                dat.primBound[i] = primitives[i].GetBounds();
                 bounds.merge(dat.primBound[i]);
             }
             List<uint> tempTree = new List<uint>();
             BuildStats stats = new BuildStats();
-            buildHierarchy(tempTree, dat, stats);
+            BuildHierarchy(tempTree, dat, stats);
 
             objects = new uint[dat.numPrims];
             for (int i = 0; i < dat.numPrims; ++i)
@@ -314,9 +314,9 @@ namespace Game.Collision
             tree = tempTree.ToArray();
         }
 
-        public uint primCount() { return (uint)objects.Length; }
+        public uint PrimCount() { return (uint)objects.Length; }
 
-        public void intersectRay(Ray r, WorkerCallback intersectCallback, ref float maxDist, bool stopAtFirst = false)
+        public void IntersectRay(Ray r, WorkerCallback intersectCallback, ref float maxDist, bool stopAtFirst = false)
         {
             float intervalMin = -1.0f;
             float intervalMax = -1.0f;
@@ -356,7 +356,7 @@ namespace Game.Collision
 
             for (int i = 0; i < 3; ++i)
             {
-                offsetFront[i] = floatToRawIntBits(dir[i]) >> 31;
+                offsetFront[i] = FloatToRawIntBits(dir[i]) >> 31;
                 offsetBack[i] = offsetFront[i] ^ 1;
                 offsetFront3[i] = offsetFront[i] * 3;
                 offsetBack3[i] = offsetBack[i] * 3;
@@ -383,8 +383,8 @@ namespace Game.Collision
                         if (axis < 3)
                         {
                             // "normal" interior node
-                            float tf = (intBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
-                            float tb = (intBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
+                            float tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
+                            float tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
                             // ray passes between clip zones
                             if (tf < intervalMin && tb > intervalMax)
                                 break;
@@ -432,8 +432,8 @@ namespace Game.Collision
                     {
                         if (axis > 2)
                             return; // should not happen
-                        float tf = (intBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
-                        float tb = (intBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
+                        float tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
+                        float tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
                         node = offset;
                         intervalMin = (tf >= intervalMin) ? tf : intervalMin;
                         intervalMax = (tb <= intervalMax) ? tb : intervalMax;
@@ -459,7 +459,7 @@ namespace Game.Collision
             }
         }
 
-        public void intersectPoint(Vector3 p, WorkerCallback intersectCallback)
+        public void IntersectPoint(Vector3 p, WorkerCallback intersectCallback)
         {
             if (!bounds.contains(p))
                 return;
@@ -481,8 +481,8 @@ namespace Game.Collision
                         if (axis < 3)
                         {
                             // "normal" interior node
-                            float tl = intBitsToFloat(tree[node + 1]);
-                            float tr = intBitsToFloat(tree[node + 2]);
+                            float tl = IntBitsToFloat(tree[node + 1]);
+                            float tr = IntBitsToFloat(tree[node + 2]);
                             // point is between clip zones
                             if (tl < p[(int)axis] && tr > p[axis])
                                 break;
@@ -522,8 +522,8 @@ namespace Game.Collision
                     {
                         if (axis > 2)
                             return; // should not happen
-                        float tl = intBitsToFloat(tree[node + 1]);
-                        float tr = intBitsToFloat(tree[node + 2]);
+                        float tl = IntBitsToFloat(tree[node + 1]);
+                        float tr = IntBitsToFloat(tree[node + 2]);
                         node = offset;
                         if (tl > p[axis] || tr < p[axis])
                             break;
@@ -540,7 +540,7 @@ namespace Game.Collision
             }
         }
 
-        void createNode(List<uint> tempTree, int nodeIndex, int left, int right)
+        void CreateNode(List<uint> tempTree, int nodeIndex, int left, int right)
         {
             // write leaf node
             tempTree[nodeIndex + 0] = (uint)((3 << 30) | left);
@@ -589,9 +589,9 @@ namespace Game.Collision
                     numLeavesN[i] = 0;
             }
 
-            public void updateInner() { numNodes++; }
-            public void updateBVH2() { numBVH2++; }
-            public void updateLeaf(int depth, int n)
+            public void UpdateInner() { numNodes++; }
+            public void UpdateBVH2() { numBVH2++; }
+            public void UpdateLeaf(int depth, int n)
             {
                 numLeaves++;
                 minDepth = Math.Min(depth, minDepth);
@@ -619,13 +619,13 @@ namespace Game.Collision
             public float FloatValue;
         }
 
-        uint floatToRawIntBits(float f)
+        uint FloatToRawIntBits(float f)
         {
             FloatToIntConverter converter = new FloatToIntConverter();
             converter.FloatValue = f;
             return converter.IntValue;
         }
-        float intBitsToFloat(uint i)
+        float IntBitsToFloat(uint i)
         {
             FloatToIntConverter converter = new FloatToIntConverter();
             converter.IntValue = i;

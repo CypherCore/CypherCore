@@ -940,7 +940,7 @@ namespace Game.Achievements
                 Group group = referencePlayer.GetGroup();
                 if (group)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player groupMember = refe.GetSource();
                         if (groupMember)

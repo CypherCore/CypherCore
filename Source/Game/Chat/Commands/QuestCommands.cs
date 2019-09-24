@@ -30,7 +30,7 @@ namespace Game.Chat
         [Command("add", RBACPermissions.CommandQuestAdd)]
         static bool Add(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -39,7 +39,7 @@ namespace Game.Chat
 
             // .addquest #entry'
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.extractKeyFromLink(args, "Hquest");
+            string cId = handler.ExtractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
 
@@ -70,7 +70,7 @@ namespace Game.Chat
         [Command("complete", RBACPermissions.CommandQuestComplete)]
         static bool Complete(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -79,7 +79,7 @@ namespace Game.Chat
 
             // .quest complete #entry
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.extractKeyFromLink(args, "Hquest");
+            string cId = handler.ExtractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
 
@@ -162,7 +162,7 @@ namespace Game.Chat
         [Command("remove", RBACPermissions.CommandQuestRemove)]
         static bool Remove(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -171,7 +171,7 @@ namespace Game.Chat
 
             // .removequest #entry'
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.extractKeyFromLink(args, "Hquest");
+            string cId = handler.ExtractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
 
@@ -216,7 +216,7 @@ namespace Game.Chat
         [Command("reward", RBACPermissions.CommandQuestReward)]
         static bool Reward(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayer();
+            Player player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -225,7 +225,7 @@ namespace Game.Chat
 
             // .quest reward #entry
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.extractKeyFromLink(args, "Hquest");
+            string cId = handler.ExtractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
 

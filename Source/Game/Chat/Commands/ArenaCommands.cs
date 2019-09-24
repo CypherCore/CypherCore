@@ -32,10 +32,10 @@ namespace Game.Chat
                 return false;
 
             Player target;
-            if (!handler.extractPlayerTarget(args[0] != '"' ? args : null, out target))
+            if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
                 return false;
 
-            string name = handler.extractQuotedArg(args.NextString());
+            string name = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(name))
                 return false;
 
@@ -119,14 +119,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string oldArenaStr = handler.extractQuotedArg(args.NextString());
+            string oldArenaStr = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(oldArenaStr))
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            string newArenaStr = handler.extractQuotedArg(args.NextString());
+            string newArenaStr = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(newArenaStr))
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -176,7 +176,7 @@ namespace Game.Chat
 
             string idStr;
             string nameStr;
-            handler.extractOptFirstArg(args, out idStr, out nameStr);
+            handler.ExtractOptFirstArg(args, out idStr, out nameStr);
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
@@ -185,7 +185,7 @@ namespace Game.Chat
 
             Player target;
             ObjectGuid targetGuid;
-            if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid))
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid))
                 return false;
 
             ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);

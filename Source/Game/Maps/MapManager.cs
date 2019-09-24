@@ -155,7 +155,7 @@ namespace Game.Entities
 
             Group group = player.GetGroup();
             if (entry.IsRaid() && entry.Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
-                if ((!group || !group.isRaidGroup()) && WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
+                if ((!group || !group.IsRaidGroup()) && WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return EnterState.CannotEnterNotInRaid;
 
             if (!player.IsAlive())
@@ -198,7 +198,7 @@ namespace Game.Entities
                 }
             }
             // players are only allowed to enter 10 instances per hour
-            if (entry.IsDungeon() && (player.GetGroup() == null || (player.GetGroup() != null && !player.GetGroup().isLFGGroup())))
+            if (entry.IsDungeon() && (player.GetGroup() == null || (player.GetGroup() != null && !player.GetGroup().IsLFGGroup())))
             {
                 uint instaceIdToCheck = 0;
                 InstanceSave save = player.GetInstanceSave(mapid);
@@ -245,8 +245,8 @@ namespace Game.Entities
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
 
-            uint gx = 63 - p.x_coord;
-            uint gy = 63 - p.y_coord;
+            uint gx = 63 - p.X_coord;
+            uint gy = 63 - p.Y_coord;
 
             return Map.ExistMap(mapid, gx, gy) && Map.ExistVMap(mapid, gx, gy);
         }

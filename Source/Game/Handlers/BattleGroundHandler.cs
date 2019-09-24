@@ -184,7 +184,7 @@ namespace Game
                     avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
                 }
 
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
                     if (!member)
@@ -221,7 +221,7 @@ namespace Game
                 return;
 
             // Prevent players from sending BuildPvpLogDataPacket in an arena except for when sent in Battleground.EndBattleground.
-            if (bg.isArena())
+            if (bg.IsArena())
                 return;
 
             PVPLogData pvpLogData;
@@ -544,7 +544,7 @@ namespace Game
                 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
             }
 
-            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player member = refe.GetSource();
                 if (!member)

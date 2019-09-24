@@ -22,12 +22,12 @@ namespace Game.Collision
 {
     public class BIHWrap<T> where T : IModel
     {
-        public void insert(T obj)
+        public void Insert(T obj)
         {
             ++unbalanced_times;
             m_objects_to_push.Add(obj);
         }
-        public void remove(T obj)
+        public void Remove(T obj)
         {
             ++unbalanced_times;
             uint Idx = 0;
@@ -37,7 +37,7 @@ namespace Game.Collision
                 m_objects_to_push.Remove(obj);
         }
 
-        public void balance()
+        public void Balance()
         {
             if (unbalanced_times == 0)
                 return;
@@ -47,21 +47,21 @@ namespace Game.Collision
             m_objects.AddRange(m_obj2Idx.Keys);
             m_objects.AddRange(m_objects_to_push);
 
-            m_tree.build(m_objects);
+            m_tree.Build(m_objects);
         }
 
-        public void intersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
+        public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
         {
-            balance();
+            Balance();
             MDLCallback temp_cb = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
-            m_tree.intersectRay(ray, temp_cb, ref maxDist, true);
+            m_tree.IntersectRay(ray, temp_cb, ref maxDist, true);
         }
 
-        public void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
+        public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
-            balance();
+            Balance();
             MDLCallback callback = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
-            m_tree.intersectPoint(point, callback);
+            m_tree.IntersectPoint(point, callback);
         }
 
         BIH m_tree = new BIH();

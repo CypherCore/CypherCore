@@ -3431,7 +3431,7 @@ namespace Game.Entities
 
             // check if stats should only be saved on logout
             // save stats can be out of transaction
-            if (GetSession().isLogingOut() || !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
+            if (GetSession().IsLogingOut() || !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
                 _SaveStats(trans);
 
             DB.Characters.CommitTransaction(trans);

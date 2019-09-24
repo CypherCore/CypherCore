@@ -115,7 +115,7 @@ namespace Scripts.Outlands
     }
 
     [Script]
-    class npc_ancestral_wolf : npc_escortAI
+    class npc_ancestral_wolf : NpcEscortAI
     {
         public npc_ancestral_wolf(Creature creature) : base(creature)
         {
@@ -167,7 +167,7 @@ namespace Scripts.Outlands
     }
 
     [Script]
-    class npc_wounded_blood_elf : npc_escortAI
+    class npc_wounded_blood_elf : NpcEscortAI
     {
         public npc_wounded_blood_elf(Creature creature) : base(creature) { }
 
@@ -175,7 +175,7 @@ namespace Scripts.Outlands
 
         public override void EnterCombat(Unit who)
         {
-            if (HasEscortState(eEscortState.Escorting))
+            if (HasEscortState(EscortState.Escorting))
                 Talk(SAY_ELF_AGGRO);
         }
 
@@ -184,7 +184,7 @@ namespace Scripts.Outlands
             summoned.GetAI().AttackStart(me);
         }
 
-        public override void sQuestAccept(Player player, Quest quest)
+        public override void QuestAccept(Player player, Quest quest)
         {
             if (quest.Id == QUEST_ROAD_TO_FALCON_WATCH)
             {

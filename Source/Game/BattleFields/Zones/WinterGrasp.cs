@@ -61,27 +61,27 @@ namespace Game.BattleFields
             m_saveTimer = 60000;
 
             // Load from db
-            if ((Global.WorldMgr.getWorldState(WGWorldStates.Active) == 0) && (Global.WorldMgr.getWorldState(WGWorldStates.Defender) == 0) && (Global.WorldMgr.getWorldState(WGConst.ClockWorldState[0]) == 0))
+            if ((Global.WorldMgr.GetWorldState(WGWorldStates.Active) == 0) && (Global.WorldMgr.GetWorldState(WGWorldStates.Defender) == 0) && (Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]) == 0))
             {
-                Global.WorldMgr.setWorldState(WGWorldStates.Active, 0);
-                Global.WorldMgr.setWorldState(WGWorldStates.Defender, RandomHelper.URand(0, 1));
-                Global.WorldMgr.setWorldState(WGConst.ClockWorldState[0], m_NoWarBattleTime);
+                Global.WorldMgr.SetWorldState(WGWorldStates.Active, 0);
+                Global.WorldMgr.SetWorldState(WGWorldStates.Defender, RandomHelper.URand(0, 1));
+                Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_NoWarBattleTime);
             }
 
-            m_isActive = Global.WorldMgr.getWorldState(WGWorldStates.Active) != 0;
-            m_DefenderTeam = Global.WorldMgr.getWorldState(WGWorldStates.Defender);
+            m_isActive = Global.WorldMgr.GetWorldState(WGWorldStates.Active) != 0;
+            m_DefenderTeam = Global.WorldMgr.GetWorldState(WGWorldStates.Defender);
 
-            m_Timer = Global.WorldMgr.getWorldState(WGConst.ClockWorldState[0]);
+            m_Timer = Global.WorldMgr.GetWorldState(WGConst.ClockWorldState[0]);
             if (m_isActive)
             {
                 m_isActive = false;
                 m_Timer = m_RestartAfterCrash;
             }
 
-            SetData(WGData.WonA, Global.WorldMgr.getWorldState(WGWorldStates.AttackedA));
-            SetData(WGData.DefA, Global.WorldMgr.getWorldState(WGWorldStates.DefendedA));
-            SetData(WGData.WonH, Global.WorldMgr.getWorldState(WGWorldStates.AttackedH));
-            SetData(WGData.DefH, Global.WorldMgr.getWorldState(WGWorldStates.DefendedH));
+            SetData(WGData.WonA, Global.WorldMgr.GetWorldState(WGWorldStates.AttackedA));
+            SetData(WGData.DefA, Global.WorldMgr.GetWorldState(WGWorldStates.DefendedA));
+            SetData(WGData.WonH, Global.WorldMgr.GetWorldState(WGWorldStates.AttackedH));
+            SetData(WGData.DefH, Global.WorldMgr.GetWorldState(WGWorldStates.DefendedH));
 
             foreach (var gy in WGConst.WGGraveYard)
             {
@@ -163,13 +163,13 @@ namespace Game.BattleFields
             bool m_return = base.Update(diff);
             if (m_saveTimer <= diff)
             {
-                Global.WorldMgr.setWorldState(WGWorldStates.Active, m_isActive);
-                Global.WorldMgr.setWorldState(WGWorldStates.Defender, m_DefenderTeam);
-                Global.WorldMgr.setWorldState(WGConst.ClockWorldState[0], m_Timer);
-                Global.WorldMgr.setWorldState(WGWorldStates.AttackedA, GetData(WGData.WonA));
-                Global.WorldMgr.setWorldState(WGWorldStates.DefendedA, GetData(WGData.DefA));
-                Global.WorldMgr.setWorldState(WGWorldStates.AttackedH, GetData(WGData.WonH));
-                Global.WorldMgr.setWorldState(WGWorldStates.DefendedH, GetData(WGData.DefH));
+                Global.WorldMgr.SetWorldState(WGWorldStates.Active, m_isActive);
+                Global.WorldMgr.SetWorldState(WGWorldStates.Defender, m_DefenderTeam);
+                Global.WorldMgr.SetWorldState(WGConst.ClockWorldState[0], m_Timer);
+                Global.WorldMgr.SetWorldState(WGWorldStates.AttackedA, GetData(WGData.WonA));
+                Global.WorldMgr.SetWorldState(WGWorldStates.DefendedA, GetData(WGData.DefA));
+                Global.WorldMgr.SetWorldState(WGWorldStates.AttackedH, GetData(WGData.WonH));
+                Global.WorldMgr.SetWorldState(WGWorldStates.DefendedH, GetData(WGData.DefH));
                 m_saveTimer = 60 * Time.InMilliseconds;
             }
             else
@@ -1194,7 +1194,7 @@ namespace Game.BattleFields
                     break;
             }
 
-            _state = (WGGameObjectState)Global.WorldMgr.getWorldState(_worldState);
+            _state = (WGGameObjectState)Global.WorldMgr.GetWorldState(_worldState);
             switch (_state)
             {
                 case WGGameObjectState.NeutralIntact:
@@ -1449,7 +1449,7 @@ namespace Game.BattleFields
 
         public void Save()
         {
-            Global.WorldMgr.setWorldState(_worldState, (ulong)_state);
+            Global.WorldMgr.SetWorldState(_worldState, (ulong)_state);
         }
 
         public ObjectGuid GetGUID() { return _buildGUID; }
@@ -1568,7 +1568,7 @@ namespace Game.BattleFields
 
         public void Save()
         {
-            Global.WorldMgr.setWorldState(_staticInfo.WorldStateId, (uint)_state);
+            Global.WorldMgr.SetWorldState(_staticInfo.WorldStateId, (uint)_state);
         }
 
         public uint GetTeamControl()  { return _teamControl; }

@@ -106,7 +106,7 @@ namespace Game.Spells
                     return;
 
             if (m_caster == unitTarget)                              // prevent interrupt message
-                finish();
+                Finish();
 
             SpellInstakillLog data = new SpellInstakillLog();
             data.Target = unitTarget.GetGUID();
@@ -561,7 +561,7 @@ namespace Game.Spells
                 return;
             }
 
-            finish();
+            Finish();
 
             m_caster.CastSpell(null, spellInfo, false);
         }
@@ -2336,7 +2336,7 @@ namespace Game.Spells
                 return;
 
             // cast finish successfully
-            finish();
+            Finish();
 
             Pet pet = m_caster.CreateTamedPetFrom(creatureTarget, m_spellInfo.Id);
             if (pet == null)                                               // in very specific state like near world end/etc.
@@ -2489,18 +2489,18 @@ namespace Game.Spells
                 return;
             }
 
-            if (!unitTarget.GetThreatManager().getOnlineContainer().empty())
+            if (!unitTarget.GetThreatManager().GetOnlineContainer().Empty())
             {
                 // Also use this effect to set the taunter's threat to the taunted creature's highest value
-                float myThreat = unitTarget.GetThreatManager().getThreat(m_caster);
-                float topThreat = unitTarget.GetThreatManager().getOnlineContainer().getMostHated().getThreat();
+                float myThreat = unitTarget.GetThreatManager().GetThreat(m_caster);
+                float topThreat = unitTarget.GetThreatManager().GetOnlineContainer().GetMostHated().GetThreat();
                 if (topThreat > myThreat)
-                    unitTarget.GetThreatManager().addThreat(m_caster, topThreat - myThreat);
+                    unitTarget.GetThreatManager().AddThreat(m_caster, topThreat - myThreat);
 
                 //Set aggro victim to caster
-                HostileReference forcedVictim = unitTarget.GetThreatManager().getOnlineContainer().getReferenceByTarget(m_caster);
+                HostileReference forcedVictim = unitTarget.GetThreatManager().GetOnlineContainer().GetReferenceByTarget(m_caster);
                 if (forcedVictim != null)
-                    unitTarget.GetThreatManager().setCurrentVictim(forcedVictim);
+                    unitTarget.GetThreatManager().SetCurrentVictim(forcedVictim);
             }
 
             if (unitTarget.ToCreature().IsAIEnabled && !unitTarget.ToCreature().HasReactState(ReactStates.Passive))
@@ -2774,8 +2774,8 @@ namespace Game.Spells
                 {
                     SpellInfo curSpellInfo = spell.m_spellInfo;
                     // check if we can interrupt spell
-                    if ((spell.getState() == SpellState.Casting
-                        || (spell.getState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
+                    if ((spell.GetState() == SpellState.Casting
+                        || (spell.GetState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && (curSpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                         && ((i == CurrentSpellTypes.Generic && curSpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Interrupt))
                         || (i == CurrentSpellTypes.Channeled && curSpellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Interrupt))))
@@ -4329,7 +4329,7 @@ namespace Game.Spells
                 return;
 
             Group group = player.GetGroup();
-            if (!group || (group.isRaidGroup() && !group.IsLeader(player.GetGUID()) && !group.IsAssistant(player.GetGUID())))
+            if (!group || (group.IsRaidGroup() && !group.IsLeader(player.GetGUID()) && !group.IsAssistant(player.GetGUID())))
                 return;
 
             float x, y, z;
@@ -4513,7 +4513,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            unitTarget.GetThreatManager().modifyThreatPercent(m_caster, damage);
+            unitTarget.GetThreatManager().ModifyThreatPercent(m_caster, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.TransDoor)]

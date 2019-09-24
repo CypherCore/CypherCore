@@ -188,7 +188,7 @@ namespace Game.Network.Packets
         {
             data.WriteUInt32(moveSpline.GetId());                                         // ID
 
-            if (!moveSpline.isCyclic())                                                 // Destination
+            if (!moveSpline.IsCyclic())                                                 // Destination
                 data.WriteVector3(moveSpline.FinalDestination());
             else
                 data.WriteVector3(Vector3.Zero);
@@ -199,17 +199,17 @@ namespace Game.Network.Packets
             if (hasSplineMove)
             {
                 data.WriteUInt32((uint)moveSpline.splineflags.Flags);   // SplineFlags
-                data.WriteInt32(moveSpline.timePassed());               // Elapsed
+                data.WriteInt32(moveSpline.TimePassed());               // Elapsed
                 data.WriteInt32(moveSpline.Duration());                // Duration
                 data.WriteFloat(1.0f);                                  // DurationModifier
                 data.WriteFloat(1.0f);                                  // NextDurationModifier
                 data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
-                data.WriteBits(moveSpline.getPath().Length, 16);
+                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
+                data.WriteBits(moveSpline.GetPath().Length, 16);
                 data.WriteBits((byte)moveSpline.spline.m_mode, 2);      // Mode
                 data.WriteBit(0);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
-                data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.Parabolic));        // HasJumpExtraData
+                data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic));        // HasJumpExtraData
                 data.FlushBits();
 
                 //if (HasSplineFilterKey)
@@ -241,7 +241,7 @@ namespace Game.Network.Packets
                 if (hasFadeObjectTime)
                     data.WriteInt32(moveSpline.effect_start_time);     // FadeObjectTime
 
-                foreach (var vec in moveSpline.getPath())
+                foreach (var vec in moveSpline.GetPath())
                     data.WriteVector3(vec);
 
                 if (moveSpline.spell_effect_extra.HasValue)
@@ -252,7 +252,7 @@ namespace Game.Network.Packets
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ParabolicCurveId);
                 }
 
-                if (moveSpline.splineflags.hasFlag(SplineFlag.Parabolic))
+                if (moveSpline.splineflags.HasFlag(SplineFlag.Parabolic))
                 {
                     data.WriteFloat(moveSpline.vertical_acceleration);
                     data.WriteInt32(moveSpline.effect_start_time);
@@ -263,8 +263,8 @@ namespace Game.Network.Packets
 
         public static void WriteCreateObjectAreaTriggerSpline(Spline spline, WorldPacket data)
         {
-            data.WriteBits(spline.getPoints().Length, 16);
-            foreach (var point in spline.getPoints())
+            data.WriteBits(spline.GetPoints().Length, 16);
+            foreach (var point in spline.GetPoints())
                 data.WriteVector3(point);
         }
 
@@ -344,29 +344,29 @@ namespace Game.Network.Packets
             MovementSpline movementSpline = SplineData.Move;
 
             MoveSplineFlag splineFlags = moveSpline.splineflags;
-            splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.isCyclic());
+            splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.IsCyclic());
             movementSpline.Flags = (uint)(splineFlags.Flags & ~SplineFlag.MaskNoMonsterMove);
             movementSpline.Face = moveSpline.facing.type;
             movementSpline.FaceDirection = moveSpline.facing.angle;
             movementSpline.FaceGUID = moveSpline.facing.target;
             movementSpline.FaceSpot = moveSpline.facing.f;
 
-            if (splineFlags.hasFlag(SplineFlag.Animation))
+            if (splineFlags.HasFlag(SplineFlag.Animation))
             {
-                movementSpline.AnimTier = splineFlags.getAnimTier();
+                movementSpline.AnimTier = splineFlags.GetAnimTier();
                 movementSpline.TierTransStartTime = (uint)moveSpline.effect_start_time;
             }
 
             movementSpline.MoveTime = (uint)moveSpline.Duration();
 
-            if (splineFlags.hasFlag(SplineFlag.Parabolic))
+            if (splineFlags.HasFlag(SplineFlag.Parabolic))
             {
                 movementSpline.JumpExtraData.HasValue = true;
                 movementSpline.JumpExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
                 movementSpline.JumpExtraData.Value.StartTime = (uint)moveSpline.effect_start_time;
             }
 
-            if (splineFlags.hasFlag(SplineFlag.FadeObject))
+            if (splineFlags.HasFlag(SplineFlag.FadeObject))
                 movementSpline.FadeObjectTime = (uint)moveSpline.effect_start_time;
 
             if (moveSpline.spell_effect_extra.HasValue)
@@ -380,19 +380,19 @@ namespace Game.Network.Packets
             }
 
             Spline spline = moveSpline.spline;
-            Vector3[] array = spline.getPoints();
+            Vector3[] array = spline.GetPoints();
 
-            if (splineFlags.hasFlag(SplineFlag.UncompressedPath))
+            if (splineFlags.HasFlag(SplineFlag.UncompressedPath))
             {
-                if (!splineFlags.hasFlag(SplineFlag.Cyclic))
+                if (!splineFlags.HasFlag(SplineFlag.Cyclic))
                 {
-                    int count = spline.getPointCount() - 3;
+                    int count = spline.GetPointCount() - 3;
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 2]);
                 }
                 else
                 {
-                    int count = spline.getPointCount() - 3;
+                    int count = spline.GetPointCount() - 3;
                     movementSpline.Points.Add(array[1]);
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 1]);
@@ -400,8 +400,8 @@ namespace Game.Network.Packets
             }
             else
             {
-                int lastIdx = spline.getPointCount() - 3;
-                Span<Vector3> realPath = new Span<Vector3>(spline.getPoints()).Slice(1);
+                int lastIdx = spline.GetPointCount() - 3;
+                Span<Vector3> realPath = new Span<Vector3>(spline.GetPoints()).Slice(1);
 
                 movementSpline.Points.Add(realPath[lastIdx]);
 

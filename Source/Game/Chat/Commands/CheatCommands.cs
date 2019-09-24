@@ -184,7 +184,7 @@ namespace Game.Chat.Commands
         {
             string argstr = args.NextString();
 
-            Player chr = handler.getSelectedPlayer();
+            Player chr = handler.GetSelectedPlayer();
             if (!chr)
                 chr = handler.GetSession().GetPlayer();
             else if (handler.HasLowerSecurity(chr, ObjectGuid.Empty)) // check online security
@@ -197,7 +197,7 @@ namespace Game.Chat.Commands
             {
                 chr.SetTaxiCheater(false);
                 handler.SendSysMessage(CypherStrings.YouRemoveTaxis, handler.GetNameLink(chr));
-                if (handler.needReportToTarget(chr))
+                if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursTaxisRemoved, handler.GetNameLink());
 
                 return true;
@@ -206,7 +206,7 @@ namespace Game.Chat.Commands
             {
                 chr.SetTaxiCheater(true);
                 handler.SendSysMessage(CypherStrings.YouGiveTaxis, handler.GetNameLink(chr));
-                if (handler.needReportToTarget(chr))
+                if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursTaxisAdded, handler.GetNameLink());
                 return true;
             }
@@ -222,7 +222,7 @@ namespace Game.Chat.Commands
                 return false;
 
             int flag = args.NextInt32();
-            Player chr = handler.getSelectedPlayer();
+            Player chr = handler.GetSelectedPlayer();
             if (!chr)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -232,13 +232,13 @@ namespace Game.Chat.Commands
             if (flag != 0)
             {
                 handler.SendSysMessage(CypherStrings.YouSetExploreAll, handler.GetNameLink(chr));
-                if (handler.needReportToTarget(chr))
+                if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursExploreSetAll, handler.GetNameLink());
             }
             else
             {
                 handler.SendSysMessage(CypherStrings.YouSetExploreNothing, handler.GetNameLink(chr));
-                if (handler.needReportToTarget(chr))
+                if (handler.NeedReportToTarget(chr))
                     chr.SendSysMessage(CypherStrings.YoursExploreSetNothing, handler.GetNameLink());
             }
 

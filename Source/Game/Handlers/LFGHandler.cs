@@ -32,9 +32,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfJoin)]
         void HandleLfgJoin(DFJoin dfJoin)
         {
-            if (!Global.LFGMgr.isOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
+            if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
                 (GetPlayer().GetGroup() && GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
-                (GetPlayer().GetGroup().GetMembersCount() == MapConst.MaxGroupSize || !GetPlayer().GetGroup().isLFGGroup())))
+                (GetPlayer().GetGroup().GetMembersCount() == MapConst.MaxGroupSize || !GetPlayer().GetGroup().IsLFGGroup())))
                 return;
 
             if (dfJoin.Slots.Empty())
@@ -218,7 +218,7 @@ namespace Game
             LfgPartyInfo lfgPartyInfo = new LfgPartyInfo();
 
             // Get the Locked dungeons of the other party members
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player plrg = refe.GetSource();
                 if (!plrg)

@@ -91,7 +91,7 @@ namespace Game
             spell.m_misc.Data0 = packet.Cast.Misc[0];
             spell.m_misc.Data1 = packet.Cast.Misc[1];
             spell.m_castFlagsEx |= SpellCastFlagsEx.UseToySpell;
-            spell.prepare(targets);
+            spell.Prepare(targets);
         }
 
         [WorldPacketHandler(ClientOpcodes.ToyClearFanfare)]

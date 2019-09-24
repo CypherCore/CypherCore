@@ -85,7 +85,7 @@ namespace Game.Entities
             UpdateHonorFields();
 
             // do not reward honor in arenas, but return true to enable onkill spellproc
-            if (InBattleground() && GetBattleground() && GetBattleground().isArena())
+            if (InBattleground() && GetBattleground() && GetBattleground().IsArena())
                 return true;
 
             // Promote to float for calculations
@@ -132,7 +132,7 @@ namespace Game.Entities
                     else
                         victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
 
-                    honor_f = (float)Math.Ceiling(Formulas.hk_honor_at_level_f(k_level) * (v_level - k_grey) / (k_level - k_grey));
+                    honor_f = (float)Math.Ceiling(Formulas.HKHonorAtLevelF(k_level) * (v_level - k_grey) / (k_level - k_grey));
 
                     // count the number of playerkills in one day
                     ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), (ushort)1, true);
@@ -729,7 +729,7 @@ namespace Game.Entities
                 bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
                 // call after remove to be sure that player resurrected for correct cast
-                if (bg.isBattleground() && !IsGameMaster() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
+                if (bg.IsBattleground() && !IsGameMaster() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
                 {
                     if (bg.GetStatus() == BattlegroundStatus.InProgress || bg.GetStatus() == BattlegroundStatus.WaitJoin)
                     {
@@ -752,7 +752,7 @@ namespace Game.Entities
             if (HasAura(26013))
                 return false;
 
-            if (bg.isArena() && !GetSession().HasPermission(RBACPermissions.JoinArenas))
+            if (bg.IsArena() && !GetSession().HasPermission(RBACPermissions.JoinArenas))
                 return false;
 
             if (bg.IsRandom() && !GetSession().HasPermission(RBACPermissions.JoinRandomBg))

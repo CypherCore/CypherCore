@@ -580,7 +580,7 @@ namespace Game.Entities
             {
                 case TypeId.Unit:
                     Global.ScriptMgr.OnQuestAccept(this, (questGiver.ToCreature()), quest);
-                    questGiver.ToCreature().GetAI().sQuestAccept(this, quest);
+                    questGiver.ToCreature().GetAI().QuestAccept(this, quest);
                     break;
                 case TypeId.Item:
                 case TypeId.Container:
@@ -2077,7 +2077,7 @@ namespace Game.Entities
             var group = GetGroup();
             if (group)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player player = refe.GetSource();
 
@@ -2216,7 +2216,7 @@ namespace Game.Entities
 
                 // just if !ingroup || !noraidgroup || raidgroup
                 QuestStatusData q_status = m_QuestStatus[questid];
-                if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().isRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
+                if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().IsRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
                 {
                     if (qInfo.HasSpecialFlag(QuestSpecialFlags.Kill))// && !qInfo.HasSpecialFlag(QuestSpecialFlags.Cast))
                     {
@@ -2263,7 +2263,7 @@ namespace Game.Entities
 
                 // just if !ingroup || !noraidgroup || raidgroup
                 QuestStatusData q_status = m_QuestStatus[questid];
-                if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().isRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
+                if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().IsRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
                 {
                     foreach (QuestObjective obj in qInfo.Objectives)
                     {
@@ -2550,7 +2550,7 @@ namespace Game.Entities
                         continue;
 
                     // hide quest if player is in raid-group and quest is no raid quest
-                    if (GetGroup() != null && GetGroup().isRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                             continue;
 
@@ -2943,7 +2943,7 @@ namespace Game.Entities
                     if (qInfo == null)
                         continue;
 
-                    if (GetGroup() != null && GetGroup().isRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
                     foreach (QuestObjective obj in qInfo.Objectives)

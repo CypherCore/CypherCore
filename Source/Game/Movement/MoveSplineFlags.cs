@@ -26,12 +26,12 @@ namespace Game.Movement
         public MoveSplineFlag(SplineFlag f) { Flags = f; }
         public MoveSplineFlag(MoveSplineFlag f) { Flags = f.Flags; }
 
-        public bool isSmooth() { return Flags.HasAnyFlag(SplineFlag.Catmullrom); }
-        public bool isLinear() { return !isSmooth(); }
+        public bool IsSmooth() { return Flags.HasAnyFlag(SplineFlag.Catmullrom); }
+        public bool IsLinear() { return !IsSmooth(); }
 
-        public byte getAnimTier() { return animTier; }
-        public bool hasAllFlags(SplineFlag f) { return (Flags & f) == f; }
-        public bool hasFlag(SplineFlag f) { return (Flags & f) != 0; }
+        public byte GetAnimTier() { return animTier; }
+        public bool HasAllFlags(SplineFlag f) { return (Flags & f) == f; }
+        public bool HasFlag(SplineFlag f) { return (Flags & f) != 0; }
 
         public void SetUnsetFlag(SplineFlag f, bool Set = true)
         {

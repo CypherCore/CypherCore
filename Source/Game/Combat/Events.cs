@@ -25,16 +25,16 @@ namespace Game.Combat
         {
             iType = pType;
         }
-        public UnitEventTypes getType()
+        public UnitEventTypes GetEventType()
         {
             return iType;
         }
-        bool matchesTypeMask(uint pMask)
+        bool MatchesTypeMask(uint pMask)
         {
             return Convert.ToBoolean((uint)iType & pMask);
         }
 
-        void setType(UnitEventTypes pType)
+        void SetEventType(UnitEventTypes pType)
         {
             iType = pType;
         }
@@ -67,32 +67,32 @@ namespace Game.Combat
             iBValue = pValue;
         }
 
-        public float getFValue()
+        public float GetFValue()
         {
             return iFValue;
         }
 
-        bool getBValue()
+        bool GetBValue()
         {
             return iBValue;
         }
 
-        void setBValue(bool pValue)
+        void SetBValue(bool pValue)
         {
             iBValue = pValue;
         }
 
-        public HostileReference getReference()
+        public HostileReference GetReference()
         {
             return iHostileReference;
         }
 
-        public void setThreatManager(ThreatManager pThreatManager)
+        public void SetThreatManager(ThreatManager pThreatManager)
         {
             iThreatManager = pThreatManager;
         }
 
-        ThreatManager getThreatManager()
+        ThreatManager GetThreatManager()
         {
             return iThreatManager;
         }

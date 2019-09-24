@@ -656,7 +656,7 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class npc_crok_scourgebane : npc_escortAI
+    class npc_crok_scourgebane : NpcEscortAI
     {
         public npc_crok_scourgebane(Creature creature) : base(creature)
         {

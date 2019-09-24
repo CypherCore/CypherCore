@@ -1083,8 +1083,8 @@ namespace Game
             if (!EnableHeight)
                 Log.outError(LogFilter.ServerLoading, "VMap height checking Disabled! Creatures movements and other various things WILL be broken! Expect no support.");
 
-            Global.VMapMgr.setEnableLineOfSightCalc(EnableLOS);
-            Global.VMapMgr.setEnableHeightCalc(EnableHeight);
+            Global.VMapMgr.SetEnableLineOfSightCalc(EnableLOS);
+            Global.VMapMgr.SetEnableHeightCalc(EnableHeight);
 
             Log.outInfo(LogFilter.ServerLoading, "VMap support included. LineOfSight: {0}, getHeight: {1}, indoorCheck: {2}", EnableLOS, EnableHeight, EnableIndoor);
             Log.outInfo(LogFilter.ServerLoading, @"VMap data directory is: {0}\vmaps", GetDataPath());
@@ -1807,7 +1807,7 @@ namespace Game
 
         void InitWeeklyQuestResetTime()
         {
-            long wstime = getWorldState(WorldStates.WeeklyQuestResetTime);
+            long wstime = GetWorldState(WorldStates.WeeklyQuestResetTime);
             long curtime = Time.UnixTime;
             m_NextWeeklyQuestReset = wstime < curtime ? curtime : wstime;
         }
@@ -1844,14 +1844,14 @@ namespace Game
 
         void InitMonthlyQuestResetTime()
         {
-            long wstime = getWorldState(WorldStates.MonthlyQuestResetTime);
+            long wstime = GetWorldState(WorldStates.MonthlyQuestResetTime);
             long curtime = Time.UnixTime;
             m_NextMonthlyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
         void InitRandomBGResetTime()
         {
-            long bgtime = getWorldState(WorldStates.BGDailyResetTime);
+            long bgtime = GetWorldState(WorldStates.BGDailyResetTime);
             if (bgtime == 0)
                 m_NextRandomBGReset = Time.UnixTime;         // game time not yet init
 
@@ -1869,12 +1869,12 @@ namespace Game
             m_NextRandomBGReset = bgtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
             if (bgtime == 0)
-                setWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
+                SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
         void InitGuildResetTime()
         {
-            long gtime = getWorldState(WorldStates.GuildDailyResetTime);
+            long gtime = GetWorldState(WorldStates.GuildDailyResetTime);
             if (gtime == 0)
                 m_NextGuildReset = Time.UnixTime;         // game time not yet init
 
@@ -1888,12 +1888,12 @@ namespace Game
             m_NextGuildReset = gtime < curTime ? nextDayResetTime - Time.Day : nextDayResetTime;
 
             if (gtime == 0)
-                setWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
+                SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
         }
 
         void InitCurrencyResetTime()
         {
-            long currencytime = getWorldState(WorldStates.CurrencyResetTime);
+            long currencytime = GetWorldState(WorldStates.CurrencyResetTime);
             if (currencytime == 0)
                 m_NextCurrencyReset = Time.UnixTime;         // game time not yet init
 
@@ -1910,7 +1910,7 @@ namespace Game
             m_NextCurrencyReset = currencytime < curTime ? nextWeekResetTime - WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval) * Time.Day : nextWeekResetTime;
 
             if (currencytime == 0)
-                setWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
+                SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
         void DailyReset()
@@ -1941,7 +1941,7 @@ namespace Game
                     session.GetPlayer().ResetCurrencyWeekCap();
 
             m_NextCurrencyReset = m_NextCurrencyReset + Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
-            setWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
+            SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
         public void LoadDBAllowedSecurityLevel()
@@ -1975,7 +1975,7 @@ namespace Game
                     session.GetPlayer().ResetWeeklyQuestStatus();
 
             m_NextWeeklyQuestReset = (m_NextWeeklyQuestReset + Time.Week);
-            setWorldState(WorldStates.WeeklyQuestResetTime, (ulong)m_NextWeeklyQuestReset);
+            SetWorldState(WorldStates.WeeklyQuestResetTime, (ulong)m_NextWeeklyQuestReset);
 
             // change available weeklies
             Global.PoolMgr.ChangeWeeklyQuests();
@@ -2003,7 +2003,7 @@ namespace Game
             // plan next reset time
             m_NextMonthlyQuestReset = (curTime >= nextMonthResetTime) ? nextMonthResetTime + Time.Month : nextMonthResetTime;
 
-            setWorldState(WorldStates.MonthlyQuestResetTime, (ulong)m_NextMonthlyQuestReset);
+            SetWorldState(WorldStates.MonthlyQuestResetTime, (ulong)m_NextMonthlyQuestReset);
         }
 
         public void ResetEventSeasonalQuests(ushort event_id)
@@ -2029,18 +2029,18 @@ namespace Game
                     session.GetPlayer().SetRandomWinner(false);
 
             m_NextRandomBGReset = m_NextRandomBGReset + Time.Day;
-            setWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
+            SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
         void ResetGuildCap()
         {
             m_NextGuildReset = (m_NextGuildReset + Time.Day);
-            setWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
-            ulong week = getWorldState(WorldStates.GuildWeeklyResetTime);
+            SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
+            ulong week = GetWorldState(WorldStates.GuildWeeklyResetTime);
             week = week < 7 ? week + 1 : 1;
 
             Log.outInfo(LogFilter.Server, "Guild Daily Cap reset. Week: {0}", week == 1);
-            setWorldState(WorldStates.GuildWeeklyResetTime, week);
+            SetWorldState(WorldStates.GuildWeeklyResetTime, week);
             Global.GuildMgr.ResetTimes(week == 1);
         }
 
@@ -2101,12 +2101,12 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} world states in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void setWorldState(WorldStates index, ulong value)
+        public void SetWorldState(WorldStates index, ulong value)
         {
-            setWorldState((uint)index, value);
+            SetWorldState((uint)index, value);
         }
 
-        public void setWorldState(uint index, object value)
+        public void SetWorldState(uint index, object value)
         {
             PreparedStatement stmt;
 
@@ -2130,12 +2130,12 @@ namespace Game
             m_worldstates[index] = Convert.ToUInt32(value);
         }
 
-        public uint getWorldState(WorldStates index)
+        public uint GetWorldState(WorldStates index)
         {
-            return getWorldState((uint)index);
+            return GetWorldState((uint)index);
         }
 
-        public uint getWorldState(uint index)
+        public uint GetWorldState(uint index)
         {
             return m_worldstates.LookupByKey(index);
         }

@@ -29,7 +29,7 @@ namespace Game.Chat
         [CommandNonGroup("cooldown", RBACPermissions.CommandCooldown)]
         static bool HandleCooldownCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -53,7 +53,7 @@ namespace Game.Chat
             else
             {
                 // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-                uint spellIid = handler.extractSpellIdFromLink(args);
+                uint spellIid = handler.ExtractSpellIdFromLink(args);
                 if (spellIid == 0)
                     return false;
 
@@ -74,7 +74,7 @@ namespace Game.Chat
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
         static bool Auracommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -83,7 +83,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo != null)
@@ -98,7 +98,7 @@ namespace Game.Chat
         [CommandNonGroup("unaura", RBACPermissions.CommandUnaura)]
         static bool UnAura(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -114,7 +114,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.extractSpellIdFromLink(args);
+            uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -126,7 +126,7 @@ namespace Game.Chat
         [CommandNonGroup("maxskill", RBACPermissions.CommandMaxskill)]
         static bool HandleMaxSkillCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.getSelectedPlayerOrSelf();
+            Player player = handler.GetSelectedPlayerOrSelf();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -142,7 +142,7 @@ namespace Game.Chat
         static bool SetSkill(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hskill:skill_id|h[name]|h|r
-            string skillStr = handler.extractKeyFromLink(args, "Hskill");
+            string skillStr = handler.ExtractKeyFromLink(args, "Hskill");
             if (string.IsNullOrEmpty(skillStr))
                 return false;
 
@@ -156,7 +156,7 @@ namespace Game.Chat
             if (level == 0)
                 return false;
 
-            Player target = handler.getSelectedPlayerOrSelf();
+            Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

@@ -1292,7 +1292,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.ArenaType: // 24
                     {
                         Battleground bg = referencePlayer.GetBattleground();
-                        if (!bg || !bg.isArena() || bg.GetArenaType() != (ArenaTypes)reqValue)
+                        if (!bg || !bg.IsArena() || bg.GetArenaType() != (ArenaTypes)reqValue)
                             return false;
                         break;
                     }

@@ -40,7 +40,7 @@ namespace Game.Chat
 
             // units
             Player player = handler.GetPlayer();
-            Unit target = handler.getSelectedUnit();
+            Unit target = handler.GetSelectedUnit();
             if (player == null || target == null)
             {
                 handler.SendSysMessage("Invalid target/source selection.");
@@ -187,7 +187,7 @@ namespace Game.Chat
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
             handler.SendSysMessage("mmap stats:");
             handler.SendSysMessage("  global mmap pathfinding is {0}abled", Global.DisableMgr.IsPathfindingEnabled(player.GetMapId()) ? "En" : "Dis");
-            handler.SendSysMessage(" {0} maps loaded with {1} tiles overall", Global.MMapMgr.getLoadedMapsCount(), Global.MMapMgr.getLoadedTilesCount());
+            handler.SendSysMessage(" {0} maps loaded with {1} tiles overall", Global.MMapMgr.GetLoadedMapsCount(), Global.MMapMgr.GetLoadedTilesCount());
 
             Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
             if (navmesh == null)

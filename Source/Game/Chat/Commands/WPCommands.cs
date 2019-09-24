@@ -39,7 +39,7 @@ namespace Game.Chat.Commands
                 path_number = args.NextString();
 
             uint point = 0;
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
 
             PreparedStatement stmt;
 
@@ -365,7 +365,7 @@ namespace Game.Chat.Commands
             string path_number = args.NextString();
 
             uint pathid;
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
 
             // Did player provide a path_id?
             if (string.IsNullOrEmpty(path_number))
@@ -450,7 +450,7 @@ namespace Game.Chat.Commands
             // . variable lowguid is filled with the GUID of the NPC
             uint pathid;
             uint point;
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
 
             // User did select a visual waypoint?
             if (!target || target.GetEntry() != 1)
@@ -625,7 +625,7 @@ namespace Game.Chat.Commands
             string guid_str = args.NextString();
 
             uint pathid = 0;
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
 
             // Did player provide a PathID?
 
@@ -973,7 +973,7 @@ namespace Game.Chat.Commands
         [Command("unload", RBACPermissions.CommandWpUnload)]
         static bool HandleWpUnLoadCommand(StringArguments args, CommandHandler handler)
         {
-            Creature target = handler.getSelectedCreature();
+            Creature target = handler.GetSelectedCreature();
             if (!target)
             {
                 handler.SendSysMessage("|cff33ffffYou must select a target.|r");

@@ -867,7 +867,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
     }
 
     [Script]
-    class npc_mimirons_inferno : npc_escortAI
+    class npc_mimirons_inferno : NpcEscortAI
     {
         public npc_mimirons_inferno(Creature creature)
             : base(creature)
@@ -893,7 +893,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
         {
             base.UpdateAI(diff);
 
-            if (!HasEscortState(eEscortState.Escorting))
+            if (!HasEscortState(EscortState.Escorting))
                 Start(false, true, ObjectGuid.Empty, null, false, true);
             else
             {
@@ -1034,7 +1034,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             }
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == GossipIds.MenuLoreKeeper && gossipListId == GossipIds.OptionLoreKeeper)
             {

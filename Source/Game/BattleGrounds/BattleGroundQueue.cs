@@ -97,7 +97,7 @@ namespace Game.BattleGrounds
             //add players from group to ginfo
             if (grp)
             {
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
+                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
                 {
                     Player member = refe.GetSource();
                     if (!member)
@@ -385,7 +385,7 @@ namespace Game.BattleGrounds
                 BattlegroundBracketId bracket_id = bg.GetBracketId();
 
                 // set ArenaTeamId for rated matches
-                if (bg.isArena() && bg.isRated())
+                if (bg.IsArena() && bg.IsRated())
                     bg.SetArenaTeamIdForTeam(ginfo.Team, ginfo.ArenaTeamId);
 
                 ginfo.RemoveInviteTime = GameTime.GetGameTimeMS() + BattlegroundConst.InviteAcceptWaitTime;
@@ -644,7 +644,7 @@ namespace Game.BattleGrounds
                     return false;
             }
             //allow 1v0 if debug bg
-            if (Global.BattlegroundMgr.isTesting() && (m_SelectionPools[TeamId.Alliance].GetPlayerCount() != 0 || m_SelectionPools[TeamId.Horde].GetPlayerCount() != 0))
+            if (Global.BattlegroundMgr.IsTesting() && (m_SelectionPools[TeamId.Alliance].GetPlayerCount() != 0 || m_SelectionPools[TeamId.Horde].GetPlayerCount() != 0))
                 return true;
             //return true if there are enough players in selection pools - enable to work .debug bg command correctly
             return m_SelectionPools[TeamId.Alliance].GetPlayerCount() >= minPlayers && m_SelectionPools[TeamId.Horde].GetPlayerCount() >= minPlayers;
@@ -745,7 +745,7 @@ namespace Game.BattleGrounds
             foreach (var bg in bgQueues)
             {
                 // DO NOT allow queue manager to invite new player to rated games
-                if (!bg.isRated() && bg.GetTypeID() == bgTypeId && bg.GetBracketId() == bracket_id &&
+                if (!bg.IsRated() && bg.GetTypeID() == bgTypeId && bg.GetBracketId() == bracket_id &&
                     bg.GetStatus() > BattlegroundStatus.WaitQueue && bg.GetStatus() < BattlegroundStatus.WaitLeave)
                 {
                     // clear selection pools
@@ -787,18 +787,18 @@ namespace Game.BattleGrounds
             uint MinPlayersPerTeam = bg_template.GetMinPlayersPerTeam();
             uint MaxPlayersPerTeam = bg_template.GetMaxPlayersPerTeam();
 
-            if (bg_template.isArena())
+            if (bg_template.IsArena())
             {
                 MaxPlayersPerTeam = arenaType;
-                MinPlayersPerTeam = (uint)(Global.BattlegroundMgr.isArenaTesting() ? 1 : arenaType);
+                MinPlayersPerTeam = (uint)(Global.BattlegroundMgr.IsArenaTesting() ? 1 : arenaType);
             }
-            else if (Global.BattlegroundMgr.isTesting())
+            else if (Global.BattlegroundMgr.IsTesting())
                 MinPlayersPerTeam = 1;
 
             m_SelectionPools[TeamId.Alliance].Init();
             m_SelectionPools[TeamId.Horde].Init();
 
-            if (bg_template.isBattleground())
+            if (bg_template.IsBattleground())
             {
                 if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
                 {
@@ -826,7 +826,7 @@ namespace Game.BattleGrounds
             {
                 // if there are enough players in pools, start new Battleground or non rated arena
                 if (CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam)
-                    || (bg_template.isArena() && CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam)))
+                    || (bg_template.IsArena() && CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam)))
                 {
                     // we successfully created a pool
                     Battleground bg2 = Global.BattlegroundMgr.CreateNewBattleground(bgTypeId, bracketEntry, (ArenaTypes)arenaType, false);
@@ -846,7 +846,7 @@ namespace Game.BattleGrounds
                     bg2.StartBattleground();
                 }
             }
-            else if (bg_template.isArena())
+            else if (bg_template.IsArena())
             {
                 // found out the minimum and maximum ratings the newly added team should battle against
                 // arenaRating is the rating of the latest joined team, or 0
@@ -1166,7 +1166,7 @@ namespace Game.BattleGrounds
                     player.RemoveBattlegroundQueueId(m_BgQueueTypeId);
                     bgQueue.RemovePlayer(m_PlayerGuid, true);
                     //update queues if Battleground isn't ended
-                    if (bg && bg.isBattleground() && bg.GetStatus() != BattlegroundStatus.WaitLeave)
+                    if (bg && bg.IsBattleground() && bg.GetStatus() != BattlegroundStatus.WaitLeave)
                         Global.BattlegroundMgr.ScheduleQueueUpdate(0, 0, m_BgQueueTypeId, m_BgTypeId, bg.GetBracketId());
 
                     BattlefieldStatusNone battlefieldStatus;

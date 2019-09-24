@@ -222,7 +222,7 @@ namespace Game.Chat
                 return false;
 
             // Can be NULL at console call
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
 
             string namePart = args.NextString().ToLower();
 
@@ -490,7 +490,7 @@ namespace Game.Chat
                 return false;
 
             // can be NULL at console call
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
 
             string namePart = args.NextString().ToLower();
 
@@ -620,7 +620,7 @@ namespace Game.Chat
                 return false;
 
             // can be NULL in console call
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
 
             string namePart = args.NextString();
 
@@ -786,7 +786,7 @@ namespace Game.Chat
                 return false;
 
             // can be NULL in console call
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
 
             // title name have single string arg for player name
             string targetName = target ? target.GetName() : "NAME";
@@ -943,7 +943,7 @@ namespace Game.Chat
                 int limit;
                 string limitStr;
 
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
                 if (args.Empty())
                 {
                     // NULL only if used from console
@@ -1058,7 +1058,7 @@ namespace Game.Chat
                     return false;
 
                 // can be NULL at console call
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
 
                 string namePart = args.NextString();
 
@@ -1157,7 +1157,7 @@ namespace Game.Chat
                     return false;
 
                 // can be NULL at console call
-                Player target = handler.getSelectedPlayer();
+                Player target = handler.GetSelectedPlayer();
 
                 uint id = args.NextUInt32();
 

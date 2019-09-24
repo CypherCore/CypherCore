@@ -34,14 +34,14 @@ namespace Game.Chat.Commands
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
             string tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.extractQuotedArg(tail1);
+            string subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
@@ -49,7 +49,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.extractQuotedArg(tail2);
+            string text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
@@ -63,7 +63,7 @@ namespace Game.Chat.Commands
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.playerLink(targetName);
+            string nameLink = handler.PlayerLink(targetName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -75,14 +75,14 @@ namespace Game.Chat.Commands
             Player receiver;
             ObjectGuid receiverGuid;
             string receiverName;
-            if (!handler.extractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
+            if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
                 return false;
 
             string tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.extractQuotedArg(tail1);
+            string subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
@@ -90,7 +90,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.extractQuotedArg(tail2);
+            string text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
@@ -164,7 +164,7 @@ namespace Game.Chat.Commands
             draft.SendMailTo(trans, new MailReceiver(receiver, receiverGuid.GetCounter()), sender);
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.playerLink(receiverName);
+            string nameLink = handler.PlayerLink(receiverName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -177,14 +177,14 @@ namespace Game.Chat.Commands
             Player receiver;
             ObjectGuid receiverGuid;
             string receiverName;
-            if (!handler.extractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
+            if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
                 return false;
 
             string tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.extractQuotedArg(tail1);
+            string subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
@@ -192,7 +192,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.extractQuotedArg(tail2);
+            string text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
@@ -213,7 +213,7 @@ namespace Game.Chat.Commands
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.playerLink(receiverName);
+            string nameLink = handler.PlayerLink(receiverName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -223,7 +223,7 @@ namespace Game.Chat.Commands
         {
             // - Find the player
             Player player;
-            if (!handler.extractPlayerTarget(args, out player))
+            if (!handler.ExtractPlayerTarget(args, out player))
                 return false;
 
             string msgStr = args.NextString("");
@@ -231,7 +231,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // Check that he is not logging out.
-            if (player.GetSession().isLogingOut())
+            if (player.GetSession().IsLogingOut())
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;

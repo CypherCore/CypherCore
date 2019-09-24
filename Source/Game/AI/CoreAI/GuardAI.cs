@@ -37,9 +37,9 @@ namespace Game.AI
             if (!obj.IsTypeMask(TypeMask.Unit))
                 return false;
 
-            var threatList = me.GetThreatManager().getThreatList();
+            var threatList = me.GetThreatManager().GetThreatList();
             foreach (var refe in threatList)
-                if (refe.getUnitGuid() == obj.GetGUID())
+                if (refe.GetUnitGuid() == obj.GetGUID())
                     return true;
 
             return false;

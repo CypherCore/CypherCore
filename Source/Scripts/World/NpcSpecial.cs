@@ -1170,7 +1170,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_garments_of_quests : npc_escortAI
+    class npc_garments_of_quests : NpcEscortAI
     {
         public npc_garments_of_quests(Creature creature) : base(creature)
         {
@@ -1582,7 +1582,7 @@ namespace Scripts.World.NpcSpecial
                             {
                                 Unit unit = Global.ObjAccessor.GetUnit(me, pair.Key);
                                 if (unit)
-                                    unit.GetHostileRefManager().deleteReference(me);
+                                    unit.GetHostileRefManager().DeleteReference(me);
 
                                 _damageTimes.Remove(pair.Key);
                             }
@@ -2222,7 +2222,7 @@ namespace Scripts.World.NpcSpecial
             });
         }
 
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             switch (gossipListId)
             {

@@ -43,10 +43,10 @@ namespace Game.Entities
 
             // Search in threat list
             ObjectGuid guid = who.GetGUID();
-            foreach (var refe in GetThreatManager().getThreatList())
+            foreach (var refe in GetThreatManager().GetThreatList())
             {
                 // Return true if the unit matches
-                if (refe != null && refe.getUnitGuid() == guid)
+                if (refe != null && refe.GetUnitGuid() == guid)
                     return true;
             }
 
@@ -60,18 +60,18 @@ namespace Game.Entities
 
         public void SendChangeCurrentVictim(HostileReference pHostileReference)
         {
-            if (!GetThreatManager().isThreatListEmpty())
+            if (!GetThreatManager().IsThreatListEmpty())
             {
                 HighestThreatUpdate packet = new HighestThreatUpdate();
                 packet.UnitGUID = GetGUID();
-                packet.HighestThreatGUID = pHostileReference.getUnitGuid();
+                packet.HighestThreatGUID = pHostileReference.GetUnitGuid();
 
-                var refeList = GetThreatManager().getThreatList();
+                var refeList = GetThreatManager().GetThreatList();
                 foreach (var refe in refeList)
                 {
                     ThreatInfo info = new ThreatInfo();
-                    info.UnitGUID = refe.getUnitGuid();
-                    info.Threat = (long)refe.getThreat() * 100;
+                    info.UnitGUID = refe.GetUnitGuid();
+                    info.Threat = (long)refe.GetThreat() * 100;
                     packet.ThreatList.Add(info);
                 }
                 SendMessageToSet(packet, false);
@@ -108,7 +108,7 @@ namespace Game.Entities
                     ++i;
             }
 
-            GetHostileRefManager().deleteReferencesForFaction(factionId);
+            GetHostileRefManager().DeleteReferencesForFaction(factionId);
 
             foreach (var control in m_Controlled)
                 control.StopAttackFaction(factionId);
@@ -136,22 +136,22 @@ namespace Game.Entities
         {
             ThreatRemove packet = new ThreatRemove();
             packet.UnitGUID = GetGUID();
-            packet.AboutGUID = pHostileReference.getUnitGuid();
+            packet.AboutGUID = pHostileReference.GetUnitGuid();
             SendMessageToSet(packet, false);
         }
 
         void SendThreatListUpdate()
         {
-            if (!GetThreatManager().isThreatListEmpty())
+            if (!GetThreatManager().IsThreatListEmpty())
             {
                 ThreatUpdate packet = new ThreatUpdate();
                 packet.UnitGUID = GetGUID();
-                var tlist = GetThreatManager().getThreatList();
+                var tlist = GetThreatManager().GetThreatList();
                 foreach (var refe in tlist)
                 {
                     ThreatInfo info = new ThreatInfo();
-                    info.UnitGUID = refe.getUnitGuid();
-                    info.Threat = (long)refe.getThreat() * 100;
+                    info.UnitGUID = refe.GetUnitGuid();
+                    info.Threat = (long)refe.GetThreat() * 100;
                     packet.ThreatList.Add(info);
                 }
                 SendMessageToSet(packet, false);
@@ -160,9 +160,9 @@ namespace Game.Entities
 
         public void DeleteThreatList()
         {
-            if (CanHaveThreatList(true) && !threatManager.isThreatListEmpty())
+            if (CanHaveThreatList(true) && !threatManager.IsThreatListEmpty())
                 SendClearThreatList();
-            threatManager.clearReferences();
+            threatManager.ClearReferences();
         }
 
         public void TauntApply(Unit taunter)
@@ -208,7 +208,7 @@ namespace Game.Entities
             if (!target || target != taunter)
                 return;
 
-            if (threatManager.isThreatListEmpty())
+            if (threatManager.IsThreatListEmpty())
             {
                 if (creature.IsAIEnabled)
                     creature.GetAI().EnterEvadeMode(EvadeReason.NoHostiles);
@@ -326,7 +326,7 @@ namespace Game.Entities
         {
             // Only mobs can manage threat lists
             if (CanHaveThreatList() && !HasUnitState(UnitState.Evade))
-                threatManager.addThreat(victim, fThreat, schoolMask, threatSpell);
+                threatManager.AddThreat(victim, fThreat, schoolMask, threatSpell);
         }
         public float ApplyTotalThreatModifier(float fThreat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal)
         {
@@ -601,7 +601,7 @@ namespace Game.Entities
 
             // melee attack spell casted at main hand attack only - no normal melee dmg dealt
             if (attType == WeaponAttackType.BaseAttack && GetCurrentSpell(CurrentSpellTypes.Melee) != null && !extra)
-                m_currentSpells[CurrentSpellTypes.Melee].cast();
+                m_currentSpells[CurrentSpellTypes.Melee].Cast();
             else
             {
                 // attack can be redirected to another target
@@ -975,7 +975,7 @@ namespace Game.Entities
                         Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
                         if (spell)
                         {
-                            if (spell.getState() == SpellState.Preparing)
+                            if (spell.GetState() == SpellState.Preparing)
                             {
                                 SpellInterruptFlags interruptFlags = spell.m_spellInfo.InterruptFlags;
                                 if (interruptFlags.HasAnyFlag(SpellInterruptFlags.AbortOnDmg))
@@ -1143,7 +1143,7 @@ namespace Game.Entities
                         {
                             Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
                             if (spell != null)
-                                if (spell.getState() == SpellState.Preparing)
+                                if (spell.GetState() == SpellState.Preparing)
                                 {
                                     var interruptFlags = spell.m_spellInfo.InterruptFlags;
                                     if (interruptFlags.HasAnyFlag(SpellInterruptFlags.AbortOnDmg))
@@ -1154,7 +1154,7 @@ namespace Game.Entities
                         }
                         Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (spell1 != null)
-                            if (spell1.getState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Delay) && damagetype != DamageEffectType.DOT)
+                            if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Delay) && damagetype != DamageEffectType.DOT)
                                 spell1.DelayedChannel();
                     }
                 }
@@ -1474,13 +1474,13 @@ namespace Game.Entities
                 {
                     Loot loot = creature.loot;
 
-                    loot.clear();
+                    loot.Clear();
                     uint lootid = creature.GetCreatureTemplate().LootId;
                     if (lootid != 0)
                         loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode());
 
                     if (creature.GetLootMode() > 0)
-                        loot.generateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+                        loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
                     if (group)
                     {
@@ -1490,7 +1490,7 @@ namespace Game.Entities
                             group.SendLooter(creature, null);
 
                         // Update round robin looter only if the creature had loot
-                        if (!loot.empty())
+                        if (!loot.Empty())
                             group.UpdateLooterGuid(creature);
                     }
                 }
@@ -1572,7 +1572,7 @@ namespace Game.Entities
                     creature.DeleteThreatList();
 
                     // must be after setDeathState which resets dynamic flags
-                    if (!creature.loot.isLooted())
+                    if (!creature.loot.IsLooted())
                         creature.AddDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();
@@ -1798,7 +1798,7 @@ namespace Game.Entities
             List<Unit> nearMembers = new List<Unit>();
             // reserve place for players and pets because resizing vector every unit push is unefficient (vector is reallocated then)
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
+            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player target = refe.GetSource();
                 if (target)

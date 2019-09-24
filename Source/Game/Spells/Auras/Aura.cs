@@ -2715,7 +2715,7 @@ namespace Game.Spells
             if (ReferenceEquals(first, other))
                 return true;
 
-            if ((object)first == null || (object)other == null)
+            if (ReferenceEquals(first, null) || ReferenceEquals(other, null))
                 return false;
 
             return first.Equals(other);

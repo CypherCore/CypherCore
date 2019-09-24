@@ -98,7 +98,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.getSelectedPlayer();
+            Player target = handler.GetSelectedPlayer();
             if (target == null)
                 target = handler.GetPlayer();
 

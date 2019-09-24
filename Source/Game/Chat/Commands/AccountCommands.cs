@@ -467,7 +467,7 @@ namespace Game.Chat
 
                 if (string.IsNullOrEmpty(exp))
                 {
-                    Player player = handler.getSelectedPlayer();
+                    Player player = handler.GetSelectedPlayer();
                     if (!player)
                         return false;
 
@@ -531,7 +531,7 @@ namespace Game.Chat
 
                 if (string.IsNullOrEmpty(arg3))
                 {
-                    if (!handler.getSelectedPlayer())
+                    if (!handler.GetSelectedPlayer())
                         return false;
                     isAccountNameGiven = false;
                 }
@@ -560,7 +560,7 @@ namespace Game.Chat
                 }
 
                 // command.getSession() == NULL only for console
-                targetAccountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(targetAccountName) : handler.getSelectedPlayer().GetSession().GetAccountId();
+                targetAccountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(targetAccountName) : handler.GetSelectedPlayer().GetSession().GetAccountId();
                 if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out int gmRealmID))
                     return false;
 
@@ -602,7 +602,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                RBACData rbac = isAccountNameGiven ? null : handler.getSelectedPlayer().GetSession().GetRBACData();
+                RBACData rbac = isAccountNameGiven ? null : handler.GetSelectedPlayer().GetSession().GetRBACData();
                 Global.AccountMgr.UpdateAccountAccess(rbac, targetAccountId, (byte)gm, gmRealmID);
                 handler.SendSysMessage(CypherStrings.YouChangeSecurity, targetAccountName, gm);
                 return true;

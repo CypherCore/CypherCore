@@ -184,17 +184,17 @@ namespace Game.AI
         //Drops all threat to 0%. Does not remove players from the threat list
         public void DoResetThreat()
         {
-            if (!me.CanHaveThreatList() || me.GetThreatManager().isThreatListEmpty())
+            if (!me.CanHaveThreatList() || me.GetThreatManager().IsThreatListEmpty())
             {
                 Log.outError(LogFilter.Scripts, "DoResetThreat called for creature that either cannot have threat list or has empty threat list (me entry = {0})", me.GetEntry());
                 return;
             }
 
-            var threatlist = me.GetThreatManager().getThreatList();
+            var threatlist = me.GetThreatManager().GetThreatList();
 
             foreach (var refe in threatlist)
             {
-                Unit unit = Global.ObjAccessor.GetUnit(me, refe.getUnitGuid());
+                Unit unit = Global.ObjAccessor.GetUnit(me, refe.GetUnitGuid());
                 if (unit != null && DoGetThreat(unit) != 0)
                     DoModifyThreatPercent(unit, -100);
             }
@@ -204,14 +204,14 @@ namespace Game.AI
         {
             if (unit == null)
                 return 0.0f;
-            return me.GetThreatManager().getThreat(unit);
+            return me.GetThreatManager().GetThreat(unit);
         }
 
         public void DoModifyThreatPercent(Unit unit, int pct)
         {
             if (unit == null)
                 return;
-            me.GetThreatManager().modifyThreatPercent(unit, pct);
+            me.GetThreatManager().ModifyThreatPercent(unit, pct);
         }
 
         void DoTeleportTo(float x, float y, float z, uint time = 0)
@@ -485,10 +485,10 @@ namespace Game.AI
             float x, y, z;
             me.GetPosition(out x, out y, out z);
 
-            var threatList = me.GetThreatManager().getThreatList();
+            var threatList = me.GetThreatManager().GetThreatList();
             foreach (var refe in threatList)
             {
-                Unit target = refe.getTarget();
+                Unit target = refe.GetTarget();
                 if (target)
                     if (target.IsTypeId(TypeId.Player) && !CheckBoundary(target))
                         target.NearTeleportTo(x, y, z, 0);

@@ -471,8 +471,8 @@ namespace Game
                 return phaseShift.VisibleMapIds.First().Key;
 
             GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
-            uint gx = (uint)((MapConst.MaxGrids - 1) - gridCoord.x_coord);
-            uint gy = (uint)((MapConst.MaxGrids - 1) - gridCoord.y_coord);
+            uint gx = (uint)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
+            uint gy = (uint)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
 
             uint gxbegin = Math.Max(gx - 1, 0);
             uint gxend = Math.Min(gx + 1, MapConst.MaxGrids);

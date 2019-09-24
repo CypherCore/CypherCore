@@ -177,12 +177,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                 _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25), task =>
                 {
                     Unit target = null;
-                    var t_list = me.GetThreatManager().getThreatList();
+                    var t_list = me.GetThreatManager().GetThreatList();
                     List<Unit> target_list = new List<Unit>();
 
                     foreach (var itr in t_list)
                     {
-                        target = Global.ObjAccessor.GetUnit(me, itr.getUnitGuid());
+                        target = Global.ObjAccessor.GetUnit(me, itr.GetUnitGuid());
                         if (target && !target.IsWithinDist(me, 8.00f, false) && target.IsWithinDist(me, 25.0f, false))
                             target_list.Add(target);
 

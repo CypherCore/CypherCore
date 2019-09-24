@@ -660,7 +660,7 @@ namespace Game.AI
                     case SmartEvents.GameEventEnd:
                         {
                             var events = Global.GameEventMgr.GetEventMap();
-                            if (e.Event.gameEvent.gameEventId >= events.Length || !events[e.Event.gameEvent.gameEventId].isValid())
+                            if (e.Event.gameEvent.gameEventId >= events.Length || !events[e.Event.gameEvent.gameEventId].IsValid())
                                 return false;
 
                             break;
@@ -1139,7 +1139,7 @@ namespace Game.AI
                         }
 
                         GameEventData eventData = events[eventId];
-                        if (!eventData.isValid())
+                        if (!eventData.IsValid())
                         {
                             Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.gameEventStop.id);
                             return false;
@@ -1158,7 +1158,7 @@ namespace Game.AI
                         }
 
                         GameEventData eventData = events[eventId];
-                        if (!eventData.isValid())
+                        if (!eventData.IsValid())
                         {
                             Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.gameEventStart.id);
                             return false;

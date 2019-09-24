@@ -101,7 +101,7 @@ namespace Game
                 //FIXME: logout must be delayed in case lost connection with client in time of combat
                 if (GetPlayer().GetDeathTimer() != 0)
                 {
-                    _player.GetHostileRefManager().deleteReferences();
+                    _player.GetHostileRefManager().DeleteReferences();
                     _player.BuildPlayerRepop();
                     _player.RepopAtGraveyard();
                 }
@@ -179,7 +179,7 @@ namespace Game
 
                 // remove player from the group if he is:
                 // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-                if (_player.GetGroup() && !_player.GetGroup().isRaidGroup() && m_Socket[(int)ConnectionType.Realm] != null)
+                if (_player.GetGroup() && !_player.GetGroup().IsRaidGroup() && m_Socket[(int)ConnectionType.Realm] != null)
                     _player.RemoveFromGroup();
 
                 //! Send update to group and reset stored max enchanting level
@@ -622,7 +622,7 @@ namespace Game
         public string GetOS() { return _os; }
         public void SetInQueue(bool state) { m_inQueue = state; }
 
-        public bool isLogingOut() { return _logoutTime != 0 || m_playerLogout; }
+        public bool IsLogingOut() { return _logoutTime != 0 || m_playerLogout; }
 
         public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
