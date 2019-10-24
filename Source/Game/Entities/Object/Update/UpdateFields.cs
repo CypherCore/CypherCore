@@ -208,7 +208,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteUInt16(ArtifactPowerId);
             data.WriteUInt8(PurchasedRank);
             data.WriteUInt8(CurrentRankWithBonus);
@@ -649,7 +648,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteUInt32(AzeriteEssenceID);
             data.WriteUInt32(Rank);
         }
@@ -865,7 +863,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellXSpellVisualID);
         }
@@ -928,7 +925,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteInt32(SpellID);
             data.WriteInt32(AuraSpellID);
         }
@@ -2774,7 +2770,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteInt32(Field_0);
             data.WriteInt32(Field_4);
             data.WriteInt32(Field_8);
@@ -2797,7 +2792,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteInt32(ModIndex);
             data.WriteFloat(ModifierValue);
             data.WriteInt32(LabelID);
@@ -2818,7 +2812,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteInt32(ModIndex);
             data.WriteInt32(ModifierValue);
             data.WriteInt32(LabelID);
@@ -2835,7 +2828,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteInt16(ResearchProjectID);
         }
     }
@@ -4518,17 +4510,19 @@ namespace Game.Entities
         public override void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
         {
             UpdateMask changesMask = _changesMask;
-            data.WriteBits(changesMask.GetBlocksMask(0), 1);
-            if (changesMask.GetBlock(0) != 0)
-                data.WriteBits(changesMask.GetBlock(0), 32);
+            data.WriteBits(changesMask.GetBlock(0), 7);
 
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
                     data.WriteBit(OverrideActive);
-                    data.FlushBits();
                 }
+            }
+
+            data.FlushBits();
+            if (changesMask[0])
+            {
                 if (changesMask[2])
                 {
                     data.WriteUInt32(StartTimeOffset);
@@ -4746,7 +4740,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteUInt32(ConversationLineID);
             data.WriteUInt32(StartTime);
             data.WriteUInt32(UiCameraID);
@@ -4774,7 +4767,6 @@ namespace Game.Entities
         }
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
         {
-            data.FlushBits();
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(CreatureDisplayInfoID);
             data.WritePackedGuid(ActorGUID);
