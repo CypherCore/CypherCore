@@ -178,6 +178,12 @@ namespace Game.Entities
                         data.WriteUInt32(_updateMask[block]);
             }
 
+            else if (_values.Count == 32)
+            {
+                data.WriteBits(_updateMask.Last(), 32);
+                return;
+            }
+
             if ((_values.Count % 32) != 0)
                 data.WriteBits(_updateMask.Last(), _values.Count % 32);
         }
