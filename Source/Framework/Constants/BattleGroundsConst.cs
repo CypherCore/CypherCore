@@ -198,23 +198,6 @@ namespace Framework.Constants
         Neutral = 2  // Battleground: Neutral,  Arena: None
     }
 
-    public enum BattlegroundMarks
-    {
-        SpellWsMarkLoser = 24950,
-        SpellWsMarkWinner = 24951,
-        SpellAbMarkLoser = 24952,
-        SpellAbMarkWinner = 24953,
-        SpellAvMarkLoser = 24954,
-        SpellAvMarkWinner = 24955,
-        SpellSaMarkWinner = 61160,
-        SpellSaMarkLoser = 61159,
-        ItemAvMarkOfHonor = 20560,
-        ItemWsMarkOfHonor = 20558,
-        ItemAbMarkOfHonor = 20559,
-        ItemEyMarkOfHonor = 29024,
-        ItemSaMarkOfHonor = 42425
-    }
-
     public enum BattlegroundMarksCount
     {
         WinnterCount = 3,

@@ -1057,26 +1057,6 @@ namespace Game.Spells
                 return;
             }
 
-            // bg reward have some special in code work
-            BattlegroundTypeId bgType = 0;
-            switch ((BattlegroundMarks)m_spellInfo.Id)
-            {
-                case BattlegroundMarks.SpellAvMarkWinner:
-                case BattlegroundMarks.SpellAvMarkLoser:
-                    bgType = BattlegroundTypeId.AV;
-                    break;
-                case BattlegroundMarks.SpellWsMarkWinner:
-                case BattlegroundMarks.SpellWsMarkLoser:
-                    bgType = BattlegroundTypeId.WS;
-                    break;
-                case BattlegroundMarks.SpellAbMarkWinner:
-                case BattlegroundMarks.SpellAbMarkLoser:
-                    bgType = BattlegroundTypeId.AB;
-                    break;
-                default:
-                    break;
-            }
-
             uint num_to_add = (uint)damage;
 
             if (num_to_add < 1)
@@ -1146,7 +1126,7 @@ namespace Game.Spells
                     pItem.SetCreator(player.GetGUID());
 
                 // send info to the client
-                player.SendNewItem(pItem, num_to_add, true, bgType == 0);
+                player.SendNewItem(pItem, num_to_add, true, true);
 
                 if (pItem.GetQuality() > ItemQuality.Epic || (pItem.GetQuality() == ItemQuality.Epic && pItem.GetItemLevel(player) >= GuildConst.MinNewsItemLevel))
                 {
@@ -1156,8 +1136,7 @@ namespace Game.Spells
                 }
 
                 // we succeeded in creating at least one item, so a levelup is possible
-                if (bgType == 0)
-                    player.UpdateCraftSkill(m_spellInfo.Id);
+                player.UpdateCraftSkill(m_spellInfo.Id);
             }
         }
 
