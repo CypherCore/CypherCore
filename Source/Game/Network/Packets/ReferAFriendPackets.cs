@@ -45,7 +45,7 @@ namespace Game.Network.Packets
         public ObjectGuid Target;
     }
 
-    public class ProposeLevelGrant : ServerPacket
+    /*public class ProposeLevelGrant : ServerPacket
     {
         public ProposeLevelGrant() : base(ServerOpcodes.ProposeLevelGrant) { }
 
@@ -55,7 +55,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid Sender;
-    }
+    }*/
 
     public class ReferAFriendFailure : ServerPacket
     {

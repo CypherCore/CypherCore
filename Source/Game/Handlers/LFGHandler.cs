@@ -285,6 +285,7 @@ namespace Game
             lfgUpdateStatus.Joined = join;
             lfgUpdateStatus.LfgJoined = updateData.updateType != LfgUpdateType.RemovedFromQueue;
             lfgUpdateStatus.Queued = queued;
+            lfgUpdateStatus.QueueMapID = Global.LFGMgr.GetDungeonMapId(_player.GetGUID());
 
             SendPacket(lfgUpdateStatus);
         }

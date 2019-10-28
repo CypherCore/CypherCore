@@ -116,6 +116,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32((uint)ChannelFlags);
             _worldPacket.WriteInt32(ChatChannelID);
             _worldPacket.WriteUInt64((ulong)InstanceID);
+            _worldPacket.WritePackedGuid(ChannelGUID);
             _worldPacket.WriteString(Channel);
             _worldPacket.WriteString(ChannelWelcomeMsg);
         }
@@ -125,6 +126,7 @@ namespace Game.Network.Packets
         public int InstanceID;
         public ChannelFlags ChannelFlags;
         public string Channel = "";
+        public ObjectGuid ChannelGUID;
     }
 
     public class ChannelNotifyLeft : ServerPacket

@@ -97,19 +97,19 @@ namespace Game.Network.Packets
                 Name = fields.Read<string>(1);
                 RaceId = fields.Read<byte>(2);
                 ClassId = (Class)fields.Read<byte>(3);
-                Sex = fields.Read<byte>(4);
-                Skin = fields.Read<byte>(5);
-                Face = fields.Read<byte>(6);
+                SexId = fields.Read<byte>(4);
+                SkinId = fields.Read<byte>(5);
+                FaceId = fields.Read<byte>(6);
                 HairStyle = fields.Read<byte>(7);
                 HairColor = fields.Read<byte>(8);
                 FacialHair = fields.Read<byte>(9);
                 CustomDisplay[0] = fields.Read<byte>(10);
                 CustomDisplay[1] = fields.Read<byte>(11);
                 CustomDisplay[2] = fields.Read<byte>(12);
-                Level = fields.Read<byte>(13);
+                ExperienceLevel = fields.Read<byte>(13);
                 ZoneId = fields.Read<uint>(14);
                 MapId = fields.Read<uint>(15);
-                PreLoadPosition = new Vector3(fields.Read<float>(16), fields.Read<float>(17), fields.Read<float>(18));
+                PreloadPos = new Vector3(fields.Read<float>(16), fields.Read<float>(17), fields.Read<float>(18));
 
                 ulong guildId = fields.Read<ulong>(19);
                 if (guildId != 0)
@@ -134,11 +134,11 @@ namespace Game.Network.Packets
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
-                    CustomizationFlag = CharacterCustomizeFlags.Customize;
+                    Flags2 = CharacterCustomizeFlags.Customize;
                 else if (atLoginFlags.HasAnyFlag(AtLoginFlags.ChangeFaction))
-                    CustomizationFlag = CharacterCustomizeFlags.Faction;
+                    Flags2 = CharacterCustomizeFlags.Faction;
                 else if (atLoginFlags.HasAnyFlag(AtLoginFlags.ChangeRace))
-                    CustomizationFlag = CharacterCustomizeFlags.Race;
+                    Flags2 = CharacterCustomizeFlags.Race;
 
                 Flags3 = 0;
                 Flags4 = 0;
@@ -150,9 +150,9 @@ namespace Game.Network.Packets
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(22));
                     if (creatureInfo != null)
                     {
-                        Pet.CreatureDisplayId = fields.Read<uint>(23);
-                        Pet.Level = fields.Read<ushort>(24);
-                        Pet.CreatureFamily = (uint)creatureInfo.Family;
+                        PetCreatureDisplayId = fields.Read<uint>(23);
+                        PetExperienceLevel = fields.Read<ushort>(24);
+                        PetCreatureFamilyId = (uint)creatureInfo.Family;
                     }
                 }
 
@@ -172,9 +172,10 @@ namespace Game.Network.Packets
 
                 for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
                 {
-                    VisualItems[slot].InventoryType = (byte)equipment.NextUInt32();
+                    VisualItems[slot].InvType = (byte)equipment.NextUInt32();
                     VisualItems[slot].DisplayId = equipment.NextUInt32();
                     VisualItems[slot].DisplayEnchantId = equipment.NextUInt32();
+                    VisualItems[slot].Subclass = (byte)equipment.NextUInt32();
                 }
             }
 
@@ -185,9 +186,9 @@ namespace Game.Network.Packets
                 data.WriteUInt8(ListPosition);
                 data.WriteUInt8(RaceId);
                 data.WriteUInt8((byte)ClassId);
-                data.WriteUInt8(Sex);
-                data.WriteUInt8(Skin);
-                data.WriteUInt8(Face);
+                data.WriteUInt8(SexId);
+                data.WriteUInt8(SkinId);
+                data.WriteUInt8(FaceId);
                 data.WriteUInt8(HairStyle);
                 data.WriteUInt8(HairColor);
                 data.WriteUInt8(FacialHair);
@@ -195,17 +196,17 @@ namespace Game.Network.Packets
                 foreach (var display in CustomDisplay)
                     data.WriteUInt8(display);
 
-                data.WriteUInt8(Level);
+                data.WriteUInt8(ExperienceLevel);
                 data.WriteUInt32(ZoneId);
                 data.WriteUInt32(MapId);
-                data.WriteVector3(PreLoadPosition);
+                data.WriteVector3(PreloadPos);
                 data.WritePackedGuid(GuildGuid);
                 data.WriteUInt32((uint)Flags);
-                data.WriteUInt32((uint)CustomizationFlag);
+                data.WriteUInt32((uint)Flags2);
                 data.WriteUInt32(Flags3);
-                data.WriteUInt32(Pet.CreatureDisplayId);
-                data.WriteUInt32(Pet.Level);
-                data.WriteUInt32(Pet.CreatureFamily);
+                data.WriteUInt32(PetCreatureDisplayId);
+                data.WriteUInt32(PetExperienceLevel);
+                data.WriteUInt32(PetCreatureFamilyId);
 
                 data.WriteUInt32(ProfessionIds[0]);
                 data.WriteUInt32(ProfessionIds[1]);
@@ -233,20 +234,20 @@ namespace Game.Network.Packets
             public byte ListPosition; // Order of the characters in list
             public byte RaceId;
             public Class ClassId;
-            public byte Sex;
-            public byte Skin;
-            public byte Face;
+            public byte SexId;
+            public byte SkinId;
+            public byte FaceId;
             public byte HairStyle;
             public byte HairColor;
             public byte FacialHair;
             public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            public byte Level;
+            public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
-            public Vector3 PreLoadPosition;
+            public Vector3 PreloadPos;
             public ObjectGuid GuildGuid;
             public CharacterFlags Flags; // Character flag @see enum CharacterFlags
-            public CharacterCustomizeFlags CustomizationFlag; // Character customization flags @see enum CharacterCustomizeFlags
+            public CharacterCustomizeFlags Flags2; // Character customization flags @see enum CharacterCustomizeFlags
             public uint Flags3; // Character flags 3 @todo research
             public uint Flags4;
             public bool FirstLogin;
@@ -255,7 +256,9 @@ namespace Game.Network.Packets
             public ushort SpecID;
             public uint Unknown703;
             public uint LastLoginVersion;
-            public PetInfo Pet = new PetInfo();
+            public uint PetCreatureDisplayId;
+            public uint PetExperienceLevel;
+            public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
@@ -266,12 +269,14 @@ namespace Game.Network.Packets
                 {
                     data.WriteUInt32(DisplayId);
                     data.WriteUInt32(DisplayEnchantId);
-                    data.WriteUInt8(InventoryType);
+                    data.WriteUInt8(InvType);
+                    data.WriteUInt8(Subclass);
                 }
 
                 public uint DisplayId;
                 public uint DisplayEnchantId;
-                public byte InventoryType;
+                public byte InvType;
+                public byte Subclass;
             }
 
             public struct PetInfo

@@ -135,6 +135,25 @@ namespace Game.Network.Packets
             public uint ContributionPoints;
         }
 
+        public struct PVPMatchPlayerPVPStat
+        {
+            public int PvpStatID;
+            public uint PvpStatValue;
+
+            public PVPMatchPlayerPVPStat(int pvpStatID, uint pvpStatValue)
+            {
+                PvpStatID = pvpStatID;
+                PvpStatValue = pvpStatValue;
+            }
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteInt32(PvpStatID);
+                data.WriteUInt32(PvpStatValue);
+            }
+
+        }
+
         public class PVPMatchPlayerStatistics
         {
             public void Write(WorldPacket data)
@@ -151,8 +170,8 @@ namespace Game.Network.Packets
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
 
-                foreach (var id in Stats)
-                    data.WriteUInt32(id);
+                foreach (var pvpStat in Stats)
+                        pvpStat.Write(data);
 
                 data.WriteBit(Faction);
                 data.WriteBit(IsInWorld);
@@ -190,7 +209,7 @@ namespace Game.Network.Packets
             public Optional<int> RatingChange;
             public Optional<uint> PreMatchMMR;
             public Optional<int> MmrChange;
-            public List<uint> Stats = new List<uint>();
+            public List<PVPMatchPlayerPVPStat> Stats = new List<PVPMatchPlayerPVPStat>();
             public int PrimaryTalentTree;
             public int Sex;
             public Race PlayerRace;

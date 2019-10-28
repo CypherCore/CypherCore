@@ -30,11 +30,12 @@ namespace Game.Chat
 {
     public class Channel
     {
-        public Channel(uint channelId, Team team = 0, AreaTableRecord zoneEntry = null)
+        public Channel(ObjectGuid guid, uint channelId, Team team = 0, AreaTableRecord zoneEntry = null)
         {
             _channelFlags = ChannelFlags.General;
             _channelId = channelId;
             _channelTeam = team;
+            _channelGuid = guid;
             _zoneEntry = zoneEntry;
 
             ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
@@ -50,12 +51,13 @@ namespace Game.Chat
                 _channelFlags |= ChannelFlags.NotLfg;
         }
 
-        public Channel(string name, Team team = 0)
+        public Channel(ObjectGuid guid, string name, Team team = 0)
         {
             _announceEnabled = true;
             _ownershipEnabled = true;
             _channelFlags = ChannelFlags.Custom;
             _channelTeam = team;
+            _channelGuid = guid;
             _channelName = name;
 
             // If storing custom channels in the db is enabled either load or save the channel
@@ -881,6 +883,7 @@ namespace Game.Chat
         }
 
         public uint GetChannelId() { return _channelId; }
+        public ObjectGuid GetChannelGuid() { return _channelGuid; }
         public bool IsConstant() { return _channelId != 0; }
 
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
@@ -924,6 +927,7 @@ namespace Game.Chat
         ChannelFlags _channelFlags;
         uint _channelId;
         Team _channelTeam;
+        ObjectGuid _channelGuid;
         ObjectGuid _ownerGuid;
         string _channelName;
         string _channelPassword;

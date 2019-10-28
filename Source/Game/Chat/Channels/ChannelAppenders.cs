@@ -71,6 +71,7 @@ namespace Game.Chat
             //notify.InstanceID = 0;
             notify.ChannelFlags = _source.GetFlags();
             notify.Channel = _source.GetName(localeIdx);
+            notify.ChannelGUID = _source.GetChannelGuid();
             return notify;
         }
 

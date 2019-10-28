@@ -731,7 +731,6 @@ namespace Game.Network.Packets
 
     public struct DBQueryRecord
     {
-        public ObjectGuid GUID;
         public uint RecordID;
     }
 

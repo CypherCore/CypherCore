@@ -24,7 +24,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.GrantLevel)]
+        //[WorldPacketHandler(ClientOpcodes.GrantLevel)]
         void HandleGrantLevel(GrantLevel grantLevel)
         {
             Player target = Global.ObjAccessor.GetPlayer(GetPlayer(), grantLevel.Target);
@@ -60,12 +60,12 @@ namespace Game
                 return;
             }
 
-            ProposeLevelGrant proposeLevelGrant = new ProposeLevelGrant();
-            proposeLevelGrant.Sender = GetPlayer().GetGUID();
-            target.SendPacket(proposeLevelGrant);
+            //ProposeLevelGrant proposeLevelGrant = new ProposeLevelGrant();
+            //proposeLevelGrant.Sender = GetPlayer().GetGUID();
+            //target.SendPacket(proposeLevelGrant);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AcceptLevelGrant)]
+        //[WorldPacketHandler(ClientOpcodes.AcceptLevelGrant)]
         void HandleAcceptGrantLevel(AcceptLevelGrant acceptLevelGrant)
         {
             Player other = Global.ObjAccessor.GetPlayer(GetPlayer(), acceptLevelGrant.Granter);

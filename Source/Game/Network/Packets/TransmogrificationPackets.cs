@@ -54,14 +54,19 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.WriteBit(IsSetFavorite);
             _worldPacket.WriteInt32(FavoriteAppearances.Count);
+            _worldPacket.WriteInt32(NewAppearances.Count);
 
             foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
                 _worldPacket.WriteUInt32(itemModifiedAppearanceId);
+
+            foreach (var newAppearance in NewAppearances)
+                _worldPacket.WriteUInt32(newAppearance);
         }
 
         public bool IsFullUpdate;
         public bool IsSetFavorite;
         public List<uint> FavoriteAppearances = new List<uint>();
+        public List<uint> NewAppearances = new List<uint>();
     }
 
     class OpenTransmogrifier : ServerPacket

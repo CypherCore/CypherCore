@@ -837,8 +837,8 @@ namespace Game.BattleGrounds.Zones
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(BasesAssaulted);
-            playerData.Stats.Add(BasesDefended);
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)ABObjectives.AssaultBase, BasesAssaulted));
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)ABObjectives.DefendBase, BasesDefended));
         }
 
         public override uint GetAttr1() { return BasesAssaulted; }

@@ -73,24 +73,24 @@ namespace Game
 
                     Log.outInfo(LogFilter.Network, "Loading Character {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
-                    if (!Player.ValidateAppearance((Race)charInfo.RaceId, charInfo.ClassId, (Gender)charInfo.Sex, charInfo.HairStyle, charInfo.HairColor, charInfo.Face, charInfo.FacialHair, charInfo.Skin, charInfo.CustomDisplay))
+                    if (!Player.ValidateAppearance((Race)charInfo.RaceId, charInfo.ClassId, (Gender)charInfo.SexId, charInfo.HairStyle, charInfo.HairColor, charInfo.FaceId, charInfo.FacialHair, charInfo.SkinId, charInfo.CustomDisplay))
                     {
                         Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString());
 
                         // Make sure customization always works properly - send all zeroes instead
-                        charInfo.Skin = 0;
-                        charInfo.Face = 0;
+                        charInfo.SkinId = 0;
+                        charInfo.FaceId = 0;
                         charInfo.HairStyle = 0;
                         charInfo.HairColor = 0;
                         charInfo.FacialHair = 0;
 
-                        if (charInfo.CustomizationFlag != CharacterCustomizeFlags.Customize)
+                        if (charInfo.Flags2 != CharacterCustomizeFlags.Customize)
                         {
                             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                             stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
                             stmt.AddValue(1, charInfo.Guid.GetCounter());
                             DB.Characters.Execute(stmt);
-                            charInfo.CustomizationFlag = CharacterCustomizeFlags.Customize;
+                            charInfo.Flags2 = CharacterCustomizeFlags.Customize;
                         }
                     }
 
@@ -99,7 +99,7 @@ namespace Game
                         _legitCharacters.Add(charInfo.Guid);
 
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
-                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, false);
+                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, false);
 
                     if (charInfo.ClassId == Class.DemonHunter)
                         demonHunterCount++;
@@ -109,7 +109,7 @@ namespace Game
                     else
                         charResult.HasDemonHunterOnRealm = false;
 
-                    charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.Level);
+                    charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.ExperienceLevel);
 
                     charResult.Characters.Add(charInfo);
                 }
@@ -163,7 +163,7 @@ namespace Game
                     Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
-                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, true);
+                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, true);
 
                     charEnum.Characters.Add(charInfo);
                 }
@@ -891,7 +891,6 @@ namespace Game
             features.CfgRealmID = 2;
             features.CfgRealmRecID = 0;
             features.TokenPollTimeSeconds = 300;
-            features.TokenRedeemIndex = 0;
             features.VoiceEnabled = false;
             features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 

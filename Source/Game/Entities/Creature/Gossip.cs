@@ -434,6 +434,7 @@ namespace Game.Misc
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
+            packet.QuestSessionBonus = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
             packet.AutoLaunched = autoLaunched;
             packet.DisplayPopup = displayPopup;
             packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));

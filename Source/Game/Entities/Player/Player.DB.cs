@@ -3205,17 +3205,17 @@ namespace Game.Entities
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)
                     {
-                        ss.Append($"{item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
+                        ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
                         SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetVisibleEnchantmentId(this));
                         if (enchant != null)
                             ss.Append(enchant.ItemVisual);
                         else
                             ss.Append('0');
 
-                        ss.Append(' ');
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} ");
                     }
                     else
-                        ss.Append("0 0 0 ");
+                        ss.Append("0 0 0 0 ");
                 }
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3362,10 +3362,10 @@ namespace Game.Entities
                         else
                             ss.Append('0');
 
-                        ss.Append(' ');
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} ");
                     }
                     else
-                        ss.Append("0 0 0 ");
+                        ss.Append("0 0 0 0 ");
                 }
 
                 stmt.AddValue(index++, ss.ToString());

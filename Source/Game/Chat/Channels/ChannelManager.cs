@@ -29,6 +29,7 @@ namespace Game.Chat
         public ChannelManager(Team team)
         {
             _team = team;
+            _guidGenerator = new ObjectGuidGenerator(HighGuid.ChatChannel);
         }
 
         public static ChannelManager ForTeam(Team team)
@@ -61,18 +62,13 @@ namespace Game.Chat
         {
             if (channelId != 0) // builtin
             {
-                ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-                uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
-                if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
-                    zoneId = 0;
-
-                Tuple<uint, uint> key = Tuple.Create(channelId, zoneId);
-                var channel = _channels.LookupByKey(key);
+                ObjectGuid channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
+                var channel = _channels.LookupByKey(channelGuid);
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(channelId, _team, zoneEntry);
-                _channels[key] = newChannel;
+                Channel newChannel = new Channel(channelGuid, channelId, _team, zoneEntry);
+                _channels[channelGuid] = newChannel;
                 return newChannel;
             }
             else // custom
@@ -81,7 +77,7 @@ namespace Game.Chat
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(name, _team);
+                Channel newChannel = new Channel(CreateCustomChannelGuid(), name, _team);
                 _customChannels[name.ToLower()] = newChannel;
                 return newChannel;
             }
@@ -92,13 +88,7 @@ namespace Game.Chat
             Channel result = null;
             if (channelId != 0) // builtin
             {
-                ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-                uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
-                if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
-                    zoneId = 0;
-
-                Tuple<uint, uint> key = Tuple.Create(channelId, zoneId);
-                var channel = _channels.LookupByKey(key);
+                var channel = _channels.LookupByKey(CreateBuiltinChannelGuid(channelId, zoneEntry));
                 if (channel != null)
                     result = channel;
             }
@@ -134,18 +124,13 @@ namespace Game.Chat
 
         public void LeftChannel(uint channelId, AreaTableRecord zoneEntry)
         {
-            ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
-            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
-                zoneId = 0;
-
-            Tuple<uint, uint> key = Tuple.Create(channelId, zoneId);
-            var channel = _channels.LookupByKey(key);
+            var guid = CreateBuiltinChannelGuid(channelId, zoneEntry);
+            var channel = _channels.LookupByKey(guid);
             if (channel == null)
                 return;
 
             if (channel.GetNumPlayers() == 0)
-                _channels.Remove(key);
+                _channels.Remove(guid);
         }
 
         public static void SendNotOnChannelNotify(Player player, string name)
@@ -156,9 +141,45 @@ namespace Game.Chat
             player.SendPacket(notify);
         }
 
+        ObjectGuid CreateCustomChannelGuid()
+        {
+            ulong high = 0;
+            high |= (ulong)HighGuid.ChatChannel << 58;
+            high |= (ulong)Global.WorldMgr.GetRealmId().Realm << 42;
+            high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
+
+            ObjectGuid channelGuid = new ObjectGuid();
+            channelGuid.SetRawValue(high, _guidGenerator.Generate());
+            return channelGuid;
+        }
+
+        ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
+        {
+
+            ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
+            uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
+            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
+                zoneId = 0;
+
+            ulong high = 0;
+            high |= (ulong)HighGuid.ChatChannel << 58;
+            high |= (ulong)Global.WorldMgr.GetRealmId().Realm << 42;
+            high |= 1ul << 25; // built-in
+            if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))
+                high |= 1ul << 24; // trade
+
+            high |= (ulong)(zoneId) << 10;
+            high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
+
+            ObjectGuid channelGuid = new ObjectGuid();
+            channelGuid.SetRawValue(high, channelId);
+            return channelGuid;
+        }
+
         Dictionary<string, Channel> _customChannels = new Dictionary<string, Channel>();
-        Dictionary<Tuple<uint /*channelId*/, uint /*zoneId*/>, Channel> _channels = new Dictionary<Tuple<uint, uint>, Channel>();
+        Dictionary<ObjectGuid, Channel> _channels = new Dictionary<ObjectGuid, Channel>();
         Team _team;
+        ObjectGuidGenerator _guidGenerator;
 
         static ChannelManager allianceChannelMgr = new ChannelManager(Team.Alliance);
         static ChannelManager hordeChannelMgr = new ChannelManager(Team.Horde);

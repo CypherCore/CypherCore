@@ -149,6 +149,7 @@ namespace Game.Network.Packets
             bool hasLFGListSearchResult = _worldPacket.HasBit();
             bool hasLFGListApplicant = _worldPacket.HasBit();
             bool hasClubMessage = _worldPacket.HasBit();
+            bool hasClubFinderResult = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
 
@@ -159,13 +160,15 @@ namespace Game.Network.Packets
                 _worldPacket.ResetBitPos();
             }
 
+            HorusChatLog.Read(_worldPacket);
+
+            Note = _worldPacket.ReadString(noteLength);
+
             if (hasMailInfo)
             {
                 MailInfo.HasValue = true;
                 MailInfo.Value.Read(_worldPacket);
             }
-
-            Note = _worldPacket.ReadString(noteLength);
 
             if (hasCalendarInfo)
             {
@@ -196,6 +199,12 @@ namespace Game.Network.Packets
                 LFGListApplicant.HasValue = true;
                 LFGListApplicant.Value.Read(_worldPacket);
             }
+
+            if (hasClubFinderResult)
+            {
+                ClubFinderResult.HasValue = true;
+                ClubFinderResult.Value.Read(_worldPacket);
+            }
         }
 
         public SupportTicketHeader Header;
@@ -203,6 +212,7 @@ namespace Game.Network.Packets
         public ObjectGuid TargetCharacterGUID;
         public byte ComplaintType;
         public string Note;
+        public SupportTicketHorusChatLog HorusChatLog;
         public Optional<SupportTicketMailInfo> MailInfo;
         public Optional<SupportTicketCalendarEventInfo> CalenderInfo;
         public Optional<SupportTicketPetInfo> PetInfo;
@@ -210,6 +220,7 @@ namespace Game.Network.Packets
         public Optional<SupportTicketLFGListSearchResult> LFGListSearchResult;
         public Optional<SupportTicketLFGListApplicant> LFGListApplicant;
         public Optional<SupportTicketCommunityMessage> CommunityMessage;
+        public Optional<SupportTicketClubFinderResult> ClubFinderResult;
 
         public struct SupportTicketChatLine
         {
@@ -254,6 +265,82 @@ namespace Game.Network.Packets
             public Optional<uint> ReportLineIndex;
         }
 
+        public struct SupportTicketHorusChatLine
+        {
+            public void Read(WorldPacket data)
+            {
+                Timestamp = data.ReadInt32();
+                AuthorGUID = data.ReadPackedGuid();
+
+                bool hasClubID = data.HasBit();
+                bool hasChannelGUID = data.HasBit();
+                bool hasRealmAddress = data.HasBit();
+                bool hasSlashCmd = data.HasBit();
+                uint textLength = data.ReadBits<uint>(12);
+
+                if (hasClubID)
+                {
+                    ClubID.HasValue = true;
+                    ClubID.Value = data.ReadUInt64();
+                }
+
+                if (hasChannelGUID)
+                {
+                    ChannelGUID.HasValue = true;
+                    ChannelGUID.Value = data.ReadPackedGuid();
+                }
+
+                if (hasRealmAddress)
+                {
+                    RealmAddress.HasValue = true;
+                    RealmAddress.Value.VirtualRealmAddress = data.ReadUInt32();
+                    RealmAddress.Value.field_4 = data.ReadUInt16();
+                    RealmAddress.Value.field_6 = data.ReadUInt8();
+                }
+
+                if (hasSlashCmd)
+                {
+                    SlashCmd.HasValue = true;
+                    SlashCmd.Value = data.ReadInt32();
+                }
+
+                Text = data.ReadString(textLength);
+            }
+
+            public struct SenderRealm
+            {
+                public uint VirtualRealmAddress;
+                public ushort field_4;
+                public byte field_6;
+            }
+
+            public int Timestamp;
+            public ObjectGuid AuthorGUID;
+            public Optional<ulong> ClubID;
+            public Optional<ObjectGuid> ChannelGUID;
+            public Optional<SenderRealm> RealmAddress;
+            public Optional<int> SlashCmd;
+            public string Text;
+        }
+
+        public class SupportTicketHorusChatLog
+        {
+            public List<SupportTicketHorusChatLine> Lines = new List<SupportTicketHorusChatLine>();
+
+            public void Read(WorldPacket data)
+            {
+                uint linesCount = data.ReadUInt32();
+                data.ResetBitPos();
+
+                for (uint i = 0; i < linesCount; i++)
+                {
+                    var chatLine = new SupportTicketHorusChatLine();
+                    chatLine.Read(data);
+                    Lines.Add(chatLine);
+                }
+            }
+        }
+
         public struct SupportTicketMailInfo
         {
             public void Read(WorldPacket data)
@@ -266,9 +353,9 @@ namespace Game.Network.Packets
                 MailSubject = data.ReadString(subjectLength);
             }
 
-            int MailID;
-            string MailSubject;
-            string MailBody;
+            public int MailID;
+            public string MailSubject;
+            public string MailBody;
         }
 
         public struct SupportTicketCalendarEventInfo
@@ -281,9 +368,9 @@ namespace Game.Network.Packets
                 EventTitle = data.ReadString(data.ReadBits<byte>(8));
             }
 
-            ulong EventID;
-            ulong InviteID;
-            string EventTitle;
+            public ulong EventID;
+            public ulong InviteID;
+            public string EventTitle;
         }
 
         public struct SupportTicketPetInfo
@@ -295,8 +382,8 @@ namespace Game.Network.Packets
                 PetName = data.ReadString(data.ReadBits<byte>(8));
             }
 
-            ObjectGuid PetID;
-            string PetName;
+            public ObjectGuid PetID;
+            public string PetName;
         }
 
         public struct SupportTicketGuildInfo
@@ -309,8 +396,8 @@ namespace Game.Network.Packets
                 GuildName = data.ReadString(nameLength);
             }
 
-            ObjectGuid GuildID;
-            string GuildName;
+            public ObjectGuid GuildID;
+            public string GuildName;
         }
 
         public struct SupportTicketLFGListSearchResult
@@ -336,16 +423,16 @@ namespace Game.Network.Packets
                 VoiceChat = data.ReadString(voiceChatLength);
             }
 
-            RideTicket RideTicket;
-            uint GroupFinderActivityID;
-            ObjectGuid LastTitleAuthorGuid;
-            ObjectGuid LastDescriptionAuthorGuid;
-            ObjectGuid LastVoiceChatAuthorGuid;
-            ObjectGuid ListingCreatorGuid;
-            ObjectGuid Unknown735;
-            string Title;
-            string Description;
-            string VoiceChat;
+            public RideTicket RideTicket;
+            public uint GroupFinderActivityID;
+            public ObjectGuid LastTitleAuthorGuid;
+            public ObjectGuid LastDescriptionAuthorGuid;
+            public ObjectGuid LastVoiceChatAuthorGuid;
+            public ObjectGuid ListingCreatorGuid;
+            public ObjectGuid Unknown735;
+            public string Title;
+            public string Description;
+            public string VoiceChat;
         }
 
         public struct SupportTicketLFGListApplicant
@@ -358,13 +445,29 @@ namespace Game.Network.Packets
                 Comment = data.ReadString(data.ReadBits<uint>(9));
             }
 
-            RideTicket RideTicket;
-            string Comment;
+            public RideTicket RideTicket;
+            public string Comment;
         }
 
         public struct SupportTicketCommunityMessage
         {
             public bool IsPlayerUsingVoice;
+        }
+
+        public struct SupportTicketClubFinderResult
+        {
+            public ulong ClubFinderPostingID;
+            public ulong ClubID;
+            public ObjectGuid ClubFinderGUID;
+            public string ClubName;
+
+            public void Read(WorldPacket data)
+            {
+                ClubFinderPostingID = data.ReadUInt64();
+                ClubID = data.ReadUInt64();
+                ClubFinderGUID = data.ReadPackedGuid();
+                ClubName = data.ReadString(data.ReadBits<uint>(12));
+            }
         }
     }
 

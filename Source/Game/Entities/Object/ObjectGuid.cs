@@ -295,6 +295,7 @@ namespace Game.Entities
             {
                 case HighGuid.Player:
                 case HighGuid.Item:
+                case HighGuid.ChatChannel:
                 case HighGuid.Transport:
                 case HighGuid.Guild:
                     return true;

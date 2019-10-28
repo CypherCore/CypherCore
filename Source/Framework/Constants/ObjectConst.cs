@@ -105,7 +105,8 @@ namespace Framework.Constants
         CommerceObj = 45,
         ClientSession = 46,
         Cast = 47,
-        ClientConnection = 48
+        ClientConnection = 48,
+        ClubFinder = 49
     }
 
     public enum NotifyFlags

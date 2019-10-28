@@ -1003,7 +1003,7 @@ namespace Game.BattleGrounds.Zones
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(FlagCaptures);
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)EotSMisc.ObjectiveCaptureFlag, FlagCaptures));
         }
 
         public override uint GetAttr1() { return FlagCaptures; }

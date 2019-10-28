@@ -41,11 +41,15 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CfgRealmID);
             _worldPacket.WriteInt32(CfgRealmRecID);
 
+            _worldPacket.WriteUInt32(RAFSystem.MaxRecruits);
+            _worldPacket.WriteUInt32(RAFSystem.MaxRecruitMonths);
+            _worldPacket.WriteUInt32(RAFSystem.MaxRecruitmentUses);
+            _worldPacket.WriteUInt32(RAFSystem.DaysInCycle);
+
             _worldPacket.WriteUInt32(TwitterPostThrottleLimit);
             _worldPacket.WriteUInt32(TwitterPostThrottleCooldown);
 
             _worldPacket.WriteUInt32(TokenPollTimeSeconds);
-            _worldPacket.WriteUInt32(TokenRedeemIndex);
             _worldPacket.WriteInt64(TokenBalanceAmount);
 
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
@@ -61,7 +65,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(ItemRestorationButtonEnabled);
             _worldPacket.WriteBit(BrowserEnabled);
             _worldPacket.WriteBit(SessionAlert.HasValue);
-            _worldPacket.WriteBit(RecruitAFriendSendingEnabled);
+            _worldPacket.WriteBit(RAFSystem.Enabled);
+            _worldPacket.WriteBit(RAFSystem.RecruitingEnabled);
             _worldPacket.WriteBit(CharUndeleteEnabled);
             _worldPacket.WriteBit(RestrictedAccount);
             _worldPacket.WriteBit(CommerceSystemEnabled);
@@ -81,6 +86,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(ClubsPresenceUpdateEnabled);
             _worldPacket.WriteBit(VoiceChatDisabledByParentalControl);
             _worldPacket.WriteBit(VoiceChatMutedByParentalControl);
+            _worldPacket.WriteBit(QuestSessionEnabled);
+            _worldPacket.WriteBit(Unused825);
+            _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.FlushBits();
 
             {
@@ -144,7 +152,6 @@ namespace Game.Network.Packets
         public bool VoiceEnabled;
         public bool BrowserEnabled;
         public bool BpayStoreAvailable;
-        public bool RecruitAFriendSendingEnabled;
         public bool BpayStoreEnabled;
         public Optional<SessionAlertConfig> SessionAlert;
         public uint ScrollOfResurrectionMaxRequestsPerDay;
@@ -157,7 +164,6 @@ namespace Game.Network.Packets
         public uint TwitterPostThrottleLimit;
         public uint TwitterPostThrottleCooldown;
         public uint TokenPollTimeSeconds;
-        public uint TokenRedeemIndex;
         public long TokenBalanceAmount;
         public uint BpayStoreProductDeliveryDelay;
         public uint ClubsPresenceUpdateTimer;
@@ -182,10 +188,14 @@ namespace Game.Network.Packets
         public bool ClubsPresenceUpdateEnabled;
         public bool VoiceChatDisabledByParentalControl;
         public bool VoiceChatMutedByParentalControl;
+        public bool QuestSessionEnabled;
+        public bool Unused825;
+        public bool ClubFinderEnabled;
 
         public Optional<List<byte>> RaceClassExpansionLevels;
         public SocialQueueConfig QuickJoinConfig;
         public VoiceChatProxySettings VoiceChatManagerSettings;
+        public RafSystemFeatureInfo RAFSystem;
 
         public struct SavedThrottleObjectState
         {
@@ -245,6 +255,16 @@ namespace Game.Network.Packets
             public ObjectGuid BnetAccountGuid;
             public ObjectGuid GuildGuid;
         }
+
+        public struct RafSystemFeatureInfo
+        {
+            public bool Enabled;
+            public bool RecruitingEnabled;
+            public uint MaxRecruits;
+            public uint MaxRecruitMonths;
+            public uint MaxRecruitmentUses;
+            public uint DaysInCycle;
+        }
     }
 
     public class FeatureSystemStatusGlueScreen : ServerPacket
@@ -263,7 +283,6 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(IsExpansionPreorderInStore);
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
-            _worldPacket.WriteBit(false); // not accessed in handler
             _worldPacket.WriteBit(TrialBoostEnabled);
             _worldPacket.WriteBit(TokenBalanceEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
@@ -271,8 +290,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(TokenPollTimeSeconds);
-            _worldPacket.WriteInt32(TokenRedeemIndex);
+            _worldPacket.WriteUInt32(TokenPollTimeSeconds);
             _worldPacket.WriteInt64(TokenBalanceAmount);
             _worldPacket.WriteInt32(MaxCharactersPerRealm);
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
@@ -297,8 +315,7 @@ namespace Game.Network.Packets
         public bool LiveRegionCharacterListEnabled; // NYI
         public bool LiveRegionCharacterCopyEnabled; // NYI
         public bool LiveRegionAccountCopyEnabled; // NYI
-        public int TokenPollTimeSeconds;     // NYI
-        public int TokenRedeemIndex;     // NYI
+        public uint TokenPollTimeSeconds;     // NYI
         public long TokenBalanceAmount;     // NYI 
         public int MaxCharactersPerRealm;
         public uint BpayStoreProductDeliveryDelay;     // NYI

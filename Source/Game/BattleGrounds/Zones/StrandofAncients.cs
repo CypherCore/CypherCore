@@ -1088,6 +1088,25 @@ namespace Game.BattleGrounds.Zones
             return true;
         }
 
+        public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        {
+            if (!base.UpdatePlayerScore(player, type, value, doAddHonor))
+                return false;
+
+            switch (type)
+            {
+                case ScoreType.DestroyedDemolisher:
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)SAObjectives.DemolishersDestroyed);
+                    break;
+                case ScoreType.DestroyedWall:
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)SAObjectives.GatesDestroyed);
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+
         SAGateInfo GetGate(uint entry)
         {
             foreach (var gate in SAMiscConst.Gates)
@@ -1157,8 +1176,8 @@ namespace Game.BattleGrounds.Zones
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(DemolishersDestroyed);
-            playerData.Stats.Add(GatesDestroyed);
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)SAObjectives.DemolishersDestroyed, DemolishersDestroyed));
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)SAObjectives.GatesDestroyed, GatesDestroyed));
         }
 
         public override uint GetAttr1() { return DemolishersDestroyed; }
@@ -1642,6 +1661,12 @@ namespace Game.BattleGrounds.Zones
         public const int LeftCapturableGy = 3;
         public const int CentralCapturableGy = 4;
         public const int Max = 5;
+    }
+
+    enum SAObjectives
+    {
+        GatesDestroyed = 231,
+        DemolishersDestroyed = 232
     }
     #endregion
 }

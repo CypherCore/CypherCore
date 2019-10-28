@@ -789,10 +789,10 @@ namespace Game.BattleGrounds.Zones
             switch (type)
             {
                 case ScoreType.FlagCaptures:                           // flags captured
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, 42);
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, WSObjectives.CaptureFlag);
                     break;
                 case ScoreType.FlagReturns:                            // flags returned
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, 44);
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, WSObjectives.ReturnFlag);
                     break;
                 default:
                     break;
@@ -970,8 +970,8 @@ namespace Game.BattleGrounds.Zones
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(FlagCaptures);
-            playerData.Stats.Add(FlagReturns);
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat(WSObjectives.CaptureFlag, FlagCaptures));
+            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat(WSObjectives.ReturnFlag, FlagReturns));
         }
 
         public override uint GetAttr1() { return FlagCaptures; }
@@ -1114,6 +1114,11 @@ namespace Game.BattleGrounds.Zones
         public const uint HordeFlagDropped = 9806;
         public const uint AllianceFlagReturned = 9808;
         public const uint HordeFlagReturned = 9809;
+    }
+    struct WSObjectives
+    {
+        public const int CaptureFlag = 42;
+        public const int ReturnFlag = 44;
     }
     #endregion
 }

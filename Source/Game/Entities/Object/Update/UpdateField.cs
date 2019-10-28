@@ -319,8 +319,10 @@ namespace Game.Entities
             _changesMask = new UpdateMask(changeMask);
         }
 
-        public abstract void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver);
-        public abstract void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver);
+        public virtual void WriteCreate(WorldPacket data, T owner, Player receiver) { }
+        public virtual void WriteUpdate(WorldPacket data, T owner, Player receiver) { }
+        public virtual void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver) { }
+        public virtual void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver) { }
 
         public abstract void ClearChangesMask();
 
