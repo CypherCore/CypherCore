@@ -129,9 +129,9 @@ namespace Game.DataStorage
 
     public sealed class PowerTypeRecord
     {
-        public uint Id;
         public string NameGlobalStringTag;
         public string CostGlobalStringTag;
+        public uint Id;
         public PowerType PowerTypeEnum;
         public sbyte MinPower;
         public short MaxBasePower;

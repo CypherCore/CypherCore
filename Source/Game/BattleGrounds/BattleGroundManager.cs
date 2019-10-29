@@ -451,10 +451,10 @@ namespace Game.BattleGrounds
                 if (bgTemplate.Id != BattlegroundTypeId.AA && bgTemplate.Id != BattlegroundTypeId.RB)
                 {
                     uint startId = result.Read<uint>(5);
-                    if (CliDB.WorldSafeLocsStorage.ContainsKey(startId))
+                    WorldSafeLocsEntry start = Global.ObjectMgr.GetWorldSafeLoc(startId);
+                    if (start != null)
                     {
-                        WorldSafeLocsRecord start = CliDB.WorldSafeLocsStorage.LookupByKey(startId);
-                        bgTemplate.StartLocation[TeamId.Alliance] = new Position(start.Loc.X, start.Loc.Y, start.Loc.Z, (start.Facing + MathFunctions.PI) / 180);
+                        bgTemplate.StartLocation[TeamId.Alliance] = start.Loc;
                     }
                     else
                     {
@@ -462,11 +462,11 @@ namespace Game.BattleGrounds
                         continue;
                     }
 
-                    startId = result.Read<uint>(6);                    
-                    if (CliDB.WorldSafeLocsStorage.ContainsKey(startId))
+                    startId = result.Read<uint>(6);
+                    start = Global.ObjectMgr.GetWorldSafeLoc(startId);
+                    if (start != null)
                     {
-                        WorldSafeLocsRecord start = CliDB.WorldSafeLocsStorage.LookupByKey(startId);
-                        bgTemplate.StartLocation[TeamId.Horde] = new Position(start.Loc.X, start.Loc.Y, start.Loc.Z, result.Read<float>(8));
+                        bgTemplate.StartLocation[TeamId.Horde] = start.Loc;
                     }
                     else
                     {

@@ -397,11 +397,6 @@ namespace Game.DataStorage
 
             CliDB.RewardPackXItemStorage.Clear();
 
-            foreach (RulesetItemUpgradeRecord rulesetItemUpgrade in CliDB.RulesetItemUpgradeStorage.Values)
-                _rulesetItemUpgrade[rulesetItemUpgrade.ItemID] = rulesetItemUpgrade.ItemUpgradeID;
-
-            CliDB.RulesetItemUpgradeStorage.Clear();
-
             foreach (SkillLineRecord skill in CliDB.SkillLineStorage.Values)
             {
                 if (skill.ParentSkillLineID != 0)
@@ -1518,11 +1513,6 @@ namespace Game.DataStorage
             return _rewardPackItems.LookupByKey(rewardPackID);
         }
 
-        public uint GetRulesetItemUpgrade(uint itemId)
-        {
-            return _rulesetItemUpgrade.LookupByKey(itemId);
-        }
-
         public List<SkillLineRecord> GetSkillLinesForParentSkill(uint parentSkillId)
         {
             return _skillLinesByParentSkillLine.LookupByKey(parentSkillId);
@@ -1982,7 +1972,6 @@ namespace Game.DataStorage
         Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>>();
         MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new MultiMap<uint, RewardPackXCurrencyTypeRecord>();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new MultiMap<uint, RewardPackXItemRecord>();
-        Dictionary<uint, uint> _rulesetItemUpgrade = new Dictionary<uint, uint>();
         MultiMap<uint, SkillLineRecord> _skillLinesByParentSkillLine = new MultiMap<uint, SkillLineRecord>();
         MultiMap<uint, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new MultiMap<uint, SkillLineAbilityRecord>();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new MultiMap<uint, SkillRaceClassInfoRecord>();

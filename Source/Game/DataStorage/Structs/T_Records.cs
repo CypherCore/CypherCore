@@ -117,6 +117,7 @@ namespace Game.DataStorage
         public byte ExpansionID;
         public int PatchID;
         public short UiOrder;
+        public uint PlayerConditionID;
     }
 
     public sealed class TransmogSetGroupRecord

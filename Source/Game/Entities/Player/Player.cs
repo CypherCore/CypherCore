@@ -4666,7 +4666,7 @@ namespace Game.Entities
                 SpawnCorpseBones();
             }
 
-            WorldSafeLocsRecord ClosestGrave = null;
+            WorldSafeLocsEntry ClosestGrave = null;
 
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
@@ -4688,11 +4688,11 @@ namespace Game.Entities
             // and don't show spirit healer location
             if (ClosestGrave != null)
             {
-                TeleportTo(ClosestGrave.MapID, ClosestGrave.Loc.X, ClosestGrave.Loc.Y, ClosestGrave.Loc.Z, (ClosestGrave.Facing * MathFunctions.PI) / 180);
+                TeleportTo(ClosestGrave.Loc);
                 if (IsDead())                                        // not send if alive, because it used in TeleportTo()
                 {
                     DeathReleaseLoc packet = new DeathReleaseLoc();
-                    packet.MapID = (int)ClosestGrave.MapID;
+                    packet.MapID = (int)ClosestGrave.Loc.GetMapId();
                     packet.Loc = ClosestGrave.Loc;
                     SendPacket(packet);
                 }

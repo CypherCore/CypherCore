@@ -417,7 +417,7 @@ namespace Framework.Constants
         ReachAccountHonorLevel = 213,
         HeartOfAzerothArtifactPowerEarned = 214,
         HeartOfAzerothLevelReached = 215,
-        TotalTypes = 217
+        TotalTypes = 219
     }
 
     public enum CriteriaDataType

@@ -339,10 +339,9 @@ namespace Game
 
                 // Delete orphaned guild bank tab entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gbt FROM guild_bank_tab gbt LEFT JOIN guild g ON gbt.guildId = g.guildId WHERE g.guildId IS NULL");
-
-                                                        //         0        1      2        3        4
+                
+                //                                              0        1      2        3        4
                 SQLResult result = DB.Characters.Query("SELECT guildid, TabId, TabName, TabIcon, TabText FROM guild_bank_tab ORDER BY guildid ASC, TabId ASC");
-
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild bank tabs. DB table `guild_bank_tab` is empty.");
@@ -383,7 +382,7 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guildId = result.Read<ulong>(44);
+                        ulong guildId = result.Read<ulong>(43);
                         Guild guild = GetGuildById(guildId);
                         if (guild)
                             guild.LoadBankItemFromDB(result.GetFields());

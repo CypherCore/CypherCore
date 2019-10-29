@@ -79,7 +79,7 @@ namespace Game.DataStorage
         public string ToolTip;
         public uint MinPower;
         public uint MaxPower;
-        public ushort StartPower;
+        public uint StartPower;
         public byte CenterPower;
         public float RegenerationPeace;
         public float RegenerationCombat;

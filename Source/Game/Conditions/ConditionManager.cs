@@ -1073,7 +1073,7 @@ namespace Game
                 case ConditionSourceType.SmartEvent:
                     break;
                 case ConditionSourceType.Graveyard:
-                    if (!CliDB.WorldSafeLocsStorage.ContainsKey(cond.SourceEntry))
+                    if (Global.ObjectMgr.GetWorldSafeLoc((uint)cond.SourceEntry) == null)
                     {
                         Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in WorldSafeLocs.db2, ignoring.");
                         return false;

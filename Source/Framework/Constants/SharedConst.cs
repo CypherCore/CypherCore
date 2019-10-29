@@ -757,6 +757,7 @@ namespace Framework.Constants
         PvpIsland = 45,
         NormalWarfront = 147,
         HeroicWarfront = 149,
+        LFR15thAnniversary = 151,
 
         Max
     }

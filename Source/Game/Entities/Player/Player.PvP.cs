@@ -695,9 +695,9 @@ namespace Game.Entities
                 // If map is dungeon find linked graveyard
                 if (GetMap().IsDungeon())
                 {
-                    WorldSafeLocsRecord entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
                     if (entry != null)
-                        m_bgData.joinPos = new WorldLocation(entry.MapID, entry.Loc.X, entry.Loc.Y, entry.Loc.Z, 0.0f);
+                        m_bgData.joinPos = entry.Loc;
                     else
                         Log.outError(LogFilter.Player, "SetBattlegroundEntryPoint: Dungeon map {0} has no linked graveyard, setting home location as entry point.", GetMapId());
                 }

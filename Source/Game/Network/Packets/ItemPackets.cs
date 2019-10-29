@@ -774,25 +774,17 @@ namespace Game.Network.Packets
                 if (lootItem.randomBonusListId != 0)
                     ItemBonus.Value.BonusListIDs.Add(lootItem.randomBonusListId);
             }
-
-            if (lootItem.upgradeId != 0)
-            {
-                Modifications.HasValue = true;
-                Modifications.Value.Insert((int)ItemModifier.UpgradeId, (int)lootItem.upgradeId);
-            }
         }
 
         public ItemInstance(VoidStorageItem voidItem)
         {
             ItemID = voidItem.ItemEntry;
 
-            if (voidItem.ItemUpgradeId != 0 || voidItem.FixedScalingLevel != 0 || voidItem.ArtifactKnowledgeLevel != 0)
+            if (voidItem.FixedScalingLevel != 0 || voidItem.ArtifactKnowledgeLevel != 0)
             {
                 Modifications.HasValue = true;
-                if (voidItem.ItemUpgradeId != 0)
-                    Modifications.Value.Insert((int)ItemModifier.UpgradeId, (int)voidItem.ItemUpgradeId);
                 if (voidItem.FixedScalingLevel != 0)
-                    Modifications.Value.Insert((int)ItemModifier.ScalingStatDistributionFixedLevel, (int)voidItem.FixedScalingLevel);
+                    Modifications.Value.Insert((int)ItemModifier.TimewalkerLevel, (int)voidItem.FixedScalingLevel);
                 if (voidItem.ArtifactKnowledgeLevel != 0)
                     Modifications.Value.Insert((int)ItemModifier.ArtifactKnowledgeLevel, (int)voidItem.ArtifactKnowledgeLevel);
             }

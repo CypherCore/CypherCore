@@ -161,7 +161,6 @@ namespace Game.DataStorage
             ItemSparseStorage = DBReader.Read<ItemSparseRecord>("ItemSparse.db2", HotfixStatements.SEL_ITEM_SPARSE, HotfixStatements.SEL_ITEM_SPARSE_LOCALE);
             ItemSpecStorage = DBReader.Read<ItemSpecRecord>("ItemSpec.db2", HotfixStatements.SEL_ITEM_SPEC);
             ItemSpecOverrideStorage = DBReader.Read<ItemSpecOverrideRecord>("ItemSpecOverride.db2", HotfixStatements.SEL_ITEM_SPEC_OVERRIDE);
-            ItemUpgradeStorage = DBReader.Read<ItemUpgradeRecord>("ItemUpgrade.db2", HotfixStatements.SEL_ITEM_UPGRADE);
             ItemXBonusTreeStorage = DBReader.Read<ItemXBonusTreeRecord>("ItemXBonusTree.db2", HotfixStatements.SEL_ITEM_X_BONUS_TREE);
             //KeyChainStorage = DBReader.Read<KeyChainRecord>("KeyChain.db2", HotfixStatements.SEL_KEYCHAIN);
             LFGDungeonsStorage = DBReader.Read<LFGDungeonsRecord>("LFGDungeons.db2", HotfixStatements.SEL_LFG_DUNGEONS, HotfixStatements.SEL_LFG_DUNGEONS_LOCALE);
@@ -204,7 +203,6 @@ namespace Game.DataStorage
             RewardPackStorage = DBReader.Read<RewardPackRecord>("RewardPack.db2", HotfixStatements.SEL_REWARD_PACK);
             RewardPackXCurrencyTypeStorage = DBReader.Read<RewardPackXCurrencyTypeRecord>("RewardPackXCurrencyType.db2", HotfixStatements.SEL_REWARD_PACK_X_CURRENCY_TYPE);
             RewardPackXItemStorage = DBReader.Read<RewardPackXItemRecord>("RewardPackXItem.db2", HotfixStatements.SEL_REWARD_PACK_X_ITEM);
-            RulesetItemUpgradeStorage = DBReader.Read<RulesetItemUpgradeRecord>("RulesetItemUpgrade.db2", HotfixStatements.SEL_RULESET_ITEM_UPGRADE);
             ScalingStatDistributionStorage = DBReader.Read<ScalingStatDistributionRecord>("ScalingStatDistribution.db2", HotfixStatements.SEL_SCALING_STAT_DISTRIBUTION);
             ScenarioStorage = DBReader.Read<ScenarioRecord>("Scenario.db2", HotfixStatements.SEL_SCENARIO, HotfixStatements.SEL_SCENARIO_LOCALE);
             ScenarioStepStorage = DBReader.Read<ScenarioStepRecord>("ScenarioStep.db2", HotfixStatements.SEL_SCENARIO_STEP, HotfixStatements.SEL_SCENARIO_STEP_LOCALE);
@@ -274,7 +272,6 @@ namespace Game.DataStorage
             WMOAreaTableStorage = DBReader.Read<WMOAreaTableRecord>("WMOAreaTable.db2", HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
             WorldEffectStorage = DBReader.Read<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = DBReader.Read<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
-            WorldSafeLocsStorage = DBReader.Read<WorldSafeLocsRecord>("WorldSafeLocs.db2", HotfixStatements.SEL_WORLD_SAFE_LOCS, HotfixStatements.SEL_WORLD_SAFE_LOCS_LOCALE);
             WorldStateExpressionStorage = DBReader.Read<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             Global.DB2Mgr.LoadStores();
@@ -507,7 +504,6 @@ namespace Game.DataStorage
         public static DB6Storage<ItemSparseRecord> ItemSparseStorage;
         public static DB6Storage<ItemSpecRecord> ItemSpecStorage;
         public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
-        public static DB6Storage<ItemUpgradeRecord> ItemUpgradeStorage;
         public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
         //public static DB6Storage<KeyChainRecord> KeyChainStorage;
         public static DB6Storage<LFGDungeonsRecord> LFGDungeonsStorage;
@@ -550,7 +546,6 @@ namespace Game.DataStorage
         public static DB6Storage<RewardPackRecord> RewardPackStorage;
         public static DB6Storage<RewardPackXCurrencyTypeRecord> RewardPackXCurrencyTypeStorage;
         public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage;
-        public static DB6Storage<RulesetItemUpgradeRecord> RulesetItemUpgradeStorage;
         public static DB6Storage<ScalingStatDistributionRecord> ScalingStatDistributionStorage;
         public static DB6Storage<ScenarioRecord> ScenarioStorage;
         public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage;
@@ -620,7 +615,6 @@ namespace Game.DataStorage
         public static DB6Storage<WMOAreaTableRecord> WMOAreaTableStorage;
         public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
-        public static DB6Storage<WorldSafeLocsRecord> WorldSafeLocsStorage;
         public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage;
         #endregion
 

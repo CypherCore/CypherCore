@@ -935,7 +935,7 @@ namespace Game
                 if (gems[i])
                 {
                     uint gemScalingLevel = _player.GetLevel();
-                    uint fixedLevel = gems[i].GetModifier(ItemModifier.ScalingStatDistributionFixedLevel);
+                    uint fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
                     if (fixedLevel != 0)
                         gemScalingLevel = fixedLevel;
 

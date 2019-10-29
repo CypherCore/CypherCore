@@ -92,9 +92,9 @@ namespace Game.Entities
                         if (item.GetTemplate().GetArtifactID() != 0 && artifactDataPair != null)
                             item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3, artifactDataPair.Item4);
 
-                        ulong counter = result.Read<ulong>(44);
+                        ulong counter = result.Read<ulong>(43);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(45);
+                        byte slot = result.Read<byte>(44);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -1100,18 +1100,17 @@ namespace Game.Entities
 
             do
             {
-                // SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
+                // SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
                 ulong itemId = result.Read<ulong>(0);
                 uint itemEntry = result.Read<uint>(1);
                 byte slot = result.Read<byte>(2);
                 ObjectGuid creatorGuid = result.Read<ulong>(3) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3)) : ObjectGuid.Empty;
                 uint randomBonusListId = result.Read<uint>(4);
-                uint upgradeId = result.Read<uint>(5);
-                uint fixedScalingLevel = result.Read<uint>(6);
-                uint artifactKnowledgeLevel = result.Read<uint>(7);
-                byte context = result.Read<byte>(8);
+                uint fixedScalingLevel = result.Read<uint>(5);
+                uint artifactKnowledgeLevel = result.Read<uint>(6);
+                byte context = result.Read<byte>(7);
                 List<uint> bonusListIDs = new List<uint>();
-                var bonusListIdTokens = new StringArray(result.Read<string>(9), ' ');
+                var bonusListIdTokens = new StringArray(result.Read<string>(8), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
                 {
                     if (uint.TryParse(bonusListIdTokens[i], out uint id))
@@ -1136,10 +1135,9 @@ namespace Game.Entities
                     continue;
                 }
 
-                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
+                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
 
                 BonusData bonus = new BonusData(new ItemInstance(_voidStorageItems[slot]));
-
                 GetSession().GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
             }
             while (result.NextRow());
@@ -1230,7 +1228,7 @@ namespace Game.Entities
                 }
 
                 Item item = Bag.NewItemOrBag(proto);
-                ObjectGuid ownerGuid = result.Read<ulong>(44) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(44)) : ObjectGuid.Empty;
+                ObjectGuid ownerGuid = result.Read<ulong>(43) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(43)) : ObjectGuid.Empty;
                 if (!item.LoadFromDB(itemGuid, ownerGuid, result.GetFields(), itemEntry))
                 {
                     Log.outError(LogFilter.Player, "Player:_LoadMailedItems - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
@@ -2249,15 +2247,14 @@ namespace Game.Entities
                     stmt.AddValue(3, i);
                     stmt.AddValue(4, _voidStorageItems[i].CreatorGuid.GetCounter());
                     stmt.AddValue(5, (byte)_voidStorageItems[i].RandomBonusListId);
-                    stmt.AddValue(6, _voidStorageItems[i].ItemUpgradeId);
-                    stmt.AddValue(7, _voidStorageItems[i].FixedScalingLevel);
-                    stmt.AddValue(8, _voidStorageItems[i].ArtifactKnowledgeLevel);
-                    stmt.AddValue(9, _voidStorageItems[i].Context);
+                    stmt.AddValue(6, _voidStorageItems[i].FixedScalingLevel);
+                    stmt.AddValue(7, _voidStorageItems[i].ArtifactKnowledgeLevel);
+                    stmt.AddValue(8, _voidStorageItems[i].Context);
 
                     StringBuilder bonusListIDs = new StringBuilder();
                     foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)
                         bonusListIDs.AppendFormat("{0} ", bonusListID);
-                    stmt.AddValue(10, bonusListIDs.ToString());
+                    stmt.AddValue(9, bonusListIDs.ToString());
                 }
 
                 trans.Append(stmt);

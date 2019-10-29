@@ -30,9 +30,9 @@ namespace Game.Entities
             BasicData = item;
             ExtendedData = sparse;
 
-            Specializations[0] = new BitArray((int)Class.Max * PlayerConst.MaxSpecializations);
-            Specializations[1] = new BitArray((int)Class.Max * PlayerConst.MaxSpecializations);
-            Specializations[2] = new BitArray((int)Class.Max * PlayerConst.MaxSpecializations);
+            Specializations[0] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
+            Specializations[1] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
+            Specializations[2] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
         }
 
         public string GetName(LocaleConstant locale = SharedConst.DefaultLocale)
@@ -296,7 +296,7 @@ namespace Game.Entities
         public uint GetStartQuest() { return ExtendedData.StartQuestID; }
         public uint GetLockID() { return ExtendedData.LockID; }
         public uint GetItemSet() { return ExtendedData.ItemSet; }
-        public uint GetArea() { return ExtendedData.ZoneBound; }
+        public uint GetArea(int index) { return ExtendedData.ZoneBound[index]; }
         public uint GetMap() { return ExtendedData.InstanceBound; }
         public BagFamilyMask GetBagFamily() { return (BagFamilyMask)ExtendedData.BagFamily; }
         public uint GetTotemCategory() { return ExtendedData.TotemCategoryID; }
@@ -344,7 +344,7 @@ namespace Game.Entities
         public ItemFlagsCustom FlagsCu;
         public float SpellPPMRate;
         public uint RandomBonusListTemplateId;
-        public BitArray[] Specializations = new BitArray[3];
+        public BitSet[] Specializations = new BitSet[3];
         public uint ItemSpecClassMask;
 
         protected ItemRecord BasicData;

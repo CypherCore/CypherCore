@@ -1275,10 +1275,6 @@ namespace Game.Entities
 
                 item.AddItemFlag(ItemFieldFlags.NewItem);
 
-                uint upgradeID = Global.DB2Mgr.GetRulesetItemUpgrade(itemId);
-                if (upgradeID != 0)
-                    item.SetModifier(ItemModifier.UpgradeId, upgradeID);
-
                 item.SetContext(context);
                 item.SetBonuses(bonusListIDs);
 

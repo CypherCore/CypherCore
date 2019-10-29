@@ -67,15 +67,6 @@ namespace Game.DataStorage
         public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
     }
 
-    public sealed class WorldSafeLocsRecord
-    {
-        public uint Id;
-        public string AreaName;
-        public Vector3 Loc;
-        public ushort MapID;
-        public float Facing;
-    }
-
     public sealed class WorldStateExpressionRecord
     {
         public uint Id;

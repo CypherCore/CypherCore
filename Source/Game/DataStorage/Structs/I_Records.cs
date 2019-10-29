@@ -63,6 +63,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DisplayType;
+        public int SubclassID;
         public uint ItemDisplayInfoID;
         public int DefaultIconFileDataID;
         public int UiOrder;
@@ -346,7 +347,7 @@ namespace Game.DataStorage
         public ushort SocketMatchEnchantmentId;
         public ushort TotemCategoryID;
         public ushort InstanceBound;
-        public ushort ZoneBound;
+        public ushort[] ZoneBound = new ushort[2];
         public ushort ItemSet;
         public ushort LockID;
         public ushort StartQuestID;
@@ -395,16 +396,6 @@ namespace Game.DataStorage
         public uint Id;
         public ushort SpecID;
         public uint ItemID;
-    }
-
-    public sealed class ItemUpgradeRecord
-    {
-        public uint Id;
-        public byte ItemUpgradePathID;
-        public byte ItemLevelIncrement;
-        public ushort PrerequisiteID;
-        public ushort CurrencyType;
-        public uint CurrencyAmount;
     }
 
     public sealed class ItemXBonusTreeRecord

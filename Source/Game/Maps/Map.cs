@@ -4320,7 +4320,7 @@ namespace Game.Maps
         List<Map> m_childTerrainMaps = new List<Map>(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new SortedMultiMap<long, ScriptAction>();
 
-        BitArray marked_cells = new BitArray(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
+        BitSet marked_cells = new BitSet(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<uint, CreatureGroup> CreatureGroupHolder = new Dictionary<uint, CreatureGroup>();
         internal uint i_InstanceId;
         long i_gridExpiry;

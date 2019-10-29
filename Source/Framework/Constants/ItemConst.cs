@@ -304,7 +304,7 @@ namespace Framework.Constants
         BattlePetDisplayId = 6,
         EnchantIllusionAllSpecs = 7,
         ArtifactAppearanceId = 8,
-        ScalingStatDistributionFixedLevel = 9,
+        TimewalkerLevel = 9,
         EnchantIllusionSpec1 = 10,
         TransmogAppearanceSpec2 = 11,
         EnchantIllusionSpec2 = 12,
@@ -317,9 +317,11 @@ namespace Framework.Constants
         ChallengeKeystoneAffixId1 = 19,
         ChallengeKeystoneAffixId2 = 20,
         ChallengeKeystoneAffixId3 = 21,
-        ChallengeKeystoneIsCharged = 22,
+        ChallengeKeystoneAffixId4 = 22,
         ArtifactKnowledgeLevel = 23,
         ArtifactTier = 24,
+        Unused25 = 25,
+        PvpRating = 26,
 
         Max
     }

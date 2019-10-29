@@ -273,7 +273,7 @@ namespace Game
             GetPlayer().DurabilityLossAll(0.25f, true);
 
             // get corpse nearest graveyard
-            WorldSafeLocsRecord corpseGrave = null;
+            WorldSafeLocsEntry corpseGrave = null;
             WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
@@ -286,10 +286,10 @@ namespace Game
             // teleport to nearest from corpse graveyard, if different from nearest to player ghost
             if (corpseGrave != null)
             {
-                WorldSafeLocsRecord ghostGrave = Global.ObjectMgr.GetClosestGraveYard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
+                WorldSafeLocsEntry ghostGrave = Global.ObjectMgr.GetClosestGraveYard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
 
                 if (corpseGrave != ghostGrave)
-                    GetPlayer().TeleportTo(corpseGrave.MapID, corpseGrave.Loc.X, corpseGrave.Loc.Y, corpseGrave.Loc.Z, GetPlayer().GetOrientation());
+                    GetPlayer().TeleportTo(corpseGrave.Loc);
             }
         }
 

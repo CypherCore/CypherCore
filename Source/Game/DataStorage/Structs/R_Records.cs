@@ -53,11 +53,4 @@ namespace Game.DataStorage
         public uint ItemQuantity;
         public uint RewardPackID;
     }
-
-    public sealed class RulesetItemUpgradeRecord
-    {
-        public uint Id;
-        public uint ItemID;
-        public ushort ItemUpgradeID;
-    }
 }

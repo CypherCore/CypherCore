@@ -113,16 +113,16 @@ namespace Game.Chat.Commands
             if (graveyardId == 0)
                 return false;
 
-            WorldSafeLocsRecord gy = CliDB.WorldSafeLocsStorage.LookupByKey(graveyardId);
+            WorldSafeLocsEntry gy = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
             if (gy == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardnoexist, graveyardId);
                 return false;
             }
 
-            if (!GridDefines.IsValidMapCoord(gy.MapID, gy.Loc.X, gy.Loc.Y, gy.Loc.Z))
+            if (!GridDefines.IsValidMapCoord(gy.Loc))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, gy.Loc.X, gy.Loc.Y, gy.MapID);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, gy.Loc.GetPositionX(), gy.Loc.GetPositionY(), gy.Loc.GetMapId());
                 return false;
             }
 
@@ -136,7 +136,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(gy.MapID, gy.Loc.X, gy.Loc.Y, gy.Loc.Z, (gy.Facing * MathFunctions.PI) / 180); // Orientation is initially in degrees
+            player.TeleportTo(gy.Loc);
             return true;
         }
 

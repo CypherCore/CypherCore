@@ -510,15 +510,15 @@ namespace Game.BattleGrounds.Zones
                     Log.outError(LogFilter.Battleground, "BattlegroundEY: Could not spawn Speedbuff Fel Reaver.");
             }
 
-            WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainAlliance);
-            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainAlliance, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSGaveyardIds.MainAlliance);
+            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainAlliance, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
             }
 
-            sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainHorde);
-            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainHorde, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.193953f, TeamId.Horde))
+            sg = Global.ObjectMgr.GetWorldSafeLoc(EotSGaveyardIds.MainHorde);
+            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainHorde, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.193953f, TeamId.Horde))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
@@ -752,8 +752,8 @@ namespace Game.BattleGrounds.Zones
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
-            if (sg == null || !AddSpiritGuide(Point, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, GetTeamIndexByTeamId(Team)))
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            if (sg == null || !AddSpiritGuide(Point, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
                     Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
 
@@ -869,7 +869,7 @@ namespace Game.BattleGrounds.Zones
             packet.AddState(0xC0D, 0x17B);
         }
 
-        public override WorldSafeLocsRecord GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             uint g_id = 0;
 
@@ -884,9 +884,9 @@ namespace Game.BattleGrounds.Zones
                 default: return null;
             }
 
-            WorldSafeLocsRecord entry = null;
-            WorldSafeLocsRecord nearestEntry = null;
-            entry = CliDB.WorldSafeLocsStorage.LookupByKey(g_id);
+            WorldSafeLocsEntry entry = null;
+            WorldSafeLocsEntry nearestEntry = null;
+            entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
             nearestEntry = entry;
 
             if (entry == null)
@@ -899,19 +899,19 @@ namespace Game.BattleGrounds.Zones
             float plr_y = player.GetPositionY();
             float plr_z = player.GetPositionZ();
 
-            float distance = (entry.Loc.X - plr_x) * (entry.Loc.X - plr_x) + (entry.Loc.Y - plr_y) * (entry.Loc.Y - plr_y) + (entry.Loc.Z - plr_z) * (entry.Loc.Z - plr_z);
+            float distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
             float nearestDistance = distance;
 
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 if (m_PointOwnedByTeam[i] == player.GetTeam() && m_PointState[i] == EotSPointState.UnderControl)
                 {
-                    entry = CliDB.WorldSafeLocsStorage.LookupByKey(EotSMisc.m_CapturingPointTypes[i].GraveYardId);
+                    entry = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[i].GraveYardId);
                     if (entry == null)
                         Log.outError(LogFilter.Battleground, "BattlegroundEY: Graveyard {0} could not be found.", EotSMisc.m_CapturingPointTypes[i].GraveYardId);
                     else
                     {
-                        distance = (entry.Loc.X - plr_x) * (entry.Loc.X - plr_x) + (entry.Loc.Y - plr_y) * (entry.Loc.Y - plr_y) + (entry.Loc.Z - plr_z) * (entry.Loc.Z - plr_z);
+                        distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
                         if (distance < nearestDistance)
                         {
                             nearestDistance = distance;
@@ -924,9 +924,9 @@ namespace Game.BattleGrounds.Zones
             return nearestEntry;
         }
 
-        public override WorldSafeLocsRecord GetExploitTeleportLocation(Team team)
+        public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
         {
-            return CliDB.WorldSafeLocsStorage.LookupByKey(team == Team.Alliance ? EotSMisc.ExploitTeleportLocationAlliance : EotSMisc.ExploitTeleportLocationHorde);
+            return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? EotSMisc.ExploitTeleportLocationAlliance : EotSMisc.ExploitTeleportLocationHorde);
         }
 
         public override bool IsAllNodesControlledByTeam(Team team)

@@ -180,7 +180,7 @@ namespace Game.BattleGrounds.Zones
             //Graveyards
             for (byte i = 0; i < SAGraveyards.Max; i++)
             {
-                WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(SAMiscConst.GYEntries[i]);
+                WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
                 if (sg == null)
                 {
                     Log.outError(LogFilter.Battleground, "SOTA: Can't find GY entry %u", SAMiscConst.GYEntries[i]);
@@ -190,12 +190,12 @@ namespace Game.BattleGrounds.Zones
                 if (i == SAGraveyards.BeachGy)
                 {
                     GraveyardStatus[i] = Attackers;
-                    AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, SAMiscConst.GYOrientation[i], Attackers);
+                    AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), SAMiscConst.GYOrientation[i], Attackers);
                 }
                 else
                 {
                     GraveyardStatus[i] = ((Attackers == TeamId.Horde) ? TeamId.Alliance : TeamId.Horde);
-                    if (!AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, SAMiscConst.GYOrientation[i], Attackers == TeamId.Horde ? TeamId.Alliance : TeamId.Horde))
+                    if (!AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), SAMiscConst.GYOrientation[i], Attackers == TeamId.Horde ? TeamId.Alliance : TeamId.Horde))
                         Log.outError(LogFilter.Battleground, "SOTA: couldn't spawn GY: %u", i);
                 }
             }
@@ -700,7 +700,7 @@ namespace Game.BattleGrounds.Zones
         {
         }
 
-        public override WorldSafeLocsRecord GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             uint safeloc = 0;
 
@@ -709,16 +709,16 @@ namespace Game.BattleGrounds.Zones
             else
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.DefenderLastGy];
 
-            WorldSafeLocsRecord closest = CliDB.WorldSafeLocsStorage.LookupByKey(safeloc);
-            float nearest = player.GetExactDistSq(closest.Loc.X, closest.Loc.Y, closest.Loc.Z);
+            WorldSafeLocsEntry closest = Global.ObjectMgr.GetWorldSafeLoc(safeloc);
+            float nearest = player.GetExactDistSq(closest.Loc);
 
             for (byte i = SAGraveyards.RightCapturableGy; i < SAGraveyards.Max; i++)
             {
                 if (GraveyardStatus[i] != player.GetTeamId())
                     continue;
 
-                WorldSafeLocsRecord ret = CliDB.WorldSafeLocsStorage.LookupByKey(SAMiscConst.GYEntries[i]);
-                float dist = player.GetExactDistSq(ret.Loc.X, ret.Loc.Y, ret.Loc.Z);
+                WorldSafeLocsEntry ret = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
+                float dist = player.GetExactDistSq(ret.Loc);
                 if (dist < nearest)
                 {
                     closest = ret;
@@ -812,14 +812,14 @@ namespace Game.BattleGrounds.Zones
 
             DelCreature(SACreatureTypes.Max + i);
             GraveyardStatus[i] = Source.GetTeamId();
-            WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(SAMiscConst.GYEntries[i]);
+            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(SAMiscConst.GYEntries[i]);
             if (sg == null)
             {
-                Log.outError(LogFilter.Battleground, "CaptureGraveyard: non-existant GY entry: %u", SAMiscConst.GYEntries[i]);
+                Log.outError(LogFilter.Battleground, $"CaptureGraveyard: non-existant GY entry: {SAMiscConst.GYEntries[i]}");
                 return;
             }
 
-            AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, SAMiscConst.GYOrientation[i], GraveyardStatus[i]);
+            AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), SAMiscConst.GYOrientation[i], GraveyardStatus[i]);
             uint npc = 0;
             int flag = 0;
 

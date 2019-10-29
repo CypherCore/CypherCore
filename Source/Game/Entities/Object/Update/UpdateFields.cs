@@ -2326,9 +2326,9 @@ namespace Game.Entities
             }
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
-                data.WriteBit(HasQuestSession);
+                data.WriteBit((bool)HasQuestSession);
             }
-            data.WriteBit(HasLevelLink);
+            data.WriteBit((bool)HasLevelLink);
             data.FlushBits();
         }
         public override void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)

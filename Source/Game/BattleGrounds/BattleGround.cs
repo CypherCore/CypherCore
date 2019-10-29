@@ -966,9 +966,9 @@ namespace Game.BattleGrounds
 
         public void TeleportPlayerToExploitLocation(Player player)
         {
-            WorldSafeLocsRecord loc = GetExploitTeleportLocation(player.GetBGTeam());
+            WorldSafeLocsEntry loc = GetExploitTeleportLocation(player.GetBGTeam());
             if (loc != null)
-                player.TeleportTo(loc.MapID, loc.Loc.X, loc.Loc.Y, loc.Loc.Z, loc.Facing);
+                player.TeleportTo(loc.Loc);
         }
 
         public virtual void AddPlayer(Player player)
@@ -1292,7 +1292,7 @@ namespace Game.BattleGrounds
             List<ObjectGuid> ghostList = m_ReviveQueue[guideGuid];
             if (!ghostList.Empty())
             {
-                WorldSafeLocsRecord closestGrave = null;
+                WorldSafeLocsEntry closestGrave = null;
                 foreach (var guid in ghostList)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -1303,7 +1303,7 @@ namespace Game.BattleGrounds
                         closestGrave = GetClosestGraveYard(player);
 
                     if (closestGrave != null)
-                        player.TeleportTo(GetMapId(), closestGrave.Loc.X, closestGrave.Loc.Y, closestGrave.Loc.Z, player.GetOrientation());
+                        player.TeleportTo(closestGrave.Loc);
                 }
                 ghostList.Clear();
             }
@@ -1735,7 +1735,7 @@ namespace Game.BattleGrounds
             m_BgRaids[GetTeamIndexByTeamId(team)] = bg_raid;
         }
 
-        public virtual WorldSafeLocsRecord GetClosestGraveYard(Player player)
+        public virtual WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             return Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
         }
@@ -1926,7 +1926,7 @@ namespace Game.BattleGrounds
 
         public virtual void HandlePlayerResurrect(Player player) { }
 
-        public virtual WorldSafeLocsRecord GetExploitTeleportLocation(Team team) { return null; }
+        public virtual WorldSafeLocsEntry GetExploitTeleportLocation(Team team) { return null; }
 
         public virtual bool HandlePlayerUnderMap(Player player) { return false; }
 

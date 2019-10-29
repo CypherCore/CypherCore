@@ -550,7 +550,7 @@ namespace Game.Chat
         static bool HandleDebugNearGraveyard(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            WorldSafeLocsRecord nearestLoc = null;
+            WorldSafeLocsEntry nearestLoc = null;
 
             if (args.NextString().Equals("linked"))
             {
@@ -573,22 +573,23 @@ namespace Game.Chat
                 float z = player.GetPositionZ();
                 float distNearest = float.MaxValue;
 
-                foreach (var loc in CliDB.WorldSafeLocsStorage.Values)
+                foreach (var pair in Global.ObjectMgr.GetWorldSafeLocs())
                 {
-                    if (loc.MapID == player.GetMapId())
+                    var worldSafe = pair.Value;
+                    if (worldSafe.Loc.GetMapId() == player.GetMapId())
                     {
-                        float dist = (loc.Loc.X - x) * (loc.Loc.X - x) + (loc.Loc.Y - y) * (loc.Loc.Y - y) + (loc.Loc.Z - z) * (loc.Loc.Z - z);
+                        float dist = (worldSafe.Loc.GetPositionX() - x) * (worldSafe.Loc.GetPositionX() - x) + (worldSafe.Loc.GetPositionY() - y) * (worldSafe.Loc.GetPositionY() - y) + (worldSafe.Loc.GetPositionZ() - z) * (worldSafe.Loc.GetPositionZ() - z);
                         if (dist < distNearest)
                         {
                             distNearest = dist;
-                            nearestLoc = loc;
+                            nearestLoc = worldSafe;
                         }
                     }
                 }
             }
 
             if (nearestLoc != null)
-                handler.SendSysMessage(CypherStrings.CommandNearGraveyard, nearestLoc.Id, nearestLoc.Loc.X, nearestLoc.Loc.Y, nearestLoc.Loc.Z);
+                handler.SendSysMessage(CypherStrings.CommandNearGraveyard, nearestLoc.Id, nearestLoc.Loc.GetPositionX(), nearestLoc.Loc.GetPositionY(), nearestLoc.Loc.GetPositionZ());
             else
                 handler.SendSysMessage(CypherStrings.CommandNearGraveyardNotfound);
 

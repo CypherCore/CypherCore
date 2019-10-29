@@ -746,7 +746,7 @@ namespace Game
                 uint zoneId = result.Read<uint>(1);
                 Team team = (Team)result.Read<uint>(2);
 
-                WorldSafeLocsRecord entry = CliDB.WorldSafeLocsStorage.LookupByKey(safeLocId);
+                WorldSafeLocsEntry entry = GetWorldSafeLoc(safeLocId);
                 if (entry == null)
                 {
                     Log.outError(LogFilter.Sql, "Table `graveyard_zone` has a record for not existing graveyard (WorldSafeLocs.dbc id) {0}, skipped.", safeLocId);
@@ -772,16 +772,46 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} graveyard-zone links in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+        public void LoadWorldSafeLocs()
+        {
+            uint oldMSTime = Time.GetMSTime();
 
-        WorldSafeLocsRecord GetDefaultGraveYard(Team team)
+            //                                         0   1      2     3     4     5
+            SQLResult result = DB.World.Query("SELECT ID, MapID, LocX, LocY, LocZ, Facing FROM world_safe_locs");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 world locations. DB table `world_safe_locs` is empty.");
+                return;
+            }
+            do
+            {
+                uint id = result.Read<uint>(0);
+                WorldLocation loc = new WorldLocation(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                if (!GridDefines.IsValidMapCoord(loc))
+                {
+                    Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc.ToString()}, skipped");
+                    continue;
+                }
+
+                WorldSafeLocsEntry worldSafeLocs = new WorldSafeLocsEntry();
+                worldSafeLocs.Id = id;
+                worldSafeLocs.Loc = loc;
+                _worldSafeLocs[id] = worldSafeLocs;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldSafeLocs.Count} world locations {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        WorldSafeLocsEntry GetDefaultGraveYard(Team team)
         {
             if (team == Team.Horde)
-                return CliDB.WorldSafeLocsStorage.LookupByKey(10);
+                return GetWorldSafeLoc(10);
             else if (team == Team.Alliance)
-                return CliDB.WorldSafeLocsStorage.LookupByKey(4);
+                return GetWorldSafeLoc(4);
             else return null;
         }
-        public WorldSafeLocsRecord GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
+        public WorldSafeLocsEntry GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
         {
             float x, y, z;
             location.GetPosition(out x, out y, out z);
@@ -821,19 +851,19 @@ namespace Game
             // at corpse map
             bool foundNear = false;
             float distNear = 10000;
-            WorldSafeLocsRecord entryNear = null;
+            WorldSafeLocsEntry entryNear = null;
 
             // at entrance map for corpse map
             bool foundEntr = false;
             float distEntr = 10000;
-            WorldSafeLocsRecord entryEntr = null;
+            WorldSafeLocsEntry entryEntr = null;
 
             // some where other
-            WorldSafeLocsRecord entryFar = null;
+            WorldSafeLocsEntry entryFar = null;
 
             foreach (var data in range)
             {
-                WorldSafeLocsRecord entry = CliDB.WorldSafeLocsStorage.LookupByKey(data.safeLocId);
+                WorldSafeLocsEntry entry = GetWorldSafeLoc(data.safeLocId);
                 if (entry == null)
                 {
                     Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` has record for not existing graveyard (WorldSafeLocs.dbc id) {0}, skipped.", data.safeLocId);
@@ -850,17 +880,17 @@ namespace Game
                     if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
                         continue;
 
-                    if (entry.MapID == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.MapID))
+                    if (entry.Loc.GetMapId() == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.Loc.GetMapId()))
                         continue;
                 }
 
                 // find now nearest graveyard at other map
-                if (MapId != entry.MapID && entry.MapID != mapEntry.ParentMapID)
+                if (MapId != entry.Loc.GetMapId() && entry.Loc.GetMapId() != mapEntry.ParentMapID)
                 {
                     // if find graveyard at different map from where entrance placed (or no entrance data), use any first
                     if (mapEntry == null
                         || mapEntry.CorpseMapID < 0
-                        || mapEntry.CorpseMapID != entry.MapID
+                        || mapEntry.CorpseMapID != entry.Loc.GetMapId()
                         || (mapEntry.Corpse.X == 0 && mapEntry.Corpse.Y == 0))
                     {
                         // not have any corrdinates for check distance anyway
@@ -869,8 +899,8 @@ namespace Game
                     }
 
                     // at entrance map calculate distance (2D);
-                    float dist2 = (entry.Loc.X - mapEntry.Corpse.X) * (entry.Loc.X - mapEntry.Corpse.X)
-                        + (entry.Loc.Y - mapEntry.Corpse.Y) * (entry.Loc.Y - mapEntry.Corpse.Y);
+                    float dist2 = (entry.Loc.GetPositionX() - mapEntry.Corpse.X) * (entry.Loc.GetPositionX() - mapEntry.Corpse.X)
+                        + (entry.Loc.GetPositionY() - mapEntry.Corpse.Y) * (entry.Loc.GetPositionY() - mapEntry.Corpse.Y);
                     if (foundEntr)
                     {
                         if (dist2 < distEntr)
@@ -889,7 +919,7 @@ namespace Game
                 // find now nearest graveyard at same map
                 else
                 {
-                    float dist2 = (entry.Loc.X - x) * (entry.Loc.X - x) + (entry.Loc.Y - y) * (entry.Loc.Y - y) + (entry.Loc.Z - z) * (entry.Loc.Z - z);
+                    float dist2 = (entry.Loc.GetPositionX() - x) * (entry.Loc.GetPositionX() - x) + (entry.Loc.GetPositionY() - y) * (entry.Loc.GetPositionY() - y) + (entry.Loc.GetPositionZ() - z) * (entry.Loc.GetPositionZ() - z);
                     if (foundNear)
                     {
                         if (dist2 < distNear)
@@ -924,6 +954,14 @@ namespace Game
                     return data;
             }
             return null;
+        }
+        public WorldSafeLocsEntry GetWorldSafeLoc(uint id)
+        {
+            return _worldSafeLocs.LookupByKey(id);
+        }
+        public Dictionary<uint, WorldSafeLocsEntry> GetWorldSafeLocs()
+        {
+            return _worldSafeLocs;
         }
 
         public bool AddGraveYardLink(uint id, uint zoneId, Team team, bool persist = true)
@@ -4985,7 +5023,7 @@ namespace Game
                 uint Trigger_ID = result.Read<uint>(0);
                 uint PortLocID = result.Read<uint>(1);
 
-                WorldSafeLocsRecord portLoc = CliDB.WorldSafeLocsStorage.LookupByKey(PortLocID);
+                WorldSafeLocsEntry portLoc = GetWorldSafeLoc(PortLocID);
                 if (portLoc == null)
                 {
                     Log.outError(LogFilter.Sql, "Area Trigger (ID: {0}) has a non-existing Port Loc (ID: {1}) in WorldSafeLocs.dbc, skipped", Trigger_ID, PortLocID);
@@ -4993,11 +5031,11 @@ namespace Game
                 }
 
                 AreaTriggerStruct at = new AreaTriggerStruct();
-                at.target_mapId = portLoc.MapID;
-                at.target_X = portLoc.Loc.X;
-                at.target_Y = portLoc.Loc.Y;
-                at.target_Z = portLoc.Loc.Z;
-                at.target_Orientation = (portLoc.Facing * MathFunctions.PI) / 180; // Orientation is initially in degrees
+                at.target_mapId = portLoc.Loc.GetMapId();
+                at.target_X = portLoc.Loc.GetPositionX();
+                at.target_Y = portLoc.Loc.GetPositionY();
+                at.target_Z = portLoc.Loc.GetPositionZ();
+                at.target_Orientation = portLoc.Loc.GetOrientation();
                 at.PortLocId = portLoc.Id;
 
                 AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(Trigger_ID);
@@ -9773,6 +9811,7 @@ namespace Game
         Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new Dictionary<uint, AreaTriggerStruct>();
         Dictionary<ulong, AccessRequirement> _accessRequirementStorage = new Dictionary<ulong, AccessRequirement>();
         MultiMap<ulong, DungeonEncounter> _dungeonEncounterStorage = new MultiMap<ulong, DungeonEncounter>();
+        Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new Dictionary<uint, WorldSafeLocsEntry>();
 
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new Dictionary<HighGuid, ObjectGuidGenerator>();
         // first free id for selected id type
@@ -10148,6 +10187,12 @@ namespace Game
 
             return true;
         }
+    }
+
+    public class WorldSafeLocsEntry
+    {
+        public uint Id;
+        public WorldLocation Loc;
     }
 
     public class GraveYardData

@@ -596,7 +596,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        public WorldSafeLocsRecord GetClosestGraveYard(Player player)
+        public WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             BfGraveyard closestGY = null;
             float maxdist = -1;
@@ -617,7 +617,7 @@ namespace Game.BattleFields
             }
 
             if (closestGY != null)
-                return CliDB.WorldSafeLocsStorage.LookupByKey(closestGY.GetGraveyardId());
+                return Global.ObjectMgr.GetWorldSafeLoc(closestGY.GetGraveyardId());
 
             return null;
         }
@@ -891,8 +891,8 @@ namespace Game.BattleFields
 
         public float GetDistance(Player player)
         {
-            WorldSafeLocsRecord safeLoc = CliDB.WorldSafeLocsStorage.LookupByKey(m_GraveyardId);
-            return player.GetDistance2d(safeLoc.Loc.X, safeLoc.Loc.Y);
+            WorldSafeLocsEntry safeLoc = Global.ObjectMgr.GetWorldSafeLoc(m_GraveyardId);
+            return player.GetDistance2d(safeLoc.Loc.GetPositionX(), safeLoc.Loc.GetPositionY());
         }
 
         public void AddPlayer(ObjectGuid playerGuid)
@@ -964,7 +964,7 @@ namespace Game.BattleFields
 
         void RelocateDeadPlayers()
         {
-            WorldSafeLocsRecord closestGrave = null;
+            WorldSafeLocsEntry closestGrave = null;
             foreach (var guid in m_ResurrectQueue)
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -972,12 +972,12 @@ namespace Game.BattleFields
                     continue;
 
                 if (closestGrave != null)
-                    player.TeleportTo(player.GetMapId(), closestGrave.Loc.X, closestGrave.Loc.Y, closestGrave.Loc.Z, player.GetOrientation());
+                    player.TeleportTo(closestGrave.Loc);
                 else
                 {
                     closestGrave = m_Bf.GetClosestGraveYard(player);
                     if (closestGrave != null)
-                        player.TeleportTo(player.GetMapId(), closestGrave.Loc.X, closestGrave.Loc.Y, closestGrave.Loc.Z, player.GetOrientation());
+                        player.TeleportTo(closestGrave.Loc);
                 }
             }
         }

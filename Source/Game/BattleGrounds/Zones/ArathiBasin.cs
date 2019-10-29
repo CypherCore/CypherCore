@@ -631,7 +631,7 @@ namespace Game.BattleGrounds.Zones
             base.EndBattleground(winner);
         }
 
-        public override WorldSafeLocsRecord GetClosestGraveYard(Player player)
+        public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
             int teamIndex = GetTeamIndexByTeamId(player.GetTeam());
 
@@ -641,7 +641,7 @@ namespace Game.BattleGrounds.Zones
                 if (m_Nodes[i] == ABNodeStatus.Occupied + teamIndex)
                     nodes.Add(i);
 
-            WorldSafeLocsRecord good_entry = null;
+            WorldSafeLocsEntry good_entry = null;
             // If so, select the closest node to place ghost on
             if (!nodes.Empty())
             {
@@ -651,10 +651,10 @@ namespace Game.BattleGrounds.Zones
                 float mindist = 999999.0f;
                 for (byte i = 0; i < nodes.Count; ++i)
                 {
-                    WorldSafeLocsRecord entry = CliDB.WorldSafeLocsStorage.LookupByKey(GraveyardIds[nodes[i]]);
+                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(GraveyardIds[nodes[i]]);
                     if (entry == null)
                         continue;
-                    float dist = (entry.Loc.X - plr_x) * (entry.Loc.X - plr_x) + (entry.Loc.Y - plr_y) * (entry.Loc.Y - plr_y);
+                    float dist = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y);
                     if (mindist > dist)
                     {
                         mindist = dist;
@@ -665,14 +665,14 @@ namespace Game.BattleGrounds.Zones
             }
             // If not, place ghost on starting location
             if (good_entry == null)
-                good_entry = CliDB.WorldSafeLocsStorage.LookupByKey(GraveyardIds[teamIndex + 5]);
+                good_entry = Global.ObjectMgr.GetWorldSafeLoc(GraveyardIds[teamIndex + 5]);
 
             return good_entry;
         }
 
-        public override WorldSafeLocsRecord GetExploitTeleportLocation(Team team)
+        public override WorldSafeLocsEntry GetExploitTeleportLocation(Team team)
         {
-            return CliDB.WorldSafeLocsStorage.LookupByKey(team == Team.Alliance ? ExploitTeleportLocationAlliance : ExploitTeleportLocationHorde);
+            return Global.ObjectMgr.GetWorldSafeLoc(team == Team.Alliance ? ExploitTeleportLocationAlliance : ExploitTeleportLocationHorde);
         }
 
         public override bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
@@ -757,8 +757,8 @@ namespace Game.BattleGrounds.Zones
         public const int WarningNearVictoryScore = 1400;
         public const int MaxTeamScore = 1600;
 
-        public const int ExploitTeleportLocationAlliance = 3705;
-        public const int ExploitTeleportLocationHorde = 3706;
+        public const uint ExploitTeleportLocationAlliance = 3705;
+        public const uint ExploitTeleportLocationHorde = 3706;
 
         public static Position[] NodePositions =
         {

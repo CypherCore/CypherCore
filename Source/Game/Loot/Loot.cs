@@ -41,7 +41,6 @@ namespace Game.Loots
             needs_quest = li.needs_quest;
 
             randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
-            upgradeId = Global.DB2Mgr.GetRulesetItemUpgrade(itemid);
             canSave = true;
         }
 
@@ -88,7 +87,6 @@ namespace Game.Loots
 
         public uint itemid;
         public uint randomBonusListId;
-        public uint upgradeId;
         public List<uint> BonusListIDs = new List<uint>();
         public byte context;
         public List<Condition> conditions = new List<Condition>();                               // additional loot condition

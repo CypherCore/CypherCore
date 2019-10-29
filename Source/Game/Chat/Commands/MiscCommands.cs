@@ -1069,7 +1069,7 @@ namespace Game.Chat
             else
                 return false;
 
-            WorldSafeLocsRecord graveyard = CliDB.WorldSafeLocsStorage.LookupByKey(graveyardId);
+            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
             if (graveyard == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardnoexist, graveyardId);
@@ -1112,7 +1112,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             uint zone_id = player.GetZoneId();
 
-            WorldSafeLocsRecord graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
+            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
             if (graveyard != null)
             {
                 uint graveyardId = graveyard.Id;

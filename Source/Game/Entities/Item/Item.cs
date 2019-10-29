@@ -166,7 +166,6 @@ namespace Game.Entities
                         stmt.AddValue(++index, (uint)m_itemData.Durability);
                         stmt.AddValue(++index, (uint)m_itemData.CreatePlayedTime);
                         stmt.AddValue(++index, m_text);
-                        stmt.AddValue(++index, GetModifier(ItemModifier.UpgradeId));
                         stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetSpeciesId));
                         stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetBreedData));
                         stmt.AddValue(++index, GetModifier(ItemModifier.BattlePetLevel));
@@ -303,7 +302,7 @@ namespace Game.Entities
 
                         ItemModifier[] modifiersTable =
                         {
-                            ItemModifier.ScalingStatDistributionFixedLevel,
+                            ItemModifier.TimewalkerLevel,
                             ItemModifier.ArtifactKnowledgeLevel
                         };
 
@@ -315,7 +314,7 @@ namespace Game.Entities
                         {
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_MODIFIERS);
                             stmt.AddValue(0, GetGUID().GetCounter());
-                            stmt.AddValue(1, GetModifier(ItemModifier.ScalingStatDistributionFixedLevel));
+                            stmt.AddValue(1, GetModifier(ItemModifier.TimewalkerLevel));
                             stmt.AddValue(2, GetModifier(ItemModifier.ArtifactKnowledgeLevel));
                             trans.Append(stmt);
                         }
@@ -438,30 +437,14 @@ namespace Game.Entities
             SetCreatePlayedTime(fields.Read<uint>(11));
             SetText(fields.Read<string>(12));
 
-            uint upgradeId = fields.Read<uint>(13);
-            ItemUpgradeRecord rulesetUpgrade = CliDB.ItemUpgradeStorage.LookupByKey(Global.DB2Mgr.GetRulesetItemUpgrade(entry));
-            ItemUpgradeRecord upgrade = CliDB.ItemUpgradeStorage.LookupByKey(upgradeId);
-            if (rulesetUpgrade == null || upgrade == null || rulesetUpgrade.ItemUpgradePathID != upgrade.ItemUpgradePathID)
-            {
-                upgradeId = 0;
-                need_save = true;
-            }
+            SetModifier(ItemModifier.BattlePetSpeciesId, fields.Read<uint>(13));
+            SetModifier(ItemModifier.BattlePetBreedData, fields.Read<uint>(14));
+            SetModifier(ItemModifier.BattlePetLevel, fields.Read<ushort>(14));
+            SetModifier(ItemModifier.BattlePetDisplayId, fields.Read<uint>(16));
 
-            if (rulesetUpgrade != null && upgradeId == 0)
-            {
-                upgradeId = rulesetUpgrade.Id;
-                need_save = true;
-            }
+            SetContext(fields.Read<byte>(17));
 
-            SetModifier(ItemModifier.UpgradeId, upgradeId);
-            SetModifier(ItemModifier.BattlePetSpeciesId, fields.Read<uint>(14));
-            SetModifier(ItemModifier.BattlePetBreedData, fields.Read<uint>(15));
-            SetModifier(ItemModifier.BattlePetLevel, fields.Read<ushort>(16));
-            SetModifier(ItemModifier.BattlePetDisplayId, fields.Read<uint>(17));
-
-            SetContext(fields.Read<byte>(18));
-
-            var bonusListString = new StringArray(fields.Read<string>(19), ' ');
+            var bonusListString = new StringArray(fields.Read<string>(18), ' ');
             List<uint> bonusListIDs = new List<uint>();
             for (var i = 0; i < bonusListString.Length; ++i)
             {
@@ -470,25 +453,25 @@ namespace Game.Entities
             }
             SetBonuses(bonusListIDs);
 
-            SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(20));
-            SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(21));
-            SetModifier(ItemModifier.TransmogAppearanceSpec2, fields.Read<uint>(22));
-            SetModifier(ItemModifier.TransmogAppearanceSpec3, fields.Read<uint>(23));
-            SetModifier(ItemModifier.TransmogAppearanceSpec4, fields.Read<uint>(24));
+            SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(19));
+            SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(20));
+            SetModifier(ItemModifier.TransmogAppearanceSpec2, fields.Read<uint>(21));
+            SetModifier(ItemModifier.TransmogAppearanceSpec3, fields.Read<uint>(22));
+            SetModifier(ItemModifier.TransmogAppearanceSpec4, fields.Read<uint>(23));
 
-            SetModifier(ItemModifier.EnchantIllusionAllSpecs, fields.Read<uint>(25));
-            SetModifier(ItemModifier.EnchantIllusionSpec1, fields.Read<uint>(26));
-            SetModifier(ItemModifier.EnchantIllusionSpec2, fields.Read<uint>(27));
-            SetModifier(ItemModifier.EnchantIllusionSpec3, fields.Read<uint>(28));
-            SetModifier(ItemModifier.EnchantIllusionSpec4, fields.Read<uint>(29));
+            SetModifier(ItemModifier.EnchantIllusionAllSpecs, fields.Read<uint>(24));
+            SetModifier(ItemModifier.EnchantIllusionSpec1, fields.Read<uint>(25));
+            SetModifier(ItemModifier.EnchantIllusionSpec2, fields.Read<uint>(26));
+            SetModifier(ItemModifier.EnchantIllusionSpec3, fields.Read<uint>(27));
+            SetModifier(ItemModifier.EnchantIllusionSpec4, fields.Read<uint>(28));
 
             int gemFields = 4;
             ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 gemData[i] = new ItemDynamicFieldGems();
-                gemData[i].ItemId = fields.Read<uint>(30 + i * gemFields);
-                var gemBonusListIDs = new StringArray(fields.Read<string>(31 + i * gemFields), ' ');
+                gemData[i].ItemId = fields.Read<uint>(29 + i * gemFields);
+                var gemBonusListIDs = new StringArray(fields.Read<string>(30 + i * gemFields), ' ');
                 if (!gemBonusListIDs.IsEmpty())
                 {
                     uint b = 0;
@@ -499,13 +482,13 @@ namespace Game.Entities
                     }
                 }
 
-                gemData[i].Context = fields.Read<byte>(32 + i * gemFields);
+                gemData[i].Context = fields.Read<byte>(31 + i * gemFields);
                 if (gemData[i].ItemId != 0)
-                    SetGem((ushort)i, gemData[i], fields.Read<uint>(33 + i * gemFields));
+                    SetGem((ushort)i, gemData[i], fields.Read<uint>(32 + i * gemFields));
             }
 
-            SetModifier(ItemModifier.ScalingStatDistributionFixedLevel, fields.Read<uint>(42));
-            SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(43));
+            SetModifier(ItemModifier.TimewalkerLevel, fields.Read<uint>(41));
+            SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(42));
 
             // Enchants must be loaded after all other bonus/scaling data
             var enchantmentTokens = new StringArray(fields.Read<string>(8), ' ');
@@ -536,7 +519,6 @@ namespace Game.Entities
                 stmt.AddValue(index++, (uint)m_itemData.Expiration);
                 stmt.AddValue(index++, (uint)m_itemData.DynamicFlags);
                 stmt.AddValue(index++, (uint)m_itemData.Durability);
-                stmt.AddValue(index++, GetModifier(ItemModifier.UpgradeId));
                 stmt.AddValue(index++, guid);
                 DB.Characters.Execute(stmt);
             }
@@ -1104,7 +1086,8 @@ namespace Game.Entities
         public bool IsLimitedToAnotherMapOrZone(uint cur_mapId, uint cur_zoneId)
         {
             ItemTemplate proto = GetTemplate();
-            return proto != null && ((proto.GetMap() != 0 && proto.GetMap() != cur_mapId) || (proto.GetArea() != 0 && proto.GetArea() != cur_zoneId));
+            return proto != null && ((proto.GetMap() != 0 && proto.GetMap() != cur_mapId) ||
+                ((proto.GetArea(0) != 0 && proto.GetArea(0) != cur_zoneId) && (proto.GetArea(1) != 0 && proto.GetArea(1) != cur_zoneId)));
         }
 
         public void SendUpdateSockets()
@@ -1892,12 +1875,11 @@ namespace Game.Entities
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
             uint maxItemLevel = GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-            return GetItemLevel(GetTemplate(), _bonusData, owner.GetLevel(), GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), GetModifier(ItemModifier.UpgradeId),
+            return GetItemLevel(GetTemplate(), _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
                 minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
         }
 
-        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint upgradeId,
-            uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus)
+        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus)
         {
             if (itemTemplate == null)
                 return 1;
@@ -1927,9 +1909,6 @@ namespace Game.Entities
                 itemLevel += bonusData.GemItemLevelBonus[i];
 
             uint itemLevelBeforeUpgrades = itemLevel;
-            ItemUpgradeRecord upgrade = CliDB.ItemUpgradeStorage.LookupByKey(upgradeId);
-            if (upgrade != null)
-                itemLevel += upgrade.ItemLevelIncrement;
 
             if (pvpBonus)
                 itemLevel += Global.DB2Mgr.GetPvpItemLevelBonus(itemTemplate.GetId());
@@ -1974,7 +1953,7 @@ namespace Game.Entities
             if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.Conjured | ItemFlags.NoDisenchant) || itemTemplate.GetBonding() == ItemBondingType.Quest)
                 return null;
 
-            if (itemTemplate.GetArea() != 0 || itemTemplate.GetMap() != 0 || itemTemplate.GetMaxStackSize() > 1)
+            if (itemTemplate.GetArea(0) != 0 || itemTemplate.GetArea(1) != 0 || itemTemplate.GetMap() != 0 || itemTemplate.GetMaxStackSize() > 1)
                 return null;
 
             if (GetSellPrice(itemTemplate, quality, itemLevel) == 0 && !Global.DB2Mgr.HasItemCurrencyCost(itemTemplate.GetId()))
@@ -2380,7 +2359,7 @@ namespace Game.Entities
 
         public void SetFixedLevel(uint level)
         {
-            if (!_bonusData.HasFixedLevel || GetModifier(ItemModifier.ScalingStatDistributionFixedLevel) != 0)
+            if (!_bonusData.HasFixedLevel || GetModifier(ItemModifier.TimewalkerLevel) != 0)
                 return;
 
             ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(_bonusData.ScalingStatDistribution);
@@ -2393,7 +2372,7 @@ namespace Game.Entities
                     if ((contentTuning.Flags.HasAnyFlag(2) || contentTuning.MinLevel != 0 || contentTuning.MaxLevel != 0) && !contentTuning.Flags.HasAnyFlag(4))
                         level = (uint)Math.Min(Math.Max(level, contentTuning.MinLevel), contentTuning.MaxLevel);
 
-                SetModifier(ItemModifier.ScalingStatDistributionFixedLevel, level);
+                SetModifier(ItemModifier.TimewalkerLevel, level);
             }
         }
 
@@ -2402,7 +2381,7 @@ namespace Game.Entities
             if (_bonusData.RequiredLevelOverride != 0)
                 return _bonusData.RequiredLevelOverride;
             else if (_bonusData.HasFixedLevel)
-                return (int)GetModifier(ItemModifier.ScalingStatDistributionFixedLevel);
+                return (int)GetModifier(ItemModifier.TimewalkerLevel);
             else
                 return _bonusData.RequiredLevel;
         }

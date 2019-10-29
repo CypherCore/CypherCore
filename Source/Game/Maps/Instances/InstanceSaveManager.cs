@@ -57,7 +57,7 @@ namespace Game.Maps
                 return null;
             }
 
-            if (entranceId != 0 && !CliDB.WorldSafeLocsStorage.ContainsKey(entranceId))
+            if (entranceId != 0 && Global.ObjectMgr.GetWorldSafeLoc(entranceId) == null)
             {
                 Log.outWarn(LogFilter.Misc, "InstanceSaveManager.AddInstanceSave: invalid entranceId = {0} defined for instance save with mapid = {1}, instanceid = {2}!", entranceId, mapId, instanceId);
                 entranceId = 0;

@@ -1990,92 +1990,97 @@ namespace Game.Entities
                 effectsBySpell[effect.SpellID][effect.DifficultyID][effect.EffectIndex] = effect;
             }
 
-            foreach (var spell in CliDB.SpellNameStorage.Values)
-                loadData[spell.Id] = new SpellInfoLoadHelper();
+            SpellInfoLoadHelper GetSpellInfoLoadHelper(uint spellId)
+            {
+                if (!loadData.ContainsKey(spellId))
+                    loadData[spellId] = new SpellInfoLoadHelper();
+
+                return loadData[spellId];
+            }
 
             foreach (SpellAuraOptionsRecord auraOptions in CliDB.SpellAuraOptionsStorage.Values)
                 if (auraOptions.DifficultyID == 0)    // TODO: implement
-                    loadData[auraOptions.SpellID].AuraOptions = auraOptions;
+                    GetSpellInfoLoadHelper(auraOptions.SpellID).AuraOptions = auraOptions;
 
             CliDB.SpellAuraOptionsStorage.Clear();
 
             foreach (SpellAuraRestrictionsRecord auraRestrictions in CliDB.SpellAuraRestrictionsStorage.Values)
             {
                 if (auraRestrictions.DifficultyID == 0)    // TODO: implement
-                    loadData[auraRestrictions.SpellID].AuraRestrictions = auraRestrictions;
+                    GetSpellInfoLoadHelper(auraRestrictions.SpellID).AuraRestrictions = auraRestrictions;
             }
             CliDB.SpellAuraRestrictionsStorage.Clear();
 
             foreach (SpellCastingRequirementsRecord castingRequirements in CliDB.SpellCastingRequirementsStorage.Values)
-                loadData[castingRequirements.SpellID].CastingRequirements = castingRequirements;
+                GetSpellInfoLoadHelper(castingRequirements.SpellID).CastingRequirements = castingRequirements;
 
             CliDB.SpellCastingRequirementsStorage.Clear();
 
             foreach (SpellCategoriesRecord categories in CliDB.SpellCategoriesStorage.Values)
             {
                 if (categories.DifficultyID == 0)  // TODO: implement
-                    loadData[categories.SpellID].Categories = categories;
+                    GetSpellInfoLoadHelper(categories.SpellID).Categories = categories;
             }
             CliDB.SpellCategoriesStorage.Clear();
 
             foreach (SpellClassOptionsRecord classOptions in CliDB.SpellClassOptionsStorage.Values)
-                loadData[classOptions.SpellID].ClassOptions = classOptions;
+                GetSpellInfoLoadHelper(classOptions.SpellID).ClassOptions = classOptions;
 
             CliDB.SpellClassOptionsStorage.Clear();
 
             foreach (SpellCooldownsRecord cooldowns in CliDB.SpellCooldownsStorage.Values)
             {
                 if (cooldowns.DifficultyID == 0)   // TODO: implement
-                    loadData[cooldowns.SpellID].Cooldowns = cooldowns;
+                    GetSpellInfoLoadHelper(cooldowns.SpellID).Cooldowns = cooldowns;
             }
             CliDB.SpellCooldownsStorage.Clear();
 
             foreach (SpellEquippedItemsRecord equippedItems in CliDB.SpellEquippedItemsStorage.Values)
-                loadData[equippedItems.SpellID].EquippedItems = equippedItems;
+                GetSpellInfoLoadHelper(equippedItems.SpellID).EquippedItems = equippedItems;
 
             CliDB.SpellEquippedItemsStorage.Clear();
 
             foreach (SpellInterruptsRecord interrupts in CliDB.SpellInterruptsStorage.Values)
             {
                 if (interrupts.DifficultyID == 0)  // TODO: implement
-                    loadData[interrupts.SpellID].Interrupts = interrupts;
+                    GetSpellInfoLoadHelper(interrupts.SpellID).Interrupts = interrupts;
             }
             CliDB.SpellInterruptsStorage.Clear();
 
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
             {
                 if (levels.DifficultyID == 0)  // TODO: implement
-                    loadData[levels.SpellID].Levels = levels;
+                    GetSpellInfoLoadHelper(levels.SpellID).Levels = levels;
             }
 
             foreach (SpellMiscRecord misc in CliDB.SpellMiscStorage.Values)
                 if (misc.DifficultyID == 0)
-                    loadData[misc.SpellID].Misc = misc;
+                    GetSpellInfoLoadHelper(misc.SpellID).Misc = misc;
 
             foreach (SpellReagentsRecord reagents in CliDB.SpellReagentsStorage.Values)
-                loadData[reagents.SpellID].Reagents = reagents;
+                GetSpellInfoLoadHelper(reagents.SpellID).Reagents = reagents;
 
             CliDB.SpellReagentsStorage.Clear();
 
             foreach (SpellScalingRecord scaling in CliDB.SpellScalingStorage.Values)
-                loadData[scaling.SpellID].Scaling = scaling;
+                GetSpellInfoLoadHelper(scaling.SpellID).Scaling = scaling;
 
             CliDB.SpellScalingStorage.Clear();
 
             foreach (SpellShapeshiftRecord shapeshift in CliDB.SpellShapeshiftStorage.Values)
-                loadData[shapeshift.SpellID].Shapeshift = shapeshift;
+                GetSpellInfoLoadHelper(shapeshift.SpellID).Shapeshift = shapeshift;
 
             CliDB.SpellShapeshiftStorage.Clear();
 
             foreach (SpellTargetRestrictionsRecord targetRestrictions in CliDB.SpellTargetRestrictionsStorage.Values)
             {
                 if (targetRestrictions.DifficultyID == 0)  // TODO: implement
-                    loadData[targetRestrictions.SpellID].TargetRestrictions = targetRestrictions;
+                    GetSpellInfoLoadHelper(targetRestrictions.SpellID).TargetRestrictions = targetRestrictions;
             }
             CliDB.SpellTargetRestrictionsStorage.Clear();
 
             foreach (SpellTotemsRecord totems in CliDB.SpellTotemsStorage.Values)
-                loadData[totems.SpellID].Totems = totems;
+                GetSpellInfoLoadHelper(totems.SpellID).Totems = totems;
 
             CliDB.SpellTotemsStorage.Clear();
 
@@ -2089,7 +2094,7 @@ namespace Game.Entities
 
             foreach (var spellEntry in CliDB.SpellNameStorage.Values)
             {
-                loadData[spellEntry.Id].Entry = spellEntry;
+                GetSpellInfoLoadHelper(spellEntry.Id).Entry = spellEntry;
                 mSpellInfoMap[spellEntry.Id] = new SpellInfo(loadData[spellEntry.Id], effectsBySpell.LookupByKey(spellEntry.Id), visualsBySpell.LookupByKey(spellEntry.Id));
             }
 

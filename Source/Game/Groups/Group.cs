@@ -2678,7 +2678,7 @@ namespace Game.Groups
                 BonusData bonusData = new BonusData(itemInstance);
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemid);
-                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.GetLevel(), 0, lootItemInSlot.upgradeId, 0, 0, 0, false);
+                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.GetLevel(), 0, 0, 0, 0, false);
                 return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
             }
 

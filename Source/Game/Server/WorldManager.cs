@@ -581,6 +581,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellArea Data...");                // must be after quest load
             Global.SpellMgr.LoadSpellAreas();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading World locations...");
+            Global.ObjectMgr.LoadWorldSafeLocs();                            // must be before LoadAreaTriggerTeleports and LoadGraveyardZones
+
             Log.outInfo(LogFilter.ServerLoading, "Loading AreaTrigger definitions...");
             Global.ObjectMgr.LoadAreaTriggerTeleports();
 
