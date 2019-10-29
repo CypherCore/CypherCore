@@ -75,7 +75,9 @@ namespace Framework.Constants
         SiegeableMulti = 53,
         SiegeableMo = 54,
         PvpReward = 55,
-        Max = 56
+        FuturePatch1 = 56,
+        FuturePatch2 = 57,
+        Max = 58
     }
 
     public enum GameObjectState

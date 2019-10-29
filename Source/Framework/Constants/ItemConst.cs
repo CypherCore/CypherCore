@@ -1066,6 +1066,7 @@ namespace Framework.Constants
         CantDoThatRightNow = 102,// You Can'T Do That Right Now.
         BagFull6 = 103,// That Bag Is Full.
         CantBeScrapped = 104,// You Can'T Scrap That Item
+        None4 = 105
     }
 
     public enum BuyResult
