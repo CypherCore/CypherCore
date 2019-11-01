@@ -448,7 +448,7 @@ namespace Game.Entities
             List<uint> bonusListIDs = new List<uint>();
             for (var i = 0; i < bonusListString.Length; ++i)
             {
-                if (uint.TryParse(tokens[i], out uint bonusListID))
+                if (uint.TryParse(bonusListString[i], out uint bonusListID))
                     bonusListIDs.Add(bonusListID);
             }
             SetBonuses(bonusListIDs);

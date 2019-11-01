@@ -3078,7 +3078,7 @@ namespace Game.Entities
             // first save/honor gain after midnight will also update the player's honor fields
             UpdateHonorFields();
 
-            Log.outDebug(LogFilter.Player, $"Player::SaveToDB: The value of player {GetName()}%s at save: ");
+            Log.outDebug(LogFilter.Player, $"Player::SaveToDB: The value of player {GetName()} at save: ");
 
             if (!create)
                 Global.ScriptMgr.OnPlayerSave(this);

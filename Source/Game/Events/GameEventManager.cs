@@ -1584,14 +1584,12 @@ namespace Game
             return ae.Contains(event_id);
         }
 
-
         public List<ushort> GetActiveEventList() { return m_ActiveEvents; }
         public GameEventData[] GetEventMap() { return mGameEvent; }
         public bool IsActiveEvent(ushort event_id) { return m_ActiveEvents.Contains(event_id); }
 
         void AddActiveEvent(ushort event_id) { m_ActiveEvents.Add(event_id); }
         void RemoveActiveEvent(ushort event_id) { m_ActiveEvents.Remove(event_id); }
-
 
         List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
         List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
