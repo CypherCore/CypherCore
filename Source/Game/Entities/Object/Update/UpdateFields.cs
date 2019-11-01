@@ -2349,7 +2349,7 @@ namespace Game.Entities
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
-            bool hasQuestLogDynamicChangesMask = data.WriteBit(IsQuestLogDynamicChangesMask());
+            bool noQuestLogChangesMask = data.WriteBit(IsQuestLogChangesMaskSkipped());
             if (changesMask[0])
             {
                 if (changesMask[1])
@@ -2378,10 +2378,10 @@ namespace Game.Entities
                     {
                         if (QuestSessionQuestLog.HasChanged(i))
                         {
-                            if (hasQuestLogDynamicChangesMask)
-                                QuestSessionQuestLog[i].WriteUpdate(data, owner, receiver);
-                            else
+                            if (noQuestLogChangesMask)
                                 QuestSessionQuestLog[i].WriteCreate(data, owner, receiver);
+                            else
+                                QuestSessionQuestLog[i].WriteUpdate(data, owner, receiver);
                         }
                     }
                 }
@@ -2539,10 +2539,10 @@ namespace Game.Entities
                 {
                     if (changesMask[42 + i])
                     {
-                        if (hasQuestLogDynamicChangesMask)
-                            QuestLog[i].WriteUpdate(data, owner, receiver);
-                        else
+                        if (noQuestLogChangesMask)
                             QuestLog[i].WriteCreate(data, owner, receiver);
+                        else
+                            QuestLog[i].WriteUpdate(data, owner, receiver);
                     }
                 }
             }
@@ -2613,7 +2613,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        bool IsQuestLogDynamicChangesMask() { return false; } // bandwidth savings aren't worth the cpu time
+        bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
     }
 
     public class SkillInfo : BaseUpdateData<Player>
