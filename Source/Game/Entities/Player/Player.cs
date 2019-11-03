@@ -266,8 +266,8 @@ namespace Game.Entities
             InitRunes();
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), (ulong)WorldConfig.GetIntValue(WorldCfg.StartPlayerMoney));
-            SetCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
-            SetCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
+            SetCreateCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
+            SetCreateCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
             // start with every map explored
             if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
@@ -1201,7 +1201,7 @@ namespace Game.Entities
         }
 
         //Currency - Money
-        void SetCurrency(CurrencyTypes id, uint count, bool printLog = true)
+        void SetCreateCurrency(CurrencyTypes id, uint count, bool printLog = true)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1233,6 +1233,16 @@ namespace Game.Entities
 
             if (!ignoreMultipliers)
                 count *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id);
+
+            // Currency that is immediately converted into reputation with that faction instead
+            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
+            if (factionEntry != null)
+            {
+                if (currency.Flags.HasAnyFlag((uint)CurrencyFlags.HighPrecision))
+                    count /= 100;
+                GetReputationMgr().ModifyReputation(factionEntry, count, true);
+                return;
+            }
 
             uint oldTotalCount = 0;
             uint oldWeekCount = 0;
