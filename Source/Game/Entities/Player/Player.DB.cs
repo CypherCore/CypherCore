@@ -2458,7 +2458,7 @@ namespace Game.Entities
             // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
             SetMultiActionBars(result.Read<byte>(68));
 
-            m_fishingSteps = result.Read<byte>(72);
+            m_fishingSteps = result.Read<byte>(71);
 
             InitDisplayIds();
 
@@ -2493,8 +2493,8 @@ namespace Game.Entities
             var RelocateToHomebind = new Action(() => { mapId = homebind.GetMapId(); instanceId = 0; Relocate(homebind); });
 
             SetDungeonDifficultyID(CheckLoadedDungeonDifficultyID((Difficulty)result.Read<byte>(49)));
-            SetRaidDifficultyID(CheckLoadedRaidDifficultyID((Difficulty)result.Read<byte>(70)));
-            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID((Difficulty)result.Read<byte>(71)));
+            SetRaidDifficultyID(CheckLoadedRaidDifficultyID((Difficulty)result.Read<byte>(69)));
+            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID((Difficulty)result.Read<byte>(70)));
 
             string taxi_nodes = result.Read<string>(48);
 
@@ -3020,12 +3020,8 @@ namespace Game.Entities
             }
 
             // RaF stuff.
-            m_grantableLevels = result.Read<byte>(69);
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
                 AddDynamicFlag(UnitDynFlags.ReferAFriend);
-
-            if (m_grantableLevels > 0)
-                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GrantableLevels), (byte)1);
 
             _LoadDeclinedNames(holder.GetResult(PlayerLoginQueryLoad.DeclinedNames));
 
@@ -3042,9 +3038,9 @@ namespace Game.Entities
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowerAbilities)))
                 _garrison = garrison;
 
-            _InitHonorLevelOnLoadFromDB(result.Read<uint>(73), result.Read<uint>(74));
+            _InitHonorLevelOnLoadFromDB(result.Read<uint>(72), result.Read<uint>(73));
 
-            _restMgr.LoadRestBonus(RestTypes.Honor, (PlayerRestState)result.Read<byte>(75), result.Read<float>(76));
+            _restMgr.LoadRestBonus(RestTypes.Honor, (PlayerRestState)result.Read<byte>(74), result.Read<float>(75));
             if (time_diff > 0)
             {
                 //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
@@ -3224,7 +3220,6 @@ namespace Game.Entities
                 stmt.AddValue(index++, ss.ToString());
 
                 stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
-                stmt.AddValue(index++, m_grantableLevels);
                 stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
             }
             else
@@ -3373,7 +3368,6 @@ namespace Game.Entities
 
                 stmt.AddValue(index++, ss.ToString());
                 stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
-                stmt.AddValue(index++, m_grantableLevels);
 
                 stmt.AddValue(index++, IsInWorld && !GetSession().PlayerLogout() ? 1 : 0);
                 stmt.AddValue(index++, (uint)m_activePlayerData.Honor);

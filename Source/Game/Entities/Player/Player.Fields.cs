@@ -218,7 +218,6 @@ namespace Game.Entities
         uint m_zoneUpdateTimer;
 
         uint m_ChampioningFaction;
-        byte m_grantableLevels;
         byte m_fishingSteps;
 
         // Recall position

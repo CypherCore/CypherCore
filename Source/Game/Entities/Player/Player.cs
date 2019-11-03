@@ -5398,20 +5398,6 @@ namespace Game.Entities
 
             UpdateCriteria(CriteriaTypes.ReachLevel);
 
-            // Refer-A-Friend
-            if (GetSession().GetRecruiterId() != 0)
-            {
-                if (level < WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
-                {
-                    if (level % 2 == 0)
-                    {
-                        ++m_grantableLevels;
-
-                        SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GrantableLevels), (byte)1);
-                    }
-                }
-            }
-
             Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
         }
 
@@ -6987,8 +6973,6 @@ namespace Game.Entities
             GetSession().SendDoFlight(mountDisplayId, path, startNode);
         }
 
-        public byte GetGrantableLevels() { return m_grantableLevels; }
-        public void SetGrantableLevels(int val) { m_grantableLevels = (byte)val; }
         public bool GetsRecruitAFriendBonus(bool forXP)
         {
             bool recruitAFriend = false;
