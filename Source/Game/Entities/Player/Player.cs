@@ -6076,7 +6076,7 @@ namespace Game.Entities
                     // But exclude stoppable elevators from this hack - they would be teleporting from one end to another
                     // if affected transports move so far horizontally that it causes them to run out of visibility range then you are out of luck
                     // fix visibility instead of adding hacks here
-                    if (target.ToGameObject().IsDynTransport())
+                    if (!target.ToGameObject().IsDynTransport())
                         s64.Add(target.GetGUID());
                     break;
                 case TypeId.Unit:
