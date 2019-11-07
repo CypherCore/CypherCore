@@ -235,7 +235,7 @@ namespace Game.DataStorage
                         bool hasRef = refData.Entries.TryGetValue(i, out int refId);
 
                         long recordIndex = i + previousRecordCount;
-                        long recordOffset = (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
+                        long recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
 
                         var rec = new WDC3Row(this, bitReader, (int)recordOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
                         _records.Add(rec.Id, rec);
@@ -537,7 +537,7 @@ namespace Game.DataStorage
                                 }
                                 else
                                 {
-                                    var pos = _recordsOffset + _data.Offset + (_data.Position >> 3);
+                                    var pos = _recordsOffset + (_data.Position >> 3);
                                     int ofs = GetFieldValue<int>(fieldIndex);
                                     localized[LocaleConstant.enUS] = _stringsTable.LookupByKey(pos + ofs);
                                 }

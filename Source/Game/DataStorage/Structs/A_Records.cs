@@ -81,7 +81,7 @@ namespace Game.DataStorage
         public ushort UwZoneMusic;
         public byte ExplorationLevel;
         public ushort IntroSound;
-        public byte UwIntroSound;
+        public uint UwIntroSound;
         public byte FactionGroupMask;
         public float AmbientMultiplier;
         public byte MountFlags;
