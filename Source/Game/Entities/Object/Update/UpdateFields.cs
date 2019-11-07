@@ -639,8 +639,8 @@ namespace Game.Entities
 
     public class UnlockedAzeriteEssence
     {
-        uint AzeriteEssenceID;
-        uint Rank;
+        public uint AzeriteEssenceID;
+        public uint Rank;
 
         public void WriteCreate(WorldPacket data, Item owner, Player receiver)
         {
@@ -916,8 +916,8 @@ namespace Game.Entities
 
     public class PassiveSpellHistory
     {
-        int SpellID;
-        int AuraSpellID;
+        public int SpellID;
+        public int AuraSpellID;
 
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
