@@ -494,6 +494,10 @@ namespace Game
                 sender.ToggleAFK();
             }
 
+            Guild guild = sender.GetGuild();
+            if (guild != null)
+                guild.SendEventAwayChanged(sender.GetGUID(), sender.IsAFK(), sender.IsDND());
+
             Global.ScriptMgr.OnPlayerChat(sender, ChatMsg.Afk, Language.Universal, packet.Text);
         }
 
@@ -527,6 +531,10 @@ namespace Game
 
                 sender.ToggleDND();
             }
+
+            Guild guild = sender.GetGuild();
+            if (guild != null)
+                guild.SendEventAwayChanged(sender.GetGUID(), sender.IsAFK(), sender.IsDND());
 
             Global.ScriptMgr.OnPlayerChat(sender, ChatMsg.Dnd, Language.Universal, packet.Text);
         }

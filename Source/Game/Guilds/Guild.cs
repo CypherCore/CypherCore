@@ -1091,6 +1091,29 @@ namespace Game.Guilds
             member.AddFlag(GuildMemberFlags.Online);
         }
 
+        public void SendEventAwayChanged(ObjectGuid memberGuid, bool afk, bool dnd)
+        {
+            Member member = GetMember(memberGuid);
+            if (member == null)
+                return;
+
+            if (afk)
+                member.AddFlag(GuildMemberFlags.AFK);
+            else
+                member.RemoveFlag(GuildMemberFlags.AFK);
+
+            if (dnd)
+                member.AddFlag(GuildMemberFlags.DND);
+            else
+                member.RemoveFlag(GuildMemberFlags.DND);
+
+            GuildEventAwayChange awayChange = new GuildEventAwayChange();
+            awayChange.Guid = memberGuid;
+            awayChange.AFK = afk;
+            awayChange.DND = dnd;
+            BroadcastPacket(awayChange);
+        }
+
         void SendEventBankMoneyChanged()
         {
             GuildEventBankMoneyChanged eventPacket = new GuildEventBankMoneyChanged();

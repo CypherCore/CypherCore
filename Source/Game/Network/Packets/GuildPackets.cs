@@ -278,6 +278,23 @@ namespace Game.Network.Packets
         public string OldGuildName;
     }
 
+    public class GuildEventAwayChange : ServerPacket
+    {
+        public GuildEventAwayChange() : base(ServerOpcodes.GuildEventAwayChange) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Guid);
+            _worldPacket.WriteBit(AFK);
+            _worldPacket.WriteBit(DND);
+            _worldPacket.FlushBits();
+        }
+
+        public ObjectGuid Guid;
+        public bool AFK;
+        public bool DND;
+    }
+
     public class GuildEventPresenceChange : ServerPacket
     {
         public GuildEventPresenceChange() : base(ServerOpcodes.GuildEventPresenceChange) { }
