@@ -454,7 +454,7 @@ namespace Game.BattlePets
             _owner.SendPacket(battlePetError);
         }
 
-        public BattlePetSlot GetSlot(byte slot) { return _slots[slot]; }
+        public BattlePetSlot GetSlot(byte slot) { return slot < _slots.Count ? _slots[slot] : null; }
         WorldSession GetOwner() { return _owner; }
 
         public ushort GetTrapLevel() { return _trapLevel; }

@@ -35,7 +35,11 @@ namespace Game
         {
             BattlePetMgr.BattlePet pet = GetBattlePetMgr().GetPet(battlePetSetBattleSlot.PetGuid);
             if (pet != null)
-                GetBattlePetMgr().GetSlot(battlePetSetBattleSlot.Slot).Pet = pet.PacketInfo;
+            {
+                BattlePetSlot slot = GetBattlePetMgr().GetSlot(battlePetSetBattleSlot.Slot);
+                if (slot != null)
+                    slot.Pet = pet.PacketInfo;
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlePetModifyName)]
