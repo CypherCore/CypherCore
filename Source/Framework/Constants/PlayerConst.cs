@@ -64,6 +64,11 @@ namespace Framework.Constants
         public const int MaxHonorLevel = 500;
         public const byte LevelMinHonor = 110;
         public const uint SpellPvpRulesEnabled = 134735;
+
+        //Azerite
+        public const uint ItemIdHeartOfAzeroth = 158075;
+        public const uint MaxAzeriteItemLevel = 70;
+        public const uint MaxAzeriteItemKnowledgeLevel = 30;
     }
 
     public struct MoneyConstants

@@ -1869,7 +1869,7 @@ namespace Game.Entities
             ItemContainerDeleteLootItemsFromDB();
         }
 
-        public uint GetItemLevel(Player owner)
+        public virtual uint GetItemLevel(Player owner)
         {
             uint minItemLevel = owner.m_unitData.MinItemLevel;
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
@@ -2386,6 +2386,17 @@ namespace Game.Entities
                 return _bonusData.RequiredLevel;
         }
 
+        public static Item NewItemOrBag(ItemTemplate proto)
+        {
+            if (proto.GetInventoryType() == InventoryType.Bag)
+                return new Bag();
+
+            if (Global.DB2Mgr.IsAzeriteItem(proto.GetId()))
+                return new AzeriteItem();
+
+            return new Item();
+        }
+
         public static void AddItemsSetItem(Player player, Item item)
         {
             ItemTemplate proto = item.GetTemplate();
@@ -2535,17 +2546,17 @@ namespace Game.Entities
         public void AddItemFlag(ItemFieldFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void RemoveItemFlag(ItemFieldFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void SetItemFlags(ItemFieldFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
+        bool HasItemFlag2(ItemFieldFlags2 flag) { return (m_itemData.DynamicFlags2 & (uint)flag) != 0; }
+        void AddItemFlag2(ItemFieldFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
+        void RemoveItemFlag2(ItemFieldFlags2 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
+        void SetItemFlags2(ItemFieldFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
 
-        public Bag ToBag()
-        {
-            if (IsBag())
-                return (this as Bag);
-            else
-                return null;
-        }
+        public Bag ToBag() { return IsBag() ? this as Bag : null; }
+        public AzeriteItem ToAzeriteItem() { return IsAzeriteItem() ? this as AzeriteItem : null; }
 
         public bool IsLocked() { return !HasItemFlag(ItemFieldFlags.Unlocked); }
         public bool IsBag() { return GetTemplate().GetInventoryType() == InventoryType.Bag; }
+        bool IsAzeriteItem() { return GetTypeId() == TypeId.AzeriteItem; }
         public bool IsCurrencyToken() { return GetTemplate().IsCurrencyToken(); }
         public bool IsBroken() { return m_itemData.MaxDurability > 0 && m_itemData.Durability == 0; }
         public void SetDurability(uint durability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Durability), durability); }
@@ -2948,7 +2959,5 @@ namespace Game.Entities
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
         public ushort[] BonusListIDs = new ushort[16];
         public byte Context;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] Padding = new byte[3];
     }
 }

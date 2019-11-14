@@ -92,9 +92,9 @@ namespace Game.Entities
                         if (item.GetTemplate().GetArtifactID() != 0 && artifactDataPair != null)
                             item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3, artifactDataPair.Item4);
 
-                        ulong counter = result.Read<ulong>(43);
+                        ulong counter = result.Read<ulong>(46);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(44);
+                        byte slot = result.Read<byte>(47);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -1228,7 +1228,7 @@ namespace Game.Entities
                 }
 
                 Item item = Bag.NewItemOrBag(proto);
-                ObjectGuid ownerGuid = result.Read<ulong>(43) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(43)) : ObjectGuid.Empty;
+                ObjectGuid ownerGuid = result.Read<ulong>(46) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(46)) : ObjectGuid.Empty;
                 if (!item.LoadFromDB(itemGuid, ownerGuid, result.GetFields(), itemEntry))
                 {
                     Log.outError(LogFilter.Player, "Player:_LoadMailedItems - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
@@ -3830,6 +3830,10 @@ namespace Game.Entities
                         trans.Append(stmt);
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER);
+                        stmt.AddValue(0, guid);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER);
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 

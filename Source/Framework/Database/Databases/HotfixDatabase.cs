@@ -100,6 +100,16 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE, "SELECT ID, Name, FactionID, DepositRate, ConsignmentRate FROM auction_house ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE_LOCALE, "SELECT ID, Name_lang FROM auction_house_locale WHERE locale = ?");
 
+            // AzeriteItem.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ITEM, "SELECT ID, ItemID FROM azerite_item ORDER BY ID DESC");
+
+            // AzeriteKnowledgeMultiplier.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_KNOWLEDGE_MULTIPLIER, "SELECT ID, Multiplier FROM azerite_knowledge_multiplier ORDER BY ID DESC");
+
+            // AzeriteLevelInfo.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_LEVEL_INFO, "SELECT ID, BaseExperienceToNextLevel, MinimumExperienceToNextLevel, ItemLevel" +
+                " FROM azerite_level_info ORDER BY ID DESC");
+
             // BankBagSlotPrices.db2
             PrepareStatement(HotfixStatements.SEL_BANK_BAG_SLOT_PRICES, "SELECT ID, Cost FROM bank_bag_slot_prices ORDER BY ID DESC");
 
@@ -898,8 +908,8 @@ namespace Framework.Database
                 " FROM spell_levels ORDER BY ID DESC");
 
             // SpellMisc.db2
-            PrepareStatement(HotfixStatements.SEL_SPELL_MISC, "SELECT Attributes1, Attributes2, Attributes3, Attributes4, Attributes5, Attributes6, Attributes7, " +
-                "Attributes8, Attributes9, Attributes10, Attributes11, Attributes12, Attributes13, Attributes14, ID, DifficultyID, CastingTimeIndex, " +
+            PrepareStatement(HotfixStatements.SEL_SPELL_MISC, "SELECT ID, Attributes1, Attributes2, Attributes3, Attributes4, Attributes5, Attributes6, Attributes7, " +
+                "Attributes8, Attributes9, Attributes10, Attributes11, Attributes12, Attributes13, Attributes14, DifficultyID, CastingTimeIndex, " +
                 "DurationIndex, RangeIndex, SchoolMask, Speed, LaunchDelay, MinDuration, SpellIconFileDataID, ActiveIconFileDataID, ContentTuningID, SpellID" +
                 " FROM spell_misc ORDER BY ID DESC");
 
@@ -1126,6 +1136,12 @@ namespace Framework.Database
 
         SEL_AUCTION_HOUSE,
         SEL_AUCTION_HOUSE_LOCALE,
+
+        SEL_AZERITE_ITEM,
+
+        SEL_AZERITE_KNOWLEDGE_MULTIPLIER,
+
+        SEL_AZERITE_LEVEL_INFO,
 
         SEL_BANK_BAG_SLOT_PRICES,
 

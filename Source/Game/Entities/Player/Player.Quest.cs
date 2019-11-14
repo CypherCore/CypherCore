@@ -584,6 +584,7 @@ namespace Game.Entities
                     break;
                 case TypeId.Item:
                 case TypeId.Container:
+                case TypeId.AzeriteItem:
                     {
                         Item item = (Item)questGiver;
                         Global.ScriptMgr.OnQuestAccept(this, item, quest);

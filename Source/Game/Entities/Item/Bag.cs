@@ -287,11 +287,6 @@ namespace Game.Entities
 
         void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
 
-        public static Item NewItemOrBag(ItemTemplate proto)
-        {
-            return (proto.GetInventoryType() == InventoryType.Bag) ? new Bag() : new Item();
-        }
-
         ContainerData m_containerData;
         Item[] m_bagslot = new Item[36];
     }

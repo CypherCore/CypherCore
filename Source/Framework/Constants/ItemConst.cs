@@ -829,6 +829,11 @@ namespace Framework.Constants
         Unk26 = 0x80000000 // ?
     }
 
+    public enum ItemFieldFlags2
+    {
+        HeartOfAzerothEquipped = 0x1
+    }
+
     public enum ItemFlags : long
     {
         NoPickup = 0x01,
@@ -1141,6 +1146,7 @@ namespace Framework.Constants
         JusticePoints = 395,
         ValorPoints = 396,
         ApexisCrystals = 823,
+        Azerite = 1553
     }
 
     public enum PlayerCurrencyState

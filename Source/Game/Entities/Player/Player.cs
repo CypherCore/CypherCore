@@ -1244,6 +1244,17 @@ namespace Game.Entities
                 return;
             }
 
+            if (id == CurrencyTypes.Azerite)
+            {
+                if (count > 0)
+                {
+                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                    if (heartOfAzeroth != null)
+                        heartOfAzeroth.ToAzeriteItem().GiveXP((ulong)count);
+                }
+                return;
+            }
+
             uint oldTotalCount = 0;
             uint oldWeekCount = 0;
             uint oldTrackedCount = 0;

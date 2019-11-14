@@ -151,6 +151,7 @@ namespace Game.Achievements
                     case CriteriaTypes.CompleteBattleground:
                     case CriteriaTypes.DamageDone:
                     case CriteriaTypes.HealingDone:
+                    case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
                         break;
                     case CriteriaTypes.KillCreature:
@@ -168,6 +169,7 @@ namespace Game.Achievements
                     case CriteriaTypes.HighestHitReceived:
                     case CriteriaTypes.HighestHealCasted:
                     case CriteriaTypes.HighestHealingReceived:
+                    case CriteriaTypes.HeartOfAzerothLevelReached:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
                         break;
                     case CriteriaTypes.ReachLevel:
@@ -425,8 +427,6 @@ namespace Game.Achievements
                     case CriteriaTypes.EarnHonorXp:
                     case CriteriaTypes.RelicTalentUnlocked:
                     case CriteriaTypes.ReachAccountHonorLevel:
-                    case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
-                    case CriteriaTypes.HeartOfAzerothLevelReached:
                         break;                                   // Not implemented yet :(
                 }
 

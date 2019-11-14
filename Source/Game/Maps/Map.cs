@@ -3434,7 +3434,7 @@ namespace Game.Maps
             // prepare static data
             ObjectGuid sourceGUID = source != null ? source.GetGUID() : ObjectGuid.Empty; //some script commands doesn't have source
             ObjectGuid targetGUID = target != null ? target.GetGUID() : ObjectGuid.Empty;
-            ObjectGuid ownerGUID = (source != null && source.GetTypeId() == TypeId.Item) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
+            ObjectGuid ownerGUID = (source != null && source.IsTypeMask(TypeMask.Item)) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
 
             // Schedule script execution for all scripts in the script map
             bool immedScript = false;
@@ -3468,7 +3468,7 @@ namespace Game.Maps
             // prepare static data
             ObjectGuid sourceGUID = source != null ? source.GetGUID() : ObjectGuid.Empty;
             ObjectGuid targetGUID = target != null ? target.GetGUID() : ObjectGuid.Empty;
-            ObjectGuid ownerGUID = (source != null && source.GetTypeId() == TypeId.Item) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
+            ObjectGuid ownerGUID = (source != null && source.IsTypeMask(TypeMask.Item)) ? ((Item)source).GetOwnerGUID() : ObjectGuid.Empty;
 
             var sa = new ScriptAction();
             sa.sourceGUID = sourceGUID;

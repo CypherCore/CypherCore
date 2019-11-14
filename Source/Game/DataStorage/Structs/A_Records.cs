@@ -253,4 +253,24 @@ namespace Game.DataStorage
         public byte DepositRate;
         public byte ConsignmentRate;
     }
+
+    public sealed class AzeriteItemRecord
+    {
+        public uint ID;
+        public uint ItemID;
+    }
+
+    public sealed class AzeriteKnowledgeMultiplierRecord
+    {
+        public uint ID;
+        public float Multiplier;
+    }
+
+    public sealed class AzeriteLevelInfoRecord
+    {
+        public uint ID;
+        public ulong BaseExperienceToNextLevel;
+        public ulong MinimumExperienceToNextLevel;
+        public uint ItemLevel;
+    }
 }

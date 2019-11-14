@@ -291,7 +291,7 @@ namespace Game.Entities
         public UpdateField<int> Context = new UpdateField<int>(0, 16);
         public UpdateField<ulong> ArtifactXP = new UpdateField<ulong>(0, 17);
         public UpdateField<byte> ItemAppearanceModID = new UpdateField<byte>(0, 18);
-        public UpdateField<uint> Field_130 = new UpdateField<uint>(0, 19);
+        public UpdateField<uint> DynamicFlags2 = new UpdateField<uint>(0, 19);
         public UpdateFieldArray<int> SpellCharges = new UpdateFieldArray<int>(5, 20, 21);
         public UpdateFieldArray<ItemEnchantment> Enchantment = new UpdateFieldArray<ItemEnchantment>(13, 26, 27);
 
@@ -343,7 +343,7 @@ namespace Game.Entities
             data.WriteInt32(Gems.Size());
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                data.WriteUInt32(Field_130);
+                data.WriteUInt32(DynamicFlags2);
             }
             for (int i = 0; i < Modifiers.Size(); ++i)
             {
@@ -496,7 +496,7 @@ namespace Game.Entities
                 }
                 if (changesMask[19])
                 {
-                    data.WriteUInt32(Field_130);
+                    data.WriteUInt32(DynamicFlags2);
                 }
             }
             if (changesMask[20])
@@ -541,7 +541,7 @@ namespace Game.Entities
             ClearChangesMask(Context);
             ClearChangesMask(ArtifactXP);
             ClearChangesMask(ItemAppearanceModID);
-            ClearChangesMask(Field_130);
+            ClearChangesMask(DynamicFlags2);
             ClearChangesMask(SpellCharges);
             ClearChangesMask(Enchantment);
             _changesMask.ResetAll();
@@ -642,19 +642,19 @@ namespace Game.Entities
         public uint AzeriteEssenceID;
         public uint Rank;
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, AzeriteItem owner, Player receiver)
         {
             data.WriteUInt32(AzeriteEssenceID);
             data.WriteUInt32(Rank);
         }
-        public void WriteUpdate(WorldPacket data, Item owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, AzeriteItem owner, Player receiver)
         {
             data.WriteUInt32(AzeriteEssenceID);
             data.WriteUInt32(Rank);
         }
     }
 
-    public class SelectedAzeriteEssences : BaseUpdateData<Item>
+    public class SelectedAzeriteEssences : BaseUpdateData<AzeriteItem>
     {
         UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 1);
         UpdateField<uint> Enabled = new UpdateField<uint>(0, 2);
@@ -662,7 +662,7 @@ namespace Game.Entities
 
         public SelectedAzeriteEssences() : base(7) { }
 
-        public override void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public override void WriteCreate(WorldPacket data, AzeriteItem owner, Player receiver)
         {
             for (int i = 0; i < 3; ++i)
             {
@@ -672,7 +672,7 @@ namespace Game.Entities
             data.WriteBits(Enabled, 1);
             data.FlushBits();
         }
-        public override void WriteUpdate(WorldPacket data, Item owner, Player receiver)
+        public override void WriteUpdate(WorldPacket data, AzeriteItem owner, Player receiver)
         {
             UpdateMask changesMask = _changesMask;
             data.WriteBits(changesMask.GetBlocksMask(0), 1);
@@ -713,7 +713,7 @@ namespace Game.Entities
         }
     }
 
-    public class AzeriteItemData : BaseUpdateData<Item>
+    public class AzeriteItemData : BaseUpdateData<AzeriteItem>
     {
         public DynamicUpdateField<UnlockedAzeriteEssence> UnlockedEssences = new DynamicUpdateField<UnlockedAzeriteEssence>(0, 1);
         public DynamicUpdateField<SelectedAzeriteEssences> SelectedEssences = new DynamicUpdateField<SelectedAzeriteEssences>(0, 2);
@@ -726,7 +726,7 @@ namespace Game.Entities
 
         public AzeriteItemData() : base(9) { }
 
-        public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
@@ -752,18 +752,18 @@ namespace Game.Entities
                 SelectedEssences[i].WriteCreate(data, owner, receiver);
             }
         }
-        public override void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public override void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
             UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000000Fu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, fieldVisibilityFlags, owner, receiver);
         }
-        void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
+        public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
                 allowedMaskForTarget |= new UpdateMask(9, new[] { 0x000001F0u });
         }
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlock(0), 9);
 

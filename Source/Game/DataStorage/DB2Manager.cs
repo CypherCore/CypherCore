@@ -722,6 +722,11 @@ namespace Game.DataStorage
             return _artifactPowerRanks.LookupByKey(Tuple.Create(artifactPowerId, rank));
         }
 
+        public bool IsAzeriteItem(uint itemId)
+        {
+            return CliDB.AzeriteItemStorage.Any(pair => pair.Value.ItemID == itemId);
+        }
+
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, LocaleConstant locale = LocaleConstant.enUS, Gender gender = Gender.Male, bool forceGender = false)
         {
             if ((gender == Gender.Female || gender == Gender.None) && (forceGender || broadcastText.Text1.HasString(SharedConst.DefaultLocale)))
