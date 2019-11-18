@@ -1674,6 +1674,55 @@ namespace Game
             return result;
         }
 
+        static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
+        {
+            Group group = player.GetGroup();
+            if (group = null)
+                return 0;
+
+            switch (status)
+            {
+                case PlayerConditionLfgStatus.InLFGDungeon:
+                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) ? 1 : 0u;
+                case PlayerConditionLfgStatus.InLFGRandomDungeon:
+                    return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) &&
+                        Global.LFGMgr.SelectedRandomLfgDungeon(player.GetGUID()) ? 1 : 0u;
+                case PlayerConditionLfgStatus.InLFGFirstRandomDungeon:
+                    {
+                        if (!Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()))
+                            return 0;
+
+                        uint selectedRandomDungeon = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
+                        if (selectedRandomDungeon == 0)
+                            return 0;
+
+                        DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(selectedRandomDungeon, player.GetLevel());
+                        if (reward != null)
+                        {
+                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                            if (quest != null)
+                                if (player.CanRewardQuest(quest, false))
+                                    return 1;
+                        }
+                        return 0;
+                    }
+                case PlayerConditionLfgStatus.PartialClear:
+                    break;
+                case PlayerConditionLfgStatus.StrangerCount:
+                    break;
+                case PlayerConditionLfgStatus.VoteKickCount:
+                    break;
+                case PlayerConditionLfgStatus.BootCount:
+                    break;
+                case PlayerConditionLfgStatus.GearDiff:
+                    break;
+                default:
+                    break;
+            }
+
+            return 0;
+        }
+
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
             if (condition.MinLevel != 0 && player.GetLevel() < condition.MinLevel)
@@ -1719,6 +1768,9 @@ namespace Game
             if (condition.SkillID[0] != 0 || condition.SkillID[1] != 0 || condition.SkillID[2] != 0 || condition.SkillID[3] != 0)
             {
                 results = new bool[condition.SkillID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.SkillID.Length; ++i)
                 {
                     if (condition.SkillID[i] != 0)
@@ -1765,6 +1817,9 @@ namespace Game
                 else
                 {
                     results = new bool[condition.MinFactionID.Length + 1];
+                    for (var i = 0; i < results.Length; ++i)
+                        results[i] = true;
+
                     for (var i = 0; i < condition.MinFactionID.Length; ++i)
                     {
                         if (condition.MinFactionID[i] != 0)
@@ -1839,6 +1894,9 @@ namespace Game
             if (condition.PrevQuestID[0] != 0)
             {
                 results = new bool[condition.PrevQuestID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.PrevQuestID.Length; ++i)
                 {
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
@@ -1853,6 +1911,9 @@ namespace Game
             if (condition.CurrQuestID[0] != 0)
             {
                 results = new bool[condition.CurrQuestID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.CurrQuestID.Length; ++i)
                 {
                     if (condition.CurrQuestID[i] != 0)
@@ -1866,6 +1927,9 @@ namespace Game
             if (condition.CurrentCompletedQuestID[0] != 0)
             {
                 results = new bool[condition.CurrentCompletedQuestID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.CurrentCompletedQuestID.Length; ++i)
                 {
                     if (condition.CurrentCompletedQuestID[i] != 0)
@@ -1880,6 +1944,9 @@ namespace Game
             if (condition.SpellID[0] != 0)
             {
                 results = new bool[condition.SpellID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.SpellID.Length; ++i)
                 {
                     if (condition.SpellID[i] != 0)
@@ -1893,6 +1960,9 @@ namespace Game
             if (condition.ItemID[0] != 0)
             {
                 results = new bool[condition.ItemID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.ItemID.Length; ++i)
                 {
                     if (condition.ItemID[i] != 0)
@@ -1906,6 +1976,9 @@ namespace Game
             if (condition.CurrencyID[0] != 0)
             {
                 results = new bool[condition.CurrencyID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.CurrencyID.Length; ++i)
                 {
                     if (condition.CurrencyID[i] != 0)
@@ -1930,6 +2003,9 @@ namespace Game
             if (condition.AuraSpellID[0] != 0)
             {
                 results = new bool[condition.AuraSpellID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.AuraSpellID.Length; ++i)
                 {
                     if (condition.AuraSpellID[i] != 0)
@@ -1962,6 +2038,9 @@ namespace Game
             if (condition.Achievement[0] != 0)
             {
                 results = new bool[condition.Achievement.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.Achievement.Length; ++i)
                 {
                     if (condition.Achievement[i] != 0)
@@ -1976,11 +2055,26 @@ namespace Game
                     return false;
             }
 
-            // TODO: research lfg status for player conditions
+            if (condition.LfgStatus[0] != 0)
+            {
+                results = new bool[condition.LfgStatus.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
+                for (int i = 0; i < condition.LfgStatus.Length; ++i)
+                    if (condition.LfgStatus[i] != 0)
+                        results[i] = PlayerConditionCompare(condition.LfgCompare[i], (int)GetPlayerConditionLfgValue(player, (PlayerConditionLfgStatus)condition.LfgStatus[i]), (int)condition.LfgValue[i]);
+
+                if (!PlayerConditionLogic(condition.LfgLogic, results))
+                    return false;
+            }
 
             if (condition.AreaID[0] != 0)
             {
                 results = new bool[condition.AreaID.Length];
+                for (var i = 0; i < results.Length; ++i)
+                    results[i] = true;
+
                 for (var i = 0; i < condition.AreaID.Length; ++i)
                     if (condition.AreaID[i] != 0)
                         results[i] = player.GetAreaId() == condition.AreaID[i] || player.GetZoneId() == condition.AreaID[i];
@@ -2010,6 +2104,9 @@ namespace Game
                 if (quest != null && player.GetQuestStatus(condition.QuestKillID) != QuestStatus.Complete)
                 {
                     results = new bool[condition.QuestKillMonster.Length];
+                    for (var i = 0; i < results.Length; ++i)
+                        results[i] = true;
+
                     for (var i = 0; i < condition.QuestKillMonster.Length; ++i)
                     {
                         if (condition.QuestKillMonster[i] != 0)

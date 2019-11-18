@@ -1430,6 +1430,18 @@ namespace Framework.Constants
         All = AlwaysVisible | Inverse
     }
 
+    public enum PlayerConditionLfgStatus
+    {
+        InLFGDungeon = 1,
+        InLFGRandomDungeon = 2,
+        InLFGFirstRandomDungeon = 3,
+        PartialClear = 4,
+        StrangerCount = 5,
+        VoteKickCount = 6,
+        BootCount = 7,
+        GearDiff = 8
+    }
+
     public enum PrestigeLevelInfoFlags : byte
     {
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
