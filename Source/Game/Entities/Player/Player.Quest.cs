@@ -585,6 +585,7 @@ namespace Game.Entities
                 case TypeId.Item:
                 case TypeId.Container:
                 case TypeId.AzeriteItem:
+                case TypeId.AzeriteEmpoweredItem:
                     {
                         Item item = (Item)questGiver;
                         Global.ScriptMgr.OnQuestAccept(this, item, quest);
@@ -1122,7 +1123,7 @@ namespace Game.Entities
             }
 
             if (quest.QuestSortID > 0)
-                UpdateCriteria(CriteriaTypes.CompleteQuestsInZone, (ulong)quest.QuestSortID);
+                UpdateCriteria(CriteriaTypes.CompleteQuestsInZone, quest.Id);
 
             UpdateCriteria(CriteriaTypes.CompleteQuestCount);
             UpdateCriteria(CriteriaTypes.CompleteQuest, quest.Id);

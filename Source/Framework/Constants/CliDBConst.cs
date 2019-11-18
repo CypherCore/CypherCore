@@ -1393,6 +1393,14 @@ namespace Framework.Constants
         UnderwaterAllowed = 0x8
     }
 
+    public enum ModifierTreeOperator
+    {
+        SingleTrue = 2,
+        SingleFalse = 3,
+        All = 4,
+        Some = 8
+    }
+
     public enum MountCapabilityFlags : byte
     {
         Ground = 0x1,

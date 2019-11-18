@@ -1392,6 +1392,13 @@ namespace Game.Entities
 
             return playerCurrency.WeeklyQuantity;
         }
+        public uint GetTrackedCurrencyCount(uint id)
+        {
+            if (!_currencyStorage.ContainsKey(id))
+                return 0;
+
+            return _currencyStorage[id].TrackedQuantity;
+        }
 
         //Action Buttons - CUF Profile
         public void SaveCUFProfile(byte id, CUFProfile profile) { _CUFProfiles[id] = profile; }

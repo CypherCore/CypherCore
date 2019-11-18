@@ -566,7 +566,11 @@ namespace Game.Achievements
 
         public bool ModifierTreeSatisfied(uint modifierTreeId)
         {
-            return AdditionalRequirementsSatisfied(Global.CriteriaMgr.GetModifierTree(modifierTreeId), 0, 0, null, _owner);
+            ModifierTreeNode modifierTree = Global.CriteriaMgr.GetModifierTree(modifierTreeId);
+            if (modifierTree != null)
+                return ModifierTreeSatisfied(modifierTree, 0, 0, null, _owner);
+
+            return false;
         }
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)

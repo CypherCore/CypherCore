@@ -25,6 +25,7 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Garrisons
 {
@@ -301,8 +302,8 @@ namespace Game.Garrisons
             return _owner.GetTeam() == Team.Horde ? GarrisonFactionIndex.Horde : GarrisonFactionIndex.Alliance;
         }
 
-        GarrisonType GetGarrisonType() { return GarrisonType.Garrison; }
-        GarrSiteLevelRecord GetSiteLevel() { return _siteLevel; }
+        public GarrisonType GetGarrisonType() { return GarrisonType.Garrison; }
+        public GarrSiteLevelRecord GetSiteLevel() { return _siteLevel; }
 
         public ICollection<Plot> GetPlots()
         {
@@ -314,7 +315,7 @@ namespace Game.Garrisons
             return _plots.LookupByKey(garrPlotInstanceId);
         }
 
-        bool HasBlueprint(uint garrBuildingId) { return _knownBuildings.Contains(garrBuildingId); }
+        public bool HasBlueprint(uint garrBuildingId) { return _knownBuildings.Contains(garrBuildingId); }
 
         public void LearnBlueprint(uint garrBuildingId)
         {
@@ -519,7 +520,7 @@ namespace Game.Garrisons
             return _followers.LookupByKey(dbId);
         }
 
-        uint CountFollowers(Predicate<Follower> predicate)
+        public uint CountFollowers(Predicate<Follower> predicate)
         {
             uint count = 0;
             foreach (var pair in _followers)
@@ -868,12 +869,20 @@ namespace Game.Garrisons
 
         public class Follower
         {
+            public GarrisonFollower PacketInfo = new GarrisonFollower();
+
             public uint GetItemLevel()
             {
                 return (PacketInfo.ItemLevelWeapon + PacketInfo.ItemLevelArmor) / 2;
             }
 
-            public GarrisonFollower PacketInfo = new GarrisonFollower();
+            public bool HasAbility(uint garrAbilityId)
+            {
+                return PacketInfo.AbilityID.Any(garrAbility =>
+                {
+                    return garrAbility.Id == garrAbilityId;
+                });
+            }
         }
     }
 }

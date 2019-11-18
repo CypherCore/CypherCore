@@ -1674,7 +1674,7 @@ namespace Game
             return result;
         }
 
-        static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
+        public static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
         {
             Group group = player.GetGroup();
             if (group = null)

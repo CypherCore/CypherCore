@@ -140,6 +140,11 @@ namespace Game.Scenarios
             return true;
         }
 
+        public ScenarioRecord GetEntry()
+        {
+            return _data.Entry;
+        }
+
         ScenarioStepState GetStepState(ScenarioStepRecord step)
         {
             if (!_stepStates.ContainsKey(step))
@@ -334,7 +339,7 @@ namespace Game.Scenarios
         public virtual void Update(uint diff) { }
 
         public void SetStepState(ScenarioStepRecord step, ScenarioStepState state) { _stepStates[step] = state; }
-        ScenarioStepRecord GetStep()
+        public ScenarioStepRecord GetStep()
         {
             return _currentstep;
         }

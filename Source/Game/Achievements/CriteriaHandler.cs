@@ -18,12 +18,15 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Arenas;
+using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Garrisons;
 using Game.Maps;
 using Game.Network;
+using Game.Network.Packets;
+using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -220,16 +223,23 @@ namespace Game.Achievements
                         }
                     case CriteriaTypes.CompleteQuestsInZone:
                         {
-                            uint counter = 0;
-
-                            var rewQuests = referencePlayer.GetRewardedQuests();
-                            foreach (var id in rewQuests)
+                            if (miscValue1 != 0)
                             {
-                                Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
-                                if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
-                                    ++counter;
+                                SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
                             }
-                            SetCriteriaProgress(criteria, counter, referencePlayer);
+                            else // login case
+                            {
+                                uint counter = 0;
+
+                                var rewQuests = referencePlayer.GetRewardedQuests();
+                                foreach (var id in rewQuests)
+                                {
+                                    Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
+                                    if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
+                                        ++counter;
+                                }
+                                SetCriteriaProgress(criteria, counter, referencePlayer);
+                            }
                             break;
                         }
                     case CriteriaTypes.FallWithoutDying:
@@ -856,7 +866,7 @@ namespace Game.Achievements
                 return false;
             }
 
-            if (criteria.Modifier != null && !AdditionalRequirementsSatisfied(criteria.Modifier, miscValue1, miscValue2, unit, referencePlayer))
+            if (criteria.Modifier != null && !ModifierTreeSatisfied(criteria.Modifier, miscValue1, miscValue2, unit, referencePlayer))
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteria: (Id: {0} Type {1}) Requirements have not been satisfied", criteria.ID, criteria.Entry.Type);
                 return false;
@@ -970,8 +980,12 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaTypes.CompleteQuestsInZone:
-                    if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
-                        return false;
+                    if (miscValue1 != 0)
+                    {
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
+                        if (quest == null || quest.QuestSortID != criteria.Entry.Asset)
+                            return false;
+                    }
                     break;
                 case CriteriaTypes.Death:
                     {
@@ -1180,19 +1194,51 @@ namespace Game.Achievements
             return true;
         }
 
-        public bool AdditionalRequirementsSatisfied(ModifierTreeNode tree, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
+        public bool ModifierTreeSatisfied(ModifierTreeNode tree, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
         {
-            foreach (ModifierTreeNode node in tree.Children)
-                if (!AdditionalRequirementsSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
-                    return false;
-
-            uint reqType = tree.Entry.Type;
-            if (reqType == 0)
-                return true;
-
-            uint reqValue = tree.Entry.Asset;
-            switch ((CriteriaAdditionalCondition)reqType)
+            switch ((ModifierTreeOperator)tree.Entry.Operator)
             {
+                case ModifierTreeOperator.SingleTrue:
+                    return tree.Entry.Type != 0 && ModifierSatisfied(tree.Entry, miscValue1, miscValue2, unit, referencePlayer);
+                case ModifierTreeOperator.SingleFalse:
+                    return tree.Entry.Type != 0 && !ModifierSatisfied(tree.Entry, miscValue1, miscValue2, unit, referencePlayer);
+                case ModifierTreeOperator.All:
+                    foreach (ModifierTreeNode node in tree.Children)
+                        if (!ModifierTreeSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
+                            return false;
+                    return true;
+                case ModifierTreeOperator.Some:
+                    {
+                        sbyte requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
+                        foreach (ModifierTreeNode node in tree.Children)
+                            if (ModifierTreeSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
+                                if (--requiredAmount == 0)
+                                    return true;
+
+                        return false;
+                    }
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
+        {
+            uint reqValue = modifier.Asset;
+        int secondaryAsset = modifier.SecondaryAsset;
+        int tertiaryAsset = modifier.TertiaryAsset;
+
+            switch ((CriteriaAdditionalCondition)modifier.Type)
+            {
+                case CriteriaAdditionalCondition.SourceDrunkValue: // 1
+                    {
+                        uint inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.m_playerData.FakeInebriation), 100);
+                        if (inebriation < reqValue)
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.SourcePlayerCondition: // 2
                     {
                         PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
@@ -1264,6 +1310,10 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.SourceIsAlive: // 16
+                    if (referencePlayer.IsDead())
+                        return false;
+                    break;
                 case CriteriaAdditionalCondition.SourceAreaOrZone: // 17
                     {
                         uint zoneId, areaId;
@@ -1289,6 +1339,14 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.SourceLevelAboveTarget: // 22
+                    if (!unit || referencePlayer.GetLevel() + reqValue < unit.GetLevel())
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceLevelEqualTarget: // 23
+                    if (!unit || referencePlayer.GetLevel() != unit.GetLevel())
+                        return false;
+                    break;
                 case CriteriaAdditionalCondition.ArenaType: // 24
                     {
                         Battleground bg = referencePlayer.GetBattleground();
@@ -1325,8 +1383,33 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.TargetCreatureFamily: // 31
+                    {
+                        if (!unit)
+                            return false;
+                        if (unit.GetTypeId() != TypeId.Unit || unit.ToCreature().GetCreatureTemplate().Family != (CreatureFamily)reqValue)
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.SourceMap: // 32
                     if (referencePlayer.GetMapId() != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ClientVersion: // 33
+                    if (reqValue < Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.BattlePetTeamLevel: // 34
+                    foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        if (slot.Pet.Level != reqValue)
+                            return false;
+                    break;
+                case CriteriaAdditionalCondition.NotInGroup: // 35
+                    if (referencePlayer.GetGroup())
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.InGroup: // 36
+                    if (!referencePlayer.GetGroup())
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TitleBitIndex: // 38          // miscValue1 is title's bit index
@@ -1341,12 +1424,76 @@ namespace Game.Achievements
                     if (unit == null || unit.GetLevelForTarget(referencePlayer) != reqValue)
                         return false;
                     break;
-                case CriteriaAdditionalCondition.TargetZone: // 41
-                    if (unit == null || unit.GetZoneId() != reqValue)
+                case CriteriaAdditionalCondition.SourceZone: // 41
+                    {
+                        uint zoneId = referencePlayer.GetAreaId();
+                        AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+                        if (areaEntry != null)
+                            if (areaEntry.Flags[0].HasAnyFlag(AreaFlags.Unk9))
+                                zoneId = areaEntry.ParentAreaID;
+                        if (zoneId != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.TargetZone: // 42
+                    {
+                        if (!unit)
+                            return false;
+                        uint zoneId = unit.GetAreaId();
+                        AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+                        if (areaEntry != null)
+                            if (areaEntry.Flags[0].HasAnyFlag(AreaFlags.Unk9))
+                                zoneId = areaEntry.ParentAreaID;
+                        if (zoneId != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.SourceHealthPctLower: // 43
+                    if (referencePlayer.GetHealthPct() > (float)reqValue)
                         return false;
                     break;
-                case CriteriaAdditionalCondition.TargetHealthPercentBelow: // 46
-                    if (unit == null || unit.GetHealthPct() >= reqValue)
+                case CriteriaAdditionalCondition.SourceHealthPctGreater: // 44
+                    if (referencePlayer.GetHealthPct() < (float)reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceHealthPctEqual: // 45
+                    if (referencePlayer.GetHealthPct() != (float)reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthPctLower: // 46
+                    if (unit == null || unit.GetHealthPct() >= (float)reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthPctGreater: // 47
+                    if (!unit || unit.GetHealthPct() < (float)reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthPctEqual: // 48
+                    if (!unit || unit.GetHealthPct() != (float)reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceHealthLower: // 49
+                    if (referencePlayer.GetHealth() > reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceHealthGreater: // 50
+                    if (referencePlayer.GetHealth() < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceHealthEqual: // 51
+                    if (referencePlayer.GetHealth() != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthLower: // 52
+                    if (!unit || unit.GetHealth() > reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthGreater: // 53
+                    if (!unit || unit.GetHealth() < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetHealthEqual: // 54
+                    if (!unit || unit.GetHealth() != reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TargetPlayerCondition: // 55
@@ -1359,10 +1506,35 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.MinAchievementPoints: // 56
+                    if (referencePlayer.GetAchievementPoints() <= reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.InLfgDungeon: // 57
+                    if (ConditionManager.GetPlayerConditionLfgValue(referencePlayer, PlayerConditionLfgStatus.InLFGDungeon) == 0)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.InLfgRandomDungeon: // 58
+                    if (ConditionManager.GetPlayerConditionLfgValue(referencePlayer, PlayerConditionLfgStatus.InLFGRandomDungeon) == 0)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.InLfgFirstRandomDungeon: // 59
+                    if (ConditionManager.GetPlayerConditionLfgValue(referencePlayer, PlayerConditionLfgStatus.InLFGFirstRandomDungeon) == 0)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.GuildReputation: // 62
+                    if (referencePlayer.GetReputationMgr().GetReputation(1168) < reqValue)
+                        return false;
+                    break;
                 case CriteriaAdditionalCondition.RatedBattlegroundRating: // 64
                     if (referencePlayer.GetRBGPersonalRating() < reqValue)
                         return false;
                     break;
+                case CriteriaAdditionalCondition.WorldStateExpression: // 67
+                    WorldStateExpressionRecord worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(reqValue);
+                    if (worldStateExpression != null)
+                        return ConditionManager.IsPlayerMeetingExpression(referencePlayer, worldStateExpression);
+                    return false;
                 case CriteriaAdditionalCondition.MapDifficulty: // 68
                     {
                         DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
@@ -1370,74 +1542,912 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.SourceLevelGreater: // 69
+                    if (referencePlayer.GetLevel() < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetLevelGreater: // 70
+                    if (!unit || unit.GetLevel() < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceLevelLower: // 71
+                    if (referencePlayer.GetLevel() > reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetLevelLower: // 72
+                    if (!unit || unit.GetLevel() > reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ModifierTree: // 73
+                    ModifierTreeNode nextModifierTree = Global.CriteriaMgr.GetModifierTree(reqValue);
+                    if (nextModifierTree != null)
+                        return ModifierTreeSatisfied(nextModifierTree, miscValue1, miscValue2, unit, referencePlayer);
+                    return false;
+                case CriteriaAdditionalCondition.ScenarioId: // 74
+                    {
+                        Scenario scenario = referencePlayer.GetScenario();
+                        if (scenario == null)
+                            return false;
+
+                        if (scenario.GetEntry().Id != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.TheTillersReputation: // 75
+                    if (referencePlayer.GetReputationMgr().GetReputation(1272) < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ScenarioStepIndex: // 82
+                    {
+                        Scenario scenario = referencePlayer.GetScenario();
+                        if (scenario == null)
+                            return false;
+
+                        if (scenario.GetStep().OrderIndex != (reqValue - 1))
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.IsOnQuest: // 84
+                    if (referencePlayer.FindQuestSlot(reqValue) == SharedConst.MaxQuestLogSize)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ExaltedWithFaction: // 85
+                    if (referencePlayer.GetReputationMgr().GetReputation(reqValue) < 42000)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.HasAchievement: // 86
+                    if (!referencePlayer.HasAchieved(reqValue))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.CloudSerpentReputation: // 88
+                    if (referencePlayer.GetReputationMgr().GetReputation(1271) < reqValue)
+                        return false;
+                    break;
                 case CriteriaAdditionalCondition.BattlePetSpecies: // 91
                     if (miscValue1 != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ActiveExpansion: // 92
+                    if ((int)referencePlayer.GetSession().GetExpansion() < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.FactionStanding: // 95
+                    if (referencePlayer.GetReputationMgr().GetReputation(reqValue) < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceSex: // 97
+                    if ((int)referencePlayer.GetGender() != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceNativeSex: // 98
+                    if (referencePlayer.m_playerData.NativeSex != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.Skill: // 99
+                    if (referencePlayer.GetPureSkillValue((SkillType)reqValue) < secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.NormalPhaseShift: // 101
+                    if (!PhasingHandler.InDbPhaseShift(referencePlayer, 0, 0, 0))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.InPhase: // 102
+                    if (!PhasingHandler.InDbPhaseShift(referencePlayer, 0, (ushort)reqValue, 0))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.NotInPhase: // 103
+                    if (PhasingHandler.InDbPhaseShift(referencePlayer, 0, (ushort)reqValue, 0))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.HasSpell: // 104
+                    if (!referencePlayer.HasSpell(reqValue))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ItemCount: // 105
+                    if (referencePlayer.GetItemCount(reqValue, false) < secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.AccountExpansion: // 106
+                    if ((int)referencePlayer.GetSession().GetAccountExpansion() < reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.RewardedQuest: // 110
                     if (!referencePlayer.GetQuestRewardStatus(reqValue))
                         return false;
                     break;
+
                 case CriteriaAdditionalCondition.CompletedQuest: // 111
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
                         return false;
                     break;
-                case CriteriaAdditionalCondition.GarrisonFollowerEntry: // 144
+                case CriteriaAdditionalCondition.ExploredArea: // 113
                     {
-                        if (!referencePlayer)
+                        AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(reqValue);
+                        if (areaTable == null)
                             return false;
-                        Garrison garrison = referencePlayer.GetGarrison();
-                        if (garrison == null)
-                            return false;
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.PacketInfo.GarrFollowerID != reqValue)
+
+                        if (areaTable.AreaBit <= 0)
+                            break; // success
+
+                        int playerIndexOffset = areaTable.AreaBit / 64;
+                        if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
+                            break;
+
+                        if ((referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & (1ul << (areaTable.AreaBit % 64))) == 0)
                             return false;
                         break;
                     }
-                case CriteriaAdditionalCondition.GarrisonFollowerQuality: // 145
+                case CriteriaAdditionalCondition.ItemCountIncludingBank: // 114
+                    if (referencePlayer.GetItemCount(reqValue, true) < secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourcePvpFactionIndex: // 116
                     {
-                        if (!referencePlayer)
+                        ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(referencePlayer.GetRace());
+                        if (race == null)
                             return false;
+
+                        FactionTemplateRecord faction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
+                        if (faction == null)
+                            return false;
+
+                        int factionIndex = -1;
+                        if (faction.FactionGroup.HasAnyFlag((byte)FactionMasks.Horde))
+                            factionIndex = 0;
+                        else if (faction.FactionGroup.HasAnyFlag((byte)FactionMasks.Alliance))
+                            factionIndex = 1;
+                        else if (faction.FactionGroup.HasAnyFlag((byte)FactionMasks.Player))
+                            factionIndex = 0;
+                        if (factionIndex != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.LfgValueEqual: // 117
+                    if (ConditionManager.GetPlayerConditionLfgValue(referencePlayer, (PlayerConditionLfgStatus)reqValue) != secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.LfgValueGreater: // 118
+                    if (ConditionManager.GetPlayerConditionLfgValue(referencePlayer, (PlayerConditionLfgStatus)reqValue) < secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.CurrencyAmount: // 119
+                    if (!referencePlayer.HasCurrency(reqValue, (uint)secondaryAsset))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.CurrencyTrackedAmount: // 121
+                    if (referencePlayer.GetTrackedCurrencyCount(reqValue) < secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.MapInstanceType: // 122
+                    if ((uint)referencePlayer.GetMap().GetEntry().InstanceType != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.Mentor: // 123
+                    if (!referencePlayer.HasPlayerFlag(PlayerFlags.Mentor))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.GarrisonLevelAbove: // 126
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset || garrison.GetSiteLevel().GarrLevel < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowersAboveLevel: // 127
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.PacketInfo.FollowerLevel >= secondaryAsset;
+                        });
+
+                        if (followerCount < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowersAboveQuality: // 128
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.PacketInfo.Quality >= secondaryAsset;
+                        });
+
+                        if (followerCount < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelWithAbility: // 129
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
+                        });
+
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelWithTrait: // 130
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(secondaryAsset);
+                        if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
+                        });
+
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerWithAbilityInBuilding: // 131
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            if (followerBuilding == null)
+                                return false;
+
+                            return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
+                        });
+
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerWithTraitInBuilding: // 132
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
+                        if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            if (followerBuilding == null)
+                                return false;
+
+                            return followerBuilding.BuildingType == secondaryAsset && follower.HasAbility(reqValue); ;
+                        });
+
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelInBuilding: // 133
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            if (follower.PacketInfo.FollowerLevel < reqValue)
+                                return false;
+
+                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            if (followerBuilding == null)
+                                return false;
+
+                            return followerBuilding.BuildingType == secondaryAsset;
+                        });
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonBuildingAboveLevel: // 134
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        {
+                            if (!plot.BuildingInfo.PacketInfo.HasValue)
+                                continue;
+
+                            GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                            if (building == null || building.UpgradeLevel < reqValue || building.BuildingType != secondaryAsset)
+                                continue;
+
+                            return true;
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.GarrisonBlueprint: // 135
+                    {
+                        GarrBuildingRecord blueprintBuilding = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
+                        if (blueprintBuilding == null)
+                            return false;
+
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)blueprintBuilding.GarrTypeID)
+                            return false;
+
+                        if (!garrison.HasBlueprint(reqValue))
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonBuildingInactive: // 140
+                    {
+                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
+                        if (building == null)
+                            return false;
+
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        {
+                            if (!plot.BuildingInfo.PacketInfo.HasValue || plot.BuildingInfo.PacketInfo.Value.GarrBuildingID != reqValue)
+                                continue;
+
+                            return !plot.BuildingInfo.PacketInfo.Value.Active;
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.GarrisonBuildingEqualLevel: // 142
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        {
+                            if (!plot.BuildingInfo.PacketInfo.HasValue)
+                                continue;
+
+                            GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                            if (building == null || building.UpgradeLevel != reqValue || building.BuildingType != secondaryAsset)
+                                continue;
+
+                            return true;
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerWithAbility: // 143
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
+                            return false;
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null)
+                                return false;
+
+                            if (!follower.HasAbility(reqValue))
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.HasAbility(reqValue);
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerWithTrait: // 144
+                    {
+                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
+                        if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
+                            return false;
+
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
+                            return false;
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null || !follower.HasAbility(reqValue))
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.HasAbility(reqValue);
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerAboveQualityWod: // 145
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison)
+                            return false;
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null || follower.PacketInfo.Quality < reqValue)
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.PacketInfo.Quality >= reqValue;
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerEqualLevel: // 146
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
+                            return false;
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null || follower.PacketInfo.FollowerLevel < reqValue)
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.PacketInfo.FollowerLevel >= reqValue;
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.BattlePetSpeciesInTeam: // 151
+                    {
+                        uint count = 0;
+                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                            if (slot.Pet.Species == secondaryAsset)
+                                ++count;
+
+                        if (count < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.BattlePetFamilyInTeam: // 152
+                    {
+                        uint count = 0;
+                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        {
+                            BattlePetSpeciesRecord species = CliDB.BattlePetSpeciesStorage.LookupByKey(slot.Pet.Species);
+                            if (species != null)
+                                if (species.PetTypeEnum == secondaryAsset)
+                                    ++count;
+                        }
+
+                        if (count < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerId: // 157
+                    {
                         Garrison garrison = referencePlayer.GetGarrison();
                         if (garrison == null)
                             return false;
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.PacketInfo.Quality != reqValue)
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null || follower.PacketInfo.GarrFollowerID != reqValue)
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.PacketInfo.GarrFollowerID == reqValue;
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerAboveItemLevel: // 168
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null)
+                            return false;
+
+                        if (miscValue1 != 0)
+                        {
+                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            if (follower == null || follower.PacketInfo.GarrFollowerID != reqValue)
+                                return false;
+                        }
+                        else
+                        {
+                            uint followerCount = garrison.CountFollowers(follower =>
+                            {
+                                return follower.GetItemLevel() >= reqValue;
+                            });
+
+                            if (followerCount < 1)
+                                return false;
+                        }
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowersAboveItemLevel: // 169
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.GetItemLevel() >= secondaryAsset;
+                        });
+
+                        if (followerCount < reqValue)
                             return false;
 
                         break;
                     }
-                case CriteriaAdditionalCondition.GarrisonFollowerLevel: // 146
-                    {
-                        if (!referencePlayer)
-                            return false;
-                        Garrison garrison = referencePlayer.GetGarrison();
-                        if (garrison == null)
-                            return false;
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.PacketInfo.FollowerLevel < reqValue)
-                            return false;
 
+
+                case CriteriaAdditionalCondition.GarrisonLevelEqual: // 170
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison || garrison.GetSiteLevel().GarrLevel != reqValue)
+                            return false;
                         break;
                     }
-                case CriteriaAdditionalCondition.GarrisonFollowILvl: // 184
+                case CriteriaAdditionalCondition.TargetingCorpse: // 173
+                    if (referencePlayer.GetTarget().GetHigh() != HighGuid.Corpse)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.GarrisonFollowersLevelEqual: // 175
                     {
-                        if (!referencePlayer)
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            return follower.PacketInfo.FollowerLevel >= secondaryAsset;
+                        });
+
+                        if (followerCount < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.GarrisonFollowerIdInBuilding: // 176
+                    {
+                        Garrison garrison = referencePlayer.GetGarrison();
+                        if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison)
+                            return false;
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            if (follower.PacketInfo.GarrFollowerID != reqValue)
+                                return false;
+
+                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            if (followerBuilding == null)
+                                return false;
+
+                            return followerBuilding.BuildingType == secondaryAsset;
+                        });
+
+                        if (followerCount < 1)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.WorldPvpArea: // 179
+                    {
+                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(referencePlayer.GetZoneId());
+                        if (bf == null || bf.GetBattleId() != reqValue)
+                            return false;
+                        break;
+                    }
+
+                case CriteriaAdditionalCondition.GarrisonFollowersItemLevelAbove: // 184
+                    {
                         Garrison garrison = referencePlayer.GetGarrison();
                         if (garrison == null)
                             return false;
-                        Garrison.Follower follower = garrison.GetFollower(miscValue1);
-                        if (follower == null || follower.GetItemLevel() < reqValue)
+
+                        uint followerCount = garrison.CountFollowers(follower =>
+                        {
+                            GarrFollowerRecord garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
+                            if (garrFollower == null)
+                                return false;
+
+                            return follower.GetItemLevel() >= secondaryAsset && garrFollower.GarrFollowerTypeID == tertiaryAsset;
+                        });
+
+                        if (followerCount < reqValue)
                             return false;
                         break;
                     }
                 case CriteriaAdditionalCondition.HonorLevel: // 193
-                    if (!referencePlayer || referencePlayer.GetHonorLevel() != reqValue)
+                    if (referencePlayer.GetHonorLevel() != reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.PrestigeLevel: // 194
                     return false;
+                case CriteriaAdditionalCondition.ItemModifiedAppearance: // 200
+                    {
+                        Tuple<bool, bool> hasAppearance = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
+                        if (!hasAppearance.Item1 || hasAppearance.Item2)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.HasCharacterRestrictions: // 203
+                    {
+                        if (referencePlayer.m_activePlayerData.CharacterRestrictions.Empty())
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.QuestInfoId: // 206
+                    {
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
+                        if (quest == null || quest.Id != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.ArtifactAppearanceSetUsed: // 208
+                    {
+                        for (byte slot = EquipmentSlot.MainHand; slot <= EquipmentSlot.Ranged; ++slot)
+                        {
+                            Item artifact = referencePlayer.GetItemByPos(InventorySlots.Bag0, slot);
+                            if (artifact != null)
+                            {
+                                ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
+                                if (artifactAppearance != null)
+                                    if (artifactAppearance.ArtifactAppearanceSetID == reqValue)
+                                        return true;
+                            }
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.CurrencyAmountEqual: // 209
+                    if (referencePlayer.GetCurrency(reqValue) != secondaryAsset)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.ScenarioType: // 211
+                    {
+                        Scenario scenario = referencePlayer.GetScenario();
+                        if (scenario == null)
+                            return false;
+
+                        if (scenario.GetEntry().Type != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.AccountExpansionEqual: // 212
+                    if ((uint)referencePlayer.GetSession().GetAccountExpansion() != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.AchievementGloballyIncompleted: // 231
+                    {
+                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(secondaryAsset);
+                        if (achievement == null)
+                            return false;
+
+                        if (Global.AchievementMgr.IsRealmCompleted(achievement))
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.MainHandVisibleSubclass: // 232
+                    {
+                        uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
+                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.MainHand].ItemID);
+                        if (itemTemplate != null)
+                            itemSubclass = itemTemplate.GetSubClass();
+                        if (itemSubclass != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.OffHandVisibleSubclass: // 233
+                    {
+                        uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
+                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.OffHand].ItemID);
+                        if (itemTemplate != null)
+                            itemSubclass = itemTemplate.GetSubClass();
+                        if (itemSubclass != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.AzeriteItemLevel: // 235
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().m_azeriteItemData.Level < reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.SourceDisplayRace: // 252
+                    {
+                        CreatureDisplayInfoRecord creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(referencePlayer.GetDisplayId());
+                        if (creatureDisplayInfo == null)
+                            return false;
+
+                        CreatureDisplayInfoExtraRecord creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
+                        if (creatureDisplayInfoExtra == null)
+                            return false;
+
+                        if (creatureDisplayInfoExtra.DisplayRaceID != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.TargetDisplayRace: // 253
+                    {
+                        if (!unit)
+                            return false;
+                        CreatureDisplayInfoRecord creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(unit.GetDisplayId());
+                        if (creatureDisplayInfo == null)
+                            return false;
+
+                        CreatureDisplayInfoExtraRecord creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
+                        if (creatureDisplayInfoExtra == null)
+                            return false;
+
+                        if (creatureDisplayInfoExtra.DisplayRaceID != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.SourceAuraCountEqual: // 255
+                    if (referencePlayer.GetAuraCount((uint)secondaryAsset) != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetAuraCountEqual: // 256
+                    if (!unit || unit.GetAuraCount((uint)secondaryAsset) != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceAuraCountGreater: // 257
+                    if (referencePlayer.GetAuraCount((uint)secondaryAsset) < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetAuraCountGreater: // 258
+                    if (!unit || unit.GetAuraCount((uint)secondaryAsset) < reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankLower: // 259
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (heartOfAzeroth != null)
+                        {
+                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            if (azeriteItem != null)
+                            {
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                    if (essence.AzeriteEssenceID == reqValue && essence.Rank < secondaryAsset)
+                                        return true;
+                            }
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankEqual: // 260
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (heartOfAzeroth != null)
+                        {
+                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            if (azeriteItem != null)
+                            {
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                    if (essence.AzeriteEssenceID == reqValue && essence.Rank == secondaryAsset)
+                                        return true;
+                            }
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankGreater: // 261
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (heartOfAzeroth != null)
+                        {
+                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            if (azeriteItem != null)
+                            {
+                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                    if (essence.AzeriteEssenceID == reqValue && essence.Rank > secondaryAsset)
+                                        return true;
+                            }
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.SourceHasAuraEffectIndex: // 262
+                    if (referencePlayer.GetAuraEffect(reqValue, (uint)secondaryAsset) == null)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceSpecializationRole: // 263
+                    {
+                        ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(referencePlayer.GetPrimarySpecialization());
+                        if (spec == null || spec.Role != reqValue)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.SourceLevel120: // 264
+                    if (referencePlayer.GetLevel() != 120)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankLower: // 266
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (heartOfAzeroth != null)
+                        {
+                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            if (azeriteItem != null)
+                            {
+                                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                                if (selectedEssences != null)
+                                {
+                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                        if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank < secondaryAsset)
+                                            return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankGreater: // 267
+                    {
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        if (heartOfAzeroth != null)
+                        {
+                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            if (azeriteItem != null)
+                            {
+                                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                                if (selectedEssences != null)
+                                {
+                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                        if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank > secondaryAsset)
+                                            return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                case CriteriaAdditionalCondition.MapOrCosmeticMap: // 280
+                    {
+                        MapRecord map = referencePlayer.GetMap().GetEntry();
+                        if (map.Id != reqValue && map.CosmeticParentMapID != reqValue)
+                            return false;
+                        break;
+                    }
                 default:
                     break;
             }

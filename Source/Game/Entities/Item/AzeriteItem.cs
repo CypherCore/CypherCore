@@ -28,7 +28,7 @@ namespace Game.Entities
 {
     public class AzeriteItem : Item
     {
-        AzeriteItemData m_azeriteItemData;
+        public AzeriteItemData m_azeriteItemData;
 
         public AzeriteItem()
         {
@@ -206,6 +206,15 @@ namespace Game.Entities
             xpGain.ItemGUID = GetGUID();
             xpGain.XP = xp;
             owner.SendPacket(xpGain);
+        }
+
+        public SelectedAzeriteEssences GetSelectedAzeriteEssences()
+        {
+            foreach (SelectedAzeriteEssences essences in m_azeriteItemData.SelectedEssences)
+                if (essences.Enabled != 0)
+                    return essences;
+
+            return null;
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)

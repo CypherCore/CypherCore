@@ -656,9 +656,9 @@ namespace Game.Entities
 
     public class SelectedAzeriteEssences : BaseUpdateData<AzeriteItem>
     {
-        UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 1);
-        UpdateField<uint> Enabled = new UpdateField<uint>(0, 2);
-        UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(3, 3, 4);
+        public UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 1);
+        public UpdateField<uint> Enabled = new UpdateField<uint>(0, 2);
+        public UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(3, 3, 4);
 
         public SelectedAzeriteEssences() : base(7) { }
 

@@ -263,6 +263,11 @@ namespace Game.Entities
             _updateMask[block] &= ~(uint)UpdateMask.GetBlockFlag(index);
         }
 
+        public bool Empty()
+        {
+            return _values.Empty();
+        }
+
         public int Size()
         {
             return _values.Count;
