@@ -1426,22 +1426,19 @@ namespace Game.Groups
                 partyUpdate.LfgInfos.Value.Aborted = false;
 
                 partyUpdate.LfgInfos.Value.MyFlags = (byte)(Global.LFGMgr.GetState(m_guid) == LfgState.FinishedDungeon ? 2 : 0);
-
-                uint randomSlot = 0;
-                var selectedDungeons = Global.LFGMgr.GetSelectedDungeons(player.GetGUID());
-                if (selectedDungeons.Count == 1)
-                {
-                    LFGDungeonsRecord dungeon = CliDB.LFGDungeonsStorage.LookupByKey(selectedDungeons.First());
-                    if (dungeon != null)
-                        if (dungeon.TypeID == LfgType.RandomDungeon)
-                            randomSlot= dungeon.Id;
-                }
-
-                partyUpdate.LfgInfos.Value.MyRandomSlot = randomSlot;
+                partyUpdate.LfgInfos.Value.MyRandomSlot = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
 
                 partyUpdate.LfgInfos.Value.MyPartialClear = 0;
                 partyUpdate.LfgInfos.Value.MyGearDiff = 0.0f;
                 partyUpdate.LfgInfos.Value.MyFirstReward = false;
+
+                DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(partyUpdate.LfgInfos.Value.MyRandomSlot, player.GetLevel());
+                if (reward != null)
+                {
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                    if (quest != null)
+                        partyUpdate.LfgInfos.Value.MyFirstReward = player.CanRewardQuest(quest, false);
+                }
 
                 partyUpdate.LfgInfos.Value.MyStrangerCount = 0;
                 partyUpdate.LfgInfos.Value.MyKickVoteCount = 0;

@@ -1486,6 +1486,22 @@ namespace Game.DungeonFinding
             return PlayersStore[guid].GetSelectedDungeons();
         }
 
+        public uint GetSelectedRandomDungeon(ObjectGuid guid)
+        {
+            if (GetState(guid) != LfgState.None)
+            {
+                var dungeons = GetSelectedDungeons(guid);
+                if (!dungeons.Empty())
+                {
+                    LFGDungeonData dungeon = GetLFGDungeon(dungeons.First());
+                    if (dungeon != null && dungeon.type == LfgType.Raid)
+                        return dungeons.First();
+                }
+            }
+
+            return 0;
+        }
+
         public Dictionary<uint, LfgLockInfoData> GetLockedDungeons(ObjectGuid guid)
         {
             Dictionary<uint, LfgLockInfoData> lockDic = new Dictionary<uint, LfgLockInfoData>();
