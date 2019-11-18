@@ -189,7 +189,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE, "INSERT INTO item_instance_azerite (itemGuid, xp, level, knowledgeLevel) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_ON_LOAD, "UPDATE item_instance_azerite SET xp = ?, knowledgeLevel = ? WHERE itemGuid = ?");
             PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE, "DELETE FROM item_instance_azerite WHERE itemGuid = ?");
-            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER, "DELETE iz FROM item_instance_azerite iz LEFT JOIN item_instance ii ON iz.itemGuid = ii.guid WHERE ii.owner_guid = ?");
+            PrepareStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER, "DELETE iz FROM item_instance_azerite iz LEFT JOIN item_instance ii ON iz.itemGuid = ii.guid WHERE ii.owner_guid = ?");
             PrepareStatement(CharStatements.UPD_GIFT_OWNER, "UPDATE character_gifts SET guid = ? WHERE item_guid = ?");
             PrepareStatement(CharStatements.DEL_GIFT, "DELETE FROM character_gifts WHERE item_guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM, "SELECT entry, flags FROM character_gifts WHERE item_guid = ?");
