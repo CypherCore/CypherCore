@@ -525,7 +525,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, uint artifactTier, List<ArtifactPowerLoadInfo> powers)
+        public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, uint artifactTier, List<ArtifactPowerData> powers)
         {
             for (byte i = 0; i <= artifactTier; ++i)
                 InitArtifactPowers(GetTemplate().GetArtifactID(), i);
@@ -539,7 +539,7 @@ namespace Game.Entities
                 SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
 
             byte totalPurchasedRanks = 0;
-            foreach (ArtifactPowerLoadInfo power in powers)
+            foreach (ArtifactPowerData power in powers)
             {
                 power.CurrentRankWithBonus += power.PurchasedRank;
                 totalPurchasedRanks += power.PurchasedRank;
@@ -585,7 +585,7 @@ namespace Game.Entities
                 SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, power.CurrentRankWithBonus);
             }
 
-            foreach (ArtifactPowerLoadInfo power in powers)
+            foreach (ArtifactPowerData power in powers)
             {
                 ArtifactPowerRecord scaledArtifactPowerEntry = CliDB.ArtifactPowerStorage.LookupByKey(power.ArtifactPowerId);
                 if (!scaledArtifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.ScalesWithNumPowers))
@@ -2149,7 +2149,7 @@ namespace Game.Entities
             return null;
         }
 
-        void AddArtifactPower(ArtifactPowerLoadInfo artifactPower)
+        void AddArtifactPower(ArtifactPowerData artifactPower)
         {
             int index = m_artifactPowerIdToIndex.Count;
             m_artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
@@ -2183,7 +2183,7 @@ namespace Game.Entities
                 if (m_artifactPowerIdToIndex.ContainsKey(artifactPower.Id))
                     continue;
 
-                ArtifactPowerLoadInfo powerData = new ArtifactPowerLoadInfo();
+                ArtifactPowerData powerData = new ArtifactPowerData();
                 powerData.ArtifactPowerId = artifactPower.Id;
                 powerData.PurchasedRank = 0;
                 powerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
@@ -2945,11 +2945,86 @@ namespace Game.Entities
         }
     }
 
-    public class ArtifactPowerLoadInfo
+    public class ArtifactPowerData
     {
         public uint ArtifactPowerId;
         public byte PurchasedRank;
         public byte CurrentRankWithBonus;
+    }
+
+    class ArtifactData
+    {
+        public ulong Xp;
+        public uint ArtifactAppearanceId;
+        public uint ArtifactTierId;
+        public List<ArtifactPowerData> ArtifactPowers = new List<ArtifactPowerData>();
+    }
+
+    class ItemAdditionalLoadInfo
+    {
+        public ArtifactData Artifact;
+        public AzeriteData AzeriteItem;
+
+        public static void Init(Dictionary<ulong, ItemAdditionalLoadInfo> loadInfo, SQLResult artifactResult, SQLResult azeriteItemResult)
+        {
+            //                 0     1                       2                 3                   4                 5
+            // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid ...
+            if (!artifactResult.IsEmpty())
+            {
+                do
+                {
+                    ItemAdditionalLoadInfo info = new ItemAdditionalLoadInfo();
+                    if (info.Artifact == null)
+                        info.Artifact = new ArtifactData();
+
+                    info.Artifact.Xp = artifactResult.Read<ulong>(1);
+                    info.Artifact.ArtifactAppearanceId = artifactResult.Read<uint>(2);
+                    info.Artifact.ArtifactTierId = artifactResult.Read<uint>(3);
+
+                    ArtifactPowerData artifactPowerData = new ArtifactPowerData();
+                    artifactPowerData.ArtifactPowerId = artifactResult.Read<uint>(4);
+                    artifactPowerData.PurchasedRank = artifactResult.Read<byte>(5);
+
+                    ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
+                    if (artifactPower != null)
+                    {
+                        uint maxRank = artifactPower.MaxPurchasableRank;
+                        // allow ARTIFACT_POWER_FLAG_FINAL to overflow maxrank here - needs to be handled in Item::CheckArtifactUnlock (will refund artifact power)
+                        if (artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier) && artifactPower.Tier < info.Artifact.ArtifactTierId)
+                            maxRank += info.Artifact.ArtifactTierId - artifactPower.Tier;
+
+                        if (artifactPowerData.PurchasedRank > maxRank)
+                            artifactPowerData.PurchasedRank = (byte)maxRank;
+
+                        artifactPowerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
+
+                        info.Artifact.ArtifactPowers.Add(artifactPowerData);
+                    }
+
+                    loadInfo[artifactResult.Read<ulong>(0)] = info;
+
+                } while (artifactResult.NextRow());
+            }
+
+            //                  0      1         2                  3
+            // SELECT iz.itemGuid, iz.xp, iz.level, iz.knowledgeLevel FROM item_instance_azerite iz INNER JOIN ...
+            if (!azeriteItemResult.IsEmpty())
+            {
+                do
+                {
+                    ItemAdditionalLoadInfo info = new ItemAdditionalLoadInfo();
+                    if (info.AzeriteItem == null)
+                        info.AzeriteItem = new AzeriteData();
+
+                    info.AzeriteItem.Xp = azeriteItemResult.Read<ulong>(1);
+                    info.AzeriteItem.Level = azeriteItemResult.Read<uint>(2);
+                    info.AzeriteItem.KnowledgeLevel = azeriteItemResult.Read<uint>(3);
+
+                    loadInfo[azeriteItemResult.Read<ulong>(0)] = info;
+
+                } while (azeriteItemResult.NextRow());
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

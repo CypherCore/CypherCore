@@ -2459,6 +2459,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Artifacts, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.LoadAzerite, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
@@ -2621,6 +2625,7 @@ namespace Game
         Reputation,
         Inventory,
         Artifacts,
+        LoadAzerite,
         Actions,
         MailCount,
         MailDate,

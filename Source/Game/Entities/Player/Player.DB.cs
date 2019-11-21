@@ -38,40 +38,10 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, SQLResult artifactsResult, uint timeDiff)
+        void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, uint timeDiff)
         {
-            //                 0     1                       2                 3                   4                 5
-            // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN character_inventory ci ON ci.item = ap.guid WHERE ci.guid = ?
-            var artifactData = new Dictionary<ObjectGuid, Tuple<ulong, uint, uint, List<ArtifactPowerLoadInfo>>>();
-            if (!artifactsResult.IsEmpty())
-            {
-                do
-                {
-                    var artifactDataEntry = Tuple.Create(artifactsResult.Read<ulong>(1), artifactsResult.Read<uint>(2), artifactsResult.Read<uint>(3), new List<ArtifactPowerLoadInfo>());
-                    ArtifactPowerLoadInfo artifactPowerData = new ArtifactPowerLoadInfo();
-                    artifactPowerData.ArtifactPowerId = artifactsResult.Read<uint>(4);
-                    artifactPowerData.PurchasedRank = artifactsResult.Read<byte>(5);
-
-                    ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
-                    if (artifactPower != null)
-                    {
-                        uint maxRank = artifactPower.MaxPurchasableRank;
-                        // allow ARTIFACT_POWER_FLAG_FINAL to overflow maxrank here - needs to be handled in Item::CheckArtifactUnlock (will refund artifact power)
-                        if (artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier) && artifactPower.Tier < artifactDataEntry.Item3)
-                            maxRank += artifactDataEntry.Item3 - artifactPower.Tier;
-
-                        if (artifactPowerData.PurchasedRank > maxRank)
-                            artifactPowerData.PurchasedRank = (byte)maxRank;
-
-                        artifactPowerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
-
-                        artifactDataEntry.Item4.Add(artifactPowerData);
-                    }
-
-                    artifactData[ObjectGuid.Create(HighGuid.Item, artifactsResult.Read<ulong>(0))] = artifactDataEntry;
-
-                } while (artifactsResult.NextRow());
-            }
+            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult);
 
             if (!result.IsEmpty())
             {
@@ -88,13 +58,24 @@ namespace Game.Entities
                     Item item = _LoadItem(trans, zoneId, timeDiff, result.GetFields());
                     if (item != null)
                     {
-                        var artifactDataPair = artifactData.LookupByKey(item.GetGUID());
-                        if (item.GetTemplate().GetArtifactID() != 0 && artifactDataPair != null)
-                            item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3, artifactDataPair.Item4);
+                        var addionalData = additionalData.LookupByKey(item.GetGUID().GetCounter());
+                        if (addionalData != null)
+                        {
+                            if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
+                                item.LoadArtifactData(this, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId, addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
 
-                        ulong counter = result.Read<ulong>(46);
+                            if (addionalData.AzeriteItem != null)
+                            {
+                                AzeriteItem azeriteItem = item.ToAzeriteItem();
+                                if (azeriteItem != null)
+                                    azeriteItem.LoadAzeriteItemData(addionalData.AzeriteItem);
+                            }
+                        }
+
+
+                        ulong counter = result.Read<ulong>(43);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(47);
+                        byte slot = result.Read<byte>(44);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -1158,6 +1139,8 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
 
+            Dictionary<uint, Mail> mailById = new Dictionary<uint, Mail>();
+
             if (!result.IsEmpty())
             {
                 do
@@ -1170,14 +1153,13 @@ namespace Game.Entities
                     m.receiver = result.Read<uint>(3);
                     m.subject = result.Read<string>(4);
                     m.body = result.Read<string>(5);
-                    bool has_items = result.Read<bool>(6);
-                    m.expire_time = result.Read<uint>(7);
-                    m.deliver_time = result.Read<uint>(8);
-                    m.money = result.Read<ulong>(9);
-                    m.COD = result.Read<ulong>(10);
-                    m.checkMask = (MailCheckMask)result.Read<byte>(11);
-                    m.stationery = (MailStationery)result.Read<byte>(12);
-                    m.mailTemplateId = result.Read<ushort>(13);
+                    m.expire_time = result.Read<uint>(6);
+                    m.deliver_time = result.Read<uint>(7);
+                    m.money = result.Read<ulong>(8);
+                    m.COD = result.Read<ulong>(9);
+                    m.checkMask = (MailCheckMask)result.Read<byte>(10);
+                    m.stationery = (MailStationery)result.Read<byte>(11);
+                    m.mailTemplateId = result.Read<ushort>(12);
 
                     if (m.mailTemplateId != 0 && !CliDB.MailTemplateStorage.ContainsKey(m.mailTemplateId))
                     {
@@ -1187,65 +1169,92 @@ namespace Game.Entities
 
                     m.state = MailState.Unchanged;
 
-                    if (has_items)
-                        _LoadMailedItems(m);
-
                     m_mail.Add(m);
+                    mailById[m.messageID] = m;
                 }
                 while (result.NextRow());
             }
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
+            stmt.AddValue(0, GetGUID().GetCounter());
+            result = DB.Characters.Query(stmt);
+
+            if (!result.IsEmpty())
+            {
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
+                stmt.AddValue(0, GetGUID().GetCounter());
+                SQLResult artifactResult = DB.Characters.Query(stmt);
+
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
+                stmt.AddValue(0, GetGUID().GetCounter());
+                SQLResult azeriteResult = DB.Characters.Query(stmt);
+
+                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult);
+
+                do
+                {
+                    uint mailId = result.Read<uint>(44);
+                    _LoadMailedItem(mailById[mailId], result.GetFields(), additionalData.LookupByKey(result.Read<ulong>(0)));
+                }
+                while (result.NextRow());
+            }
+
             m_mailsLoaded = true;
         }
-        void _LoadMailedItems(Mail mail)
+        void _LoadMailedItem(Mail mail, SQLFields fields, ItemAdditionalLoadInfo additionalLoadInfo)
         {
-            // data needs to be at first place for Item.LoadFromDB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
-            stmt.AddValue(0, mail.messageID);
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
-                return;
+            ulong itemGuid = fields.Read<ulong>(0);
+            uint itemEntry = fields.Read<uint>(1);
 
-            do
+            mail.AddItem(itemGuid, itemEntry);
+
+            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
+            if (proto == null)
             {
-                ulong itemGuid = result.Read<ulong>(0);
-                uint itemEntry = result.Read<uint>(1);
+                Log.outError(LogFilter.Player, "Player {0} has unknown item_template (ProtoType) in mailed items(GUID: {1} template: {2}) in mail ({3}), deleted.", GetGUID().ToString(), itemGuid, itemEntry, mail.messageID);
 
-                mail.AddItem(itemGuid, itemEntry);
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_MAIL_ITEM);
+                stmt.AddValue(0, itemGuid);
+                DB.Characters.Execute(stmt);
 
-                ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
-                if (proto == null)
-                {
-                    Log.outError(LogFilter.Player, "Player {0} has unknown item_template (ProtoType) in mailed items(GUID: {1} template: {2}) in mail ({3}), deleted.", GetGUID().ToString(), itemGuid, itemEntry, mail.messageID);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_MAIL_ITEM);
-                    stmt.AddValue(0, itemGuid);
-                    DB.Characters.Execute(stmt);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                    stmt.AddValue(0, itemGuid);
-                    DB.Characters.Execute(stmt);
-                    continue;
-                }
-
-                Item item = Bag.NewItemOrBag(proto);
-                ObjectGuid ownerGuid = result.Read<ulong>(46) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(46)) : ObjectGuid.Empty;
-                if (!item.LoadFromDB(itemGuid, ownerGuid, result.GetFields(), itemEntry))
-                {
-                    Log.outError(LogFilter.Player, "Player:_LoadMailedItems - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
-
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM);
-                    stmt.AddValue(0, itemGuid);
-                    DB.Characters.Execute(stmt);
-
-                    item.FSetState(ItemUpdateState.Removed);
-
-                    item.SaveToDB(null);                               // it also deletes item object !
-                    continue;
-                }
-
-                AddMItem(item);
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
+                stmt.AddValue(0, itemGuid);
+                DB.Characters.Execute(stmt);
+                return;
             }
-            while (result.NextRow());
+
+            Item item = Bag.NewItemOrBag(proto);
+            ObjectGuid ownerGuid = fields.Read<ulong>(43) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(43)) : ObjectGuid.Empty;
+            if (!item.LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
+            {
+                Log.outError(LogFilter.Player, "Player:_LoadMailedItem - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM);
+                stmt.AddValue(0, itemGuid);
+                DB.Characters.Execute(stmt);
+
+                item.FSetState(ItemUpdateState.Removed);
+
+                item.SaveToDB(null);                               // it also deletes item object !
+                return;
+            }
+
+            if (additionalLoadInfo != null)
+            {
+                if (item.GetTemplate().GetArtifactID() != 0 && additionalLoadInfo.Artifact != null)
+                    item.LoadArtifactData(this, additionalLoadInfo.Artifact.Xp, additionalLoadInfo.Artifact.ArtifactAppearanceId,
+                        additionalLoadInfo.Artifact.ArtifactTierId, additionalLoadInfo.Artifact.ArtifactPowers);
+
+                if (additionalLoadInfo.AzeriteItem != null)
+                {
+                    AzeriteItem azeriteItem = item.ToAzeriteItem();
+                    if (azeriteItem != null)
+                        azeriteItem.LoadAzeriteItemData(additionalLoadInfo.AzeriteItem);
+                }
+            }
+
+            AddMItem(item);
         }
         void _LoadDeclinedNames(SQLResult result)
         {
@@ -2889,7 +2898,7 @@ namespace Game.Entities
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
-            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), time_diff);
+            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), holder.GetResult(PlayerLoginQueryLoad.LoadAzerite), time_diff);
 
             if (IsVoidStorageUnlocked())
                 _LoadVoidStorage(holder.GetResult(PlayerLoginQueryLoad.VoidStorage));

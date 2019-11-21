@@ -66,60 +66,51 @@ namespace Game.Entities
             trans.Append(stmt);
         }
 
-        public override bool LoadFromDB(ulong guid, ObjectGuid ownerGuid, SQLFields fields, uint entry)
+        public void LoadAzeriteItemData(AzeriteData azeriteData)
         {
-            if (!base.LoadFromDB(guid, ownerGuid, fields, entry))
-                return false;
-
             bool needSave = false;
 
-            ulong xp = fields.Read<ulong>(43);
-            uint level = fields.Read<uint>(44);
-            uint knowledgeLevel = fields.Read<uint>(45);
-
-            if (!CliDB.AzeriteLevelInfoStorage.ContainsKey(level))
+            if (!CliDB.AzeriteLevelInfoStorage.ContainsKey(azeriteData.Level))
             {
-                xp = 0;
-                level = 1;
-                knowledgeLevel = GetCurrentKnowledgeLevel();
+                azeriteData.Xp = 0;
+                azeriteData.Level = 1;
+                azeriteData.KnowledgeLevel = GetCurrentKnowledgeLevel();
                 needSave = true;
             }
-            else if (level > PlayerConst.MaxAzeriteItemLevel)
+            else if (azeriteData.Level > PlayerConst.MaxAzeriteItemLevel)
             {
-                xp = 0;
-                level = PlayerConst.MaxAzeriteItemLevel;
+                azeriteData.Xp = 0;
+                azeriteData.Level = PlayerConst.MaxAzeriteItemLevel;
                 needSave = true;
             }
 
-            if (knowledgeLevel != GetCurrentKnowledgeLevel())
+            if (azeriteData.KnowledgeLevel != GetCurrentKnowledgeLevel())
             {
                 // rescale XP to maintain same progress %
-                ulong oldMax = CalcTotalXPToNextLevel(level, knowledgeLevel);
-                knowledgeLevel = GetCurrentKnowledgeLevel();
-                ulong newMax = CalcTotalXPToNextLevel(level, knowledgeLevel);
-                xp = (ulong)(xp / (double)oldMax * newMax);
+                ulong oldMax = CalcTotalXPToNextLevel(azeriteData.Level, azeriteData.KnowledgeLevel);
+                azeriteData.KnowledgeLevel = GetCurrentKnowledgeLevel();
+                ulong newMax = CalcTotalXPToNextLevel(azeriteData.Level, azeriteData.KnowledgeLevel);
+                azeriteData.Xp = (ulong)(azeriteData.Xp / (double)oldMax * newMax);
                 needSave = true;
             }
-            else if (knowledgeLevel > PlayerConst.MaxAzeriteItemKnowledgeLevel)
+            else if (azeriteData.KnowledgeLevel > PlayerConst.MaxAzeriteItemKnowledgeLevel)
             {
-                knowledgeLevel = PlayerConst.MaxAzeriteItemKnowledgeLevel;
+                azeriteData.KnowledgeLevel = PlayerConst.MaxAzeriteItemKnowledgeLevel;
                 needSave = true;
             }
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Xp), xp);
-            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Level), level);
-            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.KnowledgeLevel), knowledgeLevel);
+            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Xp), azeriteData.Xp);
+            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Level), azeriteData.Level);
+            SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.KnowledgeLevel), azeriteData.KnowledgeLevel);
 
             if (needSave)
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_ON_LOAD);
-                stmt.AddValue(0, xp);
-                stmt.AddValue(1, knowledgeLevel);
-                stmt.AddValue(2, guid);
+                stmt.AddValue(0, azeriteData.Xp);
+                stmt.AddValue(1, azeriteData.KnowledgeLevel);
+                stmt.AddValue(2, GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
-
-            return true;
         }
 
         public override void DeleteFromDB(SQLTransaction trans)
@@ -134,6 +125,16 @@ namespace Game.Entities
         public override uint GetItemLevel(Player owner)
         {
             return CliDB.AzeriteLevelInfoStorage.LookupByKey(m_azeriteItemData.Level).ItemLevel;
+        }
+
+        uint GetLevel() { return m_azeriteItemData.Level; }
+        uint GetEffectiveLevel()
+        {
+            uint level = m_azeriteItemData.AuraLevel;
+            if (level == 0)
+                level = m_azeriteItemData.Level;
+
+            return level;
         }
 
         uint GetCurrentKnowledgeLevel()
@@ -276,5 +277,12 @@ namespace Game.Entities
             m_values.ClearChangesMask(m_azeriteItemData);
             base.ClearUpdateMask(remove);
         }
+    }
+
+    public class AzeriteData
+    {
+        public ulong Xp;
+        public uint Level;
+        public uint KnowledgeLevel;
     }
 }
