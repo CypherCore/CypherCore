@@ -3948,6 +3948,7 @@ namespace Game.Entities
             if (updateItemAuras)
                 ApplyItemDependentAuras(item, apply);
             ApplyArtifactPowers(item, apply);
+            ApplyAzeritePowers(item, apply);
             ApplyEnchantment(item, apply);
 
             Log.outDebug(LogFilter.Player, "_ApplyItemMods complete.");
@@ -4366,6 +4367,7 @@ namespace Game.Entities
 
                     ApplyItemEquipSpell(m_items[i], false);
                     ApplyEnchantment(m_items[i], false);
+                    ApplyAzeritePowers(m_items[i], false);
                     ApplyArtifactPowers(m_items[i], false);
                 }
             }
@@ -4418,6 +4420,7 @@ namespace Game.Entities
 
                     ApplyItemEquipSpell(m_items[i], true);
                     ApplyArtifactPowers(m_items[i], true);
+                    ApplyAzeritePowers(m_items[i], true);
                     ApplyEnchantment(m_items[i], true);
                 }
             }
@@ -5458,6 +5461,96 @@ namespace Game.Entities
                     unlearnedSpells.SuppressMessaging = true;
                     unlearnedSpells.SpellID.Add(artifactPowerRank.SpellID);
                     SendPacket(unlearnedSpells);
+                }
+            }
+        }
+
+        void ApplyAzeritePowers(Item item, bool apply)
+        {
+            AzeriteItem azeriteItem = item.ToAzeriteItem();
+            if (azeriteItem != null)
+            {
+                // milestone powers
+                foreach (uint azeriteItemMilestonePowerId in azeriteItem.m_azeriteItemData.UnlockedEssenceMilestones)
+                    ApplyAzeriteItemMilestonePower(item, CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteItemMilestonePowerId), apply);
+
+                // essences
+                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                if (selectedEssences != null)
+                {
+                    for (byte slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
+                        if (selectedEssences.AzeriteEssenceID[slot] != 0)
+                            ApplyAzeriteEssence(item, selectedEssences.AzeriteEssenceID[slot], azeriteItem.GetEssenceRank(selectedEssences.AzeriteEssenceID[slot]),
+                                (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence, apply);
+                }
+            }
+        }
+
+        public void ApplyAzeriteItemMilestonePower(Item item, AzeriteItemMilestonePowerRecord azeriteItemMilestonePower, bool apply)
+        {
+            AzeriteItemMilestoneType type = (AzeriteItemMilestoneType)azeriteItemMilestonePower.Type;
+            if (type == AzeriteItemMilestoneType.BonusStamina)
+            {
+                AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteItemMilestonePower.AzeritePowerID);
+                if (azeritePower != null)
+                {
+                    if (apply)
+                        CastSpell(this, azeritePower.SpellID, true, item);
+                    else
+                        RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());
+                }
+            }
+        }
+
+        public void ApplyAzeriteEssence(Item item, uint azeriteEssenceId, uint rank, bool major, bool apply)
+        {
+            for (uint currentRank = 1; currentRank <= rank; ++currentRank)
+            {
+                AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(azeriteEssenceId, currentRank);
+                if (azeriteEssencePower != null)
+                {
+                    ApplyAzeriteEssencePower(item, azeriteEssencePower, major, apply);
+                    if (major && currentRank == 1)
+                    {
+                        if (apply)
+                            CastCustomSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride, SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription, this, TriggerCastFlags.FullMask);
+                        else
+                            RemoveAurasDueToSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride);
+                    }
+                }
+            }
+        }
+
+        void ApplyAzeriteEssencePower(Item item, AzeriteEssencePowerRecord azeriteEssencePower, bool major, bool apply)
+        {
+            SpellInfo powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MinorPowerDescription);
+            if (powerSpell != null)
+            {
+                if (apply)
+                    CastSpell(this, powerSpell, true, item);
+                else
+                    RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
+            }
+
+            if (major)
+            {
+                powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MajorPowerDescription);
+                if (powerSpell != null)
+                {
+                    if (powerSpell.IsPassive())
+                    {
+                        if (apply)
+                            CastSpell(this, powerSpell, true, item);
+                        else
+                            RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
+                    }
+                    else
+                    {
+                        if (apply)
+                            LearnSpell(powerSpell.Id, true, 0, true);
+                        else
+                            RemoveSpell(powerSpell.Id, false, false, true);
+                    }
                 }
             }
         }

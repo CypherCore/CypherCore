@@ -150,6 +150,8 @@ namespace Game.Spells
             }
 
             if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) ||
+                GetBase().HasEffectType(AuraType.OverrideActionbarSpells) ||
+                GetBase().HasEffectType(AuraType.OverrideActionbarSpellsTriggered) ||
                 GetBase().HasEffectType(AuraType.ModSpellCategoryCooldown) ||
                 GetBase().HasEffectType(AuraType.ModMaxCharges) ||
                 GetBase().HasEffectType(AuraType.ChargeRecoveryMod) ||

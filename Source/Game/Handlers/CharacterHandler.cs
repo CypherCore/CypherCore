@@ -2463,6 +2463,14 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.LoadAzerite, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.LoadAzeriteMilestonePowers, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.LoadAzeriteUnlockedEssences, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
@@ -2626,6 +2634,8 @@ namespace Game
         Inventory,
         Artifacts,
         LoadAzerite,
+        LoadAzeriteMilestonePowers,
+        LoadAzeriteUnlockedEssences,
         Actions,
         MailCount,
         MailDate,

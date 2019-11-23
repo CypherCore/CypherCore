@@ -254,10 +254,40 @@ namespace Game.DataStorage
         public byte ConsignmentRate;
     }
 
+    public sealed class AzeriteEssenceRecord
+    {
+        public string Name;
+        public string Description;
+        public uint ID;
+        public int SpecSetID;
+    }
+
+    public sealed class AzeriteEssencePowerRecord
+    {
+        public uint ID;
+        public string SourceAlliance;
+        public string SourceHorde;
+        public int AzeriteEssenceID;
+        public byte Tier;
+        public uint MajorPowerDescription;
+        public uint MinorPowerDescription;
+        public uint MajorPowerActual;
+        public uint MinorPowerActual;
+    }
+
     public sealed class AzeriteItemRecord
     {
         public uint ID;
         public uint ItemID;
+    }
+
+    public sealed class AzeriteItemMilestonePowerRecord
+    {
+        public uint ID;
+        public int RequiredLevel;
+        public int AzeritePowerID;
+        public int Type;
+        public int AutoUnlock;
     }
 
     public sealed class AzeriteKnowledgeMultiplierRecord
@@ -272,5 +302,14 @@ namespace Game.DataStorage
         public ulong BaseExperienceToNextLevel;
         public ulong MinimumExperienceToNextLevel;
         public uint ItemLevel;
+    }
+
+    public sealed class AzeritePowerRecord
+    {
+        public uint ID;
+        public uint SpellID;
+        public int ItemBonusListID;
+        public int SpecSetID;
+        public int Flags;
     }
 }

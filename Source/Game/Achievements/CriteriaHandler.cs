@@ -1652,10 +1652,11 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.RewardedQuest: // 110
-                    if (!referencePlayer.GetQuestRewardStatus(reqValue))
+                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
+                    if (questBit != 0)
+                        if ((referencePlayer.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
                         return false;
                     break;
-
                 case CriteriaAdditionalCondition.CompletedQuest: // 111
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
                         return false;
@@ -2293,7 +2294,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.AzeriteItemLevel: // 235
                     {
                         Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
-                        if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().m_azeriteItemData.Level < reqValue)
+                        if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
                             return false;
                         break;
                     }

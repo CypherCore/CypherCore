@@ -100,15 +100,29 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE, "SELECT ID, Name, FactionID, DepositRate, ConsignmentRate FROM auction_house ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE_LOCALE, "SELECT ID, Name_lang FROM auction_house_locale WHERE locale = ?");
 
+            // AzeriteEssence.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE, "SELECT Name, Description, ID, SpecSetID FROM azerite_essence ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM azerite_essence_locale WHERE locale = ?");
+
+            // AzeriteEssencePower.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_POWER, "SELECT ID, SourceAlliance, SourceHorde, AzeriteEssenceID, Tier, MajorPowerDescription, " +
+                "MinorPowerDescription, MajorPowerActual, MinorPowerActual FROM azerite_essence_power ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_POWER_LOCALE, "SELECT ID, SourceAlliance_lang, SourceHorde_lang FROM azerite_essence_power_locale WHERE locale = ?");
+
             // AzeriteItem.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_ITEM, "SELECT ID, ItemID FROM azerite_item ORDER BY ID DESC");
+
+            // AzeriteItemMilestonePower.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_ITEM_MILESTONE_POWER, "SELECT ID, RequiredLevel, AzeritePowerID, Type, AutoUnlock FROM azerite_item_milestone_power ORDER BY ID DESC");
 
             // AzeriteKnowledgeMultiplier.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_KNOWLEDGE_MULTIPLIER, "SELECT ID, Multiplier FROM azerite_knowledge_multiplier ORDER BY ID DESC");
 
             // AzeriteLevelInfo.db2
-            PrepareStatement(HotfixStatements.SEL_AZERITE_LEVEL_INFO, "SELECT ID, BaseExperienceToNextLevel, MinimumExperienceToNextLevel, ItemLevel" +
-                " FROM azerite_level_info ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_AZERITE_LEVEL_INFO, "SELECT ID, BaseExperienceToNextLevel, MinimumExperienceToNextLevel, ItemLevel FROM azerite_level_info ORDER BY ID DESC");
+
+            // AzeritePower.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_POWER, "SELECT ID, SpellID, ItemBonusListID, SpecSetID, Flags FROM azerite_power ORDER BY ID DESC");
 
             // BankBagSlotPrices.db2
             PrepareStatement(HotfixStatements.SEL_BANK_BAG_SLOT_PRICES, "SELECT ID, Cost FROM bank_bag_slot_prices ORDER BY ID DESC");
@@ -831,6 +845,9 @@ namespace Framework.Database
                 " FROM specialization_spells ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_SPECIALIZATION_SPELLS_LOCALE, "SELECT ID, Description_lang FROM specialization_spells_locale WHERE locale = ?");
 
+            // SpecSetMember.db2
+            PrepareStatement(HotfixStatements.SEL_SPEC_SET_MEMBER, "SELECT ID, ChrSpecializationID, SpecSetID FROM spec_set_member ORDER BY ID DESC");
+
             // SpellAuraOptions.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_AURA_OPTIONS, "SELECT ID, DifficultyID, CumulativeAura, ProcCategoryRecovery, ProcChance, ProcCharges, " +        
                 "SpellProcsPerMinuteID, ProcTypeMask1, ProcTypeMask2, SpellID FROM spell_aura_options ORDER BY ID DESC");
@@ -1137,11 +1154,21 @@ namespace Framework.Database
         SEL_AUCTION_HOUSE,
         SEL_AUCTION_HOUSE_LOCALE,
 
+        SEL_AZERITE_ESSENCE,
+        SEL_AZERITE_ESSENCE_LOCALE,
+
+        SEL_AZERITE_ESSENCE_POWER,
+        SEL_AZERITE_ESSENCE_POWER_LOCALE,
+
         SEL_AZERITE_ITEM,
+
+        SEL_AZERITE_ITEM_MILESTONE_POWER,
 
         SEL_AZERITE_KNOWLEDGE_MULTIPLIER,
 
         SEL_AZERITE_LEVEL_INFO,
+
+        SEL_AZERITE_POWER,
 
         SEL_BANK_BAG_SLOT_PRICES,
 
@@ -1505,6 +1532,8 @@ namespace Framework.Database
 
         SEL_SPECIALIZATION_SPELLS,
         SEL_SPECIALIZATION_SPELLS_LOCALE,
+
+        SEL_SPEC_SET_MEMBER,
 
         SEL_SPELL_AURA_OPTIONS,
 

@@ -2010,7 +2010,7 @@ namespace Game.Entities
                 LearnSpellHighestRank(next);
         }
 
-        public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0)
+        public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false)
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);
 
@@ -2024,6 +2024,7 @@ namespace Game.Entities
             {
                 LearnedSpells packet = new LearnedSpells();
                 packet.SpellID.Add(spellId);
+                packet.SuppressMessaging = suppressMessaging;
                 SendPacket(packet);
             }
 
@@ -2049,9 +2050,9 @@ namespace Game.Entities
 
         }
 
-        public void RemoveSpell(uint spell_id, bool disabled = false, bool learn_low_rank = true)
+        public void RemoveSpell(uint spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)
         {
-            var pSpell = m_spells.LookupByKey(spell_id);
+            var pSpell = m_spells.LookupByKey(spellId);
             if (pSpell == null)
                 return;
 
@@ -2059,7 +2060,7 @@ namespace Game.Entities
                 return;
 
             // unlearn non talent higher ranks (recursive)
-            uint nextSpell = Global.SpellMgr.GetNextSpellInChain(spell_id);
+            uint nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
             if (nextSpell != 0)
             {
                 SpellInfo spellInfo1 = Global.SpellMgr.GetSpellInfo(nextSpell);
@@ -2067,12 +2068,12 @@ namespace Game.Entities
                     RemoveSpell(nextSpell, disabled, false);
             }
             //unlearn spells dependent from recently removed spells
-            var spellsRequiringSpell = Global.SpellMgr.GetSpellsRequiringSpellBounds(spell_id);
+            var spellsRequiringSpell = Global.SpellMgr.GetSpellsRequiringSpellBounds(spellId);
             foreach (var id in spellsRequiringSpell)
                 RemoveSpell(id, disabled);
 
             // re-search, it can be corrupted in prev loop
-            pSpell = m_spells.LookupByKey(spell_id);
+            pSpell = m_spells.LookupByKey(spellId);
             if (pSpell == null)
                 return;                                             // already unleared
 
@@ -2088,23 +2089,23 @@ namespace Game.Entities
             else
             {
                 if (pSpell.State == PlayerSpellState.New)
-                    m_spells.Remove(spell_id);
+                    m_spells.Remove(spellId);
                 else
                     pSpell.State = PlayerSpellState.Removed;
             }
 
-            RemoveOwnedAura(spell_id, GetGUID());
+            RemoveOwnedAura(spellId, GetGUID());
 
             // remove pet auras
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
-                PetAura petSpell = Global.SpellMgr.GetPetAura(spell_id, i);
+                PetAura petSpell = Global.SpellMgr.GetPetAura(spellId, i);
                 if (petSpell != null)
                     RemovePetAura(petSpell);
             }
 
             // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo != null && spellInfo.IsPrimaryProfessionFirstRank())
             {
                 uint freeProfs = GetFreePrimaryProfessionPoints() + 1;
@@ -2113,10 +2114,10 @@ namespace Game.Entities
             }
 
             // remove dependent skill
-            var spellLearnSkill = Global.SpellMgr.GetSpellLearnSkill(spell_id);
+            var spellLearnSkill = Global.SpellMgr.GetSpellLearnSkill(spellId);
             if (spellLearnSkill != null)
             {
-                uint prev_spell = Global.SpellMgr.GetPrevSpellInChain(spell_id);
+                uint prev_spell = Global.SpellMgr.GetPrevSpellInChain(spellId);
                 if (prev_spell == 0)                                    // first rank, remove skill
                     SetSkill(spellLearnSkill.skill, 0, 0, 0);
                 else
@@ -2150,7 +2151,7 @@ namespace Game.Entities
             }
 
             // remove dependent spells
-            var spell_bounds = Global.SpellMgr.GetSpellLearnSpellMapBounds(spell_id);
+            var spell_bounds = Global.SpellMgr.GetSpellLearnSpellMapBounds(spellId);
 
             foreach (var spellNode in spell_bounds)
             {
@@ -2162,7 +2163,7 @@ namespace Game.Entities
             // activate lesser rank in spellbook/action bar, and cast it if need
             bool prev_activate = false;
 
-            uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spell_id);
+            uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
             if (prev_id != 0)
             {
                 // if ranked non-stackable spell: need activate lesser rank and update dendence state
@@ -2181,12 +2182,12 @@ namespace Game.Entities
                         }
 
                         // now re-learn if need re-activate
-                        if (cur_active && !prevSpell.Active && learn_low_rank)
+                        if (cur_active && !prevSpell.Active && learnLowRank)
                         {
                             if (AddSpell(prev_id, true, false, prevSpell.Dependent, prevSpell.Disabled))
                             {
                                 // downgrade spell ranks in spellbook and action bar
-                                SendSupercededSpell(spell_id, prev_id);
+                                SendSupercededSpell(spellId, prev_id);
                                 prev_activate = true;
                             }
                         }
@@ -2194,7 +2195,7 @@ namespace Game.Entities
                 }
             }
 
-            m_overrideSpells.Remove(spell_id);
+            m_overrideSpells.Remove(spellId);
 
             if (m_canTitanGrip)
             {
@@ -2217,9 +2218,10 @@ namespace Game.Entities
             // remove from spell book if not replaced by lesser rank
             if (!prev_activate)
             {
-                UnlearnedSpells removedSpells = new UnlearnedSpells();
-                removedSpells.SpellID.Add(spell_id);
-                SendPacket(removedSpells);
+                UnlearnedSpells unlearnedSpells = new UnlearnedSpells();
+                unlearnedSpells.SpellID.Add(spellId);
+                unlearnedSpells.SuppressMessaging = suppressMessaging;
+                SendPacket(unlearnedSpells);
             }
         }
         bool IsNeedCastPassiveSpellAtLearn(SpellInfo spellInfo)

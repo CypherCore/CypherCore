@@ -160,6 +160,11 @@ namespace Game.Entities
             return _values.IndexOf(value);
         }
 
+        public int FindIndexIf(Predicate<T> blah)
+        {
+            return _values.FindIndex(blah);
+        }
+
         public bool HasChanged(int index)
         {
             return (_updateMask[index / 32] & (1 << (index % 32))) != 0;

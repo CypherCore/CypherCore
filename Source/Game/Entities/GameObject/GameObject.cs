@@ -1890,19 +1890,41 @@ namespace Game.Entities
                             if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                                 return;
 
-                        Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                        Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
-                        if (!item)
+                        switch (info.ItemForge.ForgeType)
                         {
-                            player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
-                            return;
-                        }
+                            case 0: // Artifact Forge
+                            case 1: // Relic Forge
+                                {
 
-                        ArtifactForgeOpened artifactForgeOpened = new ArtifactForgeOpened();
-                        artifactForgeOpened.ArtifactGUID = item.GetGUID();
-                        artifactForgeOpened.ForgeGUID = GetGUID();
-                        player.SendPacket(artifactForgeOpened);
-                        return;
+                                    Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
+                                    Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
+                                    if (!item)
+                                    {
+                                        player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
+                                        return;
+                                    }
+
+                                    ArtifactForgeOpened artifactForgeOpened = new ArtifactForgeOpened();
+                                    artifactForgeOpened.ArtifactGUID = item.GetGUID();
+                                    artifactForgeOpened.ForgeGUID = GetGUID();
+                                    player.SendPacket(artifactForgeOpened);
+                                    break;
+                                }
+                            case 2: // Heart Forge
+                                {
+                                    Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                                    if (!item)
+                                        return;
+
+                                    AzeriteEssenceForgeOpened azeriteEssenceForgeOpened = new AzeriteEssenceForgeOpened();
+                                    azeriteEssenceForgeOpened.ForgeGUID = GetGUID();
+                                    player.SendPacket(azeriteEssenceForgeOpened);
+                                    break;
+                                }
+                            default:
+                                break;
+                        }
+                        break;
                     }
                 case GameObjectTypes.UILink:
                     {

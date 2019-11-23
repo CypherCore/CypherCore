@@ -5747,6 +5747,47 @@ namespace Game.Spells
 
             unitTarget.ToPlayer().GetSession().GetCollectionMgr().AddTransmogSet((uint)effectInfo.MiscValue);
         }
+
+        [SpellEffectHandler(SpellEffectName.LearnAzeriteEssencePower)]
+        void EffectLearnAzeriteEssencePower(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerTarget = unitTarget != null ? unitTarget.ToPlayer() : null;
+            if (!playerTarget)
+                return;
+
+            Item heartOfAzeroth = playerTarget.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+            if (heartOfAzeroth == null)
+                return;
+
+            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+            if (azeriteItem == null)
+                return;
+
+            // remove old rank and apply new one
+            if (azeriteItem.IsEquipped())
+            {
+                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                if (selectedEssences != null)
+                {
+                    for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
+                    {
+                        if (selectedEssences.AzeriteEssenceID[slot] == effectInfo.MiscValue)
+                        {
+                            bool major = (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence;
+                            playerTarget.ApplyAzeriteEssence(azeriteItem, (uint)effectInfo.MiscValue, SharedConst.MaxAzeriteEssenceRank, major, false);
+                            playerTarget.ApplyAzeriteEssence(azeriteItem, (uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB, major, false);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            azeriteItem.SetEssenceRank((uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB);
+            azeriteItem.SetState(ItemUpdateState.Changed, playerTarget);
+        }
     }
 
     public class DispelableAura

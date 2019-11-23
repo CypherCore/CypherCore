@@ -923,6 +923,13 @@ namespace Framework.Constants
         First = NoLinkRequired | DontCountFirstBonusRank,
     }
 
+    public enum AzeriteItemMilestoneType
+    {
+        MajorEssence = 0,
+        MinorEssence = 1,
+        BonusStamina = 2
+    }
+
     public enum BattlegroundBracketId                                  // bracketId for level ranges
     {
         First = 0,

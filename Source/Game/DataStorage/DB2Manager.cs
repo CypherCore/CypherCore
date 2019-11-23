@@ -59,9 +59,29 @@ namespace Game.DataStorage
             CliDB.ArtifactPowerLinkStorage.Clear();
 
             foreach (ArtifactPowerRankRecord artifactPowerRank in CliDB.ArtifactPowerRankStorage.Values)
-                _artifactPowerRanks[Tuple.Create((uint)artifactPowerRank.ArtifactPowerID, artifactPowerRank.RankIndex)] = artifactPowerRank;
+                _artifactPowerRanks[Tuple.Create(artifactPowerRank.ArtifactPowerID, artifactPowerRank.RankIndex)] = artifactPowerRank;
 
             CliDB.ArtifactPowerRankStorage.Clear();
+
+            foreach (AzeriteEssencePowerRecord azeriteEssencePower in CliDB.AzeriteEssencePowerStorage.Values)
+                _azeriteEssencePowersByIdAndRank[Tuple.Create((uint)azeriteEssencePower.AzeriteEssenceID, (uint)azeriteEssencePower.Tier)] = azeriteEssencePower;
+
+            foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in CliDB.AzeriteItemMilestonePowerStorage.Values)
+                _azeriteItemMilestonePowers.Add(azeriteItemMilestonePower);
+
+            _azeriteItemMilestonePowers = _azeriteItemMilestonePowers.OrderBy(p => p.RequiredLevel).ToList();
+
+            uint azeriteEssenceSlot = 0;
+            foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in _azeriteItemMilestonePowers)
+            {
+                AzeriteItemMilestoneType type = (AzeriteItemMilestoneType)azeriteItemMilestonePower.Type;
+                if (type == AzeriteItemMilestoneType.MajorEssence || type == AzeriteItemMilestoneType.MinorEssence)
+                {
+                    //ASSERT(azeriteEssenceSlot < MAX_AZERITE_ESSENCE_SLOT);
+                    _azeriteItemMilestonePowerByEssenceSlot[azeriteEssenceSlot] = azeriteItemMilestonePower;
+                    ++azeriteEssenceSlot;
+                }
+            }            
 
             foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
                 _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
@@ -417,6 +437,9 @@ namespace Game.DataStorage
 
             CliDB.SpecializationSpellsStorage.Clear();
 
+            foreach (SpecSetMemberRecord specSetMember in CliDB.SpecSetMemberStorage.Values)
+                _specsBySpecSet.Add(Tuple.Create((int)specSetMember.SpecSetID, (uint)specSetMember.ChrSpecializationID));
+
             foreach (SpellClassOptionsRecord classOption in CliDB.SpellClassOptionsStorage.Values)
                 _spellFamilyNames.Add(classOption.SpellClassSet);
 
@@ -725,6 +748,22 @@ namespace Game.DataStorage
         public bool IsAzeriteItem(uint itemId)
         {
             return CliDB.AzeriteItemStorage.Any(pair => pair.Value.ItemID == itemId);
+        }
+
+        public AzeriteEssencePowerRecord GetAzeriteEssencePower(uint azeriteEssenceId, uint rank)
+        {
+            return _azeriteEssencePowersByIdAndRank.LookupByKey((azeriteEssenceId, rank));
+        }
+
+        public List<AzeriteItemMilestonePowerRecord> GetAzeriteItemMilestonePowers()
+        {
+            return _azeriteItemMilestonePowers;
+        }
+
+        public AzeriteItemMilestonePowerRecord GetAzeriteItemMilestonePower(int slot)
+        {
+            //ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT, "Slot %u must be lower than MAX_AZERITE_ESSENCE_SLOT (%u)", uint32(slot), MAX_AZERITE_ESSENCE_SLOT);
+            return _azeriteItemMilestonePowerByEssenceSlot[slot];
         }
 
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, LocaleConstant locale = LocaleConstant.enUS, Gender gender = Gender.Male, bool forceGender = false)
@@ -1549,6 +1588,11 @@ namespace Game.DataStorage
             return _specializationSpellsBySpec.LookupByKey(specId);
         }
 
+        public bool IsSpecSetMember(int specSetId, uint specId)
+        {
+            return _specsBySpecSet.Contains(Tuple.Create(specSetId, specId));
+        }
+
         bool IsValidSpellFamiliyName(SpellFamilyNames family)
         {
             return _spellFamilyNames.Contains((byte)family);
@@ -1938,6 +1982,9 @@ namespace Game.DataStorage
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();
         MultiMap<uint, uint> _artifactPowerLinks = new MultiMap<uint, uint>();
         Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord>();
+        Dictionary<Tuple<uint, uint>, AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new Dictionary<Tuple<uint, uint>, AzeriteEssencePowerRecord>();
+        List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new List<AzeriteItemMilestonePowerRecord>();
+        AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
         List<Tuple<byte, byte, uint>> _characterFacialHairStyles = new List<Tuple<byte, byte, uint>>();
         MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord> _charSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord>();
         Dictionary<uint, CharStartOutfitRecord> _charStartOutfits = new Dictionary<uint, CharStartOutfitRecord>();
@@ -1981,6 +2028,7 @@ namespace Game.DataStorage
         MultiMap<uint, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new MultiMap<uint, SkillLineAbilityRecord>();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new MultiMap<uint, SkillRaceClassInfoRecord>();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new MultiMap<uint, SpecializationSpellsRecord>();
+        List<Tuple<int, uint>> _specsBySpecSet = new List<Tuple<int, uint>>();
         List<byte> _spellFamilyNames = new List<byte>();
         Dictionary<uint, List<SpellPowerRecord>> _spellPowers = new Dictionary<uint, List<SpellPowerRecord>>();
         Dictionary<uint, Dictionary<uint, List<SpellPowerRecord>>> _spellPowerDifficulties = new Dictionary<uint, Dictionary<uint, List<SpellPowerRecord>>>();

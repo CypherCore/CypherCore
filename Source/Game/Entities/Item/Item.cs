@@ -1869,22 +1869,33 @@ namespace Game.Entities
             ItemContainerDeleteLootItemsFromDB();
         }
 
-        public virtual uint GetItemLevel(Player owner)
+        public uint GetItemLevel(Player owner)
         {
+            ItemTemplate itemTemplate = GetTemplate();
             uint minItemLevel = owner.m_unitData.MinItemLevel;
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
-            uint maxItemLevel = GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
+            uint maxItemLevel = itemTemplate.GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-            return GetItemLevel(GetTemplate(), _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
-                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
+
+            uint azeriteLevel = 0;
+            AzeriteItem azeriteItem = ToAzeriteItem();
+            if (azeriteItem != null)
+                azeriteLevel = azeriteItem.GetEffectiveLevel();
+
+            return GetItemLevel(itemTemplate, _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
+                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus, azeriteLevel);
         }
 
-        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus)
+        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus, uint azeriteLevel)
         {
             if (itemTemplate == null)
                 return 1;
 
             uint itemLevel = itemTemplate.GetBaseItemLevel();
+            AzeriteLevelInfoRecord azeriteLevelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(azeriteLevel);
+            if (azeriteLevelInfo != null)
+                itemLevel = azeriteLevelInfo.ItemLevel;
+
             ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(bonusData.ScalingStatDistribution);
             if (ssd != null)
             {
@@ -2965,15 +2976,21 @@ namespace Game.Entities
         public ArtifactData Artifact;
         public AzeriteData AzeriteItem;
 
-        public static void Init(Dictionary<ulong, ItemAdditionalLoadInfo> loadInfo, SQLResult artifactResult, SQLResult azeriteItemResult)
+        public static void Init(Dictionary<ulong, ItemAdditionalLoadInfo> loadInfo, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult)
         {
-            //                 0     1                       2                 3                   4                 5
-            // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid ...
+            ItemAdditionalLoadInfo GetOrCreateLoadInfo(ulong guid)
+            {
+                if (!loadInfo.ContainsKey(guid))
+                    loadInfo[guid] = new ItemAdditionalLoadInfo();
+
+                return loadInfo[guid];
+            }
+
             if (!artifactResult.IsEmpty())
             {
                 do
                 {
-                    ItemAdditionalLoadInfo info = new ItemAdditionalLoadInfo();
+                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(artifactResult.Read<ulong>(0));
                     if (info.Artifact == null)
                         info.Artifact = new ArtifactData();
 
@@ -3001,28 +3018,68 @@ namespace Game.Entities
                         info.Artifact.ArtifactPowers.Add(artifactPowerData);
                     }
 
-                    loadInfo[artifactResult.Read<ulong>(0)] = info;
-
                 } while (artifactResult.NextRow());
             }
 
-            //                  0      1         2                  3
-            // SELECT iz.itemGuid, iz.xp, iz.level, iz.knowledgeLevel FROM item_instance_azerite iz INNER JOIN ...
             if (!azeriteItemResult.IsEmpty())
             {
                 do
                 {
-                    ItemAdditionalLoadInfo info = new ItemAdditionalLoadInfo();
+                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemResult.Read<ulong>(0));
                     if (info.AzeriteItem == null)
                         info.AzeriteItem = new AzeriteData();
 
                     info.AzeriteItem.Xp = azeriteItemResult.Read<ulong>(1);
                     info.AzeriteItem.Level = azeriteItemResult.Read<uint>(2);
                     info.AzeriteItem.KnowledgeLevel = azeriteItemResult.Read<uint>(3);
+                    for (int i = 0; i < PlayerConst.MaxSpecializations; ++i)
+                    {
+                        uint specializationId = azeriteItemResult.Read<uint>(4 + i * 4);
+                        if (!CliDB.ChrSpecializationStorage.ContainsKey(specializationId))
+                            continue;
 
-                    loadInfo[azeriteItemResult.Read<ulong>(0)] = info;
+                        info.AzeriteItem.SelectedAzeriteEssences[i].SpecializationId = specializationId;
+                        for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
+                        {
+                            AzeriteEssenceRecord azeriteEssence = CliDB.AzeriteEssenceStorage.LookupByKey(azeriteItemResult.Read<uint>(5 + i * 4 + j));
+                            if (azeriteEssence == null || !Global.DB2Mgr.IsSpecSetMember(azeriteEssence.SpecSetID, specializationId))
+                                continue;
+
+                            info.AzeriteItem.SelectedAzeriteEssences[i].AzeriteEssenceId[j] = azeriteEssence.ID;
+                        }
+                    }
 
                 } while (azeriteItemResult.NextRow());
+            }
+
+            if (!azeriteItemMilestonePowersResult.IsEmpty())
+            {
+                do
+                {
+                    ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemMilestonePowersResult.Read<ulong>(0));
+                    if (info.AzeriteItem == null)
+                        info.AzeriteItem = new AzeriteData();
+
+                    info.AzeriteItem.AzeriteItemMilestonePowers.Add(azeriteItemMilestonePowersResult.Read<uint>(1));
+                }
+                while (azeriteItemMilestonePowersResult.NextRow());
+            }
+
+            if (!azeriteItemUnlockedEssencesResult.IsEmpty())
+            {
+                do
+                {
+                    AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(azeriteItemUnlockedEssencesResult.Read<uint>(1), azeriteItemUnlockedEssencesResult.Read<uint>(2));
+                    if (azeriteEssencePower != null)
+                    {
+                        ItemAdditionalLoadInfo info = GetOrCreateLoadInfo(azeriteItemUnlockedEssencesResult.Read<ulong>(0));
+                        if (info.AzeriteItem == null)
+                            info.AzeriteItem = new AzeriteData();
+
+                        info.AzeriteItem.UnlockedAzeriteEssences.Add(azeriteEssencePower);
+                    }
+                }
+                while (azeriteItemUnlockedEssencesResult.NextRow());
             }
         }
     }

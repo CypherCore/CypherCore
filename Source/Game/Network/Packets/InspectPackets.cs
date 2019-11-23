@@ -75,7 +75,7 @@ namespace Game.Network.Packets
                 GuildData.Value.Write(_worldPacket);
 
             if (AzeriteLevel.HasValue)
-                _worldPacket.WriteInt32(AzeriteLevel.Value);
+                _worldPacket.WriteUInt32((uint)AzeriteLevel);
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
@@ -84,7 +84,7 @@ namespace Game.Network.Packets
         public List<ushort> PvpTalents = new List<ushort>();
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
         public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6);
-        public Optional<int> AzeriteLevel;
+        public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
         public uint HonorLevel;
@@ -155,6 +155,30 @@ namespace Game.Network.Packets
                     Gems.Add(gem);
                 }
                 ++i;
+            }
+
+            AzeriteItem azeriteItem = item.ToAzeriteItem();
+            if (azeriteItem != null)
+            {
+                SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
+                if (essences != null)
+                {
+                    for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
+                    {
+                        AzeriteEssenceData essence = new AzeriteEssenceData();
+                        essence.Index = slot;
+                        essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
+                        if (essence.AzeriteEssenceID != 0)
+                        {
+                            essence.Rank = azeriteItem.GetEssenceRank(essence.AzeriteEssenceID);
+                            essence.SlotUnlocked = true;
+                        }
+                        else
+                            essence.SlotUnlocked = azeriteItem.HasUnlockedEssenceSlot(slot);
+
+                        AzeriteEssences.Add(essence);
+                    }
+                }
             }
         }
 

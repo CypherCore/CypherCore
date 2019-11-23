@@ -166,6 +166,13 @@ namespace Game.DataStorage
         public byte DisplayOrder;
     }
 
+    public sealed class SpecSetMemberRecord
+    {
+        public uint ID;
+        public uint ChrSpecializationID;
+        public uint SpecSetID;
+    }
+
     public sealed class SpellAuraOptionsRecord
     {
         public uint Id;
