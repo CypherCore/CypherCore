@@ -734,7 +734,7 @@ namespace Game.Scripting
         public Item GetCastItem() { return m_spell.m_CastItem; }
 
         // Creates item. Calls Spell.DoCreateItem method.
-        public void CreateItem(uint effIndex, uint itemId) { m_spell.DoCreateItem(effIndex, itemId); }
+        public void CreateItem(uint effIndex, uint itemId, ItemContext context) { m_spell.DoCreateItem(effIndex, itemId, context); }
 
         // Returns SpellInfo from the spell that triggered the current one
         public SpellInfo GetTriggeringSpell() { return m_spell.m_triggeredByAuraSpell; }

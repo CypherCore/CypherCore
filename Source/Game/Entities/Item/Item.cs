@@ -47,7 +47,7 @@ namespace Game.Entities
             loot = new Loot();
         }
 
-        public virtual bool Create(ulong guidlow, uint itemid, Player owner)
+        public virtual bool Create(ulong guidlow, uint itemid, ItemContext context, Player owner)
         {
             _Create(ObjectGuid.Create(HighGuid.Item, guidlow));
 
@@ -77,6 +77,7 @@ namespace Game.Entities
 
             SetExpiration(itemProto.GetDuration());
             SetCreatePlayedTime(0);
+            SetContext(context);
 
             if (itemProto.GetArtifactID() != 0)
             {
@@ -442,7 +443,7 @@ namespace Game.Entities
             SetModifier(ItemModifier.BattlePetLevel, fields.Read<ushort>(14));
             SetModifier(ItemModifier.BattlePetDisplayId, fields.Read<uint>(16));
 
-            SetContext(fields.Read<byte>(17));
+            SetContext((ItemContext)fields.Read<byte>(17));
 
             var bonusListString = new StringArray(fields.Read<string>(18), ' ');
             List<uint> bonusListIDs = new List<uint>();
@@ -1110,7 +1111,7 @@ namespace Game.Entities
             owner.SendPacket(itemTimeUpdate);
         }
 
-        public static Item CreateItem(uint item, uint count, Player player = null)
+        public static Item CreateItem(uint item, uint count, ItemContext context, Player player = null)
         {
             if (count < 1)
                 return null;                                        //don't create item at zero count
@@ -1122,7 +1123,7 @@ namespace Game.Entities
                     count = pProto.GetMaxStackSize();
 
                 Item pItem = Bag.NewItemOrBag(pProto);
-                if (pItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), item, player))
+                if (pItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), item, context, player))
                 {
                     pItem.SetCount(count);
                     return pItem;
@@ -1134,7 +1135,7 @@ namespace Game.Entities
 
         public Item CloneItem(uint count, Player player = null)
         {
-            Item newItem = CreateItem(GetEntry(), count, player);
+            Item newItem = CreateItem(GetEntry(), count, GetContext(), player);
             if (newItem == null)
                 return null;
 
@@ -1802,7 +1803,7 @@ namespace Game.Entities
                         loot_item.is_underthreshold = item_result.Read<bool>(6);
                         loot_item.needs_quest = item_result.Read<bool>(7);
                         loot_item.randomBonusListId = item_result.Read<uint>(8);
-                        loot_item.context = item_result.Read<byte>(9);
+                        loot_item.context = (ItemContext)item_result.Read<byte>(9);
 
                         StringArray bonusLists = new StringArray(item_result.Read<string>(10), ' ');
                         if (!bonusLists.IsEmpty())
@@ -2358,7 +2359,9 @@ namespace Game.Entities
             SetState(ItemUpdateState.Changed, owner);
         }
 
-        public void SetContext(int context) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Context), context); }
+        public ItemContext GetContext() { return (ItemContext)(int)m_itemData.Context;    }
+        public void SetContext(ItemContext context) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Context), (int)context); }
+
         public void SetPetitionId(uint petitionId)
         {
             SetUpdateFieldValue(m_itemData.ModifyValue(m_itemData.Enchantment, 0).ModifyValue((ItemEnchantment itemEnchantment) => itemEnchantment.ID), petitionId);

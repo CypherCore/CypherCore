@@ -1345,7 +1345,7 @@ namespace Scripts.Spells.Items
                     return;
             }
 
-            CreateItem(effIndex, newitemid);
+            CreateItem(effIndex, newitemid, ItemContext.None);
         }
 
         public override void Register()

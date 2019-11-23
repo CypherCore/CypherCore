@@ -1042,7 +1042,7 @@ namespace Game.Spells
             }
         }
 
-        public void DoCreateItem(uint i, uint itemtype, byte context = 0, List<uint> bonusListIds = null)
+        public void DoCreateItem(uint i, uint itemtype, ItemContext context = 0, List<uint> bonusListIds = null)
         {
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
@@ -1146,7 +1146,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            DoCreateItem(effIndex, effectInfo.ItemType);
+            DoCreateItem(effIndex, effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
             ExecuteLogEffectCreateItem(effIndex, effectInfo.ItemType);
         }
 
@@ -1162,9 +1162,10 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
 
             uint item_id = effectInfo.ItemType;
+            ItemContext context = m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None;
 
             if (item_id != 0)
-                DoCreateItem(effIndex, item_id);
+                DoCreateItem(effIndex, item_id, context);
 
             // special case: fake item replaced by generate using spell_loot_template
             if (m_spellInfo.IsLootCrafting())
@@ -1179,10 +1180,10 @@ namespace Game.Spells
                     player.DestroyItemCount(item_id, count, true);
 
                     // create some random items
-                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell);
+                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context);
                 }
                 else
-                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell);    // create some random items
+                    player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context);    // create some random items
 
                 player.UpdateCraftSkill(m_spellInfo.Id);
             }
@@ -1200,7 +1201,7 @@ namespace Game.Spells
             Player player = unitTarget.ToPlayer();
 
             // create some random items
-            player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell);
+            player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
             // @todo ExecuteLogEffectCreateItem(i, GetEffect(i].ItemType);
         }
 
@@ -1511,7 +1512,7 @@ namespace Game.Spells
 
             ushort pos = m_CastItem.GetPos();
 
-            Item pNewItem = Item.CreateItem(newitemid, 1, player);
+            Item pNewItem = Item.CreateItem(newitemid, 1, m_CastItem.GetContext(), player);
             if (pNewItem == null)
                 return;
 
@@ -2112,7 +2113,7 @@ namespace Game.Spells
                 player.DestroyItemCount(itemTarget, ref count, true);
                 unitTarget = player;
                 // and add a scroll
-                DoCreateItem(effIndex, effectInfo.ItemType);
+                DoCreateItem(effIndex, effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
                 itemTarget = null;
                 m_targets.SetItemTarget(null);
             }
@@ -5497,7 +5498,7 @@ namespace Game.Spells
             List<uint> bonusList = new List<uint>();
             bonusList.Add(collectionMgr.GetHeirloomBonus(m_misc.Data0));
 
-            DoCreateItem(effIndex, m_misc.Data0, 0, bonusList);
+            DoCreateItem(effIndex, m_misc.Data0, ItemContext.None, bonusList);
             ExecuteLogEffectCreateItem(effIndex, m_misc.Data0);
         }
 

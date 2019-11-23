@@ -348,7 +348,7 @@ namespace Framework.Constants
         OverrideRequiredLevel = 18
     }
 
-    enum ItemContext : byte
+    public enum ItemContext : byte
     {
         None = 0,
         DungeonNormal = 1,

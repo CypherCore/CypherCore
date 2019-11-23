@@ -696,7 +696,7 @@ namespace Game
                     List<ItemPosCount> dest = new List<ItemPosCount>();
                     if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
                     {
-                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, 0, item.BonusListIDs);
+                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
                         _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
                     }
                 }

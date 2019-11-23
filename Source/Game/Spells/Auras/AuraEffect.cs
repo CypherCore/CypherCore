@@ -5031,7 +5031,7 @@ namespace Game.Spells
                                             if (creature.GetCreatureTemplate().SkinLootId == 0)
                                                 return;
 
-                                            player.AutoStoreLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, true);
+                                            player.AutoStoreLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, ItemContext.None, true);
 
                                             creature.DespawnOrUnsummon();
                                         }

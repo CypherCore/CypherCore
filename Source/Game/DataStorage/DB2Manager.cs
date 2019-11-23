@@ -1144,17 +1144,11 @@ namespace Game.DataStorage
             return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
         }
 
-        public List<uint> GetItemBonusTree(uint itemId, uint itemContext)
+        void VisitItemBonusTree(uint itemId, Action<ItemBonusTreeNodeRecord> visitor)
         {
-            List<uint> bonusListIDs = new List<uint>();
-
-            ItemSparseRecord proto = CliDB.ItemSparseStorage.LookupByKey(itemId);
-            if (proto == null)
-                return bonusListIDs;
-
             var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
             if (itemIdRange.Empty())
-                return bonusListIDs;
+                return;
 
             foreach (var itemTreeId in itemIdRange)
             {
@@ -1163,47 +1157,59 @@ namespace Game.DataStorage
                     continue;
 
                 foreach (ItemBonusTreeNodeRecord bonusTreeNode in treeList)
+                    visitor(bonusTreeNode);
+            }
+        }
+
+        public List<uint> GetItemBonusTree(uint itemId, ItemContext itemContext)
+        {
+            List<uint> bonusListIDs = new List<uint>();
+
+            ItemSparseRecord proto = CliDB.ItemSparseStorage.LookupByKey(itemId);
+            if (proto == null)
+                return bonusListIDs;
+
+            VisitItemBonusTree(itemId, bonusTreeNode =>
+            {
+                if ((ItemContext)bonusTreeNode.ItemContext != itemContext)
+                    return;
+
+                if (bonusTreeNode.ChildItemBonusListID != 0)
                 {
-                    if (bonusTreeNode.ItemContext != itemContext)
-                        continue;
+                    bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
+                }
+                else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
+                {
+                    ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
+                    if (selector == null)
+                        return;
 
-                    if (bonusTreeNode.ChildItemBonusListID != 0)
+                    short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
+
+                    uint bonus = GetItemBonusListForItemLevelDelta(delta);
+                    if (bonus != 0)
+                        bonusListIDs.Add(bonus);
+
+                    ItemLevelSelectorQualitySetRecord selectorQualitySet = CliDB.ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                    if (selectorQualitySet != null)
                     {
-                        bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-                    }
-                    else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
-                    {
-                        ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
-                        if (selector == null)
-                            continue;
-
-                        short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
-
-                        uint bonus = GetItemBonusListForItemLevelDelta(delta);
-                        if (bonus != 0)
-                            bonusListIDs.Add(bonus);
-
-                        ItemLevelSelectorQualitySetRecord selectorQualitySet = CliDB.ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                        if (selectorQualitySet != null)
+                        var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                        if (itemSelectorQualities != null)
                         {
-                            var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                            if (itemSelectorQualities != null)
-                            {
-                                ItemQuality quality = ItemQuality.Uncommon;
-                                if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
-                                    quality = ItemQuality.Epic;
-                                else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
-                                    quality = ItemQuality.Rare;
+                            ItemQuality quality = ItemQuality.Uncommon;
+                            if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
+                                quality = ItemQuality.Epic;
+                            else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
+                                quality = ItemQuality.Rare;
 
-                                var itemSelectorQuality = itemSelectorQualities.FirstOrDefault(p => p.Quality < (byte)quality);
+                            var itemSelectorQuality = itemSelectorQualities.FirstOrDefault(p => p.Quality < (byte)quality);
 
-                                if (itemSelectorQuality != null)
-                                    bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
-                            }
+                            if (itemSelectorQuality != null)
+                                bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
                         }
                     }
                 }
-            }
+            });
 
             return bonusListIDs;
         }

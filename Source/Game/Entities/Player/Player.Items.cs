@@ -1238,7 +1238,7 @@ namespace Game.Entities
                 if (msg != InventoryResult.Ok)
                     break;
 
-                EquipNewItem(eDest, titem_id, true);
+                EquipNewItem(eDest, titem_id, ItemContext.None, true);
                 AutoUnequipOffhandIfNeed();
                 titem_amount--;
             }
@@ -1260,13 +1260,13 @@ namespace Game.Entities
             Log.outError(LogFilter.Player, "STORAGE: Can't equip or store initial item {0} for race {1} class {2}, error msg = {3}", titem_id, GetRace(), GetClass(), msg);
             return false;
         }
-        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomPropertyId = 0, List<ObjectGuid> allowedLooters = null, byte context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
+        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomPropertyId = 0, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
         {
             uint count = 0;
             foreach (var itemPosCount in pos)
                 count += itemPosCount.count;
 
-            Item item = Item.CreateItem(itemId, count, this);
+            Item item = Item.CreateItem(itemId, count, context, this);
             if (item != null)
             {
                 ItemAddedQuestCheck(itemId, count);
@@ -1275,7 +1275,6 @@ namespace Game.Entities
 
                 item.AddItemFlag(ItemFieldFlags.NewItem);
 
-                item.SetContext(context);
                 item.SetBonuses(bonusListIDs);
 
                 item = StoreItem(pos, item, update);
@@ -1598,9 +1597,9 @@ namespace Game.Entities
             // not found req. item count and have unequippable items
             return res;
         }
-        Item EquipNewItem(ushort pos, uint item, bool update)
+        Item EquipNewItem(ushort pos, uint item, ItemContext context, bool update)
         {
-            Item pItem = Item.CreateItem(item, 1, this);
+            Item pItem = Item.CreateItem(item, 1, context, this);
             if (pItem != null)
             {
                 ItemAddedQuestCheck(item, 1);
@@ -2509,7 +2508,7 @@ namespace Game.Entities
                 }
             }
 
-            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item), null, 0, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, true);
+            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item), null, ItemContext.Vendor, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, ItemContext.Vendor, true);
             if (it != null)
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
@@ -3831,13 +3830,13 @@ namespace Game.Entities
             return max_personal_rating;
         }
 
-        public void SendItemRetrievalMail(uint itemEntry, uint count)
+        public void SendItemRetrievalMail(uint itemEntry, uint count, ItemContext context)
         {
             MailSender sender = new MailSender(MailMessageType.Creature, 34337);
             MailDraft draft = new MailDraft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
             SQLTransaction trans = new SQLTransaction();
 
-            Item item = Item.CreateItem(itemEntry, count, null);
+            Item item = Item.CreateItem(itemEntry, count, context, null);
             if (item)
             {
                 item.SaveToDB(trans);
@@ -5090,7 +5089,7 @@ namespace Game.Entities
         InventoryResult CanEquipNewItem(byte slot, out ushort dest, uint item, bool swap)
         {
             dest = 0;
-            Item pItem = Item.CreateItem(item, 1, this);
+            Item pItem = Item.CreateItem(item, 1, ItemContext.None, this);
             if (pItem != null)
             {
                 InventoryResult result = CanEquipItem(slot, out dest, pItem, swap);
@@ -6065,11 +6064,11 @@ namespace Game.Entities
                 pItem.SetState(ItemUpdateState.Changed, this);
             }
         }
-        public void AutoStoreLoot(uint loot_id, LootStore store, bool broadcast = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, broadcast); }
-        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, bool broadcast = false)
+        public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
+        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false)
         {
             Loot loot = new Loot();
-            loot.FillLoot(loot_id, store, this, true);
+            loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
 
             uint max_slot = loot.GetMaxSlotInLootFor(this);
             for (uint i = 0; i < max_slot; ++i)
@@ -6351,7 +6350,7 @@ namespace Game.Entities
                         if (groupRules)
                             group.UpdateLooterGuid(go, true);
 
-                        loot.FillLoot(lootid, LootStorage.Gameobject, this, !groupRules, false, go.GetLootMode());
+                        loot.FillLoot(lootid, LootStorage.Gameobject, this, !groupRules, false, go.GetLootMode(), GetMap().GetDifficultyLootItemContext());
                         go.SetLootGenerationTime();
 
                         // get next RR player (for next loot)

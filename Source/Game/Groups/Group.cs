@@ -1269,7 +1269,7 @@ namespace Game.Groups
                                 List<ItemPosCount> dest = new List<ItemPosCount>();
                                 InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                                 if (msg == InventoryResult.Ok)
-                                    player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, true);
+                                    player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, ItemContext.None, true);
                                 else // If the player's inventory is full, send the disenchant result in a mail.
                                 {
                                     Loot loot = new Loot();
@@ -1280,7 +1280,7 @@ namespace Game.Groups
                                     {
                                         LootItem lootItem = loot.LootItemInSlot(i, player);
                                         player.SendEquipError(msg, null, null, lootItem.itemid);
-                                        player.SendItemRetrievalMail(lootItem.itemid, lootItem.count);
+                                        player.SendItemRetrievalMail(lootItem.itemid, lootItem.count, lootItem.context);
                                     }
                                 }
                             }

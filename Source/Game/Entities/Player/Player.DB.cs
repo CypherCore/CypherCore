@@ -1089,7 +1089,7 @@ namespace Game.Entities
                 uint randomBonusListId = result.Read<uint>(4);
                 uint fixedScalingLevel = result.Read<uint>(5);
                 uint artifactKnowledgeLevel = result.Read<uint>(6);
-                byte context = result.Read<byte>(7);
+                ItemContext context = (ItemContext)result.Read<byte>(7);
                 List<uint> bonusListIDs = new List<uint>();
                 var bonusListIdTokens = new StringArray(result.Read<string>(8), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
@@ -2266,7 +2266,7 @@ namespace Game.Entities
                     stmt.AddValue(5, (byte)_voidStorageItems[i].RandomBonusListId);
                     stmt.AddValue(6, _voidStorageItems[i].FixedScalingLevel);
                     stmt.AddValue(7, _voidStorageItems[i].ArtifactKnowledgeLevel);
-                    stmt.AddValue(8, _voidStorageItems[i].Context);
+                    stmt.AddValue(8, (byte)_voidStorageItems[i].Context);
 
                     StringBuilder bonusListIDs = new StringBuilder();
                     foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)

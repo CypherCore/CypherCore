@@ -1477,7 +1477,7 @@ namespace Game.Entities
                     loot.Clear();
                     uint lootid = creature.GetCreatureTemplate().LootId;
                     if (lootid != 0)
-                        loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode());
+                        loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode(), GetMap().GetDifficultyLootItemContext());
 
                     if (creature.GetLootMode() > 0)
                         loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);

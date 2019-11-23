@@ -3017,17 +3017,17 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public int GetDifficultyLootItemContext()
+        public ItemContext GetDifficultyLootItemContext()
         {
             MapDifficultyRecord mapDifficulty = GetMapDifficulty();
             if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
-                return mapDifficulty.ItemContext;
+                return (ItemContext)mapDifficulty.ItemContext;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
             if (difficulty != null)
-                return difficulty.ItemContext;
+                return (ItemContext)difficulty.ItemContext;
 
-            return 0;
+            return ItemContext.None;
         }
 
         public uint GetId()

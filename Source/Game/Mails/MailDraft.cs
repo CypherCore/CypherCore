@@ -59,7 +59,7 @@ namespace Game.Mails
             Loot mailLoot = new Loot();
 
             // can be empty
-            mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true);
+            mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
 
             uint max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
             for (uint i = 0; m_items.Count < SharedConst.MaxMailItems && i < max_slot; ++i)
@@ -67,7 +67,7 @@ namespace Game.Mails
                 LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
                 if (lootitem != null)
                 {
-                    Item item = Item.CreateItem(lootitem.itemid, lootitem.count, receiver);
+                    Item item = Item.CreateItem(lootitem.itemid, lootitem.count, lootitem.context, receiver);
                     if (item != null)
                     {
                         item.SaveToDB(trans);                           // save for prevent lost at next mail load, if send fail then item will deleted

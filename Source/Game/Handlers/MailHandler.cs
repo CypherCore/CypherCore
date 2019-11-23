@@ -610,7 +610,7 @@ namespace Game
             }
 
             Item bodyItem = new Item();                              // This is not bag and then can be used new Item.
-            if (!bodyItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), 8383, player))
+            if (!bodyItem.Create(Global.ObjectMgr.GetGenerator(HighGuid.Item).Generate(), 8383, ItemContext.None, player))
                 return;
 
             // in mail template case we need create new item text

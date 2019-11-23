@@ -682,7 +682,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(Context);
+            data.WriteUInt8((byte)Context);
             data.WriteInt32(BonusListIDs.Count);
             foreach (uint bonusID in BonusListIDs)
                 data.WriteUInt32(bonusID);
@@ -690,7 +690,7 @@ namespace Game.Network.Packets
 
         public void Read(WorldPacket data)
         {
-            Context = data.ReadUInt8();
+            Context = (ItemContext)data.ReadUInt8();
             uint bonusListIdSize = data.ReadUInt32();
 
             BonusListIDs = new List<uint>();
@@ -730,7 +730,7 @@ namespace Game.Network.Packets
             return !(left == right);
         }
 
-        public byte Context;
+        public ItemContext Context;
         public List<uint> BonusListIDs = new List<uint>();
     }
 
@@ -746,7 +746,7 @@ namespace Game.Network.Packets
             {
                 ItemBonus.HasValue = true;
                 ItemBonus.Value.BonusListIDs.AddRange(bonusListIds);
-                ItemBonus.Value.Context = (byte)item.m_itemData.Context;
+                ItemBonus.Value.Context = item.GetContext();
             }
 
             uint mask = item.m_itemData.ModifiersMask;
@@ -802,7 +802,7 @@ namespace Game.Network.Packets
             ItemID = gem.ItemId;
 
             ItemBonusInstanceData bonus = new ItemBonusInstanceData();
-            bonus.Context = gem.Context;
+            bonus.Context = (ItemContext)(byte)gem.Context;
             foreach (ushort bonusListId in gem.BonusListIDs)
                 if (bonusListId != 0)
                     bonus.BonusListIDs.Add(bonusListId);

@@ -445,7 +445,7 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, uint randomBonusListId, uint fixedScalingLevel, uint artifactKnowledgeLevel, byte context, List<uint> bonuses)
+        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, uint randomBonusListId, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<uint> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
@@ -465,7 +465,7 @@ namespace Game.Entities
         public uint RandomBonusListId;
         public uint FixedScalingLevel;
         public uint ArtifactKnowledgeLevel;
-        public byte Context;
+        public ItemContext Context;
         public List<uint> BonusListIDs = new List<uint>();
     }
 

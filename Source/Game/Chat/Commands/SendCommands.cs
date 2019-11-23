@@ -153,7 +153,7 @@ namespace Game.Chat.Commands
 
             foreach (var pair in items)
             {
-                Item item = Item.CreateItem(pair.Key, pair.Value, handler.GetSession() ? handler.GetSession().GetPlayer() : null);
+                Item item = Item.CreateItem(pair.Key, pair.Value, ItemContext.None, handler.GetSession() ? handler.GetSession().GetPlayer() : null);
                 if (item)
                 {
                     item.SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted

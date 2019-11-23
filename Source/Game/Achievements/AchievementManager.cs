@@ -549,7 +549,7 @@ namespace Game.Achievements
 
                 SQLTransaction trans = new SQLTransaction();
 
-                Item item = reward.ItemId != 0 ? Item.CreateItem(reward.ItemId, 1, _owner) : null;
+                Item item = reward.ItemId != 0 ? Item.CreateItem(reward.ItemId, 1, ItemContext.None, _owner) : null;
                 if (item)
                 {
                     // save new item before send

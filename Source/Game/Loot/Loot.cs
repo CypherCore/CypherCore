@@ -88,7 +88,7 @@ namespace Game.Loots
         public uint itemid;
         public uint randomBonusListId;
         public List<uint> BonusListIDs = new List<uint>();
-        public byte context;
+        public ItemContext context;
         public List<Condition> conditions = new List<Condition>();                               // additional loot condition
         public List<ObjectGuid> allowedGUIDs = new List<ObjectGuid>();
         public ObjectGuid rollWinnerGUID;                                   // Stores the guid of person who won loot, if his bags are full only he can see the item in loot list!
@@ -198,7 +198,7 @@ namespace Game.Loots
         }
 
         // Calls processor of corresponding LootTemplate (which handles everything including references)
-        public bool FillLoot(uint lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default)
+        public bool FillLoot(uint lootId, LootStore store, Player lootOwner, bool personal, bool noEmptyError = false, LootModes lootMode = LootModes.Default, ItemContext context = 0)
         {
             // Must be provided
             if (lootOwner == null)
@@ -212,7 +212,7 @@ namespace Game.Loots
                 return false;
             }
 
-            _itemContext = (byte)lootOwner.GetMap().GetDifficultyLootItemContext();
+            _itemContext = context;
 
             tab.Process(this, store.IsRatesAllowed(), (byte)lootMode);          // Processing is done there, callback via Loot.AddItem()
 
@@ -866,7 +866,7 @@ namespace Game.Loots
 
         // Loot GUID
         ObjectGuid _GUID;
-        byte _itemContext;
+        ItemContext _itemContext;
     }
 
     public class AELootResult

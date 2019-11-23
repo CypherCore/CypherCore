@@ -70,7 +70,7 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
-        public override bool Create(ulong guidlow, uint itemid, Player owner)
+        public override bool Create(ulong guidlow, uint itemid, ItemContext context, Player owner)
         {
             var itemProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
@@ -93,6 +93,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), itemProto.MaxDurability);
             SetDurability(itemProto.MaxDurability);
             SetCount(1);
+            SetContext(context);
 
             // Setting the number of Slots the Container has
             SetBagSize(itemProto.GetContainerSlots());

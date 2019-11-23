@@ -2703,7 +2703,7 @@ namespace Scripts.Spells.Generic
                         return;
                 }
 
-                CreateItem(effIndex, itemId[RandomHelper.URand(0, 4)]);
+                CreateItem(effIndex, itemId[RandomHelper.URand(0, 4)], ItemContext.None);
             }
         }
 

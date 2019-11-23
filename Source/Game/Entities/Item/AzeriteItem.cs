@@ -40,9 +40,9 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.DEBUGknowledgeWeek), -1);
         }
 
-        public override bool Create(ulong guidlow, uint itemId, Player owner)
+        public override bool Create(ulong guidlow, uint itemId, ItemContext context, Player owner)
         {
-            if (!base.Create(guidlow, itemId, owner))
+            if (!base.Create(guidlow, itemId, context, owner))
                 return false;
 
             SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Level), 1u);

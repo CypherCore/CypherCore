@@ -240,7 +240,7 @@ namespace Game.BlackMarket
 
             // Create item
             BlackMarketTemplate templ = entry.GetTemplate();
-            Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity);
+            Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
             if (!item)
                 return;
 
