@@ -2113,6 +2113,7 @@ namespace Game.Spells
                 player.DestroyItemCount(itemTarget, ref count, true);
                 unitTarget = player;
                 // and add a scroll
+                damage = 1;
                 DoCreateItem(effIndex, effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
                 itemTarget = null;
                 m_targets.SetItemTarget(null);
