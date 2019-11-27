@@ -5385,6 +5385,9 @@ namespace Game.Entities
         //Artifact
         void ApplyArtifactPowers(Item item, bool apply)
         {
+            if (item.IsArtifactDisabled())
+                return;
+
             foreach (ArtifactPower artifactPower in item.m_itemData.ArtifactPowers)
             {
                 byte rank = artifactPower.CurrentRankWithBonus;

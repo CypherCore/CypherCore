@@ -2152,6 +2152,15 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)_bonusData.AppearanceModID);
         }
 
+        public bool IsArtifactDisabled()
+        {
+            ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(GetTemplate().GetArtifactID());
+            if (artifact != null)
+                return artifact.ArtifactCategoryID != 2; // fishing artifact
+
+            return true;
+        }
+
         public ArtifactPower GetArtifactPower(uint artifactPowerId)
         {
             var index = m_artifactPowerIdToIndex.LookupByKey(artifactPowerId);
