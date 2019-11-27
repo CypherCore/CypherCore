@@ -2673,6 +2673,8 @@ namespace Game.Groups
             {
                 ItemInstance itemInstance = new ItemInstance(lootItemInSlot);
                 BonusData bonusData = new BonusData(itemInstance);
+                if (!bonusData.CanDisenchant)
+                    return null;
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemid);
                 uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.GetLevel(), 0, 0, 0, 0, false, 0);

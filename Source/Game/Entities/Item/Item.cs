@@ -1957,6 +1957,9 @@ namespace Game.Entities
 
         public ItemDisenchantLootRecord GetDisenchantLoot(Player owner)
         {
+            if (!_bonusData.CanDisenchant)
+                return null;
+
             return GetDisenchantLoot(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner));
         }
 
@@ -2834,9 +2837,10 @@ namespace Game.Entities
             RepairCostMultiplier = 1.0f;
             ScalingStatDistribution = proto.GetScalingStatDistribution();
             RelicType = -1;
-            HasItemLevelBonus = false;
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
+            CanDisenchant = !proto.GetFlags().HasAnyFlag(ItemFlags.NoDisenchant);
+            CanScrap = proto.GetFlags4().HasAnyFlag(ItemFlags4.Scrapable);
 
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
@@ -2865,7 +2869,6 @@ namespace Game.Entities
             {
                 case ItemBonusType.ItemLevel:
                     ItemLevelBonus += values[0];
-                    HasItemLevelBonus = true;
                     break;
                 case ItemBonusType.Stat:
                     {
@@ -2935,6 +2938,12 @@ namespace Game.Entities
                 case ItemBonusType.OverrideRequiredLevel:
                     RequiredLevelOverride = values[0];
                     break;
+                case ItemBonusType.OverrideCanDisenchant:
+                    CanDisenchant = values[0] != 0;
+                    break;
+                case ItemBonusType.OverrideCanScrap:
+                    CanScrap = values[0] != 0;
+                    break;
             }
         }
 
@@ -2956,7 +2965,8 @@ namespace Game.Entities
         public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
         public int RelicType;
         public int RequiredLevelOverride;
-        public bool HasItemLevelBonus;
+        public bool CanDisenchant;
+        public bool CanScrap;
         public bool HasFixedLevel;
         State _state;
 
