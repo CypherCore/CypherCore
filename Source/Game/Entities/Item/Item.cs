@@ -570,7 +570,7 @@ namespace Game.Entities
                                         if (artifactPowerPicker != null)
                                         {
                                             PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
-                                            if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
+                                            if (playerCondition == null || (owner != null && ConditionManager.IsPlayerMeetingCondition(owner, playerCondition)))
                                                 if (artifactPower.Label == _bonusData.GemRelicType[e - EnchantmentSlot.Sock1])
                                                     power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
                                         }
@@ -595,7 +595,7 @@ namespace Game.Entities
                 SetArtifactPower((ushort)power.ArtifactPowerId, power.PurchasedRank, (byte)(totalPurchasedRanks + 1));
             }
 
-            CheckArtifactRelicSlotUnlock(owner != null ? owner : GetOwner());
+            CheckArtifactRelicSlotUnlock(owner);
         }
 
         public void CheckArtifactRelicSlotUnlock(Player owner)

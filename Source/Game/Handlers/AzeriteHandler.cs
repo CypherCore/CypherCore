@@ -91,7 +91,7 @@ namespace Game
 
             SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
             // essence is already in that slot, nothing to do
-            if (selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
+            if (selectedEssences != null && selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
                 return;
 
             uint rank = azeriteItem.GetEssenceRank(azeriteEssenceActivateEssence.AzeriteEssenceID);
@@ -127,46 +127,53 @@ namespace Game
                 return;
             }
 
-            // need to remove selected essence from another slot if selected
-            int removeEssenceFromSlot = -1;
-            for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
-                if (azeriteEssenceActivateEssence.Slot != slot && selectedEssences.AzeriteEssenceID[slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
-                    removeEssenceFromSlot = slot;
-
-            // check cooldown of major essence slot
-            if (selectedEssences.AzeriteEssenceID[0] != 0 && (azeriteEssenceActivateEssence.Slot == 0 || removeEssenceFromSlot == 0))
+            if (selectedEssences != null)
             {
-                for (uint essenceRank = 1; essenceRank <= rank; ++essenceRank)
+                // need to remove selected essence from another slot if selected
+                int removeEssenceFromSlot = -1;
+                for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
+                    if (azeriteEssenceActivateEssence.Slot != slot && selectedEssences.AzeriteEssenceID[slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
+                        removeEssenceFromSlot = slot;
+
+                // check cooldown of major essence slot
+                if (selectedEssences.AzeriteEssenceID[0] != 0 && (azeriteEssenceActivateEssence.Slot == 0 || removeEssenceFromSlot == 0))
                 {
-                    AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(selectedEssences.AzeriteEssenceID[0], essenceRank);
-                    if (_player.GetSpellHistory().HasCooldown(azeriteEssencePower.MajorPowerDescription))
+                    for (uint essenceRank = 1; essenceRank <= rank; ++essenceRank)
                     {
-                        activateEssenceResult.Reason = AzeriteEssenceActivateResult.CantRemoveEssence;
-                        activateEssenceResult.Arg = azeriteEssencePower.MajorPowerDescription;
-                        activateEssenceResult.Slot = azeriteEssenceActivateEssence.Slot;
-                        SendPacket(activateEssenceResult);
-                        return;
+                        AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(selectedEssences.AzeriteEssenceID[0], essenceRank);
+                        if (_player.GetSpellHistory().HasCooldown(azeriteEssencePower.MajorPowerDescription))
+                        {
+                            activateEssenceResult.Reason = AzeriteEssenceActivateResult.CantRemoveEssence;
+                            activateEssenceResult.Arg = azeriteEssencePower.MajorPowerDescription;
+                            activateEssenceResult.Slot = azeriteEssenceActivateEssence.Slot;
+                            SendPacket(activateEssenceResult);
+                            return;
+                        }
                     }
                 }
-            }
 
-            if (removeEssenceFromSlot != -1)
-            {
-                _player.ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[removeEssenceFromSlot], SharedConst.MaxAzeriteEssenceRank,
-                    (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(removeEssenceFromSlot).Type == AzeriteItemMilestoneType.MajorEssence, false);
-                azeriteItem.SetSelectedAzeriteEssence(removeEssenceFromSlot, 0);
-            }
 
-            if (selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] != 0)
-            {
-                _player.ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot], SharedConst.MaxAzeriteEssenceRank,
-                    (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(azeriteEssenceActivateEssence.Slot).Type == AzeriteItemMilestoneType.MajorEssence, false);
+                if (removeEssenceFromSlot != -1)
+                {
+                    _player.ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[removeEssenceFromSlot], SharedConst.MaxAzeriteEssenceRank,
+                        (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(removeEssenceFromSlot).Type == AzeriteItemMilestoneType.MajorEssence, false);
+                    azeriteItem.SetSelectedAzeriteEssence(removeEssenceFromSlot, 0);
+                }
+
+                if (selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] != 0)
+                {
+                    _player.ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot], SharedConst.MaxAzeriteEssenceRank,
+                        (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(azeriteEssenceActivateEssence.Slot).Type == AzeriteItemMilestoneType.MajorEssence, false);
+                }
             }
+            else
+                azeriteItem.CreateSelectedAzeriteEssences(_player.GetPrimarySpecialization());
+
+            azeriteItem.SetSelectedAzeriteEssence(azeriteEssenceActivateEssence.Slot, azeriteEssenceActivateEssence.AzeriteEssenceID);
 
             _player.ApplyAzeriteEssence(azeriteItem, azeriteEssenceActivateEssence.AzeriteEssenceID, rank,
                 (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(azeriteEssenceActivateEssence.Slot).Type == AzeriteItemMilestoneType.MajorEssence, true);
 
-            azeriteItem.SetSelectedAzeriteEssence(azeriteEssenceActivateEssence.Slot, azeriteEssenceActivateEssence.AzeriteEssenceID);
             azeriteItem.SetState(ItemUpdateState.Changed, _player);
         }
     }

@@ -1234,20 +1234,29 @@ namespace Game.Entities
 
         public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo)
         {
-            var swaps = GetAuraEffectsByType(AuraType.OverrideActionbarSpells);
-            var swaps2 = GetAuraEffectsByType(AuraType.OverrideActionbarSpellsTriggered);
-            if (!swaps2.Empty())
-                swaps.AddRange(swaps2);
-
-            foreach (AuraEffect auraEffect in swaps)
+            SpellInfo findMatchingAuraEffectIn(AuraType type)
             {
-                if (auraEffect.GetMiscValue() == spellInfo.Id || auraEffect.IsAffectingSpell(spellInfo))
+                foreach (AuraEffect auraEffect in GetAuraEffectsByType(type))
                 {
-                    SpellInfo newInfo = Global.SpellMgr.GetSpellInfo((uint)auraEffect.GetAmount());
-                    if (newInfo != null)
-                        return newInfo;
+                    bool matches = auraEffect.GetMiscValue() != 0 ? auraEffect.GetMiscValue() == spellInfo.Id : auraEffect.IsAffectingSpell(spellInfo);
+                    if (matches)
+                    {
+                        SpellInfo info = Global.SpellMgr.GetSpellInfo((uint)auraEffect.GetAmount());
+                        if (info != null)
+                            return info;
+                    }
                 }
+
+                return null;
             }
+
+            SpellInfo newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpells);
+            if (newInfo != null)
+                return newInfo;
+
+            newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered);
+            if (newInfo != null)
+                return newInfo;
 
             return spellInfo;
         }

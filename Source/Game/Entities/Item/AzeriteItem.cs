@@ -167,14 +167,14 @@ namespace Game.Entities
                     selectedEssences.ModifyValue(selectedEssences.AzeriteEssenceID, i) = selectedEssenceData.AzeriteEssenceId[i];
                 }
 
-                if (owner.GetPrimarySpecialization() == selectedEssenceData.SpecializationId)
+                if (owner != null && owner.GetPrimarySpecialization() == selectedEssenceData.SpecializationId)
                     selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(1);
 
                 AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
             }
 
             // add selected essences for current spec
-            if (GetSelectedAzeriteEssences() == null)
+            if (owner != null && GetSelectedAzeriteEssences() == null)
                 CreateSelectedAzeriteEssences(owner.GetPrimarySpecialization());
 
             if (needSave)
@@ -372,6 +372,14 @@ namespace Game.Entities
             return null;
         }
 
+        public void CreateSelectedAzeriteEssences(uint specializationId)
+        {
+            SelectedAzeriteEssences selectedEssences = new SelectedAzeriteEssences();
+            selectedEssences.ModifyValue(selectedEssences.SpecializationID).SetValue(specializationId);
+            selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(1);
+            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
+        }
+
         public void SetSelectedAzeriteEssences(uint specializationId)
         {
             int index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled == 1; });
@@ -486,14 +494,6 @@ namespace Game.Entities
                 else
                     hasPreviousMilestone = false;
             }
-        }
-
-        void CreateSelectedAzeriteEssences(uint specializationId)
-        {
-            var selectedEssences = new SelectedAzeriteEssences();
-            selectedEssences.ModifyValue(selectedEssences.SpecializationID).SetValue(specializationId);
-            selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(1);
-            AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
         }
     }
 
