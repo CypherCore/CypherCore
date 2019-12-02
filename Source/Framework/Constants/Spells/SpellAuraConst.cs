@@ -306,7 +306,7 @@ namespace Framework.Constants
         ModBaseHealthPct = 282,
         ModHealingReceived = 283,  // Possibly Only For Some Spell Family Class Spells
         Linked = 284,
-        ModAttackPowerOfArmor = 285,
+        Linked2 = 285,
         AbilityPeriodicCrit = 286,
         DeflectSpells = 287,
         IgnoreHitDirection = 288,
@@ -346,7 +346,7 @@ namespace Framework.Constants
         InterfereTargetting = 322,
         Unk323 = 323,  // Not Used In 4.3.4
         Unk324 = 324,  // Spell Critical Chance (Probably By School Mask)
-        Unk325 = 325,  // Not Used In 4.3.4
+        LearnPvpTalent = 325,  // NYI
         PhaseGroup = 326,  // Phase Related
         Unk327 = 327,  // Not Used In 4.3.4
         TriggerSpellOnPowerPct = 328,

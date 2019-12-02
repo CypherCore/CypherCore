@@ -1107,15 +1107,6 @@ namespace Game.Entities
             float attPowerMod = GetModifierValue(unitMod, UnitModifierType.TotalValue);
             float attPowerMultiplier = GetModifierValue(unitMod, UnitModifierType.TotalPCT) - 1.0f;
 
-            //add dynamic flat mods
-            if (!ranged)
-            {
-                var mAPbyArmor = GetAuraEffectsByType(AuraType.ModAttackPowerOfArmor);
-                foreach (var iter in mAPbyArmor)
-                    // always: ((*i).GetModifier().m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
-                    attPowerMod += (int)(GetArmor() / iter.GetAmount());
-            }
-
             if (ranged)
             {
                 SetRangedAttackPower((int)base_attPower);

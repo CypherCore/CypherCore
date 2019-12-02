@@ -3907,19 +3907,6 @@ namespace Game.Spells
             target.HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalPCT, GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.ModAttackPowerOfArmor)]
-        void HandleAuraModAttackPowerOfArmor(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            // Recalculate bonus
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().UpdateAttackPowerAndDamage(false);
-        }
-
         /********************************/
         /***        DAMAGE BONUS      ***/
         /********************************/
