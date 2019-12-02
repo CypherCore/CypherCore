@@ -5760,7 +5760,7 @@ namespace Game.Spells
             if (!playerTarget)
                 return;
 
-            Item heartOfAzeroth = playerTarget.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+            Item heartOfAzeroth = playerTarget.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (heartOfAzeroth == null)
                 return;
 

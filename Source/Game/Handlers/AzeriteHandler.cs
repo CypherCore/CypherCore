@@ -32,7 +32,7 @@ namespace Game
             if (!AzeriteItem.FindHeartForge(_player))
                 return;
 
-            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (!item)
                 return;
 
@@ -65,8 +65,8 @@ namespace Game
             AzeriteEssenceSelectionResult activateEssenceResult = new AzeriteEssenceSelectionResult();
             activateEssenceResult.AzeriteEssenceID = azeriteEssenceActivateEssence.AzeriteEssenceID;
 
-            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
-            if (!item || !item.IsEquipped())
+            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment);
+            if (item == null)
             {
                 activateEssenceResult.Reason = AzeriteEssenceActivateResult.NotEquipped;
                 activateEssenceResult.Slot = azeriteEssenceActivateEssence.Slot;

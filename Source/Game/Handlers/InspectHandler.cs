@@ -67,7 +67,7 @@ namespace Game
                 inspectResult.GuildData.Set(guildData);
             }
 
-            Item heartOfAzeroth = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+            Item heartOfAzeroth = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (heartOfAzeroth != null)
             {
                 AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();

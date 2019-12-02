@@ -1248,7 +1248,7 @@ namespace Game.Entities
             {
                 if (count > 0)
                 {
-                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                    Item heartOfAzeroth = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                     if (heartOfAzeroth != null)
                         heartOfAzeroth.ToAzeriteItem().GiveXP((ulong)count);
                 }

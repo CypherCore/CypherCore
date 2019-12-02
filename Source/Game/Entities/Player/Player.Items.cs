@@ -2858,47 +2858,89 @@ namespace Game.Entities
 
             return null;
         }
-        public Item GetItemByEntry(uint entry)
+        public Item GetItemByEntry(uint entry, ItemSearchLocation where = ItemSearchLocation.Default)
         {
-            // in inventory
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
+            if (where.HasAnyFlag(ItemSearchLocation.InEquipment))
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                    if (pItem.GetEntry() == entry)
-                        return pItem;
+                for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; ++i)
+                {
+                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                    if (pItem != null)
+                        if (pItem.GetEntry() == entry)
+                            return pItem;
+                }
             }
 
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+            if (where.HasAnyFlag(ItemSearchLocation.InInventory))
             {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                    for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                    {
-                        Item pItem = pBag.GetItemByPos(j);
-                        if (pItem != null)
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
+                {
+                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                    if (pItem != null)
+                        if (pItem.GetEntry() == entry)
+                            return pItem;
+                }
+
+                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+                {
+                    Bag pBag = GetBagByPos(i);
+                    if (pBag != null)
+                        for (byte j = 0; j < pBag.GetBagSize(); ++j)
                         {
-                            if (pItem.GetEntry() == entry)
-                                return pItem;
+                            Item pItem = pBag.GetItemByPos(j);
+                            if (pItem != null)
+                            {
+                                if (pItem.GetEntry() == entry)
+                                    return pItem;
+                            }
+                        }
+                }
+
+                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                {
+                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                    if (pItem)
+                        if (pItem.GetEntry() == entry)
+                            return pItem;
+                }
+            }
+
+            if (where.HasAnyFlag(ItemSearchLocation.InBank))
+            {
+                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
+                {
+                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                    if (pItem != null)
+                        if (pItem.GetEntry() == entry)
+                            return pItem;
+                }
+
+                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
+                {
+                    Bag pBag = GetBagByPos(i);
+                    if (pBag != null)
+                    {
+                        for (byte j = 0; j < pBag.GetBagSize(); ++j)
+                        {
+                            Item pItem = pBag.GetItemByPos(j);
+                            if (pItem != null)
+                                if (pItem.GetEntry() == entry)
+                                    return pItem;
                         }
                     }
+                }
             }
 
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; ++i)
+            if (where.HasAnyFlag(ItemSearchLocation.InReagentBank))
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                    if (pItem.GetEntry() == entry)
-                        return pItem;
-            }
-
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetEntry() == entry)
-                        return pItem;
+                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                {
+                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                    if (pItem != null)
+                        if (pItem.GetEntry() == entry)
+                            return pItem;
+                }
             }
 
             return null;

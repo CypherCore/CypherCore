@@ -2293,7 +2293,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.AzeriteItemLevel: // 235
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
                             return false;
                         break;
@@ -2346,7 +2346,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankLower: // 259
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
@@ -2361,7 +2361,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankEqual: // 260
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
@@ -2376,7 +2376,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankGreater: // 261
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
@@ -2406,7 +2406,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankLower: // 266
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
@@ -2425,7 +2425,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankGreater: // 267
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
                             AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();

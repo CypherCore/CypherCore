@@ -1912,7 +1912,7 @@ namespace Game.Entities
                                 }
                             case 2: // Heart Forge
                                 {
-                                    Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+                                    Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                                     if (!item)
                                         return;
 

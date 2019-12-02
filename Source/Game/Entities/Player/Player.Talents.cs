@@ -422,7 +422,7 @@ namespace Game.Entities
             activeGlyphs.IsFullUpdate = true;
             SendPacket(activeGlyphs);
 
-            Item item = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth);
+            Item item = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (item != null)
             {
                 AzeriteItem azeriteItem = item.ToAzeriteItem();

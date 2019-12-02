@@ -740,10 +740,21 @@ namespace Framework.Constants
         FailedRestArea = 8
     }
 
-    public enum TutorialsFlag 
+    public enum TutorialsFlag
     {
         None = 0x00,
         Changed = 0x01,
         LoadedFromDB = 0x02
+    }
+
+    public enum ItemSearchLocation
+    {
+        InEquipment = 0x01,
+        InInventory = 0x02,
+        InBank = 0x04,
+        InReagentBank = 0x08,
+
+        Default = InEquipment | InInventory,
+        Everywhere = InEquipment | InInventory | InBank | InReagentBank
     }
 }
