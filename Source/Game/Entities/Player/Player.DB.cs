@@ -487,7 +487,8 @@ namespace Game.Entities
                     int maxDuration = auraResult.Read<int>(6);
                     int remainTime = auraResult.Read<int>(7);
                     byte remainCharges = auraResult.Read<byte>(8);
-                    int castItemLevel = auraResult.Read<int>(9);
+                    uint castItemId = auraResult.Read<uint>(9);
+                    int castItemLevel = auraResult.Read<int>(10);
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId);
                     if (spellInfo == null)
@@ -518,7 +519,7 @@ namespace Game.Entities
 
                     AuraLoadEffectInfo info = effectInfo[key];
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, info.BaseAmounts, null, casterGuid, itemGuid, castItemLevel);
+                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, info.BaseAmounts, null, casterGuid, itemGuid, castItemId, castItemLevel);
                     if (aura != null)
                     {
                         if (!aura.CanBeSaved())
@@ -1694,6 +1695,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, aura.GetMaxDuration());
                 stmt.AddValue(index++, aura.GetDuration());
                 stmt.AddValue(index++, aura.GetCharges());
+                stmt.AddValue(index++, aura.GetCastItemId());
                 stmt.AddValue(index, aura.GetCastItemLevel());
                 trans.Append(stmt);
 

@@ -90,7 +90,7 @@ namespace Game.DataStorage
         public float Unused12;
     }
 
-    public sealed class GtCombatRatingsMultByILvlRecord
+    public sealed class GtGenericMultByILvlRecord
     {
         public float ArmorMultiplier;
         public float WeaponMultiplier;

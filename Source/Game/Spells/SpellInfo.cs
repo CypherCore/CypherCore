@@ -3905,18 +3905,18 @@ namespace Game.Spells
             return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura;
         }
 
-        public int CalcValue(Unit caster = null, int? bp = null, Unit target = null, int itemLevel = -1)
+        public int CalcValue(Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             float throwAway;
-            return CalcValue(out throwAway, caster, bp, target, itemLevel);
+            return CalcValue(out throwAway, caster, bp, target, castItemId, itemLevel);
         }
 
-        public int CalcValue(out float variance, Unit caster = null, int? bp = null, Unit target = null, int itemLevel = -1)
+        public int CalcValue(out float variance, Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
             float basePointsPerLevel = RealPointsPerLevel;
             // TODO: this needs to be a float, not rounded
-            int basePoints = CalcBaseValue(caster, target, itemLevel);
+            int basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
             float value = bp.HasValue ? bp.Value : BasePoints;
             float comboDamage = PointsPerResource;
 
@@ -3964,7 +3964,7 @@ namespace Game.Spells
             return (int)Math.Round(value);
         }
 
-        public int CalcBaseValue(Unit caster, Unit target, int itemLevel)
+        public int CalcBaseValue(Unit caster, Unit target, uint itemId, int itemLevel)
         {
             if (Scaling.Coefficient != 0.0f)
             {
@@ -4011,10 +4011,34 @@ namespace Game.Spells
 
                     if (_spellInfo.Scaling._Class == -7)
                     {
-                        // todo: get inventorytype here
-                        GtCombatRatingsMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
+                        GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
                         if (ratingMult != null)
-                            tempValue *= ratingMult.ArmorMultiplier;
+                        {
+                            ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
+                            if (itemSparse != null)
+                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.inventoryType);
+                        }
+                    }
+
+                    if (IsAura(AuraType.ModRating))
+                    {
+                        GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
+                        if (ratingMult != null)
+                        {
+                            ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
+                            if (itemSparse != null)
+                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.inventoryType);
+                        }
+                        else if (IsAura(AuraType.ModStat) && MiscValue == (int)Stats.Stamina)
+                        {
+                            GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(effectiveItemLevel);
+                            if (staminaMult != null)
+                            {
+                                ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
+                                if (itemSparse != null)
+                                    tempValue *= CliDB.GetIlvlStatMultiplier(staminaMult, itemSparse.inventoryType);
+                            }
+                        }
                     }
                 }
 
@@ -4172,6 +4196,7 @@ namespace Game.Spells
                 case SpellEffectName.ApplyAreaAuraOwner:
                 case SpellEffectName.ApllyAuraOnPet:
                 case SpellEffectName.Unk202:
+                case SpellEffectName.ApplyAreaAuraPartyNonrandom:
                     switch (ApplyAuraName)
                     {
                         case AuraType.PeriodicDamage:

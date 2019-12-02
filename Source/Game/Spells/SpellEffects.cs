@@ -1223,7 +1223,7 @@ namespace Game.Spells
                 if (!dynObj.CreateDynamicObject(caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), caster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
                     return;
 
-                Aura aura = Aura.TryCreate(m_spellInfo, m_castId, SpellConst.MaxEffectMask, dynObj, caster, m_spellValue.EffectBasePoints, null, ObjectGuid.Empty, ObjectGuid.Empty, m_castItemLevel);
+                Aura aura = Aura.TryCreate(m_spellInfo, m_castId, SpellConst.MaxEffectMask, dynObj, caster, m_spellValue.EffectBasePoints, null, ObjectGuid.Empty, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
                 if (aura != null)
                 {
                     m_spellAura = aura;

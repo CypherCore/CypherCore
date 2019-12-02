@@ -4002,33 +4002,9 @@ namespace Game.Entities
 
             uint itemLevel = item.GetItemLevel(this);
             float combatRatingMultiplier = 1.0f;
-            GtCombatRatingsMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(itemLevel);
+            GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(itemLevel);
             if (ratingMult != null)
-            {
-                switch (proto.GetInventoryType())
-                {
-                    case InventoryType.Weapon:
-                    case InventoryType.Shield:
-                    case InventoryType.Ranged:
-                    case InventoryType.Weapon2Hand:
-                    case InventoryType.WeaponMainhand:
-                    case InventoryType.WeaponOffhand:
-                    case InventoryType.Holdable:
-                    case InventoryType.RangedRight:
-                        combatRatingMultiplier = ratingMult.WeaponMultiplier;
-                        break;
-                    case InventoryType.Trinket:
-                        combatRatingMultiplier = ratingMult.TrinketMultiplier;
-                        break;
-                    case InventoryType.Neck:
-                    case InventoryType.Finger:
-                        combatRatingMultiplier = ratingMult.JewelryMultiplier;
-                        break;
-                    default:
-                        combatRatingMultiplier = ratingMult.ArmorMultiplier;
-                        break;
-                }
-            }
+                combatRatingMultiplier = CliDB.GetIlvlStatMultiplier(ratingMult, proto.GetInventoryType());
 
             // req. check at equip, but allow use for extended range if range limit max level, set proper level
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
@@ -4066,6 +4042,10 @@ namespace Game.Entities
                         //ApplyStatBuffMod(Stats.Spirit, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatSpirit, UnitModifierType.BasePCTExcludeCreate)), apply);
                         //break;
                     case ItemModType.Stamina:                          //modify stamina
+                        GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(itemLevel);
+                        if (staminaMult != null)
+                            val = (int)(val * CliDB.GetIlvlStatMultiplier(staminaMult, proto.GetInventoryType()));
+
                         HandleStatModifier(UnitMods.StatStamina, UnitModifierType.BaseValue, (float)val, apply);
                         ApplyStatBuffMod(Stats.Stamina, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStamina, UnitModifierType.BasePCTExcludeCreate)), apply);
                         break;

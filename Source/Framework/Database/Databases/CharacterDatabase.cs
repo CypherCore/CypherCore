@@ -83,7 +83,7 @@ namespace Framework.Database
 
             PrepareStatement(CharStatements.SEL_GROUP_MEMBER, "SELECT guid FROM group_member WHERE memberGuid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_INSTANCE, "SELECT id, permanent, map, difficulty, extendState, resettime, entranceId FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_AURAS, "SELECT casterGuid, itemGuid, spell, effectMask, recalculateMask, stackCount, maxDuration, remainTime, remainCharges, castItemLevel FROM character_aura WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_AURAS, "SELECT casterGuid, itemGuid, spell, effectMask, recalculateMask, stackCount, maxDuration, remainTime, remainCharges, castItemId, castItemLevel FROM character_aura WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_AURA_EFFECTS, "SELECT casterGuid, itemGuid, spell, effectMask, effectIndex, amount, baseAmount FROM character_aura_effect WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SPELL, "SELECT spell, active, disabled FROM character_spell WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS, "SELECT quest, status, timer FROM character_queststatus WHERE guid = ? AND status <> 0");
@@ -322,8 +322,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_TRANSMOG_OUTFIT, "DELETE FROM character_transmog_outfits WHERE setguid=?");
 
             // Auras
-            PrepareStatement(CharStatements.INS_AURA, "INSERT INTO character_aura (guid, casterGuid, itemGuid, spell, effectMask, recalculateMask, stackCount, maxDuration, remainTime, remainCharges, castItemLevel) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_AURA, "INSERT INTO character_aura (guid, casterGuid, itemGuid, spell, effectMask, recalculateMask, stackCount, maxDuration, remainTime, remainCharges, castItemId, castItemLevel) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_AURA_EFFECT, "INSERT INTO character_aura_effect (guid, casterGuid, itemGuid, spell, effectMask, effectIndex, amount, baseAmount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 

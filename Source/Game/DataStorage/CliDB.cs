@@ -359,7 +359,7 @@ namespace Game.DataStorage
             BarberShopCostBaseGameTable = GameTableReader.Read<GtBarberShopCostBaseRecord>("BarberShopCostBase.txt");
             BaseMPGameTable = GameTableReader.Read<GtBaseMPRecord>("BaseMp.txt");
             CombatRatingsGameTable = GameTableReader.Read<GtCombatRatingsRecord>("CombatRatings.txt");
-            CombatRatingsMultByILvlGameTable = GameTableReader.Read<GtCombatRatingsMultByILvlRecord>("CombatRatingsMultByILvl.txt");
+            CombatRatingsMultByILvlGameTable = GameTableReader.Read<GtGenericMultByILvlRecord>("CombatRatingsMultByILvl.txt");
             ItemSocketCostPerLevelGameTable = GameTableReader.Read<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             HpPerStaGameTable = GameTableReader.Read<GtHpPerStaRecord>("HpPerSta.txt");
             NpcDamageByClassGameTable[0] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClass.txt");
@@ -380,6 +380,7 @@ namespace Game.DataStorage
             NpcTotalHpGameTable[6] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp6.txt");
             NpcTotalHpGameTable[7] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp7.txt");
             SpellScalingGameTable = GameTableReader.Read<GtSpellScalingRecord>("SpellScaling.txt");
+            StaminaMultByILvlGameTable = GameTableReader.Read<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
             XpGameTable = GameTableReader.Read<GtXpRecord>("xp.txt");
 
             Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DBC GameTables data stores in {1} ms", LoadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -641,13 +642,14 @@ namespace Game.DataStorage
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
         public static GameTable<GtBaseMPRecord> BaseMPGameTable;
         public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
-        public static GameTable<GtCombatRatingsMultByILvlRecord> CombatRatingsMultByILvlGameTable;
+        public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
         public static GameTable<GtNpcDamageByClassRecord>[] NpcDamageByClassGameTable = new GameTable<GtNpcDamageByClassRecord>[(int)Expansion.Max];
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
         public static GameTable<GtNpcTotalHpRecord>[] NpcTotalHpGameTable = new GameTable<GtNpcTotalHpRecord>[(int)Expansion.Max];
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
+        public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;
         #endregion
 
@@ -746,6 +748,29 @@ namespace Game.DataStorage
             }
 
             return 0.0f;
+        }
+
+        public static float GetIlvlStatMultiplier(GtGenericMultByILvlRecord row, InventoryType invType)
+        {
+            switch (invType)
+            {
+                case InventoryType.Neck:
+                case InventoryType.Finger:
+                    return row.JewelryMultiplier;
+                case InventoryType.Trinket:
+                    return row.TrinketMultiplier;
+                case InventoryType.Weapon:
+                case InventoryType.Shield:
+                case InventoryType.Ranged:
+                case InventoryType.Weapon2Hand:
+                case InventoryType.WeaponMainhand:
+                case InventoryType.WeaponOffhand:
+                case InventoryType.Holdable:
+                case InventoryType.RangedRight:
+                    return row.WeaponMultiplier;
+                default:
+                    return row.ArmorMultiplier;
+            }
         }
         #endregion
     }
