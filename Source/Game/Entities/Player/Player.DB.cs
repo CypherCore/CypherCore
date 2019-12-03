@@ -325,6 +325,7 @@ namespace Game.Entities
                     GetGUID().ToString(), GetName(), itemEntry);
                 Item.DeleteFromInventoryDB(trans, itemGuid);
                 Item.DeleteFromDB(trans, itemGuid);
+                AzeriteItem.DeleteFromDB(trans, itemGuid);
             }
             return item;
         }
@@ -1204,40 +1205,42 @@ namespace Game.Entities
                 do
                 {
                     uint mailId = result.Read<uint>(44);
-                    _LoadMailedItem(mailById[mailId], result.GetFields(), additionalData.LookupByKey(result.Read<ulong>(0)));
+                    _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], result.GetFields(), additionalData.LookupByKey(result.Read<ulong>(0)));
                 }
                 while (result.NextRow());
             }
 
             m_mailsLoaded = true;
         }
-        void _LoadMailedItem(Mail mail, SQLFields fields, ItemAdditionalLoadInfo additionalLoadInfo)
+
+        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
         {
             ulong itemGuid = fields.Read<ulong>(0);
             uint itemEntry = fields.Read<uint>(1);
 
-            mail.AddItem(itemGuid, itemEntry);
-
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (proto == null)
             {
-                Log.outError(LogFilter.Player, "Player {0} has unknown item_template (ProtoType) in mailed items(GUID: {1} template: {2}) in mail ({3}), deleted.", GetGUID().ToString(), itemGuid, itemEntry, mail.messageID);
+                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid.ToString()}) has unknown item_template (ProtoType) in mailed items(GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
+
+                SQLTransaction trans = new SQLTransaction();
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_MAIL_ITEM);
                 stmt.AddValue(0, itemGuid);
-                DB.Characters.Execute(stmt);
+                trans.Append(stmt);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                stmt.AddValue(0, itemGuid);
-                DB.Characters.Execute(stmt);
-                return;
+                Item.DeleteFromDB(trans, itemGuid);
+                AzeriteItem.DeleteFromDB(trans, itemGuid);
+
+                DB.Characters.CommitTransaction(trans);
+                return null;
             }
 
             Item item = Bag.NewItemOrBag(proto);
             ObjectGuid ownerGuid = fields.Read<ulong>(43) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(43)) : ObjectGuid.Empty;
             if (!item.LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
             {
-                Log.outError(LogFilter.Player, "Player:_LoadMailedItem - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
+                Log.outError(LogFilter.Player, $"Player._LoadMailedItems: Item (GUID: {itemGuid}) in mail ({mailId}) doesn't exist, deleted from mail.");
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM);
                 stmt.AddValue(0, itemGuid);
@@ -1246,24 +1249,30 @@ namespace Game.Entities
                 item.FSetState(ItemUpdateState.Removed);
 
                 item.SaveToDB(null);                               // it also deletes item object !
-                return;
+                return null;
             }
 
-            if (additionalLoadInfo != null)
+            if (addionalData != null)
             {
-                if (item.GetTemplate().GetArtifactID() != 0 && additionalLoadInfo.Artifact != null)
-                    item.LoadArtifactData(this, additionalLoadInfo.Artifact.Xp, additionalLoadInfo.Artifact.ArtifactAppearanceId,
-                        additionalLoadInfo.Artifact.ArtifactTierId, additionalLoadInfo.Artifact.ArtifactPowers);
+                if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
+                    item.LoadArtifactData(player, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId,
+                        addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
 
-                if (additionalLoadInfo.AzeriteItem != null)
+                if (addionalData.AzeriteItem != null)
                 {
                     AzeriteItem azeriteItem = item.ToAzeriteItem();
                     if (azeriteItem != null)
-                        azeriteItem.LoadAzeriteItemData(this, additionalLoadInfo.AzeriteItem);
+                        azeriteItem.LoadAzeriteItemData(player, addionalData.AzeriteItem);
                 }
             }
 
-            AddMItem(item);
+            if (mail != null)
+                mail.AddItem(itemGuid, itemEntry);
+
+            if (player != null)
+                player.AddMItem(item);
+
+            return item;
         }
         void _LoadDeclinedNames(SQLResult result)
         {
@@ -1479,13 +1488,8 @@ namespace Game.Entities
                 if (item == null || item.GetState() == ItemUpdateState.New)
                     continue;
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY_BY_ITEM);
-                stmt.AddValue(0, item.GetGUID().GetCounter());
-                trans.Append(stmt);
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                stmt.AddValue(0, item.GetGUID().GetCounter());
-                trans.Append(stmt);
+                item.DeleteFromInventoryDB(trans);
+                item.DeleteFromDB(trans);
                 m_items[i].FSetState(ItemUpdateState.New);
             }
 
@@ -2073,11 +2077,10 @@ namespace Game.Entities
                 {
                     if (m.HasItems())
                     {
-                        foreach (var id in m.items)
+                        foreach (var mailItemInfo in m.items)
                         {
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                            stmt.AddValue(0, id.item_guid);
-                            trans.Append(stmt);
+                            Item.DeleteFromDB(trans, mailItemInfo.item_guid);
+                            AzeriteItem.DeleteFromDB(trans, mailItemInfo.item_guid);
                         }
                     }
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
@@ -3636,6 +3639,43 @@ namespace Game.Entities
                         SQLResult resultMail = DB.Characters.Query(stmt);
                         if (!resultMail.IsEmpty())
                         {
+                            MultiMap<uint, Item> itemsByMail = new MultiMap<uint, Item>();
+
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
+                            stmt.AddValue(0, guid);
+                            SQLResult resultItems = DB.Characters.Query(stmt);
+
+                            if (!resultItems.IsEmpty())
+                            {
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
+                                stmt.AddValue(0, guid);
+                                SQLResult artifactResult = DB.Characters.Query(stmt);
+
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
+                                stmt.AddValue(0, guid);
+                                SQLResult azeriteResult = DB.Characters.Query(stmt);
+
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
+                                stmt.AddValue(0, guid);
+                                SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
+
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
+                                stmt.AddValue(0, guid);
+                                SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
+
+                                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+                                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult);
+
+                                do
+                                {
+                                    uint mailId = resultItems.Read<uint>(44);
+                                    Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
+                                    if (mailItem != null)
+                                        itemsByMail.Add(mailId, mailItem);
+
+                                } while (resultItems.NextRow());
+                            }
+
                             do
                             {
                                 uint mail_id = resultMail.Read<uint>(0);
@@ -3669,40 +3709,13 @@ namespace Game.Entities
                                 if (mailTemplateId != 0)
                                     draft = new MailDraft(mailTemplateId, false);    // items are already included
 
-                                if (has_items)
+                                var itemsList = itemsByMail.LookupByKey(mail_id);
+                                if (itemsList != null)
                                 {
-                                    // Data needs to be at first place for Item.LoadFromDB
-                                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
-                                    stmt.AddValue(0, mail_id);
-                                    SQLResult resultItems = DB.Characters.Query(stmt);
-                                    if (!resultItems.IsEmpty())
-                                    {
-                                        do
-                                        {
-                                            ulong itemGuidLow = resultItems.Read<ulong>(0);
-                                            uint itemEntry = resultItems.Read<uint>(1);
+                                    foreach (Item item in itemsList)
+                                        draft.AddItem(item);
 
-                                            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(itemEntry);
-                                            if (itemProto == null)
-                                            {
-                                                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                                                stmt.AddValue(0, itemGuidLow);
-                                                trans.Append(stmt);
-                                                continue;
-                                            }
-
-                                            Item item = Bag.NewItemOrBag(itemProto);
-                                            if (!item.LoadFromDB(itemGuidLow, ObjectGuid.Create(HighGuid.Player, guid), resultItems.GetFields(), itemEntry))
-                                            {
-                                                item.FSetState(ItemUpdateState.Removed);
-                                                item.SaveToDB(trans);              // it also deletes item object!
-                                                continue;
-                                            }
-
-                                            draft.AddItem(item);
-                                        }
-                                        while (resultItems.NextRow());
-                                    }
+                                    itemsByMail.Remove(mail_id);
                                 }
 
                                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
@@ -3714,6 +3727,10 @@ namespace Game.Entities
                                 draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
                             }
                             while (resultMail.NextRow());
+
+                            // Free remaining items
+                            foreach (var pair in itemsByMail)
+                                pair.Value.Dispose();
                         }
 
                         // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.

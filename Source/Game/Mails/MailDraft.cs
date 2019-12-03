@@ -82,11 +82,7 @@ namespace Game.Mails
             foreach (var item in m_items.Values)
             {
                 if (inDB)
-                {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
-                    stmt.AddValue(0, item.GetGUID().GetCounter());
-                    trans.Append(stmt);
-                }
+                    item.DeleteFromDB(trans);
             }
 
             m_items.Clear();

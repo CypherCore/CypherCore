@@ -617,7 +617,31 @@ namespace Game.Entities
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE);
             stmt.AddValue(0, itemGuid);
-            trans.Append(stmt);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
         public virtual void DeleteFromDB(SQLTransaction trans)

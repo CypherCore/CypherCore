@@ -189,19 +189,23 @@ namespace Game.Entities
 
         public override void DeleteFromDB(SQLTransaction trans)
         {
+            DeleteFromDB(trans, GetGUID().GetCounter());
+            base.DeleteFromDB(trans);
+        }
+
+        public new static void DeleteFromDB(SQLTransaction trans, ulong itemGuid)
+        {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
-
-            base.DeleteFromDB(trans);
+            stmt.AddValue(0, itemGuid);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
         public uint GetLevel() { return m_azeriteItemData.Level; }
