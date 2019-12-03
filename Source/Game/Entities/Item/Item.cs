@@ -2606,7 +2606,7 @@ namespace Game.Entities
 
         public bool IsLocked() { return !HasItemFlag(ItemFieldFlags.Unlocked); }
         public bool IsBag() { return GetTemplate().GetInventoryType() == InventoryType.Bag; }
-        bool IsAzeriteItem() { return GetTypeId() == TypeId.AzeriteItem; }
+        public bool IsAzeriteItem() { return GetTypeId() == TypeId.AzeriteItem; }
         public bool IsCurrencyToken() { return GetTemplate().IsCurrencyToken(); }
         public bool IsBroken() { return m_itemData.MaxDurability > 0 && m_itemData.Durability == 0; }
         public void SetDurability(uint durability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Durability), durability); }

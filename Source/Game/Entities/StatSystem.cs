@@ -1184,6 +1184,7 @@ namespace Game.Entities
 
             _ApplyAllAuraStatMods();
             _ApplyAllItemMods();
+            ApplyAllAzeriteItemMods(true);
 
             SetCanModifyStats(true);
 
@@ -1193,6 +1194,7 @@ namespace Game.Entities
         {
             SetCanModifyStats(false);
 
+            ApplyAllAzeriteItemMods(false);
             _RemoveAllItemMods();
             _RemoveAllAuraStatMods();
 

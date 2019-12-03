@@ -195,6 +195,8 @@ namespace Game.Entities
             }
 
             _ApplyAllItemMods();
+            // Apply all azerite item mods, azerite empowered item mods will get applied through its spell script
+            ApplyAllAzeriteItemMods(true);
         }
         Item _LoadItem(SQLTransaction trans, uint zoneId, uint timeDiff, SQLFields fields)
         {

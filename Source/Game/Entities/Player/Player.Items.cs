@@ -4388,7 +4388,6 @@ namespace Game.Entities
 
                     ApplyItemEquipSpell(m_items[i], false);
                     ApplyEnchantment(m_items[i], false);
-                    ApplyAzeritePowers(m_items[i], false);
                     ApplyArtifactPowers(m_items[i], false);
                 }
             }
@@ -4441,7 +4440,6 @@ namespace Game.Entities
 
                     ApplyItemEquipSpell(m_items[i], true);
                     ApplyArtifactPowers(m_items[i], true);
-                    ApplyAzeritePowers(m_items[i], true);
                     ApplyEnchantment(m_items[i], true);
                 }
             }
@@ -4459,6 +4457,20 @@ namespace Game.Entities
                         continue;
 
                     _ApplyItemMods(m_items[i], i, apply);
+                }
+            }
+        }
+
+        void ApplyAllAzeriteItemMods(bool apply)
+        {
+            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+            {
+                if (m_items[i])
+                {
+                    if (!m_items[i].IsAzeriteItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                        continue;
+
+                    ApplyAzeritePowers(m_items[i], apply);
                 }
             }
         }
@@ -5496,7 +5508,7 @@ namespace Game.Entities
             {
                 // milestone powers
                 foreach (uint azeriteItemMilestonePowerId in azeriteItem.m_azeriteItemData.UnlockedEssenceMilestones)
-                    ApplyAzeriteItemMilestonePower(item, CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteItemMilestonePowerId), apply);
+                    ApplyAzeriteItemMilestonePower(azeriteItem, CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteItemMilestonePowerId), apply);
 
                 // essences
                 SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
@@ -5504,13 +5516,13 @@ namespace Game.Entities
                 {
                     for (byte slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
                         if (selectedEssences.AzeriteEssenceID[slot] != 0)
-                            ApplyAzeriteEssence(item, selectedEssences.AzeriteEssenceID[slot], azeriteItem.GetEssenceRank(selectedEssences.AzeriteEssenceID[slot]),
+                            ApplyAzeriteEssence(azeriteItem, selectedEssences.AzeriteEssenceID[slot], azeriteItem.GetEssenceRank(selectedEssences.AzeriteEssenceID[slot]),
                                 (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence, apply);
                 }
             }
         }
 
-        public void ApplyAzeriteItemMilestonePower(Item item, AzeriteItemMilestonePowerRecord azeriteItemMilestonePower, bool apply)
+        public void ApplyAzeriteItemMilestonePower(AzeriteItem item, AzeriteItemMilestonePowerRecord azeriteItemMilestonePower, bool apply)
         {
             AzeriteItemMilestoneType type = (AzeriteItemMilestoneType)azeriteItemMilestonePower.Type;
             if (type == AzeriteItemMilestoneType.BonusStamina)
@@ -5526,7 +5538,7 @@ namespace Game.Entities
             }
         }
 
-        public void ApplyAzeriteEssence(Item item, uint azeriteEssenceId, uint rank, bool major, bool apply)
+        public void ApplyAzeriteEssence(AzeriteItem item, uint azeriteEssenceId, uint rank, bool major, bool apply)
         {
             for (uint currentRank = 1; currentRank <= rank; ++currentRank)
             {
@@ -5545,7 +5557,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplyAzeriteEssencePower(Item item, AzeriteEssencePowerRecord azeriteEssencePower, bool major, bool apply)
+        void ApplyAzeriteEssencePower(AzeriteItem item, AzeriteEssencePowerRecord azeriteEssencePower, bool major, bool apply)
         {
             SpellInfo powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MinorPowerDescription);
             if (powerSpell != null)
