@@ -52,18 +52,24 @@ namespace Game.Entities
 
         public override void SaveToDB(SQLTransaction trans)
         {
-            base.SaveToDB(trans);
-
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
-                stmt.AddValue(1 + i, m_azeriteEmpoweredItemData.Selections[i]);
+            switch (GetState())
+            {
+                case ItemUpdateState.New:
+                case ItemUpdateState.Changed:
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+                        stmt.AddValue(1 + i, m_azeriteEmpoweredItemData.Selections[i]);
 
-            trans.Append(stmt);
+                    trans.Append(stmt);
+                    break;
+            }
+
+            base.SaveToDB(trans);
         }
 
         public void LoadAzeriteEmpoweredItemData(Player owner, AzeriteEmpoweredData azeriteEmpoweredItem)

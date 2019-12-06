@@ -53,57 +53,64 @@ namespace Game.Entities
 
         public override void SaveToDB(SQLTransaction trans)
         {
-            base.SaveToDB(trans);
-
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE);
             stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            stmt.AddValue(1, m_azeriteItemData.Xp);
-            stmt.AddValue(2, m_azeriteItemData.Level);
-            stmt.AddValue(3, m_azeriteItemData.KnowledgeLevel);
-
-            int specIndex = 0;
-            for (; specIndex < m_azeriteItemData.SelectedEssences.Size(); ++specIndex)
-            {
-                stmt.AddValue(4 + specIndex * 4, m_azeriteItemData.SelectedEssences[specIndex].SpecializationID);
-                for (var j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
-                    stmt.AddValue(5 + specIndex * 4 + j, m_azeriteItemData.SelectedEssences[specIndex].AzeriteEssenceID[j]);
-            }
-            for (; specIndex < PlayerConst.MaxSpecializations; ++specIndex)
-            {
-                stmt.AddValue(4 + specIndex * 4, 0);
-                for (var j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
-                    stmt.AddValue(5 + specIndex * 4 + j, 0);
-            }
             trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            foreach (uint azeriteItemMilestonePowerId in m_azeriteItemData.UnlockedEssenceMilestones)
-            {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, azeriteItemMilestonePowerId);
-                trans.Append(stmt);
-            }
-
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            foreach (UnlockedAzeriteEssence azeriteEssence in m_azeriteItemData.UnlockedEssences)
+            switch (GetState())
             {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
-                stmt.AddValue(0, GetGUID().GetCounter());
-                stmt.AddValue(1, azeriteEssence.AzeriteEssenceID);
-                stmt.AddValue(2, azeriteEssence.Rank);
-                trans.Append(stmt);
+                case ItemUpdateState.New:
+                case ItemUpdateState.Changed:
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, m_azeriteItemData.Xp);
+                    stmt.AddValue(2, m_azeriteItemData.Level);
+                    stmt.AddValue(3, m_azeriteItemData.KnowledgeLevel);
+
+                    int specIndex = 0;
+                    for (; specIndex < m_azeriteItemData.SelectedEssences.Size(); ++specIndex)
+                    {
+                        stmt.AddValue(4 + specIndex * 4, m_azeriteItemData.SelectedEssences[specIndex].SpecializationID);
+                        for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
+                            stmt.AddValue(5 + specIndex * 4 + j, m_azeriteItemData.SelectedEssences[specIndex].AzeriteEssenceID[j]);
+                    }
+                    for (; specIndex < PlayerConst.MaxSpecializations; ++specIndex)
+                    {
+                        stmt.AddValue(4 + specIndex * 4, 0);
+                        for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
+                            stmt.AddValue(5 + specIndex * 4 + j, 0);
+                    }
+
+                    trans.Append(stmt);
+
+                    foreach (uint azeriteItemMilestonePowerId in m_azeriteItemData.UnlockedEssenceMilestones)
+                    {
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, azeriteItemMilestonePowerId);
+                        trans.Append(stmt);
+                    }
+
+                    foreach (var azeriteEssence in m_azeriteItemData.UnlockedEssences)
+                    {
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, azeriteEssence.AzeriteEssenceID);
+                        stmt.AddValue(2, azeriteEssence.Rank);
+                        trans.Append(stmt);
+                    }
+                    break;
             }
+
+            base.SaveToDB(trans);
         }
 
         public void LoadAzeriteItemData(Player owner, AzeriteData azeriteData)
