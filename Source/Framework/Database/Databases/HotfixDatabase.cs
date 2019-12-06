@@ -100,6 +100,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE, "SELECT ID, Name, FactionID, DepositRate, ConsignmentRate FROM auction_house ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_AUCTION_HOUSE_LOCALE, "SELECT ID, Name_lang FROM auction_house_locale WHERE locale = ?");
 
+            // AzeriteEmpoweredItem.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_EMPOWERED_ITEM, "SELECT ID, ItemID, AzeriteTierUnlockSetID, AzeritePowerSetID FROM azerite_empowered_item ORDER BY ID DESC");
+
             // AzeriteEssence.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE, "SELECT Name, Description, ID, SpecSetID FROM azerite_essence ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_AZERITE_ESSENCE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM azerite_essence_locale WHERE locale = ?");
@@ -123,6 +126,19 @@ namespace Framework.Database
 
             // AzeritePower.db2
             PrepareStatement(HotfixStatements.SEL_AZERITE_POWER, "SELECT ID, SpellID, ItemBonusListID, SpecSetID, Flags FROM azerite_power ORDER BY ID DESC");
+
+            // AzeritePowerSetMember.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_POWER_SET_MEMBER, "SELECT ID, AzeritePowerSetID, AzeritePowerID, Class, Tier, OrderIndex FROM azerite_power_set_member ORDER BY ID DESC");
+
+            // AzeriteTierUnlock.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_TIER_UNLOCK, "SELECT ID, ItemCreationContext, Tier, AzeriteLevel, AzeriteTierUnlockSetID FROM azerite_tier_unlock ORDER BY ID DESC");
+
+            // AzeriteTierUnlockSet.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_TIER_UNLOCK_SET, "SELECT ID, Flags FROM azerite_tier_unlock_set ORDER BY ID DESC");
+
+            // AzeriteUnlockMapping.db2
+            PrepareStatement(HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING, "SELECT ID, ItemLevel, ItemBonusListHead, ItemBonusListShoulders, ItemBonusListChest, " +
+                "AzeriteUnlockMappingSetID FROM azerite_unlock_mapping ORDER BY ID DESC");
 
             // BankBagSlotPrices.db2
             PrepareStatement(HotfixStatements.SEL_BANK_BAG_SLOT_PRICES, "SELECT ID, Cost FROM bank_bag_slot_prices ORDER BY ID DESC");
@@ -1154,6 +1170,8 @@ namespace Framework.Database
         SEL_AUCTION_HOUSE,
         SEL_AUCTION_HOUSE_LOCALE,
 
+        SEL_AZERITE_EMPOWERED_ITEM,
+
         SEL_AZERITE_ESSENCE,
         SEL_AZERITE_ESSENCE_LOCALE,
 
@@ -1169,6 +1187,14 @@ namespace Framework.Database
         SEL_AZERITE_LEVEL_INFO,
 
         SEL_AZERITE_POWER,
+
+        SEL_AZERITE_POWER_SET_MEMBER,
+
+        SEL_AZERITE_TIER_UNLOCK,
+
+        SEL_AZERITE_TIER_UNLOCK_SET,
+
+        SEL_AZERITE_UNLOCK_MAPPING,
 
         SEL_BANK_BAG_SLOT_PRICES,
 

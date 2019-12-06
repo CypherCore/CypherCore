@@ -63,8 +63,11 @@ namespace Game.DataStorage
 
             CliDB.ArtifactPowerRankStorage.Clear();
 
+            foreach (AzeriteEmpoweredItemRecord azeriteEmpoweredItem in CliDB.AzeriteEmpoweredItemStorage.Values)
+                _azeriteEmpoweredItems[azeriteEmpoweredItem.ItemID] = azeriteEmpoweredItem;
+
             foreach (AzeriteEssencePowerRecord azeriteEssencePower in CliDB.AzeriteEssencePowerStorage.Values)
-                _azeriteEssencePowersByIdAndRank[Tuple.Create((uint)azeriteEssencePower.AzeriteEssenceID, (uint)azeriteEssencePower.Tier)] = azeriteEssencePower;
+                _azeriteEssencePowersByIdAndRank[((uint)azeriteEssencePower.AzeriteEssenceID, (uint)azeriteEssencePower.Tier)] = azeriteEssencePower;
 
             foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in CliDB.AzeriteItemMilestonePowerStorage.Values)
                 _azeriteItemMilestonePowers.Add(azeriteItemMilestonePower);
@@ -81,7 +84,25 @@ namespace Game.DataStorage
                     _azeriteItemMilestonePowerByEssenceSlot[azeriteEssenceSlot] = azeriteItemMilestonePower;
                     ++azeriteEssenceSlot;
                 }
-            }            
+            }
+
+            foreach (AzeritePowerSetMemberRecord azeritePowerSetMember in CliDB.AzeritePowerSetMemberStorage.Values)
+                if (CliDB.AzeritePowerStorage.ContainsKey(azeritePowerSetMember.AzeritePowerID))
+                    _azeritePowers.Add(azeritePowerSetMember.AzeritePowerSetID, azeritePowerSetMember);
+
+            foreach (AzeriteTierUnlockRecord azeriteTierUnlock in CliDB.AzeriteTierUnlockStorage.Values)
+            {
+                var key = (azeriteTierUnlock.AzeriteTierUnlockSetID, (ItemContext)azeriteTierUnlock.ItemCreationContext);
+
+                if (!_azeriteTierUnlockLevels.ContainsKey(key))
+                    _azeriteTierUnlockLevels[key] = new byte[SharedConst.MaxAzeriteEmpoweredTier];
+
+                _azeriteTierUnlockLevels[key][azeriteTierUnlock.Tier] = azeriteTierUnlock.AzeriteLevel;
+            }
+
+            MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappings = new MultiMap<uint, AzeriteUnlockMappingRecord>();
+            foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in CliDB.AzeriteUnlockMappingStorage.Values)
+                azeriteUnlockMappings.Add(azeriteUnlockMapping.AzeriteUnlockMappingSetID, azeriteUnlockMapping);
 
             foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
                 _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
@@ -285,6 +306,9 @@ namespace Game.DataStorage
                 _itemToBonusTree.Add(itemBonusTreeAssignment.ItemID, itemBonusTreeAssignment.ItemBonusTreeID);
 
             CliDB.ItemXBonusTreeStorage.Clear();
+
+            foreach (var pair in _azeriteEmpoweredItems)
+                LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
 
             foreach (MapDifficultyRecord entry in CliDB.MapDifficultyStorage.Values)
             {
@@ -745,6 +769,11 @@ namespace Game.DataStorage
             return _artifactPowerRanks.LookupByKey(Tuple.Create(artifactPowerId, rank));
         }
 
+        public AzeriteEmpoweredItemRecord GetAzeriteEmpoweredItem(uint itemId)
+        {
+            return _azeriteEmpoweredItems.LookupByKey(itemId);
+        }
+
         public bool IsAzeriteItem(uint itemId)
         {
             return CliDB.AzeriteItemStorage.Any(pair => pair.Value.ItemID == itemId);
@@ -764,6 +793,33 @@ namespace Game.DataStorage
         {
             //ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT, "Slot %u must be lower than MAX_AZERITE_ESSENCE_SLOT (%u)", uint32(slot), MAX_AZERITE_ESSENCE_SLOT);
             return _azeriteItemMilestonePowerByEssenceSlot[slot];
+        }
+
+        public List<AzeritePowerSetMemberRecord> GetAzeritePowers(uint itemId)
+        {
+            AzeriteEmpoweredItemRecord azeriteEmpoweredItem = GetAzeriteEmpoweredItem(itemId);
+            if (azeriteEmpoweredItem != null)
+                return _azeritePowers.LookupByKey(azeriteEmpoweredItem.AzeritePowerSetID);
+
+            return null;
+        }
+
+        public uint GetRequiredAzeriteLevelForAzeritePowerTier(uint azeriteUnlockSetId, ItemContext context, uint tier)
+        {
+            //ASSERT(tier < MAX_AZERITE_EMPOWERED_TIER);
+            var levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, context));
+            if (levels != null)
+                return levels[tier];
+
+            AzeriteTierUnlockSetRecord azeriteTierUnlockSet = CliDB.AzeriteTierUnlockSetStorage.LookupByKey(azeriteUnlockSetId);
+            if (azeriteTierUnlockSet != null && azeriteTierUnlockSet.Flags.HasAnyFlag(AzeriteTierUnlockSetFlags.Default))
+            {
+                levels = _azeriteTierUnlockLevels.LookupByKey((azeriteUnlockSetId, ItemContext.None));
+                if (levels != null)
+                    return levels[tier];
+            }
+
+            return (uint)CliDB.AzeriteLevelInfoStorage.Count;
         }
 
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, LocaleConstant locale = LocaleConstant.enUS, Gender gender = Gender.Male, bool forceGender = false)
@@ -1208,10 +1264,63 @@ namespace Game.DataStorage
                                 bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
                         }
                     }
+
+                    AzeriteUnlockMappingRecord azeriteUnlockMapping = _azeriteUnlockMappings.LookupByKey((proto.Id, itemContext));
+                    if (azeriteUnlockMapping != null)
+                    {
+                        switch (proto.inventoryType)
+                        {
+                            case InventoryType.Head:
+                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListHead);
+                                break;
+                            case InventoryType.Shoulders:
+                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListShoulders);
+                                break;
+                            case InventoryType.Chest:
+                            case InventoryType.Robe:
+                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListChest);
+                                break;
+                        }
+                    }
+
                 }
             });
 
             return bonusListIDs;
+        }
+
+        void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
+        {
+            ItemSparseRecord proto = CliDB.ItemSparseStorage.LookupByKey(itemId);
+            if (proto == null)
+                return;
+
+            VisitItemBonusTree(itemId, bonusTreeNode =>
+            {
+                if (bonusTreeNode.ChildItemBonusListID == 0 && bonusTreeNode.ChildItemLevelSelectorID != 0)
+                {
+                    ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
+                    if (selector == null)
+                        return;
+
+                    var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
+                    if (azeriteUnlockMappings != null)
+                    {
+                        AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
+                        foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
+                        {
+                            if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
+                                (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
+                                continue;
+
+                            selectedAzeriteUnlockMapping = azeriteUnlockMapping;
+                        }
+
+                        if (selectedAzeriteUnlockMapping != null)
+                            _azeriteUnlockMappings[(proto.Id, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
+                    }
+                }
+            });
         }
 
         public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)
@@ -1988,9 +2097,13 @@ namespace Game.DataStorage
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();
         MultiMap<uint, uint> _artifactPowerLinks = new MultiMap<uint, uint>();
         Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord>();
-        Dictionary<Tuple<uint, uint>, AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new Dictionary<Tuple<uint, uint>, AzeriteEssencePowerRecord>();
+        Dictionary<uint, AzeriteEmpoweredItemRecord> _azeriteEmpoweredItems = new Dictionary<uint, AzeriteEmpoweredItemRecord>();
+        Dictionary<(uint azeriteEssenceId, uint rank), AzeriteEssencePowerRecord> _azeriteEssencePowersByIdAndRank = new Dictionary<(uint azeriteEssenceId, uint rank), AzeriteEssencePowerRecord>();
         List<AzeriteItemMilestonePowerRecord> _azeriteItemMilestonePowers = new List<AzeriteItemMilestonePowerRecord>();
         AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
+        MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new MultiMap<uint, AzeritePowerSetMemberRecord>();
+        Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]>();
+        Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord>();
         List<Tuple<byte, byte, uint>> _characterFacialHairStyles = new List<Tuple<byte, byte, uint>>();
         MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord> _charSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord>();
         Dictionary<uint, CharStartOutfitRecord> _charStartOutfits = new Dictionary<uint, CharStartOutfitRecord>();

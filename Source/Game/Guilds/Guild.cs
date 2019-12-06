@@ -327,7 +327,7 @@ namespace Game.Guilds
                             CriteriaManager.WalkCriteriaTree(tree, node =>
                             {
                                 if (node.Criteria != null)
-                                    criteriaIds.Add(node.Criteria.ID);
+                                    criteriaIds.Add(node.Criteria.Id);
                             });
                         }
                     }

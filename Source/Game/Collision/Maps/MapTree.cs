@@ -142,9 +142,9 @@ namespace Game.Collision
                                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 
                             // update tree
-                            if (iSpawnIndices.ContainsKey(spawn.ID))
+                            if (iSpawnIndices.ContainsKey(spawn.Id))
                             {
-                                uint referencedVal = iSpawnIndices[spawn.ID];
+                                uint referencedVal = iSpawnIndices[spawn.Id];
                                 if (!iLoadedSpawns.ContainsKey(referencedVal))
                                 {
                                     if (referencedVal >= iNTreeValues)
@@ -202,13 +202,13 @@ namespace Game.Collision
                                 vm.ReleaseModelInstance(spawn.name);
 
                                 // update tree
-                                if (!iSpawnIndices.ContainsKey(spawn.ID))
+                                if (!iSpawnIndices.ContainsKey(spawn.Id))
                                     result = false;
                                 else
                                 {
-                                    uint referencedNode = iSpawnIndices[spawn.ID];
+                                    uint referencedNode = iSpawnIndices[spawn.Id];
                                     if (!iLoadedSpawns.ContainsKey(referencedNode))
-                                        Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-referenced model '{0}' (ID:{1})", spawn.name, spawn.ID);
+                                        Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-referenced model '{0}' (ID:{1})", spawn.name, spawn.Id);
                                     else if (--iLoadedSpawns[referencedNode] == 0)
                                     {
                                         iTreeValues[referencedNode].SetUnloaded();

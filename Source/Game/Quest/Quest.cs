@@ -218,7 +218,7 @@ namespace Game
         public void LoadQuestObjective(SQLFields fields)
         {
             QuestObjective obj = new QuestObjective();
-            obj.ID = fields.Read<uint>(0);
+            obj.Id = fields.Read<uint>(0);
             obj.QuestID = fields.Read<uint>(1);
             obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
             obj.StorageIndex = fields.Read<sbyte>(3);
@@ -238,7 +238,7 @@ namespace Game
 
             foreach (QuestObjective obj in Objectives)
             {
-                if (obj.ID == objID)
+                if (obj.Id == objID)
                 {
                     byte effectIndex = fields.Read<byte>(3);
                     if (obj.VisualEffects == null)
@@ -728,7 +728,7 @@ namespace Game
 
     public class QuestObjective
     {
-        public uint ID;
+        public uint Id;
         public uint QuestID;
         public QuestObjectiveType Type;
         public sbyte StorageIndex;

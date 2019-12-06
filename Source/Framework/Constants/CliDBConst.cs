@@ -930,6 +930,11 @@ namespace Framework.Constants
         BonusStamina = 2
     }
 
+    public enum AzeriteTierUnlockSetFlags
+    {
+        Default = 0x1
+    }
+
     public enum BattlegroundBracketId                                  // bracketId for level ranges
     {
         First = 0,
@@ -994,7 +999,8 @@ namespace Framework.Constants
 
     public enum Curves
     {
-        ArtifactRelicItemLevelBonus = 1718
+        ArtifactRelicItemLevelBonus = 1718,
+        AzeriteEmpoweredItemRespecCost = 6785
     }
 
     public enum Emote

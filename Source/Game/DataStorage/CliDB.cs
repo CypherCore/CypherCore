@@ -54,6 +54,7 @@ namespace Game.DataStorage
             ArtifactTierStorage = DBReader.Read<ArtifactTierRecord>("ArtifactTier.db2", HotfixStatements.SEL_ARTIFACT_TIER);
             ArtifactUnlockStorage = DBReader.Read<ArtifactUnlockRecord>("ArtifactUnlock.db2", HotfixStatements.SEL_ARTIFACT_UNLOCK);
             AuctionHouseStorage = DBReader.Read<AuctionHouseRecord>("AuctionHouse.db2", HotfixStatements.SEL_AUCTION_HOUSE, HotfixStatements.SEL_AUCTION_HOUSE_LOCALE);
+            AzeriteEmpoweredItemStorage = DBReader.Read<AzeriteEmpoweredItemRecord>("AzeriteEmpoweredItem.db2", HotfixStatements.SEL_AZERITE_EMPOWERED_ITEM);
             AzeriteEssenceStorage = DBReader.Read<AzeriteEssenceRecord>("AzeriteEssence.db2", HotfixStatements.SEL_AZERITE_ESSENCE, HotfixStatements.SEL_AZERITE_ESSENCE_LOCALE);
             AzeriteEssencePowerStorage = DBReader.Read<AzeriteEssencePowerRecord>("AzeriteEssencePower.db2", HotfixStatements.SEL_AZERITE_ESSENCE_POWER, HotfixStatements.SEL_AZERITE_ESSENCE_POWER_LOCALE);
             AzeriteItemStorage = DBReader.Read<AzeriteItemRecord>("AzeriteItem.db2", HotfixStatements.SEL_AZERITE_ITEM);
@@ -61,6 +62,10 @@ namespace Game.DataStorage
             AzeriteKnowledgeMultiplierStorage = DBReader.Read<AzeriteKnowledgeMultiplierRecord>("AzeriteKnowledgeMultiplier.db2", HotfixStatements.SEL_AZERITE_KNOWLEDGE_MULTIPLIER);
             AzeriteLevelInfoStorage = DBReader.Read<AzeriteLevelInfoRecord>("AzeriteLevelInfo.db2", HotfixStatements.SEL_AZERITE_LEVEL_INFO);
             AzeritePowerStorage = DBReader.Read<AzeritePowerRecord>("AzeritePower.db2", HotfixStatements.SEL_AZERITE_POWER);
+            AzeritePowerSetMemberStorage = DBReader.Read<AzeritePowerSetMemberRecord> ("AzeritePowerSetMember.db2", HotfixStatements.SEL_AZERITE_POWER_SET_MEMBER);
+            AzeriteTierUnlockStorage = DBReader.Read<AzeriteTierUnlockRecord> ("AzeriteTierUnlock.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK);
+            AzeriteTierUnlockSetStorage = DBReader.Read<AzeriteTierUnlockSetRecord> ("AzeriteTierUnlockSet.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK_SET);
+            AzeriteUnlockMappingStorage = DBReader.Read<AzeriteUnlockMappingRecord> ("AzeriteUnlockMapping.db2", HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING);
             BankBagSlotPricesStorage = DBReader.Read<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
             //BannedAddOnsStorage = DBReader.Read<BannedAddOnsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = DBReader.Read<BarberShopStyleRecord>("BarberShopStyle.db2", HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
@@ -406,6 +411,7 @@ namespace Game.DataStorage
         public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage;
         public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage;
         public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage;
+        public static DB6Storage<AzeriteEmpoweredItemRecord> AzeriteEmpoweredItemStorage;
         public static DB6Storage<AzeriteEssenceRecord> AzeriteEssenceStorage;
         public static DB6Storage<AzeriteEssencePowerRecord> AzeriteEssencePowerStorage;
         public static DB6Storage<AzeriteItemRecord> AzeriteItemStorage;
@@ -413,6 +419,10 @@ namespace Game.DataStorage
         public static DB6Storage<AzeriteKnowledgeMultiplierRecord> AzeriteKnowledgeMultiplierStorage;
         public static DB6Storage<AzeriteLevelInfoRecord> AzeriteLevelInfoStorage;
         public static DB6Storage<AzeritePowerRecord> AzeritePowerStorage;
+        public static DB6Storage<AzeritePowerSetMemberRecord> AzeritePowerSetMemberStorage;
+        public static DB6Storage<AzeriteTierUnlockRecord> AzeriteTierUnlockStorage;
+        public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage;
+        public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage;
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
         //public static DB6Storage<BannedAddOnsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;

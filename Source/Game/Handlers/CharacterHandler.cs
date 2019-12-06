@@ -2461,15 +2461,19 @@ namespace Game
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE);
             stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.LoadAzerite, stmt);
+            SetQuery(PlayerLoginQueryLoad.Azerite, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER);
             stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.LoadAzeriteMilestonePowers, stmt);
+            SetQuery(PlayerLoginQueryLoad.AzeriteMilestonePowers, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE);
             stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.LoadAzeriteUnlockedEssences, stmt);
+            SetQuery(PlayerLoginQueryLoad.AzeriteUnlockedEssences, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.AzeriteEmpowered, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
             stmt.AddValue(0, lowGuid);
@@ -2633,9 +2637,10 @@ namespace Game
         Reputation,
         Inventory,
         Artifacts,
-        LoadAzerite,
-        LoadAzeriteMilestonePowers,
-        LoadAzeriteUnlockedEssences,
+        Azerite,
+        AzeriteMilestonePowers,
+        AzeriteUnlockedEssences,
+        AzeriteEmpowered,
         Actions,
         MailCount,
         MailDate,

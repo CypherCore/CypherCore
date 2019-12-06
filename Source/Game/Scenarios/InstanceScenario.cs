@@ -138,7 +138,7 @@ namespace Game.Scenarios
 
                     SetCriteriaProgress(criteria, counter, null, ProgressType.Set);
 
-                    List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.ID);
+                    List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
                     if (trees != null)
                     {
                         foreach (CriteriaTree tree in trees)

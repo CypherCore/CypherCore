@@ -412,15 +412,15 @@ namespace Game.Chat
             foreach (var pair in targetFSL)
             {
                 FactionState faction = pair.Value;
-                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(faction.ID);
+                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(faction.Id);
                 string factionName = factionEntry != null ? factionEntry.Name[loc] : "#Not found#";
                 ReputationRank rank = target.GetReputationMgr().GetRank(factionEntry);
                 string rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[(int)rank]);
                 StringBuilder ss = new StringBuilder();
                 if (handler.GetSession() != null)
-                    ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1} {2}]|h|r", faction.ID, factionName, loc);
+                    ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1} {2}]|h|r", faction.Id, factionName, loc);
                 else
-                    ss.AppendFormat("{0} - {1} {2}", faction.ID, factionName, loc);
+                    ss.AppendFormat("{0} - {1} {2}", faction.Id, factionName, loc);
 
                 ss.AppendFormat(" {0} ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
 

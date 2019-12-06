@@ -314,7 +314,7 @@ namespace Game.Entities
         public bool HasUnlockedEssenceSlot(byte slot)
         {
             AzeriteItemMilestonePowerRecord milestone = Global.DB2Mgr.GetAzeriteItemMilestonePower(slot);
-            return m_azeriteItemData.UnlockedEssenceMilestones.FindIndex(milestone.ID) != -1;
+            return m_azeriteItemData.UnlockedEssenceMilestones.FindIndex(milestone.Id) != -1;
         }
 
         public bool HasUnlockedEssenceMilestone(uint azeriteItemMilestonePowerId) { return m_azeriteItemData.UnlockedEssenceMilestones.FindIndex(azeriteItemMilestonePowerId) != -1; }
@@ -487,12 +487,12 @@ namespace Game.Entities
                 if (milestone.RequiredLevel > GetLevel())
                     break;
 
-                if (HasUnlockedEssenceMilestone(milestone.ID))
+                if (HasUnlockedEssenceMilestone(milestone.Id))
                     continue;
 
                 if (milestone.AutoUnlock != 0)
                 {
-                    AddUnlockedEssenceMilestone(milestone.ID);
+                    AddUnlockedEssenceMilestone(milestone.Id);
                     hasPreviousMilestone = true;
                 }
                 else

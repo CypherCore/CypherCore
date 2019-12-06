@@ -6234,6 +6234,37 @@ namespace Game.Spells
                             }
                             break;
                         }
+                    case SpellEffectName.RespecAzeriteEmpoweredItem:
+                        {
+                            Item item = m_targets.GetItemTarget();
+                            if (item == null)
+                                return SpellCastResult.AzeriteEmpoweredOnly;
+
+                            if (item.GetOwnerGUID() != m_caster.GetGUID())
+                                return SpellCastResult.DontReport;
+
+                            AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+                            if (azeriteEmpoweredItem == null)
+                                return SpellCastResult.AzeriteEmpoweredOnly;
+
+                            bool hasSelections = false;
+                            for (int tier = 0; tier < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++tier)
+                            {
+                                if (azeriteEmpoweredItem.GetSelectedAzeritePower(tier) != 0)
+                                {
+                                    hasSelections = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasSelections)
+                                return SpellCastResult.AzeriteEmpoweredNoChoicesToUndo;
+
+                            if (!m_caster.ToPlayer().HasEnoughMoney(azeriteEmpoweredItem.GetRespecCost()))
+                                return SpellCastResult.DontReport;
+
+                            break;
+                        }
                     default:
                         break;
                 }

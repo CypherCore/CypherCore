@@ -340,7 +340,7 @@ namespace Game.Network.Packets
 
         public void InitializeSplineData(MoveSpline moveSpline)
         {
-            SplineData.ID = moveSpline.GetId();
+            SplineData.Id = moveSpline.GetId();
             MovementSpline movementSpline = SplineData.Move;
 
             MoveSplineFlag splineFlags = moveSpline.splineflags;
@@ -514,7 +514,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(TransferSpellID.HasValue);
             if (Ship.HasValue)
             {
-                _worldPacket.WriteUInt32(Ship.Value.ID);
+                _worldPacket.WriteUInt32(Ship.Value.Id);
                 _worldPacket.WriteInt32(Ship.Value.OriginMapID);
             }
 
@@ -531,7 +531,7 @@ namespace Game.Network.Packets
 
         public struct ShipTransferPending
         {
-            public uint ID;              // gameobject_template.entry of the transport the player is teleporting on
+            public uint Id;              // gameobject_template.entry of the transport the player is teleporting on
             public int OriginMapID;     // Map id the player is currently on (before teleport)
         }
     }
@@ -1320,7 +1320,7 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ID);
+            data.WriteUInt32(Id);
             data.WriteVector3(Destination);
             data.WriteBit(CrzTeleport);
             data.WriteBits(StopDistanceTolerance, 3);
@@ -1328,7 +1328,7 @@ namespace Game.Network.Packets
             Move.Write(data);
         }
 
-        public uint ID;
+        public uint Id;
         public Vector3 Destination;
         public bool CrzTeleport;
         public byte StopDistanceTolerance;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)

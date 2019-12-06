@@ -602,7 +602,7 @@ namespace Game.Entities
     {
         public UpdateFieldArray<int> Selections = new UpdateFieldArray<int>(5, 0, 1);
 
-        public AzeriteEmpoweredItemData() : base(6) { }
+        public AzeriteEmpoweredItemData() : base(0, TypeId.AzeriteEmpoweredItem, 6) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {

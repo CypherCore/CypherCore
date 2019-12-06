@@ -209,7 +209,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ID);
+            _worldPacket.WriteUInt32(Id);
             _worldPacket.WriteFloat(Pos.X);
             _worldPacket.WriteFloat(Pos.Y);
             _worldPacket.WriteUInt32(Icon);
@@ -220,7 +220,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public uint ID;
+        public uint Id;
         public uint Flags;
         public Vector2 Pos;
         public uint Icon;

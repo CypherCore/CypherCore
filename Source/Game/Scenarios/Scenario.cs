@@ -156,7 +156,7 @@ namespace Game.Scenarios
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
         {
             ScenarioProgressUpdate progressUpdate = new ScenarioProgressUpdate();
-            progressUpdate.CriteriaProgress.Id = criteria.ID;
+            progressUpdate.CriteriaProgress.Id = criteria.Id;
             progressUpdate.CriteriaProgress.Quantity = progress.Counter;
             progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
             progressUpdate.CriteriaProgress.Date = progress.Date;

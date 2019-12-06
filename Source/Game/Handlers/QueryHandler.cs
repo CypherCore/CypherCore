@@ -180,7 +180,7 @@ namespace Game
                     break;
 
                 QueryPageTextResponse.PageTextInfo page;
-                page.ID = pageID;
+                page.Id = pageID;
                 page.NextPageID = pageText.NextPageID;
                 page.Text = pageText.Text;
                 page.PlayerConditionID = pageText.PlayerConditionID;

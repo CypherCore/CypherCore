@@ -346,6 +346,7 @@ namespace Framework.Constants
         Bounding = 16,
         RelicType = 17,
         OverrideRequiredLevel = 18,
+        AzeriteTierUnlockSet = 19,
         OverrideCanDisenchant = 21,
         OverrideCanScrap = 22
     }
@@ -819,6 +820,7 @@ namespace Framework.Constants
         Child = 0x00080000,
         Unk15 = 0x00100000, // ?
         NewItem = 0x00200000, // Item glows in inventory
+        AzeriteEmpoweredItemViewed = 0x00400000, // Won't play azerite powers animation when viewing it
         Unk17 = 0x00400000, // ?
         Unk18 = 0x00800000, // ?
         Unk19 = 0x01000000, // ?
@@ -833,7 +835,7 @@ namespace Framework.Constants
 
     public enum ItemFieldFlags2
     {
-        HeartOfAzerothEquipped = 0x1
+        Equipped = 0x1
     }
 
     public enum ItemFlags : long

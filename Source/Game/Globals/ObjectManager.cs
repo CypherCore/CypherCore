@@ -688,7 +688,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
 
                 PointOfInterest POI = new PointOfInterest();
-                POI.ID = id;
+                POI.Id = id;
                 POI.Pos = new Vector2(result.Read<float>(1), result.Read<float>(2));
                 POI.Icon = result.Read<uint>(3);
                 POI.Flags = result.Read<uint>(4);
@@ -6702,7 +6702,7 @@ namespace Game
                 foreach (QuestObjective obj in qinfo.Objectives)
                 {
                     // Store objective for lookup by id
-                    _questObjectives[obj.ID] = obj;
+                    _questObjectives[obj.Id] = obj;
 
                     // Check storage index for objectives which store data
                     if (obj.StorageIndex < 0)
@@ -6717,7 +6717,7 @@ namespace Game
                             case QuestObjectiveType.AreaTrigger:
                             case QuestObjectiveType.WinPetBattleAgainstNpc:
                             case QuestObjectiveType.ObtainCurrency:
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid StorageIndex = {2} for objective type {3}", qinfo.Id, obj.ID, obj.StorageIndex, obj.Type);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid StorageIndex = {2} for objective type {3}", qinfo.Id, obj.Id, obj.StorageIndex, obj.Type);
                                 break;
                             default:
                                 break;
@@ -6729,17 +6729,17 @@ namespace Game
                         case QuestObjectiveType.Item:
                             qinfo.SetSpecialFlag(QuestSpecialFlags.Deliver);
                             if (GetItemTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing item entry {2}, quest can't be done.", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing item entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.Monster:
                             qinfo.SetSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast);
                             if (GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.GameObject:
                             qinfo.SetSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast);
                             if (GetGameObjectTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing gameobject entry {2}, quest can't be done.", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing gameobject entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.TalkTo:
                             // Need checks (is it creature only?)
@@ -6748,46 +6748,46 @@ namespace Game
                         case QuestObjectiveType.MinReputation:
                         case QuestObjectiveType.MaxReputation:
                             if (!CliDB.FactionStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.PlayerKills:
                             qinfo.SetSpecialFlag(QuestSpecialFlags.Kill);
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid player kills count {2}", qinfo.Id, obj.ID, obj.Amount);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid player kills count {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
                         case QuestObjectiveType.Currency:
                         case QuestObjectiveType.HaveCurrency:
                         case QuestObjectiveType.ObtainCurrency:
                             if (!CliDB.CurrencyTypesStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing currency {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing currency {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             if (obj.Amount <= 0)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid currency amount {2}", qinfo.Id, obj.ID, obj.Amount);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid currency amount {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
                         case QuestObjectiveType.LearnSpell:
                             if (!Global.SpellMgr.HasSpellInfo((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.WinPetBattleAgainstNpc:
                             if (obj.ObjectID != 0 && Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.DefeatBattlePet:
                             if (!CliDB.BattlePetSpeciesStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing battlepet species id {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing battlepet species id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.CriteriaTree:
                             if (!CliDB.CriteriaTreeStorage.ContainsKey((uint)obj.ObjectID))
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing criteria tree id {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing criteria tree id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.AreaTrigger:
                             if (!CliDB.AreaTriggerStorage.ContainsKey((uint)obj.ObjectID) && obj.ObjectID != -1)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing areatrigger id {2}", qinfo.Id, obj.ID, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing areatrigger id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.Money:
                         case QuestObjectiveType.WinPvpPetBattles:
                             break;
                         default:
-                            Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.ID, obj.Type);
+                            Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);
                             break;
                     }
                 }
@@ -8751,6 +8751,7 @@ namespace Game
                         {
                             Item.DeleteFromDB(null, itemInfo.item_guid);
                             AzeriteItem.DeleteFromDB(null, itemInfo.item_guid);
+                            AzeriteEmpoweredItem.DeleteFromDB(null, itemInfo.item_guid);
                         }
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
@@ -9459,7 +9460,7 @@ namespace Game
             }
 
             cost = dest_i.price;
-            path = dest_i.ID;
+            path = dest_i.Id;
         }
         public uint GetTaxiMountDisplayId(uint id, Team team, bool allowed_alt_team = false)
         {

@@ -1912,7 +1912,7 @@ namespace Game.Entities
                     if (transport)
                     {
                         transferPending.Ship.HasValue = true;
-                        transferPending.Ship.Value.ID = transport.GetEntry();
+                        transferPending.Ship.Value.Id = transport.GetEntry();
                         transferPending.Ship.Value.OriginMapID = (int)GetMapId();
                     }
 
@@ -7442,6 +7442,9 @@ namespace Game.Entities
         public void AddPlayerLocalFlag(PlayerLocalFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
         public void RemovePlayerLocalFlag(PlayerLocalFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
         public void SetPlayerLocalFlags(PlayerLocalFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
+
+        public byte GetNumRespecs() { return m_activePlayerData.NumRespecs; }
+        public void SetNumRespecs(byte numRespecs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumRespecs), numRespecs); }
 
         public void SetWatchedFactionIndex(uint index) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WatchedFactionIndex), index); }
 

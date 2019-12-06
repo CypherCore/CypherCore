@@ -38,10 +38,10 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, uint timeDiff)
+        void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
         {
             Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
-            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult);
+            ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
             if (!result.IsEmpty())
             {
@@ -69,6 +69,13 @@ namespace Game.Entities
                                 AzeriteItem azeriteItem = item.ToAzeriteItem();
                                 if (azeriteItem != null)
                                     azeriteItem.LoadAzeriteItemData(this, addionalData.AzeriteItem);
+                            }
+
+                            if (addionalData.AzeriteEmpoweredItem != null)
+                            {
+                                AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+                                if (azeriteEmpoweredItem != null)
+                                    azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(this, addionalData.AzeriteEmpoweredItem);
                             }
                         }
 
@@ -328,6 +335,7 @@ namespace Game.Entities
                 Item.DeleteFromInventoryDB(trans, itemGuid);
                 Item.DeleteFromDB(trans, itemGuid);
                 AzeriteItem.DeleteFromDB(trans, itemGuid);
+                AzeriteEmpoweredItem.DeleteFromDB(trans, itemGuid);
             }
             return item;
         }
@@ -1201,8 +1209,12 @@ namespace Game.Entities
                 stmt.AddValue(0, GetGUID().GetCounter());
                 SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
 
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
+                stmt.AddValue(0, GetGUID().GetCounter());
+                SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
+
                 Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
-                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult);
+                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
                 do
                 {
@@ -1233,6 +1245,7 @@ namespace Game.Entities
 
                 Item.DeleteFromDB(trans, itemGuid);
                 AzeriteItem.DeleteFromDB(trans, itemGuid);
+                AzeriteEmpoweredItem.DeleteFromDB(trans, itemGuid);
 
                 DB.Characters.CommitTransaction(trans);
                 return null;
@@ -1265,6 +1278,13 @@ namespace Game.Entities
                     AzeriteItem azeriteItem = item.ToAzeriteItem();
                     if (azeriteItem != null)
                         azeriteItem.LoadAzeriteItemData(player, addionalData.AzeriteItem);
+                }
+
+                if (addionalData.AzeriteEmpoweredItem != null)
+                {
+                    AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+                    if (azeriteEmpoweredItem != null)
+                        azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(player, addionalData.AzeriteEmpoweredItem);
                 }
             }
 
@@ -2083,6 +2103,7 @@ namespace Game.Entities
                         {
                             Item.DeleteFromDB(trans, mailItemInfo.item_guid);
                             AzeriteItem.DeleteFromDB(trans, mailItemInfo.item_guid);
+                            AzeriteEmpoweredItem.DeleteFromDB(trans, mailItemInfo.item_guid);
                         }
                     }
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
@@ -2862,6 +2883,7 @@ namespace Game.Entities
             _LoadSkills(holder.GetResult(PlayerLoginQueryLoad.Skills));
             UpdateSkillsForLevel();
 
+            SetNumRespecs(result.Read<byte>(76));
             SetPrimarySpecialization(result.Read<uint>(36));
             SetActiveTalentGroup(result.Read<byte>(64));
             ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
@@ -2913,8 +2935,8 @@ namespace Game.Entities
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
-            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), holder.GetResult(PlayerLoginQueryLoad.LoadAzerite),
-                        holder.GetResult(PlayerLoginQueryLoad.LoadAzeriteMilestonePowers), holder.GetResult(PlayerLoginQueryLoad.LoadAzeriteUnlockedEssences), time_diff);
+            _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), holder.GetResult(PlayerLoginQueryLoad.Azerite),
+                        holder.GetResult(PlayerLoginQueryLoad.AzeriteMilestonePowers), holder.GetResult(PlayerLoginQueryLoad.AzeriteUnlockedEssences), holder.GetResult(PlayerLoginQueryLoad.AzeriteEmpowered), time_diff);
 
             if (IsVoidStorageUnlocked())
                 _LoadVoidStorage(holder.GetResult(PlayerLoginQueryLoad.VoidStorage));
@@ -3173,6 +3195,7 @@ namespace Game.Entities
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
+                stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);
@@ -3665,8 +3688,12 @@ namespace Game.Entities
                                 stmt.AddValue(0, guid);
                                 SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
 
+                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
+                                stmt.AddValue(0, guid);
+                                SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
+
                                 Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
-                                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult);
+                                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
                                 do
                                 {
@@ -3881,6 +3908,10 @@ namespace Game.Entities
                         trans.Append(stmt);
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER);
+                        stmt.AddValue(0, guid);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER);
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 

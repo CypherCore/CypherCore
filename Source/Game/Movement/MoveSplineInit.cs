@@ -179,7 +179,7 @@ namespace Game.Movement
             packet.MoverGUID = unit.GetGUID();
             packet.Pos = new Vector3(loc.X, loc.Y, loc.Z);
             packet.SplineData.StopDistanceTolerance = 2;
-            packet.SplineData.ID = move_spline.GetId();
+            packet.SplineData.Id = move_spline.GetId();
 
             if (transport)
             {

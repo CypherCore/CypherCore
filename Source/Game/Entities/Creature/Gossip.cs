@@ -316,7 +316,7 @@ namespace Game.Misc
             }
 
             GossipPOI packet = new GossipPOI();
-            packet.ID = pointOfInterest.ID;
+            packet.Id = pointOfInterest.Id;
             packet.Name = pointOfInterest.Name;
 
             LocaleConstant locale = _session.GetSessionDbLocaleIndex();
@@ -468,7 +468,7 @@ namespace Game.Misc
             for (int i = 0; i < objs.Count; ++i)
             {
                 var obj = new QuestObjectiveSimple();
-                obj.ID = objs[i].ID;
+                obj.Id = objs[i].Id;
                 obj.ObjectID = objs[i].ObjectID;
                 obj.Amount = objs[i].Amount;
                 obj.Type = (byte)objs[i].Type;
@@ -504,7 +504,7 @@ namespace Game.Misc
 
                 foreach (QuestObjective questObjective in queryQuestInfoResponse.Info.Objectives)
                 {
-                    QuestObjectivesLocale questObjectivesLocaleData = Global.ObjectMgr.GetQuestObjectivesLocale(questObjective.ID);
+                    QuestObjectivesLocale questObjectivesLocaleData = Global.ObjectMgr.GetQuestObjectivesLocale(questObjective.Id);
                     if (questObjectivesLocaleData != null)
                         ObjectManager.GetLocaleString(questObjectivesLocaleData.Description, loc, ref questObjective.Description);
                 }
@@ -777,7 +777,7 @@ namespace Game.Misc
 
     public class PointOfInterest
     {
-        public uint ID;
+        public uint Id;
         public Vector2 Pos;
         public uint Icon;
         public uint Flags;

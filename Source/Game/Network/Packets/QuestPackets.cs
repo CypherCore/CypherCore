@@ -217,7 +217,7 @@ namespace Game.Network.Packets
 
                 foreach (QuestObjective questObjective in Info.Objectives)
                 {
-                    _worldPacket.WriteUInt32(questObjective.ID);
+                    _worldPacket.WriteUInt32(questObjective.Id);
                     _worldPacket.WriteUInt8((byte)questObjective.Type);
                     _worldPacket.WriteInt8(questObjective.StorageIndex);
                     _worldPacket.WriteInt32(questObjective.ObjectID);
@@ -442,7 +442,7 @@ namespace Game.Network.Packets
 
             foreach (QuestObjectiveSimple obj in Objectives)
             {
-                _worldPacket.WriteUInt32(obj.ID);
+                _worldPacket.WriteUInt32(obj.Id);
                 _worldPacket.WriteInt32(obj.ObjectID);
                 _worldPacket.WriteInt32(obj.Amount);
                 _worldPacket.WriteUInt8(obj.Type);
@@ -1122,7 +1122,7 @@ namespace Game.Network.Packets
 
     public struct QuestObjectiveSimple
     {
-        public uint ID;
+        public uint Id;
         public int ObjectID;
         public int Amount;
         public byte Type;

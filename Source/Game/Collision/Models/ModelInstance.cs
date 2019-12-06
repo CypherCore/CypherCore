@@ -36,7 +36,7 @@ namespace Game.Collision
         {
             flags = spawn.flags;
             adtId = spawn.adtId;
-            ID = spawn.ID;
+            Id = spawn.Id;
             iPos = spawn.iPos;
             iRot = spawn.iRot;
             iScale = spawn.iScale;
@@ -50,7 +50,7 @@ namespace Game.Collision
 
             spawn.flags = reader.ReadUInt32();
             spawn.adtId = reader.ReadUInt16();
-            spawn.ID = reader.ReadUInt32();
+            spawn.Id = reader.ReadUInt32();
             spawn.iPos = reader.Read<Vector3>();
             spawn.iRot = reader.Read<Vector3>();
             spawn.iScale = reader.ReadSingle();
@@ -70,7 +70,7 @@ namespace Game.Collision
 
         public uint flags;
         public ushort adtId;
-        public uint ID;
+        public uint Id;
         public Vector3 iPos;
         public Vector3 iRot;
         public float iScale;

@@ -429,12 +429,18 @@ namespace Game.Entities
                 if (azeriteItem != null)
                 {
                     if (azeriteItem.IsEquipped())
+                    {
+                        ApplyAllAzeriteEmpoweredItemMods(false);
                         ApplyAzeritePowers(azeriteItem, false);
+                    }
 
                     azeriteItem.SetSelectedAzeriteEssences(spec.Id);
 
                     if (azeriteItem.IsEquipped())
+                    {
                         ApplyAzeritePowers(azeriteItem, true);
+                        ApplyAllAzeriteEmpoweredItemMods(true);
+                    }
 
                     azeriteItem.SetState(ItemUpdateState.Changed, this);
                 }

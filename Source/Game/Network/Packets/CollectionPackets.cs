@@ -32,12 +32,12 @@ namespace Game.Network.Packets
         public override void Read()
         {
             Type = (CollectionType)_worldPacket.ReadUInt32();
-            ID = _worldPacket.ReadUInt32();
+            Id = _worldPacket.ReadUInt32();
             IsFavorite = _worldPacket.HasBit();
         }
 
         public CollectionType Type;
-        public uint ID;
+        public uint Id;
         public bool IsFavorite;
     }
 }

@@ -195,7 +195,7 @@ namespace Game.Network.Packets
         {
             public void Write(WorldPacket data)
             {
-                data.WriteUInt32(ID);
+                data.WriteUInt32(Id);
                 data.WriteUInt32(NextPageID);
                 data.WriteInt32(PlayerConditionID);
                 data.WriteUInt8(Flags);
@@ -205,7 +205,7 @@ namespace Game.Network.Packets
                 data.WriteString(Text);
             }
 
-            public uint ID;
+            public uint Id;
             public uint NextPageID;
             public int PlayerConditionID;
             public byte Flags;

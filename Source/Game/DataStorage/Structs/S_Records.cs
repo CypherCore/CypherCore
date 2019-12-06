@@ -168,7 +168,7 @@ namespace Game.DataStorage
 
     public sealed class SpecSetMemberRecord
     {
-        public uint ID;
+        public uint Id;
         public uint ChrSpecializationID;
         public uint SpecSetID;
     }

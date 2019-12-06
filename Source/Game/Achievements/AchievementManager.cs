@@ -65,14 +65,14 @@ namespace Game.Achievements
             if (HasAchieved(achievement.Id))
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Achievement already earned",
-                    criteria.ID, criteria.Entry.Type, achievement.Id);
+                    criteria.Id, criteria.Entry.Type, achievement.Id);
                 return false;
             }
 
             if (achievement.InstanceID != -1 && referencePlayer.GetMapId() != achievement.InstanceID)
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Wrong map",
-                    criteria.ID, criteria.Entry.Type, achievement.Id);
+                    criteria.Id, criteria.Entry.Type, achievement.Id);
                 return false;
             }
 
@@ -80,7 +80,7 @@ namespace Game.Achievements
                 (achievement.Faction == AchievementFaction.Alliance && referencePlayer.GetTeam() != Team.Alliance))
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Wrong faction",
-            criteria.ID, criteria.Entry.Type, achievement.Id);
+            criteria.Id, criteria.Entry.Type, achievement.Id);
                 return false;
             }
 
@@ -369,7 +369,7 @@ namespace Game.Achievements
                 if (achievementCriteria.Entry.FailEvent != miscValue1 || (achievementCriteria.Entry.FailAsset != 0 && achievementCriteria.Entry.FailAsset != miscValue2))
                     continue;
 
-                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(achievementCriteria.ID);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(achievementCriteria.Id);
                 bool allComplete = true;
                 foreach (CriteriaTree tree in trees)
                 {
@@ -577,7 +577,7 @@ namespace Game.Achievements
         {
             CriteriaUpdate criteriaUpdate = new CriteriaUpdate();
 
-            criteriaUpdate.CriteriaID = criteria.ID;
+            criteriaUpdate.CriteriaID = criteria.Id;
             criteriaUpdate.Quantity = progress.Counter;
             criteriaUpdate.PlayerGUID = _owner.GetGUID();
             criteriaUpdate.Flags = 0;
@@ -854,11 +854,11 @@ namespace Game.Achievements
             {
                 if (node.Criteria != null)
                 {
-                    var progress = _criteriaProgress.LookupByKey(node.Criteria.ID);
+                    var progress = _criteriaProgress.LookupByKey(node.Criteria.Id);
                     if (progress != null)
                     {
                         GuildCriteriaProgress guildCriteriaProgress = new GuildCriteriaProgress();
-                        guildCriteriaProgress.CriteriaID = node.Criteria.ID;
+                        guildCriteriaProgress.CriteriaID = node.Criteria.Id;
                         guildCriteriaProgress.DateCreated = 0;
                         guildCriteriaProgress.DateStarted = 0;
                         guildCriteriaProgress.DateUpdated = progress.Date;
@@ -971,7 +971,7 @@ namespace Game.Achievements
             GuildCriteriaUpdate guildCriteriaUpdate = new GuildCriteriaUpdate();
 
             GuildCriteriaProgress guildCriteriaProgress = new GuildCriteriaProgress();
-            guildCriteriaProgress.CriteriaID = entry.ID;
+            guildCriteriaProgress.CriteriaID = entry.Id;
             guildCriteriaProgress.DateCreated = 0;
             guildCriteriaProgress.DateStarted = 0;
             guildCriteriaProgress.DateUpdated = progress.Date;
@@ -981,7 +981,7 @@ namespace Game.Achievements
 
             guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
 
-            _owner.BroadcastPacketIfTrackingAchievement(guildCriteriaUpdate, entry.ID);
+            _owner.BroadcastPacketIfTrackingAchievement(guildCriteriaUpdate, entry.Id);
         }
 
         public override void SendCriteriaProgressRemoved(uint criteriaId)

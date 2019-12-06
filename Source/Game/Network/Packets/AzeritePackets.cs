@@ -99,4 +99,62 @@ namespace Game.Network.Packets
         public uint AzeriteEssenceID;
         public byte? Slot;
     }
+
+    class AzeriteEmpoweredItemViewed : ClientPacket
+    {
+        public AzeriteEmpoweredItemViewed(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ItemGUID = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid ItemGUID;
+    }
+
+    class AzeriteEmpoweredItemSelectPower : ClientPacket
+    {
+        public AzeriteEmpoweredItemSelectPower(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Tier = _worldPacket.ReadInt32();
+            AzeritePowerID = _worldPacket.ReadInt32();
+            ContainerSlot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
+        }
+
+        public int Tier;
+        public int AzeritePowerID;
+        public byte ContainerSlot;
+        public byte Slot;
+    }
+
+    class AzeriteEmpoweredItemEquippedStatusChanged : ServerPacket
+    {
+        public AzeriteEmpoweredItemEquippedStatusChanged() : base(ServerOpcodes.AzeriteEmpoweredItemEquippedStatusChanged) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsHeartEquipped);
+            _worldPacket.FlushBits();
+        }
+
+        public bool IsHeartEquipped;
+    }
+
+    class AzeriteEmpoweredItemRespecOpen : ServerPacket
+    {
+        public AzeriteEmpoweredItemRespecOpen(ObjectGuid npcGuid) : base(ServerOpcodes.AzeriteEmpoweredItemRespecOpen)
+        {
+            NpcGUID = npcGuid;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(NpcGUID);
+        }
+
+        public ObjectGuid NpcGUID;
+    }
 }

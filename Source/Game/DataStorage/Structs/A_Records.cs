@@ -254,17 +254,25 @@ namespace Game.DataStorage
         public byte ConsignmentRate;
     }
 
+    public sealed class AzeriteEmpoweredItemRecord
+    {
+        public uint Id;
+        public uint ItemID;
+        public uint AzeriteTierUnlockSetID;
+        public uint AzeritePowerSetID;
+    }
+
     public sealed class AzeriteEssenceRecord
     {
         public string Name;
         public string Description;
-        public uint ID;
+        public uint Id;
         public int SpecSetID;
     }
 
     public sealed class AzeriteEssencePowerRecord
     {
-        public uint ID;
+        public uint Id;
         public string SourceAlliance;
         public string SourceHorde;
         public int AzeriteEssenceID;
@@ -277,13 +285,13 @@ namespace Game.DataStorage
 
     public sealed class AzeriteItemRecord
     {
-        public uint ID;
+        public uint Id;
         public uint ItemID;
     }
 
     public sealed class AzeriteItemMilestonePowerRecord
     {
-        public uint ID;
+        public uint Id;
         public int RequiredLevel;
         public int AzeritePowerID;
         public int Type;
@@ -292,13 +300,13 @@ namespace Game.DataStorage
 
     public sealed class AzeriteKnowledgeMultiplierRecord
     {
-        public uint ID;
+        public uint Id;
         public float Multiplier;
     }
 
     public sealed class AzeriteLevelInfoRecord
     {
-        public uint ID;
+        public uint Id;
         public ulong BaseExperienceToNextLevel;
         public ulong MinimumExperienceToNextLevel;
         public uint ItemLevel;
@@ -306,10 +314,45 @@ namespace Game.DataStorage
 
     public sealed class AzeritePowerRecord
     {
-        public uint ID;
+        public uint Id;
         public uint SpellID;
-        public int ItemBonusListID;
+        public uint ItemBonusListID;
         public int SpecSetID;
         public int Flags;
+    }
+
+    public sealed class AzeritePowerSetMemberRecord
+    {
+        public uint Id;
+        public uint AzeritePowerSetID;
+        public int AzeritePowerID;
+        public int Class;
+        public int Tier;
+        public uint OrderIndex;
+    }
+
+    public sealed class AzeriteTierUnlockRecord
+    {
+        public uint Id;
+        public byte ItemCreationContext;
+        public byte Tier;
+        public byte AzeriteLevel;
+        public uint AzeriteTierUnlockSetID;
+    }
+
+    public sealed class AzeriteTierUnlockSetRecord
+    {
+        public uint Id;
+        public AzeriteTierUnlockSetFlags Flags;
+    }
+
+    public sealed class AzeriteUnlockMappingRecord
+    {
+        public uint Id;
+        public int ItemLevel;
+        public uint ItemBonusListHead;
+        public uint ItemBonusListShoulders;
+        public uint ItemBonusListChest;
+        public uint AzeriteUnlockMappingSetID;
     }
 }

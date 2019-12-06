@@ -50,11 +50,11 @@ namespace Game
                 if (previousMilestone == milestonePower)
                     break;
 
-                if (!azeriteItem.HasUnlockedEssenceMilestone(previousMilestone.ID))
+                if (!azeriteItem.HasUnlockedEssenceMilestone(previousMilestone.Id))
                     return;
             }
 
-            azeriteItem.AddUnlockedEssenceMilestone(milestonePower.ID);
+            azeriteItem.AddUnlockedEssenceMilestone(milestonePower.Id);
             _player.ApplyAzeriteItemMilestonePower(azeriteItem, milestonePower, true);
             azeriteItem.SetState(ItemUpdateState.Changed, _player);
         }
@@ -175,6 +175,73 @@ namespace Game
                 (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(azeriteEssenceActivateEssence.Slot).Type == AzeriteItemMilestoneType.MajorEssence, true);
 
             azeriteItem.SetState(ItemUpdateState.Changed, _player);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemViewed)]
+        void HandleAzeriteEmpoweredItemViewed(AzeriteEmpoweredItemViewed azeriteEmpoweredItemViewed)
+        {
+            Item item = _player.GetItemByGuid(azeriteEmpoweredItemViewed.ItemGUID);
+            if (item == null || !item.IsAzeriteEmpoweredItem())
+                return;
+
+            item.AddItemFlag(ItemFieldFlags.AzeriteEmpoweredItemViewed);
+            item.SetState(ItemUpdateState.Changed, _player);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemSelectPower)]
+        void HandleAzeriteEmpoweredItemSelectPower(AzeriteEmpoweredItemSelectPower azeriteEmpoweredItemSelectPower)
+        {
+            Item item = _player.GetItemByPos(azeriteEmpoweredItemSelectPower.ContainerSlot, azeriteEmpoweredItemSelectPower.Slot);
+            if (item == null)
+                return;
+
+            AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteEmpoweredItemSelectPower.AzeritePowerID);
+            if (azeritePower == null)
+                return;
+
+            AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+            if (azeriteEmpoweredItem == null)
+                return;
+
+            // Validate tier
+            int actualTier = azeriteEmpoweredItem.GetTierForAzeritePower(_player.GetClass(), azeriteEmpoweredItemSelectPower.AzeritePowerID);
+            if (azeriteEmpoweredItemSelectPower.Tier > SharedConst.MaxAzeriteEmpoweredTier || azeriteEmpoweredItemSelectPower.Tier != actualTier)
+                return;
+
+            uint azeriteLevel = 0;
+            Item heartOfAzeroth = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+            if (heartOfAzeroth == null)
+                return;
+
+            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+            if (azeriteItem != null)
+                azeriteLevel = azeriteItem.GetEffectiveLevel();
+
+            // Check required heart of azeroth level
+            if (azeriteLevel < azeriteEmpoweredItem.GetRequiredAzeriteLevelForTier((uint)actualTier))
+                return;
+
+            // tiers are ordered backwards, you first select the highest one
+            for (int i = actualTier + 1; i < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++i)
+                if (azeriteEmpoweredItem.GetSelectedAzeritePower(i) == 0)
+                    return;
+
+            bool activateAzeritePower = azeriteEmpoweredItem.IsEquipped() && heartOfAzeroth.IsEquipped();
+            if (azeritePower.ItemBonusListID != 0 && activateAzeritePower)
+                _player._ApplyItemMods(azeriteEmpoweredItem, azeriteEmpoweredItem.GetSlot(), false);
+
+            azeriteEmpoweredItem.SetSelectedAzeritePower(actualTier, azeriteEmpoweredItemSelectPower.AzeritePowerID);
+
+            if (activateAzeritePower)
+            {
+                // apply all item mods when azerite power grants a bonus, item level changes and that affects stats and auras that scale with item level
+                if (azeritePower.ItemBonusListID != 0)
+                    _player._ApplyItemMods(azeriteEmpoweredItem, azeriteEmpoweredItem.GetSlot(), true);
+                else
+                    _player.ApplyAzeritePower(azeriteEmpoweredItem, azeritePower, true);
+            }
+
+            azeriteEmpoweredItem.SetState(ItemUpdateState.Changed, _player);
         }
     }
 }

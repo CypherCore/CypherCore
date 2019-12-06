@@ -36,11 +36,11 @@ namespace Game.DataStorage
     {
         public TaxiPathBySourceAndDestination(uint _id, uint _price)
         {
-            ID = _id;
+            Id = _id;
             price = _price;
         }
 
-        public uint ID;
+        public uint Id;
         public uint price;
     }
 }

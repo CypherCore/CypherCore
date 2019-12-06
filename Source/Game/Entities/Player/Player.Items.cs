@@ -1655,6 +1655,8 @@ namespace Game.Entities
                     }
                 }
 
+                pItem.AddItemFlag2(ItemFieldFlags2.Equipped);
+
                 if (IsInWorld && update)
                 {
                     pItem.AddToWorld();
@@ -1824,6 +1826,8 @@ namespace Game.Entities
                 byte slot = (byte)(pos & 255);
                 VisualizeItem(slot, pItem);
 
+                pItem.AddItemFlag2(ItemFieldFlags2.Equipped);
+
                 if (IsInWorld)
                 {
                     pItem.AddToWorld();
@@ -1933,6 +1937,7 @@ namespace Game.Entities
                             Item.RemoveItemsSetItem(this, pProto);
 
                         _ApplyItemMods(pItem, slot, false, update);
+                        pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
                         if (slot < EquipmentSlot.End)
@@ -4475,6 +4480,20 @@ namespace Game.Entities
             }
         }
 
+        void ApplyAllAzeriteEmpoweredItemMods(bool apply)
+        {
+            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+            {
+                if (m_items[i])
+                {
+                    if (!m_items[i].IsAzeriteEmpoweredItem() || m_items[i].IsBroken() || !CanUseAttackType(Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType())))
+                        continue;
+
+                    ApplyAzeritePowers(m_items[i], apply);
+                }
+            }
+        }
+
         public ObjectGuid GetLootWorldObjectGUID(ObjectGuid lootObjectGuid)
         {
             var guid = m_AELootView.LookupByKey(lootObjectGuid);
@@ -5520,6 +5539,22 @@ namespace Game.Entities
                                 (AzeriteItemMilestoneType)Global.DB2Mgr.GetAzeriteItemMilestonePower(slot).Type == AzeriteItemMilestoneType.MajorEssence, apply);
                 }
             }
+            else
+            {
+                AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+                if (azeriteEmpoweredItem)
+                {
+                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment))
+                    {
+                        for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+                        {
+                            AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteEmpoweredItem.GetSelectedAzeritePower(i));
+                            if (azeritePower != null)
+                                ApplyAzeritePower(azeriteEmpoweredItem, azeritePower, apply);
+                        }
+                    }
+                }
+            }
         }
 
         public void ApplyAzeriteItemMilestonePower(AzeriteItem item, AzeriteItemMilestonePowerRecord azeriteItemMilestonePower, bool apply)
@@ -5589,6 +5624,17 @@ namespace Game.Entities
                     }
                 }
             }
+        }
+
+        public void ApplyAzeritePower(AzeriteEmpoweredItem item, AzeritePowerRecord azeritePower, bool apply)
+        {
+            if (apply)
+            {
+                if (azeritePower.SpecSetID == 0 || Global.DB2Mgr.IsSpecSetMember(azeritePower.SpecSetID, GetPrimarySpecialization()))
+                    CastSpell(this, azeritePower.SpellID, true, item);
+            }
+            else
+                RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());
         }
 
         public bool HasItemOrGemWithIdEquipped(uint item, uint count, byte except_slot = ItemConst.NullSlot)
