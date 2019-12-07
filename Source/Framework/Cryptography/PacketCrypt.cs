@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Security.Cryptography;
 using System;
 using System.Security.Cryptography;
 
@@ -31,46 +30,25 @@ namespace Framework.Cryptography
             if (IsInitialized)
                 throw new InvalidOperationException("PacketCrypt already initialized!");
 
-            _clientDecrypt = new AuthenticatedAesCng();
-            _clientDecrypt.Key = key;
-            _clientDecrypt.CngMode = CngChainingMode.Gcm;
-            _clientDecrypt.TagSize = 96;
-
-            _serverEncrypt = new AuthenticatedAesCng();
-            _serverEncrypt.Key = key;
-            _serverEncrypt.CngMode = CngChainingMode.Gcm;
-            _serverEncrypt.TagSize = 96;
+            _serverEncrypt = new AesGcm(key);
+            _clientDecrypt = new AesGcm(key);
 
             IsInitialized = true;
         }
 
-        public bool Encrypt(ref byte[] data, int length, ref byte[] tag)
+        public bool Encrypt(ref byte[] data, ref byte[] tag)
         {
             if (IsInitialized)
-            {
-                _serverEncrypt.IV = BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253));
-
-                using (IAuthenticatedCryptoTransform encryptor = _serverEncrypt.CreateAuthenticatedEncryptor())
-                {
-                    data = encryptor.TransformFinalBlock(data, 0, length);
-                    tag = encryptor.GetTag();
-                }
-            }
+                _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
 
             ++_serverCounter;
             return true;
         }
 
-        public bool Decrypt(ref byte[] data, int length, byte[] tag)
+        public bool Decrypt(ref byte[] data, byte[] tag)
         {
             if (IsInitialized)
-            {
-                _clientDecrypt.IV = BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43));
-                _clientDecrypt.Tag = tag;
-
-                using (ICryptoTransform decryptor = _clientDecrypt.CreateDecryptor())
-                    data = decryptor.TransformFinalBlock(data, 0, length);
-            }
+                _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
 
             ++_clientCounter;
             return true;
@@ -83,8 +61,8 @@ namespace Framework.Cryptography
 
         public bool IsInitialized { get; set; }
 
-        AuthenticatedAesCng _clientDecrypt;
-        AuthenticatedAesCng _serverEncrypt;
+        AesGcm _serverEncrypt;
+        AesGcm _clientDecrypt;
         ulong _clientCounter;
         ulong _serverCounter;
     }

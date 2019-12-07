@@ -2,7 +2,7 @@
   <Import Project="..\..\default.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>BNetServer.Server</StartupObject>
     <ApplicationIcon>Red.ico</ApplicationIcon>
   </PropertyGroup>
@@ -19,5 +19,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>

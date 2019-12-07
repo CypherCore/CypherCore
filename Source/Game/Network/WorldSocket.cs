@@ -157,7 +157,7 @@ namespace Game.Network
                 var data = new byte[header.Size];
                 Buffer.BlockCopy(GetReceiveBuffer(), 16, data, 0, header.Size);
 
-                if (!_worldCrypt.Decrypt(ref data, header.Size, header.Tag))
+                if (!_worldCrypt.Decrypt(ref data, header.Tag))
                 {
                     Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress().ToString()} failed to decrypt packet (size: {header.Size})");
                     return;
@@ -315,7 +315,7 @@ namespace Game.Network
 
             PacketHeader header = new PacketHeader();
             header.Size = packetSize;
-            _worldCrypt.Encrypt(ref data, header.Size, ref header.Tag);
+            _worldCrypt.Encrypt(ref data, ref header.Tag);
 
             ByteBuffer byteBuffer = new ByteBuffer();
             header.Write(byteBuffer);
