@@ -2,7 +2,7 @@ version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 clone_script:
 - cmd: git clone -q --branch=master --recursive https://github.com/CypherCore/CypherCore.git C:\projects\CypherCore-master
