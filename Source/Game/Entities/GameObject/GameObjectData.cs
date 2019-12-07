@@ -541,12 +541,10 @@ namespace Game.Entities
 
             unsafe
             {
-                fixed (int* ptr = Raw.data)
-                {
-                    for (int i = 0; i < SharedConst.MaxGOData; i++)
-                        stats.Data[i] = ptr[i];
-                }
+                for (int i = 0; i < SharedConst.MaxGOData; i++)
+                    stats.Data[i] = Raw.data[i];
             }
+
             stats.RequiredLevel = (uint)RequiredLevel;
 
             QueryData.Stats = stats;

@@ -3656,11 +3656,8 @@ namespace Game
 
                 unsafe
                 {
-                    fixed (int* b = go.Raw.data)
-                    {
-                        for (byte x = 0; x < db2go.PropValue.Length; ++x)
-                            b[x] = db2go.PropValue[x];
-                    }
+                    for (byte x = 0; x < db2go.PropValue.Length; ++x)
+                        go.Raw.data[x] = db2go.PropValue[x];
                 }
 
                 go.RequiredLevel = 0;
@@ -3702,11 +3699,8 @@ namespace Game
 
                     unsafe
                     {
-                        fixed (int* b = got.Raw.data)
-                        {
-                            for (byte x = 0; x < SharedConst.MaxGOData; ++x)
-                                b[x] = result.Read<int>(8 + x);
-                        }
+                        for (byte x = 0; x < SharedConst.MaxGOData; ++x)
+                            got.Raw.data[x] = result.Read<int>(8 + x);
                     }
 
                     got.RequiredLevel = result.Read<int>(42);

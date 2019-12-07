@@ -131,11 +131,8 @@ namespace Game.DataStorage
 
                     unsafe
                     {
-                        fixed (float* b = areaTriggerTemplate.DefaultDatas.Data)
-                        {
-                            for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                                b[i] = templates.Read<float>(3 + i);
-                        }
+                        for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
+                            areaTriggerTemplate.DefaultDatas.Data[i] = templates.Read<float>(3 + i);
                     }
 
                     areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(9));

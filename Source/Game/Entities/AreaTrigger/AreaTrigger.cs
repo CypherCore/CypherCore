@@ -314,12 +314,9 @@ namespace Game.Entities
 
             unsafe
             {
-                fixed (float* ptr = GetTemplate().BoxDatas.Extents)
-                {
-                    extentsX = ptr[0];
-                    extentsY = ptr[1];
-                    extentsZ = ptr[2];
-                }
+                extentsX = GetTemplate().BoxDatas.Extents[0];
+                extentsY = GetTemplate().BoxDatas.Extents[1];
+                extentsZ = GetTemplate().BoxDatas.Extents[2];
             }
 
             var check = new AnyUnitInObjectRangeCheck(this, GetTemplate().MaxSearchRadius, false);

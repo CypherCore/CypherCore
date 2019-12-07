@@ -509,19 +509,13 @@ namespace Game.Entities
                 {
                     unsafe
                     {
-                        fixed (float* ptr = areaTriggerTemplate.BoxDatas.Extents)
-                        {
-                            data.WriteFloat(ptr[0]);
-                            data.WriteFloat(ptr[1]);
-                            data.WriteFloat(ptr[2]);
-                        }
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[0]);
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[1]);
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[2]);
 
-                        fixed (float* ptr = areaTriggerTemplate.BoxDatas.ExtentsTarget)
-                        {
-                            data.WriteFloat(ptr[0]);
-                            data.WriteFloat(ptr[1]);
-                            data.WriteFloat(ptr[2]);
-                        }
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[0]);
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[1]);
+                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[2]);
                     }
                 }
 
