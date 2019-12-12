@@ -37,9 +37,6 @@ namespace Game.Network
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
         static byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
-        static byte[] ClientTypeSeed_Wn64 = { 0x1A, 0x09, 0xBE, 0x1D, 0x38, 0xA1, 0x22, 0x58, 0x6B, 0x49, 0x31, 0xBE, 0xCC, 0xEA, 0xD4, 0xAA };
-        static byte[] ClientTypeSeed_Mc64 = { 0x34, 0x1C, 0xFE, 0xFE, 0x3D, 0x72, 0xAC, 0xA9, 0xA4, 0x40, 0x7D, 0xC5, 0x35, 0xDE, 0xD6, 0x6A };
-
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
@@ -394,6 +391,15 @@ namespace Game.Network
                 return;
             }
 
+            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(Global.WorldMgr.GetRealm().Build);
+            if (buildInfo == null)
+            {
+                SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress().ToString()}).");
+                CloseSocket();
+                return;
+            }
+
             AccountInfo account = new AccountInfo(result.GetFields());
 
             // For hook purposes, we get Remoteaddress at this point.
@@ -402,9 +408,9 @@ namespace Game.Network
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
             if (account.game.OS == "Wn64")
-                digestKeyHash.Finish(ClientTypeSeed_Wn64);
+                digestKeyHash.Finish(buildInfo.Win64AuthSeed);
             else if (account.game.OS == "Mc64")
-                digestKeyHash.Finish(ClientTypeSeed_Mc64);
+                digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
             else
             {
                 Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);

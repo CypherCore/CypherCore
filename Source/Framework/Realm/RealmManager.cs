@@ -35,9 +35,42 @@ public class RealmManager : Singleton<RealmManager>
         _updateTimer = new Timer(TimeSpan.FromSeconds(updateInterval).TotalMilliseconds);
         _updateTimer.Elapsed += UpdateRealms;
 
+        LoadBuildInfo();
+
         UpdateRealms(null, null);
 
         _updateTimer.Start();
+    }
+
+    void LoadBuildInfo()
+    {
+        //                                         0             1             2              3              4      5              6
+        SQLResult result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed FROM build_info ORDER BY build ASC");
+        if (!result.IsEmpty())
+        {
+            do
+            {
+                RealmBuildInfo build = new RealmBuildInfo();
+                build.MajorVersion = result.Read<uint>(0);
+                build.MinorVersion = result.Read<uint>(1);
+                build.BugfixVersion = result.Read<uint>(2);
+                string hotfixVersion = result.Read<string>(3);
+                if (hotfixVersion.Length < build.HotfixVersion.Length)
+                    build.HotfixVersion = hotfixVersion.ToCharArray();
+
+                build.Build = result.Read<uint>(4);
+                string win64AuthSeedHexStr = result.Read<string>(5);
+                if (win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
+                    build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
+
+                string mac64AuthSeedHexStr = result.Read<string>(6);
+                if (mac64AuthSeedHexStr.Length == build.Mac64AuthSeed.Length * 2)
+                    build.Mac64AuthSeed = mac64AuthSeedHexStr.ToByteArray();
+
+                _builds.Add(build);
+
+            } while (result.NextRow());
+        }
     }
 
     public void Close()
@@ -119,37 +152,9 @@ public class RealmManager : Singleton<RealmManager>
         return _realms.LookupByKey(id);
     }
 
-    // List of client builds for verbose version info in realmlist packet
-    RealmBuildInfo[] ClientBuilds =
+    public RealmBuildInfo GetBuildInfo(uint build)
     {
-        new RealmBuildInfo(32722, 8, 2, 5, ' ' ),
-        new RealmBuildInfo(32638, 8, 2, 5, ' ' ),
-        new RealmBuildInfo(32580, 8, 2, 5, ' ' ),
-        new RealmBuildInfo(32494, 8, 2, 5, ' ' ),
-        new RealmBuildInfo(28938, 8, 1, 5, ' ' ),
-        new RealmBuildInfo(21355, 6, 2, 4, ' ' ),
-        new RealmBuildInfo(20726, 6, 2, 3, ' ' ),
-        new RealmBuildInfo(20574, 6, 2, 2, 'a' ),
-        new RealmBuildInfo(20490, 6, 2, 2, 'a' ),
-        new RealmBuildInfo(15595, 4, 3, 4, ' ' ),
-        new RealmBuildInfo(14545, 4, 2, 2, ' ' ),
-        new RealmBuildInfo(13623, 4, 0, 6, 'a' ),
-        new RealmBuildInfo(13930, 3, 3, 5, 'a' ),                                  // 3.3.5a China Mainland build
-        new RealmBuildInfo(12340, 3, 3, 5, 'a' ),
-        new RealmBuildInfo(11723, 3, 3, 3, 'a' ),
-        new RealmBuildInfo(11403, 3, 3, 2, ' ' ),
-        new RealmBuildInfo(11159, 3, 3, 0, 'a' ),
-        new RealmBuildInfo(10505, 3, 2, 2, 'a' ),
-        new RealmBuildInfo(9947,  3, 1, 3, ' ' ),
-        new RealmBuildInfo(8606,  2, 4, 3, ' ' ),
-        new RealmBuildInfo(6141,  1, 12, 3, ' ' ),
-        new RealmBuildInfo(6005,  1, 12, 2, ' ' ),
-        new RealmBuildInfo(5875,  1, 12, 1, ' ' ),
-    };
-
-    RealmBuildInfo GetBuildInfo(uint build)
-    {
-        foreach (var clientBuild in ClientBuilds)
+        foreach (var clientBuild in _builds)
             if (clientBuild.Build == build)
                 return clientBuild;
 
@@ -158,11 +163,7 @@ public class RealmManager : Singleton<RealmManager>
 
     public uint GetMinorMajorBugfixVersionForBuild(uint build)
     {
-        RealmBuildInfo buildInfo = ClientBuilds.FirstOrDefault(p =>
-        {
-            return p.Build < build;
-        });
-
+        RealmBuildInfo buildInfo = _builds.FirstOrDefault(p => p.Build < build);
         return buildInfo != null ? (buildInfo.MajorVersion * 10000 + buildInfo.MinorVersion * 100 + buildInfo.BugfixVersion) : 0;
     }
 
@@ -326,25 +327,19 @@ public class RealmManager : Singleton<RealmManager>
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
+    List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
     ConcurrentDictionary<RealmHandle, Realm> _realms = new ConcurrentDictionary<RealmHandle, Realm>();
     List<string> _subRegions = new List<string>();
     Timer _updateTimer;
 }
 
-class RealmBuildInfo
+public class RealmBuildInfo
 {
-    public RealmBuildInfo(uint build, uint majorVersion, uint minorVersion, uint bugfixVersion, char hotfixVersion = ' ')
-    {
-        Build = build;
-        MajorVersion = majorVersion;
-        MinorVersion = minorVersion;
-        BugfixVersion = bugfixVersion;
-        HotfixVersion = hotfixVersion;
-    }
-
     public uint Build;
     public uint MajorVersion;
     public uint MinorVersion;
     public uint BugfixVersion;
-    public char HotfixVersion;
+    public char[] HotfixVersion = new char[4];
+    public byte[] Win64AuthSeed = new byte[16];
+    public byte[] Mac64AuthSeed = new byte[16];
 }
