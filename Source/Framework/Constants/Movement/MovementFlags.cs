@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2019 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ namespace Framework.Constants
         DoubleJump                          = 0x20000,
         // these flags cannot be sent (18 bits in packet)
         Unk18                               = 0x40000,
-        Unk19                               = 0x80000,
+        AwaitingLoad                        = 0x80000,
         InterpolatedMovement                = 0x100000,
         InterpolatedTurning                 = 0x200000,
         InterpolatedPitching                = 0x400000
