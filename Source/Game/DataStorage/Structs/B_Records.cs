@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using Framework.Constants;
 
 namespace Game.DataStorage
 {
@@ -97,7 +98,7 @@ namespace Game.DataStorage
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
         public ushort HolidayWorldState;
-        public sbyte Flags;
+        public BattlemasterListFlags Flags;
         public int IconFileDataID;
         public short RequiredPlayerConditionID;
         public short[] MapId = new short[16];
