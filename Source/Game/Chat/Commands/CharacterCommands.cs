@@ -277,8 +277,7 @@ namespace Game.Chat
 
             ObjectGuid targetGuid;
             string targetName;
-            Player playerNotUsed;
-            if (!handler.ExtractPlayerTarget(new StringArguments(playerNameStr), out playerNotUsed, out targetGuid, out targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(playerNameStr), out _, out targetGuid, out targetName))
                 return false;
 
             CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(targetGuid);

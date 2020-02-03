@@ -702,7 +702,7 @@ namespace Game.BattleGrounds.Zones
 
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
-            uint safeloc = 0;
+            uint safeloc;
 
             if (player.GetTeamId() == Attackers)
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.BeachGy];
@@ -820,9 +820,9 @@ namespace Game.BattleGrounds.Zones
             }
 
             AddSpiritGuide(i + SACreatureTypes.Max, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), SAMiscConst.GYOrientation[i], GraveyardStatus[i]);
-            uint npc = 0;
-            int flag = 0;
 
+            uint npc;
+            int flag;
             switch (i)
             {
                 case SAGraveyards.LeftCapturableGy:

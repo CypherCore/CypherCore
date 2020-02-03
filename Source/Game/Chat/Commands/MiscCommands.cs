@@ -125,7 +125,7 @@ namespace Game.Chat
         [CommandNonGroup("gps", RBACPermissions.CommandGps)]
         static bool HandleGPSCommand(StringArguments args, CommandHandler handler)
         {
-            WorldObject obj = null;
+            WorldObject obj;
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
@@ -604,8 +604,7 @@ namespace Game.Chat
 
                 // to point where player stay (if loaded)
                 WorldLocation loc;
-                bool in_flight;
-                if (!Player.LoadPositionFromDB(out loc, out in_flight, targetGuid))
+                if (!Player.LoadPositionFromDB(out loc, out _, targetGuid))
                     return false;
 
                 // stop flight if need
@@ -809,7 +808,7 @@ namespace Game.Chat
         [CommandNonGroup("distance", RBACPermissions.CommandDistance)]
         static bool HandleGetDistanceCommand(StringArguments args, CommandHandler handler)
         {
-            WorldObject obj = null;
+            WorldObject obj;
 
             if (!args.Empty())
             {
@@ -935,10 +934,9 @@ namespace Game.Chat
         [CommandNonGroup("kick", RBACPermissions.CommandKick, true)]
         static bool Kick(StringArguments args, CommandHandler handler)
         {
-            Player target = null;
+            Player target;
             string playerName;
-            ObjectGuid guid;
-            if (!handler.ExtractPlayerTarget(args, out target, out guid, out playerName))
+            if (!handler.ExtractPlayerTarget(args, out target, out _, out playerName))
                 return false;
 
             if (handler.GetSession() != null && target == handler.GetSession().GetPlayer())
@@ -990,7 +988,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(loc))
                 location_str = loc;
 
-            Player player = null;
+            Player player;
             ObjectGuid targetGUID;
             if (!handler.ExtractPlayerTarget(args, out player, out targetGUID))
                 return false;
@@ -1285,7 +1283,7 @@ namespace Game.Chat
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
 
             // To make sure we get a target, we convert our guid to an omniversal...
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
@@ -1334,7 +1332,7 @@ namespace Game.Chat
 
             // Account data print variables
             string userName = handler.GetCypherString(CypherStrings.Error);
-            uint accId = 0;
+            uint accId;
             ulong lowguid = targetGuid.GetCounter();
             string eMail = handler.GetCypherString(CypherStrings.Error);
             string regMail = handler.GetCypherString(CypherStrings.Error);
@@ -1362,10 +1360,10 @@ namespace Game.Chat
             Class classid;
             Gender gender;
             LocaleConstant locale = handler.GetSessionDbcLocale();
-            uint totalPlayerTime = 0;
-            uint level = 0;
+            uint totalPlayerTime;
+            uint level;
             string alive = handler.GetCypherString(CypherStrings.Error);
-            ulong money = 0;
+            ulong money;
             uint xp = 0;
             uint xptotal = 0;
 
@@ -1691,7 +1689,7 @@ namespace Game.Chat
                 return false;
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
-            string muteBy = "";
+            string muteBy;
             if (handler.GetSession() != null)
                 muteBy = handler.GetSession().GetPlayerName();
             else
@@ -1875,7 +1873,7 @@ namespace Game.Chat
                         break;
                     case MovementGeneratorType.Chase:
                         {
-                            Unit target = null;
+                            Unit target;
                             if (unit.IsTypeId(TypeId.Player))
                                 target = ((ChaseMovementGenerator<Player>)movementGenerator).Target;
                             else
@@ -1891,7 +1889,7 @@ namespace Game.Chat
                         }
                     case MovementGeneratorType.Follow:
                         {
-                            Unit target = null;
+                            Unit target;
                             if (unit.IsTypeId(TypeId.Player))
                                 target = ((FollowMovementGenerator<Player>)movementGenerator).Target;
                             else

@@ -113,7 +113,7 @@ namespace Game.Chat
         [Command("move", RBACPermissions.CommandNpcMove)]
         static bool Move(StringArguments args, CommandHandler handler)
         {
-            ulong lowguid = 0;
+            ulong lowguid;
 
             Creature creature = handler.GetSelectedCreature();
             if (!creature)
@@ -812,7 +812,7 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(guid_str))
                     return false;
 
-                ulong lowguid = 0;
+                ulong lowguid;
                 Creature creature = null;
 
                 if (!string.IsNullOrEmpty(dontdel_str))
@@ -980,7 +980,7 @@ namespace Game.Chat
                     mtype = MovementGeneratorType.Random;
 
                 Creature creature = handler.GetSelectedCreature();
-                ulong guidLow = 0;
+                ulong guidLow;
 
                 if (creature)
                     guidLow = creature.GetSpawnId();

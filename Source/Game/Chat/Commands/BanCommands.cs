@@ -133,8 +133,7 @@ namespace Game.Chat.Commands
                     }
                     break;
                 case BanMode.IP:
-                    IPAddress address;
-                    if (!IPAddress.TryParse(nameOrIP, out address))
+                    if (!IPAddress.TryParse(nameOrIP, out _))
                         return false;
                     break;
             }
@@ -143,7 +142,7 @@ namespace Game.Chat.Commands
             switch (Global.WorldMgr.BanAccount(mode, nameOrIP, durationStr, reasonStr, author))
             {
                 case BanReturn.Success:
-                    if (!uint.TryParse(durationStr, out uint tempValue) || tempValue > 0)
+                    if (duration > 0)
                     {
                         if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
                             Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoubannedmessageWorld, author, nameOrIP, Time.secsToTimeString(Time.TimeStringToSecs(durationStr)), reasonStr);
@@ -654,8 +653,7 @@ namespace Game.Chat.Commands
                     }
                     break;
                 case BanMode.IP:
-                    IPAddress address;
-                    if (!IPAddress.TryParse(nameOrIP, out address))
+                    if (!IPAddress.TryParse(nameOrIP, out _))
                         return false;
                     break;
             }

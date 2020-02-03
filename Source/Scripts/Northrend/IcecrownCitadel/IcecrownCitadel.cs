@@ -861,7 +861,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        void UpdateEscortAI(uint diff)
+        public override void UpdateEscortAI(uint diff)
         {
             if (_wipeCheckTimer <= diff)
                 _wipeCheckTimer = 0;
@@ -1029,7 +1029,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 IsUndead = true;
                 me.SetDeathState(DeathState.JustRespawned);
-                uint newEntry = 0;
+                uint newEntry;
                 switch (me.GetEntry())
                 {
                     case CreatureIds.CaptainArnath:
@@ -1367,7 +1367,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 _events.ScheduleEvent(EventTypes.SoulMissile, RandomHelper.URand(1000, 6000));
         }
 
-        void Update(uint diff)
+        public override void UpdateAI(uint diff)
         {
             if (_events.Empty())
                 return;
@@ -1427,7 +1427,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         void HandleEvent(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            uint trapId = 0;
+            uint trapId;
             switch (GetSpellInfo().GetEffect(effIndex).MiscValue)
             {
                 case AwakenWard1:

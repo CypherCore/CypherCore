@@ -163,7 +163,7 @@ namespace Game.BattleGrounds.Zones
 
         void CheckSomeoneJoinedPo()
         {
-            GameObject obj = null;
+            GameObject obj;
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
@@ -203,7 +203,8 @@ namespace Game.BattleGrounds.Zones
             //reset current point counts
             for (byte i = 0; i < 2 * EotSPoints.PointsMax; ++i)
                 m_CurrentPointPlayersCount[i] = 0;
-            GameObject obj = null;
+
+            GameObject obj;
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 obj = GetBgMap().GetGameObject(BgObjects[EotSObjectTypes.TowerCapFelReaver + i]);
@@ -255,7 +256,7 @@ namespace Game.BattleGrounds.Zones
                     //point is fully horde's
                     m_PointBarStatus[point] = EotSProgressBarConsts.ProgressBarHordeControlled;
 
-                uint pointOwnerTeamId = 0;
+                uint pointOwnerTeamId;
                 //find which team should own this point
                 if (m_PointBarStatus[point] <= EotSProgressBarConsts.ProgressBarNeutralLow)
                     pointOwnerTeamId = (uint)Team.Horde;
@@ -871,8 +872,7 @@ namespace Game.BattleGrounds.Zones
 
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
-            uint g_id = 0;
-
+            uint g_id;
             switch (player.GetTeam())
             {
                 case Team.Alliance:
@@ -884,11 +884,8 @@ namespace Game.BattleGrounds.Zones
                 default: return null;
             }
 
-            WorldSafeLocsEntry entry = null;
-            WorldSafeLocsEntry nearestEntry = null;
-            entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
-            nearestEntry = entry;
-
+            WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
+            WorldSafeLocsEntry nearestEntry = entry;
             if (entry == null)
             {
                 Log.outError(LogFilter.Battleground, "BattlegroundEY: The main team graveyard could not be found. The graveyard system will not be operational!");

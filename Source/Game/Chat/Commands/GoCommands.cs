@@ -262,8 +262,8 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            float x, y, z = 0;
-            uint mapId = 0;
+            float x, y, z;
+            uint mapId;
 
             var poiData = Global.ObjectMgr.GetQuestPOIData(questID);
             if (poiData != null)

@@ -440,7 +440,7 @@ namespace Game.Chat.Commands
             }
 
             // Get security level of player, whom this ticket is assigned to
-            AccountTypes security = AccountTypes.Player;
+            AccountTypes security;
             Player assignedPlayer = ticket.GetAssignedPlayer();
             if (assignedPlayer && assignedPlayer.IsInWorld)
                 security = assignedPlayer.GetSession().GetSecurity();

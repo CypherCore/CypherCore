@@ -55,16 +55,16 @@ public class RealmManager : Singleton<RealmManager>
                 build.MinorVersion = result.Read<uint>(1);
                 build.BugfixVersion = result.Read<uint>(2);
                 string hotfixVersion = result.Read<string>(3);
-                if (hotfixVersion.Length < build.HotfixVersion.Length)
+                if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)
                     build.HotfixVersion = hotfixVersion.ToCharArray();
 
                 build.Build = result.Read<uint>(4);
                 string win64AuthSeedHexStr = result.Read<string>(5);
-                if (win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
+                if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
                     build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 
                 string mac64AuthSeedHexStr = result.Read<string>(6);
-                if (mac64AuthSeedHexStr.Length == build.Mac64AuthSeed.Length * 2)
+                if (!mac64AuthSeedHexStr.IsEmpty() && mac64AuthSeedHexStr.Length == build.Mac64AuthSeed.Length * 2)
                     build.Mac64AuthSeed = mac64AuthSeedHexStr.ToByteArray();
 
                 _builds.Add(build);

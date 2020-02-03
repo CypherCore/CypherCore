@@ -220,7 +220,6 @@ namespace Game.Chat
 
             string param1 = args.NextString();
             string param2 = args.NextString();
-            uint encounterId = 0;
             Player player = null;
 
             // Character name must be provided when using this from console.
@@ -257,7 +256,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!uint.TryParse(param1, out encounterId))
+            if (!uint.TryParse(param1, out uint encounterId))
                 return false;
 
             if (encounterId > map.GetInstanceScript().GetEncounterCount())

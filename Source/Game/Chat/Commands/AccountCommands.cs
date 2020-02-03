@@ -521,9 +521,10 @@ namespace Game.Chat
                 }
 
                 string targetAccountName = "";
-                uint targetAccountId = 0;
-                AccountTypes targetSecurity = 0;
-                uint gm = 0;
+                uint targetAccountId;
+                AccountTypes targetSecurity;
+                uint gm;
+
                 string arg1 = args.NextString();
                 string arg2 = args.NextString();
                 string arg3 = args.NextString();

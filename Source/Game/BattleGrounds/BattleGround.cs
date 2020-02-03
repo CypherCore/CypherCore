@@ -674,7 +674,7 @@ namespace Game.BattleGrounds
                 SetWinner(BattlegroundTeamId.Neutral);
             }
 
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             ulong battlegroundId = 1;
             if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {

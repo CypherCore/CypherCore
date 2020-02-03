@@ -425,7 +425,7 @@ namespace Game.Achievements
             SendPacket(achievementData);
         }
 
-        public void SendAchievementInfo(Player receiver, uint achievementId = 0)
+        public void SendAchievementInfo(Player receiver)
         {
             RespondInspectAchievements inspectedAchievements = new RespondInspectAchievements();
             inspectedAchievements.Player = _owner.GetGUID();

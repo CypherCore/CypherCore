@@ -983,8 +983,7 @@ namespace Scripts.World.NpcSpecial
                         if (Coordinates.Empty())
                             return;
 
-                        uint patientEntry = 0;
-
+                        uint patientEntry;
                         switch (me.GetEntry())
                         {
                             case CreatureIds.DoctorAlliance:

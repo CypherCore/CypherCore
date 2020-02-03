@@ -1125,7 +1125,7 @@ namespace Game.BattleFields
                 {
                     capturePoint.SetRespawnTime(0);                  // not save respawn time
                     capturePoint.Delete();
-                    capturePoint = null;
+                    capturePoint.Dispose();
                 }
                 m_capturePointGUID.Clear();
             }
@@ -1176,7 +1176,7 @@ namespace Game.BattleFields
             if (MathFunctions.fuzzyEq(fact_diff, 0.0f))
                 return false;
 
-            Team Challenger = 0;
+            Team Challenger;
             float maxDiff = m_maxSpeed * diff;
 
             if (fact_diff < 0)

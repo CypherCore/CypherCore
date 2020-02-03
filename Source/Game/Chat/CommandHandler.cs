@@ -273,13 +273,11 @@ namespace Game.Chat
 
         public string ExtractKeyFromLink(StringArguments args, params string[] linkType)
         {
-            int throwaway;
-            return ExtractKeyFromLink(args, linkType, out throwaway);
+            return ExtractKeyFromLink(args, linkType, out _);
         }
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx)
         {
-            string throwaway;
-            return ExtractKeyFromLink(args, linkType, out found_idx, out throwaway);
+            return ExtractKeyFromLink(args, linkType, out found_idx, out _);
         }
         public string ExtractKeyFromLink(StringArguments args, string[] linkType, out int found_idx, out string something1)
         {
@@ -378,14 +376,11 @@ namespace Game.Chat
         }
         public bool ExtractPlayerTarget(StringArguments args, out Player player)
         {
-            ObjectGuid guid;
-            string name;
-            return ExtractPlayerTarget(args, out player, out guid, out name);
+            return ExtractPlayerTarget(args, out player, out _, out _);
         }
         public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid)
         {
-            string name;
-            return ExtractPlayerTarget(args, out player, out playerGuid, out name);
+            return ExtractPlayerTarget(args, out player, out playerGuid, out _);
         }
 
         public bool ExtractPlayerTarget(StringArguments args, out Player player, out ObjectGuid playerGuid, out string playerName)
@@ -496,9 +491,7 @@ namespace Game.Chat
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
             // number or [name] Shift-click form |color|Htalent:talent_id, rank|h[name]|h|r
             // number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
-            int type = 0;
-            string param1Str = null;
-            string idS = ExtractKeyFromLink(args, spellKeys, out type, out param1Str);
+            string idS = ExtractKeyFromLink(args, spellKeys, out int type, out string param1Str);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 

@@ -125,9 +125,9 @@ namespace Game.Chat
         [Command("leader", RBACPermissions.CommandGroupLeader)]
         static bool HandleGroupLeaderCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = null;
-            Group group = null;
-            ObjectGuid guid = ObjectGuid.Empty;
+            Player player;
+            Group group;
+            ObjectGuid guid;
             string nameStr = args.NextString();
 
             if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
@@ -151,12 +151,11 @@ namespace Game.Chat
         [Command("disband", RBACPermissions.CommandGroupDisband)]
         static bool HandleGroupDisbandCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = null;
-            Group group = null;
-            ObjectGuid guid = ObjectGuid.Empty;
+            Player player;
+            Group group;
             string nameStr = args.NextString();
 
-            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
+            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out _))
                 return false;
 
             if (!group)
@@ -172,9 +171,9 @@ namespace Game.Chat
         [Command("remove", RBACPermissions.CommandGroupRemove)]
         static bool HandleGroupRemoveCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = null;
-            Group group = null;
-            ObjectGuid guid = ObjectGuid.Empty;
+            Player player;
+            Group group;
+            ObjectGuid guid;
             string nameStr = args.NextString();
 
             if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
@@ -196,16 +195,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player playerSource = null;
-            Player playerTarget = null;
-            Group groupSource = null;
-            Group groupTarget = null;
-            ObjectGuid guidSource = ObjectGuid.Empty;
-            ObjectGuid guidTarget = ObjectGuid.Empty;
+            Player playerSource;
+            Player playerTarget;
+            Group groupSource;
+            Group groupTarget;
             string nameplgrStr = args.NextString();
             string nameplStr = args.NextString();
 
-            if (!handler.GetPlayerGroupAndGUIDByName(nameplgrStr, out playerSource, out groupSource, out guidSource, true))
+            if (!handler.GetPlayerGroupAndGUIDByName(nameplgrStr, out playerSource, out groupSource, out _, true))
                 return false;
 
             if (!groupSource)
@@ -214,7 +211,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!handler.GetPlayerGroupAndGUIDByName(nameplStr, out playerTarget, out groupTarget, out guidTarget, true))
+            if (!handler.GetPlayerGroupAndGUIDByName(nameplStr, out playerTarget, out groupTarget, out _, true))
                 return false;
 
             if (groupTarget || playerTarget.GetGroup() == groupSource)
@@ -243,7 +240,7 @@ namespace Game.Chat
             ObjectGuid guidTarget;
             string nameTarget;
             string zoneName = "";
-            string onlineState = "";
+            string onlineState;
 
             // Parse the guid to uint32...
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());

@@ -213,12 +213,12 @@ namespace Game.BlackMarket
             if (entry.GetMailSent())
                 return;
 
-            uint bidderAccId = 0;
+            uint bidderAccId;
             ObjectGuid bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
             Player bidder = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
             // data for gm.log
             string bidderName = "";
-            bool logGmTrade = false;
+            bool logGmTrade;
 
             if (bidder)
             {

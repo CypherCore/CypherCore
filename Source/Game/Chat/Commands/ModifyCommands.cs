@@ -31,9 +31,8 @@ namespace Game.Chat
         [Command("hp", RBACPermissions.CommandModifyHp)]
         static bool HandleModifyHPCommand(StringArguments args, CommandHandler handler)
         {
-            int hp, hpmax = 0;
             Player target = handler.GetSelectedPlayerOrSelf();
-            if (CheckModifyResources(args, handler, target, out hp, out hpmax))
+            if (CheckModifyResources(args, handler, target, out int hp, out int hpmax))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, hpmax);
                 target.SetMaxHealth((uint)hpmax);
@@ -390,9 +389,8 @@ namespace Game.Chat
             if (!uint.TryParse(factionTxt, out uint factionId))
                 return false;
 
-            int amount = 0;
             string rankTxt = args.NextString();
-            if (factionId == 0 || !int.TryParse(rankTxt, out amount))
+            if (factionId == 0 || !int.TryParse(rankTxt, out int amount))
                 return false;
 
             if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())

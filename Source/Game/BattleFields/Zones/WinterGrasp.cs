@@ -527,7 +527,7 @@ namespace Game.BattleFields
 
         public override void OnGameObjectCreate(GameObject go)
         {
-            uint workshopId = 0;
+            uint workshopId;
 
             switch (go.GetEntry())
             {

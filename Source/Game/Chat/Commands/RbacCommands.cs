@@ -225,7 +225,7 @@ namespace Game.Chat.Commands
             string param3 = args.NextString();
 
             int realmId = -1;
-            uint accountId = 0;
+            uint accountId;
             string accountName;
             uint id = 0;
             RBACData rdata = null;

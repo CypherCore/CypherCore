@@ -312,7 +312,7 @@ namespace Game.AI
             UpdateEscortAI(diff);
         }
 
-        void UpdateEscortAI(uint diff)
+        public virtual void UpdateEscortAI(uint diff)
         {
             if (!UpdateVictim())
                 return;
@@ -505,7 +505,7 @@ namespace Game.AI
                 return false;
 
             int size = WaypointList.Count;
-            Escort_Waypoint waypoint = new Escort_Waypoint(0, 0, 0, 0, 0);
+            Escort_Waypoint waypoint;
             do
             {
                 waypoint = WaypointList.First();

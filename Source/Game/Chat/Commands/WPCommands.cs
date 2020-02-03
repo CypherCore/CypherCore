@@ -33,7 +33,7 @@ namespace Game.Chat.Commands
         {
             // optional
             string path_number = null;
-            uint pathid = 0;
+            uint pathid;
 
             if (!args.Empty())
                 path_number = args.NextString();
@@ -108,7 +108,7 @@ namespace Game.Chat.Commands
                 return false;
 
             string arg_id = args.NextString();
-            uint id = 0;
+            uint id;
             if (show == "add")
             {
                 if (!uint.TryParse(arg_id, out id))
@@ -624,7 +624,7 @@ namespace Game.Chat.Commands
             // second arg: GUID (optional, if a creature is selected)
             string guid_str = args.NextString();
 
-            uint pathid = 0;
+            uint pathid;
             Creature target = handler.GetSelectedCreature();
 
             // Did player provide a PathID?

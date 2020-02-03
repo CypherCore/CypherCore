@@ -196,7 +196,6 @@ namespace Game.Collision
         void SetLiquidData(WmoLiquid liquid)
         {
             iLiquid = liquid;
-            liquid = null;
         }
 
         public bool ReadFromFile(BinaryReader reader)

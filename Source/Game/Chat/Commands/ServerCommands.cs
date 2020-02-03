@@ -115,7 +115,7 @@ namespace Game.Chat
 
             uint playerAmountLimit = Global.WorldMgr.GetPlayerAmountLimit();
             AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
-            string secName = "";
+            string secName;
             switch (allowedAccountType)
             {
                 case AccountTypes.Player:

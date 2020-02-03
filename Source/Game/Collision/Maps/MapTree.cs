@@ -324,7 +324,7 @@ namespace Game.Collision
 
         public bool GetObjectHitPos(Vector3 pPos1, Vector3 pPos2, out Vector3 pResultHitPos, float pModifyDist)
         {
-            bool result = false;
+            bool result;
             float maxDist = (pPos2 - pPos1).magnitude();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
             Cypher.Assert(maxDist < float.MaxValue);
@@ -344,7 +344,7 @@ namespace Game.Collision
                 {
                     if ((pResultHitPos - pPos1).magnitude() > -pModifyDist)
                     {
-                        pResultHitPos = pResultHitPos + dir * pModifyDist;
+                        pResultHitPos += dir * pModifyDist;
                     }
                     else
                     {
@@ -353,7 +353,7 @@ namespace Game.Collision
                 }
                 else
                 {
-                    pResultHitPos = pResultHitPos + dir * pModifyDist;
+                    pResultHitPos += dir * pModifyDist;
                 }
                 result = true;
             }

@@ -393,11 +393,6 @@ namespace Game.Chat
         [Command("info", RBACPermissions.CommandGobjectInfo)]
         static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
         {
-            uint entry = 0;
-            GameObjectTypes type = 0;
-            uint displayId = 0;
-            uint lootId = 0;
-
             if (args.Empty())
                 return false;
 
@@ -405,6 +400,7 @@ namespace Game.Chat
             if (param1.IsEmpty())
                 return false;
 
+            uint entry;
             if (param1.Equals("guid"))
             {
                 string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -429,10 +425,10 @@ namespace Game.Chat
             if (gameObjectInfo == null)
                 return false;
 
-            type = gameObjectInfo.type;
-            displayId = gameObjectInfo.displayId;
+            GameObjectTypes type = gameObjectInfo.type;
+            uint displayId = gameObjectInfo.displayId;
             string name = gameObjectInfo.name;
-            lootId = gameObjectInfo.GetLootId();
+            uint lootId = gameObjectInfo.GetLootId();
 
             handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
             handler.SendSysMessage(CypherStrings.GoinfoType, type);

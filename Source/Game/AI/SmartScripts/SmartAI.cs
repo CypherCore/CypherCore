@@ -448,17 +448,6 @@ namespace Game.AI
             MovepointReached(Data);
         }
 
-        void RemoveAuras()
-        {
-            //fixme: duplicated logic in CreatureAI._EnterEvadeMode (could use RemoveAllAurasExceptType)
-            foreach (var pair in me.GetAppliedAuras())
-            {
-                Aura aura = pair.Value.GetBase();
-                if (!aura.IsPassive() && !aura.HasEffectType(AuraType.ControlVehicle) && !aura.HasEffectType(AuraType.CloneCaster) && aura.GetCasterGUID() != me.GetGUID())
-                    me.RemoveAura(pair);
-            }
-        }
-
         public override void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
             if (mEvadeDisabled)

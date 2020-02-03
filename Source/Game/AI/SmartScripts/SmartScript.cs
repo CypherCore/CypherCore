@@ -1583,7 +1583,7 @@ namespace Game.AI
                         if (!IsSmart())
                             break;
 
-                        WorldObject target = null;
+                        WorldObject target;
 
                         /*if (e.GetTargetType() == SmartTargets.CreatureRange || e.GetTargetType() == SmartTargets.CreatureGuid ||
                             e.GetTargetType() == SmartTargets.CreatureDistance || e.GetTargetType() == SmartTargets.GameobjectRange ||
