@@ -735,7 +735,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -752,7 +752,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -769,7 +769,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -786,7 +786,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -803,7 +803,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -820,7 +820,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -837,7 +837,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -854,7 +854,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -871,7 +871,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -888,7 +888,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -905,7 +905,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -922,7 +922,7 @@ namespace Game
                         ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;
@@ -1049,7 +1049,7 @@ namespace Game
                         ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
                         if (itemTemplate == null)
                         {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `item_template`, ignoring.", cond.ToString());
+                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table item does not exist, ignoring.", cond.ToString());
                             return false;
                         }
                         break;

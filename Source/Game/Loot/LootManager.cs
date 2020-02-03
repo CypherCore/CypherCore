@@ -487,7 +487,7 @@ namespace Game.Loots
                 ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
                 if (proto == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item entry not listed in `item_template` - skipped", store.GetName(), entry, itemid);
+                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
                     return false;
                 }
 

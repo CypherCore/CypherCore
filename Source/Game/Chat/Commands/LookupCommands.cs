@@ -319,7 +319,7 @@ namespace Game.Chat
             bool found = false;
             uint count = 0;
 
-            // Search in `item_template`
+            // Search in ItemSparse
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var template in its.Values)
             {

@@ -4596,7 +4596,7 @@ namespace Game
             }
 
             foreach (var id in notFoundOutfit)
-                Log.outError(LogFilter.Sql, "Item (Entry: {0}) does not exist in `item_template` but is referenced in `CharStartOutfit.dbc`", id);
+                Log.outError(LogFilter.Sql, "Item (Entry: {0}) item does not exist but is referenced in `CharStartOutfit.dbc`", id);
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item templates in {1} ms", sparseCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }

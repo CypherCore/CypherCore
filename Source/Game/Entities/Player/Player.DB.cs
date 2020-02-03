@@ -1235,7 +1235,7 @@ namespace Game.Entities
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (proto == null)
             {
-                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid.ToString()}) has unknown item_template (ProtoType) in mailed items(GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
+                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid.ToString()}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
 
                 SQLTransaction trans = new SQLTransaction();
 

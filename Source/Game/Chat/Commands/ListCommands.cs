@@ -342,7 +342,6 @@ namespace Game.Chat.Commands
             Player target;
             ObjectGuid targetGuid;
             string targetName;
-            PreparedStatement stmt = null;
 
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
             if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
@@ -353,7 +352,7 @@ namespace Game.Chat.Commands
             else if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
             stmt.AddValue(0, targetGuid.GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
@@ -408,18 +407,19 @@ namespace Game.Chat.Commands
                                         {
                                             uint item_entry = result3.Read<uint>(0);
                                             uint item_count = result3.Read<uint>(1);
-                                            SQLResult result4 = DB.World.Query("SELECT name, quality FROM item_template WHERE entry = '{0}'", item_entry);
 
-                                            string item_name = result4.Read<string>(0);
-                                            int item_quality = result4.Read<byte>(1);
+                                            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(item_entry);
+                                            if (itemTemplate == null)
+                                                continue;
+
                                             if (handler.GetSession() != null)
                                             {
-                                                uint color = ItemConst.ItemQualityColors[item_quality];
-                                                string itemStr = "|c" + color + "|Hitem:" + item_entry + ":0:0:0:0:0:0:0:0:0|h[" + item_name + "]|h|r";
+                                                uint color = ItemConst.ItemQualityColors[(int)itemTemplate.GetQuality()];
+                                                string itemStr = $"|c{color}|Hitem:{item_entry}:0:0:0:0:0:0:0:{handler.GetSession().GetPlayer().GetLevel()}:0:0:0:0:0|h[{itemTemplate.GetName(handler.GetSessionDbcLocale())}]|h|r";
                                                 handler.SendSysMessage(CypherStrings.ListMailInfoItem, itemStr, item_entry, item_guid, item_count);
                                             }
                                             else
-                                                handler.SendSysMessage(CypherStrings.ListMailInfoItem, item_name, item_entry, item_guid, item_count);
+                                                handler.SendSysMessage(CypherStrings.ListMailInfoItem, itemTemplate.GetName(handler.GetSessionDbcLocale()), item_entry, item_guid, item_count);
                                         }
                                         while (result3.NextRow());
                                     }
