@@ -554,6 +554,11 @@ namespace Game
             SendPacket(packet);
         }
 
+        public bool CanSpeak()
+        {
+            return m_muteTime <= GameTime.GetGameTime();
+        }
+
         public void SendNotification(CypherStrings str, params object[] args)
         {
             SendNotification(Global.ObjectMgr.GetCypherString(str), args);

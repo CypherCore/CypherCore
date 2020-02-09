@@ -1759,7 +1759,7 @@ namespace Game.Chat
 
             if (target)
             {
-                if (target.CanSpeak())
+                if (target.GetSession().CanSpeak())
                 {
                     handler.SendSysMessage(CypherStrings.ChatAlreadyEnabled);
                     return false;

@@ -166,7 +166,7 @@ namespace Game
                     lang = (Language)ModLangAuras.FirstOrDefault().GetMiscValue();
             }
 
-            if (!sender.CanSpeak())
+            if (!CanSpeak())
             {
                 string timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
@@ -555,7 +555,7 @@ namespace Game
             if (!GetPlayer().IsAlive())
                 return;
 
-            if (!GetPlayer().CanSpeak())
+            if (!CanSpeak())
             {
                 string timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);

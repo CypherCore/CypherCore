@@ -5783,11 +5783,6 @@ namespace Game.Entities
             UpdateItemLevelAreaBasedScaling();
         }
 
-        public bool CanSpeak()
-        {
-            return GetSession().m_muteTime <= Time.UnixTime;
-        }
-
         public void RemoveSocial()
         {
             Global.SocialMgr.RemovePlayerSocial(GetGUID());
