@@ -87,7 +87,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(VoiceChatDisabledByParentalControl);
             _worldPacket.WriteBit(VoiceChatMutedByParentalControl);
             _worldPacket.WriteBit(QuestSessionEnabled);
-            _worldPacket.WriteBit(Unused825);
+            _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.FlushBits();
 
@@ -131,7 +131,7 @@ namespace Game.Network.Packets
                     _worldPacket.WriteUInt8(level);
             }
 
-            _worldPacket.WriteBit(VoiceChatManagerSettings.Enabled);
+            _worldPacket.WriteBit(VoiceChatManagerSettings.IsSquelched);
             _worldPacket.WritePackedGuid(VoiceChatManagerSettings.BnetAccountGuid);
             _worldPacket.WritePackedGuid(VoiceChatManagerSettings.GuildGuid);
 
@@ -189,7 +189,7 @@ namespace Game.Network.Packets
         public bool VoiceChatDisabledByParentalControl;
         public bool VoiceChatMutedByParentalControl;
         public bool QuestSessionEnabled;
-        public bool Unused825;
+        public bool IsMuted;
         public bool ClubFinderEnabled;
 
         public Optional<List<byte>> RaceClassExpansionLevels;
@@ -251,7 +251,7 @@ namespace Game.Network.Packets
 
         public struct VoiceChatProxySettings
         {
-            public bool Enabled;
+            public bool IsSquelched;
             public ObjectGuid BnetAccountGuid;
             public ObjectGuid GuildGuid;
         }

@@ -909,6 +909,10 @@ namespace Game
             features.EuropaTicketSystemStatus.Value.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
             features.EuropaTicketSystemStatus.Value.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
 
+            features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
+            features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
+            features.IsMuted = !CanSpeak();
+
             SendPacket(features);
         }
 
