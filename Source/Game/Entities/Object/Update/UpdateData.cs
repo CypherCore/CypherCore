@@ -26,12 +26,18 @@ namespace Game.Entities
     {
         uint MapId;
         uint BlockCount;
+        List<ObjectGuid> destroyGUIDs = new List<ObjectGuid>();
         List<ObjectGuid> outOfRangeGUIDs = new List<ObjectGuid>();
         ByteBuffer data = new ByteBuffer();
 
         public UpdateData(uint mapId)
         {
             MapId = mapId;
+        }
+
+        public void AddDestroyObject(ObjectGuid guid)
+        {
+            destroyGUIDs.Add(guid);
         }
 
         public void AddOutOfRangeGUID(List<ObjectGuid> guids)
@@ -58,14 +64,18 @@ namespace Game.Entities
             packet.MapID = (ushort)MapId;
 
             WorldPacket buffer = new WorldPacket();
-            if (buffer.WriteBit(!outOfRangeGUIDs.Empty()))
+            if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
             {
-                buffer.WriteUInt16(0); // object limit to instantly destroy - objects before this index on m_outOfRangeGUIDs list get "smoothly phased out"
-                buffer.WriteInt32(outOfRangeGUIDs.Count);
+                buffer.WriteUInt16((ushort)destroyGUIDs.Count);
+                buffer.WriteInt32(destroyGUIDs.Count + outOfRangeGUIDs.Count);
 
-                foreach (var guid in outOfRangeGUIDs)
-                    buffer.WritePackedGuid(guid);
+                foreach (var destroyGuid in destroyGUIDs)
+                    buffer.WritePackedGuid(destroyGuid);
+
+                foreach (var outOfRangeGuid in outOfRangeGUIDs)
+                    buffer.WritePackedGuid(outOfRangeGuid);
             }
+
             var bytes = data.GetData();
             buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);
@@ -77,6 +87,7 @@ namespace Game.Entities
         public void Clear()
         {
             data.Clear();
+            destroyGUIDs.Clear();
             outOfRangeGUIDs.Clear();
             BlockCount = 0;
             MapId = 0;

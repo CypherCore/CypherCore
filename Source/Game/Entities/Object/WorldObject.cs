@@ -224,6 +224,11 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer);
         }
 
+        void BuildDestroyUpdateBlock(UpdateData data)
+        {
+            data.AddDestroyObject(GetGUID());
+        }
+        
         public void BuildOutOfRangeUpdateBlock(UpdateData data)
         {
             data.AddOutOfRangeGUID(GetGUID());
@@ -232,7 +237,7 @@ namespace Game.Entities
         public virtual void DestroyForPlayer(Player target)
         {
             UpdateData updateData = new UpdateData(target.GetMapId());
-            BuildOutOfRangeUpdateBlock(updateData);
+            BuildDestroyUpdateBlock(updateData);
             UpdateObject packet;
             updateData.BuildPacket(out packet);
             target.SendPacket(packet);

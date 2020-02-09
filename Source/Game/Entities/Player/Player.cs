@@ -786,16 +786,16 @@ namespace Game.Entities
         {
             base.DestroyForPlayer(target);
 
-            for (byte i = 0; i < EquipmentSlot.End; ++i)
-            {
-                if (m_items[i] == null)
-                    continue;
-
-                m_items[i].DestroyForPlayer(target);
-            }
-
             if (target == this)
             {
+                for (byte i = 0; i < EquipmentSlot.End; ++i)
+                {
+                    if (m_items[i] == null)
+                        continue;
+
+                    m_items[i].DestroyForPlayer(target);
+                }
+
                 for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
                 {
                     if (m_items[i] == null)
