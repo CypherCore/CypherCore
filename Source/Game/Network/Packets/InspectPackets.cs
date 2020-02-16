@@ -37,7 +37,7 @@ namespace Game.Network.Packets
 
     public class InspectResult : ServerPacket
     {
-        public InspectResult() : base(ServerOpcodes.InspectResult)
+        public InspectResult() : base(ServerOpcodes.InspectResult, ConnectionType.Instance)
         {
             DisplayInfo = new PlayerModelDisplayInfo();
         }
@@ -47,7 +47,7 @@ namespace Game.Network.Packets
             DisplayInfo.Write(_worldPacket);
             _worldPacket.WriteInt32(Glyphs.Count);
             _worldPacket.WriteInt32(Talents.Count);
-            _worldPacket.WriteInt32(PvpTalents.Count);
+            _worldPacket.WriteInt32(PvpTalents.Length);
             _worldPacket.WriteInt32(ItemLevel);
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
@@ -61,7 +61,7 @@ namespace Game.Network.Packets
             for (int i = 0; i < Talents.Count; ++i)
                 _worldPacket.WriteUInt16(Talents[i]);
 
-            for (int i = 0; i < PvpTalents.Count; ++i)
+            for (int i = 0; i < PvpTalents.Length; ++i)
                 _worldPacket.WriteUInt16(PvpTalents[i]);
 
             _worldPacket.WriteBit(GuildData.HasValue);
@@ -81,9 +81,9 @@ namespace Game.Network.Packets
         public PlayerModelDisplayInfo DisplayInfo;
         public List<ushort> Glyphs = new List<ushort>();
         public List<ushort> Talents = new List<ushort>();
-        public List<ushort> PvpTalents = new List<ushort>();
+        public ushort[] PvpTalents = new ushort[4];
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
-        public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6);
+        public PVPBracketData[] Bracket = new PVPBracketData[6];
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
@@ -270,6 +270,7 @@ namespace Game.Network.Packets
             data.WriteUInt8(Face);
             data.WriteUInt8(Race);
             data.WriteUInt8(ClassID);
+            data.FlushBits();
             CustomDisplay.ForEach(id => data.WriteUInt8(id));
 
             data.WriteString(Name);
