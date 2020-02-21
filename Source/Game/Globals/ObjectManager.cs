@@ -437,35 +437,73 @@ namespace Game
             oldMSTime = Time.GetMSTime();
             _classExpansionRequirementStorage.Clear();
 
-            //                                  0        1
-            result = DB.World.Query("SELECT classID, expansion FROM `class_expansion_requirement`");
+            //                               0        1       2                     3
+            result = DB.World.Query("SELECT ClassID, RaceID, ActiveExpansionLevel, AccountExpansionLevel FROM `class_expansion_requirement`");
             if (!result.IsEmpty())
             {
+                Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>>();
                 uint count = 0;
                 do
                 {
                     byte classID = result.Read<byte>(0);
-                    byte expansion = result.Read<byte>(1);
+                    byte raceID = result.Read<byte>(1);
+                    byte activeExpansionLevel = result.Read<byte>(2);
+                    byte accountExpansionLevel = result.Read<byte>(3);
 
                     ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(classID);
                     if (classEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Class {0} defined in `class_expansion_requirement` does not exists, skipped.", classID);
+                        Log.outError(LogFilter.Sql, $"Class {classID} (race {raceID}) defined in `class_expansion_requirement` does not exists, skipped.");
                         continue;
                     }
 
-                    if (expansion >= (int)Expansion.Max)
+                    ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
+                    if (raceEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Class {0} defined in `class_expansion_requirement` has incorrect expansion {1}, skipped.", classID, expansion);
+                        Log.outError(LogFilter.Sql, $"Race {raceID} (class {classID}) defined in `class_expansion_requirement` does not exists, skipped.");
                         continue;
                     }
 
-                    _classExpansionRequirementStorage[classID] = expansion;
+                    if (activeExpansionLevel >= (int)Expansion.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect ActiveExpansionLevel {activeExpansionLevel}, skipped.");
+                        continue;
+                    }
+
+                    if (accountExpansionLevel >= (int)Expansion.MaxAccountExpansions)
+                    {
+                        Log.outError(LogFilter.Sql, $"Class {classID} Race {raceID} defined in `class_expansion_requirement` has incorrect AccountExpansionLevel {accountExpansionLevel}, skipped.");
+                        continue;
+                    }
+
+                    if (!temp.ContainsKey(raceID))
+                        temp[raceID] = new Dictionary<byte, Tuple<byte, byte>>();
+
+                    temp[raceID][classID] = Tuple.Create(activeExpansionLevel, accountExpansionLevel);
 
                     ++count;
                 }
                 while (result.NextRow());
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} class expansion requirements in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+
+                foreach (var race in temp)
+                {
+                    RaceClassAvailability raceClassAvailability = new RaceClassAvailability();
+                    raceClassAvailability.RaceID = race.Key;
+
+                    foreach (var class_ in race.Value)
+                    {
+                        ClassAvailability classAvailability = new ClassAvailability();
+                        classAvailability.ClassID = class_.Key;
+                        classAvailability.ActiveExpansionLevel = class_.Value.Item1;
+                        classAvailability.AccountExpansionLevel = class_.Value.Item2;
+
+                        raceClassAvailability.Classes.Add(classAvailability);
+                    }
+
+                    _classExpansionRequirementStorage.Add(raceClassAvailability);
+                }
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} class expansion requirements in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 class expansion requirements. DB table `class_expansion_requirement` is empty.");
@@ -533,12 +571,26 @@ namespace Game
         }
         public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
         public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
-        public Dictionary<byte, byte> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
-        public Expansion GetClassExpansionRequirement(Class class_)
+        public List<RaceClassAvailability> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
+        public ClassAvailability GetClassExpansionRequirement(Race raceId, Class classId)
         {
-            if (_classExpansionRequirementStorage.ContainsKey((byte)class_))
-                return (Expansion)_classExpansionRequirementStorage[(byte)class_];
-            return Expansion.Classic;
+            var raceClassAvailability = _classExpansionRequirementStorage.Find(raceClass =>
+            {
+                return raceClass.RaceID == (byte)raceId;
+            });
+
+            if (raceClassAvailability == null)
+                return null;
+
+            var classAvailability = raceClassAvailability.Classes.Find(availability =>
+            {
+                return availability.ClassID == (byte)classId;
+            });
+
+            if (classAvailability == null)
+                return null;
+
+            return classAvailability;
         }
         public PlayerChoice GetPlayerChoice(int choiceId)
         {
@@ -9694,7 +9746,7 @@ namespace Game
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new Dictionary<byte, RaceUnlockRequirement>();
-        Dictionary<byte, byte> _classExpansionRequirementStorage = new Dictionary<byte, byte>();
+        List<RaceClassAvailability> _classExpansionRequirementStorage = new List<RaceClassAvailability>();
         Dictionary<uint, string> _realmNameStorage = new Dictionary<uint, string>();
 
         //Quest
@@ -10741,6 +10793,19 @@ namespace Game
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
+    }
+
+    public class ClassAvailability
+    {
+        public byte ClassID;
+        public byte ActiveExpansionLevel;
+        public byte AccountExpansionLevel;
+    }
+
+    public class RaceClassAvailability
+    {
+        public byte RaceID;
+        public List<ClassAvailability> Classes = new List<ClassAvailability>();
     }
 
     public class RaceUnlockRequirement

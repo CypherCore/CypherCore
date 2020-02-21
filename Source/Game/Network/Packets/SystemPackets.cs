@@ -77,7 +77,6 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(WillKickFromWorld);
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
-            _worldPacket.WriteBit(RaceClassExpansionLevels.HasValue);
             _worldPacket.WriteBit(TokenBalanceEnabled);
             _worldPacket.WriteBit(WarModeFeatureEnabled);
             _worldPacket.WriteBit(ClubsEnabled);
@@ -122,13 +121,6 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.Delay);
                 _worldPacket.WriteInt32(SessionAlert.Value.Period);
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
-            }
-
-            if (RaceClassExpansionLevels.HasValue)
-            {
-                _worldPacket.WriteInt32(RaceClassExpansionLevels.Value.Count);
-                foreach (var level in RaceClassExpansionLevels.Value)
-                    _worldPacket.WriteUInt8(level);
             }
 
             _worldPacket.WriteBit(VoiceChatManagerSettings.IsSquelched);
@@ -192,7 +184,6 @@ namespace Game.Network.Packets
         public bool IsMuted;
         public bool ClubFinderEnabled;
 
-        public Optional<List<byte>> RaceClassExpansionLevels;
         public SocialQueueConfig QuickJoinConfig;
         public VoiceChatProxySettings VoiceChatManagerSettings;
         public RafSystemFeatureInfo RAFSystem;

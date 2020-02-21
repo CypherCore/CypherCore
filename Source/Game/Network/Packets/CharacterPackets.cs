@@ -219,11 +219,20 @@ namespace Game.Network.Packets
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);
                 data.WriteUInt32(Flags4);
+                data.WriteInt32(Unknown830.Count);
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
                 data.WriteBit(BoostInProgress);
                 data.WriteBits(unkWod61x, 5);
+
+                foreach (string str in Unknown830)
+                    data.WriteBits(str.GetByteCount() + 1, 6);
+
                 data.FlushBits();
+
+                foreach (string str in Unknown830)
+                    if (!str.IsEmpty())
+                        data.WriteCString(str);
 
                 data.WriteString(Name);
             }
@@ -262,6 +271,8 @@ namespace Game.Network.Packets
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
+            public List<string> Unknown830 = new List<string>(); // Something with character names, same length limit as name,
+                                                 // client accepts unlimited number of these in packet but only uses first 3
 
             public struct VisualItemInfo
             {

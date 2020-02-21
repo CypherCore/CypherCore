@@ -658,13 +658,13 @@ namespace Game.Entities
     {
         public UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 1);
         public UpdateField<uint> Enabled = new UpdateField<uint>(0, 2);
-        public UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(3, 3, 4);
+        public UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(4, 3, 4);
 
-        public SelectedAzeriteEssences() : base(7) { }
+        public SelectedAzeriteEssences() : base(8) { }
 
         public override void WriteCreate(WorldPacket data, AzeriteItem owner, Player receiver)
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 data.WriteUInt32(AzeriteEssenceID[i]);
             }
@@ -693,7 +693,7 @@ namespace Game.Entities
             }
             if (changesMask[3])
             {
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     if (changesMask[4 + i])
                     {
@@ -1043,22 +1043,24 @@ namespace Game.Entities
         public UpdateField<int> LookAtControllerID = new UpdateField<int>(96, 111);
         public UpdateField<int> TaxiNodesID = new UpdateField<int>(96, 112);
         public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(96, 113);
+        public UpdateField<ObjectGuid>SkinningOwnerGUID = new UpdateField<ObjectGuid>(96, 114);
         public UpdateFieldArray<uint> NpcFlags = new UpdateFieldArray<uint>(2, 114, 115);
-        public UpdateFieldArray<int> Power = new UpdateFieldArray<int>(6, 117, 118);
-        public UpdateFieldArray<uint> MaxPower = new UpdateFieldArray<uint>(6, 117, 124);
-        public UpdateFieldArray<float> PowerRegenFlatModifier = new UpdateFieldArray<float>(6, 117, 130);
-        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new UpdateFieldArray<float>(6, 117, 136);
-        public UpdateFieldArray<VisibleItem> VirtualItems = new UpdateFieldArray<VisibleItem>(3, 142, 143);
-        public UpdateFieldArray<uint> AttackRoundBaseTime = new UpdateFieldArray<uint>(2, 146, 147);
-        public UpdateFieldArray<int> Stats = new UpdateFieldArray<int>(4, 149, 150);
-        public UpdateFieldArray<int> StatPosBuff = new UpdateFieldArray<int>(4, 149, 154);
-        public UpdateFieldArray<int> StatNegBuff = new UpdateFieldArray<int>(4, 149, 158);
-        public UpdateFieldArray<int> Resistances = new UpdateFieldArray<int>(7, 162, 163);
-        public UpdateFieldArray<int> BonusResistanceMods = new UpdateFieldArray<int>(7, 162, 170);
-        public UpdateFieldArray<int> PowerCostModifier = new UpdateFieldArray<int>(7, 162, 177);
-        public UpdateFieldArray<float> PowerCostMultiplier = new UpdateFieldArray<float>(7, 162, 184);
 
-        public UnitData() : base(0, TypeId.Unit, 191) { }
+        public UpdateFieldArray<int>Power = new UpdateFieldArray<int>(6, 118, 119);
+        public UpdateFieldArray<uint>MaxPower = new UpdateFieldArray<uint>(6, 118, 125);
+        public UpdateFieldArray<float>PowerRegenFlatModifier = new UpdateFieldArray<float>(6, 118, 131);
+        public UpdateFieldArray<float>PowerRegenInterruptedFlatModifier = new UpdateFieldArray<float>(6, 118, 137);
+        public UpdateFieldArray<VisibleItem>VirtualItems = new UpdateFieldArray<VisibleItem>(3, 143, 144);
+        public UpdateFieldArray<uint>AttackRoundBaseTime = new UpdateFieldArray<uint>(2, 147, 148);
+        public UpdateFieldArray<int>Stats = new UpdateFieldArray<int>(4, 150, 151);
+        public UpdateFieldArray<int>StatPosBuff = new UpdateFieldArray<int>(4, 150, 155);
+        public UpdateFieldArray<int>StatNegBuff = new UpdateFieldArray<int>(4, 150, 159);
+        public UpdateFieldArray<int>Resistances = new UpdateFieldArray<int>(7, 163, 164);
+        public UpdateFieldArray<int>BonusResistanceMods = new UpdateFieldArray<int>(7, 163, 171);
+        public UpdateFieldArray<int>PowerCostModifier = new UpdateFieldArray<int>(7, 163, 178);
+        public UpdateFieldArray<float>PowerCostMultiplier = new UpdateFieldArray<float>(7, 163, 185);
+
+        public UnitData() : base(0, TypeId.Unit, 192) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
@@ -1234,6 +1236,8 @@ namespace Game.Entities
             data.WriteInt32(PassiveSpells.Size());
             data.WriteInt32(WorldEffects.Size());
             data.WriteInt32(ChannelObjects.Size());
+            data.WritePackedGuid(SkinningOwnerGUID);
+
             for (int i = 0; i < PassiveSpells.Size(); ++i)
                 PassiveSpells[i].WriteCreate(data, owner, receiver);
 
@@ -1246,7 +1250,7 @@ namespace Game.Entities
 
         public override void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(191, new uint[] { 0xFFFFEFFFu, 0xFC3FBFFFu, 0x0001EFFFu, 0xFFDFFFF9u, 0x001FC003u, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new UpdateMask(192, new uint[] { 0xFFFFEFFFu, 0xFC3FBFFFu, 0x0001EFFFu, 0xFFBFFFF9u, 0x003F8007u, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, fieldVisibilityFlags, owner, receiver);
         }
@@ -1254,11 +1258,11 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(191, new uint[] { 0x00001000u, 0x03C04000u, 0xFFFE1000u, 0x00200006u, 0xFFE03FFCu, 0x7FFFFFFFu });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00001000u, 0x03C04000u, 0xFFFE1000u, 0x00400006u, 0xFFC07FF8u, 0xFFFFFFFFu });
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                allowedMaskForTarget |= new UpdateMask(191, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x00200000u, 0x00003FFCu, 0x00000000u });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x00400000u, 0x00007FF8u, 0x00000000u });
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                allowedMaskForTarget |= new UpdateMask(191, new uint[] { 0x00000000u, 0x03C00000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x000003FCu });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x03C00000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x000007F8u });
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
@@ -1762,94 +1766,98 @@ namespace Game.Entities
                 {
                     data.WritePackedGuid(GuildGUID);
                 }
+                if (changesMask[114])
+                {
+                    data.WritePackedGuid(SkinningOwnerGUID);
+                }
             }
-            if (changesMask[114])
+            if (changesMask[115])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[115 + i])
+                    if (changesMask[116 + i])
                     {
                         data.WriteUInt32(GetViewerDependentNpcFlags(NpcFlags[i], i, owner, receiver));
                     }
                 }
             }
-            if (changesMask[117])
+            if (changesMask[118])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[118 + i])
+                    if (changesMask[119 + i])
                     {
                         data.WriteInt32(Power[i]);
                     }
-                    if (changesMask[124 + i])
+                    if (changesMask[125 + i])
                     {
                         data.WriteUInt32(MaxPower[i]);
                     }
-                    if (changesMask[130 + i])
+                    if (changesMask[131 + i])
                     {
                         data.WriteFloat(PowerRegenFlatModifier[i]);
                     }
-                    if (changesMask[136 + i])
+                    if (changesMask[137 + i])
                     {
                         data.WriteFloat(PowerRegenInterruptedFlatModifier[i]);
                     }
                 }
             }
-            if (changesMask[142])
+            if (changesMask[143])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (changesMask[143 + i])
+                    if (changesMask[144 + i])
                     {
                         VirtualItems[i].WriteUpdate(data, owner, receiver);
                     }
                 }
             }
-            if (changesMask[146])
+            if (changesMask[147])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[147 + i])
+                    if (changesMask[148 + i])
                     {
                         data.WriteUInt32(AttackRoundBaseTime[i]);
                     }
                 }
             }
-            if (changesMask[149])
+            if (changesMask[150])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[150 + i])
+                    if (changesMask[151 + i])
                     {
                         data.WriteInt32(Stats[i]);
                     }
-                    if (changesMask[154 + i])
+                    if (changesMask[155 + i])
                     {
                         data.WriteInt32(StatPosBuff[i]);
                     }
-                    if (changesMask[158 + i])
+                    if (changesMask[159 + i])
                     {
                         data.WriteInt32(StatNegBuff[i]);
                     }
                 }
             }
-            if (changesMask[162])
+            if (changesMask[163])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[163 + i])
+                    if (changesMask[164 + i])
                     {
                         data.WriteInt32(Resistances[i]);
                     }
-                    if (changesMask[170 + i])
+                    if (changesMask[171 + i])
                     {
                         data.WriteInt32(BonusResistanceMods[i]);
                     }
-                    if (changesMask[177 + i])
+                    if (changesMask[178 + i])
                     {
                         data.WriteInt32(PowerCostModifier[i]);
                     }
-                    if (changesMask[184 + i])
+                    if (changesMask[185 + i])
                     {
                         data.WriteFloat(PowerCostMultiplier[i]);
                     }
@@ -1969,6 +1977,7 @@ namespace Game.Entities
             ClearChangesMask(LookAtControllerID);
             ClearChangesMask(TaxiNodesID);
             ClearChangesMask(GuildGUID);
+            ClearChangesMask(SkinningOwnerGUID);
             ClearChangesMask(NpcFlags);
             ClearChangesMask(Power);
             ClearChangesMask(MaxPower);
@@ -3097,32 +3106,31 @@ namespace Game.Entities
         public UpdateField<int> PvpLastWeeksRewardClaimed = new UpdateField<int>(98, 101);
         public UpdateField<byte> NumBankSlots = new UpdateField<byte>(98, 102);
         public UpdateField<Optional<QuestSession>> QuestSession = new UpdateField<Optional<QuestSession>>(98, 103);
-        public UpdateFieldArray<ObjectGuid> InvSlots = new UpdateFieldArray<ObjectGuid>(195, 104, 105);
-        public UpdateFieldArray<uint> TrackResourceMask = new UpdateFieldArray<uint>(2, 300, 301);
-        public UpdateFieldArray<ulong> ExploredZones = new UpdateFieldArray<ulong>(192, 303, 304);
-        public UpdateFieldArray<RestInfo> RestInfo = new UpdateFieldArray<RestInfo>(2, 496, 497);
-        public UpdateFieldArray<int> ModDamageDonePos = new UpdateFieldArray<int>(7, 499, 500);
-        public UpdateFieldArray<int> ModDamageDoneNeg = new UpdateFieldArray<int>(7, 499, 507);
-        public UpdateFieldArray<float> ModDamageDonePercent = new UpdateFieldArray<float>(7, 499, 514);
-        public UpdateFieldArray<float> WeaponDmgMultipliers = new UpdateFieldArray<float>(3, 521, 522);
-        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new UpdateFieldArray<float>(3, 521, 525);
-        public UpdateFieldArray<uint> BuybackPrice = new UpdateFieldArray<uint>(12, 528, 529);
-        public UpdateFieldArray<uint> BuybackTimestamp = new UpdateFieldArray<uint>(12, 528, 541);
-        public UpdateFieldArray<uint> CombatRatings = new UpdateFieldArray<uint>(32, 553, 554);
-        public UpdateFieldArray<PVPInfo> PvpInfo = new UpdateFieldArray<PVPInfo>(6, 586, 587);
-        public UpdateFieldArray<uint> NoReagentCostMask = new UpdateFieldArray<uint>(4, 593, 594);
-        public UpdateFieldArray<uint> ProfessionSkillLine = new UpdateFieldArray<uint>(2, 598, 599);
-        public UpdateFieldArray<uint> BagSlotFlags = new UpdateFieldArray<uint>(4, 601, 602);
-        public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 606, 607);
-        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 614, 615);
 
+        public UpdateFieldArray<ObjectGuid> InvSlots = new UpdateFieldArray<ObjectGuid>(199, 104, 105);
+        public UpdateFieldArray<uint> TrackResourceMask = new UpdateFieldArray<uint>(2, 304, 305);
+        public UpdateFieldArray<ulong> ExploredZones = new UpdateFieldArray<ulong>(192, 307, 308);
+        public UpdateFieldArray<RestInfo> RestInfo = new UpdateFieldArray<RestInfo>(2, 500, 501);
+        public UpdateFieldArray<int> ModDamageDonePos = new UpdateFieldArray<int>(7, 503, 504);
+        public UpdateFieldArray<int> ModDamageDoneNeg = new UpdateFieldArray<int>(7, 503, 511);
+        public UpdateFieldArray<float> ModDamageDonePercent = new UpdateFieldArray<float>(7, 503, 518);
+        public UpdateFieldArray<float> WeaponDmgMultipliers = new UpdateFieldArray<float>(3, 525, 526);
+        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new UpdateFieldArray<float>(3, 525, 529);
+        public UpdateFieldArray<uint> BuybackPrice = new UpdateFieldArray<uint>(12, 532, 533);
+        public UpdateFieldArray<uint> BuybackTimestamp = new UpdateFieldArray<uint>(12, 532, 545);
+        public UpdateFieldArray<uint> CombatRatings = new UpdateFieldArray<uint>(32, 557, 558);
+        public UpdateFieldArray<PVPInfo> PvpInfo = new UpdateFieldArray<PVPInfo>(6, 590, 591);
+        public UpdateFieldArray<uint> NoReagentCostMask = new UpdateFieldArray<uint>(4, 597, 598);
+        public UpdateFieldArray<uint> ProfessionSkillLine = new UpdateFieldArray<uint>(2, 602, 603);
+        public UpdateFieldArray<uint> BagSlotFlags = new UpdateFieldArray<uint>(4, 605, 606);
+        public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 610, 611);
+        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 618, 619);
 
-
-        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1487) { }
+        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1494) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            for (int i = 0; i < 195; ++i)
+            for (int i = 0; i < 199; ++i)
             {
                 data.WritePackedGuid(InvSlots[i]);
             }
@@ -3997,7 +4005,7 @@ namespace Game.Entities
             }
             if (_changesMask[104])
             {
-                for (int i = 0; i < 195; ++i)
+                for (int i = 0; i < 199; ++i)
                 {
                     if (_changesMask[105 + i])
                     {
@@ -4005,147 +4013,147 @@ namespace Game.Entities
                     }
                 }
             }
-            if (_changesMask[300])
+            if (_changesMask[304])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[301 + i])
+                    if (_changesMask[305 + i])
                     {
                         data.WriteUInt32(TrackResourceMask[i]);
                     }
                 }
             }
-            if (_changesMask[303])
+            if (_changesMask[307])
             {
                 for (int i = 0; i < 192; ++i)
                 {
-                    if (_changesMask[304 + i])
+                    if (_changesMask[308 + i])
                     {
                         data.WriteUInt64(ExploredZones[i]);
                     }
                 }
             }
-            if (_changesMask[496])
+            if (_changesMask[500])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[497 + i])
+                    if (_changesMask[501 + i])
                     {
                         RestInfo[i].WriteUpdate(data, owner, receiver);
                     }
                 }
             }
-            if (_changesMask[499])
+            if (_changesMask[503])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (_changesMask[500 + i])
+                    if (_changesMask[504 + i])
                     {
                         data.WriteInt32(ModDamageDonePos[i]);
                     }
-                    if (_changesMask[507 + i])
+                    if (_changesMask[511 + i])
                     {
                         data.WriteInt32(ModDamageDoneNeg[i]);
                     }
-                    if (_changesMask[514 + i])
+                    if (_changesMask[518 + i])
                     {
                         data.WriteFloat(ModDamageDonePercent[i]);
                     }
                 }
             }
-            if (_changesMask[521])
+            if (_changesMask[525])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (_changesMask[522 + i])
+                    if (_changesMask[526 + i])
                     {
                         data.WriteFloat(WeaponDmgMultipliers[i]);
                     }
-                    if (_changesMask[525 + i])
+                    if (_changesMask[529 + i])
                     {
                         data.WriteFloat(WeaponAtkSpeedMultipliers[i]);
                     }
                 }
             }
-            if (_changesMask[528])
+            if (_changesMask[532])
             {
                 for (int i = 0; i < 12; ++i)
                 {
-                    if (_changesMask[529 + i])
+                    if (_changesMask[533 + i])
                     {
                         data.WriteUInt32(BuybackPrice[i]);
                     }
-                    if (_changesMask[541 + i])
+                    if (_changesMask[545 + i])
                     {
                         data.WriteUInt32(BuybackTimestamp[i]);
                     }
                 }
             }
-            if (_changesMask[553])
+            if (_changesMask[557])
             {
                 for (int i = 0; i < 32; ++i)
                 {
-                    if (_changesMask[554 + i])
+                    if (_changesMask[558 + i])
                     {
                         data.WriteUInt32(CombatRatings[i]);
                     }
                 }
             }
-            if (_changesMask[593])
+            if (_changesMask[597])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (_changesMask[594 + i])
+                    if (_changesMask[598 + i])
                     {
                         data.WriteUInt32(NoReagentCostMask[i]);
                     }
                 }
             }
-            if (_changesMask[598])
+            if (_changesMask[602])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[599 + i])
+                    if (_changesMask[603 + i])
                     {
                         data.WriteUInt32(ProfessionSkillLine[i]);
                     }
                 }
             }
-            if (_changesMask[601])
+            if (_changesMask[605])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (_changesMask[602 + i])
+                    if (_changesMask[606 + i])
                     {
                         data.WriteUInt32(BagSlotFlags[i]);
                     }
                 }
             }
-            if (_changesMask[606])
+            if (_changesMask[610])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (_changesMask[607 + i])
+                    if (_changesMask[611 + i])
                     {
                         data.WriteUInt32(BankBagSlotFlags[i]);
                     }
                 }
             }
-            if (_changesMask[614])
+            if (_changesMask[618])
             {
                 for (int i = 0; i < 875; ++i)
                 {
-                    if (_changesMask[615 + i])
+                    if (_changesMask[619 + i])
                     {
                         data.WriteUInt64(QuestCompleted[i]);
                     }
                 }
             }
-            if (_changesMask[586])
+            if (_changesMask[590])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (_changesMask[587 + i])
+                    if (_changesMask[591 + i])
                     {
                         PvpInfo[i].WriteUpdate(data, owner, receiver);
                     }

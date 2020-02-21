@@ -94,6 +94,7 @@ namespace Game
 
                 QueryGameObjectResponse response = new QueryGameObjectResponse();
                 response.GameObjectID = packet.GameObjectID;
+                response.Guid = packet.Guid;
                 SendPacket(response);
             }
         }

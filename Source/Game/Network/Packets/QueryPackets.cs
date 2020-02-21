@@ -274,6 +274,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(GameObjectID);
+            _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
@@ -307,6 +308,7 @@ namespace Game.Network.Packets
         }
 
         public uint GameObjectID;
+        public ObjectGuid Guid;
         public bool Allow;
         public GameObjectStats Stats;
     }

@@ -460,11 +460,13 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(GarrTalentID);
+            data.WriteInt32(Rank);
             data.WriteUInt32((uint)ResearchStartTime);
             data.WriteInt32(Flags);
         }
 
         public int GarrTalentID;
+        public int Rank;
         public long ResearchStartTime;
         public int Flags;
     }
@@ -496,18 +498,18 @@ namespace Game.Network.Packets
                 mission.Write(data);
 
             foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
-            {
                 data.WriteInt32(missionReward.Count);
+
+            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
                 foreach (GarrisonMissionReward missionRewardItem in missionReward)
                     missionRewardItem.Write(data);
-            }
 
             foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
-            {
                 data.WriteInt32(missionReward.Count);
+
+            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
                 foreach (GarrisonMissionReward missionRewardItem in missionReward)
                     missionRewardItem.Write(data);
-            }
 
             foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);

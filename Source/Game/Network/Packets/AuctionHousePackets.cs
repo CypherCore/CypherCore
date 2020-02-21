@@ -354,7 +354,7 @@ namespace Game.Network.Packets
 
     class AuctionListPendingSalesResult : ServerPacket
     {
-        public AuctionListPendingSalesResult() : base(ServerOpcodes.AuctionListPendingSalesResult) { }
+        public AuctionListPendingSalesResult() : base(ServerOpcodes.Unknown) { }
 
         public override void Write()
         {

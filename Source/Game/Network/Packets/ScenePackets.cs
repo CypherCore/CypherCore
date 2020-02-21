@@ -32,6 +32,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SceneScriptPackageID);
             _worldPacket.WritePackedGuid(TransportGUID);
             _worldPacket.WriteXYZO(Location);
+            _worldPacket.WriteBit(PerformTactCallbacks);
+            _worldPacket.FlushBits();
         }
 
         public uint SceneID;
@@ -40,6 +42,7 @@ namespace Game.Network.Packets
         public uint SceneScriptPackageID;
         public ObjectGuid TransportGUID;
         public Position Location;
+        public bool PerformTactCallbacks;
     }
 
     class CancelScene : ServerPacket

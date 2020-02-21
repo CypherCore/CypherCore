@@ -246,10 +246,17 @@ namespace Game
             //}
 
             // prevent character creating Expansion class without Expansion account
-            var classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.ClassId);
-            if (classExpansionRequirement > GetAccountExpansion())
+            ClassAvailability classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.RaceId, charCreate.CreateInfo.ClassId);
+            if (classExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Network, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {classExpansionRequirement} class ({charCreate.CreateInfo.ClassId})");
+                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
+                SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                return;
+            }
+
+            if (classExpansionRequirement.ActiveExpansionLevel > (int)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (int)GetAccountExpansion())
+            {
+                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {classExpansionRequirement.AccountExpansionLevel} race/class ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }

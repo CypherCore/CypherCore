@@ -132,10 +132,17 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(SuccessInfo.Value.CurrencyID);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.Time);
 
-                foreach (var klass in SuccessInfo.Value.AvailableClasses)
+                foreach (var raceClassAvailability in SuccessInfo.Value.AvailableClasses)
                 {
-                    _worldPacket.WriteUInt8(klass.Key); // the current class
-                    _worldPacket.WriteUInt8(klass.Value); // the required Expansion
+                    _worldPacket.WriteUInt8(raceClassAvailability.RaceID);
+                    _worldPacket.WriteInt32(raceClassAvailability.Classes.Count);
+
+                    foreach (var classAvailability in raceClassAvailability.Classes)
+                    {
+                        _worldPacket.WriteUInt8(classAvailability.ClassID);
+                        _worldPacket.WriteUInt8(classAvailability.ActiveExpansionLevel);
+                        _worldPacket.WriteUInt8(classAvailability.AccountExpansionLevel);
+                    }
                 }
 
                 _worldPacket.WriteBit(SuccessInfo.Value.IsExpansionTrial);
@@ -197,8 +204,8 @@ namespace Game.Network.Packets
 
         public class AuthSuccessInfo
         {
-            public byte AccountExpansionLevel; // the current expansion of this account, the possible values are in @ref Expansions
             public byte ActiveExpansionLevel; // the current server expansion, the possible values are in @ref Expansions
+            public byte AccountExpansionLevel; // the current expansion of this account, the possible values are in @ref Expansions
             public uint TimeRested; // affects the return value of the GetBillingTimeRested() client API call, it is the number of seconds you have left until the experience points and loot you receive from creatures and quests is reduced. It is only used in the Asia region in retail, it's not implemented in TC and will probably never be.
 
             public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
@@ -211,7 +218,7 @@ namespace Game.Network.Packets
             public List<VirtualRealmInfo> VirtualRealms = new List<VirtualRealmInfo>();     // list of realms connected to this one (inclusive) @todo implement
             public List<CharacterTemplate> Templates = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
 
-            public Dictionary<byte, byte> AvailableClasses; // the minimum AccountExpansion required to select the classes
+            public List<RaceClassAvailability> AvailableClasses; // the minimum AccountExpansion required to select the classes
 
             public bool IsExpansionTrial;
             public bool ForceCharacterTemplate; // forces the client to always use a character template when creating a new character. @see Templates. @todo implement

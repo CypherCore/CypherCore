@@ -61,7 +61,7 @@ namespace Game
 
             AuctionHelloResponse packet = new AuctionHelloResponse();
             packet.Guid = guid;
-            packet.OpenForBusiness = true;                         // 3.3.3: 1 - AH enabled, 0 - AH disabled
+            packet.OpenForBusiness = false;                         // 3.3.3: 1 - AH enabled, 0 - AH disabled
             SendPacket(packet);
         }
 
@@ -590,7 +590,7 @@ namespace Game
             SendPacket(result);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionListItems)]
+        //[WorldPacketHandler(ClientOpcodes.AuctionListItems)]
         void HandleAuctionListItems(AuctionListItems packet)
         {
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
@@ -636,7 +636,7 @@ namespace Game
             SendPacket(result);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionListPendingSales)]
+        //[WorldPacketHandler(ClientOpcodes.AuctionListPendingSales)]
         void HandleAuctionListPendingSales(AuctionListPendingSales packet)
         {
             AuctionListPendingSalesResult result = new AuctionListPendingSalesResult();
