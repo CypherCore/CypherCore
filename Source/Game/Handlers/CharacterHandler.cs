@@ -256,7 +256,7 @@ namespace Game
 
             if (classExpansionRequirement.ActiveExpansionLevel > (int)GetExpansion() || classExpansionRequirement.AccountExpansionLevel > (int)GetAccountExpansion())
             {
-                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {classExpansionRequirement.AccountExpansionLevel} race/class ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
+                Log.outError(LogFilter.Player, $"Account:[{GetAccountId()}] tried to create character with race/class {charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId} without required expansion(had {GetExpansion()}/{GetAccountExpansion()}, required {classExpansionRequirement.ActiveExpansionLevel}/{classExpansionRequirement.AccountExpansionLevel})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }

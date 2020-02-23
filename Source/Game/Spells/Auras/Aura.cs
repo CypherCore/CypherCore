@@ -1713,7 +1713,7 @@ namespace Game.Spells
                 return 0;
 
             // At least one effect has to pass checks to proc aura
-            uint procEffectMask = 0;
+            uint procEffectMask = aurApp.GetEffectMask();
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                 if ((procEffectMask & (1u << i)) != 0)
                     if ((procEntry.DisableEffectsMask & (1u << i)) != 0 || !GetEffect(i).CheckEffectProc(aurApp, eventInfo))
