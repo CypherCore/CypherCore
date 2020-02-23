@@ -122,7 +122,8 @@ namespace Framework.Constants
         CharNameConsecutiveSpaces = 93,
         CharNameRussianConsecutiveSilentCharacters = 94,
         CharNameRussianSilentCharacterAtBeginningOrEnd = 95,
-        CharNameDeclensionDoesntMatchBaseName = 96
+        CharNameDeclensionDoesntMatchBaseName = 96,
+        CharNameSpacesDisallowed = 97
     }
 
     public enum CharacterUndeleteResult
