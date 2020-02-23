@@ -628,6 +628,9 @@ namespace Game.Entities
             if (itemTemplate == null)
                 return false;
 
+            if (!_owner.GetPlayer())
+                return false;
+
             if (_owner.GetPlayer().CanUseItem(itemTemplate) != InventoryResult.Ok)
                 return false;
 
