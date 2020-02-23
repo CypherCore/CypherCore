@@ -148,6 +148,7 @@ namespace Game.DataStorage
         public int FemaleSkeletonFileDataID;
         public int MaleSkeletonFileDataID;
         public int HelmVisFallbackRaceID;
+        public int TransmogrifyDisabledSlotMask;
         public ushort FactionID;
         public ushort CinematicSequenceID;
         public short ResSicknessSpellID;
@@ -222,6 +223,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int ExpectedStatModID;
+        public int MythicPlusSeasonID;
         public uint ContentTuningID;
     }
 
@@ -384,6 +386,8 @@ namespace Game.DataStorage
         public sbyte Quality;
         public int FactionID;
         public int ItemGroupSoundsID;
+        public int ConvertToPlayerExperience;
+        public int PlayerConditionID;
     }
 
     public sealed class CurveRecord

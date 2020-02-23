@@ -41,7 +41,7 @@ namespace Framework.Constants
         public const int MaxMountCapabilities = 24;
         public const int MaxLockCase = 8;
         public const int MaxAzeriteEmpoweredTier = 5;
-        public const int MaxAzeriteEssenceSlot = 3;
+        public const int MaxAzeriteEssenceSlot = 4;
         public const int MaxAzeriteEssenceRank = 4;
 
         /// <summary>
@@ -582,6 +582,8 @@ namespace Framework.Constants
         BattleForAzeroth = 7,
         Max,
 
+        ShadowLands = 8,
+
         MaxAccountExpansions
     }
     public enum PowerType : sbyte
@@ -762,7 +764,8 @@ namespace Framework.Constants
         HeroicWarfront = 149,
         LFR15thAnniversary = 151,
 
-        Max
+        VisionsOfNzoth = 152,
+        TeemingIsland = 153
     }
 
     public enum DifficultyFlags : ushort

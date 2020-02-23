@@ -24,6 +24,7 @@ using Game.Maps;
 using Game.Network;
 using Game.Network.Packets;
 using System;
+using Game.DataStorage;
 
 namespace Game
 {
@@ -71,9 +72,9 @@ namespace Game
                 packet.Events.Add(eventInfo);
             }
 
-            for (Difficulty i = 0; i < Difficulty.Max; ++i)
+            foreach (var difficulty in CliDB.DifficultyStorage.Values)
             {
-                var boundInstances = _player.GetBoundInstances(i);
+                var boundInstances = _player.GetBoundInstances((Difficulty)difficulty.Id);
                 if (boundInstances != null)
                 {
                     foreach (var boundInstance in boundInstances.Values)

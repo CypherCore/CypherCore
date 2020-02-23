@@ -3100,7 +3100,7 @@ namespace Game.Entities
                         info.AzeriteItem.SelectedAzeriteEssences[i].SpecializationId = specializationId;
                         for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
                         {
-                            AzeriteEssenceRecord azeriteEssence = CliDB.AzeriteEssenceStorage.LookupByKey(azeriteItemResult.Read<uint>(5 + i * 4 + j));
+                            AzeriteEssenceRecord azeriteEssence = CliDB.AzeriteEssenceStorage.LookupByKey(azeriteItemResult.Read<uint>(5 + i * 5 + j));
                             if (azeriteEssence == null || !Global.DB2Mgr.IsSpecSetMember(azeriteEssence.SpecSetID, specializationId))
                                 continue;
 

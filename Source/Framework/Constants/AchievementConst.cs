@@ -26,7 +26,7 @@ namespace Framework.Constants
         Any = -1,
     }
 
-    public enum CriteriaTreeFlags : ushort
+    public enum CriteriaTreeFlags
     {
         ProgressBar = 0x0001,
         ProgressIsDate = 0x0004,

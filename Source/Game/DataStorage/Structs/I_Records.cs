@@ -63,7 +63,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DisplayType;
-        public int SubclassID;
         public uint ItemDisplayInfoID;
         public int DefaultIconFileDataID;
         public int UiOrder;

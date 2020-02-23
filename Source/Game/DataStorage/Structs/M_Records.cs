@@ -140,6 +140,8 @@ namespace Game.DataStorage
         public uint PlayerConditionID;
         public float MountFlyRideHeight;
         public int UiModelSceneID;
+        public int MountSpecialRiderAnimKitID;
+        public int MountSpecialSpellVisualKitID;
 
         public bool IsSelfMount() { return (Flags & MountFlags.SelfMount) != 0; }
     }

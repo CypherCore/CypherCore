@@ -5280,10 +5280,10 @@ namespace Game
 
                 if (dungeonEncounter.DifficultyID == 0)
                 {
-                    for (uint i = 0; i < (int)Difficulty.Max; ++i)
+                    foreach (var difficulty in CliDB.DifficultyStorage.Values)
                     {
-                        if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeonEncounter.MapID, (Difficulty)i) != null)
-                            _dungeonEncounterStorage.Add(MathFunctions.MakePair64((uint)dungeonEncounter.MapID, i), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
+                        if (Global.DB2Mgr.GetMapDifficultyData((uint)dungeonEncounter.MapID, (Difficulty)difficulty.Id) != null)
+                            _dungeonEncounterStorage.Add(MathFunctions.MakePair64((uint)dungeonEncounter.MapID, difficulty.Id), new DungeonEncounter(dungeonEncounter, creditType, creditEntry, lastEncounterDungeon));
                     }
                 }
                 else

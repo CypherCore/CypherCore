@@ -34,6 +34,7 @@ namespace Game.DataStorage
         public int VisibilityPlayerConditionID;
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
+        public int AlternateUiMapGroup;
     }
 
     public sealed class UiMapAssignmentRecord

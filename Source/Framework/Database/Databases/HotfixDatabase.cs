@@ -223,12 +223,12 @@ namespace Framework.Database
                 "MaleDisplayId, FemaleDisplayId, HighResMaleDisplayId, HighResFemaleDisplayId, CreateScreenFileDataID, SelectScreenFileDataID, " +        
                 "MaleCustomizeOffset1, MaleCustomizeOffset2, MaleCustomizeOffset3, FemaleCustomizeOffset1, FemaleCustomizeOffset2, FemaleCustomizeOffset3, " +        
                 "LowResScreenFileDataID, AlteredFormStartVisualKitID1, AlteredFormStartVisualKitID2, AlteredFormStartVisualKitID3, " +        
-                "AlteredFormFinishVisualKitID1, AlteredFormFinishVisualKitID2, AlteredFormFinishVisualKitID3, HeritageArmorAchievementID, StartingLevel, " +        
-                "UiDisplayOrder, FemaleSkeletonFileDataID, MaleSkeletonFileDataID, HelmVisFallbackRaceID, FactionID, CinematicSequenceID, ResSicknessSpellID, " +        
-                "SplashSoundID, BaseLanguage, CreatureType, Alliance, RaceRelated, UnalteredVisualRaceID, CharComponentTextureLayoutID, " +        
-                "CharComponentTexLayoutHiResID, DefaultClassID, NeutralRaceID, MaleModelFallbackRaceID, MaleModelFallbackSex, FemaleModelFallbackRaceID, " +        
-                "FemaleModelFallbackSex, MaleTextureFallbackRaceID, MaleTextureFallbackSex, FemaleTextureFallbackRaceID, FemaleTextureFallbackSex" +        
-                " FROM chr_races ORDER BY ID DESC");
+                "AlteredFormFinishVisualKitID1, AlteredFormFinishVisualKitID2, AlteredFormFinishVisualKitID3, HeritageArmorAchievementID, StartingLevel, " +
+                "UiDisplayOrder, FemaleSkeletonFileDataID, MaleSkeletonFileDataID, HelmVisFallbackRaceID, TransmogrifyDisabledSlotMask, FactionID, " +
+                "CinematicSequenceID, ResSicknessSpellID, SplashSoundID, BaseLanguage, CreatureType, Alliance, RaceRelated, UnalteredVisualRaceID, " +
+                "CharComponentTextureLayoutID, CharComponentTexLayoutHiResID, DefaultClassID, NeutralRaceID, MaleModelFallbackRaceID, MaleModelFallbackSex, " +
+                "FemaleModelFallbackRaceID, FemaleModelFallbackSex, MaleTextureFallbackRaceID, MaleTextureFallbackSex, FemaleTextureFallbackRaceID, " +
+                "FemaleTextureFallbackSex FROM chr_races ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_CHR_RACES_LOCALE, "SELECT ID, Name_lang, NameFemale_lang, NameLowercase_lang, NameFemaleLowercase_lang" +        
                 " FROM chr_races_locale WHERE locale = ?");
 
@@ -250,8 +250,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING, "SELECT ID, MinLevel, MaxLevel, Flags, ExpansionID FROM content_tuning ORDER BY ID DESC");
 
             // ContentTuningXExpected.db2
-            PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED, "SELECT ID, ExpectedStatModID, ContentTuningID FROM content_tuning_x_expected" +        
-                " ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED, "SELECT ID, ExpectedStatModID, MythicPlusSeasonID, ContentTuningID" +
+                " FROM content_tuning_x_expected ORDER BY ID DESC");
 
             // ConversationLine.db2
             PrepareStatement(HotfixStatements.SEL_CONVERSATION_LINE, "SELECT ID, BroadcastTextID, SpellVisualKitID, AdditionalDuration, NextConversationLineID, " +        
@@ -296,8 +296,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CRITERIA_TREE_LOCALE, "SELECT ID, Description_lang FROM criteria_tree_locale WHERE locale = ?");
 
             // CurrencyTypes.db2
-            PrepareStatement(HotfixStatements.SEL_CURRENCY_TYPES, "SELECT ID, Name, Description, CategoryID, InventoryIconFileID, SpellWeight, SpellCategory, MaxQty, " +        
-                "MaxEarnablePerWeek, Flags, Quality, FactionID, ItemGroupSoundsID FROM currency_types ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_CURRENCY_TYPES, "SELECT ID, Name, Description, CategoryID, InventoryIconFileID, SpellWeight, SpellCategory, MaxQty, " +
+                "MaxEarnablePerWeek, Flags, Quality, FactionID, ItemGroupSoundsID, ConvertToPlayerExperience, PlayerConditionID FROM currency_types" +
+                " ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_CURRENCY_TYPES_LOCALE, "SELECT ID, Name_lang, Description_lang FROM currency_types_locale WHERE locale = ?");
 
             // Curve.db2
@@ -487,8 +488,8 @@ namespace Framework.Database
                 "ItemGroupSoundsID FROM item ORDER BY ID DESC");
 
             // ItemAppearance.db2
-            PrepareStatement(HotfixStatements.SEL_ITEM_APPEARANCE, "SELECT ID, DisplayType, SubclassID, ItemDisplayInfoID, DefaultIconFileDataID, UiOrder" +
-                " FROM item_appearance ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_ITEM_APPEARANCE, "SELECT ID, DisplayType, ItemDisplayInfoID, DefaultIconFileDataID, UiOrder FROM item_appearance" +
+                " ORDER BY ID DESC");
 
             // ItemArmorQuality.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_ARMOR_QUALITY, "SELECT ID, Qualitymod1, Qualitymod2, Qualitymod3, Qualitymod4, Qualitymod5, Qualitymod6, " +        
@@ -680,8 +681,8 @@ namespace Framework.Database
                 " ORDER BY ID DESC");
 
             // Mount.db2
-            PrepareStatement(HotfixStatements.SEL_MOUNT, "SELECT Name, SourceText, Description, ID, MountTypeID, Flags, SourceTypeEnum, SourceSpellID, " +        
-                "PlayerConditionID, MountFlyRideHeight, UiModelSceneID FROM mount ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_MOUNT, "SELECT Name, SourceText, Description, ID, MountTypeID, Flags, SourceTypeEnum, SourceSpellID, " +
+                "PlayerConditionID, MountFlyRideHeight, UiModelSceneID, MountSpecialRiderAnimKitID, MountSpecialSpellVisualKitID FROM mount ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_MOUNT_LOCALE, "SELECT ID, Name_lang, SourceText_lang, Description_lang FROM mount_locale WHERE locale = ?");
 
             // MountCapability.db2
@@ -1000,7 +1001,7 @@ namespace Framework.Database
                 " FROM spell_totems ORDER BY ID DESC");
 
             // SpellVisualKit.db2
-            PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_KIT, "SELECT ID, Flags, FallbackPriority, FallbackSpellVisualKitId, DelayMin, DelayMax" +
+            PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_KIT, "SELECT ID, FallbackPriority, FallbackSpellVisualKitId, DelayMin, DelayMax, Flags1, Flags2" +
                 " FROM spell_visual_kit ORDER BY ID DESC");
 
             // SpellXSpellVisual.db2
@@ -1065,8 +1066,8 @@ namespace Framework.Database
                 " ORDER BY ID DESC");
 
             // UiMap.db2
-            PrepareStatement(HotfixStatements.SEL_UI_MAP, "SELECT Name, ID, ParentUiMapID, Flags, System, Type, LevelRangeMin, LevelRangeMax, BountySetID, " +        
-                "BountyDisplayLocation, VisibilityPlayerConditionID, HelpTextPosition, BkgAtlasID FROM ui_map ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_UI_MAP, "SELECT Name, ID, ParentUiMapID, Flags, System, Type, LevelRangeMin, LevelRangeMax, BountySetID, " +
+                "BountyDisplayLocation, VisibilityPlayerConditionID, HelpTextPosition, BkgAtlasID, AlternateUiMapGroup FROM ui_map ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_UI_MAP_LOCALE, "SELECT ID, Name_lang FROM ui_map_locale WHERE locale = ?");
 
             // UiMapAssignment.db2

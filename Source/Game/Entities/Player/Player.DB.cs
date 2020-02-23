@@ -1047,7 +1047,7 @@ namespace Game.Entities
                         Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) has bind to not existed or not dungeon map {2} ({3})", GetName(), GetGUID().ToString(), mapId, mapname);
                         deleteInstance = true;
                     }
-                    else if (difficulty >= (int)Difficulty.Max)
+                    else if (CliDB.DifficultyStorage.HasRecord(difficulty))
                     {
                         Log.outError(LogFilter.Player, "_LoadBoundInstances: player {0}({1}) has bind to not existed difficulty {2} instance for map {3} ({4})", GetName(), GetGUID().ToString(), difficulty, mapId, mapname);
                         deleteInstance = true;

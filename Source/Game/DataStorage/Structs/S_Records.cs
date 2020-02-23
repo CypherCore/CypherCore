@@ -537,11 +537,11 @@ namespace Game.DataStorage
     public sealed class SpellVisualKitRecord
     {
         public uint Id;
-        public int Flags;
         public sbyte FallbackPriority;
-        public uint FallbackSpellVisualKitId;
+        public int FallbackSpellVisualKitId;
         public ushort DelayMin;
         public ushort DelayMax;
+        public int[] Flags = new int[2];
     }
 
     public sealed class SpellXSpellVisualRecord

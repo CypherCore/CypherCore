@@ -20,6 +20,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
+using Game.DataStorage;
 
 namespace Game.Chat
 {
@@ -36,9 +37,9 @@ namespace Game.Chat
             string format = "map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}";
 
             uint counter = 0;
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
+            foreach (var difficulty in CliDB.DifficultyStorage.Values)
             {
-                var binds = player.GetBoundInstances((Difficulty)i);
+                var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
                 foreach (var pair in binds)
                 {
                     InstanceSave save = pair.Value.save;
@@ -53,9 +54,9 @@ namespace Game.Chat
             Group group = player.GetGroup();
             if (group)
             {
-                for (byte i = 0; i < (int)Difficulty.Max; ++i)
+                foreach (var difficulty in CliDB.DifficultyStorage.Values)
                 {
-                    var binds = group.GetBoundInstances((Difficulty)i);
+                    var binds = group.GetBoundInstances((Difficulty)difficulty.Id);
                     foreach (var pair in binds)
                     {
                         InstanceSave save = pair.Value.save;
@@ -93,9 +94,9 @@ namespace Game.Chat
                     return false;
             }
 
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
+            foreach (var difficulty in CliDB.DifficultyStorage.Values)
             {
-                var binds = player.GetBoundInstances((Difficulty)i);
+                var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
                 foreach (var pair in binds)
                 {
                     InstanceSave save = pair.Value.save;
@@ -104,7 +105,7 @@ namespace Game.Chat
                         string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
                         handler.SendSysMessage("unbinding map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}", pair.Key, save.GetInstanceId(),
                             pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
-                        player.UnbindInstance(pair.Key, (Difficulty)i);
+                        player.UnbindInstance(pair.Key, (Difficulty)difficulty.Id);
                         counter++;
                     }
                 }

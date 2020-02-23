@@ -78,15 +78,15 @@ namespace Game.Entities
                     int specIndex = 0;
                     for (; specIndex < m_azeriteItemData.SelectedEssences.Size(); ++specIndex)
                     {
-                        stmt.AddValue(4 + specIndex * 4, m_azeriteItemData.SelectedEssences[specIndex].SpecializationID);
+                        stmt.AddValue(4 + specIndex * 5, m_azeriteItemData.SelectedEssences[specIndex].SpecializationID);
                         for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
-                            stmt.AddValue(5 + specIndex * 4 + j, m_azeriteItemData.SelectedEssences[specIndex].AzeriteEssenceID[j]);
+                            stmt.AddValue(5 + specIndex * 5 + j, m_azeriteItemData.SelectedEssences[specIndex].AzeriteEssenceID[j]);
                     }
                     for (; specIndex < PlayerConst.MaxSpecializations; ++specIndex)
                     {
-                        stmt.AddValue(4 + specIndex * 4, 0);
+                        stmt.AddValue(4 + specIndex * 5, 0);
                         for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
-                            stmt.AddValue(5 + specIndex * 4 + j, 0);
+                            stmt.AddValue(5 + specIndex * 5 + j, 0);
                     }
 
                     trans.Append(stmt);
