@@ -3025,10 +3025,10 @@ namespace Game.Entities
 
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);
             if (properties != null)
-                properties.Title = SummonType.Totem;
+                properties.Title = SummonTitle.Totem;
             properties = CliDB.SummonPropertiesStorage.LookupByKey(647); // 52893
             if (properties != null)
-                properties.Title = SummonType.Totem;
+                properties.Title = SummonTitle.Totem;
             properties = CliDB.SummonPropertiesStorage.LookupByKey(628);
             if (properties != null) // Hungry Plaguehound
                 properties.Control = SummonCategory.Pet;

@@ -1693,19 +1693,19 @@ namespace Game.Spells
                     }
                     switch (properties.Title)
                     {
-                        case SummonType.Pet:
-                        case SummonType.Guardian:
-                        case SummonType.Guardian2:
-                        case SummonType.Minion:
+                        case SummonTitle.Pet:
+                        case SummonTitle.Guardian:
+                        case SummonTitle.Runeblade:
+                        case SummonTitle.Minion:
                             SummonGuardian(effIndex, entry, properties, numSummons);
                             break;
                         // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
-                        case SummonType.Vehicle:
-                        case SummonType.Vehicle2:
+                        case SummonTitle.Vehicle:
+                        case SummonTitle.Mount:
                             summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id);
                             break;
-                        case SummonType.LightWell:
-                        case SummonType.Totem:
+                        case SummonTitle.LightWell:
+                        case SummonTitle.Totem:
                             {
                                 summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
                                 if (summon == null || !summon.IsTotem())
@@ -1718,7 +1718,7 @@ namespace Game.Spells
                                 }
                                 break;
                             }
-                        case SummonType.Minipet:
+                        case SummonTitle.Companion:
                             {
                                 summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
                                 if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))

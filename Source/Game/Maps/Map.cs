@@ -3317,20 +3317,20 @@ namespace Game.Maps
                         {
                             switch (properties.Title)
                             {
-                                case SummonType.Minion:
-                                case SummonType.Guardian:
-                                case SummonType.Guardian2:
+                                case SummonTitle.Minion:
+                                case SummonTitle.Guardian:
+                                case SummonTitle.Runeblade:
                                     mask = UnitTypeMask.Guardian;
                                     break;
-                                case SummonType.Totem:
-                                case SummonType.LightWell:
+                                case SummonTitle.Totem:
+                                case SummonTitle.LightWell:
                                     mask = UnitTypeMask.Totem;
                                     break;
-                                case SummonType.Vehicle:
-                                case SummonType.Vehicle2:
+                                case SummonTitle.Vehicle:
+                                case SummonTitle.Mount:
                                     mask = UnitTypeMask.Summon;
                                     break;
-                                case SummonType.Minipet:
+                                case SummonTitle.Companion:
                                     mask = UnitTypeMask.Minion;
                                     break;
                                 default:

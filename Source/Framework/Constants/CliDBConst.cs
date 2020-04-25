@@ -1557,7 +1557,8 @@ namespace Framework.Constants
         Unk18 = 0x00020000,
         Unk19 = 0x00040000,
         Unk20 = 0x00080000,
-        Unk21 = 0x00100000           // Totems
+        Unk21 = 0x00100000,          // Totems
+        Companion = 0x00200000
     }
 
     public enum TaxiNodeFlags : byte

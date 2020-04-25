@@ -199,7 +199,7 @@ namespace Game.Entities
                     if (GetMinionGUID().IsEmpty())
                         SetMinionGUID(minion.GetGUID());
 
-                if (minion.m_Properties != null && minion.m_Properties.Title == SummonType.Minipet)
+                if (minion.m_Properties != null && minion.m_Properties.Title == SummonTitle.Companion)
                 {
                     SetCritterGUID(minion.GetGUID());
                     Player thisPlayer = ToPlayer();
@@ -230,7 +230,7 @@ namespace Game.Entities
 
                 m_Controlled.Remove(minion);
 
-                if (minion.m_Properties != null && minion.m_Properties.Title == SummonType.Minipet)
+                if (minion.m_Properties != null && minion.m_Properties.Title == SummonTitle.Companion)
                 {
                     if (GetCritterGUID() == minion.GetGUID())
                         SetCritterGUID(ObjectGuid.Empty);

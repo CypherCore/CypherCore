@@ -566,7 +566,7 @@ namespace Game.DataStorage
         public uint Id;
         public SummonCategory Control;
         public uint Faction;
-        public SummonType Title;
+        public SummonTitle Title;
         public int Slot;
         public SummonPropFlags Flags;
     }

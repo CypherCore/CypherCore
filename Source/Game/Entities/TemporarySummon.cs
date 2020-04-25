@@ -378,7 +378,7 @@ namespace Game.Entities
             m_bonusSpellDamage = 0;
 
             UnitTypeMask |= UnitTypeMask.Guardian;
-            if (properties != null && (properties.Title == SummonType.Pet || properties.Control == SummonCategory.Pet))
+            if (properties != null && (properties.Title == SummonTitle.Pet || properties.Control == SummonCategory.Pet))
             {
                 UnitTypeMask |= UnitTypeMask.ControlableGuardian;
                 InitCharmInfo();
