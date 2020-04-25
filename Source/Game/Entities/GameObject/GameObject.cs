@@ -942,7 +942,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, string.Join(",", data.spawnDifficulties));
+            stmt.AddValue(index++, data.spawnDifficulties.Empty() ? "" : string.Join(",", data.spawnDifficulties));
             stmt.AddValue(index++, data.phaseId);
             stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, GetPositionX());
