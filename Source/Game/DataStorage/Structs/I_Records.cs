@@ -267,6 +267,13 @@ namespace Game.DataStorage
         public sbyte TransmogSourceTypeEnum;
     }
 
+    public sealed class ItemNameDescriptionRecord
+    {
+        public uint Id;
+        public LocalizedString Description;
+        public int Color;
+    }
+
     public sealed class ItemPriceBaseRecord
     {
         public uint Id;

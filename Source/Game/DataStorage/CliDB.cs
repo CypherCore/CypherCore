@@ -166,6 +166,7 @@ namespace Game.DataStorage
             ItemLimitCategoryStorage = DBReader.Read<ItemLimitCategoryRecord>("ItemLimitCategory.db2", HotfixStatements.SEL_ITEM_LIMIT_CATEGORY, HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_LOCALE);
             ItemLimitCategoryConditionStorage = DBReader.Read<ItemLimitCategoryConditionRecord>("ItemLimitCategoryCondition.db2", HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_CONDITION);
             ItemModifiedAppearanceStorage = DBReader.Read<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
+            ItemNameDescriptionStorage = DBReader.Read<ItemNameDescriptionRecord>("ItemNameDescription.db2", HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE);
             ItemPriceBaseStorage = DBReader.Read<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
             ItemSearchNameStorage = DBReader.Read<ItemSearchNameRecord>("ItemSearchName.db2", HotfixStatements.SEL_ITEM_SEARCH_NAME, HotfixStatements.SEL_ITEM_SEARCH_NAME_LOCALE);
             ItemSetStorage = DBReader.Read<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
@@ -523,6 +524,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemLimitCategoryRecord> ItemLimitCategoryStorage;
         public static DB6Storage<ItemLimitCategoryConditionRecord> ItemLimitCategoryConditionStorage;
         public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
+        public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
         public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;

@@ -585,6 +585,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE, "SELECT ID, ItemID, ItemAppearanceModifierID, ItemAppearanceID, OrderIndex, " +        
                 "TransmogSourceTypeEnum FROM item_modified_appearance ORDER BY ID DESC");
 
+            // ItemNameDescription.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, "SELECT ID, Description, Color FROM item_name_description ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE, "SELECT ID, Description_lang FROM item_name_description_locale WHERE locale = ?");
+
             // ItemPriceBase.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base ORDER BY ID DESC");
 
@@ -1421,6 +1425,9 @@ namespace Framework.Database
         SEL_ITEM_LIMIT_CATEGORY_CONDITION,
 
         SEL_ITEM_MODIFIED_APPEARANCE,
+
+        SEL_ITEM_NAME_DESCRIPTION,
+        SEL_ITEM_NAME_DESCRIPTION_LOCALE,
 
         SEL_ITEM_PRICE_BASE,
 
