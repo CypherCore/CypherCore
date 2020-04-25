@@ -1056,14 +1056,12 @@ namespace Game
                 return;
 
             uint spellToLearn = (uint)item.GetTemplate().Effects[1].SpellID;
-            foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)
+
+            var entry = Global.SpellMgr.GetBattlePetSpecies(spellToLearn);
+            if (entry != null)
             {
-                if (entry.SummonSpellID == spellToLearn)
-                {
-                    GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                    _player.UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
-                    break;
-                }
+                GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
+                _player.UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
             }
 
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);

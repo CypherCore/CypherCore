@@ -1971,6 +1971,12 @@ namespace Game.Entities
             mSpellInfoMap.Clear();
             Dictionary<uint, SpellInfoLoadHelper> loadData = new Dictionary<uint, SpellInfoLoadHelper>();
 
+            Dictionary<uint, BattlePetSpeciesRecord> battlePetSpeciesByCreature = new Dictionary<uint, BattlePetSpeciesRecord>();
+            Dictionary<uint, BattlePetSpeciesRecord> battlePetSpeciesBySpellId = new Dictionary<uint, BattlePetSpeciesRecord>();
+            foreach (var battlePetSpecies in CliDB.BattlePetSpeciesStorage.Values)
+                if (battlePetSpecies.CreatureID != 0)
+                    battlePetSpeciesByCreature[battlePetSpecies.CreatureID] = battlePetSpecies;
+
             Dictionary<uint, Dictionary<uint, SpellEffectRecord[]>> effectsBySpell = new Dictionary<uint, Dictionary<uint, SpellEffectRecord[]>>();
             Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>> visualsBySpell = new Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>>();
             foreach (var effect in CliDB.SpellEffectStorage.Values)
@@ -1988,6 +1994,20 @@ namespace Game.Entities
                     effectsBySpell[effect.SpellID][effect.DifficultyID] = new SpellEffectRecord[SpellConst.MaxEffects];
 
                 effectsBySpell[effect.SpellID][effect.DifficultyID][effect.EffectIndex] = effect;
+
+                if (effect.Effect == (int)SpellEffectName.Summon)
+                {
+                    var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
+                    if (summonProperties != null)
+                    {
+                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.Flags.HasAnyFlag(SummonPropFlags.Companion))
+                        {
+                            var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
+                            if (battlePetSpecies != null)
+                                mBattlePets[effect.SpellID] = battlePetSpecies;
+                        }
+                    }
+                }
             }
 
             SpellInfoLoadHelper GetSpellInfoLoadHelper(uint spellId)
@@ -3359,8 +3379,12 @@ namespace Game.Entities
             return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
         }
 
+        public BattlePetSpeciesRecord GetBattlePetSpecies(uint spellId)
+        {
+            return mBattlePets.LookupByKey(spellId);
+        }
+        
         #region Fields
-        //private:
         Dictionary<uint, SpellChainNode> mSpellChains = new Dictionary<uint, SpellChainNode>();
         MultiMap<uint, uint> mSpellsReqSpell = new MultiMap<uint, uint>();
         MultiMap<uint, uint> mSpellReq = new MultiMap<uint, uint>();
@@ -3387,6 +3411,7 @@ namespace Game.Entities
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new Dictionary<uint, PetDefaultSpellsEntry>();           // only spells not listed in related mPetLevelupSpellMap entry
         Dictionary<uint, SpellInfo> mSpellInfoMap = new Dictionary<uint, SpellInfo>();
         Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new Dictionary<Tuple<uint, byte>, uint>();
+        Dictionary<uint, BattlePetSpeciesRecord> mBattlePets = new Dictionary<uint, BattlePetSpeciesRecord>();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
         Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new Dictionary<AuraType, AuraEffectHandler>();
