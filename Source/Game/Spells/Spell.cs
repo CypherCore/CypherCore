@@ -4907,7 +4907,7 @@ namespace Game.Spells
                             {
                                 TradeData pTrade = m_caster.ToPlayer().GetTradeData();
                                 if (pTrade != null)
-                                    pTempItem = pTrade.GetTraderData().GetItem((TradeSlots)m_targets.GetItemTargetGUID().GetLowValue());
+                                    pTempItem = pTrade.GetTraderData().GetItem(TradeSlots.NonTraded);
                             }
                             else if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Item))
                                 pTempItem = m_caster.ToPlayer().GetItemByGuid(m_targets.GetItemTargetGUID());
