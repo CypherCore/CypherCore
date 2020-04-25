@@ -363,7 +363,7 @@ namespace Game
 
         public AuctionHouseRecord GetAuctionHouseEntry(uint factionTemplateId, ref uint houseId)
         {
-            uint houseid = 7; // goblin auction house
+            uint houseid = 1; // Auction House
 
             if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionAuction))
             {
@@ -372,27 +372,26 @@ namespace Game
                 // but no easy way convert creature faction to player race faction for specific city
                 switch (factionTemplateId)
                 {
-                    case 12: houseid = 1; break; // human
-                    case 29: houseid = 6; break; // orc, and generic for horde
-                    case 55: houseid = 2; break; // dwarf, and generic for alliance
-                    case 68: houseid = 4; break; // undead
-                    case 80: houseid = 3; break; // n-elf
-                    case 104: houseid = 5; break; // trolls
-                    case 120: houseid = 7; break; // booty bay, neutral
-                    case 474: houseid = 7; break; // gadgetzan, neutral
-                    case 855: houseid = 7; break; // everlook, neutral
-                    case 1604: houseid = 6; break; // b-elfs,
-                    default:                       // for unknown case
+                    case 120: 
+                        houseid = 7; 
+                        break; // booty bay, Blackwater Auction House
+                    case 474: 
+                        houseid = 7; 
+                        break; // gadgetzan, Blackwater Auction House
+                    case 855:
+                        houseid = 7;
+                        break; // everlook, Blackwater Auction House
+                    default:                       // default
                         {
                             FactionTemplateRecord u_entry = CliDB.FactionTemplateStorage.LookupByKey(factionTemplateId);
                             if (u_entry == null)
-                                houseid = 7; // goblin auction house
+                                houseid = 1; // Auction House
                             else if ((u_entry.FactionGroup & (int)FactionMasks.Alliance) != 0)
-                                houseid = 1; // human auction house
+                                houseid = 2; // Alliance Auction House
                             else if ((u_entry.FactionGroup & (int)FactionMasks.Horde) != 0)
-                                houseid = 6; // orc auction house
+                                houseid = 6; // Horde Auction House
                             else
-                                houseid = 7; // goblin auction house
+                                houseid = 1; // Auction House
                             break;
                         }
                 }
@@ -476,31 +475,25 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void BuildListBidderItems(AuctionListBidderItemsResult packet, Player player, ref uint totalcount)
+        public void BuildListBidderItems(AuctionListBidderItemsResult packet, Player player)
         {
             foreach (var Aentry in AuctionsMap.Values)
             {
                 if (Aentry != null && Aentry.bidder == player.GetGUID().GetCounter())
-                {
                     Aentry.BuildAuctionInfo(packet.Items, false);
-                    ++totalcount;
-                }
             }
         }
 
-        public void BuildListOwnerItems(AuctionListOwnerItemsResult packet, Player player, ref uint totalcount)
+        public void BuildListOwnerItems(AuctionListOwnerItemsResult packet, Player player)
         {
             foreach (var Aentry in AuctionsMap.Values)
             {
                 if (Aentry != null && Aentry.owner == player.GetGUID().GetCounter())
-                {
                     Aentry.BuildAuctionInfo(packet.Items, false);
-                    ++totalcount;
-                }
             }
         }
 
-        public void BuildListAuctionItems(AuctionListItemsResult packet, Player player, string searchedname, uint listfrom, byte levelmin, byte levelmax, bool usable, Optional<AuctionSearchFilters> filters, uint quality)
+        public void BuildListAuctionItems(AuctionListItemsResult packet, Player player, string searchedname, uint listfrom, byte levelmin, byte levelmax, AuctionHouseFilterMask filters, Optional<AuctionSearchClassFilters> classFilters)
         {
             long curTime = GameTime.GetGameTime();
 
@@ -515,32 +508,32 @@ namespace Game
                     continue;
 
                 ItemTemplate proto = item.GetTemplate();
-                if (filters.HasValue)
+                if (classFilters.HasValue)
                 {
                     // if we dont want any class filters, Optional is not initialized
                     // if we dont want this class included, SubclassMask is set to FILTER_SKIP_CLASS
                     // if we want this class and did not specify and subclasses, its set to FILTER_SKIP_SUBCLASS
                     // otherwise full restrictions apply
-                    if (filters.Value.Classes[(int)proto.GetClass()].SubclassMask == AuctionSearchFilters.FilterType.SkipClass)
+                    if (classFilters.Value.Classes[(int)proto.GetClass()].SubclassMask == AuctionSearchClassFilters.FilterType.SkipClass)
                         continue;
 
-                    if (filters.Value.Classes[(int)proto.GetClass()].SubclassMask != AuctionSearchFilters.FilterType.SkipSubclass)
+                    if (classFilters.Value.Classes[(int)proto.GetClass()].SubclassMask != AuctionSearchClassFilters.FilterType.SkipSubclass)
                     {
-                        if (!Convert.ToBoolean((int)filters.Value.Classes[(int)proto.GetClass()].SubclassMask & (1u << (int)proto.GetSubClass())))
+                        if (!Convert.ToBoolean((int)classFilters.Value.Classes[(int)proto.GetClass()].SubclassMask & (1u << (int)proto.GetSubClass())))
                             continue;
 
-                        if (!Convert.ToBoolean(filters.Value.Classes[(int)proto.GetClass()].InvTypes[(int)proto.GetSubClass()] & (1u << (int)proto.GetInventoryType())))
+                        if (!Convert.ToBoolean(classFilters.Value.Classes[(int)proto.GetClass()].InvTypes[(int)proto.GetSubClass()] & (1u << (int)proto.GetInventoryType())))
                             continue;
                     }
                 }
 
-                if (quality != 0xffffffff && (uint)proto.GetQuality() != quality)
+                if (!filters.HasFlag((AuctionHouseFilterMask)(1 << ((int)proto.GetQuality() + 4))))
                     continue;
 
                 if (levelmin != 0 && (item.GetRequiredLevel() < levelmin || (levelmax != 0 && item.GetRequiredLevel() > levelmax)))
                     continue;
 
-                if (usable && player.CanUseItem(item) != InventoryResult.Ok)
+                if (filters.HasFlag(AuctionHouseFilterMask.UsableOnly) && player.CanUseItem(item) != InventoryResult.Ok)
                     continue;
 
                 // Allow search by suffix (ie: of the Monkey) or partial name (ie: Monkey)
@@ -580,7 +573,7 @@ namespace Game
             }
             AuctionItem auctionItem = new AuctionItem();
 
-            auctionItem.AuctionItemID = (int)Id;
+            auctionItem.AuctionID = (int)Id;
             auctionItem.Item = new ItemInstance(item);
             auctionItem.BuyoutPrice = buyout;
             auctionItem.CensorBidInfo = false;
@@ -786,7 +779,7 @@ namespace Game
         public uint factionTemplateId;
     }
 
-    public class AuctionSearchFilters
+    public class AuctionSearchClassFilters
     {
         public enum FilterType : uint
         {

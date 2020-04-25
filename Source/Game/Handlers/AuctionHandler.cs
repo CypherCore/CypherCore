@@ -69,14 +69,14 @@ namespace Game
         {
             AuctionCommandResult auctionCommandResult = new AuctionCommandResult();
             auctionCommandResult.InitializeAuction(auction);
-            auctionCommandResult.Command = action;
-            auctionCommandResult.ErrorCode = errorCode;
+            auctionCommandResult.Command = (int)action;
+            auctionCommandResult.ErrorCode = (int)errorCode;
             SendPacket(auctionCommandResult);
         }
 
         public void SendAuctionOutBidNotification(AuctionEntry auction, Item item)
         {
-            AuctionOutBidNotification packet = new AuctionOutBidNotification();
+            AuctionOutbidNotification packet = new AuctionOutbidNotification();
             packet.BidAmount = auction.bid;
             packet.MinIncrement = auction.GetAuctionOutBid();
             packet.Info.Initialize(auction, item);
@@ -223,7 +223,7 @@ namespace Game
             ulong deposit = Global.AuctionMgr.GetAuctionDeposit(auctionHouseEntry, packet.RunTime, item, finalCount);
             if (!GetPlayer().HasEnoughMoney(deposit))
             {
-                SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.NotEnoughtMoney);
+                SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.NotEnoughMoney);
                 return;
             }
 
@@ -355,7 +355,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionPlaceBid)]
         void HandleAuctionPlaceBid(AuctionPlaceBid packet)
         {
-            if (packet.AuctionItemID == 0 || packet.BidAmount == 0)
+            if (packet.AuctionID == 0 || packet.BidAmount == 0)
                 return; // check for cheaters
 
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
@@ -371,7 +371,7 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionMgr.GetAuctionsMap(creature.GetFaction());
 
-            AuctionEntry auction = auctionHouse.GetAuction(packet.AuctionItemID);
+            AuctionEntry auction = auctionHouse.GetAuction(packet.AuctionID);
             Player player = GetPlayer();
 
             if (auction == null || auction.owner == player.GetGUID().GetCounter())
@@ -406,7 +406,7 @@ namespace Game
             if (!player.HasEnoughMoney(packet.BidAmount))
             {
                 // client already test it but just in case ...
-                SendAuctionCommandResult(auction, AuctionAction.PlaceBid, AuctionError.NotEnoughtMoney);
+                SendAuctionCommandResult(auction, AuctionAction.PlaceBid, AuctionError.NotEnoughMoney);
                 return;
             }
 
@@ -493,7 +493,7 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionMgr.GetAuctionsMap(creature.GetFaction());
 
-            AuctionEntry auction = auctionHouse.GetAuction((uint)packet.AuctionItemID);
+            AuctionEntry auction = auctionHouse.GetAuction((uint)packet.AuctionID);
             Player player = GetPlayer();
 
             SQLTransaction trans = new SQLTransaction();
@@ -527,7 +527,7 @@ namespace Game
             {
                 SendAuctionCommandResult(null, AuctionAction.Cancel, AuctionError.DatabaseError);
                 //this code isn't possible ... maybe there should be assert
-                Log.outError(LogFilter.Network, "CHEATER: {0} tried to cancel auction (id: {1}) of another player or auction is null", player.GetGUID().ToString(), packet.AuctionItemID);
+                Log.outError(LogFilter.Network, "CHEATER: {0} tried to cancel auction (id: {1}) of another player or auction is null", player.GetGUID().ToString(), packet.AuctionID);
                 return;
             }
 
@@ -562,7 +562,7 @@ namespace Game
             AuctionListBidderItemsResult result = new AuctionListBidderItemsResult();
 
             Player player = GetPlayer();
-            auctionHouse.BuildListBidderItems(result, player, ref result.TotalCount);
+            auctionHouse.BuildListBidderItems(result, player);
             result.DesiredDelay = 300;
             SendPacket(result);
         }
@@ -585,18 +585,18 @@ namespace Game
 
             AuctionListOwnerItemsResult result = new AuctionListOwnerItemsResult();
 
-            auctionHouse.BuildListOwnerItems(result, GetPlayer(), ref result.TotalCount);
+            auctionHouse.BuildListOwnerItems(result, GetPlayer());
             result.DesiredDelay = 300;
             SendPacket(result);
         }
 
-        //[WorldPacketHandler(ClientOpcodes.AuctionListItems)]
-        void HandleAuctionListItems(AuctionListItems packet)
+        [WorldPacketHandler(ClientOpcodes.AuctionBrowseQuery)]
+        void HandleAuctionListItems(AuctionBrowseQuery browseQuery)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(browseQuery.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleAuctionListItems - {0} not found or you can't interact with him.", packet.Auctioneer.ToString());
+                Log.outDebug(LogFilter.Network, "WORLD: HandleAuctionListItems - {0} not found or you can't interact with him.", browseQuery.Auctioneer.ToString());
                 return;
             }
 
@@ -606,41 +606,32 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionMgr.GetAuctionsMap(creature.GetFaction());
 
-
-            Optional<AuctionSearchFilters> filters = new Optional<AuctionSearchFilters>();
+            Optional<AuctionSearchClassFilters> classFilters = new Optional<AuctionSearchClassFilters>();
 
             AuctionListItemsResult result = new AuctionListItemsResult();
-            if (!packet.ClassFilters.Empty())
+            if (!browseQuery.ItemClassFilters.Empty())
             {
-                filters.HasValue = true;
+                classFilters.HasValue = true;
 
-                foreach (var classFilter in packet.ClassFilters)
+                foreach (var classFilter in browseQuery.ItemClassFilters)
                 {
                     if (!classFilter.SubClassFilters.Empty())
                     {
                         foreach (var subClassFilter in classFilter.SubClassFilters)
                         {
-                            filters.Value.Classes[classFilter.ItemClass].SubclassMask |= (AuctionSearchFilters.FilterType)(1 << subClassFilter.ItemSubclass);
-                            filters.Value.Classes[classFilter.ItemClass].InvTypes[subClassFilter.ItemSubclass] = subClassFilter.InvTypeMask;
+                            classFilters.Value.Classes[classFilter.ItemClass].SubclassMask |= (AuctionSearchClassFilters.FilterType)(1 << subClassFilter.ItemSubclass);
+                            if (subClassFilter.ItemSubclass < ItemConst.MaxItemSubclassTotal)
+                                classFilters.Value.Classes[classFilter.ItemClass].InvTypes[subClassFilter.ItemSubclass] = subClassFilter.InvTypeMask;
                         }
                     }
                     else
-                        filters.Value.Classes[classFilter.ItemClass].SubclassMask = AuctionSearchFilters.FilterType.SkipSubclass;
+                        classFilters.Value.Classes[classFilter.ItemClass].SubclassMask = AuctionSearchClassFilters.FilterType.SkipSubclass;
                 }
             }
 
-            auctionHouse.BuildListAuctionItems(result, GetPlayer(), packet.Name.ToLower(), packet.Offset, packet.MinLevel, packet.MaxLevel, packet.OnlyUsable, filters, packet.Quality);
+            auctionHouse.BuildListAuctionItems(result, GetPlayer(), browseQuery.Name.ToLower(), browseQuery.Offset, browseQuery.MinLevel, browseQuery.MaxLevel, browseQuery.Filters, classFilters);
 
             result.DesiredDelay = WorldConfig.GetUIntValue(WorldCfg.AuctionSearchDelay);
-            result.OnlyUsable = packet.OnlyUsable;
-            SendPacket(result);
-        }
-
-        //[WorldPacketHandler(ClientOpcodes.AuctionListPendingSales)]
-        void HandleAuctionListPendingSales(AuctionListPendingSales packet)
-        {
-            AuctionListPendingSalesResult result = new AuctionListPendingSalesResult();
-            result.TotalNumRecords = 0;
             SendPacket(result);
         }
 

@@ -431,7 +431,6 @@ namespace Game.Network
                 return;
             }
 
-
             Sha256 keyData = new Sha256();
             keyData.Finish(account.game.SessionKey);
 
