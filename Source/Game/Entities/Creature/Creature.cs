@@ -300,7 +300,7 @@ namespace Game.Entities
 
             SetDynamicFlags((UnitDynFlags)dynamicFlags);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), (uint)CliDB.AnimationDataStorage.Count);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, cInfo.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, cInfo.BaseAttackTime);

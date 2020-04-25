@@ -452,7 +452,7 @@ namespace Game.Entities
 
             // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
             _cinematicMgr.m_cinematicDiff += diff;
-            if (_cinematicMgr.m_activeCinematicCameraId != 0 && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
+            if (_cinematicMgr.m_activeCinematicCameraIndex != 0 && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
             {
                 _cinematicMgr.m_lastCinematicCheck = GameTime.GetGameTimeMS();
                 _cinematicMgr.UpdateCinematicLocation(diff);
@@ -5490,7 +5490,7 @@ namespace Game.Entities
                     return;
             }
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), (uint)CliDB.AnimationDataStorage.Count);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
         }
 
         //Creature
@@ -6513,7 +6513,7 @@ namespace Game.Entities
 
             CinematicSequencesRecord sequence = CliDB.CinematicSequencesStorage.LookupByKey(CinematicSequenceId);
             if (sequence != null)
-                _cinematicMgr.SetActiveCinematicCamera(sequence.Camera[0]);
+                _cinematicMgr.BeginCinematic(sequence);
         }
         public void SendMovieStart(uint movieId)
         {

@@ -732,6 +732,13 @@ namespace Game.DataStorage
             return _hotfixBlob.LookupByKey(Tuple.Create(tableHash, recordId));
         }
 
+        public uint GetEmptyAnimStateID()
+        {
+            return 1484;
+            // TEMP: well... AnimationData.db2 in 8.3.0 has more rows than max hardcoded anim id in client
+            // return sAnimationDataStore.GetNumRows();
+        }
+        
         public List<uint> GetAreasForGroup(uint areaGroupId)
         {
             return _areaGroupMembers.LookupByKey(areaGroupId);

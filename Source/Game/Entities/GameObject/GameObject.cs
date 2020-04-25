@@ -276,7 +276,7 @@ namespace Game.Entities
             SetGoState(goState);
             SetGoArtKit((byte)artKit);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), (uint)CliDB.AnimationDataStorage.Count);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
 
             switch (goInfo.type)
             {
