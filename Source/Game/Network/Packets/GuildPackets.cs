@@ -1056,7 +1056,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(item.EnchantmentID);
                 _worldPacket.WriteInt32(item.Charges);
                 _worldPacket.WriteInt32(item.OnUseEnchantmentID);
-                _worldPacket.WriteInt32(item.Flags);
+                _worldPacket.WriteUInt32(item.Flags);
 
                 item.Item.Write(_worldPacket);
 
@@ -1520,7 +1520,7 @@ namespace Game.Network.Packets
         public int EnchantmentID;
         public int Charges;
         public int OnUseEnchantmentID;
-        public int Flags;
+        public uint Flags;
         public bool Locked;
         public List<ItemGemData> SocketEnchant = new List<ItemGemData>();
     }

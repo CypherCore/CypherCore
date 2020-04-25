@@ -2248,7 +2248,7 @@ namespace Game.Guilds
                             itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
                             itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
                             itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Use);
-                            itemInfo.Flags = 0;
+                            itemInfo.Flags = tabItem.m_itemData.DynamicFlags;
 
                             byte i = 0;
                             foreach (SocketedGem gemData in tabItem.m_itemData.Gems)
