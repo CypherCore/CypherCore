@@ -30,7 +30,8 @@ namespace Game.Entities
 
         public uint m_cinematicDiff;
         public uint m_lastCinematicCheck;
-        public uint m_activeCinematicCameraId;
+        CinematicSequencesRecord m_activeCinematic;
+        public int m_activeCinematicCameraIndex;
         public uint m_cinematicLength;
         List<FlyByCamera> m_cinematicCamera;
         Position m_remoteSightPosition;
@@ -39,33 +40,38 @@ namespace Game.Entities
         public CinematicManager(Player playerref)
         {
             player = playerref;
-            m_cinematicDiff = 0;
-            m_lastCinematicCheck = 0;
-            m_activeCinematicCameraId = 0;
-            m_cinematicLength = 0;
-            m_cinematicCamera = null;
+            m_activeCinematicCameraIndex = -1;
             m_remoteSightPosition = new Position(0.0f, 0.0f, 0.0f);
-            m_CinematicObject = null;
         }
 
         public virtual void Dispose()
         {
-            if (m_cinematicCamera != null && m_activeCinematicCameraId != 0)
+            if (m_cinematicCamera != null && m_activeCinematic != null)
                 EndCinematic();
         }
 
-        public void BeginCinematic()
+        public void BeginCinematic(CinematicSequencesRecord cinematic)
+        {
+            m_activeCinematic = cinematic;
+            m_activeCinematicCameraIndex = -1;
+        }
+        
+        public void NextCinematicCamera()
         {
             // Sanity check for active camera set
-            if (m_activeCinematicCameraId == 0)
+            if (m_activeCinematic == null || m_activeCinematicCameraIndex >= m_activeCinematic.Camera.Length)
                 return;
 
-            var list = M2Storage.GetFlyByCameras(m_activeCinematicCameraId);
-            if (!list.Empty())
+            uint cinematicCameraId = m_activeCinematic.Camera[++m_activeCinematicCameraIndex];
+            if (cinematicCameraId == 0)
+                return;
+
+            var flyByCameras = M2Storage.GetFlyByCameras(cinematicCameraId);
+            if (!flyByCameras.Empty())
             {
                 // Initialize diff, and set camera
                 m_cinematicDiff = 0;
-                m_cinematicCamera = list;
+                m_cinematicCamera = flyByCameras;
 
                 if (!m_cinematicCamera.Empty())
                 {
@@ -90,12 +96,13 @@ namespace Game.Entities
 
         public void EndCinematic()
         {
-            if (m_activeCinematicCameraId == 0)
+            if (m_activeCinematic == null)
                 return;
 
             m_cinematicDiff = 0;
             m_cinematicCamera = null;
-            m_activeCinematicCameraId = 0;
+            m_activeCinematic = null;
+            m_activeCinematicCameraIndex = -1;
             if (m_CinematicObject)
             {
                 WorldObject vpObject = player.GetViewpoint();
@@ -109,7 +116,7 @@ namespace Game.Entities
 
         public void UpdateCinematicLocation(uint diff)
         {
-            if (m_activeCinematicCameraId == 0 || m_cinematicCamera == null || m_cinematicCamera.Count == 0)
+            if (m_activeCinematic == null || m_activeCinematicCameraIndex == -1 || m_cinematicCamera == null || m_cinematicCamera.Count == 0)
                 return;
 
             Position lastPosition = new Position();
@@ -185,8 +192,6 @@ namespace Game.Entities
                 EndCinematic();
         }
 
-        uint GetActiveCinematicCamera() { return m_activeCinematicCameraId; }
-        public void SetActiveCinematicCamera(uint cinematicCameraId = 0) { m_activeCinematicCameraId = cinematicCameraId; }
-        public bool IsOnCinematic() { return (m_cinematicCamera != null); }
+        public bool IsOnCinematic() { return m_cinematicCamera != null; }
     }
 }

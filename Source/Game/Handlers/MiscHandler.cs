@@ -144,7 +144,7 @@ namespace Game
         void HandleNextCinematicCamera(NextCinematicCamera packet)
         {    
             // Sent by client when cinematic actually begun. So we begin the server side process
-            GetPlayer().GetCinematicMgr().BeginCinematic();
+            GetPlayer().GetCinematicMgr().NextCinematicCamera();
         }
 
         [WorldPacketHandler(ClientOpcodes.CompleteMovie)]
