@@ -354,7 +354,7 @@ namespace BNetServer.Networking
                 response.State = new Bgs.Protocol.Account.V1.AccountState();
                 response.State.PrivacyInfo = new Bgs.Protocol.Account.V1.PrivacyInfo();
                 response.State.PrivacyInfo.IsUsingRid = false;
-                response.State.PrivacyInfo.IsRealIdVisibleForViewFriends = false;
+                response.State.PrivacyInfo.IsVisibleForViewFriends = false;
                 response.State.PrivacyInfo.IsHiddenFromFriendFinder = true;
 
                 response.Tags = new Bgs.Protocol.Account.V1.AccountFieldTags();

@@ -51,7 +51,7 @@ namespace BNetServer.Networking
                         AddRecentPlayersRequest request = new AddRecentPlayersRequest();
                         request.MergeFrom(stream);
 
-                        AddRecentPlayersResponse response = new AddRecentPlayersResponse();
+                        NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleAddRecentPlayers(request, response);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method UserManagerService.AddRecentPlayers(bgs.protocol.user_manager.v1.AddRecentPlayersRequest: {1}) returned bgs.protocol.user_manager.v1.AddRecentPlayersResponse: {2} status: {3}.",
                           GetCallerInfo(), request.ToString(), response.ToString(), status);
@@ -65,9 +65,9 @@ namespace BNetServer.Networking
                     {
                         ClearRecentPlayersRequest request = new ClearRecentPlayersRequest();
                         request.MergeFrom(stream);
-                        
 
-                        ClearRecentPlayersResponse response = new ClearRecentPlayersResponse();
+
+                        NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleClearRecentPlayers(request, response);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method UserManagerService.ClearRecentPlayers(bgs.protocol.user_manager.v1.ClearRecentPlayersRequest: {1}) returned bgs.protocol.user_manager.v1.ClearRecentPlayersResponse: {2} status: {3}.",
                           GetCallerInfo(), request.ToString(), response.ToString(), status);
@@ -171,14 +171,14 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleAddRecentPlayers(AddRecentPlayersRequest request, AddRecentPlayersResponse response)
+        BattlenetRpcErrorCode HandleAddRecentPlayers(AddRecentPlayersRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method UserManagerService.AddRecentPlayers: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleClearRecentPlayers(ClearRecentPlayersRequest request, ClearRecentPlayersResponse response)
+        BattlenetRpcErrorCode HandleClearRecentPlayers(ClearRecentPlayersRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method UserManagerService.ClearRecentPlayers: {1}",
               GetCallerInfo(), request.ToString());

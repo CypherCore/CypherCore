@@ -21,7 +21,7 @@ using System.Reflection;
 public class Singleton<T> where T : class
 {
     private static volatile T instance;
-    private static object syncRoot = new Object();
+    private static object syncRoot = new object();
 
     public static T Instance
     {

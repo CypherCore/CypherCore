@@ -31,44 +31,14 @@ namespace BNetServer.Networking
         {
             switch (methodId)
             {
-                case 12:
-                    {
-                        GameAccountHandle request = new GameAccountHandle();
-                        request.MergeFrom(stream);
-
-                        GameAccountBlob response = new GameAccountBlob();
-                        BattlenetRpcErrorCode status = HandleGetGameAccountBlob(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.GetGameAccountBlob(GameAccountHandle: {1}) returned GameAccountBlob: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
                 case 13:
                     {
-                        GetAccountRequest request = new GetAccountRequest();
+                        ResolveAccountRequest request = new ResolveAccountRequest();
                         request.MergeFrom(stream);
 
-                        GetAccountResponse response = new GetAccountResponse();
-                        BattlenetRpcErrorCode status = HandleGetAccount(request, response);
+                        ResolveAccountResponse response = new ResolveAccountResponse();
+                        BattlenetRpcErrorCode status = HandleResolveAccount(request, response);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.GetAccount(GetAccountRequest: {1}) returned GetAccountResponse: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
-                case 14:
-                    {
-                        CreateGameAccountRequest request = new CreateGameAccountRequest();
-                        request.MergeFrom(stream);
-
-                        GameAccountHandle response = new GameAccountHandle();
-                        BattlenetRpcErrorCode status = HandleCreateGameAccount(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.CreateGameAccount(CreateGameAccountRequest: {1}) returned GameAccountHandle: {2} status: {3}.",
                           GetCallerInfo(), request.ToString(), response.ToString(), status);
                         if (status == 0)
                             SendResponse(token, response);
@@ -91,38 +61,10 @@ namespace BNetServer.Networking
                             SendResponse(token, status);
                         break;
                     }
-                case 20:
-                    {
-                        CacheExpireRequest request = new CacheExpireRequest();
-                        request.MergeFrom(stream);
-
-                        BattlenetRpcErrorCode status = HandleCacheExpire(request);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.CacheExpire(CacheExpireRequest: {1}) status: {2}.",
-                          GetCallerInfo(), request.ToString(), status);
-                        if (status != 0)
-                            SendResponse(token, status);
-                        break;
-                    }
-                case 21:
-                    {
-                        CredentialUpdateRequest request = new CredentialUpdateRequest();
-                        request.MergeFrom(stream);
-
-                        CredentialUpdateResponse response = new CredentialUpdateResponse();
-                        BattlenetRpcErrorCode status = HandleCredentialUpdate(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.CredentialUpdate(CredentialUpdateRequest: {1}) returned CredentialUpdateResponse: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
                 case 25:
                     {
                         SubscriptionUpdateRequest request = new SubscriptionUpdateRequest();
                         request.MergeFrom(stream);
-
 
                         SubscriptionUpdateResponse response = new SubscriptionUpdateResponse();
                         BattlenetRpcErrorCode status = HandleSubscribe(request, response);
@@ -239,21 +181,6 @@ namespace BNetServer.Networking
                             SendResponse(token, status);
                         break;
                     }
-                case 36:
-                    {
-                        ForwardCacheExpireRequest request = new ForwardCacheExpireRequest();
-                        request.MergeFrom(stream);
-
-                        NoData response = new NoData();
-                        BattlenetRpcErrorCode status = HandleForwardCacheExpire(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.ForwardCacheExpire(ForwardCacheExpireRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
                 case 37:
                     {
                         GetAuthorizedDataRequest request = new GetAuthorizedDataRequest();
@@ -269,90 +196,6 @@ namespace BNetServer.Networking
                             SendResponse(token, status);
                         break;
                     }
-                case 38:
-                    {
-                        AccountFlagUpdateRequest request = new AccountFlagUpdateRequest();
-                        request.MergeFrom(stream);
-
-                        BattlenetRpcErrorCode status = HandleAccountFlagUpdate(request);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.AccountFlagUpdate(AccountFlagUpdateRequest: {1}) status: {2}.",
-                          GetCallerInfo(), request.ToString(), status);
-                        if (status != 0)
-                            SendResponse(token, status);
-                        break;
-                    }
-                case 39:
-                    {
-                        GameAccountFlagUpdateRequest request = new GameAccountFlagUpdateRequest();
-                        request.MergeFrom(stream);
-
-                        BattlenetRpcErrorCode status = HandleGameAccountFlagUpdate(request);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.GameAccountFlagUpdate(GameAccountFlagUpdateRequest: {1}) status: {2}.",
-                          GetCallerInfo(), request.ToString(), status);
-                        if (status != 0)
-                            SendResponse(token, status);
-                        break;
-                    }
-                /* case 40:
-                     {
-                         UpdateParentalControlsAndCAISRequest request = new UpdateParentalControlsAndCAISRequest();
-                         request.MergeFrom(stream);
-
-                         NoData response = new NoData();
-                         BattlenetRpcErrorCode status = HandleUpdateParentalControlsAndCAIS(request, response);
-                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.UpdateParentalControlsAndCAIS(UpdateParentalControlsAndCAISRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
-                           GetCallerInfo(), request.ToString(), response.ToString(), status);
-                         if (status == 0)
-                             SendResponse(token, response);
-                         else
-                             SendResponse(token, status);
-                         break;
-                     }
-                 case 41:
-                     {
-                         CreateGameAccountRequest request = new CreateGameAccountRequest();
-                         request.MergeFrom(stream);
-
-                         CreateGameAccountResponse response = new CreateGameAccountResponse();
-                         BattlenetRpcErrorCode status = HandleCreateGameAccount2(request, response);
-                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.CreateGameAccount2(CreateGameAccountRequest: {1}) returned CreateGameAccountResponse: {2} status: {3}.",
-                           GetCallerInfo(), request.ToString(), response.ToString(), status);
-                         if (status == 0)
-                             SendResponse(token, response);
-                         else
-                             SendResponse(token, status);
-                         break;
-                     }
-                 case 42:
-                     {
-                         GetGameAccountRequest request = new GetGameAccountRequest();
-                         request.MergeFrom(stream);
-
-                         GetGameAccountResponse response = new GetGameAccountResponse();
-                         BattlenetRpcErrorCode status = HandleGetGameAccount(request, response);
-                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.GetGameAccount(GetGameAccountRequest: {1}) returned GetGameAccountResponse: {2} status: {3}.",
-                           GetCallerInfo(), request.ToString(), response.ToString(), status);
-                         if (status == 0)
-                             SendResponse(token, &response);
-                         else
-                             SendResponse(token, status);
-                         break;
-                     }
-                 case 43:
-                     {
-                         QueueDeductRecordRequest request = new QueueDeductRecordRequest();
-                         request.MergeFrom(stream);
-
-                         NoData response = new NoData();
-                         BattlenetRpcErrorCode status = HandleQueueDeductRecord(request, response);
-                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method AccountService.QueueDeductRecord(QueueDeductRecordRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
-                           GetCallerInfo(), request.ToString(), response.ToString(), status);
-                         if (status == 0)
-                             SendResponse(token, response);
-                         else
-                             SendResponse(token, status);
-                         break;
-                     }*/
                 default:
                     Log.outError(LogFilter.ServiceProtobuf, "Bad method id {0}.", methodId);
                     SendResponse(token, BattlenetRpcErrorCode.RpcInvalidMethod);
@@ -360,39 +203,15 @@ namespace BNetServer.Networking
             }
         }
 
-        BattlenetRpcErrorCode HandleGetGameAccountBlob(GameAccountHandle request, GameAccountBlob response)
+        BattlenetRpcErrorCode HandleResolveAccount(ResolveAccountRequest request, ResolveAccountResponse response)
         {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.GetAccount({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleGetAccount(GetAccountRequest request, GetAccountResponse response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.GetAccount({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleCreateGameAccount(CreateGameAccountRequest request, GameAccountHandle response)
-        {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.CreateGameAccount({1})", GetCallerInfo(), request.ToString());
+            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.ResolveAccount({1})", GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
         BattlenetRpcErrorCode HandleIsIgrAddress(IsIgrAddressRequest request, NoData response)
         {
             Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.IsIgrAddress({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleCacheExpire(CacheExpireRequest request)
-        {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.CacheExpire({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleCredentialUpdate(CredentialUpdateRequest request, CredentialUpdateResponse response)
-        {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.CredentialUpdate({1})", GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
@@ -442,21 +261,9 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleForwardCacheExpire(ForwardCacheExpireRequest request, NoData response)
-        {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.ForwardCacheExpire({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
         BattlenetRpcErrorCode HandleGetAuthorizedData(GetAuthorizedDataRequest request, GetAuthorizedDataResponse response)
         {
             Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.GetAuthorizedData({1})", GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleAccountFlagUpdate(AccountFlagUpdateRequest request)
-        {
-            Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.AccountFlagUpdate({1})", GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
@@ -465,35 +272,6 @@ namespace BNetServer.Networking
             Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.GameAccountFlagUpdate({1})", GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
-
-        /*BattlenetRpcErrorCode HandleUpdateParentalControlsAndCAIS(UpdateParentalControlsAndCAISRequest request, NoData response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.UpdateParentalControlsAndCAIS: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleCreateGameAccount2(CreateGameAccountRequest request, CreateGameAccountResponse response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.CreateGameAccount2: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleGetGameAccount(GetGameAccountRequest request, GetGameAccountResponse response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.GetGameAccount: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleQueueDeductRecord(QueueDeductRecordRequest request, NoData response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method AccountService.QueueDeductRecord: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-        */
     }
 
     class AccountListener : ServiceBase

@@ -30,8 +30,6 @@ namespace BNetServer.Services
             AddService<AccountService>(OriginalHash.AccountService);
             AddService<AccountListener>(OriginalHash.AccountListener);
             AddService<AuthenticationService>(OriginalHash.AuthenticationService);
-            AddService<ChallengeService>(OriginalHash.ChallengeService);
-            AddService<ChannelService>(OriginalHash.ChannelService);
             AddService<ConnectionService>(OriginalHash.ConnectionService);
             AddService<FriendsService>(OriginalHash.FriendsService);
             AddService<GameUtilitiesService>(OriginalHash.GameUtilitiesService);

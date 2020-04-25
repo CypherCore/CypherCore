@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BNetServer", "Source\BNetServer\BNetServer.csproj", "{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}"
 EndProject
@@ -16,8 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Servers", "Servers", "{480EFA6E-4FEC-483A-8432-09964C3486E0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{0C88588D-45B8-4AA9-8EEA-DB1A1BD19D19}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Google.Protobuf", "Deps\Source\Google.Protobuf\Google.Protobuf.csproj", "{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,18 +87,6 @@ Global
 		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|mac-x64.Build.0 = Release|x64
 		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.ActiveCfg = Release|x64
 		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.Build.0 = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|linux-x64.ActiveCfg = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|linux-x64.Build.0 = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|mac-x64.ActiveCfg = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|mac-x64.Build.0 = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|win-x64.ActiveCfg = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Debug|win-x64.Build.0 = Debug|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|linux-x64.ActiveCfg = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|linux-x64.Build.0 = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|mac-x64.ActiveCfg = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|mac-x64.Build.0 = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|win-x64.ActiveCfg = Release|x64
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D}.Release|win-x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,7 +97,6 @@ Global
 		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6} = {0C88588D-45B8-4AA9-8EEA-DB1A1BD19D19}
 		{1899C17C-1FA4-4807-B90E-0336C5748C1A} = {0C88588D-45B8-4AA9-8EEA-DB1A1BD19D19}
 		{2F7515AD-18E3-4ACA-A14B-1929F76299E7} = {0C88588D-45B8-4AA9-8EEA-DB1A1BD19D19}
-		{54EBBA35-DEFE-4967-8B87-4FBA47FDC33D} = {0C88588D-45B8-4AA9-8EEA-DB1A1BD19D19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {836F0B44-1360-4E79-8ED9-F3D23C2ACEF5}

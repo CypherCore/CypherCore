@@ -35,7 +35,6 @@ namespace BNetServer.Networking
                     {
                         SubscribeRequest request = new SubscribeRequest();
                         request.MergeFrom(stream);
-                        
 
                         SubscribeResponse response = new SubscribeResponse();
                         BattlenetRpcErrorCode status = HandleSubscribe(request, response);
@@ -51,7 +50,6 @@ namespace BNetServer.Networking
                     {
                         SendInvitationRequest request = new SendInvitationRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleSendInvitation(request, response);
@@ -65,9 +63,8 @@ namespace BNetServer.Networking
                     }
                 case 3:
                     {
-                        GenericInvitationRequest request = new GenericInvitationRequest();
+                        AcceptInvitationRequest request = new AcceptInvitationRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleAcceptInvitation(request, response);
@@ -81,9 +78,8 @@ namespace BNetServer.Networking
                     }
                 case 4:
                     {
-                        GenericInvitationRequest request = new GenericInvitationRequest();
+                        RevokeInvitationRequest request = new RevokeInvitationRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleRevokeInvitation(request, response);
@@ -97,9 +93,8 @@ namespace BNetServer.Networking
                     }
                 case 5:
                     {
-                        GenericInvitationRequest request = new GenericInvitationRequest();
+                        DeclineInvitationRequest request = new DeclineInvitationRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleDeclineInvitation(request, response);
@@ -113,9 +108,8 @@ namespace BNetServer.Networking
                     }
                 case 6:
                     {
-                        GenericInvitationRequest request = new GenericInvitationRequest();
+                        IgnoreInvitationRequest request = new IgnoreInvitationRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleIgnoreInvitation(request, response);
@@ -127,29 +121,12 @@ namespace BNetServer.Networking
                             SendResponse(token, status);
                         break;
                     }
-                case 7:
-                    {
-                        AssignRoleRequest request = new AssignRoleRequest();
-                        request.MergeFrom(stream);
-                        
-
-                        NoData response = new NoData();
-                        BattlenetRpcErrorCode status = HandleAssignRole(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsService.AssignRole(bgs.protocol.friends.v1.AssignRoleRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
                 case 8:
                     {
-                        GenericFriendRequest request = new GenericFriendRequest();
+                        RemoveFriendRequest request = new RemoveFriendRequest();
                         request.MergeFrom(stream);
-                        
 
-                        GenericFriendResponse response = new GenericFriendResponse();
+                        NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleRemoveFriend(request, response);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsService.RemoveFriend(bgs.protocol.friends.v1.GenericFriendRequest: {1}) returned bgs.protocol.friends.v1.GenericFriendResponse: {2} status: {3}.",
                           GetCallerInfo(), request.ToString(), response.ToString(), status);
@@ -163,7 +140,6 @@ namespace BNetServer.Networking
                     {
                         ViewFriendsRequest request = new ViewFriendsRequest();
                         request.MergeFrom(stream);
-                        
 
                         ViewFriendsResponse response = new ViewFriendsResponse();
                         BattlenetRpcErrorCode status = HandleViewFriends(request, response);
@@ -179,7 +155,6 @@ namespace BNetServer.Networking
                     {
                         UpdateFriendStateRequest request = new UpdateFriendStateRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleUpdateFriendState(request, response);
@@ -195,7 +170,6 @@ namespace BNetServer.Networking
                     {
                         UnsubscribeRequest request = new UnsubscribeRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleUnsubscribe(request, response);
@@ -209,9 +183,8 @@ namespace BNetServer.Networking
                     }
                 case 12:
                     {
-                        GenericFriendRequest request = new GenericFriendRequest();
+                        RevokeAllInvitationsRequest request = new RevokeAllInvitationsRequest();
                         request.MergeFrom(stream);
-                        
 
                         NoData response = new NoData();
                         BattlenetRpcErrorCode status = HandleRevokeAllInvitations(request, response);
@@ -223,38 +196,6 @@ namespace BNetServer.Networking
                             SendResponse(token, status);
                         break;
                     }
-                /*case 13:
-                    {
-                        GetFriendListRequest request = new GetFriendListRequest();
-                        request.MergeFrom(stream);
-                        
-
-                        GetFriendListResponse response = new GetFriendListResponse();
-                        BattlenetRpcErrorCode status = HandleGetFriendList(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsService.GetFriendList(bgs.protocol.friends.v1.GetFriendListRequest: {1}) returned bgs.protocol.friends.v1.GetFriendListResponse: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }
-                case 14:
-                    {
-                        CreateFriendshipRequest request = new CreateFriendshipRequest();
-                        request.MergeFrom(stream);
-                        
-
-                        NoData response = new NoData();
-                        BattlenetRpcErrorCode status = HandleCreateFriendship(request, response);
-                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsService.CreateFriendship(bgs.protocol.friends.v1.CreateFriendshipRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
-                          GetCallerInfo(), request.ToString(), response.ToString(), status);
-                        if (status == 0)
-                            SendResponse(token, response);
-                        else
-                            SendResponse(token, status);
-                        break;
-                    }*/
                 default:
                     Log.outError(LogFilter.ServiceProtobuf, "Bad method id {0}.", methodId);
                     SendResponse(token, BattlenetRpcErrorCode.RpcInvalidMethod);
@@ -276,42 +217,35 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleAcceptInvitation(GenericInvitationRequest request, NoData response)
+        BattlenetRpcErrorCode HandleAcceptInvitation(AcceptInvitationRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.AcceptInvitation: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleRevokeInvitation(GenericInvitationRequest request, NoData response)
+        BattlenetRpcErrorCode HandleRevokeInvitation(RevokeInvitationRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.RevokeInvitation: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleDeclineInvitation(GenericInvitationRequest request, NoData response)
+        BattlenetRpcErrorCode HandleDeclineInvitation(DeclineInvitationRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.DeclineInvitation: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleIgnoreInvitation(GenericInvitationRequest request, NoData response)
+        BattlenetRpcErrorCode HandleIgnoreInvitation(IgnoreInvitationRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.IgnoreInvitation: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleAssignRole(AssignRoleRequest request, NoData response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.AssignRole: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleRemoveFriend(GenericFriendRequest request, GenericFriendResponse response)
+        BattlenetRpcErrorCode HandleRemoveFriend(RemoveFriendRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.RemoveFriend: {1}",
               GetCallerInfo(), request.ToString());
@@ -339,27 +273,12 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleRevokeAllInvitations(GenericFriendRequest request, NoData response)
+        BattlenetRpcErrorCode HandleRevokeAllInvitations(RevokeAllInvitationsRequest request, NoData response)
         {
             Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.RevokeAllInvitations: {1}",
               GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
-
-        /*BattlenetRpcErrorCode HandleGetFriendList(GetFriendListRequest request, GetFriendListResponse response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.GetFriendList: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-
-        BattlenetRpcErrorCode HandleCreateFriendship(CreateFriendshipRequest request, NoData response)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method FriendsService.CreateFriendship: {1}",
-              GetCallerInfo(), request.ToString());
-            return BattlenetRpcErrorCode.RpcNotImplemented;
-        }
-        */
     }
 
     class FriendsListener : ServiceBase
@@ -374,7 +293,6 @@ namespace BNetServer.Networking
                     {
                         FriendNotification request = new FriendNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnFriendAdded(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnFriendAdded(bgs.protocol.friends.v1.FriendNotification: {1}) status: {2}.",
@@ -387,7 +305,6 @@ namespace BNetServer.Networking
                     {
                         FriendNotification request = new FriendNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnFriendRemoved(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnFriendRemoved(bgs.protocol.friends.v1.FriendNotification: {1}) status: {2}.",
@@ -400,7 +317,6 @@ namespace BNetServer.Networking
                     {
                         InvitationNotification request = new InvitationNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnReceivedInvitationAdded(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnReceivedInvitationAdded(bgs.protocol.friends.v1.InvitationNotification: {1}) status: {2}.",
@@ -413,7 +329,6 @@ namespace BNetServer.Networking
                     {
                         InvitationNotification request = new InvitationNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnReceivedInvitationRemoved(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnReceivedInvitationRemoved(bgs.protocol.friends.v1.InvitationNotification: {1}) status: {2}.",
@@ -426,7 +341,6 @@ namespace BNetServer.Networking
                     {
                         InvitationNotification request = new InvitationNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnSentInvitationAdded(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnSentInvitationAdded(bgs.protocol.friends.v1.InvitationNotification: {1}) status: {2}.",
@@ -439,7 +353,6 @@ namespace BNetServer.Networking
                     {
                         InvitationNotification request = new InvitationNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnSentInvitationRemoved(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnSentInvitationRemoved(bgs.protocol.friends.v1.InvitationNotification: {1}) status: {2}.",
@@ -452,7 +365,6 @@ namespace BNetServer.Networking
                     {
                         UpdateFriendStateNotification request = new UpdateFriendStateNotification();
                         request.MergeFrom(stream);
-                        
 
                         BattlenetRpcErrorCode status = HandleOnUpdateFriendState(request);
                         Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method FriendsListener.OnUpdateFriendState(bgs.protocol.friends.v1.UpdateFriendStateNotification: {1}) status: {2}.",
