@@ -580,8 +580,8 @@ namespace Game
                 if (m.state == MailState.Deleted || curTime < m.deliver_time)
                     continue;
 
-                // max. 50 mails can be sent
-                if (response.Mails.Count < 50)
+                // max. 100 mails can be sent
+                if (response.Mails.Count < 100)
                     response.Mails.Add(new MailListEntry(m, player));
             }
 
