@@ -2506,19 +2506,19 @@ namespace Game.Entities
             return vCount.count;
         }
 
-        public override string GetName(LocaleConstant locale_idx = LocaleConstant.enUS)
+        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
         {
-            if (locale_idx != LocaleConstant.enUS)
+            if (locale != LocaleConstant.enUS)
             {
                 CreatureLocale cl = Global.ObjectMgr.GetCreatureLocale(GetEntry());
                 if (cl != null)
                 {
-                    if (cl.Name.Length > (byte)locale_idx && !string.IsNullOrEmpty(cl.Name[(byte)locale_idx]))
-                        return cl.Name[(byte)locale_idx];
+                    if (cl.Name.Length > (int)locale && !cl.Name[(int)locale].IsEmpty())
+                        return cl.Name[(int)locale];
                 }
             }
 
-            return base.GetName(locale_idx);
+            return base.GetName(locale);
         }
 
         public virtual byte GetPetAutoSpellSize() { return 4; }

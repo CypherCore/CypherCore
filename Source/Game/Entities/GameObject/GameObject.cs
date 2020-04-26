@@ -2085,18 +2085,17 @@ namespace Game.Entities
             return GetGoInfo().ScriptId;
         }
 
-        public override string GetName(LocaleConstant loc_idx = LocaleConstant.enUS)
+        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
         {
-            if (loc_idx != LocaleConstant.enUS)
+            if (locale != LocaleConstant.enUS)
             {
-                byte uloc_idx = (byte)loc_idx;
                 GameObjectLocale cl = Global.ObjectMgr.GetGameObjectLocale(GetEntry());
                 if (cl != null)
-                    if (cl.Name.Length > uloc_idx && !string.IsNullOrEmpty(cl.Name[uloc_idx]))
-                        return cl.Name[uloc_idx];
+                    if (cl.Name.Length > (int)locale && !cl.Name[(int)locale].IsEmpty())
+                        return cl.Name[(int)locale];
             }
 
-            return base.GetName(loc_idx);
+            return base.GetName(locale);
         }
 
         public void UpdatePackedRotation()

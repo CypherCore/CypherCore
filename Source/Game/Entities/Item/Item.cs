@@ -106,6 +106,16 @@ namespace Game.Entities
             return true;
         }
 
+        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
+        {
+            ItemTemplate itemTemplate = GetTemplate();
+            var suffix = CliDB.ItemNameDescriptionStorage.LookupByKey(_bonusData.Suffix);
+            if (suffix != null)
+                return $"{itemTemplate.GetName(locale)} {suffix.Description[locale]}";
+
+            return itemTemplate.GetName(locale);
+        }
+
         public bool IsNotEmptyBag()
         {
             Bag bag = ToBag();
@@ -2861,6 +2871,7 @@ namespace Game.Entities
             CanDisenchant = !proto.GetFlags().HasAnyFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.GetFlags4().HasAnyFlag(ItemFlags4.Scrapable);
 
+            _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
             _state.AzeriteTierUnlockSetPriority = int.MaxValue;
@@ -2913,6 +2924,13 @@ namespace Game.Entities
                     }
                     else if ((uint)Quality < values[0])
                         Quality = (ItemQuality)values[0];
+                    break;
+                case ItemBonusType.Suffix:
+                    if (values[1] < _state.SuffixPriority)
+                    {
+                        Suffix = (uint)values[0];
+                        _state.SuffixPriority = values[1];
+                    }
                     break;
                 case ItemBonusType.Socket:
                     {
@@ -2994,6 +3012,7 @@ namespace Game.Entities
         public int RelicType;
         public int RequiredLevelOverride;
         public uint AzeriteTierUnlockSetId;
+        public uint Suffix;
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;
@@ -3001,6 +3020,7 @@ namespace Game.Entities
 
         struct State
         {
+            public int SuffixPriority;
             public int AppearanceModPriority;
             public int ScalingStatDistributionPriority;
             public int AzeriteTierUnlockSetPriority;

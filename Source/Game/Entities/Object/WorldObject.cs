@@ -1681,7 +1681,7 @@ namespace Game.Entities
         public virtual ushort GetMovementAnimKitId() { return 0; }
         public virtual ushort GetMeleeAnimKitId() { return 0; }
 
-        public virtual string GetName(LocaleConstant locale_idx = LocaleConstant.enUS) { return _name; }
+        public virtual string GetName(LocaleConstant locale = LocaleConstant.enUS) { return _name; }
         public void SetName(string name) { _name = name; }
 
         public ObjectGuid GetGUID() { return m_guid; }
