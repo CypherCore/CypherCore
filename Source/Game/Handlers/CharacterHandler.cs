@@ -49,7 +49,7 @@ namespace Game
             stmt.AddValue(0, PetSaveMode.AsCurrent);
             stmt.AddValue(1, GetAccountId());
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharEnumCallback));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharEnumCallback));
         }
 
         void HandleCharEnumCallback(SQLResult result)
@@ -144,7 +144,7 @@ namespace Game
             stmt.AddValue(0, (uint)PetSaveMode.AsCurrent);
             stmt.AddValue(1, GetAccountId());
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharUndeleteEnumCallback));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharUndeleteEnumCallback));
         }
 
         void HandleCharUndeleteEnumCallback(SQLResult result)
@@ -307,7 +307,7 @@ namespace Game
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
             stmt.AddValue(0, charCreate.CreateInfo.Name);
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
             {
                 if (!result.IsEmpty())
                 {
@@ -334,6 +334,7 @@ namespace Game
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
                 stmt.AddValue(0, GetAccountId());
                 queryCallback.SetNextQuery(DB.Characters.AsyncQuery(stmt));
+
             }).WithChainingCallback((queryCallback, result) =>
             {
                 if (!result.IsEmpty())
@@ -346,17 +347,16 @@ namespace Game
                         return;
                     }
                 }
-
+                
+                int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
+                bool hasDemonHunterReqLevel = demonHunterReqLevel == 0;
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
                 int skipCinematics = WorldConfig.GetIntValue(WorldCfg.SkipCinematics);
+                bool checkDemonHunterReqs = createInfo.ClassId == Class.DemonHunter && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
 
                 void finalizeCharacterCreation(SQLResult result1)
                 {
                     bool haveSameRace = false;
-                    int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
-                    bool hasDemonHunterReqLevel = (demonHunterReqLevel == 0);
-                    bool checkDemonHunterReqs = createInfo.ClassId == Class.DemonHunter && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
-
                     if (result1 != null && !result1.IsEmpty())
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
@@ -461,33 +461,39 @@ namespace Game
 
                     newChar.atLoginFlags = AtLoginFlags.FirstLogin;               // First login
 
-                    // Player created, save it now
-                    newChar.SaveToDB(true);
-                    createInfo.CharCount += 1;
+                    SQLTransaction characterTransaction = new SQLTransaction();
+                    SQLTransaction loginTransaction = new SQLTransaction();
 
-                    SQLTransaction trans = new SQLTransaction();
+                    // Player created, save it now
+                    newChar.SaveToDB(loginTransaction, characterTransaction, true);
+                    createInfo.CharCount += 1;
 
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
                     stmt.AddValue(0, GetAccountId());
                     stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Realm);
-                    trans.Append(stmt);
+                    loginTransaction.Append(stmt);
 
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS);
                     stmt.AddValue(0, createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
                     stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Realm);
-                    trans.Append(stmt);
+                    loginTransaction.Append(stmt);
 
-                    DB.Login.CommitTransaction(trans);
+                    DB.Login.CommitTransaction(loginTransaction);
 
-                    // Success
-                    SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
+                    AddTransactionCallback(DB.Characters.AsyncCommitTransaction(characterTransaction)).AfterComplete(success =>
+                    {
+                        if (success)
+                        {
+                            Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
+                            Global.ScriptMgr.OnPlayerCreate(newChar);
+                            Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
-                    Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
-                    Global.ScriptMgr.OnPlayerCreate(newChar);
-                    Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
-
-                    newChar.CleanupsBeforeDelete();
+                            SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
+                        }
+                        else
+                            SendCharCreate(ResponseCodes.CharCreateError);
+                    });
                 }
 
                 if (!allowTwoSideAccounts || skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter)
@@ -1021,7 +1027,7 @@ namespace Game
             stmt.AddValue(0, request.RenameInfo.Guid.GetCounter());
             stmt.AddValue(1, request.RenameInfo.NewName);
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRenameCallBack, request.RenameInfo));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRenameCallBack, request.RenameInfo));
         }
 
         void HandleCharRenameCallBack(CharacterRenameInfo renameInfo, SQLResult result)
@@ -1211,7 +1217,7 @@ namespace Game
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_CUSTOMIZE_INFO);
             stmt.AddValue(0, packet.CustomizeInfo.CharGUID.GetCounter());
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharCustomizeCallback, packet.CustomizeInfo));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharCustomizeCallback, packet.CustomizeInfo));
         }
 
         void HandleCharCustomizeCallback(CharCustomizeInfo customizeInfo, SQLResult result)
@@ -1492,7 +1498,7 @@ namespace Game
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS);
             stmt.AddValue(0, packet.RaceOrFactionChangeInfo.Guid.GetCounter());
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRaceOrFactionChangeCallback, packet.RaceOrFactionChangeInfo));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRaceOrFactionChangeCallback, packet.RaceOrFactionChangeInfo));
         }
 
         void HandleCharRaceOrFactionChangeCallback(CharRaceOrFactionChangeInfo factionChangeInfo, SQLResult result)
@@ -2045,7 +2051,7 @@ namespace Game
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE);
             stmt.AddValue(0, GetBattlenetAccountId());
 
-            _queryProcessor.AddQuery(DB.Login.AsyncQuery(stmt).WithCallback(HandleUndeleteCooldownStatusCallback));
+            _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleUndeleteCooldownStatusCallback));
         }
 
         void HandleUndeleteCooldownStatusCallback(SQLResult result)
@@ -2076,7 +2082,7 @@ namespace Game
             stmt.AddValue(0, GetBattlenetAccountId());
 
             CharacterUndeleteInfo undeleteInfo = undeleteCharacter.UndeleteInfo;
-            _queryProcessor.AddQuery(DB.Login.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
+            _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithChainingCallback((queryCallback, result) =>
             {
                 if (!result.IsEmpty())
                 {

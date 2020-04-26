@@ -3108,6 +3108,17 @@ namespace Game.Entities
 
         public void SaveToDB(bool create = false)
         {
+            SQLTransaction loginTransaction = new SQLTransaction();
+            SQLTransaction characterTransaction = new SQLTransaction();
+
+            SaveToDB(loginTransaction, characterTransaction, create);
+
+            DB.Characters.CommitTransaction(characterTransaction);
+            DB.Login.CommitTransaction(loginTransaction);
+        }
+
+        public void SaveToDB(SQLTransaction loginTransaction, SQLTransaction characterTransaction, bool create = false)
+        {
             // delay auto save at any saves (manual, in code, or autosave)
             m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
 
@@ -3126,13 +3137,12 @@ namespace Game.Entities
             if (!create)
                 Global.ScriptMgr.OnPlayerSave(this);
 
-            SQLTransaction trans = new SQLTransaction();
             PreparedStatement stmt;
             byte index = 0;
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
             stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
+            characterTransaction.Append(stmt);
 
             float finiteAlways(float f) { return !float.IsInfinity(f) ? f : 0.0f; };
 
@@ -3428,7 +3438,7 @@ namespace Game.Entities
                 stmt.AddValue(index, GetGUID().GetCounter());
             }
 
-            trans.Append(stmt);
+            characterTransaction.Append(stmt);
 
             if (m_fishingSteps != 0)
             {
@@ -3436,58 +3446,55 @@ namespace Game.Entities
                 index = 0;
                 stmt.AddValue(index++, GetGUID().GetCounter());
                 stmt.AddValue(index++, m_fishingSteps);
-                trans.Append(stmt);
+                characterTransaction.Append(stmt);
             }
 
             if (m_mailsUpdated)                                     //save mails only when needed
-                _SaveMail(trans);
+                _SaveMail(characterTransaction);
 
-            _SaveBGData(trans);
-            _SaveInventory(trans);
-            _SaveVoidStorage(trans);
-            _SaveQuestStatus(trans);
-            _SaveDailyQuestStatus(trans);
-            _SaveWeeklyQuestStatus(trans);
-            _SaveSeasonalQuestStatus(trans);
-            _SaveMonthlyQuestStatus(trans);
-            _SaveGlyphs(trans);
-            _SaveTalents(trans);
-            _SaveSpells(trans);
-            GetSpellHistory().SaveToDB<Player>(trans);
-            _SaveActions(trans);
-            _SaveAuras(trans);
-            _SaveSkills(trans);
-            m_achievementSys.SaveToDB(trans);
-            reputationMgr.SaveToDB(trans);
-            m_questObjectiveCriteriaMgr.SaveToDB(trans);
-            _SaveEquipmentSets(trans);
-            GetSession().SaveTutorialsData(trans);                 // changed only while character in game
-            _SaveInstanceTimeRestrictions(trans);
-            _SaveCurrency(trans);
-            _SaveCUFProfiles(trans);
+            _SaveBGData(characterTransaction);
+            _SaveInventory(characterTransaction);
+            _SaveVoidStorage(characterTransaction);
+            _SaveQuestStatus(characterTransaction);
+            _SaveDailyQuestStatus(characterTransaction);
+            _SaveWeeklyQuestStatus(characterTransaction);
+            _SaveSeasonalQuestStatus(characterTransaction);
+            _SaveMonthlyQuestStatus(characterTransaction);
+            _SaveGlyphs(characterTransaction);
+            _SaveTalents(characterTransaction);
+            _SaveSpells(characterTransaction);
+            GetSpellHistory().SaveToDB<Player>(characterTransaction);
+            _SaveActions(characterTransaction);
+            _SaveAuras(characterTransaction);
+            _SaveSkills(characterTransaction);
+            m_achievementSys.SaveToDB(characterTransaction);
+            reputationMgr.SaveToDB(characterTransaction);
+            m_questObjectiveCriteriaMgr.SaveToDB(characterTransaction);
+            _SaveEquipmentSets(characterTransaction);
+            GetSession().SaveTutorialsData(characterTransaction);                 // changed only while character in game
+            _SaveInstanceTimeRestrictions(characterTransaction);
+            _SaveCurrency(characterTransaction);
+            _SaveCUFProfiles(characterTransaction);
             if (_garrison != null)
-                _garrison.SaveToDB(trans);
+                _garrison.SaveToDB(characterTransaction);
 
             // check if stats should only be saved on logout
             // save stats can be out of transaction
             if (GetSession().IsLogingOut() || !WorldConfig.GetBoolValue(WorldCfg.StatsSaveOnlyOnLogout))
-                _SaveStats(trans);
-
-            DB.Characters.CommitTransaction(trans);
+                _SaveStats(characterTransaction);
 
             // TODO: Move this out
-            trans = new SQLTransaction();
-            GetSession().GetCollectionMgr().SaveAccountToys(trans);
-            GetSession().GetBattlePetMgr().SaveToDB(trans);
-            GetSession().GetCollectionMgr().SaveAccountHeirlooms(trans);
-            GetSession().GetCollectionMgr().SaveAccountMounts(trans);
-            GetSession().GetCollectionMgr().SaveAccountItemAppearances(trans);
+            GetSession().GetCollectionMgr().SaveAccountToys(loginTransaction);
+            GetSession().GetBattlePetMgr().SaveToDB(loginTransaction);
+            GetSession().GetCollectionMgr().SaveAccountHeirlooms(loginTransaction);
+            GetSession().GetCollectionMgr().SaveAccountMounts(loginTransaction);
+            GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, GetSession().GetAccountId());
             stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
             stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
-            trans.Append(stmt);
+            loginTransaction.Append(stmt);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, GetSession().GetAccountId());
@@ -3497,9 +3504,7 @@ namespace Game.Entities
             stmt.AddValue(4, GetName());
             stmt.AddValue(5, GetGUID().GetCounter());
             stmt.AddValue(6, Time.UnixTime);
-            trans.Append(stmt);
-
-            DB.Login.CommitTransaction(trans);
+            loginTransaction.Append(stmt);
 
             // save pet (hunter pet level and experience and all type pets health/mana).
             Pet pet = GetPet();

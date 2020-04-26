@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace Framework.Database
 {
-    public class QueryCallback
+    public class QueryCallback : ISqlCallback
     {
         public QueryCallback(Task<SQLResult> result)
         {
@@ -49,7 +49,7 @@ namespace Framework.Database
             _result = next._result;
         }
 
-        public QueryCallbackStatus InvokeIfReady()
+        public bool InvokeIfReady()
         {
             QueryCallbackData callback = _callbacks.Peek();
 
@@ -68,17 +68,17 @@ namespace Framework.Database
                     if (_callbacks.Count == 0)
                     {
                         Cypher.Assert(!hasNext);
-                        return QueryCallbackStatus.Completed;
+                        return true;
                     }
 
                     // abort chain
                     if (!hasNext)
-                        return QueryCallbackStatus.Completed;
+                        return true;
 
                     callback = _callbacks.Peek();
                 }
                 else
-                    return QueryCallbackStatus.NotReady;
+                    return false;
             }
         }
 
@@ -99,12 +99,5 @@ namespace Framework.Database
         }
 
         public Action<QueryCallback, SQLResult> _result;
-    }
-
-    public enum QueryCallbackStatus
-    {
-        NotReady,
-        NextStep,
-        Completed
     }
 }

@@ -19,21 +19,27 @@ using System.Collections.Generic;
 
 namespace Framework.Database
 {
-    public class QueryCallbackProcessor
+    public interface ISqlCallback
     {
-        public void AddQuery(QueryCallback query)
+        bool InvokeIfReady();
+    }
+
+    public class AsyncCallbackProcessor<T> where T : ISqlCallback
+    {   
+        List<T> _callbacks = new List<T>();
+
+        public T AddCallback(T query)
         {
             _callbacks.Add(query);
+            return query;
         }
 
-        public void ProcessReadyQueries()
+        public void ProcessReadyCallbacks()
         {
             if (_callbacks.Empty())
                 return;
 
-            _callbacks.RemoveAll(callback => callback.InvokeIfReady() == QueryCallbackStatus.Completed);
+            _callbacks.RemoveAll(callback => callback.InvokeIfReady());
         }
-
-        List<QueryCallback> _callbacks = new List<QueryCallback>();
     }
 }

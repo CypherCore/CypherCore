@@ -631,7 +631,7 @@ namespace Game
 
         public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
-        public QueryCallbackProcessor GetQueryProcessor() { return _queryProcessor; }
+        public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
         void SetLogoutStartTime(long requestTime)
         {
@@ -645,7 +645,8 @@ namespace Game
 
         void ProcessQueryCallbacks()
         {
-            _queryProcessor.ProcessReadyQueries();
+            _queryProcessor.ProcessReadyCallbacks();
+            _transactionCallbacks.ProcessReadyCallbacks();
 
             if (_realmAccountLoginCallback != null && _realmAccountLoginCallback.IsCompleted && _accountLoginCallback != null && _accountLoginCallback.IsCompleted)
             {
@@ -662,6 +663,11 @@ namespace Game
             }
         }
 
+        TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        {
+            return _transactionCallbacks.AddCallback(callback);
+        }
+        
         void InitWarden(BigInteger k)
         {
             if (_os == "Win")
@@ -896,7 +902,8 @@ namespace Game
         Task<SQLQueryHolder<AccountInfoQueryLoad>> _accountLoginCallback;
         Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
 
-        QueryCallbackProcessor _queryProcessor = new QueryCallbackProcessor();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new AsyncCallbackProcessor<TransactionCallback>();
         #endregion
     }
 

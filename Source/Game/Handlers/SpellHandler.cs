@@ -188,7 +188,7 @@ namespace Game
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
-                _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt)
+                _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt)
                     .WithCallback(result => HandleOpenWrappedItemCallback(item.GetPos(), item.GetGUID(), result)));
             }
             else

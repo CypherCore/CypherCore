@@ -73,6 +73,7 @@ namespace Game.Entities
         {
             return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
         }
+
         static ObjectGuid GlobalCreate(HighGuid type, ulong counter)
         {
             return new ObjectGuid((ulong)type << 58, counter);

@@ -383,7 +383,7 @@ namespace Game.Entities
             stmt.AddValue(1, GetActiveTalentGroup());
 
             WorldSession mySess = GetSession();
-            mySess.GetQueryProcessor().AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
+            mySess.GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
             {
                 // in case player logs out before db response (player would be deleted in that case)
                 Player thisPlayer = mySess.GetPlayer();

@@ -253,7 +253,15 @@ namespace Framework.Database
             _queue.Push(new TransactionTask(transaction));
         }
 
-        public bool DirectCommitTransaction(SQLTransaction transaction)
+        public TransactionCallback AsyncCommitTransaction(SQLTransaction transaction)
+        {
+            TransactionWithResultTask task = new TransactionWithResultTask(transaction);
+            Task<bool> result = task.GetFuture();
+            _queue.Push(task);
+            return new TransactionCallback(result);
+        }
+
+        public MySqlErrorCode DirectCommitTransaction(SQLTransaction transaction)
         {
             using (var Connection = _connectionInfo.GetConnection())
             {
@@ -277,13 +285,12 @@ namespace Framework.Database
                             trans.Commit();
                             scope.Complete();
                         }
-                        return true;
+                        return  MySqlErrorCode.None;
                     }
                     catch (MySqlException ex) //error occurred
                     {
-                        HandleMySQLException(ex, query);
                         trans.Rollback();
-                        return false;
+                        return HandleMySQLException(ex, query);
                     }
                 }
             }

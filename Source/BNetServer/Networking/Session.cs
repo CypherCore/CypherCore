@@ -55,7 +55,7 @@ namespace BNetServer.Networking
             stmt.AddValue(0, ip_address);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().GetAddressBytes(), 0));
 
-            _queryProcessor.AddQuery(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
+            _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }
 
         void CheckIpCallback(SQLResult result)
@@ -89,7 +89,7 @@ namespace BNetServer.Networking
             if (!base.Update())
                 return false;
 
-            _queryProcessor.ProcessReadyQueries();
+            _queryProcessor.ProcessReadyCallbacks();
 
             return true;
         }
@@ -631,7 +631,7 @@ namespace BNetServer.Networking
 
         bool _authed;
 
-        QueryCallbackProcessor _queryProcessor = new QueryCallbackProcessor();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
 
         Dictionary<uint, Action<CodedInputStream>> _responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         uint _requestToken;

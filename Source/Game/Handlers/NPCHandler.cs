@@ -351,7 +351,7 @@ namespace Game
             stmt.AddValue(1, PetSaveMode.FirstStableSlot);
             stmt.AddValue(2, PetSaveMode.LastStableSlot);
 
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(SendStablePetCallback, guid));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(SendStablePetCallback, guid));
         }
 
         void SendStablePetCallback(ObjectGuid guid, SQLResult result)

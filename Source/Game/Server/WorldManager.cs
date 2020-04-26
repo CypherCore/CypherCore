@@ -1781,7 +1781,7 @@ namespace Game
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(_UpdateRealmCharCount));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(_UpdateRealmCharCount));
         }
 
         void _UpdateRealmCharCount(SQLResult result)
@@ -2145,7 +2145,7 @@ namespace Game
 
         void ProcessQueryCallbacks()
         {
-            _queryProcessor.ProcessReadyQueries();
+            _queryProcessor.ProcessReadyCallbacks();
         }
 
         public void ReloadRBAC()
@@ -2324,7 +2324,7 @@ namespace Game
 
         ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new ConcurrentQueue<Tuple<WorldSocket, ulong>>();
 
-        QueryCallbackProcessor _queryProcessor = new QueryCallbackProcessor();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
 
         Realm _realm;
 
