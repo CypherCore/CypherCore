@@ -6046,7 +6046,7 @@ namespace Game.Spells
                                 return SpellCastResult.ItemNotFound;
 
                             // required level has to be checked also! Exploit fix
-                            if (targetItem.GetTemplate().GetBaseItemLevel() < m_spellInfo.BaseLevel || (targetItem.GetTemplate().GetBaseRequiredLevel() != 0 && (uint)targetItem.GetTemplate().GetBaseRequiredLevel() < m_spellInfo.BaseLevel))
+                            if (targetItem.GetItemLevel(targetItem.GetOwner()) < m_spellInfo.BaseLevel || (targetItem.GetRequiredLevel() != 0 && targetItem.GetRequiredLevel() < m_spellInfo.BaseLevel))
                                 return SpellCastResult.Lowlevel;
 
                             bool isItemUsable = false;

@@ -1447,7 +1447,7 @@ namespace Game.Entities
             }
             return InventoryResult.ItemNotFound;
         }
-        public InventoryResult CanUseItem(ItemTemplate proto)
+        public InventoryResult CanUseItem(ItemTemplate proto, bool skipRequiredLevelCheck = false)
         {
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
 
@@ -1477,7 +1477,7 @@ namespace Game.Entities
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
                 return InventoryResult.ProficiencyNeeded;
 
-            if (GetLevel() < proto.GetBaseRequiredLevel())
+            if (!skipRequiredLevelCheck && GetLevel() < proto.GetBaseRequiredLevel())
                 return InventoryResult.CantEquipLevelI;
 
             // If World Event is not active, prevent using event dependant items
