@@ -9275,7 +9275,8 @@ namespace Game
             // Cleanup other tables from not existed guids ( >= hiItemGuid)
             DB.Characters.Execute("DELETE FROM character_inventory WHERE item >= {0}", GetGuidSequenceGenerator(HighGuid.Item).GetNextAfterMaxUsed());      // One-time query
             DB.Characters.Execute("DELETE FROM mail_items WHERE item_guid >= {0}", GetGuidSequenceGenerator(HighGuid.Item).GetNextAfterMaxUsed());          // One-time query
-            DB.Characters.Execute("DELETE FROM auctionhouse WHERE itemguid >= {0}", GetGuidSequenceGenerator(HighGuid.Item).GetNextAfterMaxUsed());         // One-time query
+            DB.Characters.Execute("DELETE a, ab, ai FROM auctionhouse a LEFT JOIN auction_bidders ab ON ab.auctionId = a.id LEFT JOIN auction_items ai ON ai.auctionId = a.id WHERE ai.itemGuid >= '{0}'",
+              GetGuidSequenceGenerator(HighGuid.Item).GetNextAfterMaxUsed());       // One-time query
             DB.Characters.Execute("DELETE FROM guild_bank_item WHERE item_guid >= {0}", GetGuidSequenceGenerator(HighGuid.Item).GetNextAfterMaxUsed());     // One-time query
 
             result = DB.World.Query("SELECT MAX(guid) FROM transports");

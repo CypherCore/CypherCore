@@ -4013,6 +4013,10 @@ namespace Game.Entities
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR);
+                        stmt.AddValue(0, guid);
+                        trans.Append(stmt);
+
                         Corpse.DeleteFromDB(playerGuid, trans);
 
                         Garrison.DeleteFromDB(guid, trans);

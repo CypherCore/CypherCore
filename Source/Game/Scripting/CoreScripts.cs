@@ -482,16 +482,16 @@ namespace Game.Scripting
         }
 
         // Called when an auction is added to an auction house.
-        public virtual void OnAuctionAdd(AuctionHouseObject ah, AuctionEntry entry) { }
+        public virtual void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction) { }
 
         // Called when an auction is removed from an auction house.
-        public virtual void OnAuctionRemove(AuctionHouseObject ah, AuctionEntry entry) { }
+        public virtual void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction) { }
 
         // Called when an auction was succesfully completed.
-        public virtual void OnAuctionSuccessful(AuctionHouseObject ah, AuctionEntry entry) { }
+        public virtual void OnAuctionSuccessful(AuctionHouseObject ah, AuctionPosting auction) { }
 
         // Called when an auction expires.
-        public virtual void OnAuctionExpire(AuctionHouseObject ah, AuctionEntry entry) { }
+        public virtual void OnAuctionExpire(AuctionHouseObject ah, AuctionPosting auction) { }
     }
 
     public class ConditionScript : ScriptObject

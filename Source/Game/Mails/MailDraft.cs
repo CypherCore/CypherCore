@@ -137,7 +137,7 @@ namespace Game.Mails
         public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckMask checkMask = MailCheckMask.None, uint deliver_delay = 0)
         {
             Player pReceiver = receiver.GetPlayer();               // can be NULL
-            Player pSender = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId()));
+            Player pSender = sender.GetMailMessageType() == MailMessageType.Normal ? Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId())) : null;
 
             if (pReceiver != null)
                 PrepareItems(pReceiver, trans);                            // generate mail template items

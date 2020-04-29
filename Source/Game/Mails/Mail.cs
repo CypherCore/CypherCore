@@ -90,7 +90,15 @@ namespace Game.Mails
             m_receiver = receiver;
             m_receiver_lowguid = receiver_lowguid;
 
-            // ASSERT(!receiver || receiver.GetGUID().GetCounter() == receiver_lowguid);
+            Cypher.Assert(!receiver || receiver.GetGUID().GetCounter() == receiver_lowguid);
+        }
+
+        public MailReceiver(Player receiver, ObjectGuid receiverGuid)
+        {
+            m_receiver = receiver;
+            m_receiver_lowguid = receiverGuid.GetCounter();
+
+            Cypher.Assert(!receiver || receiver.GetGUID() == receiverGuid);
         }
 
         public Player GetPlayer() { return m_receiver; }
@@ -140,10 +148,11 @@ namespace Game.Mails
             m_senderId = (uint)sender.EventId;
             m_stationery = MailStationery.Default; 
         }
-        public MailSender(AuctionEntry sender)
+
+        public MailSender(AuctionHouseObject sender)
         {
             m_messageType = MailMessageType.Auction;
-            m_senderId = sender.GetHouseId();
+            m_senderId = sender.GetAuctionHouseId();
             m_stationery = MailStationery.Auction;
         }
 

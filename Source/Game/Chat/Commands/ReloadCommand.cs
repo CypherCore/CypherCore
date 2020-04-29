@@ -86,8 +86,7 @@ namespace Game.Chat
         {
             // Reload dynamic data tables from the database
             Log.outInfo(LogFilter.Server, "Re-Loading Auctions...");
-            Global.AuctionMgr.LoadAuctionItems();
-            Global.AuctionMgr.LoadAuctions();
+            Global.AuctionHouseMgr.LoadAuctions();
             handler.SendGlobalGMSysMessage("Auctions reloaded.");
             return true;
         }

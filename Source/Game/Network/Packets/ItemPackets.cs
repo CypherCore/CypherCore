@@ -883,7 +883,7 @@ namespace Game.Network.Packets
 
     public class ItemEnchantData
     {
-        public ItemEnchantData(int id, uint expiration, int charges, byte slot)
+        public ItemEnchantData(uint id, uint expiration, int charges, byte slot)
         {
             ID = id;
             Expiration = expiration;
@@ -893,13 +893,13 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(ID);
+            data.WriteUInt32(ID);
             data.WriteUInt32(Expiration);
             data.WriteInt32(Charges);
             data.WriteUInt8(Slot);
         }
 
-        public int ID;
+        public uint ID;
         public uint Expiration;
         public int Charges;
         public byte Slot;

@@ -105,7 +105,7 @@ public static class Global
 
     public static GameEventManager GameEventMgr { get { return GameEventManager.Instance; } }
     public static CreatureTextManager CreatureTextMgr { get { return CreatureTextManager.Instance; } }
-    public static AuctionManager AuctionMgr { get { return AuctionManager.Instance; } }
+    public static AuctionManager AuctionHouseMgr { get { return AuctionManager.Instance; } }
 
     public static SpellManager SpellMgr { get { return SpellManager.Instance; } }
     public static SupportManager SupportMgr { get { return SupportManager.Instance; } }

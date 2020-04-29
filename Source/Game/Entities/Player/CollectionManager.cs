@@ -760,15 +760,15 @@ namespace Game.Entities
             }
         }
 
-        public Tuple<bool, bool> HasItemAppearance(uint itemModifiedAppearanceId)
+        public (bool PermAppearance, bool TempAppearance) HasItemAppearance(uint itemModifiedAppearanceId)
         {
             if (itemModifiedAppearanceId < _appearances.Count && _appearances.Get((int)itemModifiedAppearanceId))
-                return Tuple.Create(true, false);
+                return (true, false);
 
             if (_temporaryAppearances.ContainsKey(itemModifiedAppearanceId))
-                return Tuple.Create(true, true);
+                return (true, true);
 
-            return Tuple.Create(false, false);
+            return (false, false);
         }
 
         public List<ObjectGuid> GetItemsProvidingTemporaryAppearance(uint itemModifiedAppearanceId)
@@ -776,6 +776,15 @@ namespace Game.Entities
             return _temporaryAppearances.LookupByKey(itemModifiedAppearanceId);
         }
 
+        public List<uint> GetAppearanceIds()
+        {
+            List<uint> appearances = new List<uint>();
+            foreach (int id in _appearances)
+                appearances.Add(CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
+
+            return appearances;
+        }
+        
         public void SetAppearanceIsFavorite(uint itemModifiedAppearanceId, bool apply)
         {
             var apperanceState = _favoriteAppearances.LookupByKey(itemModifiedAppearanceId);

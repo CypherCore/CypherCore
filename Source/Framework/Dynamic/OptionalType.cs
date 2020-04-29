@@ -44,11 +44,6 @@ namespace Framework.Dynamic
             Value = default(T);
         }
 
-        public static implicit operator Optional<T> (T value)
-        {
-            return value;
-        }
-
         public static explicit operator T(Optional<T> value)
         {
             return (T)value;

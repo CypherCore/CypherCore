@@ -2210,8 +2210,8 @@ namespace Game.Achievements
                     return false;
                 case CriteriaAdditionalCondition.ItemModifiedAppearance: // 200
                     {
-                        Tuple<bool, bool> hasAppearance = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
-                        if (!hasAppearance.Item1 || hasAppearance.Item2)
+                        var hasAppearance = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
+                        if (!hasAppearance.PermAppearance || hasAppearance.TempAppearance)
                             return false;
                         break;
                     }

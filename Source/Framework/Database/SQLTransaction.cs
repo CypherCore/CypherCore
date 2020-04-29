@@ -53,7 +53,7 @@ namespace Framework.Database
             m_trans = trans;
         }
 
-        public bool Execute<T>(MySqlBase<T> mySqlBase)
+        public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
         {
             MySqlErrorCode errorCode = TryExecute(mySqlBase);
             if (errorCode == MySqlErrorCode.None)
@@ -87,7 +87,7 @@ namespace Framework.Database
     {
         public TransactionWithResultTask(SQLTransaction trans) : base(trans) { }
 
-        public new bool Execute<T>(MySqlBase<T> mySqlBase)
+        public override bool Execute<T>(MySqlBase<T> mySqlBase)
         {
             MySqlErrorCode errorCode = TryExecute(mySqlBase);
             if (errorCode == MySqlErrorCode.None)

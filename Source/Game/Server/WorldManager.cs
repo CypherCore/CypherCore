@@ -691,12 +691,13 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Completed Achievements...");
             Global.AchievementMgr.LoadCompletedAchievements();
 
-            // Load dynamic data tables from the database
-            Log.outInfo(LogFilter.ServerLoading, "Loading Item Auctions...");
-            Global.AuctionMgr.LoadAuctionItems();
+            // Load before guilds and arena teams
+            Log.outInfo(LogFilter.ServerLoading, "Loading character cache store...");
+            Global.CharacterCacheStorage.LoadCharacterCacheStorage();
 
+            // Load dynamic data tables from the database
             Log.outInfo(LogFilter.ServerLoading, "Loading Auctions...");
-            Global.AuctionMgr.LoadAuctions();
+            Global.AuctionHouseMgr.LoadAuctions();
 
             if (WorldConfig.GetBoolValue(WorldCfg.BlackmarketEnabled))
             {
@@ -706,10 +707,6 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, "Loading Black Market Auctions...");
                 Global.BlackMarketMgr.LoadAuctions();
             }
-
-            // Load before guilds and arena teams
-            Log.outInfo(LogFilter.ServerLoading, "Loading character cache store...");
-            Global.CharacterCacheStorage.LoadCharacterCacheStorage();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Guild rewards...");
             Global.GuildMgr.LoadGuildRewards();
@@ -1184,7 +1181,7 @@ namespace Game
                 }
 
                 // Handle expired auctions
-                Global.AuctionMgr.Update();
+                Global.AuctionHouseMgr.Update();
             }
 
             if (m_timers[WorldTimers.AuctionsPending].Passed())

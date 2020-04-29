@@ -975,29 +975,29 @@ namespace Game.Scripting
         }
 
         // AuctionHouseScript
-        public void OnAuctionAdd(AuctionHouseObject ah, AuctionEntry entry)
+        public void OnAuctionAdd(AuctionHouseObject ah, AuctionPosting auction)
         {
             Cypher.Assert(ah != null);
-            Cypher.Assert(entry != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionAdd(ah, entry));
+            Cypher.Assert(auction != null);
+            ForEach<AuctionHouseScript>(p => p.OnAuctionAdd(ah, auction));
         }
-        public void OnAuctionRemove(AuctionHouseObject ah, AuctionEntry entry)
+        public void OnAuctionRemove(AuctionHouseObject ah, AuctionPosting auction)
         {
             Cypher.Assert(ah != null);
-            Cypher.Assert(entry != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionRemove(ah, entry));
+            Cypher.Assert(auction != null);
+            ForEach<AuctionHouseScript>(p => p.OnAuctionRemove(ah, auction));
         }
-        public void OnAuctionSuccessful(AuctionHouseObject ah, AuctionEntry entry)
+        public void OnAuctionSuccessful(AuctionHouseObject ah, AuctionPosting auction)
         {
             Cypher.Assert(ah != null);
-            Cypher.Assert(entry != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionSuccessful(ah, entry));
+            Cypher.Assert(auction != null);
+            ForEach<AuctionHouseScript>(p => p.OnAuctionSuccessful(ah, auction));
         }
-        public void OnAuctionExpire(AuctionHouseObject ah, AuctionEntry entry)
+        public void OnAuctionExpire(AuctionHouseObject ah, AuctionPosting auction)
         {
             Cypher.Assert(ah != null);
-            Cypher.Assert(entry != null);
-            ForEach<AuctionHouseScript>(p => p.OnAuctionExpire(ah, entry));
+            Cypher.Assert(auction != null);
+            ForEach<AuctionHouseScript>(p => p.OnAuctionExpire(ah, auction));
         }
 
         // ConditionScript

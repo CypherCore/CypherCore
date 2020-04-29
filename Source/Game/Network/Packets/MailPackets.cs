@@ -326,7 +326,7 @@ namespace Game.Network.Packets
                 if (item.GetEnchantmentId(slot) == 0)
                     continue;
 
-                Enchants.Add(new ItemEnchantData((int)item.GetEnchantmentId(slot), item.GetEnchantmentDuration(slot), (int)item.GetEnchantmentCharges(slot), (byte)slot));
+                Enchants.Add(new ItemEnchantData(item.GetEnchantmentId(slot), item.GetEnchantmentDuration(slot), (int)item.GetEnchantmentCharges(slot), (byte)slot));
             }
 
             byte i = 0;
