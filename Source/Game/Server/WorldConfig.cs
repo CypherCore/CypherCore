@@ -209,12 +209,18 @@ namespace Game
             Values[WorldCfg.AddonChannel] = GetDefaultValue("AddonChannel", true);
             Values[WorldCfg.CleanCharacterDb] = GetDefaultValue("CleanCharacterDB", false);
             Values[WorldCfg.PersistentCharacterCleanFlags] = GetDefaultValue("PersistentCharacterCleanFlags", 0);
-            Values[WorldCfg.AuctionGetallDelay] = GetDefaultValue("Auction.GetAllScanDelay", 900);
+            Values[WorldCfg.AuctionReplicateDelay] = GetDefaultValue("Auction.ReplicateItemsCooldown", 900);
             Values[WorldCfg.AuctionSearchDelay] = GetDefaultValue("Auction.SearchDelay", 300);
             if ((int)Values[WorldCfg.AuctionSearchDelay] < 100 || (int)Values[WorldCfg.AuctionSearchDelay] > 10000)
             {
                 Log.outError(LogFilter.ServerLoading, "Auction.SearchDelay ({0}) must be between 100 and 10000. Using default of 300ms", Values[WorldCfg.AuctionSearchDelay]);
                 Values[WorldCfg.AuctionSearchDelay] = 300;
+            }
+            Values[WorldCfg.AuctionTaintedSearchDelay] = GetDefaultValue("Auction.TaintedSearchDelay", 3000);
+            if ((int)Values[WorldCfg.AuctionTaintedSearchDelay] < 100 || (int)Values[WorldCfg.AuctionTaintedSearchDelay] > 10000)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Auction.TaintedSearchDelay ({Values[WorldCfg.AuctionTaintedSearchDelay]}) must be between 100 and 10000. Using default of 3s");
+                Values[WorldCfg.AuctionTaintedSearchDelay] = 3000;
             }
             Values[WorldCfg.ChatChannelLevelReq] = GetDefaultValue("ChatLevelReq.Channel", 1);
             Values[WorldCfg.ChatWhisperLevelReq] = GetDefaultValue("ChatLevelReq.Whisper", 1);

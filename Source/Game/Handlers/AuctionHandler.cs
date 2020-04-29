@@ -34,7 +34,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionBrowseQuery)]
         void HandleAuctionBrowseQuery(AuctionBrowseQuery browseQuery)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, browseQuery.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -90,7 +90,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionCancelCommoditiesPurchase)]
         void HandleAuctionCancelCommoditiesPurchase(AuctionCancelCommoditiesPurchase cancelCommoditiesPurchase)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.PlaceBid);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, cancelCommoditiesPurchase.TaintedBy.HasValue, AuctionCommand.PlaceBid);
             if (throttle.Throttled)
                 return;
 
@@ -112,7 +112,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionConfirmCommoditiesPurchase)]
         void HandleAuctionConfirmCommoditiesPurchase(AuctionConfirmCommoditiesPurchase confirmCommoditiesPurchase)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.PlaceBid);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, confirmCommoditiesPurchase.TaintedBy.HasValue, AuctionCommand.PlaceBid);
             if (throttle.Throttled)
                 return;
 
@@ -168,7 +168,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionListBidderItems)]
         void HandleAuctionListBidderItems(AuctionListBidderItems listBidderItems)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listBidderItems.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -196,7 +196,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionListBucketsByBucketKeys)]
         void HandleAuctionListBucketsByBucketKeys(AuctionListBucketsByBucketKeys listBucketsByBucketKeys)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listBucketsByBucketKeys.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -227,7 +227,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionListItemsByBucketKey)]
         void HandleAuctionListItemsByBucketKey(AuctionListItemsByBucketKey listItemsByBucketKey)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listItemsByBucketKey.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -259,7 +259,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionListItemsByItemId)]
         void HandleAuctionListItemsByItemID(AuctionListItemsByItemID listItemsByItemID)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listItemsByItemID.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -291,7 +291,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionListOwnerItems)]
         void HandleAuctionListOwnerItems(AuctionListOwnerItems listOwnerItems)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listOwnerItems.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
@@ -318,7 +318,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionPlaceBid)]
         void HandleAuctionPlaceBid(AuctionPlaceBid placeBid)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.PlaceBid);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, placeBid.TaintedBy.HasValue, AuctionCommand.PlaceBid);
             if (throttle.Throttled)
                 return;
 
@@ -448,7 +448,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionRemoveItem)]
         void HandleAuctionRemoveItem(AuctionRemoveItem removeItem)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.Cancel);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, removeItem.TaintedBy.HasValue, AuctionCommand.Cancel);
             if (throttle.Throttled)
                 return;
 
@@ -540,7 +540,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionSellCommodity)]
         void HandleAuctionSellCommodity(AuctionSellCommodity sellCommodity)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.SellItem);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, sellCommodity.TaintedBy.HasValue, AuctionCommand.SellItem);
             if (throttle.Throttled)
                 return;
 
@@ -753,7 +753,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionSellItem)]
         void HandleAuctionSellItem(AuctionSellItem sellItem)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.SellItem);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, sellItem.TaintedBy.HasValue, AuctionCommand.SellItem);
             if (throttle.Throttled)
                 return;
 
@@ -899,7 +899,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionSetFavoriteItem)]
         void HandleAuctionSetFavoriteItem(AuctionSetFavoriteItem setFavoriteItem)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, false);
             if (throttle.Throttled)
                 return;
 
@@ -928,7 +928,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AuctionStartCommoditiesPurchase)]
         void HandleAuctionStartCommoditiesPurchase(AuctionStartCommoditiesPurchase startCommoditiesPurchase)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, AuctionCommand.PlaceBid);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, startCommoditiesPurchase.TaintedBy.HasValue, AuctionCommand.PlaceBid);
             if (throttle.Throttled)
                 return;
 

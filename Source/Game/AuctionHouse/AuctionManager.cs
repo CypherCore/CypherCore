@@ -34,7 +34,6 @@ namespace Game
 {
     public class AuctionManager : Singleton<AuctionManager>
     {
-        const int AH_MINIMUM_DEPOSIT = 100;
         const int MIN_AUCTION_TIME = 12 * Time.Hour;
 
         AuctionHouseObject mHordeAuctions;
@@ -367,7 +366,7 @@ namespace Game
             player.ModifyMoney(-(long)totaldeposit);
         }
 
-        void UpdatePendingAuctions()
+        public void UpdatePendingAuctions()
         {
             foreach (var pair in _pendingAuctionsByPlayer)
             {
@@ -429,7 +428,7 @@ namespace Game
             return ++_replicateIdGenerator;
         }
 
-        public AuctionThrottleResult CheckThrottle(Player player, AuctionCommand command = AuctionCommand.SellItem)
+        public AuctionThrottleResult CheckThrottle(Player player, bool addonTainted, AuctionCommand command = AuctionCommand.SellItem)
         {
             DateTime now = GameTime.GetGameTimeSteadyPoint();
 
@@ -452,7 +451,7 @@ namespace Game
             if ((--throttleObject.QueriesRemaining) == 0)
                 return new AuctionThrottleResult(throttleObject.PeriodEnd - now, false);
             else
-                return new AuctionThrottleResult(TimeSpan.FromMilliseconds(WorldConfig.GetIntValue(WorldCfg.AuctionSearchDelay)), false);
+                return new AuctionThrottleResult(TimeSpan.FromMilliseconds(WorldConfig.GetIntValue(addonTainted ? WorldCfg.AuctionTaintedSearchDelay : WorldCfg.AuctionSearchDelay)), false);
         }
 
         public AuctionHouseRecord GetAuctionHouseEntry(uint factionTemplateId)
@@ -1073,7 +1072,7 @@ namespace Game
             if (throttleData == null)
             {
                 throttleData = new PlayerReplicateThrottleData();
-                throttleData.NextAllowedReplication = curTime + TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.AuctionGetallDelay));
+                throttleData.NextAllowedReplication = curTime + TimeSpan.FromSeconds(WorldConfig.GetIntValue(WorldCfg.AuctionReplicateDelay));
                 throttleData.Global = Global.AuctionHouseMgr.GenerateReplicationId();
             }
             else

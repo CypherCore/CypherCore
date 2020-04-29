@@ -1188,7 +1188,7 @@ namespace Game
             {
                 m_timers[WorldTimers.AuctionsPending].Reset();
 
-                //Global.AuctionMgr.UpdatePendingAuctions();
+                Global.AuctionHouseMgr.UpdatePendingAuctions();
             }
 
             if (m_timers[WorldTimers.Blackmarket].Passed())
