@@ -28,14 +28,16 @@ namespace Game.Network.Packets
         public string Name;
         public string Version;
         public bool Loaded;
-        public bool Enabled;
+        public bool Disabled;
 
         public void Read(WorldPacket data)
         {
+            data.ResetBitPos();
+
             uint nameLength = data.ReadBits<uint>(10);
             uint versionLength = data.ReadBits<uint>(10);
             Loaded = data.HasBit();
-            Enabled = data.HasBit();
+            Disabled = data.HasBit();
             if (nameLength > 1)
             {
                 Name = data.ReadString(nameLength - 1);
