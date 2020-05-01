@@ -203,7 +203,6 @@ namespace Game.Entities
         public void BuildValuesUpdateBlockForPlayer(UpdateData data, Player target)
         {
             WorldPacket buffer = new WorldPacket();
-
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
@@ -215,7 +214,6 @@ namespace Game.Entities
         public void BuildValuesUpdateBlockForPlayerWithFlag(UpdateData data, UpdateFieldFlag flags, Player target)
         {
             WorldPacket buffer = new WorldPacket();
-
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 

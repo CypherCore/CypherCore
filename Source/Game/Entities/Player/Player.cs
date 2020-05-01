@@ -7558,15 +7558,56 @@ namespace Game.Entities
 
             UpdateMask mask = new UpdateMask(191);
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
-            m_unitData.WriteUpdate(buffer, mask, flags, this, target);
+            m_unitData.WriteUpdate(buffer, mask, true, this, target);
 
             UpdateMask mask2 = new UpdateMask(161);
             m_playerData.AppendAllowedFieldsMaskForFlag(mask2, flags);
-            m_playerData.WriteUpdate(buffer, mask2, flags, this, target);
+            m_playerData.WriteUpdate(buffer, mask2, true, this, target);
 
             data.WriteUInt32(buffer.GetSize());
             data.WriteUInt32(valuesMask.GetBlock(0));
             data.WriteBytes(buffer);
+        }
+
+        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, UpdateMask requestedPlayerMask, UpdateMask requestedActivePlayerMask, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            m_unitData.FilterDisallowedFieldsMaskForFlag(requestedUnitMask, flags);
+            if (requestedUnitMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Unit);
+
+            if (requestedPlayerMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Player);
+
+            if (target == this && requestedActivePlayerMask.IsAnySet())
+                valuesMask.Set((int)TypeId.ActivePlayer);
+
+            WorldPacket buffer = new WorldPacket();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Unit])
+                m_unitData.WriteUpdate(buffer, requestedUnitMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Player])
+                m_playerData.WriteUpdate(buffer, requestedPlayerMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.ActivePlayer])
+                m_activePlayerData.WriteUpdate(buffer, requestedActivePlayerMask, true, this, target);
+
+            WorldPacket buffer1 = new WorldPacket();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
         }
 
         public override void ClearUpdateMask(bool remove)

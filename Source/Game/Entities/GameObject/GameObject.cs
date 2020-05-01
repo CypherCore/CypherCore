@@ -2514,6 +2514,33 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
+        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target)
+        {
+            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            if (requestedGameObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.GameObject);
+
+            WorldPacket buffer = new WorldPacket();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.GameObject])
+                m_gameObjectData.WriteUpdate(buffer, requestedGameObjectMask, true, this, target);
+
+            WorldPacket buffer1 = new WorldPacket();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
+        }
+
         public override void ClearUpdateMask(bool remove)
         {
             m_values.ClearChangesMask(m_gameObjectData);

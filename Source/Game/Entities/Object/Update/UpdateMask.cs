@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -63,6 +64,8 @@ namespace Game.Entities
                 return (_blocks[index / 32] & (1 << (index % 32))) != 0;
             }
         }
+
+        public bool IsAnySet() { return _blocksMask.Any(blockMask => blockMask != 0); }
 
         public void Reset(int index)
         {

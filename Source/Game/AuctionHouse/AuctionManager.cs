@@ -760,7 +760,7 @@ namespace Game
 
             SQLTransaction trans = new SQLTransaction();
 
-            foreach (var auction in _itemsByAuctionId.Values)
+            foreach (var auction in _itemsByAuctionId.Values.ToList())
             {
                 ///- filter auctions expired on next update
                 if (auction.EndTime > curTime.AddMinutes(1))

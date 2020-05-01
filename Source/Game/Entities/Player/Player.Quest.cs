@@ -2974,7 +2974,25 @@ namespace Game.Entities
                 {
                     GameObject obj = ObjectAccessor.GetGameObject(this, guid);
                     if (obj != null)
-                        obj.BuildValuesUpdateBlockForPlayer(udata, this);
+                    {
+                        switch (obj.GetGoType())
+                        {
+                            case GameObjectTypes.QuestGiver:
+                            case GameObjectTypes.Chest:
+                            case GameObjectTypes.Goober:
+                            case GameObjectTypes.Generic:
+                                if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
+                                {
+                                    ObjectFieldData objMask = new ObjectFieldData();
+                                    GameObjectFieldData goMask = new GameObjectFieldData();
+                                    objMask.MarkChanged(obj.m_objectData.DynamicFlags);
+                                    obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, goMask._changesMask, this);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
                 else if (guid.IsCreatureOrVehicle())
                 {
@@ -3001,7 +3019,10 @@ namespace Game.Entities
 
                             if (buildUpdateBlock)
                             {
-                                obj.BuildValuesUpdateBlockForPlayer(udata, this);
+                                ObjectFieldData objMask = new ObjectFieldData();
+                                UnitData unitMask = new UnitData();
+                                unitMask.MarkChanged(obj.m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
+                                obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, unitMask._changesMask, this);
                                 break;
                             }
                         }

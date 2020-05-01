@@ -467,14 +467,50 @@ namespace Game.Entities
 
             UpdateMask mask = new UpdateMask(40);
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);
-            m_itemData.WriteUpdate(buffer, mask, flags, this, target);
+            m_itemData.WriteUpdate(buffer, mask, true, this, target);
 
             UpdateMask mask2 = new UpdateMask(9);
             m_azeriteItemData.AppendAllowedFieldsMaskForFlag(mask2, flags);
-            m_azeriteItemData.WriteUpdate(buffer, mask2, flags, this, target);
+            m_azeriteItemData.WriteUpdate(buffer, mask2, true, this, target);
 
             data.WriteUInt32(buffer.GetSize());
             data.WriteBytes(buffer);
+        }
+
+        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteItemMask, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            m_itemData.FilterDisallowedFieldsMaskForFlag(requestedItemMask, flags);
+            if (requestedItemMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Item);
+
+            m_azeriteItemData.FilterDisallowedFieldsMaskForFlag(requestedAzeriteItemMask, flags);
+            if (requestedAzeriteItemMask.IsAnySet())
+                valuesMask.Set((int)TypeId.AzeriteItem);
+
+            WorldPacket buffer = new WorldPacket();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Item])
+                m_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.AzeriteItem])
+                m_azeriteItemData.WriteUpdate(buffer, requestedAzeriteItemMask, true, this, target);
+
+            WorldPacket buffer1 = new WorldPacket();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
         }
 
         public override void ClearUpdateMask(bool remove)

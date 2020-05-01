@@ -329,11 +329,6 @@ namespace Game.Entities
             _changesMask = new UpdateMask(changeMask);
         }
 
-        public virtual void WriteCreate(WorldPacket data, T owner, Player receiver) { }
-        public virtual void WriteUpdate(WorldPacket data, T owner, Player receiver) { }
-        public virtual void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver) { }
-        public virtual void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, T owner, Player receiver) { }
-
         public abstract void ClearChangesMask();
 
         public UpdateMask GetUpdateMask()
@@ -410,15 +405,13 @@ namespace Game.Entities
 
         public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()
         {
-            _changesMask.Set(updateField.BlockBit);
-            _changesMask.Set(updateField.Bit);
+            MarkChanged(updateField);
             return updateField;
         }
 
         public ref U ModifyValue<U>(UpdateFieldArray<U> updateField, int index) where U : new()
         {
-            _changesMask.Set(updateField.Bit);
-            _changesMask.Set(updateField.FirstElementBit + index);
+            MarkChanged(updateField, index);
             return ref updateField._values[index];
         }
 
@@ -443,6 +436,40 @@ namespace Game.Entities
             updateField.MarkChanged(index);
 
             return new DynamicUpdateFieldSetter<U>(updateField, index);
+        }
+
+        public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Set(updateField.BlockBit);
+            _changesMask.Set(updateField.Bit);
+        }
+
+        public void MarkChanged<U>(UpdateFieldArray<U> updateField, int index) where U : new()
+        {
+            _changesMask.Set(updateField.Bit);
+            _changesMask.Set(updateField.FirstElementBit + index);
+        }
+
+        public void WriteCompleteDynamicFieldUpdateMask(int size, WorldPacket data)
+        {
+            data.WriteBits(size, 32);
+            if (size > 32)
+            {
+                if (data.HasUnfinishedBitPack())
+                    for (int block = 0; block < size / 32; ++block)
+                        data.WriteBits(0xFFFFFFFFu, 32);
+                else
+                    for (int block = 0; block < size / 32; ++block)
+                        data.WriteUInt32(0xFFFFFFFFu);
+            }
+            else if (size == 32)
+            {
+                data.WriteBits(0xFFFFFFFFu, 32);
+                return;
+            }
+
+            if ((size % 32) != 0)
+                data.WriteBits(0xFFFFFFFFu, size % 32);
         }
     }
 
