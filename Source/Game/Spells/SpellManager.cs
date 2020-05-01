@@ -2884,6 +2884,9 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
                         spellInfo.GetEffect(1).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
                         break;
+                    case 69030: // Val'kyr Target Search
+                        spellInfo.Attributes |= SpellAttr0.UnaffectedByInvulnerability;
+                        break;
                     case 69198: // Raging Spirit Visual
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
                         break;
