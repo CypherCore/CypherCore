@@ -253,7 +253,7 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns>
         public override string ToString()
         {
-            return $"Plane[n={_normal.ToString()}, c={_const.ToString()}]";
+            return $"Plane[n={_normal}, c={_const}]";
         }
         #endregion
     }

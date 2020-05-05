@@ -59,7 +59,7 @@ namespace Game
             Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
             if (!npc)
             {
-                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit.ToString()} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace Game
             Trainer trainer = Global.ObjectMgr.GetTrainer(trainerId);
             if (trainer == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {npc.GetGUID().ToString()} id {trainerId}");
+                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {npc.GetGUID()} id {trainerId}");
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace Game
             Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
             if (npc == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID.ToString()} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID} not found or you can not interact with him.");
                 return;
             }
 

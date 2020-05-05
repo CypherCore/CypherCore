@@ -593,14 +593,14 @@ namespace Game.Entities
                     PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalents[slot]);
                     if (talentInfo == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent id: {pvpTalents[slot]}");
+                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent id: {pvpTalents[slot]}");
                         continue;
                     }
 
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
                     if (spellEntry == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent spell: {talentInfo.SpellID}");
+                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent spell: {talentInfo.SpellID}");
                         continue;
                     }
 

@@ -60,7 +60,7 @@ namespace Game
 
             if (battlemasterJoin.QueueIDs.Empty())
             {
-                Log.outError(LogFilter.Network, $"Battleground: no bgtype received. possible cheater? {_player.GetGUID().ToString()}");
+                Log.outError(LogFilter.Network, $"Battleground: no bgtype received. possible cheater? {_player.GetGUID()}");
                 return;
             }
 

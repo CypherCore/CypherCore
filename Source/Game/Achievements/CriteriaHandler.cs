@@ -2210,8 +2210,8 @@ namespace Game.Achievements
                     return false;
                 case CriteriaAdditionalCondition.ItemModifiedAppearance: // 200
                     {
-                        var hasAppearance = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
-                        if (!hasAppearance.PermAppearance || hasAppearance.TempAppearance)
+                        var (PermAppearance, TempAppearance) = referencePlayer.GetSession().GetCollectionMgr().HasItemAppearance(reqValue);
+                        if (!PermAppearance || TempAppearance)
                             return false;
                         break;
                     }

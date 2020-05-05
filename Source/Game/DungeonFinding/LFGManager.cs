@@ -1285,13 +1285,13 @@ namespace Game.DungeonFinding
             uint gDungeonId = GetDungeon(gguid);
             if (gDungeonId != dungeonId)
             {
-                Log.outDebug(LogFilter.Lfg, $"Group {gguid.ToString()} finished dungeon {dungeonId} but queued for {gDungeonId}. Ignoring");
+                Log.outDebug(LogFilter.Lfg, $"Group {gguid} finished dungeon {dungeonId} but queued for {gDungeonId}. Ignoring");
                 return;
             }
 
             if (GetState(gguid) == LfgState.FinishedDungeon) // Shouldn't happen. Do not reward multiple times
             {
-                Log.outDebug(LogFilter.Lfg, $"Group {gguid.ToString()} already rewarded");
+                Log.outDebug(LogFilter.Lfg, $"Group {gguid} already rewarded");
                 return;
             }
 
@@ -1302,7 +1302,7 @@ namespace Game.DungeonFinding
             {
                 if (GetState(guid) == LfgState.FinishedDungeon)
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} already rewarded");
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} already rewarded");
                     continue;
                 }
 
@@ -1318,14 +1318,14 @@ namespace Game.DungeonFinding
 
                 if (dungeon == null || (dungeon.type != LfgType.RandomDungeon && !dungeon.seasonal))
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} dungeon {rDungeonId} is not random or seasonal");
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} dungeon {rDungeonId} is not random or seasonal");
                     continue;
                 }
 
                 Player player = Global.ObjAccessor.FindPlayer(guid);
                 if (!player || player.GetMap() != currMap)
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} not found in world");
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} not found in world");
                     continue;
                 }
 
@@ -1334,7 +1334,7 @@ namespace Game.DungeonFinding
 
                 if (player.GetMapId() != mapId)
                 {
-                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} is in map {player.GetMapId()} and should be in {mapId} to get reward");
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} is in map {player.GetMapId()} and should be in {mapId} to get reward");
                     continue;
                 }
 
@@ -1366,7 +1366,7 @@ namespace Game.DungeonFinding
 
                 // Give rewards
                 string doneString = done ? "" : "not";
-                Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} done dungeon {GetDungeon(gguid)}, {doneString} previously done.");
+                Log.outDebug(LogFilter.Lfg, $"Group: {gguid}, Player: {guid} done dungeon {GetDungeon(gguid)}, {doneString} previously done.");
                 LfgPlayerRewardData data = new LfgPlayerRewardData(dungeon.Entry(), GetDungeon(gguid, false), done, quest);
                 player.GetSession().SendLfgPlayerReward(data);
             }

@@ -1722,8 +1722,7 @@ namespace Game.DataStorage
 
         public List<SpellPowerRecord> GetSpellPowers(uint spellId, Difficulty difficulty = Difficulty.None)
         {
-            bool notUsed;
-            return GetSpellPowers(spellId, difficulty, out notUsed);
+            return GetSpellPowers(spellId, difficulty, out _);
         }
 
         public List<SpellPowerRecord> GetSpellPowers(uint spellId, Difficulty difficulty, out bool hasDifficultyPowers)

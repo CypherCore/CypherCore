@@ -1097,7 +1097,7 @@ namespace Game
             Item item = _player.GetItemByGuid(removeNewItem.ItemGuid);
             if (!item)
             {
-                Log.outDebug(LogFilter.Network, $"WorldSession.HandleRemoveNewItem: Item ({removeNewItem.ItemGuid.ToString()}) not found for {GetPlayerInfo()}!");
+                Log.outDebug(LogFilter.Network, $"WorldSession.HandleRemoveNewItem: Item ({removeNewItem.ItemGuid}) not found for {GetPlayerInfo()}!");
                 return;
             }
 

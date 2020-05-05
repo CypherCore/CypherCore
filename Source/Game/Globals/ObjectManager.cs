@@ -841,7 +841,7 @@ namespace Game
                 WorldLocation loc = new WorldLocation(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                 if (!GridDefines.IsValidMapCoord(loc))
                 {
-                    Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc.ToString()}, skipped");
+                    Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc}, skipped");
                     continue;
                 }
 
@@ -3452,10 +3452,8 @@ namespace Game
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
-                    uint zoneId = 0;
-                    uint areaId = 0;
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -4164,10 +4162,8 @@ namespace Game
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
-                    uint zoneId = 0;
-                    uint areaId = 0;
                     PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
-                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out uint zoneId, out uint areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -9518,7 +9514,7 @@ namespace Game
             TaxiNodesRecord node = CliDB.TaxiNodesStorage.LookupByKey(id);
             if (node != null)
             {
-                uint mount_entry = 0;
+                uint mount_entry;
                 if (team == Team.Alliance)
                     mount_entry = node.MountCreatureID[1];
                 else

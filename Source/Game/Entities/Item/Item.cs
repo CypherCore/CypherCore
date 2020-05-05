@@ -1601,7 +1601,7 @@ namespace Game.Entities
                 return 0;
 
             float qualityFactor = qualityPrice.Data;
-            float baseFactor = 0.0f;
+            float baseFactor;
 
             var inventoryType = proto.GetInventoryType();
 
@@ -2308,11 +2308,6 @@ namespace Game.Entities
                             break;
                         case ItemEnchantmentType.ArtifactPowerBonusRankByID:
                             {
-                                var indexItr = m_artifactPowerIdToIndex.LookupByKey(enchant.EffectArg[i]);
-                                ushort index;
-                                if (indexItr != 0)
-                                    index = indexItr;
-
                                 ushort artifactPowerIndex = m_artifactPowerIdToIndex.LookupByKey(enchant.EffectArg[i]);
                                 if (artifactPowerIndex != 0)
                                 {
@@ -2933,7 +2928,7 @@ namespace Game.Entities
                     break;
                 case ItemBonusType.Stat:
                     {
-                        uint statIndex = 0;
+                        uint statIndex;
                         for (statIndex = 0; statIndex < ItemConst.MaxStats; ++statIndex)
                             if (ItemStatType[statIndex] == values[0] || ItemStatType[statIndex] == -1)
                                 break;

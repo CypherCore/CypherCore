@@ -109,7 +109,7 @@ namespace Game.Entities
 
         public void SaveAccountToys(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             foreach (var pair in _toys)
             {
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_TOYS);

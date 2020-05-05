@@ -1444,7 +1444,7 @@ namespace Game
                 return BanReturn.Exists;
 
             SQLResult resultAccounts;
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
 
             // Update the database with ban information
             switch (mode)
@@ -1522,7 +1522,7 @@ namespace Game
         /// Remove a ban from an account or IP address
         public bool RemoveBanAccount(BanMode mode, string nameOrIP)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             if (mode == BanMode.IP)
             {
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_IP_NOT_BANNED);

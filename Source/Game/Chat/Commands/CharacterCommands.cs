@@ -327,7 +327,7 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, targetName, accountName);
 
-            string logString = $"changed ownership of player {targetName} ({targetGuid.ToString()}) from account {oldAccountId} to account {newAccountId}";
+            string logString = $"changed ownership of player {targetName} ({targetGuid}) from account {oldAccountId} to account {newAccountId}";
             WorldSession session = handler.GetSession();
             if (session != null)
             {

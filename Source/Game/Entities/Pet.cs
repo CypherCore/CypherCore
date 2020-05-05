@@ -99,7 +99,7 @@ namespace Game.Entities
 
             ulong ownerid = owner.GetGUID().GetCounter();
 
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
 
             if (petnumber != 0)
             {

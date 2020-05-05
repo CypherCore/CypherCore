@@ -28,7 +28,7 @@ namespace Framework.Dynamic
             set
             {
                 _hasValue = value;
-                Value = _hasValue ? new T() : default(T);
+                Value = _hasValue ? new T() : default;
             }
         }
 
@@ -41,7 +41,7 @@ namespace Framework.Dynamic
         public void Clear()
         {
             _hasValue = false;
-            Value = default(T);
+            Value = default;
         }
 
         public static explicit operator T(Optional<T> value)

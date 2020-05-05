@@ -312,7 +312,7 @@ namespace Game
 
         public override string GetOwnerInfo()
         {
-            return $"{_owner.GetGUID().ToString()} {_owner.GetName()}";
+            return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
         public override List<Criteria> GetCriteriaByType(CriteriaTypes type)

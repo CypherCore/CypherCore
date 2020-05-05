@@ -464,7 +464,7 @@ namespace Game.AI
                 me.RemoveUnitFlag(UnitFlags.ImmuneToNpc);
             }
 
-            Log.outDebug(LogFilter.Scripts, $"EscortAI started. ActiveAttacker = {m_bIsActiveAttacker}, Run = {m_bIsRunning}, PlayerGUID = {m_uiPlayerGUID.ToString()}");
+            Log.outDebug(LogFilter.Scripts, $"EscortAI started. ActiveAttacker = {m_bIsActiveAttacker}, Run = {m_bIsRunning}, PlayerGUID = {m_uiPlayerGUID}");
 
             CurrentWPIndex = 0;
 

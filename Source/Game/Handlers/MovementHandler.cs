@@ -630,7 +630,7 @@ namespace Game
             // prevent tampered movement data
             if (moveApplyMovementForceAck.Ack.Status.Guid != mover.GetGUID())
             {
-                Log.outError(LogFilter.Network, $"HandleMoveApplyMovementForceAck: guid error, expected {mover.GetGUID().ToString()}, got {moveApplyMovementForceAck.Ack.Status.Guid.ToString()}");
+                Log.outError(LogFilter.Network, $"HandleMoveApplyMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveApplyMovementForceAck.Ack.Status.Guid}");
                 return;
             }
 
@@ -652,7 +652,7 @@ namespace Game
             // prevent tampered movement data
             if (moveRemoveMovementForceAck.Ack.Status.Guid != mover.GetGUID())
             {
-                Log.outError(LogFilter.Network, $"HandleMoveRemoveMovementForceAck: guid error, expected {mover.GetGUID().ToString()}, got {moveRemoveMovementForceAck.Ack.Status.Guid.ToString()}");
+                Log.outError(LogFilter.Network, $"HandleMoveRemoveMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveRemoveMovementForceAck.Ack.Status.Guid}");
                 return;
             }
 

@@ -209,7 +209,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID().ToString()} don't have record in character_gifts table and will deleted");
+                Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID()} don't have record in character_gifts table and will deleted");
                 GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
                 return;
             }

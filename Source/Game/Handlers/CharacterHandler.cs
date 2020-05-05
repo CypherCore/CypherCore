@@ -1399,7 +1399,7 @@ namespace Game
                             if (!CliDB.ItemModifiedAppearanceStorage.ContainsKey(saveEquipmentSet.Set.Appearances[i]))
                                 return;
 
-                            (bool hasAppearance, bool isTemporary) = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
+                            (bool hasAppearance, _) = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
                             if (!hasAppearance)
                                 return;
                         }

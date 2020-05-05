@@ -660,7 +660,7 @@ namespace Game.Achievements
 
         public override string GetOwnerInfo()
         {
-            return $"{_owner.GetGUID().ToString()} {_owner.GetName()}";
+            return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
         Player _owner;

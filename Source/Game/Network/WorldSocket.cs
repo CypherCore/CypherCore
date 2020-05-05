@@ -156,14 +156,14 @@ namespace Game.Network
 
                 if (!_worldCrypt.Decrypt(ref data, header.Tag))
                 {
-                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress().ToString()} failed to decrypt packet (size: {header.Size})");
+                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress()} failed to decrypt packet (size: {header.Size})");
                     return;
                 }
 
                 WorldPacket worldPacket = new WorldPacket(data);
                 if (worldPacket.GetOpcode() >= (int)ClientOpcodes.Max)
                 {
-                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress().ToString()} sent wrong opcode (opcode: {worldPacket.GetOpcode()})");
+                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress()} sent wrong opcode (opcode: {worldPacket.GetOpcode()})");
                     return;
                 }
 
@@ -395,7 +395,7 @@ namespace Game.Network
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress().ToString()}).");
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress()}).");
                 CloseSocket();
                 return;
             }

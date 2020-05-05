@@ -41,7 +41,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(browseQuery.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {browseQuery.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {browseQuery.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            Log.outDebug(LogFilter.Auctionhouse, $"Auctionhouse search ({browseQuery.Auctioneer.ToString()}), searchedname: {browseQuery.Name}, levelmin: {browseQuery.MinLevel}, levelmax: {browseQuery.MaxLevel}, filters: {browseQuery.Filters}");
+            Log.outDebug(LogFilter.Auctionhouse, $"Auctionhouse search ({browseQuery.Auctioneer}), searchedname: {browseQuery.Name}, levelmin: {browseQuery.MinLevel}, levelmax: {browseQuery.MaxLevel}, filters: {browseQuery.Filters}");
 
             Optional<AuctionSearchClassFilters> classFilters = new Optional<AuctionSearchClassFilters>();
 
@@ -97,7 +97,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(cancelCommoditiesPurchase.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {cancelCommoditiesPurchase.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {cancelCommoditiesPurchase.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(confirmCommoditiesPurchase.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {confirmCommoditiesPurchase.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {confirmCommoditiesPurchase.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -154,7 +154,7 @@ namespace Game
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(hello.Guid, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!unit)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionHelloOpcode - {hello.Guid.ToString()} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionHelloOpcode - {hello.Guid} not found or you can't interact with him.");
                 return;
             }
 
@@ -175,7 +175,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listBidderItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListBidderItems - {listBidderItems.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListBidderItems - {listBidderItems.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -203,7 +203,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listBucketsByBucketKeys.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {listBucketsByBucketKeys.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {listBucketsByBucketKeys.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -234,7 +234,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listItemsByBucketKey.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItemsByBucketKey - {listItemsByBucketKey.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItemsByBucketKey - {listItemsByBucketKey.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -266,7 +266,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listItemsByItemID.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItemsByItemID - {listItemsByItemID.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItemsByItemID - {listItemsByItemID.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -298,7 +298,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(listOwnerItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListOwnerItems - {listOwnerItems.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListOwnerItems - {listOwnerItems.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -325,7 +325,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(placeBid.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionPlaceBid - {placeBid.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionPlaceBid - {placeBid.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -455,7 +455,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(removeItem.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionRemoveItem - {removeItem.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionRemoveItem - {removeItem.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -489,7 +489,7 @@ namespace Game
             {
                 SendAuctionCommandResult(0, AuctionCommand.Cancel, AuctionResult.DatabaseError, throttle.DelayUntilNext);
                 //this code isn't possible ... maybe there should be assert
-                Log.outError(LogFilter.Network, $"CHEATER: {player.GetGUID().ToString()} tried to cancel auction (id: {removeItem.AuctionID}) of another player or auction is null");
+                Log.outError(LogFilter.Network, $"CHEATER: {player.GetGUID()} tried to cancel auction (id: {removeItem.AuctionID}) of another player or auction is null");
                 return;
             }
 
@@ -517,7 +517,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(replicateItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleReplicateItems - {replicateItems.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleReplicateItems - {replicateItems.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -546,7 +546,7 @@ namespace Game
 
             if (sellCommodity.UnitPrice == 0 || sellCommodity.UnitPrice > PlayerConst.MaxMoneyAmount)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID().ToString()}) attempted to sell item with invalid price.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell item with invalid price.");
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.DatabaseError, throttle.DelayUntilNext);
                 return;
             }
@@ -561,7 +561,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellCommodity.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {sellCommodity.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionListItems - {sellCommodity.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -569,7 +569,7 @@ namespace Game
             AuctionHouseRecord auctionHouseEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(creature.GetFaction(), ref houseId);
             if (auctionHouseEntry == null)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Unit ({sellCommodity.Auctioneer.ToString()}) has wrong faction.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Unit ({sellCommodity.Auctioneer}) has wrong faction.");
                 return;
             }
 
@@ -771,7 +771,7 @@ namespace Game
 
             if (sellItem.MinBid > PlayerConst.MaxMoneyAmount || sellItem.BuyoutPrice > PlayerConst.MaxMoneyAmount)
             {
-                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID().ToString()}) attempted to sell item with higher price than max gold amount.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Player {_player.GetName()} ({_player.GetGUID()}) attempted to sell item with higher price than max gold amount.");
                 SendAuctionCommandResult(0, AuctionCommand.SellItem, AuctionResult.Inventory, throttle.DelayUntilNext, InventoryResult.TooMuchGold);
                 return;
             }
@@ -862,8 +862,8 @@ namespace Game
 
             auction.Items.Add(item);
 
-            Log.outInfo(LogFilter.Network, $"CMSG_AuctionAction.SellItem: {_player.GetGUID().ToString()} {_player.GetName()} is selling item {item.GetGUID().ToString()} {item.GetTemplate().GetName()} " +
-                $"to auctioneer {creature.GetGUID().ToString()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
+            Log.outInfo(LogFilter.Network, $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
+                $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
                 $"(in sec) in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 
             // Add to pending auctions, or fail with insufficient funds error

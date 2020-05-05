@@ -469,8 +469,7 @@ namespace Game.Loots
 
         public LootItem LootItemInSlot(uint lootSlot, Player player)
         {
-            NotNormalLootItem qitem, ffaitem, conditem;
-            return LootItemInSlot(lootSlot, player, out qitem, out ffaitem, out conditem);
+            return LootItemInSlot(lootSlot, player, out _, out _, out _);
         }
         public LootItem LootItemInSlot(uint lootSlot, Player player, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem)
         {

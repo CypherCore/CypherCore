@@ -211,7 +211,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint entry = 0;
+            uint entry;
             while ((entry = args.NextUInt32()) != 0)
             {
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);

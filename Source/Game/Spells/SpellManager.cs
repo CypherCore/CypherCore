@@ -1972,7 +1972,6 @@ namespace Game.Entities
             Dictionary<uint, SpellInfoLoadHelper> loadData = new Dictionary<uint, SpellInfoLoadHelper>();
 
             Dictionary<uint, BattlePetSpeciesRecord> battlePetSpeciesByCreature = new Dictionary<uint, BattlePetSpeciesRecord>();
-            Dictionary<uint, BattlePetSpeciesRecord> battlePetSpeciesBySpellId = new Dictionary<uint, BattlePetSpeciesRecord>();
             foreach (var battlePetSpecies in CliDB.BattlePetSpeciesStorage.Values)
                 if (battlePetSpecies.CreatureID != 0)
                     battlePetSpeciesByCreature[battlePetSpecies.CreatureID] = battlePetSpecies;

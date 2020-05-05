@@ -135,17 +135,17 @@ namespace Game
 
         public string BuildAuctionWonMailBody(ObjectGuid guid, ulong bid, ulong buyout)
         {
-            return $"{guid.ToString()}:{bid}:{buyout}:0";
+            return $"{guid}:{bid}:{buyout}:0";
         }
 
         public string BuildAuctionSoldMailBody(ObjectGuid guid, ulong bid, ulong buyout, uint deposit, ulong consignment)
         {
-            return $"{guid.ToString()}:{bid}:{buyout}:{deposit}:{consignment}:0";
+            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:0";
         }
 
         public string BuildAuctionInvoiceMailBody(ObjectGuid guid, ulong bid, ulong buyout, uint deposit, ulong consignment, uint moneyDelay, uint eta)
         {
-            return $"{guid.ToString()}:{bid}:{buyout}:{deposit}:{consignment}:{moneyDelay}:{eta}:0";
+            return $"{guid}:{bid}:{buyout}:{deposit}:{consignment}:{moneyDelay}:{eta}:0";
         }
 
         public void LoadAuctions()
@@ -383,7 +383,7 @@ namespace Game
                 else
                 {
                     // Expire any auctions that we couldn't get a deposit for
-                    Log.outWarn(LogFilter.Auctionhouse, $"Player {playerGUID.ToString()} was offline, unable to retrieve deposit!");
+                    Log.outWarn(LogFilter.Auctionhouse, $"Player {playerGUID} was offline, unable to retrieve deposit!");
 
                     SQLTransaction trans = new SQLTransaction();
                     foreach (PendingAuctionInfo pendingAuction in pair.Value.Auctions)
@@ -1350,13 +1350,13 @@ namespace Game
 
         public void SendAuctionWon(AuctionPosting auction, Player bidder, SQLTransaction trans)
         {
-            uint bidderAccId = 0;
+            uint bidderAccId;
             if (!bidder)
                 bidder = Global.ObjAccessor.FindConnectedPlayer(auction.Bidder); // try lookup bidder when called from .Update
 
             // data for gm.log
             string bidderName = "";
-            bool logGmTrade = false;
+            bool logGmTrade;
 
             if (bidder)
             {
@@ -1528,7 +1528,6 @@ namespace Game
         AuctionHouseRecord _auctionHouse;
 
         SortedList<uint, AuctionPosting> _itemsByAuctionId = new SortedList<uint, AuctionPosting>(); // ordered for replicate
-        Dictionary<uint, AuctionPosting> _soldItemsById = new Dictionary<uint, AuctionPosting>();
         SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new SortedDictionary<AuctionsBucketKey, AuctionsBucketData>();// ordered for search by itemid only
         Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new Dictionary<ObjectGuid, CommodityQuote>();
 
@@ -1628,7 +1627,7 @@ namespace Game
             }
 
             // all (not optional<>)
-            auctionItem.DurationLeft = (int)Math.Max((EndTime - GameTime.GetGameTimeSystemPoint()).ToMilliseconds(), 0l);
+            auctionItem.DurationLeft = (int)Math.Max((EndTime - GameTime.GetGameTimeSystemPoint()).ToMilliseconds(), 0L);
             auctionItem.DeleteReason = 0;
 
             // SMSG_AUCTION_LIST_ITEMS_RESULT (only if owned)

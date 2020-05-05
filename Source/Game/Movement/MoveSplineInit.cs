@@ -328,7 +328,6 @@ namespace Game.Movement
                 if (transport != null)
                 {
                     float unused = 0.0f; // need reference
-
                     transport.CalculatePassengerOffset(ref x, ref y, ref z, ref unused);
                 }
             }

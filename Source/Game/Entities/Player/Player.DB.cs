@@ -217,7 +217,7 @@ namespace Game.Entities
                 item = Bag.NewItemOrBag(proto);
                 if (item.LoadFromDB(itemGuid, GetGUID(), fields, itemEntry))
                 {
-                    PreparedStatement stmt = null;
+                    PreparedStatement stmt;
 
                     // Do not allow to have item limited to another map/zone in alive state
                     if (IsAlive() && item.IsLimitedToAnotherMapOrZone(GetMapId(), zoneId))
@@ -349,7 +349,7 @@ namespace Game.Entities
                 {
                     if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)                      // client limit
                     {
-                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID().ToString()}) has more than {SkillConst.MaxPlayerSkills} skills.");
+                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID()}) has more than {SkillConst.MaxPlayerSkills} skills.");
                         break;
                     }
 
@@ -1235,7 +1235,7 @@ namespace Game.Entities
             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemEntry);
             if (proto == null)
             {
-                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid.ToString()}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
+                Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
 
                 SQLTransaction trans = new SQLTransaction();
 
@@ -1657,7 +1657,7 @@ namespace Game.Entities
         }
         void _SaveSpells(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
 
             foreach (var spell in m_spells.ToList())
             {
@@ -1767,7 +1767,7 @@ namespace Game.Entities
         }
         void _SaveCurrency(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             foreach (var pair in _currencyStorage)
             {
                 CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(pair.Key);
@@ -2180,7 +2180,7 @@ namespace Game.Entities
             foreach (var pair in _equipmentSets)
             {
                 EquipmentSetInfo eqSet = pair.Value;
-                PreparedStatement stmt = null;
+                PreparedStatement stmt;
                 byte j = 0;
                 switch (eqSet.state)
                 {
@@ -2271,7 +2271,7 @@ namespace Game.Entities
         }
         void _SaveVoidStorage(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
             {
                 if (_voidStorageItems[i] == null) // unused item
@@ -2307,7 +2307,7 @@ namespace Game.Entities
         }
         void _SaveCUFProfiles(SQLTransaction trans)
         {
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             ulong lowGuid = GetGUID().GetCounter();
 
             for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
@@ -3144,7 +3144,7 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             characterTransaction.Append(stmt);
 
-            float finiteAlways(float f) { return !float.IsInfinity(f) ? f : 0.0f; };
+            static float finiteAlways(float f) { return !float.IsInfinity(f) ? f : 0.0f; };
 
             if (create)
             {

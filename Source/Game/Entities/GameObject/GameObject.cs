@@ -1429,7 +1429,7 @@ namespace Game.Entities
                             var guid = ChairListSlots.LookupByKey(nearest_slot);
                             if (!guid.IsEmpty())
                             {
-                                guid = player.GetGUID(); //this slot in now used by player
+                                ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
                                 player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
                                 player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
                                 return;
