@@ -951,7 +951,7 @@ namespace Game.Entities
             int levelBasedHitDiff = leveldif;
 
             // Base hit chance from attacker and victim levels
-            int modHitChance = 100;
+            int modHitChance;
             if (levelBasedHitDiff >= 0)
             {
                 if (!victim.IsTypeId(TypeId.Player))
@@ -2294,7 +2294,7 @@ namespace Game.Entities
 
         public void ApplyCastTimePercentMod(float val, bool apply)
         {
-            if (val > 0)
+            if (val > 0.0f)
             {
                 ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), val, !apply);
                 ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), val, !apply);
@@ -4547,13 +4547,10 @@ namespace Game.Entities
                 return 0.0f;
             }
 
-            if (m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalPCT] <= 0.0f)
-                return 0.0f;
-
-            float value = MathFunctions.CalculatePct(m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BaseValue], Math.Max(m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BasePCTExcludeCreate], -100.0f));
-            value *= m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BasePCT];
-            value += m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalValue];
-            value *= m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalPCT];
+            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             return value;
         }

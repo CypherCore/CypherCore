@@ -1351,7 +1351,7 @@ namespace Game.Entities
                 return;
 
             if (PvP)
-            { 
+            {
                 combatTimer = 5000;
                 Player me = ToPlayer();
                 if (me)
@@ -2146,17 +2146,16 @@ namespace Game.Entities
             return MeleeHitOutcome.Normal;
         }
         public uint CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct)
-        {
-            float minDamage, maxDamage = 0.0f;
+        { 
+            float minDamage;
+            float maxDamage;
 
             if (normalized || !addTotalPct)
             {
                 CalculateMinMaxDamage(attType, normalized, addTotalPct, out minDamage, out maxDamage);
                 if (IsInFeralForm() && attType == WeaponAttackType.BaseAttack)
                 {
-                    float minOffhandDamage = 0.0f;
-                    float maxOffhandDamage = 0.0f;
-                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out minOffhandDamage, out maxOffhandDamage);
+                    CalculateMinMaxDamage(WeaponAttackType.OffAttack, normalized, addTotalPct, out float minOffhandDamage, out float maxOffhandDamage);
                     minDamage += minOffhandDamage;
                     maxDamage += maxOffhandDamage;
                 }
@@ -2265,19 +2264,6 @@ namespace Game.Entities
                     return 0.0f;
                 return ap * (1.0f + m_unitData.AttackPowerMultiplier);
             }
-        }
-        public float GetModifierValue(UnitMods unitMod, UnitModifierType modifierType)
-        {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierType.End)
-            {
-                Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
-                return 0.0f;
-            }
-
-            if (modifierType == UnitModifierType.TotalPCT && m_auraModifiersGroup[(int)unitMod][(int)modifierType] <= 0.0f)
-                return 0.0f;
-
-            return m_auraModifiersGroup[(int)unitMod][(int)modifierType];
         }
         public bool IsWithinMeleeRange(Unit obj)
         {
@@ -2449,7 +2435,7 @@ namespace Game.Entities
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;
             uint level = victim.GetLevelForTarget(this);
-            float resistanceConstant = 0.0f;
+            float resistanceConstant;
 
             if (level == bossLevel)
                 resistanceConstant = bossResistanceConstant;
@@ -2492,7 +2478,7 @@ namespace Game.Entities
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
-            for (var i = 0; i < vSchoolAbsorbCopy.Count; ++i )
+            for (var i = 0; i < vSchoolAbsorbCopy.Count; ++i)
             {
                 var absorbAurEff = vSchoolAbsorbCopy[i];
                 if (damageInfo.GetDamage() == 0)
@@ -2758,7 +2744,7 @@ namespace Game.Entities
                 // no more than 100%
                 MathFunctions.RoundToInterval(ref arpPct, 0.0f, 100.0f);
 
-                float maxArmorPen = 0.0f;
+                float maxArmorPen;
                 if (victim.GetLevelForTarget(attacker) < 60)
                     maxArmorPen = 400 + 85 * victim.GetLevelForTarget(attacker);
                 else
@@ -3014,10 +3000,15 @@ namespace Game.Entities
             return (CastingTime / 3500.0f) * DotFactor;
         }
 
+        void ApplyPercentModFloatVar(ref float var, float val, bool apply)
+        {
+            var *= (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val));
+        }
+
         public void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
         {
             float remainingTimePct = m_attackTimer[(int)att] / (m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]);
-            if (val > 0)
+            if (val > 0.0f)
             {
                 MathFunctions.ApplyPercentModFloatVar(ref m_modAttackSpeedPct[(int)att], val, !apply);
 
@@ -3265,5 +3256,58 @@ namespace Game.Entities
             }
             return true;
         }
+
+        public virtual bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff) { return true; }
+
+        public virtual void UpdateDamageDoneMods(WeaponAttackType attackType)
+        {
+            UnitMods unitMod = attackType switch
+            {
+                WeaponAttackType.BaseAttack => UnitMods.DamageMainHand,
+                WeaponAttackType.OffAttack => UnitMods.DamageOffHand,
+                WeaponAttackType.RangedAttack => UnitMods.DamageRanged,
+                _ => throw new NotImplementedException(),
+            };
+
+            float amount = GetTotalAuraModifier(AuraType.ModDamageDone, auratype => CheckAttackFitToAuraRequirement(attackType, auratype));
+            SetStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount);
+        }
+
+        public void UpdateAllDamageDoneMods()
+        {
+            for (var attackType = WeaponAttackType.BaseAttack; attackType < WeaponAttackType.Max; ++attackType)
+                UpdateDamageDoneMods(attackType);
+        }
+
+        public void UpdateDamagePctDoneMods(WeaponAttackType attackType)
+        {
+            (UnitMods unitMod, float factor) = attackType switch
+            {
+                WeaponAttackType.BaseAttack => (UnitMods.DamageMainHand, 1.0f),
+                WeaponAttackType.OffAttack => (UnitMods.DamageOffHand, 0.5f),
+                WeaponAttackType.RangedAttack => (UnitMods.DamageRanged, 1.0f),
+                _ => throw new NotImplementedException(),
+            };
+
+            factor *= GetTotalAuraMultiplier(AuraType.ModDamagePercentDone, aurEff =>
+            {
+                if (!aurEff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
+                    return false;
+
+                return CheckAttackFitToAuraRequirement(attackType, aurEff);
+            });
+
+            if (attackType == WeaponAttackType.OffAttack)
+                factor *= GetTotalAuraMultiplier(AuraType.ModOffhandDamagePct, auraEffect => CheckAttackFitToAuraRequirement(attackType, auraEffect));
+
+            SetStatPctModifier(unitMod, UnitModifierPctType.Total, factor);
+        }
+
+        public void UpdateAllDamagePctDoneMods()
+        {
+            for (var attackType = WeaponAttackType.BaseAttack; attackType < WeaponAttackType.Max; ++attackType)
+                UpdateDamagePctDoneMods(attackType);
+        }
+
     }
 }

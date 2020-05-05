@@ -27,35 +27,99 @@ namespace Game.Entities
 {
     public partial class Unit
     {
-        public bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, int amount, bool apply)
+        public void HandleStatFlatModifier(UnitMods unitMod, UnitModifierFlatType modifierType, float amount, bool apply)
         {
-            return HandleStatModifier(unitMod, modifierType, (float)amount, apply);
-        }
-        public bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply)
-        {
-            if (unitMod >= UnitMods.End || modifierType >= UnitModifierType.End)
+            if (unitMod >= UnitMods.End || modifierType >= UnitModifierFlatType.End)
             {
-                Log.outError(LogFilter.Unit, "ERROR in HandleStatModifier(): non-existing UnitMods or wrong UnitModifierType!");
-                return false;
+                Log.outError(LogFilter.Unit, "ERROR in HandleStatFlatModifier(): non-existing UnitMods or wrong UnitModifierFlatType!");
+                return;
             }
+
+            if (amount == 0)
+                return;
 
             switch (modifierType)
             {
-                case UnitModifierType.BaseValue:
-                case UnitModifierType.BasePCTExcludeCreate:
-                case UnitModifierType.TotalValue:
-                    m_auraModifiersGroup[(int)unitMod][(int)modifierType] += apply ? amount : -amount;
-                    break;
-                case UnitModifierType.BasePCT:
-                case UnitModifierType.TotalPCT:
-                    MathFunctions.ApplyPercentModFloatVar(ref m_auraModifiersGroup[(int)unitMod][(int)modifierType], amount, apply);
+                case UnitModifierFlatType.Base:
+                case UnitModifierFlatType.BasePCTExcludeCreate:
+                case UnitModifierFlatType.Total:
+                    m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] += apply ? amount : -amount;
                     break;
                 default:
                     break;
             }
 
+            UpdateUnitMod(unitMod);
+        }
+
+        public void ApplyStatPctModifier(UnitMods unitMod, UnitModifierPctType modifierType, float pct)
+        {
+            if (unitMod >= UnitMods.End || modifierType >= UnitModifierPctType.End)
+            {
+                Log.outError(LogFilter.Unit, "ERROR in ApplyStatPctModifier(): non-existing UnitMods or wrong UnitModifierPctType!");
+                return;
+            }
+
+            if (pct == 0)
+                return;
+
+            switch (modifierType)
+            {
+                case UnitModifierPctType.Base:
+                case UnitModifierPctType.Total:
+                    MathFunctions.AddPct(ref m_auraPctModifiersGroup[(int)unitMod][(int)modifierType], pct);
+                    break;
+                default:
+                    break;
+            }
+
+            UpdateUnitMod(unitMod);
+        }
+
+        public void SetStatFlatModifier(UnitMods unitMod, UnitModifierFlatType modifierType, float val)
+        {
+            if (m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] == val)
+                return;
+
+            m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] = val;
+            UpdateUnitMod(unitMod);
+        }
+
+        public void SetStatPctModifier(UnitMods unitMod, UnitModifierPctType modifierType, float val)
+        {
+            if (m_auraPctModifiersGroup[(int)unitMod][(int)modifierType] == val)
+                return;
+
+            m_auraPctModifiersGroup[(int)unitMod][(int)modifierType] = val;
+            UpdateUnitMod(unitMod);
+        }
+
+        public float GetFlatModifierValue(UnitMods unitMod, UnitModifierFlatType modifierType)
+        {
+            if (unitMod >= UnitMods.End || modifierType >= UnitModifierFlatType.End)
+            {
+                Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
+                return 0.0f;
+            }
+
+            return m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType];
+        }
+
+        public float GetPctModifierValue(UnitMods unitMod, UnitModifierPctType modifierType)
+        {
+            if (unitMod >= UnitMods.End || modifierType >= UnitModifierPctType.End)
+            {
+                Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
+                return 0.0f;
+            }
+
+            return m_auraPctModifiersGroup[(int)unitMod][(int)modifierType];
+        }
+
+        void UpdateUnitMod(UnitMods unitMod)
+        {
             if (!CanModifyStats())
-                return false;
+                return;
 
             switch (unitMod)
             {
@@ -118,8 +182,6 @@ namespace Game.Entities
                 default:
                     break;
             }
-
-            return true;
         }
 
         int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
@@ -181,16 +243,71 @@ namespace Game.Entities
             return stat;
         }
 
-        public void ApplyStatBuffMod(Stats stat, float val, bool apply)
+        public void UpdateStatBuffMod(Stats stat)
         {
-            MathFunctions.ApplyPercentModFloatVar(ref (val > 0 ? ref m_floatStatPosBuff[(int)stat] : ref m_floatStatNegBuff[(int)stat]), val, apply);
+            float modPos = 0.0f;
+            float modNeg = 0.0f;
+            float factor = 0.0f;
+
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+
+            // includes value from items and enchantments
+            float modValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+            if (modValue > 0.0f)
+                modPos += modValue;
+            else
+                modNeg += modValue;
+
+            if (IsGuardian())
+            {
+                modValue = ((Guardian)this).GetBonusStatFromOwner(stat);
+                if (modValue > 0.0f)
+                    modPos += modValue;
+                else
+                    modNeg += modValue;
+            }
+
+            // SPELL_AURA_MOD_STAT_BONUS_PCT only affects BASE_VALUE
+            modPos = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            modNeg = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+
+            modPos += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
+            {
+                if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) && aurEff.GetAmount() > 0)
+                    return true;
+                return false;
+            });
+
+            modNeg += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
+            {
+                if ((aurEff.GetMiscValue() < 0 || aurEff.GetMiscValue() == (int)stat) && aurEff.GetAmount() < 0)
+                    return true;
+                return false;
+            });
+
+            factor = GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
+            {
+                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
+                    return true;
+                return false;
+            });
+
+            factor *= GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
+            {
+                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
+                    return true;
+                return false;
+            });
+
+            modPos *= factor;
+            modNeg *= factor;
+
+            m_floatStatPosBuff[(int)stat] = modPos;
+            m_floatStatNegBuff[(int)stat] = modNeg;
+
             UpdateStatBuffModForClient(stat);
         }
-        public void ApplyStatPercentBuffMod(Stats stat, float val, bool apply)
-        {
-            MathFunctions.ApplyPercentModFloatVar(ref m_floatStatPosBuff[(int)stat], val, apply);
-            MathFunctions.ApplyPercentModFloatVar(ref m_floatStatNegBuff[(int)stat], val, apply);
-        }
+
         void UpdateStatBuffModForClient(Stats stat)
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatPosBuff, (int)stat), (int)m_floatStatPosBuff[(int)stat]);
@@ -204,7 +321,7 @@ namespace Game.Entities
             if (school > SpellSchools.Normal)
             {
                 UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
-                SetResistance(school, (int)m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BaseValue]);
+                SetResistance(school, (int)GetFlatModifierValue(unitMod, UnitModifierFlatType.Base));
                 SetBonusResistanceMod(school, (int)(GetTotalAuraModValue(unitMod) - GetResistance(school)));
             }
             else
@@ -216,10 +333,7 @@ namespace Game.Entities
         public virtual void UpdateAttackPowerAndDamage(bool ranged = false) { }
         public virtual void UpdateDamagePhysical(WeaponAttackType attType)
         {
-            float minDamage = 0.0f;
-            float maxDamage = 0.0f;
-
-            CalculateMinMaxDamage(attType, false, true, out minDamage, out maxDamage);
+            CalculateMinMaxDamage(attType, false, true, out float minDamage, out float maxDamage);
 
             switch (attType)
             {
@@ -326,14 +440,11 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.StatStart + (int)stat;
 
-            if (m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalPCT] <= 0.0f)
-                return 0.0f;
-
-            float value = MathFunctions.CalculatePct(m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BaseValue], Math.Max(m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BasePCTExcludeCreate], -100.0f));
+            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
             value += GetCreateStat(stat);
-            value *= m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.BasePCT];
-            value += m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalValue];
-            value *= m_auraModifiersGroup[(int)unitMod][(int)UnitModifierType.TotalPCT];
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             return value;
         }
@@ -940,6 +1051,7 @@ namespace Game.Entities
         public void ApplyModDamageDonePos(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePos, (int)school), mod, apply); }
         public void ApplyModDamageDoneNeg(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, (int)school), mod, apply); }
         public void ApplyModDamageDonePercent(SpellSchools school, float pct, bool apply) { ApplyPercentModUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct, apply); }
+        public void SetModDamageDonePercent(SpellSchools school, float pct) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, (int)school), pct); }
 
         public void ApplyRatingMod(CombatRating combatRating, int value, bool apply)
         {
@@ -968,10 +1080,10 @@ namespace Game.Entities
 
             float attackPowerMod = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
-            float baseValue = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetTotalAttackPowerValue(attType) / 3.5f * attackPowerMod;
-            float basePct = GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            float totalValue = GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            float totalPct = addTotalPct ? GetModifierValue(unitMod, UnitModifierType.TotalPCT) : 1.0f;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * attackPowerMod;
+            float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
 
             float weaponMinDamage = GetWeaponDamageRange(attType, WeaponDamageRange.MinDamage);
             float weaponMaxDamage = GetWeaponDamageRange(attType, WeaponDamageRange.MaxDamage);
@@ -1007,9 +1119,9 @@ namespace Game.Entities
         {
             float value = 5.0f;
 
-            SetBaseModValue(BaseModGroup.CritPercentage, BaseModType.PCTmod, value);
-            SetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.PCTmod, value);
-            SetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.PCTmod, value);
+            SetBaseModPctValue(BaseModGroup.CritPercentage, value);
+            SetBaseModPctValue(BaseModGroup.OffhandCritPercentage, value);
+            SetBaseModPctValue(BaseModGroup.RangedCritPercentage, value);
 
             UpdateCritPercentage(WeaponAttackType.BaseAttack);
             UpdateCritPercentage(WeaponAttackType.OffAttack);
@@ -1101,11 +1213,11 @@ namespace Game.Entities
                 val2 = MathFunctions.CalculatePct(minSpellPower, m_activePlayerData.OverrideAPBySpellPowerPercent);
             }
 
-            SetModifierValue(unitMod, UnitModifierType.BaseValue, val2);
+            SetStatFlatModifier(unitMod, UnitModifierFlatType.Base, val2);
 
-            float base_attPower = GetModifierValue(unitMod, UnitModifierType.BaseValue) * GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            float attPowerMod = GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            float attPowerMultiplier = GetModifierValue(unitMod, UnitModifierType.TotalPCT) - 1.0f;
+            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            float attPowerMod = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
 
             if (ranged)
             {
@@ -1154,10 +1266,10 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.Armor;
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue);    // base armor (from items)
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor (from items)
             float baseValue = value;
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);           // armor percent from items
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);           // armor percent from items
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
 
             //add dynamic flat mods
             var mResbyIntellect = GetAuraEffectsByType(AuraType.ModResistanceOfStatPercent);
@@ -1167,7 +1279,7 @@ namespace Game.Entities
                     value += MathFunctions.CalculatePct(GetStat((Stats)i.GetMiscValueB()), i.GetAmount());
             }
 
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetArmor((int)baseValue, (int)(value - baseValue));
 
@@ -1477,7 +1589,7 @@ namespace Game.Entities
 
         public void UpdateCritPercentage(WeaponAttackType attType)
         {
-            float applyCritLimit(float value)
+            static float applyCritLimit(float value)
             {
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                     value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) : value;
@@ -1488,16 +1600,16 @@ namespace Game.Entities
             {
                 case WeaponAttackType.OffAttack:
                     SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OffhandCritPercentage),
-                        applyCritLimit(GetTotalPercentageModValue(BaseModGroup.OffhandCritPercentage) + GetRatingBonusValue(CombatRating.CritMelee)));
+                        applyCritLimit(GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.OffhandCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
                     break;
                 case WeaponAttackType.RangedAttack:
                     SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RangedCritPercentage),
-                        applyCritLimit(GetTotalPercentageModValue(BaseModGroup.RangedCritPercentage) + GetRatingBonusValue(CombatRating.CritRanged)));
+                        applyCritLimit(GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.RangedCritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritRanged)));
                     break;
                 case WeaponAttackType.BaseAttack:
                 default:
                     SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CritPercentage),
-                        applyCritLimit(GetTotalPercentageModValue(BaseModGroup.CritPercentage) + GetRatingBonusValue(CombatRating.CritMelee)));
+                        applyCritLimit(GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.FlatMod) + GetBaseModValue(BaseModGroup.CritPercentage, BaseModType.PctMod) + GetRatingBonusValue(CombatRating.CritMelee)));
                     break;
             }
         }
@@ -1638,10 +1750,10 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.Health;
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreateHealth();
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue) + GetHealthBonusFromStamina();
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + GetHealthBonusFromStamina();
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxHealth((uint)value);
         }
@@ -1669,10 +1781,10 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowers(power);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxPower(power, (int)Math.Round(value));
         }
@@ -1748,8 +1860,6 @@ namespace Game.Entities
             0.9720f,  // Druid
             0.9830f   // Demon Hunter
         };
-
-        void SetBaseModValue(BaseModGroup modGroup, BaseModType modType, float value) { m_auraBaseMod[(int)modGroup][(int)modType] = value; }
     }
 
     public partial class Creature
@@ -1775,7 +1885,7 @@ namespace Game.Entities
 
         public override void UpdateArmor()
         {
-            float baseValue = GetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue);
+            float baseValue = GetFlatModifierValue(UnitMods.Armor, UnitModifierFlatType.Base);
             float value = GetTotalAuraModValue(UnitMods.Armor);
             SetArmor((int)baseValue, (int)(value - baseValue));
         }
@@ -1805,10 +1915,10 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowers(power);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxPower(power, (int)Math.Round(value));
         }
@@ -1817,8 +1927,8 @@ namespace Game.Entities
         {
             UnitMods unitMod = ranged ? UnitMods.AttackPowerRanged : UnitMods.AttackPower;
 
-            float baseAttackPower = GetModifierValue(unitMod, UnitModifierType.BaseValue) * GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            float attackPowerMultiplier = GetModifierValue(unitMod, UnitModifierType.TotalPCT) - 1.0f;
+            float baseAttackPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            float attackPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
 
             if (ranged)
             {
@@ -1881,10 +1991,10 @@ namespace Game.Entities
             float attackPower = GetTotalAttackPowerValue(attType);
             float attackSpeedMulti = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
-            float baseValue = GetModifierValue(unitMod, UnitModifierType.BaseValue) + (attackPower / 3.5f) * variance;
-            float basePct = GetModifierValue(unitMod, UnitModifierType.BasePCT) * attackSpeedMulti;
-            float totalValue = GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            float totalPct = addTotalPct ? GetModifierValue(unitMod, UnitModifierType.TotalPCT) : 1.0f;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + (attackPower / 3.5f) * variance;
+            float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base) * attackSpeedMulti;
+            float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
             float dmgMultiplier = GetCreatureTemplate().ModDamage; // = ModDamage * _GetDamageMod(rank);
 
             minDamage = ((weaponMinDamage + baseValue) * dmgMultiplier * basePct + totalValue) * totalPct;

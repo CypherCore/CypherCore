@@ -157,18 +157,13 @@ namespace Game.Entities
                 return;
 
             // @todo research if talents/effects that increase total agility by x% should increase non-diminishing part
-            float base_agility = GetCreateStat(Stats.Agility) * m_auraModifiersGroup[(int)UnitMods.StatAgility][(int)UnitModifierType.BasePCT];
+            float base_agility = GetCreateStat(Stats.Agility) * GetPctModifierValue(UnitMods(UNIT_MOD_STAT_START + STAT_AGILITY), BASE_PCT);
             float bonus_agility = GetStat(Stats.Agility) - base_agility;
 
             // calculate diminishing (green in char screen) and non-diminishing (white) contribution
             diminishing = 100.0f * bonus_agility * dodgeRatio.Value * crit_to_dodge[(int)pclass - 1];
             nondiminishing = 100.0f * (dodge_base[(int)pclass - 1] + base_agility * dodgeRatio.Value * crit_to_dodge[pclass - 1]);
             */
-        }
-
-        float GetTotalPercentageModValue(BaseModGroup modGroup)
-        {
-            return m_auraBaseMod[(int)modGroup][0] + m_auraBaseMod[(int)modGroup][1];
         }
 
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)

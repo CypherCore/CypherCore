@@ -1098,8 +1098,7 @@ namespace Game.Entities
         }
         public InventoryResult CanStoreNewItem(byte bag, byte slot, List<ItemPosCount> dest, uint item, uint count)
         {
-            uint notused;
-            return CanStoreItem(bag, slot, dest, item, count, null, false, out notused);
+            return CanStoreItem(bag, slot, dest, item, count, null, false, out _);
         }
 
         Item _StoreItem(ushort pos, Item pItem, uint count, bool clone, bool update)
@@ -1233,8 +1232,7 @@ namespace Game.Entities
             // attempt equip by one
             while (titem_amount > 0)
             {
-                ushort eDest = 0;
-                msg = CanEquipNewItem(ItemConst.NullSlot, out eDest, titem_id, false);
+                msg = CanEquipNewItem(ItemConst.NullSlot, out ushort eDest, titem_id, false);
                 if (msg != InventoryResult.Ok)
                     break;
 
@@ -1890,7 +1888,7 @@ namespace Game.Entities
         //Add/Remove/Misc Item 
         public bool AddItem(uint itemId, uint count)
         {
-            uint noSpaceForCount = 0;
+            uint noSpaceForCount;
             List<ItemPosCount> dest = new List<ItemPosCount>();
             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
@@ -3525,7 +3523,7 @@ namespace Game.Entities
             }
 
             uint stacks = count / crItem.maxcount;
-            ItemExtendedCostRecord iece = null;
+            ItemExtendedCostRecord iece;
             if (crItem.ExtendedCost != 0)
             {
                 iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
@@ -3991,8 +3989,15 @@ namespace Game.Entities
 
             _ApplyItemBonuses(item, slot, apply);
             ApplyItemEquipSpell(item, apply);
+
             if (updateItemAuras)
+            { 
                 ApplyItemDependentAuras(item, apply);
+                WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
+                if (attackType != WeaponAttackType.Max)
+                    UpdateWeaponDependentAuras(attackType);
+            }
+
             ApplyArtifactPowers(item, apply);
             ApplyAzeritePowers(item, apply);
             ApplyEnchantment(item, apply);
@@ -4025,22 +4030,22 @@ namespace Game.Entities
                 switch ((ItemModType)statType)
                 {
                     case ItemModType.Mana:
-                        HandleStatModifier(UnitMods.Mana, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.Health:                           // modify HP
-                        HandleStatModifier(UnitMods.Health, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.Agility:                          // modify agility
-                        HandleStatModifier(UnitMods.StatAgility, UnitModifierType.BaseValue, (float)val, apply);
-                        ApplyStatBuffMod(Stats.Agility, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatAgility, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Agility);
                         break;
                     case ItemModType.Strength:                         //modify strength
-                        HandleStatModifier(UnitMods.StatStrength, UnitModifierType.BaseValue, (float)val, apply);
-                        ApplyStatBuffMod(Stats.Strength, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStrength, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Strength);
                         break;
                     case ItemModType.Intellect:                        //modify intellect
-                        HandleStatModifier(UnitMods.StatIntellect, UnitModifierType.BaseValue, (float)val, apply);
-                        ApplyStatBuffMod(Stats.Intellect, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatIntellect, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Intellect);
                         break;
                     //case ItemModType.Spirit:                           //modify spirit
                         //HandleStatModifier(UnitMods.StatSpirit, UnitModifierType.BaseValue, (float)val, apply);
@@ -4051,8 +4056,8 @@ namespace Game.Entities
                         if (staminaMult != null)
                             val = (int)(val * CliDB.GetIlvlStatMultiplier(staminaMult, proto.GetInventoryType()));
 
-                        HandleStatModifier(UnitMods.StatStamina, UnitModifierType.BaseValue, (float)val, apply);
-                        ApplyStatBuffMod(Stats.Stamina, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStamina, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
+                        UpdateStatBuffMod(Stats.Stamina);
                         break;
                     case ItemModType.DefenseSkillRating:
                         ApplyRatingMod(CombatRating.DefenseSkill, (int)(val * combatRatingMultiplier), apply);
@@ -4118,11 +4123,11 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Expertise, (int)(val * combatRatingMultiplier), apply);
                         break;
                     case ItemModType.AttackPower:
-                        HandleStatModifier(UnitMods.AttackPower, UnitModifierType.TotalValue, (float)val, apply);
-                        HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
                         break;
                     case ItemModType.RangedAttackPower:
-                        HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
                         break;
                     case ItemModType.Versatility:
                         ApplyRatingMod(CombatRating.VersatilityDamageDone, (int)(val * combatRatingMultiplier), apply);
@@ -4148,25 +4153,25 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                         break;
                     case ItemModType.ExtraArmor:
-                        HandleStatModifier(UnitMods.Armor, UnitModifierType.TotalValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)val, apply);
                         break;
                     case ItemModType.FireResistance:
-                        HandleStatModifier(UnitMods.ResistanceFire, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.FrostResistance:
-                        HandleStatModifier(UnitMods.ResistanceFrost, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.HolyResistance:
-                        HandleStatModifier(UnitMods.ResistanceHoly, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.ShadowResistance:
-                        HandleStatModifier(UnitMods.ResistanceShadow, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.NatureResistance:
-                        HandleStatModifier(UnitMods.ResistanceNature, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.ArcaneResistance:
-                        HandleStatModifier(UnitMods.ResistanceArcane, UnitModifierType.BaseValue, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.PvpPower:
                         ApplyRatingMod(CombatRating.PvpPower, val, apply);
@@ -4202,37 +4207,37 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Unused12, val, apply);
                         break;
                     case ItemModType.AgiStrInt:
-                        HandleStatModifier(UnitMods.StatAgility, UnitModifierType.BaseValue, val, apply);
-                        HandleStatModifier(UnitMods.StatStrength, UnitModifierType.BaseValue, val, apply);
-                        HandleStatModifier(UnitMods.StatIntellect, UnitModifierType.BaseValue, val, apply);
-                        ApplyStatBuffMod(Stats.Agility, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatAgility, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        ApplyStatBuffMod(Stats.Strength, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStrength, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        ApplyStatBuffMod(Stats.Intellect, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatIntellect, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        UpdateStatBuffMod(Stats.Agility);
+                        UpdateStatBuffMod(Stats.Strength);
+                        UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.AgiStr:
-                        HandleStatModifier(UnitMods.StatAgility, UnitModifierType.BaseValue, val, apply);
-                        HandleStatModifier(UnitMods.StatStrength, UnitModifierType.BaseValue, val, apply);
-                        ApplyStatBuffMod(Stats.Agility, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatAgility, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        ApplyStatBuffMod(Stats.Strength, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStrength, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
+                        UpdateStatBuffMod(Stats.Agility);
+                        UpdateStatBuffMod(Stats.Strength);
                         break;
                     case ItemModType.AgiInt:
-                        HandleStatModifier(UnitMods.StatAgility, UnitModifierType.BaseValue, val, apply);
-                        HandleStatModifier(UnitMods.StatIntellect, UnitModifierType.BaseValue, val, apply);
-                        ApplyStatBuffMod(Stats.Agility, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatAgility, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        ApplyStatBuffMod(Stats.Intellect, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatIntellect, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        UpdateStatBuffMod(Stats.Agility);
+                        UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.StrInt:
-                        HandleStatModifier(UnitMods.StatStrength, UnitModifierType.BaseValue, val, apply);
-                        HandleStatModifier(UnitMods.StatIntellect, UnitModifierType.BaseValue, val, apply);
-                        ApplyStatBuffMod(Stats.Strength, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatStrength, UnitModifierType.BasePCTExcludeCreate)), apply);
-                        ApplyStatBuffMod(Stats.Intellect, MathFunctions.CalculatePct(val, GetModifierValue(UnitMods.StatIntellect, UnitModifierType.BasePCTExcludeCreate)), apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        UpdateStatBuffMod(Stats.Strength);
+                        UpdateStatBuffMod(Stats.Intellect);
                         break;
                 }
             }
 
             uint armor = item.GetArmor(this);
             if (armor != 0)
-                HandleStatModifier(UnitMods.Armor, UnitModifierType.BaseValue, (float)armor, apply);
+                HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)armor, apply);
 
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
             if (slot == EquipmentSlot.MainHand && (proto.GetInventoryType() == InventoryType.Ranged || proto.GetInventoryType() == InventoryType.RangedRight))
@@ -4425,6 +4430,10 @@ namespace Game.Entities
 
                     ApplyItemDependentAuras(m_items[i], true);
                     _ApplyItemBonuses(m_items[i], i, true);
+
+                    WeaponAttackType attackType = Player.GetAttackBySlot(i, m_items[i].GetTemplate().GetInventoryType());
+                    if (attackType != WeaponAttackType.Max)
+                        UpdateWeaponDependentAuras(attackType);
                 }
             }
 
@@ -6229,11 +6238,7 @@ namespace Game.Entities
         public void SetLootGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.LootTargetGUID), guid); }
         public void StoreLootItem(byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
-            NotNormalLootItem qitem = null;
-            NotNormalLootItem ffaitem = null;
-            NotNormalLootItem conditem = null;
-
-            LootItem item = loot.LootItemInSlot(lootSlot, this, out qitem, out ffaitem, out conditem);
+            LootItem item = loot.LootItemInSlot(lootSlot, this, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem);
             if (item == null)
             {
                 SendEquipError(InventoryResult.LootGone);
@@ -6385,7 +6390,7 @@ namespace Game.Entities
             if (!currentLootGuid.IsEmpty() && !aeLooting)
                 Session.DoLootRelease(currentLootGuid);
 
-            Loot loot = null;
+            Loot loot;
             PermissionTypes permission = PermissionTypes.All;
 
             Log.outDebug(LogFilter.Loot, "Player.SendLoot");

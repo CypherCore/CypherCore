@@ -441,7 +441,7 @@ namespace Game.Entities
 
             SetMeleeDamageSchool((SpellSchools)cinfo.DmgSchool);
 
-            SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, (float)petlevel * 50);
+            SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)petlevel * 50);
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, SharedConst.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
@@ -467,7 +467,7 @@ namespace Game.Entities
             if (!IsHunterPet())
             {
                 for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                    SetModifierValue(UnitMods.ResistanceStart + i, UnitModifierType.BaseValue, cinfo.Resistance[i]);
+                    SetStatFlatModifier(UnitMods.ResistanceStart + i, UnitModifierFlatType.Base, cinfo.Resistance[i]);
             }
 
             // Health, Mana or Power, Armor
@@ -478,7 +478,7 @@ namespace Game.Entities
                 SetCreateMana(pInfo.mana);
 
                 if (pInfo.armor > 0)
-                    SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, pInfo.armor);
+                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, pInfo.armor);
 
                 for (byte stat = 0; stat < (int)Stats.Max; ++stat)
                     SetCreateStat((Stats)stat, pInfo.stats[stat]);
@@ -584,7 +584,6 @@ namespace Game.Entities
                                     int bonus_dmg = (int)(GetOwner().SpellBaseDamageBonusDone(SpellSchoolMask.Shadow) * 0.3f);
                                     SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel) + bonus_dmg);
                                     SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel) + bonus_dmg);
-
                                     break;
                                 }
                             case 19833: //Snake Trap - Venomous Snake
@@ -610,8 +609,8 @@ namespace Game.Entities
                                     SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, (petlevel * 4 - petlevel));
                                     SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, (petlevel * 4 + petlevel));
 
-                                    SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, GetOwner().GetArmor() * 0.35f);  // Bonus Armor (35% of player armor)
-                                    SetModifierValue(UnitMods.StatStamina, UnitModifierType.BaseValue, GetOwner().GetStat(Stats.Stamina) * 0.3f);  // Bonus Stamina (30% of player stamina)
+                                    SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, GetOwner().GetArmor() * 0.35f);  // Bonus Armor (35% of player armor)
+                                    SetStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, GetOwner().GetStat(Stats.Stamina) * 0.3f);  // Bonus Stamina (30% of player stamina)
                                     if (!HasAura(58877))//prevent apply twice for the 2 wolves
                                         AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
                                     break;
@@ -673,7 +672,7 @@ namespace Game.Entities
         public override bool UpdateStats(Stats stat)
         {
             float value = GetTotalStatValue(stat);
-            ApplyStatBuffMod(stat, m_statFromOwner[(int)stat], false);
+            UpdateStatBuffMod(stat);
             float ownersBonus = 0.0f;
 
             Unit owner = GetOwner();
@@ -712,7 +711,7 @@ namespace Game.Entities
 
             SetStat(stat, (int)value);
             m_statFromOwner[(int)stat] = ownersBonus;
-            ApplyStatBuffMod(stat, m_statFromOwner[(int)stat], true);
+            UpdateStatBuffMod(stat);
 
             switch (stat)
             {
@@ -754,7 +753,7 @@ namespace Game.Entities
         {
             if (school > SpellSchools.Normal)
             {
-                float baseValue = GetModifierValue( UnitMods.ResistanceStart + (int)school, UnitModifierType.BaseValue);
+                float baseValue = GetFlatModifierValue(UnitMods.ResistanceStart + (int)school, UnitModifierFlatType.Base);
                 float bonusValue = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school) - baseValue;
 
                 // hunter and warlock pets gain 40% of owner's resistance
@@ -773,8 +772,6 @@ namespace Game.Entities
 
         public override void UpdateArmor()
         {
-            float baseValue = 0.0f;
-            float value = 0.0f;
             float bonus_armor = 0.0f;
             UnitMods unitMod = UnitMods.Armor;
 
@@ -784,11 +781,11 @@ namespace Game.Entities
             else if (IsPet())
                 bonus_armor = GetOwner().GetArmor();
 
-            value = GetModifierValue(unitMod, UnitModifierType.BaseValue);
-            baseValue = value;
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue) + bonus_armor;
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+            float baseValue = value;
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + bonus_armor;
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetArmor((int)baseValue, (int)(value - baseValue));
         }
@@ -824,10 +821,10 @@ namespace Game.Entities
                     break;
             }
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreateHealth();
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue) + stamina * multiplicator;
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreateHealth();
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total) + stamina * multiplicator;
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxHealth((uint)value);
         }
@@ -839,10 +836,10 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
-            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowers(power);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetMaxPower(power, (int)value);
         }
@@ -902,11 +899,11 @@ namespace Game.Entities
                 }
             }
 
-            SetModifierValue(UnitMods.AttackPower, UnitModifierType.BaseValue, val + bonusAP);
+            SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, val + bonusAP);
 
             //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
-            float base_attPower = GetModifierValue(unitMod, UnitModifierType.BaseValue) * GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            float attPowerMultiplier = GetModifierValue(unitMod, UnitModifierType.TotalPCT) - 1.0f;
+            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
 
             SetAttackPower((int)base_attPower);
             SetAttackPowerMultiplier(attPowerMultiplier);
@@ -944,10 +941,10 @@ namespace Game.Entities
 
             float att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
 
-            float base_value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetTotalAttackPowerValue(attType) / 3.5f * att_speed + bonusDamage;
-            float base_pct = GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            float total_value = GetModifierValue(unitMod, UnitModifierType.TotalValue);
-            float total_pct = GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+            float base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * att_speed + bonusDamage;
+            float base_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            float total_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            float total_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             float weapon_mindamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage);
             float weapon_maxdamage = GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage);
@@ -968,6 +965,7 @@ namespace Game.Entities
         }
 
         public int GetBonusDamage() { return m_bonusSpellDamage; }
+        public float GetBonusStatFromOwner(Stats stat) { return m_statFromOwner[(int)stat]; }
 
         int m_bonusSpellDamage;
         float[] m_statFromOwner = new float[(int)Stats.Max];

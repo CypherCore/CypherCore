@@ -312,12 +312,12 @@ namespace Game.Entities
                 UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
 
             SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
-            SetModifierValue(UnitMods.ResistanceHoly, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Holy]);
-            SetModifierValue(UnitMods.ResistanceFire, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Fire]);
-            SetModifierValue(UnitMods.ResistanceNature, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Nature]);
-            SetModifierValue(UnitMods.ResistanceFrost, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Frost]);
-            SetModifierValue(UnitMods.ResistanceShadow, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Shadow]);
-            SetModifierValue(UnitMods.ResistanceArcane, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Arcane]);
+            SetStatFlatModifier(UnitMods.ResistanceHoly, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Holy]);
+            SetStatFlatModifier(UnitMods.ResistanceFire, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Fire]);
+            SetStatFlatModifier(UnitMods.ResistanceNature, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Nature]);
+            SetStatFlatModifier(UnitMods.ResistanceFrost, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Frost]);
+            SetStatFlatModifier(UnitMods.ResistanceShadow, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Shadow]);
+            SetStatFlatModifier(UnitMods.ResistanceArcane, UnitModifierFlatType.Base, cInfo.Resistance[(int)SpellSchools.Arcane]);
 
             SetCanModifyStats(true);
             UpdateAllStats();
@@ -563,7 +563,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            float addvalue = 0.0f;
+            float addvalue;
 
             switch (power)
             {
@@ -614,7 +614,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            long addvalue = 0;
+            long addvalue;
 
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
@@ -1166,7 +1166,7 @@ namespace Game.Entities
                     break;
             }
 
-            SetModifierValue(UnitMods.Health, UnitModifierType.BaseValue, health);
+            SetStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, health);
 
             //Damage
             float basedamage = stats.GenerateBaseDamage(cInfo);
@@ -1182,11 +1182,11 @@ namespace Game.Entities
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MinDamage, weaponBaseMinDamage);
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MaxDamage, weaponBaseMaxDamage);
 
-            SetModifierValue(UnitMods.AttackPower, UnitModifierType.BaseValue, stats.AttackPower);
-            SetModifierValue(UnitMods.AttackPowerRanged, UnitModifierType.BaseValue, stats.RangedAttackPower);
+            SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
+            SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
 
             float armor = stats.GenerateArmor(cInfo); // @todo Why is this treated as uint32 when it's a float?
-            SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, armor);
+            SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
         float _GetHealthMod(CreatureEliteType Rank)
@@ -2026,7 +2026,6 @@ namespace Game.Entities
                     return false;
             }
 
-            Unit myVictim = GetAttackerForHelper();
             Unit targetVictim = target.GetAttackerForHelper();
 
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
@@ -2263,13 +2262,11 @@ namespace Game.Entities
 
         public void GetRespawnPosition(out float x, out float y, out float z)
         {
-            float notUsed;
-            GetRespawnPosition(out x, out y, out z, out notUsed, out notUsed);
+            GetRespawnPosition(out x, out y, out z, out _, out _);
         }
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
         {
-            float notUsed;
-            GetRespawnPosition(out x, out y, out z, out ori, out notUsed);
+            GetRespawnPosition(out x, out y, out z, out ori, out _);
         }
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori, out float dist)
         {

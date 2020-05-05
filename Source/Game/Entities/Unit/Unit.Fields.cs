@@ -103,7 +103,8 @@ namespace Game.Entities
         MultiMap<uint, AuraApplication> m_appliedAuras = new MultiMap<uint, AuraApplication>();
         MultiMap<uint, Aura> m_ownedAuras = new MultiMap<uint, Aura>();
         List<Aura> m_scAuras = new List<Aura>();
-        protected float[][] m_auraModifiersGroup = new float[(int)UnitMods.End][];
+        protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
+        protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
         uint m_removedAurasCount;
 
         //General  

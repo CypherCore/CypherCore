@@ -153,9 +153,6 @@ namespace Game.Entities
             if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
             return  skillInfo.SkillStep[skillStatusData.Pos];
         }
 
@@ -613,15 +610,11 @@ namespace Game.Entities
                             // processed in Player.CastItemCombatSpell
                             break;
                         case ItemEnchantmentType.Damage:
-                            if (item.GetSlot() == EquipmentSlot.MainHand)
                             {
-                                if (item.GetTemplate().GetInventoryType() != InventoryType.Ranged && item.GetTemplate().GetInventoryType() != InventoryType.RangedRight)
-                                    HandleStatModifier(UnitMods.DamageMainHand, UnitModifierType.TotalValue, enchant_amount, apply);
-                                else
-                                    HandleStatModifier(UnitMods.DamageRanged, UnitModifierType.TotalValue, enchant_amount, apply);
+                                WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
+                                if (attackType != WeaponAttackType.Max)
+                                    UpdateDamageDoneMods(attackType);
                             }
-                            else if (item.GetSlot() == EquipmentSlot.OffHand)
-                                HandleStatModifier(UnitMods.DamageOffHand, UnitModifierType.TotalValue, enchant_amount, apply);
                             break;
                         case ItemEnchantmentType.EquipSpell:
                             if (enchant_spell_id != 0)
@@ -654,7 +647,7 @@ namespace Game.Entities
                             }
 
                             enchant_amount = Math.Max(enchant_amount, 1u);
-                            HandleStatModifier((UnitMods)((uint)UnitMods.ResistanceStart + enchant_spell_id), UnitModifierType.TotalValue, enchant_amount, apply);
+                            HandleStatFlatModifier((UnitMods)((uint)UnitMods.ResistanceStart + enchant_spell_id), UnitModifierFlatType.Total, enchant_amount, apply);
                             break;
                         case ItemEnchantmentType.Stat:
                             {
@@ -685,26 +678,26 @@ namespace Game.Entities
                                 {
                                     case ItemModType.Mana:
                                         Log.outDebug(LogFilter.Player, "+ {0} MANA", enchant_amount);
-                                        HandleStatModifier(UnitMods.Mana, UnitModifierType.BaseValue, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.Mana, UnitModifierFlatType.Base, enchant_amount, apply);
                                         break;
                                     case ItemModType.Health:
                                         Log.outDebug(LogFilter.Player, "+ {0} HEALTH", enchant_amount);
-                                        HandleStatModifier(UnitMods.Health, UnitModifierType.BaseValue, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, enchant_amount, apply);
                                         break;
                                     case ItemModType.Agility:
                                         Log.outDebug(LogFilter.Player, "+ {0} AGILITY", enchant_amount);
-                                        HandleStatModifier(UnitMods.StatAgility, UnitModifierType.TotalValue, enchant_amount, apply);
-                                        ApplyStatBuffMod(Stats.Agility, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Total, enchant_amount, apply);
+                                        UpdateStatBuffMod(Stats.Agility);
                                         break;
                                     case ItemModType.Strength:
                                         Log.outDebug(LogFilter.Player, "+ {0} STRENGTH", enchant_amount);
-                                        HandleStatModifier(UnitMods.StatStrength, UnitModifierType.TotalValue, enchant_amount, apply);
-                                        ApplyStatBuffMod(Stats.Strength, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Total, enchant_amount, apply);
+                                        UpdateStatBuffMod(Stats.Strength);
                                         break;
                                     case ItemModType.Intellect:
                                         Log.outDebug(LogFilter.Player, "+ {0} INTELLECT", enchant_amount);
-                                        HandleStatModifier(UnitMods.StatIntellect, UnitModifierType.TotalValue, enchant_amount, apply);
-                                        ApplyStatBuffMod(Stats.Intellect, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, enchant_amount, apply);
+                                        UpdateStatBuffMod(Stats.Intellect);
                                         break;
                                     //case ItemModType.Spirit:
                                     //Log.outDebug(LogFilter.Player, "+ {0} SPIRIT", enchant_amount);
@@ -713,8 +706,8 @@ namespace Game.Entities
                                     //break;
                                     case ItemModType.Stamina:
                                         Log.outDebug(LogFilter.Player, "+ {0} STAMINA", enchant_amount);
-                                        HandleStatModifier(UnitMods.StatStamina, UnitModifierType.TotalValue, enchant_amount, apply);
-                                        ApplyStatBuffMod(Stats.Stamina, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Total, enchant_amount, apply);
+                                        UpdateStatBuffMod(Stats.Stamina);
                                         break;
                                     case ItemModType.DefenseSkillRating:
                                         ApplyRatingMod(CombatRating.DefenseSkill, (int)enchant_amount, apply);
@@ -786,12 +779,12 @@ namespace Game.Entities
                                         Log.outDebug(LogFilter.Player, "+ {0} EXPERTISE", enchant_amount);
                                         break;
                                     case ItemModType.AttackPower:
-                                        HandleStatModifier(UnitMods.AttackPower, UnitModifierType.TotalValue, enchant_amount, apply);
-                                        HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalValue, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, enchant_amount, apply);
                                         Log.outDebug(LogFilter.Player, "+ {0} ATTACK_POWER", enchant_amount);
                                         break;
                                     case ItemModType.RangedAttackPower:
-                                        HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalValue, enchant_amount, apply);
+                                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, enchant_amount, apply);
                                         Log.outDebug(LogFilter.Player, "+ {0} RANGED_ATTACK_POWER", enchant_amount);
                                         break;
                                     case ItemModType.ManaRegeneration:
@@ -815,7 +808,7 @@ namespace Game.Entities
                                         Log.outDebug(LogFilter.Player, "+ {0} SPELL_PENETRATION", enchant_amount);
                                         break;
                                     case ItemModType.BlockValue:
-                                        HandleBaseModValue(BaseModGroup.ShieldBlockValue, BaseModType.FlatMod, enchant_amount, apply);
+                                        HandleBaseModFlatValue(BaseModGroup.ShieldBlockValue, enchant_amount, apply);
                                         Log.outDebug(LogFilter.Player, "+ {0} BLOCK_VALUE", enchant_amount);
                                         break;
                                     case ItemModType.MasteryRating:
@@ -835,20 +828,9 @@ namespace Game.Entities
                             }
                         case ItemEnchantmentType.Totem:           // Shaman Rockbiter Weapon
                             {
-                                if (GetClass() == Class.Shaman)
-                                {
-                                    float addValue = 0.0f;
-                                    if (item.GetSlot() == EquipmentSlot.MainHand)
-                                    {
-                                        addValue = enchant_amount * item.GetTemplate().GetDelay() / 1000.0f;
-                                        HandleStatModifier(UnitMods.DamageMainHand, UnitModifierType.TotalValue, addValue, apply);
-                                    }
-                                    else if (item.GetSlot() == EquipmentSlot.OffHand)
-                                    {
-                                        addValue = enchant_amount * item.GetTemplate().GetDelay() / 1000.0f;
-                                        HandleStatModifier(UnitMods.DamageOffHand, UnitModifierType.TotalValue, addValue, apply);
-                                    }
-                                }
+                                WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
+                                if (attackType != WeaponAttackType.Max)
+                                    UpdateDamageDoneMods(attackType);
                                 break;
                             }
                         case ItemEnchantmentType.UseSpell:
@@ -1187,14 +1169,14 @@ namespace Game.Entities
 
                 if (skillSlot == 0)
                 {
-                    Log.outError(LogFilter.Misc, $"Tried to add skill {id} but player {GetName()} ({GetGUID().ToString()}) cannot have additional skills");
+                    Log.outError(LogFilter.Misc, $"Tried to add skill {id} but player {GetName()} ({GetGUID()}) cannot have additional skills");
                     return;
                 }
 
                 SkillLineRecord skillEntry = CliDB.SkillLineStorage.LookupByKey(id);
                 if (skillEntry == null)
                 {
-                    Log.outError(LogFilter.Misc, $"Player.SetSkill: Skill (SkillID: {id}) not found in SkillLineStore for player '{GetName()}' ({GetGUID().ToString()})");
+                    Log.outError(LogFilter.Misc, $"Player.SetSkill: Skill (SkillID: {id}) not found in SkillLineStore for player '{GetName()}' ({GetGUID()})");
                     return;
                 }
 
@@ -1829,6 +1811,48 @@ namespace Game.Entities
             }
         }
 
+        // this one rechecks weapon auras and stores them in BaseModGroup container
+        // needed for things like axe specialization applying only to axe weapons in case of dual-wield
+        void UpdateWeaponDependentCritAuras(WeaponAttackType attackType)
+        {
+            BaseModGroup modGroup;
+            switch (attackType)
+            {
+                case WeaponAttackType.BaseAttack:
+                    modGroup = BaseModGroup.CritPercentage;
+                    break;
+                case WeaponAttackType.OffAttack:
+                    modGroup = BaseModGroup.OffhandCritPercentage;
+                    break;
+                case WeaponAttackType.RangedAttack:
+                    modGroup = BaseModGroup.RangedCritPercentage;
+                    break;
+                default:
+                    return;
+            }
+
+            float amount = 0.0f;
+            amount += GetTotalAuraModifier(AuraType.ModWeaponCritPercent, auraEffect => CheckAttackFitToAuraRequirement(attackType, auraEffect));
+
+            // these auras don't have item requirement (only Combat Expertise in 3.3.5a)
+            amount += GetTotalAuraModifier(AuraType.ModCritPct);
+
+            SetBaseModFlatValue(modGroup, amount);
+        }
+
+        public void UpdateAllWeaponDependentCritAuras()
+        {
+            for (var attackType = WeaponAttackType.BaseAttack; attackType < WeaponAttackType.Max; ++attackType)
+                UpdateWeaponDependentCritAuras(attackType);
+        }
+
+        public void UpdateWeaponDependentAuras(WeaponAttackType attackType)
+        {
+            UpdateWeaponDependentCritAuras(attackType);
+            UpdateDamageDoneMods(attackType);
+            UpdateDamagePctDoneMods(attackType);
+        }
+
         public void ApplyItemDependentAuras(Item item, bool apply)
         {
             if (apply)
@@ -1851,6 +1875,19 @@ namespace Game.Entities
                 RemoveItemDependentAurasAndCasts(item);
         }
 
+        public override bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect aurEff)
+        {
+            SpellInfo spellInfo = aurEff.GetSpellInfo();
+            if (spellInfo.EquippedItemClass == ItemClass.None)
+                return true;
+
+            Item item = GetWeaponForAttack(attackType, true);
+            if (item == null || !item.IsFitToSpellRequirements(spellInfo))
+                return false;
+
+            return true;
+        }
+        
         public void AddTemporarySpell(uint spellId)
         {
             var spell = m_spells.LookupByKey(spellId);

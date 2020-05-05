@@ -1388,8 +1388,8 @@ namespace Game.Spells
 
             Player player = m_caster.ToPlayer();
 
-            uint lockId = 0;
-            ObjectGuid guid = ObjectGuid.Empty;
+            uint lockId;
+            ObjectGuid guid;
 
             // Get lockId
             if (gameObjTarget != null)
@@ -1741,7 +1741,7 @@ namespace Game.Spells
 
                                 for (uint count = 0; count < numSummons; ++count)
                                 {
-                                    Position pos = new Position();
+                                    Position pos;
                                     if (count == 0)
                                         pos = destTarget;
                                     else
@@ -2657,7 +2657,7 @@ namespace Game.Spells
                         break;
                 }
 
-                float weapon_total_pct = m_caster.GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+                float weapon_total_pct = m_caster.GetPctModifierValue(unitMod, UnitModifierPctType.Total);
                 if (fixed_bonus != 0)
                     fixed_bonus = (int)(fixed_bonus * weapon_total_pct);
                 if (spell_bonus != 0)
@@ -2725,7 +2725,7 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive())
                 return;
 
-            int addhealth = 0;
+            int addhealth;
 
             // damage == 0 - heal for caster max health
             if (damage == 0)
@@ -2951,7 +2951,7 @@ namespace Game.Spells
 
                                     byte bag = 19;
                                     byte slot = 0;
-                                    Item item = null;
+                                    Item item;
 
                                     while (bag != 0) // 256 = 0 due to var type
                                     {
@@ -3020,7 +3020,7 @@ namespace Game.Spells
                                     if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit))
                                         return;
 
-                                    uint iTmpSpellId = 0;
+                                    uint iTmpSpellId;
                                     switch (unitTarget.GetDisplayId())
                                     {
                                         case 25369: iTmpSpellId = 51552; break; // bloodelf female
@@ -3304,7 +3304,7 @@ namespace Game.Spells
                         {
                             if (unitTarget == null || !unitTarget.IsAlive())
                                 return;
-                            uint spellId1 = 0;
+                            uint spellId1;
                             uint spellId2 = 0;
 
                             // Judgement self add switch
@@ -3985,7 +3985,7 @@ namespace Game.Spells
             if (!m_caster.IsInWorld)
                 return;
 
-            uint health = 0;
+            uint health;
             int mana = 0;
 
             // flat case
@@ -5065,7 +5065,7 @@ namespace Game.Spells
 
             for (uint count = 0; count < numGuardians; ++count)
             {
-                Position pos = new Position();
+                Position pos;
                 if (count == 0)
                     pos = destTarget;
                 else

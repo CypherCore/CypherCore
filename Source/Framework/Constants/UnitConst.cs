@@ -87,7 +87,7 @@ namespace Framework.Constants
     public enum BaseModType
     {
         FlatMod,
-        PCTmod,
+        PctMod,
         End
     }
 
@@ -178,14 +178,18 @@ namespace Framework.Constants
         PowerStart = Mana,
         PowerEnd = Pain + 1
     }
-    public enum UnitModifierType
+    public enum UnitModifierFlatType
     {
-        BaseValue = 0,
+        Base = 0,
         BasePCTExcludeCreate = 1, // percent modifier affecting all stat values from auras and gear but not player base for level
-        BasePCT = 2,
-        TotalValue = 3,
-        TotalPCT = 4,
-        End = 5
+        Total = 2,
+        End = 3
+    }
+    public enum UnitModifierPctType
+    {
+        Base = 0,
+        Total = 1,
+        End = 2
     }
     public enum VictimState
     {

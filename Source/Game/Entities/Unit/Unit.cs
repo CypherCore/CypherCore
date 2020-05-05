@@ -57,9 +57,18 @@ namespace Game.Entities
                 m_spellImmune[i] = new MultiMap<uint, uint>();
 
             for (byte i = 0; i < (int)UnitMods.End; ++i)
-                m_auraModifiersGroup[i] = new float[] { 0.0f, 100.0f, 1.0f, 0.0f, 1.0f };
+            {
+                m_auraFlatModifiersGroup[i] = new float[(int)UnitModifierFlatType.End];
+                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Base] = 0.0f;
+                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.BasePCTExcludeCreate] = 100.0f;
+                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Total] = 0.0f;
 
-            m_auraModifiersGroup[(int)UnitMods.DamageOffHand][(int)UnitModifierType.TotalPCT] = 0.5f;
+                m_auraPctModifiersGroup[i] = new float[(int)UnitModifierPctType.End];
+                m_auraPctModifiersGroup[i][(int)UnitModifierPctType.Base] = 1.0f;
+                m_auraPctModifiersGroup[i][(int)UnitModifierPctType.Total] = 1.0f;
+            }
+
+            m_auraPctModifiersGroup[(int)UnitMods.DamageOffHand][(int)UnitModifierPctType.Total] = 0.5f;
 
             foreach (AuraType auraType in Enum.GetValues(typeof(AuraType)))
                 m_modAuras[auraType] = new List<AuraEffect>();
@@ -1239,7 +1248,7 @@ namespace Game.Entities
                             else if (GetRace() == Race.Worgen)
                             {
                                 if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 9);
+                                    skinColor = (byte)RandomHelper.URand(0, 9);
 
                                 // Male
                                 if (GetGender() == Gender.Male)
@@ -1284,7 +1293,7 @@ namespace Game.Entities
                             else if (GetRace() == Race.Tauren)
                             {
                                 if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 20);
+                                    skinColor = (byte)RandomHelper.URand(0, 20);
 
                                 if (GetGender() == Gender.Male)
                                 {
@@ -1393,7 +1402,7 @@ namespace Game.Entities
                             else if (GetRace() == Race.Worgen)
                             {
                                 if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 8);
+                                    skinColor = (byte)RandomHelper.URand(0, 8);
 
                                 // Male
                                 if (GetGender() == Gender.Male)
@@ -1438,7 +1447,7 @@ namespace Game.Entities
                             else if (GetRace() == Race.Tauren)
                             {
                                 if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 20);
+                                    skinColor = (byte)RandomHelper.URand(0, 20);
 
                                 if (GetGender() == Gender.Male)
                                 {
@@ -1679,10 +1688,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ShapeshiftForm), (byte)form);
         }
 
-        public void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value)
-        {
-            m_auraModifiersGroup[(int)unitMod][(int)modifierType] = value;
-        }
         public int CalcSpellDuration(SpellInfo spellProto)
         {
             sbyte comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
@@ -1932,20 +1937,16 @@ namespace Game.Entities
             FactionTemplateRecord entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
             if (entry == null)
             {
-                ObjectGuid guid = ObjectGuid.Empty;                             // prevent repeating spam same faction problem
-
-                if (GetGUID() != guid)
+                Player player = ToPlayer();
+                if (player != null)
+                    Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), GetFaction());
+                else
                 {
-                    Player player = ToPlayer();
                     Creature creature = ToCreature();
-                    if (player != null)
-                        Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), GetFaction());
-                    else if (creature != null)
+                    if (creature != null)
                         Log.outError(LogFilter.Unit, "Creature (template id: {0}) has invalid faction (faction template id) #{1}", creature.GetCreatureTemplate().Entry, GetFaction());
                     else
                         Log.outError(LogFilter.Unit, "Unit (name={0}, type={1}) has invalid faction (faction template id) #{2}", GetName(), GetTypeId(), GetFaction());
-
-                    guid = GetGUID();
                 }
             }
             return entry;

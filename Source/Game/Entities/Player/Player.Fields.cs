@@ -141,7 +141,8 @@ namespace Game.Entities
 
         //Combat 
         int[] baseRatingValue = new int[(int)CombatRating.Max];
-        public float[][] m_auraBaseMod = new float[(int)BaseModGroup.End][];
+        float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
+        float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
         public DuelInfo duel;
         bool m_canParry;
         bool m_canBlock;

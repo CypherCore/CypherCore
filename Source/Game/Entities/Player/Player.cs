@@ -83,7 +83,10 @@ namespace Game.Entities
             _specializationInfo = new SpecializationInfo();
 
             for (byte i = 0; i < (byte)BaseModGroup.End; ++i)
-                m_auraBaseMod[i] = new float[] { 0.0f, 1.0f };
+            {
+                m_auraBaseFlatMod[i] = 0.0f;
+                m_auraBasePctMod[i] = 1.0f;
+            }
 
             for (var i = 0; i < (int)SpellModOp.Max; ++i)
             {
@@ -3791,7 +3794,7 @@ namespace Game.Entities
             if (powerType == null)
                 return;
 
-            float addvalue = 0.0f;
+            float addvalue;
 
             if (!IsInCombat())
             {
@@ -4695,7 +4698,7 @@ namespace Game.Entities
                 SpawnCorpseBones();
             }
 
-            WorldSafeLocsEntry ClosestGrave = null;
+            WorldSafeLocsEntry ClosestGrave;
 
             // Special handle for Battlegroundmaps
             Battleground bg = GetBattleground();
@@ -5333,8 +5336,7 @@ namespace Game.Entities
 
             PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), level);
 
-            uint basemana = 0;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out basemana);
+            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), level, out uint basemana);
 
             LevelUpInfo packet = new LevelUpInfo();
             packet.Level = level;
@@ -6567,7 +6569,7 @@ namespace Game.Entities
             if (level >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 return;
 
-            uint bonus_xp = 0;
+            uint bonus_xp;
             bool recruitAFriend = GetsRecruitAFriendBonus(true);
 
             // RaF does NOT stack with rested experience
@@ -6603,36 +6605,104 @@ namespace Game.Entities
             SetXP(newXP);
         }
 
-        public void HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)
+        public void HandleBaseModFlatValue(BaseModGroup modGroup, float amount, bool apply)
         {
-            if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
+            if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, "ERROR in HandleBaseModValue(): non existed BaseModGroup of wrong BaseModType!");
+                Log.outError(LogFilter.Spells, $"Player.HandleBaseModFlatValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                return;
+            }
+            m_auraBaseFlatMod[(int)modGroup] += apply ? amount : -amount;
+            UpdateBaseModGroup(modGroup);
+        }
+
+        public void ApplyBaseModPctValue(BaseModGroup modGroup, float pct)
+        {
+            if (modGroup >= BaseModGroup.End)
+            {
+                Log.outError(LogFilter.Spells, $"Player.ApplyBaseModPctValue: Invalid BaseModGroup/BaseModType ({modGroup}/{BaseModType.FlatMod}) for player '{GetName()}' ({GetGUID()})");
                 return;
             }
 
-            switch (modType)
+            MathFunctions.AddPct(ref m_auraBasePctMod[(int)modGroup], pct);
+            UpdateBaseModGroup(modGroup);
+        }
+
+        public void SetBaseModFlatValue(BaseModGroup modGroup, float val)
+        {
+            if (m_auraBaseFlatMod[(int)modGroup] == val)
+                return;
+
+            m_auraBaseFlatMod[(int)modGroup] = val;
+            UpdateBaseModGroup(modGroup);
+        }
+
+        public void SetBaseModPctValue(BaseModGroup modGroup, float val)
+        {
+            if (m_auraBasePctMod[(int)modGroup] == val)
+                return;
+
+            m_auraBasePctMod[(int)modGroup] = val;
+            UpdateBaseModGroup(modGroup);
+        }
+
+        public override void UpdateDamageDoneMods(WeaponAttackType attackType)
+        {
+            base.UpdateDamageDoneMods(attackType);
+
+            UnitMods unitMod = attackType switch
             {
-                case BaseModType.FlatMod:
-                    m_auraBaseMod[(int)modGroup][(int)modType] += apply ? amount : -amount;
-                    break;
-                case BaseModType.PCTmod:
-                    MathFunctions.ApplyPercentModFloatVar(ref m_auraBaseMod[(int)modGroup][(int)modType], amount, apply);
-                    break;
+                WeaponAttackType.BaseAttack => UnitMods.DamageMainHand,
+                WeaponAttackType.OffAttack => UnitMods.DamageOffHand,
+                WeaponAttackType.RangedAttack => UnitMods.DamageRanged,
+                _ => throw new NotImplementedException(),
+            };
+
+            float amount = 0.0f;
+            Item item = GetWeaponForAttack(attackType, true);
+            if (item == null)
+                return;
+
+            for (var slot = EnchantmentSlot.Perm; slot < EnchantmentSlot.Max; ++slot)
+            {
+                SpellItemEnchantmentRecord enchantmentEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(slot));
+                if (enchantmentEntry == null)
+                    continue;
+
+                for (byte i = 0; i < ItemConst.MaxItemEnchantmentEffects; ++i)
+                {
+                    switch (enchantmentEntry.Effect[i])
+                    {
+                        case ItemEnchantmentType.Damage:
+                            amount += enchantmentEntry.EffectScalingPoints[i];
+                            break;
+                        case ItemEnchantmentType.Totem:
+                            if (GetClass() == Class.Shaman)
+                                amount += enchantmentEntry.EffectScalingPoints[i] * item.GetTemplate().GetDelay() / 1000.0f;
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
 
+            HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount, true);
+        }
+
+        void UpdateBaseModGroup(BaseModGroup modGroup)
+        {
             if (!CanModifyStats())
                 return;
 
             switch (modGroup)
             {
-                case BaseModGroup.CritPercentage:
-                    UpdateCritPercentage(WeaponAttackType.BaseAttack);
+                case BaseModGroup.CritPercentage: 
+                    UpdateCritPercentage(WeaponAttackType.BaseAttack); 
                     break;
-                case BaseModGroup.RangedCritPercentage:
-                    UpdateCritPercentage(WeaponAttackType.RangedAttack);
+                case BaseModGroup.RangedCritPercentage: 
+                    UpdateCritPercentage(WeaponAttackType.RangedAttack); 
                     break;
-                case BaseModGroup.OffhandCritPercentage:
+                case BaseModGroup.OffhandCritPercentage: 
                     UpdateCritPercentage(WeaponAttackType.OffAttack);
                     break;
                 default:
@@ -6640,6 +6710,28 @@ namespace Game.Entities
             }
         }
 
+        float GetBaseModValue(BaseModGroup modGroup, BaseModType modType)
+        {
+            if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
+            {
+                Log.outError(LogFilter.Spells, $"Player.GetBaseModValue: Invalid BaseModGroup/BaseModType ({modGroup}/{modType}) for player '{GetName()}' ({GetGUID()})");
+                return 0.0f;
+            }
+
+            return (modType == BaseModType.FlatMod ? m_auraBaseFlatMod[(int)modGroup] : m_auraBasePctMod[(int)modGroup]);
+        }
+
+        float GetTotalBaseModValue(BaseModGroup modGroup)
+        {
+            if (modGroup >= BaseModGroup.End)
+            {
+                Log.outError(LogFilter.Spells, $"Player.GetTotalBaseModValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                return 0.0f;
+            }
+
+            return m_auraBaseFlatMod[(int)modGroup] * m_auraBasePctMod[(int)modGroup];
+        }
+        
         public void AddComboPoints(sbyte count, Spell spell = null)
         {
             if (count == 0)
@@ -6898,7 +6990,7 @@ namespace Game.Entities
 
             if (WorldConfig.GetBoolValue(WorldCfg.InstantTaxi))
             {
-                var lastPathNode = CliDB.TaxiNodesStorage.LookupByKey(nodes[nodes.Count - 1]);
+                var lastPathNode = CliDB.TaxiNodesStorage.LookupByKey(nodes[^1]);
                 m_taxi.ClearTaxiDestinations();
                 ModifyMoney(-totalcost);
                 UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, totalcost);
@@ -6956,7 +7048,7 @@ namespace Game.Entities
 
             var nodeList = CliDB.TaxiPathNodesByPath[path];
 
-            float distPrev = MapConst.MapSize * MapConst.MapSize;
+            float distPrev;
             float distNext = GetExactDistSq(nodeList[0].Loc.X, nodeList[0].Loc.Y, nodeList[0].Loc.Z);
 
             for (int i = 1; i < nodeList.Length; ++i)
@@ -7277,7 +7369,7 @@ namespace Game.Entities
                     return null;
             }
 
-            Item item = null;
+            Item item;
             if (useable)
                 item = GetUseableItemByPos(InventorySlots.Bag0, slot);
             else
