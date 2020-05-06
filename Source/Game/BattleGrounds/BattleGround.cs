@@ -914,6 +914,9 @@ namespace Game.BattleGrounds
                 // reset destination bg team
                 player.SetBGTeam(0);
 
+                // remove all criterias on bg leave
+                player.ResetCriteria(CriteriaCondition.BgMap, GetMapId(), true);
+
                 if (Transport)
                     player.TeleportToBGEntryPoint();
 
@@ -1036,17 +1039,8 @@ namespace Game.BattleGrounds
                 }
             }
 
-            player.ResetCriteria(CriteriaTypes.KillCreature, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.WinBg, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.DamageDone, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.BeSpellTarget, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.CastSpell, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.BgObjectiveCapture, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.HonorableKillAtArea, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.HonorableKill, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.HealingDone, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.GetKillingBlows, (int)CriteriaCondition.BgMap, GetMapId(), true);
-            player.ResetCriteria(CriteriaTypes.SpecialPvpKill, (int)CriteriaCondition.BgMap, GetMapId(), true);
+            // reset all map criterias on map enter
+            player.ResetCriteria(CriteriaCondition.BgMap, GetMapId(), true);
 
             // setup BG group membership
             PlayerAddedToBGCheckIfBGIsRunning(player);

@@ -53,10 +53,10 @@ namespace Game.Entities
             m_achievementSys.RemoveCriteriaTimer(type, entry);
         }
 
-        public void ResetCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, bool evenIfCriteriaComplete = false)
+        public void ResetCriteria(CriteriaCondition condition, uint failAsset, bool evenIfCriteriaComplete = false)
         {
-            m_achievementSys.ResetCriteria(type, miscValue1, miscValue2, evenIfCriteriaComplete);
-            m_questObjectiveCriteriaMgr.ResetCriteria(type, miscValue1, miscValue2, evenIfCriteriaComplete);
+            m_achievementSys.ResetCriteria(condition, failAsset, evenIfCriteriaComplete);
+            m_questObjectiveCriteriaMgr.ResetCriteria(condition, failAsset, evenIfCriteriaComplete);
         }
 
         public void UpdateCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, Unit unit = null)

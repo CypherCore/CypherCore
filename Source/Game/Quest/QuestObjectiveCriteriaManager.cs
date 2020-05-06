@@ -163,20 +163,17 @@ namespace Game
             }
         }
 
-        public void ResetCriteria(CriteriaTypes type, ulong miscValue1, ulong miscValue2, bool evenIfCriteriaComplete)
+        public void ResetCriteria(CriteriaCondition condition, uint failAsset, bool evenIfCriteriaComplete)
         {
-            Log.outDebug(LogFilter.Player, "QuestObjectiveCriteriaMgr.ResetCriteria({type}, {miscValue1}, {miscValue2})");
+            Log.outDebug(LogFilter.Player, $"QuestObjectiveCriteriaMgr.ResetCriteria({condition}, {failAsset}, {evenIfCriteriaComplete})");
 
             // disable for gamemasters with GM-mode enabled
             if (_owner.IsGameMaster())
                 return;
 
-            var playerCriteriaList = GetCriteriaByType(type);
+            var playerCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(condition, (int)failAsset);
             foreach (Criteria playerCriteria in playerCriteriaList)
             {
-                if (playerCriteria.Entry.FailEvent != miscValue1 || (playerCriteria.Entry.FailAsset != 0 && playerCriteria.Entry.FailAsset != miscValue2))
-                    continue;
-
                 var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(playerCriteria.Id);
                 bool allComplete = true;
                 foreach (CriteriaTree tree in trees)

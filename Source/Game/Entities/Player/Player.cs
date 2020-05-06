@@ -774,9 +774,9 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaTypes.DeathAtMap, 1);
                 UpdateCriteria(CriteriaTypes.Death, 1);
                 UpdateCriteria(CriteriaTypes.DeathInDungeon, 1);
-                ResetCriteria(CriteriaTypes.BgObjectiveCapture, (uint)CriteriaCondition.NoDeath);
-                ResetCriteria(CriteriaTypes.HonorableKill, (uint)CriteriaCondition.NoDeath);
-                ResetCriteria(CriteriaTypes.GetKillingBlows, (uint)CriteriaCondition.NoDeath);
+
+                // reset all death criterias
+                ResetCriteria(CriteriaCondition.NoDeath, 0);
             }
 
             base.SetDeathState(s);

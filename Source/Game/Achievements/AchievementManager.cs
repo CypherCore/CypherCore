@@ -355,36 +355,37 @@ namespace Game.Achievements
             }
         }
 
-        public void ResetCriteria(CriteriaTypes type, ulong miscValue1, ulong miscValue2, bool evenIfCriteriaComplete)
+        public void ResetCriteria(CriteriaCondition condition, uint failAsset, bool evenIfCriteriaComplete)
         {
-            Log.outDebug(LogFilter.Achievement, "ResetAchievementCriteria({0}, {1}, {2})", type, miscValue1, miscValue2);
+            Log.outDebug(LogFilter.Achievement, $"ResetAchievementCriteria({condition}, {failAsset}, {evenIfCriteriaComplete})");
 
             // disable for gamemasters with GM-mode enabled
             if (_owner.IsGameMaster())
                 return;
 
-            var achievementCriteriaList = GetCriteriaByType(type);
-            foreach (Criteria achievementCriteria in achievementCriteriaList)
+            var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(condition, (int)failAsset);
+            if (!achievementCriteriaList.Empty())
             {
-                if (achievementCriteria.Entry.FailEvent != miscValue1 || (achievementCriteria.Entry.FailAsset != 0 && achievementCriteria.Entry.FailAsset != miscValue2))
-                    continue;
-
-                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(achievementCriteria.Id);
-                bool allComplete = true;
-                foreach (CriteriaTree tree in trees)
+                foreach (Criteria achievementCriteria in achievementCriteriaList)
                 {
-                    // don't update already completed criteria if not forced or achievement already complete
-                    if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete) || !HasAchieved(tree.Achievement.Id))
+
+                    var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(achievementCriteria.Id);
+                    bool allComplete = true;
+                    foreach (CriteriaTree tree in trees)
                     {
-                        allComplete = false;
-                        break;
+                        // don't update already completed criteria if not forced or achievement already complete
+                        if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete) || !HasAchieved(tree.Achievement.Id))
+                        {
+                            allComplete = false;
+                            break;
+                        }
                     }
+
+                    if (allComplete)
+                        continue;
+
+                    RemoveCriteriaProgress(achievementCriteria);
                 }
-
-                if (allComplete)
-                    continue;
-
-                RemoveCriteriaProgress(achievementCriteria);
             }
         }
 

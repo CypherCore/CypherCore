@@ -282,7 +282,7 @@ namespace Game.Arenas
                             loserArenaTeam.MemberLost(player, winnerMatchmakerRating, loserMatchmakerChange);
 
                             // Arena lost => reset the win_rated_arena having the "no_lose" condition
-                            player.ResetCriteria(CriteriaTypes.WinRatedArena, (uint)CriteriaCondition.NoLose);
+                            player.ResetCriteria(CriteriaCondition.NoLose, 0);
                         }
                     }
 

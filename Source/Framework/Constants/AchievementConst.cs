@@ -91,11 +91,15 @@ namespace Framework.Constants
         Unk2 = 2,
         BgMap = 3,
         NoLose = 4,
-        Unk5 = 5,
-        Unk8 = 8,
+        RemoveAura = 5,
+        CastSpell = 8,
         NoSpellHit = 9,
         NotInGroup = 10,
-        Unk13 = 13
+        LostPetBattle = 11,
+        Unk13 = 13,
+        Event = 14,
+
+        Max
     }
 
     public enum CriteriaAdditionalCondition
