@@ -1107,6 +1107,18 @@ namespace Game.Network.Packets
         uint LoadingScreenID;
     }
 
+    class MountResultPacket : ServerPacket
+    {
+        public MountResult() : base(ServerOpcodes.MountResult, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Result);
+        }
+
+        public uint Result;
+    }
+    
     //Structs
     public struct SpellLogPowerData
     {

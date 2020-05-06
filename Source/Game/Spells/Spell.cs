@@ -3465,6 +3465,23 @@ namespace Game.Spells
             caster.SendPacket(packet);
         }
 
+        void SendMountResult(MountResult result)
+        {
+            if (result == MountResult.Ok)
+                return;
+
+            if (!m_caster.IsPlayer())
+                return;
+
+            Player caster = m_caster.ToPlayer();
+            if (caster.IsLoading())  // don't send mount results at loading time
+                return;
+
+            MountResultPacket packet = new MountResultPacket();
+            packet.Result = (uint)result;
+            caster.SendPacket(packet);
+        }
+
         void SendSpellStart()
         {
             if (!IsNeedSendToClient())
@@ -5264,7 +5281,10 @@ namespace Game.Spells
                                 return SpellCastResult.NoMountsAllowed;
 
                             if (m_caster.IsInDisallowedMountForm())
-                                return SpellCastResult.NotShapeshift;
+                            {
+                                SendMountResult(MountResult.Shapeshifted); // mount result gets sent before the cast result
+                                return SpellCastResult.DontReport;
+                            }
 
                             break;
                         }
