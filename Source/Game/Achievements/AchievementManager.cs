@@ -1058,6 +1058,9 @@ namespace Game.Achievements
             if (time == DateTime.MinValue)
                 return false;
 
+            if (time == DateTime.MaxValue)
+                return true;
+
             // Allow completing the realm first kill for entire minute after first person did it
             // it may allow more than one group to achieve it (highly unlikely)
             // but apparently this is how blizz handles it as well
