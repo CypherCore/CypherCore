@@ -207,19 +207,23 @@ namespace Game
             RequiredMinRepValue = fields.Read<int>(13);
             RequiredMaxRepValue = fields.Read<int>(14);
             SourceItemIdCount = fields.Read<byte>(15);
-            RewardMailSenderEntry = fields.Read<uint>(16);
-            SpecialFlags = (QuestSpecialFlags)fields.Read<byte>(17);
-            ScriptId = Global.ObjectMgr.GetScriptId(fields.Read<string>(18));
+            SpecialFlags = (QuestSpecialFlags)fields.Read<byte>(16);
+            ScriptId = Global.ObjectMgr.GetScriptId(fields.Read<string>(17));
 
             if (SpecialFlags.HasAnyFlag(QuestSpecialFlags.AutoAccept))
                 Flags |= QuestFlags.AutoAccept;
         }
 
+        public void LoadQuestMailSender(SQLFields fields)
+        {
+            RewardMailSenderEntry = fields.Read<uint>(1);
+        }
+
         public void LoadQuestObjective(SQLFields fields)
         {
-            QuestObjective obj = new QuestObjective();
-            obj.Id = fields.Read<uint>(0);
-            obj.QuestID = fields.Read<uint>(1);
+            QuestObjective obj = new QuestObjective();  
+            obj.QuestID = fields.Read<uint>(0);
+            obj.Id = fields.Read<uint>(1);
             obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
             obj.StorageIndex = fields.Read<sbyte>(3);
             obj.ObjectID = fields.Read<int>(4);

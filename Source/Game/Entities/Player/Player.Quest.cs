@@ -1322,8 +1322,8 @@ namespace Game.Entities
 
                         // each-from-all exclusive group (< 0)
                         // can be start if only all quests in prev quest exclusive group completed and rewarded
-                        var range = Global.ObjectMgr._exclusiveQuestGroups.LookupByKey(qPrevInfo.ExclusiveGroup);
-                        foreach (var exclude_Id in range)
+                        var bounds = Global.ObjectMgr.GetExclusiveQuestGroupBounds(qPrevInfo.ExclusiveGroup);
+                        foreach (var exclude_Id in bounds)
                         {
                             // skip checked quest id, only state of other quests in group is interesting
                             if (exclude_Id == prevId)
@@ -1352,7 +1352,7 @@ namespace Game.Entities
 
                         // each-from-all exclusive group (< 0)
                         // can be start if only all quests in prev quest exclusive group active
-                        var range = Global.ObjectMgr._exclusiveQuestGroups.LookupByKey(qPrevInfo.ExclusiveGroup);
+                        var range = Global.ObjectMgr.GetExclusiveQuestGroupBounds(qPrevInfo.ExclusiveGroup);
                         foreach (var exclude_Id in range)
                         {
                             // skip checked quest id, only state of other quests in group is interesting
@@ -1528,7 +1528,7 @@ namespace Game.Entities
             if (qInfo.ExclusiveGroup <= 0)
                 return true;
 
-            var range = Global.ObjectMgr._exclusiveQuestGroups.LookupByKey(qInfo.ExclusiveGroup);
+            var range = Global.ObjectMgr.GetExclusiveQuestGroupBounds(qInfo.ExclusiveGroup);
             // always must be found if qInfo.ExclusiveGroup != 0
 
             foreach (var exclude_Id in range)
