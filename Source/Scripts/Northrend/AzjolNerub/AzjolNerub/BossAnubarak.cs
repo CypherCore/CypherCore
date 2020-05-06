@@ -470,16 +470,6 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
             _backstabTimer = 6 * Time.InMilliseconds;
         }
 
-        bool IsInBounds(Position jumpTo, List<AreaBoundary> boundary)
-        {
-            if (boundary == null)
-                return true;
-            foreach (var it in boundary)
-                if (!it.IsWithinBoundary(jumpTo))
-                    return false;
-            return true;
-        }
-
         Position GetRandomPositionAround(Creature anubarak)
         {
             float DISTANCE_MIN = 10.0f;
@@ -498,7 +488,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
                 Position jumpTo;
                 do
                     jumpTo = GetRandomPositionAround(anubarak);
-                while (!IsInBounds(jumpTo, boundary));
+                while (!IsInBounds(boundary, jumpTo));
                 me.GetMotionMaster().MoveJump(jumpTo, 40.0f, 40.0f);
                 DoCastSelf(SpellIds.AssassinVisual, true);
             }

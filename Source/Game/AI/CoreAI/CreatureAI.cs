@@ -384,6 +384,18 @@ namespace Game.AI
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
+        public static bool IsInBounds(List<AreaBoundary> boundary, Position pos)
+        {
+            if (boundary == null)
+                return true;
+
+            foreach (AreaBoundary areaBoundary in boundary)
+                if (!areaBoundary.IsWithinBoundary(pos))
+                    return false;
+
+            return true;
+        }
+        
         public void SetBoundary(List<AreaBoundary> boundary)
         {
             _boundary = boundary;

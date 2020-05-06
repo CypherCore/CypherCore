@@ -21,50 +21,36 @@ namespace Game.Maps
 {
     public class AreaBoundary
     {
-        public AreaBoundary(BoundaryType bType, bool isInverted)
+        public AreaBoundary(bool isInverted)
         {
-            m_boundaryType = bType;
-            m_isInvertedBoundary = isInverted;
+            _isInvertedBoundary = isInverted;
         }
 
-        public BoundaryType GetBoundaryType() { return m_boundaryType; }
-
-        public bool IsWithinBoundary(Position pos) { return (IsWithinBoundaryArea(pos) != m_isInvertedBoundary); }
+        public bool IsWithinBoundary(Position pos) { return IsWithinBoundaryArea(pos) != _isInvertedBoundary; }
 
         public virtual bool IsWithinBoundaryArea(Position pos) { return false; }
 
-        BoundaryType m_boundaryType;
-        bool m_isInvertedBoundary;
-
-        public enum BoundaryType
-        {
-            Rectangle, // Rectangle Aligned With The Coordinate Axis
-            Circle,
-            Ellipse,
-            Triangle,
-            Parallelogram,
-            ZRange,
-        }
+        bool _isInvertedBoundary;
 
         public class DoublePosition : Position
         {
             public DoublePosition(double x = 0.0, double y = 0.0, double z = 0.0, float o = 0f) : base((float)x, (float)y, (float)z, o)
             {
-                d_positionX = x;
-                d_positionY = y;
-                d_positionZ = z;
+                doublePosX = x;
+                doublePosY = y;
+                doublePosZ = z;
             }
             public DoublePosition(float x, float y = 0f, float z = 0f, float o = 0f) : base(x, y, z, o)
             {
-                d_positionX = x;
-                d_positionY = y;
-                d_positionZ = z;
+                doublePosX = x;
+                doublePosY = y;
+                doublePosZ = z;
             }
             public DoublePosition(Position pos) : this(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()) { }
 
-            public double GetDoublePositionX() { return d_positionX; }
-            public double GetDoublePositionY() { return d_positionY; }
-            public double GetDoublePositionZ() { return d_positionZ; }
+            public double GetDoublePositionX() { return doublePosX; }
+            public double GetDoublePositionY() { return doublePosY; }
+            public double GetDoublePositionZ() { return doublePosZ; }
 
             public double GetDoubleExactDist2dSq(DoublePosition pos)
             {
@@ -75,22 +61,22 @@ namespace Game.Maps
 
             public Position Sync()
             {
-                posX = (float)d_positionX;
-                posY = (float)d_positionY;
-                posZ = (float)d_positionZ;
+                posX = (float)doublePosX;
+                posY = (float)doublePosY;
+                posZ = (float)doublePosZ;
                 return this;
             }
 
-            double d_positionX;
-            double d_positionY;
-            double d_positionZ;
+            double doublePosX;
+            double doublePosY;
+            double doublePosZ;
         }
     }
 
     public class RectangleBoundary : AreaBoundary
     {
         // X axis is north/south, Y axis is east/west, larger values are northwest
-        public RectangleBoundary(float southX, float northX, float eastY, float westY, bool isInverted = false) : base(BoundaryType.Rectangle, isInverted)
+        public RectangleBoundary(float southX, float northX, float eastY, float westY, bool isInverted = false) : base(isInverted)
         {
             _minX = southX;
             _maxX = northX;
@@ -114,17 +100,15 @@ namespace Game.Maps
 
     public class CircleBoundary : AreaBoundary
     {
-        public CircleBoundary(Position center, double radius, bool isInverted = false) : this(new DoublePosition(center), radius, isInverted) { }
-        public CircleBoundary(Position center, Position pointOnCircle, bool isInverted = false) : this(new DoublePosition(center), new DoublePosition(pointOnCircle), isInverted) { }
-        public CircleBoundary(DoublePosition center, double radius, bool isInverted = false) : base(BoundaryType.Circle, isInverted)
+        public CircleBoundary(Position center, double radius, bool isInverted = false) : base(isInverted)
         {
-            _center = center;
+            _center = new DoublePosition(center);
             _radiusSq = radius * radius;
         }
-        public CircleBoundary(DoublePosition center, DoublePosition pointOnCircle, bool isInverted = false) : base(BoundaryType.Circle, isInverted)
+        public CircleBoundary(Position center, Position pointOnCircle, bool isInverted = false) : base(isInverted)
         {
-            _center = center;
-            _radiusSq = center.GetDoubleExactDist2dSq(pointOnCircle);
+            _center = new DoublePosition(center);
+            _radiusSq = _center.GetDoubleExactDist2dSq(new DoublePosition(pointOnCircle));
         }
 
         public override bool IsWithinBoundaryArea(Position pos)
@@ -143,10 +127,9 @@ namespace Game.Maps
 
     public class EllipseBoundary : AreaBoundary
     {
-        public EllipseBoundary(Position center, double radiusX, double radiusY, bool isInverted = false) : this(new DoublePosition(center), radiusX, radiusY, isInverted) { }
-        public EllipseBoundary(DoublePosition center, double radiusX, double radiusY, bool isInverted = false) :base(BoundaryType.Ellipse, isInverted)
+        public EllipseBoundary(Position center, double radiusX, double radiusY, bool isInverted = false) : base(isInverted)
         {
-            _center = center;
+            _center = new DoublePosition(center);
             _radiusYSq = radiusY * radiusY;
             _scaleXSq = _radiusYSq / (radiusX * radiusX);
         }
@@ -167,13 +150,12 @@ namespace Game.Maps
 
     public class TriangleBoundary : AreaBoundary
     {
-        public TriangleBoundary(Position pointA, Position pointB, Position pointC, bool isInverted = false)
-            : this(new DoublePosition(pointA), new DoublePosition(pointB), new DoublePosition(pointC), isInverted) { }
-        public TriangleBoundary(DoublePosition pointA, DoublePosition pointB, DoublePosition pointC, bool isInverted = false) : base(BoundaryType.Triangle, isInverted)
+        public TriangleBoundary(Position pointA, Position pointB, Position pointC, bool isInverted = false) : base(isInverted)
         {
-            _a = pointA;
-            _b = pointB;
-            _c = pointC;
+            _a = new DoublePosition(pointA);
+            _b = new DoublePosition(pointB);
+            _c = new DoublePosition(pointC);
+            
             _abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
             _bcx = _c.GetDoublePositionX() - _b.GetDoublePositionX();
             _cax = _a.GetDoublePositionX() - _c.GetDoublePositionX();
@@ -210,13 +192,11 @@ namespace Game.Maps
     public class ParallelogramBoundary : AreaBoundary
     {
         // Note: AB must be orthogonal to AD
-        public ParallelogramBoundary(Position cornerA, Position cornerB, Position cornerD, bool isInverted = false)
-            : this(new DoublePosition(cornerA), new DoublePosition(cornerB), new DoublePosition(cornerD), isInverted) { }
-        public ParallelogramBoundary(DoublePosition cornerA, DoublePosition cornerB, DoublePosition cornerD, bool isInverted = false) : base(BoundaryType.Parallelogram, isInverted)
+        public ParallelogramBoundary(Position cornerA, Position cornerB, Position cornerD, bool isInverted = false) : base(isInverted)
         {
-            _a = cornerA;
-            _b = cornerB;
-            _d = cornerD;
+            _a = new DoublePosition(cornerA);
+            _b = new DoublePosition(cornerB);
+            _d = new DoublePosition(cornerD);
             _c = new DoublePosition(_d.GetDoublePositionX() + (_b.GetDoublePositionX() - _a.GetDoublePositionX()), _d.GetDoublePositionY() + (_b.GetDoublePositionY() - _a.GetDoublePositionY()));
             _abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
             _dax = _a.GetDoublePositionX() - _d.GetDoublePositionX();
@@ -251,7 +231,7 @@ namespace Game.Maps
 
     public class ZRangeBoundary : AreaBoundary
     {
-        public ZRangeBoundary(float minZ, float maxZ, bool isInverted = false) : base(BoundaryType.ZRange, isInverted)
+        public ZRangeBoundary(float minZ, float maxZ, bool isInverted = false) : base(isInverted)
         {
             _minZ = minZ;
             _maxZ = maxZ;
