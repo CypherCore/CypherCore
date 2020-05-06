@@ -181,8 +181,6 @@ namespace Game.Movement
                 Unit victim = unit.GetVictim();
                 if (victim != null)
                     unit.GetMotionMaster().MoveChase(victim);
-                else
-                    unit.GetMotionMaster().Initialize();
             }
 
             if (unit.ToCreature().GetAI() != null)

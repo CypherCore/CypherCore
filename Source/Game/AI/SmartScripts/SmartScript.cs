@@ -2131,13 +2131,8 @@ namespace Game.AI
                         {
                             Creature creature = obj.ToCreature();
                             if (creature != null)
-                            {
-                                creature.GetMotionMaster().Clear();
-                                // @todo add optional jump orientation support?
                                 creature.GetMotionMaster().MoveJump(e.Target.x, e.Target.y, e.Target.z, 0.0f, e.Action.jump.speedxy, e.Action.jump.speedz);
-                            }
                         }
-                        //todo Resume path when reached jump location
                         break;
                     }
                 case SmartActions.GoSetLootState:
