@@ -494,7 +494,6 @@ namespace Game.Entities
             CombatStop();
             DeleteThreatList();
             GetHostileRefManager().DeleteReferences();
-            GetMotionMaster().Clear(false);                    // remove different non-standard movement generators.
         }
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
