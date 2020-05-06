@@ -6354,10 +6354,6 @@ namespace Game
             }
             while (result.NextRow());
 
-            QuestLoaderHelper helper = new QuestLoaderHelper();
-            helper.LoaderFunction = (quest, fields) => quest.LoadQuestDetails(fields);
-
-
             // Load `quest_details`
             //                               0   1       2       3       4       5            6            7            8
             result = DB.World.Query("SELECT ID, Emote1, Emote2, Emote3, Emote4, EmoteDelay1, EmoteDelay2, EmoteDelay3, EmoteDelay4 FROM quest_details");
@@ -7115,14 +7111,11 @@ namespace Game
 
                 if (qinfo.NextQuestId != 0)
                 {
-                    var nextquest = _questTemplates.LookupByKey((uint)Math.Abs(qinfo.NextQuestId));
+                    var nextquest = _questTemplates.LookupByKey(qinfo.NextQuestId);
                     if (nextquest == null)
                         Log.outError(LogFilter.Sql, "Quest {0} has NextQuestId {1}, but no such quest", qinfo.Id, qinfo.NextQuestId);
                     else
-                    {
-                        int signedQuestId = qinfo.NextQuestId < 0 ? -(int)qinfo.Id : (int)qinfo.Id;
-                        nextquest.prevQuests.Add(signedQuestId);
-                    }
+                        nextquest.prevQuests.Add((int)qinfo.Id);
                 }
 
                 if (qinfo.ExclusiveGroup != 0)

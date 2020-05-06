@@ -196,7 +196,7 @@ namespace Game
             AllowableClasses = fields.Read<uint>(2);
             SourceSpellID = fields.Read<uint>(3);
             PrevQuestId = fields.Read<int>(4);
-            NextQuestId = fields.Read<int>(5);
+            NextQuestId = fields.Read<uint>(5);
             ExclusiveGroup = fields.Read<int>(6);
             RewardMailTemplateId = fields.Read<uint>(7);
             RewardMailDelay = fields.Read<uint>(8);
@@ -646,7 +646,7 @@ namespace Game
         public uint AllowableClasses { get; set; }
         public uint SourceSpellID { get; set; }
         public int PrevQuestId;
-        public int NextQuestId;
+        public uint NextQuestId;
         public int ExclusiveGroup;
         public uint RewardMailTemplateId { get; set; }
         public uint RewardMailDelay { get; set; }
