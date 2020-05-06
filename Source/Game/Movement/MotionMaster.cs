@@ -80,13 +80,15 @@ namespace Game.Movement
             Cypher.Assert(!Empty());
 
             _cleanFlag |= MMCleanFlag.Update;
-            bool isMoveGenUpdateSuccess = Top().Update(_owner, diff);
-            _cleanFlag &= ~MMCleanFlag.Update;
-
-            if (!isMoveGenUpdateSuccess)
+            if (!Top().Update(_owner, diff))
+            {
+                _cleanFlag &= ~MMCleanFlag.Update;
                 MovementExpired();
+            }
+            else
+                _cleanFlag &= ~MMCleanFlag.Update;
 
-            if (_expireList != null)
+            if (!_expireList.Empty())
                 ClearExpireList();
         }
 
@@ -107,12 +109,9 @@ namespace Game.Movement
         void ClearExpireList()
         {
             for (int i = 0; i < _expireList.Count; ++i)
-            {
-                IMovementGenerator mg = _expireList[i];
-                DirectDelete(mg);
-            }
+                DirectDelete(_expireList[i]);
 
-            _expireList = null;
+            _expireList.Clear();
 
             if (Empty())
                 Initialize();
@@ -735,8 +734,7 @@ namespace Game.Movement
         {
             if (IsStatic(curr))
                 return;
-            if (_expireList == null)
-                _expireList = new List<IMovementGenerator>();
+
             _expireList.Add(curr);
         }
 
