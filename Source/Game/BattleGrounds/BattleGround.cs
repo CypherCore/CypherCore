@@ -1471,9 +1471,6 @@ namespace Game.BattleGrounds
             if (respawntime != 0)
                 creature.SetRespawnDelay(respawntime);
 
-            if (creature.IsVehicle())
-                creature.SetRegeneratingHealth(false);
-
             return creature;
         }
 
