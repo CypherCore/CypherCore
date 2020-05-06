@@ -149,7 +149,7 @@ namespace Game.Movement
         public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
         {
             if (_slot[(int)slot] == null)
-                return MovementGeneratorType.Null;
+                return MovementGeneratorType.Max;
             else
                 return _slot[(int)slot].GetMovementGeneratorType();
         }

@@ -1865,9 +1865,6 @@ namespace Game.Chat
                     case MovementGeneratorType.Waypoint:
                         handler.SendSysMessage(CypherStrings.MovegensWaypoint);
                         break;
-                    case MovementGeneratorType.AnimalRandom:
-                        handler.SendSysMessage(CypherStrings.MovegensAnimalRandom);
-                        break;
                     case MovementGeneratorType.Confused:
                         handler.SendSysMessage(CypherStrings.MovegensConfused);
                         break;

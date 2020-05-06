@@ -32,22 +32,20 @@ namespace Framework.Constants
         Waypoint = 2,                              // WaypointMovement
 
         MaxDB = 3,                              // *** this and below motion types can't be set in DB.
-        AnimalRandom = MaxDB,         // AnimalRandomMovementGenerator.h
-        Confused = 4,                              // ConfusedMovementGenerator.h
-        Chase = 5,                              // TargetedMovementGenerator.h
-        Home = 6,                              // HomeMovementGenerator.h
-        Flight = 7,                              // WaypointMovementGenerator.h
-        Point = 8,                              // PointMovementGenerator.h
-        Fleeing = 9,                              // FleeingMovementGenerator.h
-        Distract = 10,                             // IdleMovementGenerator.h
-        Assistance = 11,                             // PointMovementGenerator.h (first part of flee for assistance)
-        AssistanceDistract = 12,                   // IdleMovementGenerator.h (second part of flee for assistance)
-        TimedFleeing = 13,                         // FleeingMovementGenerator.h (alt.second part of flee for assistance)
+        Confused = 4,                              // ConfusedMovementGenerator
+        Chase = 5,                              // TargetedMovementGenerator
+        Home = 6,                              // HomeMovementGenerator
+        Flight = 7,                              // WaypointMovementGenerator
+        Point = 8,                              // PointMovementGenerator
+        Fleeing = 9,                              // FleeingMovementGenerator
+        Distract = 10,                             // IdleMovementGenerator
+        Assistance = 11,                             // PointMovementGenerator
+        AssistanceDistract = 12,                   // IdleMovementGenerator
+        TimedFleeing = 13,                         // FleeingMovementGenerator
         Follow = 14,
         Rotate = 15,
         Effect = 16,
-        Null = 17,
-        SplineChain = 18,
+        SplineChain = 17,
         Max
     }
 
