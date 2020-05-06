@@ -2150,7 +2150,10 @@ namespace Game.Entities
 
             // transform aura was found
             if (handledAura != null)
+            {
                 handledAura.HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
+                return;
+            }
             // we've found shapeshift
             else if (!shapeshiftAura.Empty()) // we've found shapeshift
             {
@@ -2162,11 +2165,11 @@ namespace Game.Entities
                         SetDisplayId(modelId);
                     else
                         SetDisplayId(GetNativeDisplayId());
+                    return;
                 }
             }
             // no auras found - set modelid to default
-            else
-                SetDisplayId(GetNativeDisplayId());
+            SetDisplayId(GetNativeDisplayId());
         }
         public uint GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
         public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
