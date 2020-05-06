@@ -661,8 +661,8 @@ namespace Game
         public QuestSpecialFlags SpecialFlags; // custom flags, not sniffed/WDB
         public uint ScriptId;
 
-        public List<int> prevQuests = new List<int>();
-        public List<uint> prevChainQuests = new List<uint>();
+        public List<uint> DependentPreviousQuests = new List<uint>();
+        public List<uint> PrevChainQuests = new List<uint>();
         public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;

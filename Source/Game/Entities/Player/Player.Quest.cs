@@ -27,6 +27,7 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -406,7 +407,7 @@ namespace Game.Entities
         {
             if (!Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, this) && SatisfyQuestClass(quest, false) && SatisfyQuestRace(quest, false) &&
                 SatisfyQuestSkill(quest, false) && SatisfyQuestExclusiveGroup(quest, false) && SatisfyQuestReputation(quest, false) &&
-                SatisfyQuestPreviousQuest(quest, false) && SatisfyQuestNextChain(quest, false) &&
+                SatisfyQuestDependentQuests(quest, false) && SatisfyQuestNextChain(quest, false) &&
                 SatisfyQuestPrevChain(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
@@ -422,7 +423,7 @@ namespace Game.Entities
                 && SatisfyQuestStatus(quest, msg) && SatisfyQuestExclusiveGroup(quest, msg)
                 && SatisfyQuestClass(quest, msg) && SatisfyQuestRace(quest, msg) && SatisfyQuestLevel(quest, msg)
                 && SatisfyQuestSkill(quest, msg) && SatisfyQuestReputation(quest, msg)
-                && SatisfyQuestPreviousQuest(quest, msg) && SatisfyQuestTimed(quest, msg)
+                && SatisfyQuestDependentQuests(quest, msg) && SatisfyQuestTimed(quest, msg)
                 && SatisfyQuestNextChain(quest, msg) && SatisfyQuestPrevChain(quest, msg)
                 && SatisfyQuestDay(quest, msg) && SatisfyQuestWeek(quest, msg)
                 && SatisfyQuestMonth(quest, msg) && SatisfyQuestSeasonal(quest, msg)
@@ -1299,89 +1300,86 @@ namespace Game.Entities
             return false;
         }
 
+        bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
+        {
+            return SatisfyQuestPreviousQuest(qInfo, msg) && SatisfyQuestDependentPreviousQuests(qInfo, msg);
+        }
+
         public bool SatisfyQuestPreviousQuest(Quest qInfo, bool msg)
         {
             // No previous quest (might be first quest in a series)
-            if (qInfo.prevQuests.Empty())
+            if (qInfo.PrevQuestId == 0)
                 return true;
 
-            foreach (var prev in qInfo.prevQuests)
-            {
-                uint prevId = (uint)Math.Abs(prev);
+            uint prevId = (uint)Math.Abs(qInfo.PrevQuestId);
+            // If positive previous quest rewarded, return true
+            if (qInfo.PrevQuestId > 0 && m_RewardedQuests.Contains(prevId))
+                return true;
 
-                Quest qPrevInfo = Global.ObjectMgr.GetQuestTemplate(prevId);
+            // If negative previous quest active, return true
+            if (qInfo.PrevQuestId < 0 && GetQuestStatus(prevId) == QuestStatus.Incomplete)
+                return true;
 
-                if (qPrevInfo != null)
-                {
-                    // If any of the positive previous quests completed, return true
-                    if (prev > 0 && m_RewardedQuests.Contains(prevId))
-                    {
-                        // skip one-from-all exclusive group
-                        if (qPrevInfo.ExclusiveGroup >= 0)
-                            return true;
-
-                        // each-from-all exclusive group (< 0)
-                        // can be start if only all quests in prev quest exclusive group completed and rewarded
-                        var bounds = Global.ObjectMgr.GetExclusiveQuestGroupBounds(qPrevInfo.ExclusiveGroup);
-                        foreach (var exclude_Id in bounds)
-                        {
-                            // skip checked quest id, only state of other quests in group is interesting
-                            if (exclude_Id == prevId)
-                                continue;
-
-                            // alternative quest from group also must be completed and rewarded (reported)
-                            if (!m_RewardedQuests.Contains(exclude_Id))
-                            {
-                                if (msg)
-                                {
-                                    SendCanTakeQuestResponse(QuestFailedReasons.None);
-                                    Log.outDebug(LogFilter.Server, "SatisfyQuestPreviousQuest: Sent QuestFailedReason.None (questId: {0}) because player does not have required quest (1).", qInfo.Id);
-                                }
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-
-                    // If any of the negative previous quests active, return true
-                    if (prev < 0 && GetQuestStatus(prevId) != QuestStatus.None)
-                    {
-                        // skip one-from-all exclusive group
-                        if (qPrevInfo.ExclusiveGroup >= 0)
-                            return true;
-
-                        // each-from-all exclusive group (< 0)
-                        // can be start if only all quests in prev quest exclusive group active
-                        var range = Global.ObjectMgr.GetExclusiveQuestGroupBounds(qPrevInfo.ExclusiveGroup);
-                        foreach (var exclude_Id in range)
-                        {
-                            // skip checked quest id, only state of other quests in group is interesting
-                            if (exclude_Id == prevId)
-                                continue;
-
-                            // alternative quest from group also must be active
-                            if (GetQuestStatus(exclude_Id) != QuestStatus.None)
-                            {
-                                if (msg)
-                                {
-                                    SendCanTakeQuestResponse(QuestFailedReasons.None);
-                                    Log.outDebug(LogFilter.Server, "SatisfyQuestPreviousQuest: Sent QuestFailedReason.None (questId: {0}) because player does not have required quest (2).", qInfo.Id);
-
-                                }
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
-
-            // Has only positive prev. quests in non-rewarded state
-            // and negative prev. quests in non-active state
+            // Has positive prev. quest in non-rewarded state
+            // and negative prev. quest in non-active state
             if (msg)
             {
                 SendCanTakeQuestResponse(QuestFailedReasons.None);
-                Log.outDebug(LogFilter.Server, "SatisfyQuestPreviousQuest: Sent QuestFailedReason.None (questId: {0}) because player does not have required quest (3).", qInfo.Id);
+                Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestPreviousQuest: Sent QUEST_ERR_NONE (QuestID: {qInfo.Id}) because player '{GetName()}' ({GetGUID()}) doesn't have required quest {prevId}.");
+            }
+
+            return false;
+        }
+
+        bool SatisfyQuestDependentPreviousQuests(Quest qInfo, bool msg)
+        {
+            // No previous quest (might be first quest in a series)
+            if (qInfo.DependentPreviousQuests.Empty())
+                return true;
+
+            foreach (uint prevId in qInfo.DependentPreviousQuests)
+            {
+                // checked in startup
+                Quest questInfo = Global.ObjectMgr.GetQuestTemplate(prevId);
+
+                // If any of the previous quests completed, return true
+                if (IsQuestRewarded(prevId))
+                {
+                    // skip one-from-all exclusive group
+                    if (questInfo.ExclusiveGroup >= 0)
+                        return true;
+
+                    // each-from-all exclusive group (< 0)
+                    // can be start if only all quests in prev quest exclusive group completed and rewarded
+                    var bounds = Global.ObjectMgr.GetExclusiveQuestGroupBounds(questInfo.ExclusiveGroup);
+                    foreach (var exclusiveQuestId in bounds)
+                    {
+                        // skip checked quest id, only state of other quests in group is interesting
+                        if (exclusiveQuestId == prevId)
+                            continue;
+
+                        // alternative quest from group also must be completed and rewarded (reported)
+                        if (!IsQuestRewarded(exclusiveQuestId))
+                        {
+                            if (msg)
+                            {
+                                SendCanTakeQuestResponse(QuestFailedReasons.None);
+                                Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestDependentPreviousQuests: Sent QUEST_ERR_NONE (QuestID: {qInfo.Id}) because player '{GetName()}' ({GetGUID()}) doesn't have the required quest (1).");
+                            }
+
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            // Has only prev. quests in non-rewarded state
+            if (msg)
+            {
+                SendCanTakeQuestResponse(QuestFailedReasons.None);
+                Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestDependentPreviousQuests: Sent QUEST_ERR_NONE (QuestID: {qInfo.Id}) because player '{GetName()}' ({GetGUID()}) doesn't have required quest (2).");
             }
 
             return false;
@@ -1586,12 +1584,12 @@ namespace Game.Entities
         public bool SatisfyQuestPrevChain(Quest qInfo, bool msg)
         {
             // No previous quest in chain
-            if (qInfo.prevChainQuests.Empty())
+            if (qInfo.PrevChainQuests.Empty())
                 return true;
 
-            foreach (var questId in qInfo.prevChainQuests)
+            foreach (var prevQuestId in qInfo.PrevChainQuests)
             {
-                var questStatusData = m_QuestStatus.LookupByKey(questId);
+                var questStatusData = m_QuestStatus.LookupByKey(prevQuestId);
 
                 // If any of the previous quests in chain active, return false
                 if (questStatusData != null && questStatusData.Status != QuestStatus.None)

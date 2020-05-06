@@ -7022,7 +7022,7 @@ namespace Game
                         qinfo.NextQuestInChain = 0;
                     }
                     else
-                        qNext.prevChainQuests.Add(qinfo.Id);
+                        qNext.PrevChainQuests.Add(qinfo.Id);
                 }
 
                 for (var j = 0; j < SharedConst.QuestRewardCurrencyCount; ++j)
@@ -7105,8 +7105,6 @@ namespace Game
                 {
                     if (!_questTemplates.ContainsKey((uint)Math.Abs(qinfo.PrevQuestId)))
                         Log.outError(LogFilter.Sql, "Quest {0} has PrevQuestId {1}, but no such quest", qinfo.Id, qinfo.PrevQuestId);
-                    else
-                        qinfo.prevQuests.Add(qinfo.PrevQuestId);
                 }
 
                 if (qinfo.NextQuestId != 0)
@@ -7115,7 +7113,7 @@ namespace Game
                     if (nextquest == null)
                         Log.outError(LogFilter.Sql, "Quest {0} has NextQuestId {1}, but no such quest", qinfo.Id, qinfo.NextQuestId);
                     else
-                        nextquest.prevQuests.Add((int)qinfo.Id);
+                        nextquest.DependentPreviousQuests.Add(qinfo.Id);
                 }
 
                 if (qinfo.ExclusiveGroup != 0)
