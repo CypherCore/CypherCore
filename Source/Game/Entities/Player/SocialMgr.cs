@@ -69,7 +69,11 @@ namespace Game.Entities
                 else if (target.IsAFK())
                     friendInfo.Status = FriendStatus.AFK;
                 else
+                {
                     friendInfo.Status = FriendStatus.Online;
+                    if (target.GetSession().GetRecruiterId() == player.GetSession().GetAccountId() || target.GetSession().GetAccountId() == player.GetSession().GetRecruiterId())
+                        friendInfo.Status |= FriendStatus.RAF;
+                }
 
                 friendInfo.Area = target.GetZoneId();
                 friendInfo.Level = target.GetLevel();
