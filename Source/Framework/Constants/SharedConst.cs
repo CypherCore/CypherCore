@@ -218,9 +218,9 @@ namespace Framework.Constants
         /// <summary>
         /// Object Const
         /// </summary>
-        public const float DefaultWorldObjectSize = 0.388999998569489f;      // player size, also currently used (correctly?) for any non Unit world objects
+        public const float DefaultPlayerBoundingRadius = 0.388999998569489f;      // player size, also currently used (correctly?) for any non Unit world objects
         public const float AttackDistance = 5.0f;
-        public const float DefaultCombatReach = 1.5f;
+        public const float DefaultPlayerCombatReach = 1.5f;
         public const float MinMeleeReach = 2.0f;
         public const float NominalMeleeRange = 5.0f;
         public const float MeleeRange = NominalMeleeRange - MinMeleeReach * 2; //center to center for players

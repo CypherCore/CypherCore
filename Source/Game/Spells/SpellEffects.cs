@@ -2034,7 +2034,7 @@ namespace Game.Spells
             float dis = effectInfo.CalcRadius(m_caster);
 
             float fx, fy, fz;
-            m_caster.GetClosePoint(out fx, out fy, out fz, unitTarget.GetObjectSize(), dis);
+            m_caster.GetClosePoint(out fx, out fy, out fz, unitTarget.GetCombatReach(), dis);
 
             unitTarget.NearTeleportTo(fx, fy, fz, -m_caster.GetOrientation(), unitTarget == m_caster);
         }
@@ -2385,7 +2385,7 @@ namespace Game.Spells
                     Cypher.Assert(OldSummon.GetMap() == owner.GetMap());
 
                     float px, py, pz;
-                    owner.GetClosePoint(out px, out py, out pz, OldSummon.GetObjectSize());
+                    owner.GetClosePoint(out px, out py, out pz, OldSummon.GetCombatReach());
 
                     OldSummon.NearTeleportTo(px, py, pz, OldSummon.GetOrientation());
 
@@ -2402,7 +2402,7 @@ namespace Game.Spells
             }
 
             float x, y, z;
-            owner.GetClosePoint(out x, out y, out z, owner.GetObjectSize());
+            owner.GetClosePoint(out x, out y, out z, owner.GetCombatReach());
             Pet pet = owner.SummonPet(petentry, x, y, z, owner.Orientation, PetType.Summon, 0);
             if (!pet)
                 return;
@@ -2791,7 +2791,7 @@ namespace Game.Spells
             if (m_targets.HasDst())
                 destTarget.GetPosition(out x, out y, out z);
             else
-                m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize);
+                m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
 
             Map map = target.GetMap();
 
@@ -3790,7 +3790,7 @@ namespace Game.Spells
                 destTarget.GetPosition(out x, out y, out z);
             // Summon in random point all other units if location present
             else
-                m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize);
+                m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
 
             Map map = m_caster.GetMap();
             Position pos = new Position(x, y, z, m_caster.GetOrientation());
@@ -4094,7 +4094,7 @@ namespace Game.Spells
                 // Spell is not using explicit target - no generated path
                 if (m_preGeneratedPath.GetPathType() == PathType.Blank)
                 {
-                    Position pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetObjectSize(), unitTarget.GetRelativeAngle(m_caster.GetPosition()));
+                    Position pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetCombatReach(), unitTarget.GetRelativeAngle(m_caster.GetPosition()));
                     if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
                         speed = pos.GetExactDist(m_caster) / speed;
 
@@ -4530,7 +4530,7 @@ namespace Game.Spells
             else if (effectInfo.HasRadius() && m_spellInfo.Speed == 0)
             {
                 float dis = effectInfo.CalcRadius(m_originalCaster);
-                m_caster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultWorldObjectSize, dis);
+                m_caster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);
             }
             else
             {
@@ -4539,7 +4539,7 @@ namespace Game.Spells
                 float max_dis = m_spellInfo.GetMaxRange(true);
                 float dis = (float)RandomHelper.NextDouble() * (max_dis - min_dis) + min_dis;
 
-                m_caster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultWorldObjectSize, dis);
+                m_caster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);
             }
 
             Map cMap = m_caster.GetMap();
@@ -4938,7 +4938,7 @@ namespace Game.Spells
 
             // relocate
             float px, py, pz;
-            unitTarget.GetClosePoint(out px, out py, out pz, pet.GetObjectSize(), SharedConst.PetFollowDist, pet.GetFollowAngle());
+            unitTarget.GetClosePoint(out px, out py, out pz, pet.GetCombatReach(), SharedConst.PetFollowDist, pet.GetFollowAngle());
             pet.Relocate(px, py, pz, unitTarget.GetOrientation());
 
             // add to world

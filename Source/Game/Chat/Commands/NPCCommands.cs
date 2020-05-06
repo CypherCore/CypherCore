@@ -392,7 +392,7 @@ namespace Game.Chat
 
             // place pet before player
             float x, y, z;
-            player.GetClosePoint(out x, out y, out z, creatureTarget.GetObjectSize(), SharedConst.ContactDistance);
+            player.GetClosePoint(out x, out y, out z, creatureTarget.GetCombatReach(), SharedConst.ContactDistance);
             pet.Relocate(x, y, z, MathFunctions.PI - player.GetOrientation());
 
             // set pet to defensive mode by default (some classes can't control controlled pets in fact).

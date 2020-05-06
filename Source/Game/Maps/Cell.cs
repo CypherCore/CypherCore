@@ -120,7 +120,7 @@ namespace Game.Maps
         {
             //we should increase search radius by object's radius, otherwise
             //we could have problems with huge creatures, which won't attack nearest players etc
-            Visit(standing_cell, visitor, map, obj.GetPositionX(), obj.GetPositionY(), radius + obj.GetObjectSize());
+            Visit(standing_cell, visitor, map, obj.GetPositionX(), obj.GetPositionY(), radius + obj.GetCombatReach());
         }
 
         public void Visit(CellCoord standing_cell, Visitor visitor, Map map, float x_off, float y_off, float radius)

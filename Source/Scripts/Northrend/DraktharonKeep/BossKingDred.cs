@@ -102,7 +102,7 @@ namespace Scripts.Northrend.DraktharonKeep.KingDred
                 DoCastVictim(SpellIds.RaptorCall);
 
                 float x, y, z;
-                me.GetClosePoint(out x, out y, out z, me.GetObjectSize() / 3, 10.0f);
+                me.GetClosePoint(out x, out y, out z, me.GetCombatReach() / 3, 10.0f);
                 me.SummonCreature(RandomHelper.RAND(DTKCreatureIds.DrakkariGutripper, DTKCreatureIds.DrakkariScytheclaw), x, y, z, 0, TempSummonType.DeadDespawn, 1000);
                 task.Repeat();
             });

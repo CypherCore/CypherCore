@@ -546,7 +546,7 @@ namespace Game.Entities
             return attackerList;
         }
 
-        public float GetCombatReach() { return m_unitData.CombatReach; }
+        public override float GetCombatReach() { return m_unitData.CombatReach; }
         public void SetCombatReach(float combatReach) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CombatReach), combatReach); }
         public float GetBoundingRadius() { return m_unitData.BoundingRadius; }
         public void SetBoundingRadius(float boundingRadius) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BoundingRadius), boundingRadius); }

@@ -359,7 +359,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 {
                     float ang = Position.NormalizeOrientation(pos.GetAngle(me));
                     me.SetOrientation(ang);
-                    owner.GetNearPoint2D(out pos.posX, out pos.posY, 5.0f - owner.GetObjectSize(), ang);
+                    owner.GetNearPoint2D(out pos.posX, out pos.posY, 5.0f - owner.GetCombatReach(), ang);
                 }
                 else
                 {
@@ -372,7 +372,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                     float ang = Position.NormalizeOrientation(pos.GetAngle(target));
                     me.SetOrientation(ang);
-                    owner.GetNearPoint2D(out pos.posX, out pos.posY, 15.0f - owner.GetObjectSize(), ang);
+                    owner.GetNearPoint2D(out pos.posX, out pos.posY, 15.0f - owner.GetCombatReach(), ang);
                 }
 
                 me.NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), me.GetPositionZ(), me.GetOrientation());
@@ -471,7 +471,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 targets.Clear();
                 // select any unit but not the tank (by owners threatlist)
-                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetObjectSize(), true, -(int)Spells.Impaled);
+                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetCombatReach(), true, -(int)Spells.Impaled);
                 if (!target)
                     target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true); // or the tank if its solo
                 if (!target)

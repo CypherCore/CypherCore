@@ -2349,7 +2349,7 @@ namespace Framework.Constants
         UnitDestAreaParty = 34,
         UnitParty = 35,
         DestCasterUnk36 = 36,
-        UnitLastareaParty = 37,
+        UnitLastAreaParty = 37,
         UnitNearbyEntry = 38,
         DestCasterFishing = 39,
         GameobjectNearbyEntry = 40,

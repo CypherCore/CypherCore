@@ -377,14 +377,14 @@ namespace Game.Scripting
                         spellSummaryStorage[i].Targets |= 1 << ((int)SelectTargetType.SingleFriend - 1);
 
                     // Spell targets AoE friends.
-                    if (effect.TargetA.GetTarget() == Targets.UnitCasterAreaParty || effect.TargetA.GetTarget() == Targets.UnitLastareaParty ||
+                    if (effect.TargetA.GetTarget() == Targets.UnitCasterAreaParty || effect.TargetA.GetTarget() == Targets.UnitLastAreaParty ||
                         effect.TargetA.GetTarget() == Targets.SrcCaster)
                         spellSummaryStorage[i].Targets |= 1 << ((int)SelectTargetType.AoeFriend - 1);
 
                     // Spell targets any friend (or self).
                     if (effect.TargetA.GetTarget() == Targets.UnitCaster || effect.TargetA.GetTarget() == Targets.UnitAlly ||
                         effect.TargetA.GetTarget() == Targets.UnitParty || effect.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
-                        effect.TargetA.GetTarget() == Targets.UnitLastareaParty || effect.TargetA.GetTarget() == Targets.SrcCaster)
+                        effect.TargetA.GetTarget() == Targets.UnitLastAreaParty || effect.TargetA.GetTarget() == Targets.SrcCaster)
                         spellSummaryStorage[i].Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
 
                     // Make sure that this spell includes a damage effect.

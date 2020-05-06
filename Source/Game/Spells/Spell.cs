@@ -735,7 +735,12 @@ namespace Game.Spells
             SpellEffectInfo effect = GetEffect(effIndex);
             if (effect == null)
                 return;
+
             float radius = effect.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+            // if this is a proximity based aoe (Frost Nova, Psychic Scream, ...), include the caster's own combat reach
+            if (targetType.IsProximityBasedAoe())
+                radius += GetCaster().GetCombatReach();
+
             SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions);
 
             CallScriptObjectAreaTargetSelectHandlers(targets, effIndex, targetType);
@@ -797,7 +802,7 @@ namespace Game.Spells
                         float dis = (float)RandomHelper.NextDouble() * (maxDist - minDist) + minDist;
                         float x, y, z;
                         float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
-                        m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize, dis, angle);
+                        m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius, dis, angle);
 
                         float ground = m_caster.GetMap().GetHeight(m_caster.GetPhaseShift(), x, y, z, true, 50.0f);
                         float liquidLevel = MapConst.VMAPInvalidHeightValue;
@@ -830,7 +835,7 @@ namespace Game.Spells
                     {
                         float dist = effect.CalcRadius(m_caster);
                         float angl = targetType.CalcDirectionAngle();
-                        float objSize = m_caster.GetObjectSize();
+                        float objSize = m_caster.GetCombatReach();
 
                         switch (targetType.GetTarget())
                         {
@@ -885,7 +890,7 @@ namespace Game.Spells
                     if (effect != null)
                     {
                         float angle = targetType.CalcDirectionAngle();
-                        float objSize = target.GetObjectSize();
+                        float objSize = target.GetCombatReach();
                         float dist = effect.CalcRadius(m_caster);
                         if (dist < objSize)
                             dist = objSize;
@@ -1108,7 +1113,7 @@ namespace Game.Spells
                     }
                 }
 
-                float size = Math.Max(obj.GetObjectSize(), 1.0f);
+                float size = Math.Max(obj.GetCombatReach(), 1.0f);
                 float objDist2d = srcPos.GetExactDist2d(obj);
                 float dz = obj.GetPositionZ() - srcPos.posZ;
 
@@ -4843,12 +4848,12 @@ namespace Game.Spells
                                 if (!target.IsWithinLOSInMap(m_caster)) //Do full LoS/Path check. Don't exclude m2
                                     return SpellCastResult.LineOfSight;
 
-                                float objSize = target.GetObjectSize();
+                                float objSize = target.GetCombatReach();
                                 float range = m_spellInfo.GetMaxRange(true, m_caster, this) * 1.5f + objSize; // can't be overly strict
 
                                 m_preGeneratedPath.SetPathLengthLimit(range);
                                 //first try with raycast, if it fails fall back to normal path
-                                float targetObjectSize = Math.Min(target.GetObjectSize(), 4.0f);
+                                float targetObjectSize = Math.Min(target.GetCombatReach(), 4.0f);
                                 bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, true);
                                 if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                     return SpellCastResult.OutOfRange;
@@ -7746,8 +7751,7 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
-        public WorldObjectSpellAreaTargetCheck(float range, Position position, Unit caster,
-            Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        public WorldObjectSpellAreaTargetCheck(float range, Position position, Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
             : base(caster, referer, spellInfo, selectionType, condList)
         {
             _range = range;
@@ -7757,8 +7761,20 @@ namespace Game.Spells
 
         public override bool Invoke(WorldObject target)
         {
-            if (!target.IsWithinDist3d(_position, _range) && !(target.IsTypeId(TypeId.GameObject) && target.ToGameObject().IsInRange(_position.posX, _position.posY, _position.posZ, _range)))
-                return false;
+            if (target.ToGameObject())
+            {
+                // isInRange including the dimension of the GO
+                bool isInRange = target.ToGameObject().IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range);
+                if (!isInRange)
+                    return false;
+            }
+            else
+            {
+                bool isInsideCylinder = target.IsWithinDist2d(_position, _range) && Math.Abs(target.GetPositionZ() - _position.GetPositionZ()) <= _range;
+                if (!isInsideCylinder)
+                    return false;
+            }
+
             return base.Invoke(target);
         }
     }
@@ -7780,7 +7796,7 @@ namespace Game.Spells
             }
             else if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeLine))
             {
-                if (!_caster.HasInLine(target, target.GetObjectSize(), _caster.GetObjectSize()))
+                if (!_caster.HasInLine(target, target.GetCombatReach(), _caster.GetCombatReach()))
                     return false;
             }
             else
@@ -7812,7 +7828,7 @@ namespace Game.Spells
         public override bool Invoke(WorldObject target)
         {
             // return all targets on missile trajectory (0 - size of a missile)
-            if (!_caster.HasInLine(target, target.GetObjectSize(), SpellConst.TrajectoryMissileSize))
+            if (!_caster.HasInLine(target, target.GetCombatReach(), SpellConst.TrajectoryMissileSize))
                 return false;
 
             if (target.GetExactDist2d(_position) > _range)

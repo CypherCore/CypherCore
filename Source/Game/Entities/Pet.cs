@@ -180,7 +180,7 @@ namespace Game.Entities
             float px, py, pz;
             if (IsCritter())
             {
-                owner.GetClosePoint(out px, out py, out pz, GetObjectSize(), SharedConst.PetFollowDist, GetFollowAngle());
+                owner.GetClosePoint(out px, out py, out pz, GetCombatReach(), SharedConst.PetFollowDist, GetFollowAngle());
                 Relocate(px, py, pz, owner.GetOrientation());
 
                 if (!IsPositionValid())
@@ -233,7 +233,7 @@ namespace Game.Entities
             SynchronizeLevelWithOwner();
 
             // Set pet's position after setting level, its size depends on it
-            owner.GetClosePoint(out px, out py, out pz, GetObjectSize(), SharedConst.PetFollowDist, GetFollowAngle());
+            owner.GetClosePoint(out px, out py, out pz, GetCombatReach(), SharedConst.PetFollowDist, GetFollowAngle());
             Relocate(px, py, pz, owner.GetOrientation());
             if (!IsPositionValid())
             {

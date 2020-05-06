@@ -4598,6 +4598,34 @@ namespace Game.Spells
             return GetSelectionCategory() == SpellTargetSelectionCategories.Area || GetSelectionCategory() == SpellTargetSelectionCategories.Cone;
         }
 
+        public bool IsProximityBasedAoe()
+        {
+            switch (_target)
+            {
+                case Targets.UnitSrcAreaEntry:
+                case Targets.UnitSrcAreaEnemy:
+                case Targets.UnitCasterAreaParty:
+                case Targets.UnitSrcAreaAlly:
+                case Targets.UnitSrcAreaParty:
+                case Targets.UnitLastAreaParty:
+                case Targets.GameobjectSrcArea:
+                case Targets.UnitCasterAreaRaid:
+                case Targets.CorpseSrcAreaEnemy:
+                    return true;
+
+                case Targets.UnitDestAreaEntry:
+                case Targets.UnitDestAreaEnemy:
+                case Targets.UnitDestAreaAlly:
+                case Targets.UnitDestAreaParty:
+                case Targets.GameobjectDestArea:
+                case Targets.UnitAreaRaidClass:
+                    return false;
+
+                default:
+                    Log.outWarn(LogFilter.Spells, "SpellImplicitTargetInfo.IsProximityBasedAoe called a non-aoe spell");
+                    return false;
+            }
+        }
         public SpellTargetSelectionCategories GetSelectionCategory()
         {
             return _data[(int)_target].SelectionCategory;

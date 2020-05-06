@@ -452,7 +452,7 @@ namespace Scripts.World
             uint BirdEntry = 0;
 
             float fX, fY, fZ;
-            go.GetClosePoint(out fX, out fY, out fZ, go.GetObjectSize(), SharedConst.InteractionDistance);
+            go.GetClosePoint(out fX, out fY, out fZ, go.GetCombatReach(), SharedConst.InteractionDistance);
 
             switch (go.GetEntry())
             {

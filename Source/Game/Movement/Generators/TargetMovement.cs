@@ -173,7 +173,7 @@ namespace Game.Movement
                     float size = 0;
 
                     // Pets need special handling.
-                    // We need to subtract GetObjectSize() because it gets added back further down the chain
+                    // We need to subtract GetCombatReach() because it gets added back further down the chain
                     //  and that makes pets too far away. Subtracting it allows pets to properly
                     //  be (GetCombatReach() + i_offset) away.
                     // Only applies when i_target is pet's owner otherwise pets and mobs end up
@@ -181,12 +181,12 @@ namespace Game.Movement
                     if (owner.IsPet() && Target.IsTypeId(TypeId.Player))
                     {
                         dist = 1.0f;// target.GetCombatReach();
-                        size = 1.0f;// target.GetCombatReach() - target.GetObjectSize();
+                        size = 1.0f;// target.GetCombatReach() - target.GetCombatReach();
                     }
                     else
                     {
                         dist = offset + 1.0f;
-                        size = owner.GetObjectSize();
+                        size = owner.GetCombatReach();
                     }
 
                     if (Target.IsWithinDistInMap(owner, dist))

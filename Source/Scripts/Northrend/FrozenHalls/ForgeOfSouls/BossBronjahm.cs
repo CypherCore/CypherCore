@@ -137,7 +137,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls.Bronjahm
             {
                 summons.Summon(summon);
                 summon.SetReactState(ReactStates.Passive);
-                summon.GetMotionMaster().MoveFollow(me, me.GetObjectSize(), 0.0f);
+                summon.GetMotionMaster().MoveFollow(me, me.GetCombatReach(), 0.0f);
                 summon.CastSpell(summon, SpellIds.PurpleBanishVisual, true);
             }
         }

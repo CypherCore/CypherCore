@@ -2391,7 +2391,7 @@ namespace Game
                 }
 
                 if (modelInfo.CombatReach < 0.1f)
-                    modelInfo.CombatReach = SharedConst.DefaultCombatReach;
+                    modelInfo.CombatReach = SharedConst.DefaultPlayerCombatReach;
 
                 CreatureModelDataRecord modelData = CliDB.CreatureModelDataStorage.LookupByKey(creatureDisplay.ModelID);
                 if (modelData != null)

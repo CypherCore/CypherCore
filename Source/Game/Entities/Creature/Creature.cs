@@ -2094,7 +2094,7 @@ namespace Game.Entities
             else
             {
                 // include sizes for huge npcs
-                dist += GetObjectSize() + victim.GetObjectSize();
+                dist += GetCombatReach() + victim.GetCombatReach();
 
                 // to prevent creatures in air ignore attacks because distance is already too high...
                 if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air))
@@ -2675,7 +2675,7 @@ namespace Game.Entities
             if (minfo != null)
             {
                 SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
-                SetCombatReach((IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * scale);
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * scale);
             }
         }
 
@@ -2687,7 +2687,7 @@ namespace Game.Entities
             if (minfo != null)
             {
                 SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
-                SetCombatReach((IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * GetObjectScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultPlayerCombatReach : minfo.CombatReach) * GetObjectScale());
             }
         }
 

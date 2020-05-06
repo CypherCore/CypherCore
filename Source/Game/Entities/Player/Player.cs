@@ -6528,8 +6528,8 @@ namespace Game.Entities
         public override void SetObjectScale(float scale)
         {
             base.SetObjectScale(scale);
-            SetBoundingRadius(scale * SharedConst.DefaultWorldObjectSize);
-            SetCombatReach(scale * SharedConst.DefaultCombatReach);
+            SetBoundingRadius(scale * SharedConst.DefaultPlayerBoundingRadius);
+            SetCombatReach(scale * SharedConst.DefaultPlayerCombatReach);
             if (IsInWorld)
                 SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()));
         }

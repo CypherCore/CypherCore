@@ -724,7 +724,7 @@ namespace Game.Chat
                 return false;
 
             float x, y, z, o = handler.GetSession().GetPlayer().GetOrientation();
-            handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, handler.GetSession().GetPlayer().GetObjectSize());
+            handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, handler.GetSession().GetPlayer().GetCombatReach());
 
             uint id = args.NextUInt32();
             if (id == 0)

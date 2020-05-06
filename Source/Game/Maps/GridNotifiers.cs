@@ -1610,37 +1610,55 @@ namespace Game.Maps
 
     public class AnyFriendlyUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyFriendlyUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool playerOnly = false)
+        public AnyFriendlyUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool playerOnly = false, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             i_obj = obj;
             i_funit = funit;
             i_range = range;
             i_playerOnly = playerOnly;
+            i_incOwnRadius = incOwnRadius;
+            i_incTargetRadius = incTargetRadius;
         }
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && i_obj.IsWithinDistInMap(u, i_range) && i_funit.IsFriendlyTo(u) && (!i_playerOnly || u.IsTypeId(TypeId.Player)))
-                return true;
-            else
+            if (!u.IsAlive())
                 return false;
+
+            float searchRadius = i_range;
+            if (i_incOwnRadius)
+                searchRadius += i_obj.GetCombatReach();
+            if (i_incTargetRadius)
+                searchRadius += u.GetCombatReach();
+
+            if (!u.IsInMap(i_obj) || !u.IsInPhase(i_obj) || !u.IsWithinDoubleVerticalCylinder(i_obj, searchRadius, searchRadius))
+                return false;
+
+            if (!i_funit.IsFriendlyTo(u))
+                return false;
+
+            return !i_playerOnly || u.GetTypeId() == TypeId.Player;
         }
 
         WorldObject i_obj;
         Unit i_funit;
         float i_range;
         bool i_playerOnly;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
     }
 
     public class AnyGroupedUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyGroupedUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool raid, bool playerOnly = false)
+        public AnyGroupedUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool raid, bool playerOnly = false, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             _source = obj;
             _refUnit = funit;
             _range = range;
             _raid = raid;
             _playerOnly = playerOnly;
+            i_incOwnRadius = incOwnRadius;
+            i_incTargetRadius = incTargetRadius;
         }
 
         public bool Invoke(Unit u)
@@ -1656,7 +1674,19 @@ namespace Game.Maps
             else if (!_refUnit.IsInPartyWith(u))
                 return false;
 
-            return !_refUnit.IsHostileTo(u) && u.IsAlive() && _source.IsWithinDistInMap(u, _range);
+            if (_refUnit.IsHostileTo(u))
+                return false;
+
+            if (!u.IsAlive())
+                return false;
+
+            float searchRadius = _range;
+            if (i_incOwnRadius)
+                searchRadius += _source.GetCombatReach();
+            if (i_incTargetRadius)
+                searchRadius += u.GetCombatReach();
+
+            return u.IsInMap(_source) && u.IsInPhase(_source) && u.IsWithinDoubleVerticalCylinder(_source, searchRadius, searchRadius);
         }
 
         WorldObject _source;
@@ -1664,6 +1694,8 @@ namespace Game.Maps
         float _range;
         bool _raid;
         bool _playerOnly;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
     }
 
     public class AnyUnitInObjectRangeCheck : ICheck<Unit>
@@ -1717,12 +1749,14 @@ namespace Game.Maps
 
     public class AnyAoETargetUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyAoETargetUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, SpellInfo spellInfo = null)
+        public AnyAoETargetUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, SpellInfo spellInfo = null, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             i_obj = obj;
             i_funit = funit;
             _spellInfo = spellInfo;
             i_range = range;
+            i_incOwnRadius = incOwnRadius;
+            i_incTargetRadius = incTargetRadius;
 
             if (_spellInfo == null)
             {
@@ -1741,13 +1775,24 @@ namespace Game.Maps
             if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers) && !u.IsPlayer())
                 return false;
 
-            return i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.IsTypeId(TypeId.DynamicObject) ? i_obj : null) && i_obj.IsWithinDistInMap(u, i_range);
+            if (!i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.GetTypeId() == TypeId.DynamicObject ? i_obj : null))
+                return false;
+
+            float searchRadius = i_range;
+            if (i_incOwnRadius)
+                searchRadius += i_obj.GetCombatReach();
+            if (i_incTargetRadius)
+                searchRadius += u.GetCombatReach();
+
+            return u.IsInMap(i_obj) && u.IsInPhase(i_obj) && u.IsWithinDoubleVerticalCylinder(i_obj, searchRadius, searchRadius);
         }
 
         WorldObject i_obj;
         Unit i_funit;
         SpellInfo _spellInfo;
         float i_range;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
     }
 
     public class AnyDeadUnitCheck : ICheck<Unit>

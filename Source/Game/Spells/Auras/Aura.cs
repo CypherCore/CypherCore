@@ -2583,7 +2583,7 @@ namespace Game.Spells
                             case SpellEffectName.ApplyAreaAuraRaid:
                                 {
                                     targetList.Add(GetUnitOwner());
-                                    var u_check = new AnyGroupedUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, effect.Effect == SpellEffectName.ApplyAreaAuraRaid);
+                                    var u_check = new AnyGroupedUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, effect.Effect == SpellEffectName.ApplyAreaAuraRaid, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
                                     var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
                                     Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
                                     break;
@@ -2591,14 +2591,14 @@ namespace Game.Spells
                             case SpellEffectName.ApplyAreaAuraFriend:
                                 {
                                     targetList.Add(GetUnitOwner());
-                                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius);
+                                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
                                     var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
                                     Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
                                     break;
                                 }
                             case SpellEffectName.ApplyAreaAuraEnemy:
                                 {
-                                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius);
+                                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo(), false, true);
                                     var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
                                     Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
                                     break;
@@ -2669,13 +2669,13 @@ namespace Game.Spells
                 List<Unit> targetList = new List<Unit>();
                 if (effect.TargetB.GetTarget() == Targets.DestDynobjAlly || effect.TargetB.GetTarget() == Targets.UnitDestAreaAlly)
                 {
-                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers));
+                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
                     var searcher = new UnitListSearcher(GetDynobjOwner(), targetList, u_check);
                     Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
                 }
                 else
                 {
-                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius);
+                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, null, false, true);
                     var searcher = new UnitListSearcher(GetDynobjOwner(), targetList, u_check);
                     Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
                 }

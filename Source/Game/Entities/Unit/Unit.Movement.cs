@@ -603,7 +603,7 @@ namespace Game.Entities
         {
             float combat_reach = GetCombatReach();
             if (combat_reach < 0.1f)
-                combat_reach = SharedConst.DefaultCombatReach;
+                combat_reach = SharedConst.DefaultPlayerCombatReach;
 
             int attacker_number = GetAttackers().Count;
             if (attacker_number > 0)

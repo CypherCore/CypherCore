@@ -2756,7 +2756,7 @@ namespace Game.Entities
         public void RelocateStationaryPosition(float x, float y, float z, float o) { StationaryPosition.Relocate(x, y, z, o); }
 
         //! Object distance/size - overridden from Object._IsWithinDist. Needs to take in account proper GO size.
-        public override bool _IsWithinDist(WorldObject obj, float dist2compare, bool is3D)
+        public override bool _IsWithinDist(WorldObject obj, float dist2compare, bool is3D, bool incOwnRadius, bool incTargetRadius)
         {
             //! Following check does check 3d distance
             return IsInRange(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), dist2compare);
