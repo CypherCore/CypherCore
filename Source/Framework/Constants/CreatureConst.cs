@@ -208,6 +208,7 @@ namespace Framework.Constants
         Trigger = 0x80,       // Trigger Creature
         NoTaunt = 0x100,       // Creature Is Immune To Taunt Auras And Effect Attack Me
         NoMoveFlagsUpdate = 0x200, // Creature won't update movement flags
+        GhostVisibility = 0x400,       // creature will be only visible for dead players
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
         NoCrit = 0x20000,       // Creature Can'T Do Critical Strikes
@@ -219,7 +220,7 @@ namespace Framework.Constants
         IgnorePathfinding = 0x20000000,        // creature ignore pathfinding
         ImmunityKnockback = 0x40000000,        // creature is immune to knockback effects
 
-        DBAllowed = (InstanceBind | Civilian | NoParry | NoParryHasten | NoBlock | NoCrush | NoXpAtKill | 
+        DBAllowed = (InstanceBind | Civilian | NoParry | NoParryHasten | NoBlock | NoCrush | NoXpAtKill |
             Trigger | NoTaunt | NoMoveFlagsUpdate | Worldevent | NoCrit | NoSkillgain | TauntDiminish | AllDiminish | Guard |
             IgnorePathfinding | NoPlayerDamageReq | ImmunityKnockback)
     }

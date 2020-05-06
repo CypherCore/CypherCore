@@ -2076,7 +2076,7 @@ namespace Game.Entities
                     bgMap.GetBG().ProcessEvent(this, eventId, invoker);
         }
 
-        public virtual uint GetScriptId()
+        public uint GetScriptId()
         {
             GameObjectData gameObjectData = GetGoData();
             if (gameObjectData != null)

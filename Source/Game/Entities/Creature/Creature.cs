@@ -813,8 +813,7 @@ namespace Game.Entities
 
             LastUsedScriptID = GetScriptId();
 
-            // TODO: Replace with spell, handle from DB
-            if (IsSpiritHealer() || IsSpiritGuide())
+            if (IsSpiritHealer() || IsSpiritGuide() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.GhostVisibility))
             {
                 m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
