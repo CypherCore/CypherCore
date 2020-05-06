@@ -1570,7 +1570,7 @@ namespace Game.Entities
                 SetCannotReachTarget(false);
                 UpdateMovementFlags();
 
-                ClearUnitState(UnitState.AllState & ~UnitState.IgnorePathfinding);
+                ClearUnitState(UnitState.AllErasable);
 
                 if (!IsPet())
                 {

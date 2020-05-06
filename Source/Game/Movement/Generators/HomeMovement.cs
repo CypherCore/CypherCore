@@ -71,7 +71,7 @@ namespace Game.AI
             skipToHome = false;
             arrived = false;
 
-            owner.ClearUnitState(UnitState.AllState & ~(UnitState.Evade | UnitState.IgnorePathfinding));
+            owner.ClearUnitState(UnitState.AllErasable & ~UnitState.Evade);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()

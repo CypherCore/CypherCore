@@ -456,7 +456,6 @@ namespace Framework.Constants
         Possessed = 0x10000,
         Charging = 0x20000,
         Jumping = 0x40000,
-        //Onvehicle = 0x80000,
         Move = 0x100000,
         Rotating = 0x200000,
         Evade = 0x400000,
@@ -472,17 +471,18 @@ namespace Framework.Constants
                             | Possessed | Charging | Jumping | Move | Rotating
                             | Evade | RoamingMove | ConfusedMove | FleeingMove
                             | ChaseMove | FollowMove | IgnorePathfinding,
+
         Unattackable = InFlight,
-        // For Real Move Using Movegen Check And Stop (Except Unstoppable Flight)
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,
         Controlled = (Confused | Stunned | Fleeing),
         LostControl = (Controlled | Jumping | Charging),
         Sightless = (LostControl | Evade),
         CannotAutoattack = (LostControl | Casting),
         CannotTurn = (LostControl | Rotating),
-        // Stay By Different Reasons
         NotMove = Root | Stunned | Died | Distracted,
-        AllState = 0xffffffff                      //(Stopped | Moving | In_Combat | In_Flight)
+
+        AllErasable = AllStateSupported & ~IgnorePathfinding,
+        AllState = 0xffffffff
     }
 
     public enum UnitMoveType

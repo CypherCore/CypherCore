@@ -4383,7 +4383,7 @@ namespace Game.Spells
             pet.SetDynamicFlags(UnitDynFlags.HideModel);
             pet.RemoveUnitFlag(UnitFlags.Skinnable);
             pet.SetDeathState(DeathState.Alive);
-            pet.ClearUnitState(UnitState.AllState);
+            pet.ClearUnitState(UnitState.AllErasable);
             pet.SetHealth(pet.CountPctFromMaxHealth(damage));
 
             pet.InitializeAI();
