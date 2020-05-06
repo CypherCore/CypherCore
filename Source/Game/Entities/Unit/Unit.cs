@@ -2575,8 +2575,7 @@ namespace Game.Entities
                 (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
 
-            // else u1.GetTypeId() == u2.GetTypeId() == TYPEID_UNIT
-            return u1.GetFaction() == u2.GetFaction();
+            return u1.GetTypeId() == TypeId.Unit && u2.GetTypeId() == TypeId.Unit && u1.GetFaction() == u2.GetFaction();
         }
 
         public bool IsInRaidWith(Unit unit)
