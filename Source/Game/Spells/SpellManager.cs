@@ -2469,6 +2469,10 @@ namespace Game.Entities
                             spellInfo.ConeAngle = 90.0f;
                 }
 
+                // due to the way spell system works, unit would change orientation in Spell::_cast
+                if (spellInfo.HasAura(Difficulty.None, AuraType.ControlVehicle))
+                    spellInfo.AttributesEx5 |= SpellAttr5.DontTurnDuringCast;
+
                 if (spellInfo.ActiveIconFileDataId == 135754)  // flight
                     spellInfo.Attributes |= SpellAttr0.Passive;
 

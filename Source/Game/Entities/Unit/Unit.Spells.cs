@@ -2941,6 +2941,8 @@ namespace Game.Entities
             bool result = false;
 
             uint spellClickEntry = GetVehicleKit() != null ? GetVehicleKit().GetCreatureEntry() : GetEntry();
+            TriggerCastFlags flags = GetVehicleKit() ? TriggerCastFlags.IgnoreCasterMountedOrOnVehicle : TriggerCastFlags.None;
+
             var clickPair = Global.ObjectMgr.GetSpellClickInfoMapBounds(spellClickEntry);
             foreach (var clickInfo in clickPair)
             {
@@ -2983,7 +2985,7 @@ namespace Game.Entities
                     }
 
                     if (IsInMap(caster))
-                        caster.CastCustomSpell(clickInfo.spellId, SpellValueMod.BasePoint0 + i, seatId + 1, target, GetVehicleKit() != null ? TriggerCastFlags.IgnoreCasterMountedOrOnVehicle : TriggerCastFlags.None, null, null, origCasterGUID);
+                        caster.CastCustomSpell(clickInfo.spellId, SpellValueMod.BasePoint0 + i, seatId + 1, target, flags, null, null, origCasterGUID);
                     else    // This can happen during Player._LoadAuras
                     {
                         int[] bp0 = new int[SpellConst.MaxEffects];
@@ -3000,7 +3002,7 @@ namespace Game.Entities
                 else
                 {
                     if (IsInMap(caster))
-                        caster.CastSpell(target, spellEntry, GetVehicleKit() != null ? TriggerCastFlags.IgnoreCasterMountedOrOnVehicle : TriggerCastFlags.None, null, null, origCasterGUID);
+                        caster.CastSpell(target, spellEntry, flags, null, null, origCasterGUID);
                     else
                         Aura.TryRefreshStackOrCreate(spellEntry, ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), SpellConst.MaxEffectMask, this, clicker, null, null, origCasterGUID);
                 }
