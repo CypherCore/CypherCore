@@ -2080,7 +2080,11 @@ namespace Game.Entities
         {
             GameObjectData gameObjectData = GetGoData();
             if (gameObjectData != null)
-                return gameObjectData.ScriptId;
+            {
+                uint scriptId = gameObjectData.ScriptId;
+                if (scriptId != 0)
+                    return scriptId;
+            }
 
             return GetGoInfo().ScriptId;
         }

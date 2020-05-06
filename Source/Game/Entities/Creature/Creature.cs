@@ -2418,7 +2418,11 @@ namespace Game.Entities
         {
             CreatureData creatureData = GetCreatureData();
             if (creatureData != null)
-                return creatureData.ScriptId;
+            {
+                uint scriptId = creatureData.ScriptId;
+                if (scriptId != 0)
+                    return scriptId;
+            }
 
             return Global.ObjectMgr.GetCreatureTemplate(GetEntry()) != null ? Global.ObjectMgr.GetCreatureTemplate(GetEntry()).ScriptID : 0;
         }

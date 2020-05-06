@@ -3325,8 +3325,6 @@ namespace Game
                 data.phaseGroup = result.Read<uint>(25);
                 data.terrainSwapMap = result.Read<int>(26);
                 data.ScriptId = GetScriptId(result.Read<string>(27));
-                if (data.ScriptId == 0)
-                    data.ScriptId = cInfo.ScriptID;
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.mapid);
                 if (mapEntry == null)
@@ -4121,8 +4119,6 @@ namespace Game
                 }
 
                 data.ScriptId = GetScriptId(result.Read<string>(21));
-                if (data.ScriptId == 0)
-                    data.ScriptId = gInfo.ScriptId;
 
                 if (Math.Abs(data.orientation) > 2 * MathFunctions.PI)
                 {
