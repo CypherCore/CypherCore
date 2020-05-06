@@ -574,7 +574,7 @@ namespace Framework.Constants
         MovegensIdle = 527,
         MovegensRandom = 528,
         MovegensWaypoint = 529,
-        MovegensAnimalRandom = 530,
+        //                                  = 530, not used
         MovegensConfused = 531,
         MovegensChasePlayer = 532,
         MovegensChaseCreature = 533,

@@ -2912,11 +2912,13 @@ namespace Game.Entities
                         spellInfo.MaxAffectedTargets = 3;
                         break;
                     case 71809: // Jump
-                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(3); // 20yd
-                        spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards25); // 25yd
+                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(5); // 40yd
+                        spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10); // 10yd
+                        spellInfo.GetEffect(0).MiscValue = 190;
                         break;
                     case 72405: // Broken Frostmourne
-                        spellInfo.GetEffect(1).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards200); // 200yd
+                        spellInfo.GetEffect(1).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards20); // 20yd
+                        spellInfo.AttributesEx |= SpellAttr1.NoThreat;
                         break;
                     // ENDOF ICECROWN CITADEL SPELLS
                     //

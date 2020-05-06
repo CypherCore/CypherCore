@@ -239,11 +239,8 @@ namespace Game.Spells
 
             foreach (var aurApp in effectApplications)
             {
-                if (aurApp.HasEffect(GetEffIndex()))
-                {
-                    aurApp.GetTarget()._RegisterAuraEffect(this, false);
-                    HandleEffect(aurApp, handleMask, false);
-                }
+                aurApp.GetTarget()._RegisterAuraEffect(this, false);
+                HandleEffect(aurApp, handleMask, false);
             }
 
             if (Convert.ToBoolean(handleMask & AuraEffectHandleModes.ChangeAmount))
@@ -257,11 +254,11 @@ namespace Game.Spells
 
             foreach (var aurApp in effectApplications)
             {
-                if (aurApp.HasEffect(GetEffIndex()))
-                {
-                    aurApp.GetTarget()._RegisterAuraEffect(this, true);
-                    HandleEffect(aurApp, handleMask, true);
-                }
+                if (aurApp.GetRemoveMode() != AuraRemoveMode.None)
+                    continue;
+
+                aurApp.GetTarget()._RegisterAuraEffect(this, true);
+                HandleEffect(aurApp, handleMask, true);
             }
 
             if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount))
