@@ -1109,7 +1109,7 @@ namespace Game.Network.Packets
 
     class MountResultPacket : ServerPacket
     {
-        public MountResult() : base(ServerOpcodes.MountResult, ConnectionType.Instance) { }
+        public MountResultPacket() : base(ServerOpcodes.MountResult, ConnectionType.Instance) { }
 
         public override void Write()
         {

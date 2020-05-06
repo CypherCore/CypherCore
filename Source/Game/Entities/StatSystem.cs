@@ -269,7 +269,7 @@ namespace Game.Entities
 
             // SPELL_AURA_MOD_STAT_BONUS_PCT only affects BASE_VALUE
             modPos = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            modNeg = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+            modNeg = MathFunctions.CalculatePct(modNeg, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
 
             modPos += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
             {
