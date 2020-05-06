@@ -228,9 +228,9 @@ namespace Game.Entities
 
         uint GetCurrentKnowledgeLevel()
         {
-            // count weeks from 26.06.2019
+            // count weeks from 14.01.2020
             DateTime now = GameTime.GetDateAndTime();
-            DateTime beginDate = new DateTime(2019, 6, 26);
+            DateTime beginDate = new DateTime(2020, 1, 14);
             uint knowledge = 0;
             while (beginDate < now && knowledge < PlayerConst.MaxAzeriteItemKnowledgeLevel)
             {

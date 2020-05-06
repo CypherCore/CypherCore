@@ -67,7 +67,7 @@ namespace Framework.Constants
 
         //Azerite
         public const uint ItemIdHeartOfAzeroth = 158075;
-        public const uint MaxAzeriteItemLevel = 70;
+        public const uint MaxAzeriteItemLevel = 129;
         public const uint MaxAzeriteItemKnowledgeLevel = 30;
         public const uint PlayerConditionIdUnlockedAzeriteEssences = 69048;
         public const uint SpellIdHeartEssenceActionBarOverride = 298554;
