@@ -516,7 +516,7 @@ namespace Game.Entities
                 }
             }
 
-            m_randomBonusListId = fields.Read<uint>(10);
+            m_randomBonusListId = fields.Read<uint>(9);
 
             // Remove bind flag for items vs NO_BIND set
             if (IsSoulBound() && GetBonding() == ItemBondingType.None)
