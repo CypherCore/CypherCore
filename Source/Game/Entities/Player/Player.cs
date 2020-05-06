@@ -1244,7 +1244,7 @@ namespace Game.Entities
             {
                 if (currency.Flags.HasAnyFlag((uint)CurrencyFlags.HighPrecision))
                     count /= 100;
-                GetReputationMgr().ModifyReputation(factionEntry, count, true);
+                GetReputationMgr().ModifyReputation(factionEntry, count, false, true);
                 return;
             }
 
@@ -1645,8 +1645,8 @@ namespace Game.Entities
 
                 FactionRecord factionEntry1 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1);
                 ReputationRank current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
-                if (factionEntry1 != null && (uint)current_reputation_rank1 <= Rep.ReputationMaxCap1)
-                    GetReputationMgr().ModifyReputation(factionEntry1, donerep1);
+                if (factionEntry1 != null)
+                    GetReputationMgr().ModifyReputation(factionEntry1, donerep1, (uint)current_reputation_rank1 > Rep.ReputationMaxCap1);
             }
 
             if (Rep.RepFaction2 != 0 && (!Rep.TeamDependent || team == Team.Horde))
@@ -1656,8 +1656,8 @@ namespace Game.Entities
 
                 FactionRecord factionEntry2 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2);
                 ReputationRank current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
-                if (factionEntry2 != null && (uint)current_reputation_rank2 <= Rep.ReputationMaxCap2)
-                    GetReputationMgr().ModifyReputation(factionEntry2, donerep2);
+                if (factionEntry2 != null)
+                    GetReputationMgr().ModifyReputation(factionEntry2, donerep2, (uint)current_reputation_rank2 > Rep.ReputationMaxCap2);
             }
         }
         // Calculate how many reputation points player gain with the quest
@@ -1709,7 +1709,7 @@ namespace Game.Entities
                     rep = CalculateReputationGain(ReputationSource.Quest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
 
                 bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
-                GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
+                GetReputationMgr().ModifyReputation(factionEntry, rep, false, noSpillover);
             }
         }
 

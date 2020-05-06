@@ -264,9 +264,17 @@ namespace Game
             }
         }
 
-        public bool ModifyReputation(FactionRecord factionEntry, int standing, bool noSpillover = false) { return SetReputation(factionEntry, standing, true, noSpillover); }
+        public bool ModifyReputation(FactionRecord factionEntry, int standing, bool spillOverOnly = false, bool noSpillover = false)
+        {
+            return SetReputation(factionEntry, standing, true, spillOverOnly, noSpillover);
+        }
 
-        public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental = false, bool noSpillover = false)
+        public bool SetReputation(FactionRecord factionEntry, int standing)
+        {
+            return SetReputation(factionEntry, standing, false, false, false);
+        }
+        
+        public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental, bool spillOverOnly, bool noSpillover)
         {
             Global.ScriptMgr.OnPlayerReputationChange(_player, factionEntry.Id, standing, incremental);
             bool res = false;
@@ -336,7 +344,10 @@ namespace Game
             var faction = _factions.LookupByKey(factionEntry.ReputationIndex);
             if (faction != null)
             {
-                res = SetOneFactionReputation(factionEntry, standing, incremental);
+                // if we update spillover only, do not update main reputation (rank exceeds creature reward rate)
+                if (!spillOverOnly)
+                    res = SetOneFactionReputation(factionEntry, standing, incremental);
+
                 // only this faction gets reported to client, even if it has no own visible standing
                 SendState(faction);
             }
