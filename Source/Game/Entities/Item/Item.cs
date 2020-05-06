@@ -439,7 +439,9 @@ namespace Game.Entities
             SetDurability(durability);
             // update max durability (and durability) if need
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), proto.MaxDurability);
-            if (durability > proto.MaxDurability)
+
+            // do not overwrite durability for wrapped items
+            if (durability > proto.MaxDurability && !HasItemFlag(ItemFieldFlags.Wrapped))
             {
                 SetDurability(proto.MaxDurability);
                 need_save = true;
@@ -2633,6 +2635,7 @@ namespace Game.Entities
         public bool IsCurrencyToken() { return GetTemplate().IsCurrencyToken(); }
         public bool IsBroken() { return m_itemData.MaxDurability > 0 && m_itemData.Durability == 0; }
         public void SetDurability(uint durability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Durability), durability); }
+        public void SetMaxDurability(uint maxDurability) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), maxDurability); }
         public void SetInTrade(bool b = true) { mb_in_trade = b; }
         public bool IsInTrade() { return mb_in_trade; }
 

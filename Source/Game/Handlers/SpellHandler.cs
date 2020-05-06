@@ -222,6 +222,7 @@ namespace Game
             item.SetGiftCreator(ObjectGuid.Empty);
             item.SetEntry(entry);
             item.SetItemFlags((ItemFieldFlags)flags);
+            item.SetMaxDurability(item.GetTemplate().MaxDurability);
             item.SetState(ItemUpdateState.Changed, GetPlayer());
 
             GetPlayer().SaveInventoryAndGoldToDB(trans);
