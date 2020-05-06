@@ -3934,14 +3934,16 @@ namespace Game.Spells
                 if (Scaling.ResourceCoefficient != 0)
                     comboDamage = Scaling.ResourceCoefficient * value;
             }
-            else
+            else if(GetScalingExpectedStat() == ExpectedStatType.None)
             {
-                if (GetScalingExpectedStat() == ExpectedStatType.None)
+                if (caster != null && basePointsPerLevel != 0.0f)
                 {
-                    int level = caster ? (int)caster.GetLevel() : 0;
+                    int level = (int)caster.GetLevel();
                     if (level > (int)_spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
                         level = (int)_spellInfo.MaxLevel;
-                    level -= (int)_spellInfo.BaseLevel;
+
+                    // if base level is greater than spell level, reduce by base level (eg. pilgrims foods)
+                    level -= (int)Math.Max(_spellInfo.BaseLevel, _spellInfo.SpellLevel);
                     if (level < 0)
                         level = 0;
                     value += level * basePointsPerLevel;

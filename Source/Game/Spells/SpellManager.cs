@@ -3014,6 +3014,15 @@ namespace Game.Entities
                         spellInfo.AuraInterruptFlags[0] |= (uint)SpellAuraInterruptFlags.ChangeMap;
                         break;
                     // ENDOF FIRELANDS SPELLS
+
+                    // ANTORUS THE BURNING THRONE SPELLS
+                    // Decimation
+                    case 244449:
+                        // For some reason there is a instakill effect that serves absolutely no purpose.
+                        // Until we figure out what it's actually used for we disable it.
+                        spellInfo.GetEffect(2).Effect = 0;
+                        break;
+                    // ENDOF ANTORUS THE BURNING THRONE SPELLS
                     case 102445: // Summon Master Li Fei
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                         break;
