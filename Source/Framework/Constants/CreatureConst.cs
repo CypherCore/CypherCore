@@ -209,20 +209,32 @@ namespace Framework.Constants
         NoTaunt = 0x100,       // Creature Is Immune To Taunt Auras And Effect Attack Me
         NoMoveFlagsUpdate = 0x200, // Creature won't update movement flags
         GhostVisibility = 0x400,       // creature will be only visible for dead players
+        Unused11 = 0x00000800,
+        Unused12 = 0x00001000,
+        Unused13 = 0x00002000,
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
+        Unused16 = 0x00010000,
         NoCrit = 0x20000,       // Creature Can'T Do Critical Strikes
         NoSkillgain = 0x40000,       // Creature Won'T Increase Weapon Skills
         TauntDiminish = 0x80000,       // Taunt Is A Subject To Diminishing Returns On This Creautre
         AllDiminish = 0x100000,       // Creature Is Subject To All Diminishing Returns As Player Are
         NoPlayerDamageReq = 0x200000,       // creature does not need to take player damage for kill credit
+        Unused22 = 0x00400000,
+        Unused23 = 0x00800000,
+        Unused24 = 0x01000000,
+        Unused25 = 0x02000000,
+        Unused26 = 0x04000000,
+        Unused27 = 0x08000000,
         DungeonBoss = 0x10000000,        // Creature Is A Dungeon Boss (Set Dynamically, Do Not Add In Db)
         IgnorePathfinding = 0x20000000,        // creature ignore pathfinding
         ImmunityKnockback = 0x40000000,        // creature is immune to knockback effects
+        Unused31 = 0x80000000,
 
-        DBAllowed = (InstanceBind | Civilian | NoParry | NoParryHasten | NoBlock | NoCrush | NoXpAtKill |
-            Trigger | NoTaunt | NoMoveFlagsUpdate | Worldevent | NoCrit | NoSkillgain | TauntDiminish | AllDiminish | Guard |
-            IgnorePathfinding | NoPlayerDamageReq | ImmunityKnockback)
+        // Masks
+        AllUnused = (Unused11 | Unused12 | Unused13 | Unused16 | Unused22 | Unused23 | Unused24 | Unused25 | Unused26 | Unused27 | Unused31),
+
+        DBAllowed = (0xFFFFFFFF & ~(AllUnused | CreatureFlagsExtra.DungeonBoss))
     }
 
     public enum CreatureType
