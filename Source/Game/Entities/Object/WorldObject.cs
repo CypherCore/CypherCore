@@ -1916,7 +1916,7 @@ namespace Game.Entities
         {
             Vector3 vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ());
             Vector3 vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
-            Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * GetObjectSize();
+            Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetObjectSize());
 
             return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAngle(contactPoint.X, contactPoint.Y));
         }
