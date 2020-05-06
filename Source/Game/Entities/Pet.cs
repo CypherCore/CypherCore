@@ -356,6 +356,8 @@ namespace Game.Entities
             if (owner.IsTypeId(TypeId.Player) && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
                 owner.ToPlayer().SetLastPetNumber(petId);
 
+            // must be after SetMinion (owner guid check)
+            LoadMechanicTemplateImmunity();
             m_loading = false;
 
             return true;

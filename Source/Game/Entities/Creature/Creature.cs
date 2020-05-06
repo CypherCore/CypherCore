@@ -1698,7 +1698,7 @@ namespace Game.Entities
                 ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
         }
 
-        void LoadMechanicTemplateImmunity()
+        public void LoadMechanicTemplateImmunity()
         {
             // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
             // used so we know which immunities were loaded from template
