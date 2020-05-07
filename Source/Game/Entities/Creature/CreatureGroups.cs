@@ -222,13 +222,16 @@ namespace Game.Entities
             m_Formed = !dismiss;
         }
 
-        public void LeaderMoveTo(float x, float y, float z)
+        public void LeaderMoveTo(Position destination, uint id = 0, uint moveType = 0, bool orientation = false)
         {
             //! To do: This should probably get its own movement generator or use WaypointMovementGenerator.
             //! If the leader's path is known, member's path can be plotted as well using formation offsets.
             if (!m_leader)
                 return;
 
+            float x = destination.GetPositionX();
+            float y = destination.GetPositionY();
+            float z = destination.GetPositionZ();
             float pathangle = (float)Math.Atan2(m_leader.GetPositionY() - y, m_leader.GetPositionX() - x);
 
             foreach (var pair in m_members)
@@ -254,12 +257,9 @@ namespace Game.Entities
                 if (!member.IsFlying())
                     member.UpdateGroundPositionZ(dx, dy, ref dz);
 
-                if (member.IsWithinDist(m_leader, dist + 5.0f))
-                    member.SetUnitMovementFlags(m_leader.GetUnitMovementFlags());
-                else
-                    member.SetWalk(false);
+                Position point = new Position(dx, dy, dz, destination.GetOrientation());
 
-                member.GetMotionMaster().MovePoint(0, dx, dy, dz);
+                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(m_leader, dist + 5.0f), orientation);
                 member.SetHomePosition(dx, dy, dz, pathangle);
             }
         }

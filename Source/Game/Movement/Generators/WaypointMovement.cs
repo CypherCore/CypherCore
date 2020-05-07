@@ -187,7 +187,7 @@ namespace Game.Movement
 
             creature.AddUnitState(UnitState.RoamingMove);
 
-            Position formationDest = new Position(node.x, node.y, node.z, 0.0f);
+            Position formationDest = new Position(node.x, node.y, node.z, (node.orientation != 0 && node.delay != 0) ? node.orientation : 0.0f);
             MoveSplineInit init = new MoveSplineInit(creature);
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
@@ -196,7 +196,11 @@ namespace Game.Movement
                 init.DisableTransportPathTransformations();
                 ITransport trans = creature.GetDirectTransport();
                 if (trans != null)
-                    trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref formationDest.Orientation);
+                {
+                    float orientation = formationDest.GetOrientation();
+                    trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref orientation);
+                    formationDest.SetOrientation(orientation);
+                }
             }
 
             //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
@@ -227,10 +231,7 @@ namespace Game.Movement
 
             //Call for creature group update
             if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
-            {
-                creature.SetWalk(node.moveType != WaypointMoveType.Run);
-                creature.GetFormation().LeaderMoveTo(formationDest.posX, formationDest.posY, formationDest.posZ);
-            }
+                creature.GetFormation().LeaderMoveTo(formationDest, node.id, (uint)node.moveType, (node.orientation != 0 && node.delay != 0) ? true : false);
 
             return true;
         }

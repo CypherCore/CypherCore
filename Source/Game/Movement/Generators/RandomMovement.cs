@@ -118,7 +118,7 @@ namespace Game.Movement
 
             // Call for creature group update
             if (owner.GetFormation() != null && owner.GetFormation().GetLeader() == owner)
-                owner.GetFormation().LeaderMoveTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
+                owner.GetFormation().LeaderMoveTo(position);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()

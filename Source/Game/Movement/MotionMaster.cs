@@ -607,6 +607,12 @@ namespace Game.Movement
             StartMovement(new RotateMovementGenerator(time, direction), MovementSlot.Active);
         }
 
+        public void MoveFormation(uint id, Position destination, uint moveType, bool forceRun = false, bool forceOrientation = false)
+        {
+            if (_owner.GetTypeId() == TypeId.Unit)
+                StartMovement(new FormationMovementGenerator(id, destination, moveType, forceRun, forceOrientation), MovementSlot.Active);
+        }
+
         void Pop()
         {
             if (Empty())
