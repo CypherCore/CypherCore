@@ -841,26 +841,22 @@ namespace Game.Entities
                 !IsTypeId(TypeId.Player) && !ToCreature().IsControlledByPlayer() && !victim.HasInArc(MathFunctions.PI, this)
                 && (victim.IsTypeId(TypeId.Player) || !victim.ToCreature().IsWorldBoss()) && !victim.IsVehicle())
             {
-                // -probability is between 0% and 40%
                 // 20% base chance
-                float Probability = 20.0f;
+                float chance = 20.0f;
 
                 // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
                 if (victim.GetLevel() < 30)
-                    Probability = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
+                    chance = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
 
-                uint VictimDefense = victim.GetMaxSkillValueForLevel(this);
-                uint AttackerMeleeSkill = GetMaxSkillValueForLevel();
+                uint victimDefense = victim.GetMaxSkillValueForLevel(this);
+                uint attackerMeleeSkill = GetMaxSkillValueForLevel();
 
-                Probability *= (AttackerMeleeSkill / (float)VictimDefense * 0.16f);
+                chance *= attackerMeleeSkill / (float)victimDefense * 0.16f;
 
-                if (Probability < 0)
-                    Probability = 0;
+                // -probability is between 0% and 40%
+                MathFunctions.RoundToInterval(ref chance, 0.0f, 40.0f);
 
-                if (Probability > 40.0f)
-                    Probability = 40.0f;
-
-                if (RandomHelper.randChance(Probability))
+                if (RandomHelper.randChance(chance))
                     CastSpell(victim, 1604, true);
             }
 
@@ -2356,31 +2352,30 @@ namespace Game.Entities
                     return 0;
             }
 
-            float averageResist = GetEffectiveResistChance(this, schoolMask, victim, spellInfo);
+            float averageResist = CalculateAverageResistReduction(schoolMask, victim, spellInfo);
 
             float[] discreteResistProbability = new float[11];
-            for (uint i = 0; i < 11; ++i)
-            {
-                discreteResistProbability[i] = 0.5f - 2.5f * Math.Abs(0.1f * i - averageResist);
-                if (discreteResistProbability[i] < 0.0f)
-                    discreteResistProbability[i] = 0.0f;
-            }
-
             if (averageResist <= 0.1f)
             {
                 discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
                 discreteResistProbability[1] = 5.0f * averageResist;
                 discreteResistProbability[2] = 2.5f * averageResist;
             }
+            else
+            {
+                for (uint i = 0; i < 11; ++i)
+                    discreteResistProbability[i] = Math.Max(0.5f - 2.5f * Math.Abs(0.1f * i - averageResist), 0.0f);
+            }
+
+            float roll = (float)RandomHelper.NextDouble();
+            float probabilitySum = 0.0f;
 
             uint resistance = 0;
-            float r = (float)RandomHelper.NextDouble();
-            float probabilitySum = discreteResistProbability[0];
+            for (; resistance < 11; ++resistance)
+                if (roll < (probabilitySum += discreteResistProbability[resistance]))
+                    break;
 
-            while (r >= probabilitySum && resistance < 10)
-                probabilitySum += discreteResistProbability[++resistance];
-
-            float damageResisted = damage * resistance / 10;
+            float damageResisted = damage * resistance / 10f;
             if (damageResisted > 0.0f) // if any damage was resisted
             {
                 int ignoredResistance = 0;
@@ -2394,31 +2389,31 @@ namespace Game.Entities
                 if (spellInfo != null && spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
                 {
                     uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, WeaponAttackType.BaseAttack);
-                    uint armorReduction = damage - damageAfterArmor;
-                    if (armorReduction < damageResisted) // pick the lower one, the weakest resistance counts
-                        damageResisted = armorReduction;
+                    float armorReduction = damage - damageAfterArmor;
+
+                    // pick the lower one, the weakest resistance counts
+                    damageResisted = Math.Min(damageResisted, armorReduction);
                 }
             }
 
+            damageResisted = Math.Max(damageResisted, 0.0f);
             return (uint)damageResisted;
         }
 
-        float GetEffectiveResistChance(Unit owner, SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo)
+        float CalculateAverageResistReduction(SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo)
         {
             float victimResistance = (float)victim.GetResistance(schoolMask);
-            if (owner)
+
+            // pets inherit 100% of masters penetration
+            // excluding traps
+            Player player = GetSpellModOwner();
+            if (player != null && GetEntry() != SharedConst.WorldTrigger)
             {
-                // pets inherit 100% of masters penetration
-                // excluding traps
-                Player player = owner.GetSpellModOwner();
-                if (player != null && owner.GetEntry() != SharedConst.WorldTrigger)
-                {
-                    victimResistance += (float)player.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
-                    victimResistance -= (float)player.GetSpellPenetrationItemMod();
-                }
-                else
-                    victimResistance += (float)owner.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                victimResistance += (float)player.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                victimResistance -= (float)player.GetSpellPenetrationItemMod();
             }
+            else
+                victimResistance += (float)GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
 
             // holy resistance exists in pve and comes from level difference, ignore template values
             if (schoolMask.HasAnyFlag(SpellSchoolMask.Holy))
@@ -2429,8 +2424,10 @@ namespace Game.Entities
                 victimResistance = 0.0f;
 
             victimResistance = Math.Max(victimResistance, 0.0f);
-            if (owner)
-                victimResistance += Math.Max(((float)victim.GetLevelForTarget(owner) - (float)owner.GetLevelForTarget(victim)) * 5.0f, 0.0f);
+
+            // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
+            if (!spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
+                victimResistance += Math.Max((victim.GetLevelForTarget(this) - GetLevelForTarget(victim)) * 5.0f, 0.0f);
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;

@@ -716,32 +716,28 @@ namespace Game.Entities
             //calculate miss chance
             float missChance = victim.GetUnitMissChance(attType);
 
+            // melee attacks while dual wielding have +19% chance to miss
             if (spellId == 0 && HaveOffhandWeapon() && !IsInFeralForm())
-                missChance += 19;
-
-            // Calculate hit chance
-            float hitChance = 100.0f;
+                missChance += 19.0f;
 
             // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
+            float resistMissChance = 100.0f;
             if (spellId != 0)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellId, SpellModOp.ResistMissChance, ref hitChance);
+                    modOwner.ApplySpellMod(spellId, SpellModOp.ResistMissChance, ref resistMissChance);
             }
 
-            missChance += hitChance - 100.0f;
+            missChance += resistMissChance - 100.0f;
 
             if (attType == WeaponAttackType.RangedAttack)
                 missChance -= ModRangedHitChance;
             else
                 missChance -= ModMeleeHitChance;
 
-            // Limit miss chance from 0 to 77%
-            if (missChance < 0.0f)
-                return 0.0f;
-            if (missChance > 77.0f)
-                return 77.0f;
+            // Limit miss chance from 0 to 60%
+            MathFunctions.RoundToInterval(ref missChance, 0.0f, 60.0f);
             return missChance;
         }
 
@@ -870,7 +866,7 @@ namespace Game.Entities
         }
         float GetUnitMissChance(WeaponAttackType attType)
         {
-            float miss_chance = 5.00f;
+            float miss_chance = 5.0f;
 
             if (attType == WeaponAttackType.RangedAttack)
                 miss_chance -= GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
@@ -1172,7 +1168,7 @@ namespace Game.Entities
             }
 
             if (HasAuraType(AuraType.OverrideAttackPowerBySpPct))
-            { 
+            {
                 UpdateAttackPowerAndDamage();
                 UpdateAttackPowerAndDamage(true);
             }
@@ -1255,7 +1251,7 @@ namespace Game.Entities
                     UpdateSpellDamageAndHealingBonus();
 
                 if (pet != null && pet.IsPetGhoul()) // At melee attack power change for DK pet
-                 pet.UpdateAttackPowerAndDamage();
+                    pet.UpdateAttackPowerAndDamage();
 
                 if (guardian != null && guardian.IsSpiritWolf()) // At melee attack power change for Shaman feral spirit
                     guardian.UpdateAttackPowerAndDamage();
@@ -1451,7 +1447,7 @@ namespace Game.Entities
                 return;
 
             for (uint i = 0; i < PlayerConst.MaxMasterySpells; ++i)
-            {                
+            {
                 Aura aura = GetAura(chrSpec.MasterySpellID[i]);
                 if (aura != null)
                 {
@@ -1498,24 +1494,63 @@ namespace Game.Entities
             // Store Rating Value
             SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), (uint)amount);
         }
-        public void UpdateParryPercentage()
+
+        float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
         {
-            float[] parry_cap =
+            float[] m_diminishing_k =
             {
-                65.631440f,     // Warrior
-                65.631440f,     // Paladin
-                145.560408f,    // Hunter
-                145.560408f,    // Rogue
-                0.0f,           // Priest
-                65.631440f,     // DK
-                145.560408f,    // Shaman
-                0.0f,           // Mage
-                0.0f,           // Warlock
-                90.6425f,       // Monk
-                0.0f,           // Druid
-                65.631440f      // Demon Hunter
+                0.9560f,  // Warrior
+                0.9560f,  // Paladin
+                0.9880f,  // Hunter
+                0.9880f,  // Rogue
+                0.9830f,  // Priest
+                0.9560f,  // DK
+                0.9880f,  // Shaman
+                0.9830f,  // Mage
+                0.9830f,  // Warlock
+                0.9830f,  // Monk
+                0.9720f,  // Druid
+                0.9830f   // Demon Hunter
             };
 
+            //  1     1     k              cx
+            // --- = --- + --- <=> x' = --------
+            //  x'    c     x            x + ck
+
+            // where:
+            // k  is m_diminishing_k for that class
+            // c  is capArray for that class
+            // x  is chance before DR (diminishValue)
+            // x' is chance after DR (our result)
+
+            uint classIdx = (byte)playerClass - 1u;
+
+            float k = m_diminishing_k[classIdx];
+            float c = capArray[classIdx];
+
+            float result = c * diminishValue / (diminishValue + c * k);
+            result += nonDiminishValue;
+            return result;
+        }
+
+        float[] parry_cap =
+        {
+            65.631440f,     // Warrior
+            65.631440f,     // Paladin
+            145.560408f,    // Hunter
+            145.560408f,    // Rogue
+            0.0f,           // Priest
+            65.631440f,     // DK
+            145.560408f,    // Shaman
+            0.0f,           // Mage
+            0.0f,           // Warlock
+            90.6425f,       // Monk
+            0.0f,           // Druid
+            65.631440f      // Demon Hunter
+        };
+
+        public void UpdateParryPercentage()
+        {
             // No parry
             float value = 0.0f;
             int pclass = (int)GetClass() - 1;
@@ -1526,33 +1561,34 @@ namespace Game.Entities
                 float diminishing = GetRatingBonusValue(CombatRating.Parry);
                 // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
                 nondiminishing += GetTotalAuraModifier(AuraType.ModParryPercent);
+
                 // apply diminishing formula to diminishing parry chance
-                value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
+                value = CalculateDiminishingReturns(parry_cap, GetClass(), nondiminishing, diminishing);
 
                 if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                     value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsParry) : value;
             }
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), value);
         }
+        
+        float[] dodge_cap =
+        {
+            65.631440f,     // Warrior            
+            65.631440f,     // Paladin
+            145.560408f,    // Hunter
+            145.560408f,    // Rogue
+            150.375940f,    // Priest
+            65.631440f,     // DK
+            145.560408f,    // Shaman
+            150.375940f,    // Mage
+            150.375940f,    // Warlock
+            145.560408f,    // Monk
+            116.890707f,    // Druid
+            145.560408f     // Demon Hunter
+        };
 
         public void UpdateDodgePercentage()
         {
-            float[] dodge_cap =
-            {        
-                65.631440f,     // Warrior                
-                65.631440f,     // Paladin
-                145.560408f,    // Hunter
-                145.560408f,    // Rogue
-                150.375940f,    // Priest
-                65.631440f,     // DK
-                145.560408f,    // Shaman
-                150.375940f,    // Mage
-                150.375940f,    // Warlock
-                145.560408f,    // Monk
-                116.890707f,    // Druid
-                145.560408f     // Demon Hunter
-            };
-
             float diminishing = 0.0f, nondiminishing = 0.0f;
             GetDodgeFromAgility(diminishing, nondiminishing);
             // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
@@ -1560,14 +1596,14 @@ namespace Game.Entities
             // Dodge from rating
             diminishing += GetRatingBonusValue(CombatRating.Dodge);
             // apply diminishing formula to diminishing dodge chance
-            int pclass = (int)GetClass() - 1;
-            float value = nondiminishing + (diminishing * dodge_cap[pclass] / (diminishing + dodge_cap[pclass] * m_diminishing_k[pclass]));
+            float value = CalculateDiminishingReturns(dodge_cap, GetClass(), nondiminishing, diminishing);
 
             if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                 value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsDodge) : value;
 
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DodgePercentage), value);
         }
+
         public void UpdateBlockPercentage()
         {
             // No block
@@ -1844,22 +1880,6 @@ namespace Game.Entities
             }
             return apply;
         }
-
-        float[] m_diminishing_k =
-        {
-            0.9560f,  // Warrior
-            0.9560f,  // Paladin
-            0.9880f,  // Hunter
-            0.9880f,  // Rogue
-            0.9830f,  // Priest
-            0.9560f,  // DK
-            0.9880f,  // Shaman
-            0.9830f,  // Mage
-            0.9830f,  // Warlock
-            0.9830f,  // Monk
-            0.9720f,  // Druid
-            0.9830f   // Demon Hunter
-        };
     }
 
     public partial class Creature

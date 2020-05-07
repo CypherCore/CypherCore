@@ -934,7 +934,6 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        // @todo need use unit spell resistances in calculations
         SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spell)
         {
             // Can`t miss on dead target (on skinning for example)
@@ -991,7 +990,7 @@ namespace Game.Entities
             int tmp = 10000 - HitChance;
 
             int rand = RandomHelper.IRand(0, 9999);
-            if (rand < tmp)
+            if (tmp > 0 && rand < tmp)
                 return SpellMissInfo.Miss;
 
             // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
@@ -1001,18 +1000,16 @@ namespace Game.Entities
 
             // Chance resist mechanic (select max value from every mechanic spell effect)
             int resist_chance = victim.GetMechanicResistChance(spell) * 100;
-            tmp += resist_chance;
 
             // Roll chance
-            if (rand < tmp)
+            if (resist_chance > 0 && rand < (tmp += resist_chance))
                 return SpellMissInfo.Resist;
 
             // cast by caster in front of victim
             if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathFunctions.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
             {
                 int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
-                tmp += deflect_chance;
-                if (rand < tmp)
+                if (deflect_chance > 0 && rand < (tmp += deflect_chance))
                     return SpellMissInfo.Deflect;
             }
 
