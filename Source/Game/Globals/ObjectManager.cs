@@ -7017,8 +7017,6 @@ namespace Game
                             qinfo.Id, qinfo.NextQuestInChain, qinfo.NextQuestInChain);
                         qinfo.NextQuestInChain = 0;
                     }
-                    else
-                        qNext.PrevChainQuests.Add(qinfo.Id);
                 }
 
                 for (var j = 0; j < SharedConst.QuestRewardCurrencyCount; ++j)

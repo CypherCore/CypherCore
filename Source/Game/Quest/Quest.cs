@@ -662,7 +662,6 @@ namespace Game
         public uint ScriptId;
 
         public List<uint> DependentPreviousQuests = new List<uint>();
-        public List<uint> PrevChainQuests = new List<uint>();
         public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;

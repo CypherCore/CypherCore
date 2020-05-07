@@ -408,7 +408,7 @@ namespace Game.Entities
             if (!Global.DisableMgr.IsDisabledFor(DisableType.Quest, quest.Id, this) && SatisfyQuestClass(quest, false) && SatisfyQuestRace(quest, false) &&
                 SatisfyQuestSkill(quest, false) && SatisfyQuestExclusiveGroup(quest, false) && SatisfyQuestReputation(quest, false) &&
                 SatisfyQuestDependentQuests(quest, false) && SatisfyQuestNextChain(quest, false) &&
-                SatisfyQuestPrevChain(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
+                SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
                 return GetLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= GetQuestMinLevel(quest);
@@ -424,10 +424,9 @@ namespace Game.Entities
                 && SatisfyQuestClass(quest, msg) && SatisfyQuestRace(quest, msg) && SatisfyQuestLevel(quest, msg)
                 && SatisfyQuestSkill(quest, msg) && SatisfyQuestReputation(quest, msg)
                 && SatisfyQuestDependentQuests(quest, msg) && SatisfyQuestTimed(quest, msg)
-                && SatisfyQuestNextChain(quest, msg) && SatisfyQuestPrevChain(quest, msg)
-                && SatisfyQuestDay(quest, msg) && SatisfyQuestWeek(quest, msg)
-                && SatisfyQuestMonth(quest, msg) && SatisfyQuestSeasonal(quest, msg)
-                && SatisfyQuestConditions(quest, msg);
+                && SatisfyQuestNextChain(quest, msg) && SatisfyQuestDay(quest, msg)
+                && SatisfyQuestWeek(quest, msg) && SatisfyQuestMonth(quest, msg)
+                && SatisfyQuestSeasonal(quest, msg) && SatisfyQuestConditions(quest, msg);
         }
 
         public bool CanAddQuest(Quest quest, bool msg)
@@ -1578,32 +1577,6 @@ namespace Game.Entities
                 }
                 return false;
             }
-            return true;
-        }
-
-        public bool SatisfyQuestPrevChain(Quest qInfo, bool msg)
-        {
-            // No previous quest in chain
-            if (qInfo.PrevChainQuests.Empty())
-                return true;
-
-            foreach (var prevQuestId in qInfo.PrevChainQuests)
-            {
-                var questStatusData = m_QuestStatus.LookupByKey(prevQuestId);
-
-                // If any of the previous quests in chain active, return false
-                if (questStatusData != null && questStatusData.Status != QuestStatus.None)
-                {
-                    if (msg)
-                    {
-                        SendCanTakeQuestResponse(QuestFailedReasons.None);
-                        Log.outDebug(LogFilter.Server, "SatisfyQuestNextChain: Sent QuestFailedReason.None (questId: {0}) because player already did or started next quest in chain.", qInfo.Id);
-                    }
-                    return false;
-                }
-            }
-
-            // No previous quest in chain active
             return true;
         }
 
