@@ -58,9 +58,9 @@ namespace Game.Movement
         {
             DoReset((T)owner);
         }
-        public override bool Update(Unit owner, uint time_diff)
+        public override bool Update(Unit owner, uint diff)
         {
-            return DoUpdate((T)owner, time_diff);
+            return DoUpdate((T)owner, diff);
         }
 
         public bool IsActive { get; set; }
@@ -68,7 +68,7 @@ namespace Game.Movement
         public abstract void DoInitialize(T owner);
         public abstract void DoFinalize(T owner);
         public abstract void DoReset(T owner);
-        public abstract bool DoUpdate(T owner, uint time_diff);
+        public abstract bool DoUpdate(T owner, uint diff);
     }
 
     public class FollowerReference : Reference<Unit, ITargetedMovementGeneratorBase>

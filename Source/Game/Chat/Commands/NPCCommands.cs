@@ -506,7 +506,7 @@ namespace Game.Chat
 
                 FollowMovementGenerator<Creature> mgen = (FollowMovementGenerator<Creature>)creature.GetMotionMaster().Top();
 
-                if (mgen.Target != player)
+                if (mgen.GetTarget() != player)
                 {
                     handler.SendSysMessage(CypherStrings.CreatureNotFollowYou, creature.GetName());
                     return false;

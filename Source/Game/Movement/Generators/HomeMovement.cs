@@ -28,9 +28,20 @@ namespace Game.AI
             SetTargetLocation(owner);
         }
 
+        public override void DoReset(T owner) 
+        {
+            DoInitialize(owner);
+        }
+
+        public override bool DoUpdate(T owner, uint diff)
+        {
+            _arrived = _skipToHome || owner.MoveSpline.Finalized();
+            return !_arrived;
+        }
+
         public override void DoFinalize(T owner)
         {
-            if (arrived)
+            if (_arrived)
             {
                 owner.ClearUnitState(UnitState.Evade);
                 owner.SetWalk(true);
@@ -40,19 +51,11 @@ namespace Game.AI
             }
         }
 
-        public override void DoReset(T owner) { }
-
-        public override bool DoUpdate(T owner, uint time_diff)
-        {
-            arrived = skipToHome || owner.MoveSpline.Finalized();
-            return !arrived;
-        }
-
         void SetTargetLocation(T owner)
         {
             if (owner.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
             { // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
-                skipToHome = true;
+                _skipToHome = true;
                 return;
             }
 
@@ -68,8 +71,8 @@ namespace Game.AI
             init.SetWalk(false);
             init.Launch();
 
-            skipToHome = false;
-            arrived = false;
+            _skipToHome = false;
+            _arrived = false;
 
             owner.ClearUnitState(UnitState.AllErasable & ~UnitState.Evade);
         }
@@ -79,7 +82,7 @@ namespace Game.AI
             return MovementGeneratorType.Home;
         }
 
-        bool arrived;
-        bool skipToHome;
+        bool _arrived;
+        bool _skipToHome;
     }
 }

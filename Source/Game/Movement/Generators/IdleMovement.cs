@@ -22,45 +22,41 @@ namespace Game.Movement
 {
     public class IdleMovementGenerator : IMovementGenerator
     {
-        public override MovementGeneratorType GetMovementGeneratorType()
+        public override void Initialize(Unit owner)
         {
-            return MovementGeneratorType.Idle;
+            Reset(owner);
         }
-
-        public bool IsActive { get; set; }
 
         public override void Reset(Unit owner)
         {
             if (!owner.IsStopped())
                 owner.StopMoving();
         }
-        public override void Initialize(Unit owner)
-        {
-            Reset(owner);
-        }
-        public override void Finalize(Unit owner)
-        {
-        }
-        public override bool Update(Unit owner, uint time_diff)
+
+        public override bool Update(Unit owner, uint diff)
         {
             return true;
         }
+
+        public override void Finalize(Unit owner)
+        {
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Idle;
+        }
+
+        public bool IsActive { get; set; }
     }
 
     public class RotateMovementGenerator : IMovementGenerator
     {
         public RotateMovementGenerator(uint time, RotateDirection direction)
         {
-            m_duration = time;
-            m_maxDuration = time;
-            m_direction = direction;
-        }
-
-        public override void Finalize(Unit owner)
-        {
-            owner.ClearUnitState(UnitState.Rotating);
-            if (owner.IsTypeId(TypeId.Unit))
-                owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, 0);
+            _duration = time;
+            _maxDuration = time;
+            _direction = direction;
         }
 
         public override void Initialize(Unit owner)
@@ -75,36 +71,64 @@ namespace Game.Movement
             owner.AttackStop();
         }
 
-        public override bool Update(Unit owner, uint time_diff)
+        public override void Reset(Unit owner) { }
+
+        public override bool Update(Unit owner, uint diff)
         {
             float angle = owner.GetOrientation();
-            angle += time_diff * MathFunctions.TwoPi / m_maxDuration * (m_direction == RotateDirection.Left ? 1.0f : -1.0f);
+            angle += diff * MathFunctions.TwoPi / _maxDuration * (_direction == RotateDirection.Left ? 1.0f : -1.0f);
             angle = MathFunctions.wrap(angle, 0.0f, MathFunctions.TwoPi);
 
             owner.SetOrientation(angle);   // UpdateSplinePosition does not set orientation with UNIT_STATE_ROTATING
             owner.SetFacingTo(angle);      // Send spline movement to clients
 
-            if (m_duration > time_diff)
-                m_duration -= time_diff;
+            if (_duration > diff)
+                _duration -= diff;
             else
                 return false;
 
             return true;
         }
 
-        public override void Reset(Unit owner) { }
+        public override void Finalize(Unit owner)
+        {
+            owner.ClearUnitState(UnitState.Rotating);
+            if (owner.IsTypeId(TypeId.Unit))
+                owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, 0);
+        }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
 
-        uint m_duration, m_maxDuration;
-        RotateDirection m_direction;
+        uint _duration;
+        uint _maxDuration;
+        RotateDirection _direction;
     }
 
     public class DistractMovementGenerator : IMovementGenerator
     {
         public DistractMovementGenerator(uint timer)
         {
-            m_timer = timer;
+            _timer = timer;
+        }
+
+        public override void Initialize(Unit owner)
+        {
+            // Distracted creatures stand up if not standing
+            if (!owner.IsStandState())
+                owner.SetStandState(UnitStandStateType.Stand);
+
+            owner.AddUnitState(UnitState.Distracted);
+        }
+
+        public override void Reset(Unit owner) { }
+
+        public override bool Update(Unit owner, uint diff)
+        {
+            if (diff > _timer)
+                return false;
+
+            _timer -= diff;
+            return true;
         }
 
         public override void Finalize(Unit owner)
@@ -119,29 +143,9 @@ namespace Game.Movement
             }
         }
 
-        public override void Initialize(Unit owner)
-        {
-            // Distracted creatures stand up if not standing
-            if (!owner.IsStandState())
-                owner.SetStandState(UnitStandStateType.Stand);
-
-            owner.AddUnitState(UnitState.Distracted);
-        }
-
-        public override bool Update(Unit owner, uint time_diff)
-        {
-            if (time_diff > m_timer)
-                return false;
-
-            m_timer -= time_diff;
-            return true;
-        }
-
-        public override void Reset(Unit owner) { }
-
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
 
-        uint m_timer;
+        uint _timer;
     }
 
     public class AssistanceDistractMovementGenerator : DistractMovementGenerator

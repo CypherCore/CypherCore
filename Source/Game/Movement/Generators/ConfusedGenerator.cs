@@ -25,20 +25,72 @@ namespace Game.Movement
     {
         public ConfusedGenerator()
         {
-            i_nextMoveTime = new TimeTracker();
+            _timer = new TimeTracker();
         }
 
         public override void DoInitialize(T owner)
         {
-            owner.AddUnitState(UnitState.Confused);
-            owner.AddUnitFlag(UnitFlags.Confused);
-            owner.GetPosition(out i_x, out i_y, out i_z);
-
-            if (!owner.IsAlive() || owner.IsStopped())
+            if (!owner || !owner.IsAlive())
                 return;
 
+            owner.AddUnitState(UnitState.Confused);
+            owner.AddUnitFlag(UnitFlags.Confused);
             owner.StopMoving();
-            owner.AddUnitState(UnitState.ConfusedMove);
+
+            _timer.Reset(0);
+            _reference = owner.GetPosition();
+        }
+
+        public override void DoReset(T owner)
+        {
+            DoInitialize(owner);
+        }
+
+        public override bool DoUpdate(T owner, uint diff)
+        {
+            if (!owner || !owner.IsAlive())
+                return false;
+
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
+            {
+                _interrupt = true;
+                owner.StopMoving();
+                return true;
+            }
+            else
+                _interrupt = false;
+
+            // waiting for next move
+            _timer.Update(diff);
+            if (!_interrupt && _timer.Passed() && owner.MoveSpline.Finalized())
+            {
+                // start moving
+                owner.AddUnitState(UnitState.ConfusedMove);
+
+                Position destination = _reference;
+                float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
+                float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+                owner.MovePositionToFirstCollision(ref destination, distance, angle);
+
+                if (_path == null)
+                    _path = new PathGenerator(owner);
+
+                _path.SetPathLengthLimit(30.0f);
+                bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
+                if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
+                {
+                    _timer.Reset(100);
+                    return true;
+                }
+
+                MoveSplineInit init = new MoveSplineInit(owner);
+                init.MovebyPath(_path.GetPath());
+                init.SetWalk(true);
+                int traveltime = init.Launch();
+                _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
+            }
+
+            return true;
         }
 
         public override void DoFinalize(T owner)
@@ -46,7 +98,7 @@ namespace Game.Movement
             if (owner.IsTypeId(TypeId.Player))
             {
                 owner.RemoveUnitFlag(UnitFlags.Confused);
-                owner.ClearUnitState(UnitState.Confused | UnitState.ConfusedMove);
+                owner.ClearUnitState(UnitState.Confused);
                 owner.StopMoving();
             }
             else if (owner.IsTypeId(TypeId.Unit))
@@ -58,69 +110,14 @@ namespace Game.Movement
             }
         }
 
-        public override void DoReset(T owner)
-        {
-            i_nextMoveTime.Reset(0);
-
-            if (!owner.IsAlive() || owner.IsStopped())
-                return;
-
-            owner.StopMoving();
-            owner.AddUnitState(UnitState.Confused | UnitState.ConfusedMove);
-        }
-
-        public override bool DoUpdate(T owner, uint time_diff)
-        {
-            if (owner.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
-                return true;
-
-            if (i_nextMoveTime.Passed())
-            {
-                // currently moving, update location
-                owner.AddUnitState(UnitState.ConfusedMove);
-
-                if (owner.MoveSpline.Finalized())
-                    i_nextMoveTime.Reset(RandomHelper.IRand(800, 1500));
-            }
-            else
-            {
-                // waiting for next move
-                i_nextMoveTime.Update(time_diff);
-                if (i_nextMoveTime.Passed())
-                {
-                    // start moving
-                    owner.AddUnitState(UnitState.ConfusedMove);
-
-                    float dest = (float)(4.0f * RandomHelper.NextDouble() - 2.0f);
-
-                    Position pos = new Position(i_x, i_y, i_z);
-                    owner.MovePositionToFirstCollision(ref pos, dest, 0.0f);
-
-                    PathGenerator path = new PathGenerator(owner);
-                    path.SetPathLengthLimit(30.0f);
-                    bool result = path.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-                    if (!result || path.GetPathType().HasAnyFlag(PathType.NoPath))
-                    {
-                        i_nextMoveTime.Reset(100);
-                        return true;
-                    }
-
-                    MoveSplineInit init = new MoveSplineInit(owner);
-                    init.MovebyPath(path.GetPath());
-                    init.SetWalk(true);
-                    init.Launch();
-                }
-            }
-
-            return true;
-        }
-
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Confused;
         }
 
-        TimeTracker i_nextMoveTime;
-        float i_x, i_y, i_z;
+        PathGenerator _path;
+        TimeTracker _timer;
+        Position _reference;
+        bool _interrupt;
     }
 }

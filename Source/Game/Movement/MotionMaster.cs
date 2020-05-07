@@ -74,9 +74,6 @@ namespace Game.Movement
             if (!_owner)
                 return;
 
-            if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
-                return;
-
             Cypher.Assert(!Empty());
 
             _cleanFlag |= MMCleanFlag.Update;
@@ -263,7 +260,7 @@ namespace Game.Movement
             MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath);
         }
 
-        public void MovePoint(ulong id, float x, float y, float z, bool generatePath = true)
+        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true)
         {
             if (_owner.IsTypeId(TypeId.Player))
                 StartMovement(new PointMovementGenerator<Player>(id, x, y, z, generatePath), MovementSlot.Active);

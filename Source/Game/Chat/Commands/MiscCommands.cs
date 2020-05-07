@@ -1872,9 +1872,9 @@ namespace Game.Chat
                         {
                             Unit target;
                             if (unit.IsTypeId(TypeId.Player))
-                                target = ((ChaseMovementGenerator<Player>)movementGenerator).Target;
+                                target = ((ChaseMovementGenerator<Player>)movementGenerator).GetTarget();
                             else
-                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).Target;
+                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).GetTarget();
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensChaseNull);
@@ -1888,9 +1888,9 @@ namespace Game.Chat
                         {
                             Unit target;
                             if (unit.IsTypeId(TypeId.Player))
-                                target = ((FollowMovementGenerator<Player>)movementGenerator).Target;
+                                target = ((FollowMovementGenerator<Player>)movementGenerator).GetTarget();
                             else
-                                target = ((FollowMovementGenerator<Creature>)movementGenerator).Target;
+                                target = ((FollowMovementGenerator<Creature>)movementGenerator).GetTarget();
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensFollowNull);

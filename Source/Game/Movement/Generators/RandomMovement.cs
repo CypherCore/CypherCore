@@ -26,151 +26,110 @@ namespace Game.Movement
     {
         public RandomMovementGenerator(float spawn_dist = 0.0f)
         {
-            i_nextMoveTime = new TimeTrackerSmall();
-            wander_distance = spawn_dist;
+            _timer = new TimeTracker();
+            _wanderDistance = spawn_dist;
         }
 
-        TimeTrackerSmall i_nextMoveTime;
-        float wander_distance;
+        public override void DoInitialize(Creature owner)
+        {
+            if (owner == null || !owner.IsAlive())
+                return;
+
+            owner.AddUnitState(UnitState.Roaming);
+            _reference = owner.GetPosition();
+            owner.StopMoving();
+
+            if (_wanderDistance == 0)
+                _wanderDistance = owner.GetRespawnRadius();
+
+            _timer.Reset(0);
+        }
+
+        public override void DoReset(Creature owner)
+        {
+            DoInitialize(owner);
+        }
+
+        public override bool DoUpdate(Creature owner, uint diff)
+        {
+            if (!owner || !owner.IsAlive())
+                return false;
+
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
+            {
+                _interrupt = true;
+                owner.StopMoving();
+                return true;
+            }
+            else
+                _interrupt = false;
+
+            _timer.Update(diff);
+            if (!_interrupt && _timer.Passed() && owner.MoveSpline.Finalized())
+                SetRandomLocation(owner);
+
+            return true;
+        }
+
+        public override void DoFinalize(Creature owner)
+        {
+            owner.ClearUnitState(UnitState.Roaming);
+            owner.StopMoving();
+            owner.SetWalk(false);
+        }
+
+        void SetRandomLocation(Creature owner)
+        {
+            if (owner == null)
+                return;
+
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
+            {
+                _interrupt = true;
+                owner.StopMoving();
+                return;
+            }
+
+            owner.AddUnitState(UnitState.RoamingMove);
+
+            Position position = _reference;
+            float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
+            float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+            owner.MovePositionToFirstCollision(ref position, distance, angle);
+
+            uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
+
+            if (_path == null)
+                _path = new PathGenerator(owner);
+
+            _path.SetPathLengthLimit(30.0f);
+            bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
+            if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
+            {
+                _timer.Reset(100);
+                return;
+            }
+
+            MoveSplineInit init = new MoveSplineInit(owner);
+            init.MovebyPath(_path.GetPath());
+            init.SetWalk(true);
+            int traveltime = init.Launch();
+            _timer.Reset(traveltime + resetTimer);
+
+            // Call for creature group update
+            if (owner.GetFormation() != null && owner.GetFormation().GetLeader() == owner)
+                owner.GetFormation().LeaderMoveTo(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
+        }
 
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Random;
         }
 
-        public override void DoInitialize(Creature creature)
-        {
-            if (!creature.IsAlive())
-                return;
-
-            if (wander_distance == 0)
-                wander_distance = creature.GetRespawnRadius();
-
-            if (wander_distance == 0)//Temp fix
-                wander_distance = 50.0f;
-
-            creature.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
-            _setRandomLocation(creature);
-
-        }
-        public override void DoFinalize(Creature creature)
-        {
-            creature.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
-            creature.SetWalk(false);
-        }
-        public override void DoReset(Creature creature)
-        {
-            DoInitialize(creature);
-        }
-
-        public override bool DoUpdate(Creature creature, uint diff)
-        {
-            if (!creature || !creature.IsAlive())
-                return false;
-
-            if (creature.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
-            {
-                i_nextMoveTime.Reset(0);  // Expire the timer
-                creature.ClearUnitState(UnitState.RoamingMove);
-                return true;
-            }
-
-            if (creature.MoveSpline.Finalized())
-            {
-                i_nextMoveTime.Update((int)diff);
-                if (i_nextMoveTime.Passed())
-                    _setRandomLocation(creature);
-            }
-            return true;
-        }
-
-        void _setRandomLocation(Creature creature)
-        {
-            if (creature.IsMovementPreventedByCasting())
-            {
-                creature.CastStop();
-                return;
-            }
-
-            float respX, respY, respZ, respO, destZ;
-            creature.GetHomePosition(out respX, out respY, out respZ, out respO);
-            Map map = creature.GetMap();
-
-            bool is_air_ok = creature.CanFly();
-
-            float angle = (float)(RandomHelper.NextDouble() * MathFunctions.TwoPi);
-            float range = (float)(RandomHelper.NextDouble() * wander_distance);
-            float distanceX = (float)(range * Math.Cos(angle));
-            float distanceY = (float)(range * Math.Sin(angle));
-
-            float destX = respX + distanceX;
-            float destY = respY + distanceY;
-
-            // prevent invalid coordinates generation
-            GridDefines.NormalizeMapCoord(ref destX);
-            GridDefines.NormalizeMapCoord(ref destY);
-
-            float travelDistZ = range;   // sin^2+cos^2=1, so travelDistZ=range^2; no need for sqrt below
-
-            if (is_air_ok)                                          // 3D system above ground and above water (flying mode)
-            {
-                // Limit height change
-                float distanceZ = (float)(RandomHelper.NextDouble() * travelDistZ / 2.0f);
-                destZ = respZ + distanceZ;
-                float levelZ = map.GetWaterOrGroundLevel(creature.GetPhaseShift(), destX, destY, destZ - 2.5f);
-
-                // Problem here, we must fly above the ground and water, not under. Let's try on next tick
-                if (levelZ >= destZ)
-                    return;
-            }
-            else                                                    // 2D only
-            {
-                // 10.0 is the max that vmap high can check (MAX_CAN_FALL_DISTANCE)
-                travelDistZ = travelDistZ >= 10.0f ? 10.0f : travelDistZ;
-
-                // The fastest way to get an accurate result 90% of the time.
-                // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
-                destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ + travelDistZ - 2.0f, false);
-
-                if (Math.Abs(destZ - respZ) > travelDistZ)              // Map check
-                {
-                    // Vmap Horizontal or above
-                    destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ - 2.0f, true);
-
-                    if (Math.Abs(destZ - respZ) > travelDistZ)
-                    {
-                        // Vmap Higher
-                        destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ + travelDistZ - 2.0f, true);
-
-                        // let's forget this bad coords where a z cannot be find and retry at next tick
-                        if (Math.Abs(destZ - respZ) > travelDistZ)
-                            return;
-                    }
-                }
-            }
-
-            if (is_air_ok)
-                i_nextMoveTime.Reset(0);
-            else
-            {
-                if (RandomHelper.randChance(50))
-                    i_nextMoveTime.Reset(RandomHelper.IRand(5000, 10000));
-                else
-                    i_nextMoveTime.Reset(RandomHelper.IRand(50, 400));
-            }
-
-            creature.AddUnitState(UnitState.RoamingMove);
-
-            MoveSplineInit init = new MoveSplineInit(creature);
-            init.MoveTo(destX, destY, destZ);
-            init.SetWalk(true);
-            init.Launch();
-
-            //Call for creature group update
-            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
-                creature.GetFormation().LeaderMoveTo(destX, destY, destZ);
-        }
-
-        public virtual bool GetResetPosition(Creature creature, float x, float y, float z) { return false; }
+        PathGenerator _path;
+        TimeTracker _timer;
+        Position _reference;
+        float _wanderDistance;
+        bool _interrupt;
     }
 }

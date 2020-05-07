@@ -24,270 +24,251 @@ namespace Game.Movement
 {
     public interface ITargetedMovementGeneratorBase
     {
-        FollowerReference Reftarget { get; set; }
+        bool IsTargetValid();
+        Unit GetTarget();
         void StopFollowing();
     }
 
-    public abstract class TargetedMovementGeneratorMedium<T> : MovementGeneratorMedium<T>, ITargetedMovementGeneratorBase where T : Unit
+    public abstract class TargetedMovementGenerator<T> : MovementGeneratorMedium<T>, ITargetedMovementGeneratorBase where T : Unit
     {
-        public FollowerReference Reftarget { get; set; }
-        public Unit Target
+        protected TargetedMovementGenerator(Unit target, float offset = 0, float angle = 0)
         {
-            get { return Reftarget.GetTarget(); }
+            _target = new FollowerReference();
+            _target.Link(target, this);
+            _timer = new TimeTracker();
+            _offset = offset;
+            _angle = angle;
+            _recalculateTravel = false;
+            _targetReached = false;
         }
 
-        public void StopFollowing() { }
-
-        protected TargetedMovementGeneratorMedium(Unit _target, float _offset = 0, float _angle = 0)
+        public override bool DoUpdate(T owner, uint diff)
         {
-            Reftarget = new FollowerReference();
-            Reftarget.Link(_target, this);
-            recheckDistance = new TimeTrackerSmall();
-            offset = _offset;
-            angle = _angle;
-            recalculateTravel = false;
-            targetReached = false;
-        }
-
-        public override bool DoUpdate(T owner, uint time_diff)
-        {
-            if (!Reftarget.IsValid() || !Target.IsInWorld)
+            if (!IsTargetValid() || !GetTarget().IsInWorld)
                 return false;
 
             if (owner == null || !owner.IsAlive())
                 return false;
 
-            if (owner.HasUnitState(UnitState.NotMove))
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || HasLostTarget(owner))
             {
-                _clearUnitStateMove(owner);
+                _interrupt = true;
+                owner.StopMoving();
                 return true;
             }
 
-            // prevent movement while casting spells with cast time or channel time
-            if (owner.IsMovementPreventedByCasting())
+            if (_interrupt || _recalculateTravel)
             {
-                if (!owner.IsStopped())
-                    owner.StopMoving();
+                _interrupt = false;
+                SetTargetLocation(owner, true);
                 return true;
             }
 
-            // prevent crash after creature killed pet
-            if (_lostTarget(owner))
-            {
-                _clearUnitStateMove(owner);
-                return true;
-            }
 
             bool targetMoved = false;
-            recheckDistance.Update((int)time_diff);
-            if (recheckDistance.Passed())
+            _timer.Update((int)diff);
+            if (_timer.Passed())
             {
-                recheckDistance.Reset(100);
-                //More distance let have better performance, less distance let have more sensitive reaction at target move.
-                float allowed_dist = 0.0f;// owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
+                _timer.Reset(100);
 
-                if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == Target.GetGUID()))
-                    allowed_dist = 1.0f; // pet following owner
-                else
-                    allowed_dist = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
+                float distance = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
+                if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == GetTarget().GetGUID()))
+                    distance = 1.0f; // pet following owner
 
-                Vector3 dest = owner.MoveSpline.FinalDestination();
+                Vector3 destination = owner.MoveSpline.FinalDestination();
                 if (owner.MoveSpline.onTransport)
                 {
                     float o = 0;
                     ITransport transport = owner.GetDirectTransport();
                     if (transport != null)
-                        transport.CalculatePassengerPosition(ref dest.X, ref dest.Y, ref dest.Z, ref o);
+                        transport.CalculatePassengerPosition(ref destination.X, ref destination.Y, ref destination.Z, ref o);
                 }
 
                 // First check distance
-                if (owner.IsTypeId(TypeId.Unit) && (owner.ToCreature().CanFly() || owner.ToCreature().CanSwim()))
-                    targetMoved = !Target.IsWithinDist3d(dest.X, dest.Y, dest.Z, allowed_dist);
+                if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().CanFly())
+                    targetMoved = !GetTarget().IsWithinDist3d(destination.X, destination.Y, destination.Z, distance);
                 else
-                    targetMoved = !Target.IsWithinDist2d(dest.X, dest.Y, allowed_dist);
+                    targetMoved = !GetTarget().IsWithinDist2d(destination.X, destination.Y, distance);
 
 
                 // then, if the target is in range, check also Line of Sight.
                 if (!targetMoved)
-                    targetMoved = !Target.IsWithinLOSInMap(owner);
+                    targetMoved = !GetTarget().IsWithinLOSInMap(owner);
             }
 
-            if (recalculateTravel || targetMoved)
-                _setTargetLocation(owner, targetMoved);
+            if (targetMoved)
+                SetTargetLocation(owner, targetMoved);
+            else if (_speedChanged)
+                SetTargetLocation(owner, false);
 
-            if (owner.MoveSpline.Finalized())
+            if (!_targetReached && owner.MoveSpline.Finalized())
             {
                 MovementInform(owner);
-                if (angle == 0.0f && !owner.HasInArc(0.01f, Target))
-                    owner.SetInFront(Target);
+                if (_angle == 0.0f && !owner.HasInArc(0.01f, GetTarget()))
+                    owner.SetInFront(GetTarget());
 
-                if (!targetReached)
+                if (!_targetReached)
                 {
-                    targetReached = true;
-                    _reachTarget(owner);
+                    _targetReached = true;
+                    ReachTarget(owner);
                 }
             }
 
             return true;
         }
 
-        public override void UnitSpeedChanged()
+        public void SetTargetLocation(T owner, bool updateDestination)
         {
-            recalculateTravel = true;
-        }
-
-        public void _setTargetLocation(T owner, bool updateDestination)
-        {
-            if (!Reftarget.IsValid() || !Target.IsInWorld)
+            if (!IsTargetValid() || !GetTarget().IsInWorld)
                 return;
 
-            if (owner.HasUnitState(UnitState.NotMove))
+            if (!owner || !owner.IsAlive())
                 return;
 
-            if (owner.IsMovementPreventedByCasting())
-                return;
 
-            if (owner.IsTypeId(TypeId.Unit) && !Target.IsInAccessiblePlaceFor(owner.ToCreature()))
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || HasLostTarget(owner))
+            {
+                _interrupt = true;
+                owner.StopMoving();
+                return;
+            }
+
+            if (owner.IsTypeId(TypeId.Unit) && !GetTarget().IsInAccessiblePlaceFor(owner.ToCreature()))
             {
                 owner.ToCreature().SetCannotReachTarget(true);
                 return;
             }
 
-            if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsFocusing(null, true))
-                return;
-
             float x, y, z;
-            if (updateDestination || i_path == null)
+            if (updateDestination || _path == null)
             {
-                if (offset == 0)
+                if (_offset == 0)
                 {
-                    if (Target.IsWithinDistInMap(owner, SharedConst.ContactDistance))
+                    if (GetTarget().IsWithinDistInMap(owner, SharedConst.ContactDistance))
                         return;
 
                     // to nearest contact position
-                    Target.GetContactPoint(owner, out x, out y, out z);
+                    GetTarget().GetContactPoint(owner, out x, out y, out z);
                 }
                 else
                 {
-                    float dist = 0;
-                    float size = 0;
+                    float distance = _offset + 1.0f;
+                    float size = owner.GetCombatReach();
 
-                    // Pets need special handling.
-                    // We need to subtract GetCombatReach() because it gets added back further down the chain
-                    //  and that makes pets too far away. Subtracting it allows pets to properly
-                    //  be (GetCombatReach() + i_offset) away.
-                    // Only applies when i_target is pet's owner otherwise pets and mobs end up
-                    //   doing a "dance" while fighting
-                    if (owner.IsPet() && Target.IsTypeId(TypeId.Player))
+                    if (owner.IsPet() && GetTarget().GetTypeId() == TypeId.Player)
                     {
-                        dist = 1.0f;// target.GetCombatReach();
-                        size = 1.0f;// target.GetCombatReach() - target.GetCombatReach();
-                    }
-                    else
-                    {
-                        dist = offset + 1.0f;
-                        size = owner.GetCombatReach();
+                        distance = 1.0f;
+                        size = 1.0f;
                     }
 
-                    if (Target.IsWithinDistInMap(owner, dist))
+                    if (GetTarget().IsWithinDistInMap(owner, distance))
                         return;
 
-                    // to at i_offset distance from target and i_angle from target facing
-                    Target.GetClosePoint(out x, out y, out z, size, offset, angle);
+                    GetTarget().GetClosePoint(out x, out y, out z, size, _offset, _angle);
                 }
             }
             else
             {
                 // the destination has not changed, we just need to refresh the path (usually speed change)
-                var end = i_path.GetEndPosition();
+                var end = _path.GetEndPosition();
                 x = end.X;
                 y = end.Y;
                 z = end.Z;
             }
 
-            if (i_path == null)
-                i_path = new PathGenerator(owner);
+            if (_path == null)
+                _path = new PathGenerator(owner);
 
             // allow pets to use shortcut if no path found when following their master
-            bool forceDest = (owner.IsTypeId(TypeId.Unit) && owner.IsPet()
-                && owner.HasUnitState(UnitState.Follow));
+            bool forceDest = owner.IsTypeId(TypeId.Unit) && owner.IsPet() && owner.HasUnitState(UnitState.Follow);
 
-            bool result = i_path.CalculatePath(x, y, z, forceDest);
-            if (!result && Convert.ToBoolean(i_path.GetPathType() & PathType.NoPath))
+            bool result = _path.CalculatePath(x, y, z, forceDest);
+            if (!result && Convert.ToBoolean(_path.GetPathType() & PathType.NoPath))
             {
                 // Can't reach target
-                recalculateTravel = true;
+                _recalculateTravel = true;
                 if (owner.IsTypeId(TypeId.Unit))
                     owner.ToCreature().SetCannotReachTarget(true);
                 return;
             }
 
-            _addUnitStateMove(owner);
-            targetReached = false;
-            recalculateTravel = false;
-            owner.AddUnitState(UnitState.Chase);
+            _targetReached = false;
+            _recalculateTravel = false;
+            _speedChanged = false;
+
+            AddUnitStateMove(owner);
+
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().SetCannotReachTarget(false);
 
             MoveSplineInit init = new MoveSplineInit(owner);
-            init.MovebyPath(i_path.GetPath());
+            init.MovebyPath(_path.GetPath());
             init.SetWalk(EnableWalking());
             // Using the same condition for facing target as the one that is used for SetInFront on movement end
             // - applies to ChaseMovementGenerator mostly
-            if (angle == 0.0f)
-                init.SetFacing(Target);
+            if (_angle == 0.0f)
+                init.SetFacing(GetTarget());
 
             init.Launch();
         }
 
-        public void UpdateFinalDistance(float fDistance)
+        bool IsReachable()
         {
-            if (typeof(T) == typeof(Player))
-                return;
-            offset = fDistance;
-            recalculateTravel = true;
+            return _path != null ? _path.GetPathType().HasAnyFlag(PathType.Normal) : true;
         }
 
-        bool IsReachable() { return (i_path != null) ? Convert.ToBoolean(i_path.GetPathType() & PathType.Normal) : true; }
+        public override void UnitSpeedChanged()
+        {
+            _speedChanged = true;
+        }
 
-        public abstract void MovementInform(T unit);
-        public abstract bool _lostTarget(T u);
-        public abstract void _clearUnitStateMove(T u);
-        public abstract void _addUnitStateMove(T u);
-        public abstract void _reachTarget(T owner);
-        public abstract bool EnableWalking();
-        public abstract void _updateSpeed(T u);
+        public abstract void ClearUnitStateMove(T owner);
+        public abstract void AddUnitStateMove(T owner);
+        public virtual bool HasLostTarget(T owner) { return false; }
+        public abstract void ReachTarget(T owner);
+        public virtual bool EnableWalking() { return false; }
+        public abstract void MovementInform(T owner);
+        
+        public void StopFollowing() { }
 
-        #region Fields
-        PathGenerator i_path;
-        TimeTrackerSmall recheckDistance;
-        float offset;
-        float angle;
-        public bool recalculateTravel;
-        bool targetReached;
-        #endregion
+        public bool IsTargetValid() { return _target.IsValid(); }
+        public Unit GetTarget() { return _target.GetTarget(); }
+
+        FollowerReference _target;
+        PathGenerator _path;
+        TimeTracker _timer;
+        float _offset;
+        float _angle;
+        bool _recalculateTravel;
+        bool _speedChanged;
+        bool _targetReached;
+        bool _interrupt;
     }
 
-    public class ChaseMovementGenerator<T> : TargetedMovementGeneratorMedium<T> where T : Unit
+    public class ChaseMovementGenerator<T> : TargetedMovementGenerator<T> where T : Unit
     {
         public ChaseMovementGenerator(Unit target)
             : base(target)
         {
         }
+
         public ChaseMovementGenerator(Unit target, float offset, float angle)
             : base(target, offset, angle)
         {
         }
-
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
         public override void DoInitialize(T owner)
         {
             if (owner.IsTypeId(TypeId.Unit))
                 owner.SetWalk(false);
 
-            owner.AddUnitState(UnitState.Chase | UnitState.ChaseMove);
-            _setTargetLocation(owner, true);
+            owner.AddUnitState(UnitState.Chase);
+            SetTargetLocation(owner, true);
+        }
+
+        public override void DoReset(T owner)
+        {
+            DoInitialize(owner);
         }
 
         public override void DoFinalize(T owner)
@@ -295,102 +276,115 @@ namespace Game.Movement
             owner.ClearUnitState(UnitState.Chase | UnitState.ChaseMove);
         }
 
-        public override void DoReset(T owner)
+        public override void ClearUnitStateMove(T owner)
         {
-            DoInitialize(owner);
+            owner.ClearUnitState(UnitState.ChaseMove);
         }
 
-        public override bool _lostTarget(T u)
+        public override void AddUnitStateMove(T owner)
         {
-            return u.GetVictim() != Target;
-        }
-        public override void _clearUnitStateMove(T u)
-        {
-            u.ClearUnitState(UnitState.ChaseMove);
-        }
-        public override void _addUnitStateMove(T u)
-        {
-            u.AddUnitState(UnitState.ChaseMove);
+            owner.AddUnitState(UnitState.ChaseMove);
         }
 
-        public override bool EnableWalking() { return false; }
-        public override void _updateSpeed(T u) { }
-        public override void _reachTarget(T owner)
+        public override bool HasLostTarget(T owner)
         {
-            _clearUnitStateMove(owner);
-            if (owner.IsWithinMeleeRange(Target))
-                owner.Attack(Target, true);
+            return owner.GetVictim() != GetTarget();
+        }
+
+        public override void ReachTarget(T owner)
+        {
+            ClearUnitStateMove(owner);
+
+            if (owner.IsWithinMeleeRange(GetTarget()))
+                owner.Attack(GetTarget(), true);
+
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().SetCannotReachTarget(false);
         }
-        public override void MovementInform(T unit)
+
+        public override void MovementInform(T owner)
         {
-            if (unit.IsTypeId(TypeId.Unit))
+            if (owner.IsTypeId(TypeId.Unit))
             {
                 // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
-                if (unit.ToCreature().GetAI() != null)
-                    unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Chase, (uint)Target.GetGUID().GetCounter());
+                if (owner.ToCreature().GetAI() != null)
+                    owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Chase, (uint)GetTarget().GetGUID().GetCounter());
             }
         }
+
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
     }
 
-    public class FollowMovementGenerator<T> : TargetedMovementGeneratorMedium<T> where T : Unit
+    public class FollowMovementGenerator<T> : TargetedMovementGenerator<T> where T : Unit
     {
         public FollowMovementGenerator(Unit target) : base(target) { }
+
         public FollowMovementGenerator(Unit target, float offset, float angle) : base(target, offset, angle) { }
 
-        public override MovementGeneratorType GetMovementGeneratorType()
+        public override void DoInitialize(T owner)
         {
-            return MovementGeneratorType.Follow;
+            owner.AddUnitState(UnitState.Follow);
+            UpdateSpeed(owner);
+            SetTargetLocation(owner, true);
         }
-        public override void _clearUnitStateMove(T u)
-        {
-            u.ClearUnitState(UnitState.FollowMove);
-        }
-        public override void _addUnitStateMove(T u)
-        {
-            u.AddUnitState(UnitState.FollowMove);
-        }
+
         public override void DoReset(T owner)
         {
             DoInitialize(owner);
         }
-        public override bool _lostTarget(T u) { return false; }
-        public override void _reachTarget(T u) { }
 
-        public override void DoInitialize(T owner)
-        {
-            owner.AddUnitState(UnitState.Follow | UnitState.FollowMove);
-            _updateSpeed(owner);
-            _setTargetLocation(owner, true);
-        }
         public override void DoFinalize(T owner)
         {
             owner.ClearUnitState(UnitState.Follow | UnitState.FollowMove);
-            _updateSpeed(owner);
+            UpdateSpeed(owner);
         }
-        public override void MovementInform(T unit)
-        {
-            if (unit.IsTypeId(TypeId.Player))
-                return;
 
-            // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
-            if (unit.ToCreature().GetAI() != null)
-                unit.ToCreature().GetAI().MovementInform(MovementGeneratorType.Follow, (uint)Target.GetGUID().GetCounter());
+        public override void ClearUnitStateMove(T owner)
+        {
+            owner.ClearUnitState(UnitState.FollowMove);
         }
+
+        public override void AddUnitStateMove(T owner)
+        {
+            owner.AddUnitState(UnitState.FollowMove);
+        }
+
+        public override void ReachTarget(T owner)
+        {
+            ClearUnitStateMove(owner);
+        }
+
         public override bool EnableWalking()
         {
             if (typeof(T) == typeof(Player))
                 return false;
             else
-                return Reftarget.IsValid() && Target.IsWalking();
+                return IsTargetValid() && GetTarget().IsWalking();
         }
-        public override void _updateSpeed(T owner)
+
+        public override void MovementInform(T owner)
         {
             if (owner.IsTypeId(TypeId.Player))
                 return;
 
-            if (!owner.IsPet() || !owner.IsInWorld || !Reftarget.IsValid() && Target.GetGUID() != owner.GetOwnerGUID())
+            // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
+            if (owner.ToCreature().GetAI() != null)
+                owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Follow, (uint)GetTarget().GetGUID().GetCounter());
+        }
+
+        public override bool HasLostTarget(T u) { return false; }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.Follow;
+        }
+
+        void UpdateSpeed(T owner)
+        {
+            if (owner.IsTypeId(TypeId.Player))
+                return;
+
+            if (!owner.IsPet() || !owner.IsInWorld || !IsTargetValid() && GetTarget().GetGUID() != owner.GetOwnerGUID())
                 return;
 
             owner.UpdateSpeed(UnitMoveType.Run);

@@ -430,7 +430,7 @@ namespace Game.AI
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsReturning(true);
                     me.GetMotionMaster().Clear();
-                    me.GetMotionMaster().MovePoint(me.GetGUID().GetCounter(), x, y, z);
+                    me.GetMotionMaster().MovePoint((uint)me.GetGUID().GetCounter(), x, y, z);
                 }
             }
             else // COMMAND_FOLLOW
