@@ -276,7 +276,7 @@ namespace Game
             _itemsByGuid[item.GetGUID()] = item;
         }
 
-        public bool RemoveAItem(ObjectGuid guid, bool deleteItem = false)
+        public bool RemoveAItem(ObjectGuid guid, bool deleteItem = false, SQLTransaction trans = null)
         {
             var item = _itemsByGuid.LookupByKey(guid);
             if (item == null)
@@ -285,7 +285,7 @@ namespace Game
             if (deleteItem)
             {
                 item.FSetState(ItemUpdateState.Removed);
-                item.SaveToDB(null);
+                item.SaveToDB(trans);
             }
 
             _itemsByGuid.Remove(guid);
@@ -1418,7 +1418,7 @@ namespace Game
             {
                 // bidder doesn't exist, delete the item
                 foreach (Item item in auction.Items)
-                    Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true);
+                    Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true, trans);
             }
         }
 
@@ -1470,7 +1470,7 @@ namespace Game
             {
                 // owner doesn't exist, delete the item
                 foreach (Item item in auction.Items)
-                    Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true);
+                    Global.AuctionHouseMgr.RemoveAItem(item.GetGUID(), true, trans);
             }
         }
 

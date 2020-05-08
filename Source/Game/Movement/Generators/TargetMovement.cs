@@ -97,7 +97,7 @@ namespace Game.Movement
             }
 
             if (targetMoved)
-                SetTargetLocation(owner, targetMoved);
+                SetTargetLocation(owner, true);
             else if (_speedChanged)
                 SetTargetLocation(owner, false);
 
