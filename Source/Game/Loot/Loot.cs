@@ -29,6 +29,7 @@ namespace Game.Loots
 {
     public class LootItem
     {
+        public LootItem() { }
         public LootItem(LootStoreItem li)
         {
             itemid = li.itemid;
@@ -41,12 +42,6 @@ namespace Game.Loots
             needs_quest = li.needs_quest;
 
             randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
-            canSave = true;
-        }
-
-        public LootItem()
-        {
-            canSave = true;
         }
 
         public bool AllowedForPlayer(Player player)
@@ -100,7 +95,6 @@ namespace Game.Loots
         public bool is_counted;
         public bool needs_quest;                          // quest drop
         public bool follow_loot_rules;
-        public bool canSave;
     }
 
     public class NotNormalLootItem
@@ -438,33 +432,6 @@ namespace Game.Loots
                 else
                     gold = (uint)(RandomHelper.URand(minAmount >> 8, maxAmount >> 8) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney)) << 8;
             }
-        }
-
-        public void DeleteLootItemFromContainerItemDB(uint itemID)
-        {
-            // Deletes a single item associated with an openable item from the DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
-            stmt.AddValue(0, containerID.GetCounter());
-            stmt.AddValue(1, itemID);
-            DB.Characters.Execute(stmt);
-
-            // Mark the item looted to prevent resaving
-            foreach (var lootItem in items)
-            {
-                if (lootItem.itemid != itemID)
-                    continue;
-
-                lootItem.canSave = false;
-                break;
-            }
-        }
-
-        public void DeleteLootMoneyFromContainerItemDB()
-        {
-            // Deletes money loot associated with an openable item from the DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
-            stmt.AddValue(0, containerID.GetCounter());
-            DB.Characters.Execute(stmt);
         }
 
         public LootItem LootItemInSlot(uint lootSlot, Player player)

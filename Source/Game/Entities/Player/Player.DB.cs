@@ -1507,12 +1507,27 @@ namespace Game.Entities
             for (var i = InventorySlots.BuyBackStart; i < InventorySlots.BuyBackEnd; ++i)
             {
                 Item item = m_items[i];
-                if (item == null || item.GetState() == ItemUpdateState.New)
+                if (item == null)
                     continue;
+
+                ItemTemplate itemTemplate = item.GetTemplate();
+
+                if (item.GetState() == ItemUpdateState.New)
+                {
+                    if (itemTemplate != null)
+                        if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                            Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
+
+                    continue;
+                }
 
                 item.DeleteFromInventoryDB(trans);
                 item.DeleteFromDB(trans);
                 m_items[i].FSetState(ItemUpdateState.New);
+
+                if (itemTemplate != null)
+                    if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                        Global.LootItemStorage.RemoveStoredLootForContainer(item.GetGUID().GetCounter());
             }
 
             // Updated played time for refundable items. We don't do this in Player.Update because there's simply no need for it,

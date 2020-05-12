@@ -836,6 +836,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Calendar data...");
             Global.CalendarMgr.LoadFromDB();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Item loot...");
+            Global.LootItemStorage.LoadStorageFromDB();
+
             Log.outInfo(LogFilter.ServerLoading, "Initialize query data...");
             Global.ObjectMgr.InitializeQueriesData(QueryDataGroup.All);
 

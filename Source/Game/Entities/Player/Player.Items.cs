@@ -2449,7 +2449,7 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (bagItem.m_lootGenerated)
+                            if (bagItem.GetGUID() == GetLootGUID())
                             {
                                 GetSession().DoLootRelease(GetLootGUID());
                                 released = true;                    // so we don't need to look at dstBag
@@ -2467,7 +2467,7 @@ namespace Game.Entities
                         Item bagItem = bag.GetItemByPos(i);
                         if (bagItem != null)
                         {
-                            if (bagItem.m_lootGenerated)
+                            if (bagItem.GetGUID() == GetLootGUID())
                             {
                                 GetSession().DoLootRelease(GetLootGUID());
                                 break;
@@ -3911,7 +3911,13 @@ namespace Game.Entities
                 {
                     pItem.RemoveFromWorld();
                     if (del)
+                    {
                         pItem.SetState(ItemUpdateState.Removed, this);
+                        ItemTemplate itemTemplate = pItem.GetTemplate();
+                        if (itemTemplate != null)
+                            if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                                Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
+                    }
                 }
 
                 m_items[slot] = null;
@@ -5811,7 +5817,10 @@ namespace Game.Entities
                 ApplyItemObtainSpells(pItem, false);
 
                 ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
+                Global.ScriptMgr.OnItemRemove(this, pItem);
+
                 Bag pBag;
+                ItemTemplate pProto = pItem.GetTemplate();
                 if (bag == InventorySlots.Bag0)
                 {
                     SetInvSlot(slot, ObjectGuid.Empty);
@@ -5819,8 +5828,6 @@ namespace Game.Entities
                     // equipment and equipped bags can have applied bonuses
                     if (slot < InventorySlots.BagEnd)
                     {
-                        ItemTemplate pProto = pItem.GetTemplate();
-
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
@@ -5856,10 +5863,8 @@ namespace Game.Entities
 
                 // Delete rolled money / loot from db.
                 // MUST be done before RemoveFromWorld() or GetTemplate() fails
-                ItemTemplate pTmp = pItem.GetTemplate();
-                if (pTmp != null)
-                    if (Convert.ToBoolean(pTmp.GetFlags() & ItemFlags.HasLoot))
-                        pItem.ItemContainerDeleteLootMoneyAndLootItemsFromDB();
+                if (pProto.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
+                    Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
 
                 if (IsInWorld && update)
                 {
@@ -6325,7 +6330,7 @@ namespace Game.Entities
 
                 // LootItem is being removed (looted) from the container, delete it from the DB.
                 if (!loot.containerID.IsEmpty())
-                    loot.DeleteLootItemFromContainerItemDB(item.itemid);
+                    Global.LootItemStorage.RemoveStoredLootItemForContainer(loot.containerID.GetCounter(), item.itemid, item.count);
 
             }
             else
@@ -6517,9 +6522,12 @@ namespace Game.Entities
 
                 loot = item.loot;
 
+                // Store container id
+                loot.containerID = item.GetGUID();
+
                 // If item doesn't already have loot, attempt to load it. If that
-                //  fails then this is first time opening, generate loot
-                if (!item.m_lootGenerated && !item.ItemContainerLoadLootFromDB())
+                // fails then this is first time opening, generate loot
+                if (!item.m_lootGenerated && !Global.LootItemStorage.LoadStoredLoot(item, this))
                 {
                     item.m_lootGenerated = true;
                     loot.Clear();
@@ -6542,7 +6550,7 @@ namespace Game.Entities
                             // Force save the loot and money items that were just rolled
                             //  Also saves the container item ID in Loot struct (not to DB)
                             if (loot.gold > 0 || loot.unlootedCount > 0)
-                                item.ItemContainerSaveLootToDB();
+                                Global.LootItemStorage.AddNewStoredLoot(loot, this);
 
                             break;
                     }

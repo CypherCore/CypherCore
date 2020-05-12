@@ -229,7 +229,7 @@ namespace Game
 
                 // Delete the money loot record from the DB
                 if (!loot.containerID.IsEmpty())
-                    loot.DeleteLootMoneyFromContainerItemDB();
+                    Global.LootItemStorage.RemoveStoredMoneyForContainer(loot.containerID.GetCounter());
 
                 // Delete container if empty
                 if (loot.IsLooted() && guid.IsItem())

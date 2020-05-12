@@ -36,6 +36,7 @@ using Game.Scripting;
 using Game.SupportSystem;
 using Game.Services;
 using Game.Cache;
+using Game.Loots;
 
 public static class Global
 {
@@ -95,6 +96,7 @@ public static class Global
     public static CharacterTemplateDataStorage CharacterTemplateDataStorage { get { return CharacterTemplateDataStorage.Instance; } }
     public static ConversationDataStorage ConversationDataStorage { get { return ConversationDataStorage.Instance; } }
     public static CharacterCache CharacterCacheStorage { get { return CharacterCache.Instance; } }
+    public static LootItemStorage LootItemStorage { get { return LootItemStorage.Instance; } }
 
     //Misc
     public static ConditionManager ConditionMgr { get { return ConditionManager.Instance; } }
