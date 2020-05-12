@@ -1609,7 +1609,7 @@ namespace Game.Entities
                         {
                             // the reset time is set but not added to the scheduler
                             // until the players leave the instance
-                            long resettime = creature.GetRespawnTimeEx() + 2 * Time.Hour;
+                            long resettime = GameTime.GetGameTime() + 2 * Time.Hour;
                             InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(creature.GetInstanceId());
                             if (save != null)
                                 if (save.GetResetTime() < resettime)

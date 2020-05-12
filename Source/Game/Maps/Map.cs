@@ -2553,7 +2553,7 @@ namespace Game.Maps
                 do
                 {
                     var loguid = result.Read<uint>(0);
-                    var respawnTime = result.Read<uint>(1);
+                    var respawnTime = result.Read<long>(1);
 
                     _creatureRespawnTimes[loguid] = respawnTime;
                 } while (result.NextRow());
@@ -2568,7 +2568,7 @@ namespace Game.Maps
                 do
                 {
                     var loguid = result.Read<uint>(0);
-                    var respawnTime = result.Read<uint>(1);
+                    var respawnTime = result.Read<long>(1);
 
                     _goRespawnTimes[loguid] = respawnTime;
                 } while (result.NextRow());

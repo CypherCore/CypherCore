@@ -1030,7 +1030,7 @@ namespace Game.Entities
                     byte difficulty = result.Read<byte>(3);
                     BindExtensionState extendState = (BindExtensionState)result.Read<byte>(4);
 
-                    long resetTime = result.Read<uint>(5);
+                    long resetTime = result.Read<long>(5);
                     // the resettime for normal instances is only saved when the InstanceSave is unloaded
                     // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
                     // and in that case it is not used

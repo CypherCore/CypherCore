@@ -425,7 +425,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.REP_CREATURE_RESPAWN, "REPLACE INTO creature_respawn (guid, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CREATURE_RESPAWN, "DELETE FROM creature_respawn WHERE guid = ? AND mapId = ? AND instanceId = ?");
             PrepareStatement(CharStatements.DEL_CREATURE_RESPAWN_BY_INSTANCE, "DELETE FROM creature_respawn WHERE mapId = ? AND instanceId = ?");
-            PrepareStatement(CharStatements.SEL_MAX_CREATURE_RESPAWNS, "SELECT MAX(respawnTime), instanceId FROM creature_respawn WHERE instanceId > 0 GROUP BY instanceId");
 
             // Gameobject respawn
             PrepareStatement(CharStatements.SEL_GO_RESPAWNS, "SELECT guid, respawnTime FROM gameobject_respawn WHERE mapId = ? AND instanceId = ?");
@@ -504,6 +503,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_GROUP_INSTANCE_BY_GUID, "DELETE FROM group_instance WHERE guid = ? AND instance = ?");
             PrepareStatement(CharStatements.REP_GROUP_INSTANCE, "REPLACE INTO group_instance (guid, instance, permanent) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.UPD_INSTANCE_RESETTIME, "UPDATE instance SET resettime = ? WHERE id = ?");
+            PrepareStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME, "INSERT INTO instance_reset (mapid, difficulty, resettime) VALUES (?, ?, ?)");
+            PrepareStatement(CharStatements.DEL_GLOBAL_INSTANCE_RESETTIME, "DELETE FROM instance_reset WHERE mapid = ? AND difficulty = ?");
             PrepareStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME, "UPDATE instance_reset SET resettime = ? WHERE mapid = ? AND difficulty = ?");
             PrepareStatement(CharStatements.UPD_CHAR_ONLINE, "UPDATE characters SET online = 1 WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN, "UPDATE characters SET name = ?, at_login = ? WHERE guid = ?");
@@ -1099,7 +1100,6 @@ namespace Framework.Database
         REP_CREATURE_RESPAWN,
         DEL_CREATURE_RESPAWN,
         DEL_CREATURE_RESPAWN_BY_INSTANCE,
-        SEL_MAX_CREATURE_RESPAWNS,
 
         SEL_GO_RESPAWNS,
         REP_GO_RESPAWN,
@@ -1159,6 +1159,8 @@ namespace Framework.Database
         DEL_GROUP_INSTANCE_BY_GUID,
         REP_GROUP_INSTANCE,
         UPD_INSTANCE_RESETTIME,
+        INS_GLOBAL_INSTANCE_RESETTIME,
+        DEL_GLOBAL_INSTANCE_RESETTIME,
         UPD_GLOBAL_INSTANCE_RESETTIME,
         UPD_CHAR_ONLINE,
         UPD_CHAR_NAME_AT_LOGIN,

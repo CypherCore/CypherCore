@@ -126,10 +126,8 @@ namespace Game.Maps
                 if (resettime != 0)
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_INSTANCE_RESETTIME);
-
                     stmt.AddValue(0, resettime);
                     stmt.AddValue(1, InstanceId);
-
                     DB.Characters.Execute(stmt);
                 }
 
@@ -208,7 +206,7 @@ namespace Game.Maps
 
                     // Mark instance id as being used
                     Global.MapMgr.RegisterInstanceId(instanceId);
-                    long resettime = result.Read<uint>(3);
+                    long resettime = result.Read<long>(3);
                     if (resettime != 0)
                     {
                         uint mapid = result.Read<ushort>(1);
@@ -219,24 +217,6 @@ namespace Game.Maps
                     }
                 }
                 while (result.NextRow());
-
-                // update reset time for normal instances with the max creature respawn time + X hours
-                SQLResult result2 = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_MAX_CREATURE_RESPAWNS));
-                if (!result2.IsEmpty())
-                {
-                    do
-                    {
-                        uint instance = result2.Read<uint>(1);
-                        long resettime = result2.Read<uint>(0) + 2 * Time.Hour;
-                        var pair = instResetTime.LookupByKey(instance);
-                        if (pair != null && pair.Item2 != resettime)
-                        {
-                            DB.Characters.DirectExecute("UPDATE instance SET resettime = '{0}' WHERE id = '{1}'", resettime, instance);
-                            instResetTime[instance] = Tuple.Create(pair.Item1, resettime);
-                        }
-                    }
-                    while (result2.NextRow());
-                }
 
                 // schedule the reset times
                 foreach (var pair in instResetTime)
@@ -253,22 +233,31 @@ namespace Game.Maps
                 {
                     uint mapid = result.Read<ushort>(0);
                     Difficulty difficulty = (Difficulty)result.Read<byte>(1);
-                    ulong oldresettime = result.Read<uint>(2);
+                    long oldresettime = result.Read<long>(2);
 
                     MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty);
                     if (mapDiff == null)
                     {
                         Log.outError(LogFilter.Server, "InstanceSaveManager.LoadResetTimes: invalid mapid({0})/difficulty({1}) pair in instance_reset!", mapid, difficulty);
-                        DB.Characters.DirectExecute("DELETE FROM instance_reset WHERE mapid = '{0}' AND difficulty = '{1}'", mapid, difficulty);
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GLOBAL_INSTANCE_RESETTIME);
+                        stmt.AddValue(0, mapid);
+                        stmt.AddValue(1, (byte)difficulty);
+                        DB.Characters.DirectExecute(stmt);
                         continue;
                     }
 
                     // update the reset time if the hour in the configs changes
-                    ulong newresettime = (oldresettime / Time.Day) * Time.Day + diff;
+                    long newresettime = (oldresettime / Time.Day) * Time.Day + diff;
                     if (oldresettime != newresettime)
-                        DB.Characters.DirectExecute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty = '{2}'", newresettime, mapid, difficulty);
+                    {
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
+                        stmt.AddValue(0, newresettime);
+                        stmt.AddValue(1, mapid);
+                        stmt.AddValue(2, (byte)difficulty);
+                        DB.Characters.DirectExecute(stmt);
+                    }
 
-                    InitializeResetTimeFor(mapid, difficulty, (long)newresettime);
+                    InitializeResetTimeFor(mapid, difficulty, newresettime);
                 } while (result.NextRow());
             }
 
@@ -295,7 +284,12 @@ namespace Game.Maps
                     {
                         // initialize the reset time
                         t = today + period + diff;
-                        DB.Characters.DirectExecute("INSERT INTO instance_reset VALUES ('{0}', '{1}', '{2}')", mapid, (uint)difficulty, (uint)t);
+
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME);
+                        stmt.AddValue(0, mapid);
+                        stmt.AddValue(1, (byte)difficulty);
+                        stmt.AddValue(2, t);
+                        DB.Characters.DirectExecute(stmt);
                     }
 
                     if (t < now)
@@ -304,7 +298,12 @@ namespace Game.Maps
                         // calculate the next reset time
                         t = (t / Time.Day) * Time.Day;
                         t += ((today - t) / period + 1) * period + diff;
-                        DB.Characters.DirectExecute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty= '{2}'", t, mapid, (uint)difficulty);
+
+                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
+                        stmt.AddValue(0, t);
+                        stmt.AddValue(1, mapid);
+                        stmt.AddValue(2, (byte)difficulty);
+                        DB.Characters.DirectExecute(stmt);
                     }
 
                     InitializeResetTimeFor(mapid, difficulty, t);
