@@ -396,7 +396,18 @@ namespace Game.Entities
                                 if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
                                     SetRespawnTime(Time.Day);
                                 else
-                                    m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
+                                {
+                                    // else copy time from master and add a little
+                                    long baseRespawnTime = Math.Max(linkedRespawntime, now);
+                                    long offset = RandomHelper.URand(5, Time.Minute);
+
+                                    // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
+                                    // we shall inherit it instead of adding and causing an overflow
+                                    if (baseRespawnTime <= long.MaxValue - offset)
+                                        m_respawnTime = baseRespawnTime + offset;
+                                    else
+                                        m_respawnTime = long.MaxValue;
+                                }
                                 SaveRespawnTime(); // also save to DB immediately
                             }
                         }
