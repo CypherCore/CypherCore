@@ -2807,10 +2807,6 @@ namespace Game.Spells
 
             SetExecutedCurrently(false);
 
-            Creature creatureCaster = m_caster.ToCreature();
-            if (creatureCaster)
-                creatureCaster.ReleaseFocus(this);
-
             if (!m_originalCaster)
                 return;
 
@@ -3983,7 +3979,17 @@ namespace Game.Spells
 
             m_timer = (int)duration;
             foreach (TargetInfo target in m_UniqueTargetInfo)
+            {
                 m_caster.AddChannelObject(target.targetGUID);
+
+                if (m_UniqueTargetInfo.Count == 1 && m_UniqueGOTargetInfo.Empty())
+                {
+                    Creature creatureCaster = m_caster.ToCreature();
+                    if (creatureCaster != null)
+                        if (!creatureCaster.IsFocusing(this))
+                            creatureCaster.FocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.targetGUID));
+                }
+            }
 
             foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
                 m_caster.AddChannelObject(target.targetGUID);
