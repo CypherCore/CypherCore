@@ -2096,11 +2096,24 @@ namespace Game.Spells
                         }
 
                         // Now Reduce spell duration using data received at spell hit
+                        // check whatever effects we're going to apply, diminishing returns only apply to negative aura effects
+                        bool positive = true;
+                        if (m_originalCaster == unit || !m_originalCaster.IsFriendlyTo(unit))
+                        {
+                            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                            {
+                                if ((effectMask & (1 << (int)i)) != 0 && !m_spellInfo.IsPositiveEffect(i))
+                                {
+                                    positive = false;
+                                    break;
+                                }
+                            }
+                        }
+
                         int duration = m_spellAura.GetMaxDuration();
-                        float diminishMod = unit.ApplyDiminishingToDuration(m_spellInfo, ref duration, m_originalCaster, diminishLevel);
 
                         // unit is immune to aura if it was diminished to 0 duration
-                        if (diminishMod == 0.0f)
+                        if (!positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref duration, m_originalCaster, diminishLevel))
                         {
                             m_spellAura.Remove();
                             bool found = false;
@@ -2114,13 +2127,7 @@ namespace Game.Spells
                         {
                             ((UnitAura)m_spellAura).SetDiminishGroup(diminishGroup);
 
-                            bool positive = m_spellAura.GetSpellInfo().IsPositive();
-                            AuraApplication aurApp = m_spellAura.GetApplicationOfTarget(m_originalCaster.GetGUID());
-                            if (aurApp != null)
-                                positive = aurApp.IsPositive();
-
                             duration = m_originalCaster.ModSpellDuration(m_spellInfo, unit, duration, positive, effectMask);
-
                             if (duration > 0)
                             {
                                 // Haste modifies duration of channeled spells

@@ -2681,11 +2681,11 @@ namespace Game.Entities
                 ++diminish.HitCount;
         }
 
-        public float ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, Unit caster, DiminishingLevels previousLevel)
+        public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, Unit caster, DiminishingLevels previousLevel)
         {
             DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             if (duration == -1 || group == DiminishingGroup.None)
-                return 1.0f;
+                return true;
 
             int limitDuration = auraSpellInfo.GetDiminishingReturnsLimitDuration();
 
@@ -2704,7 +2704,6 @@ namespace Game.Entities
             }
 
             float mod = 1.0f;
-
             switch (group)
             {
                 case DiminishingGroup.Taunt:
@@ -2776,7 +2775,7 @@ namespace Game.Entities
             }
 
             duration = (int)(duration * mod);
-            return mod;
+            return duration != 0;
         }
 
         public void ApplyDiminishingAura(DiminishingGroup group, bool apply)
