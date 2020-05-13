@@ -4366,7 +4366,7 @@ namespace Game.Entities
                 {
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), aurEff.GetAmount(), sameEffectSpellGroup))
+                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auratype, aurEff.GetAmount(), sameEffectSpellGroup))
                         modifier += aurEff.GetAmount();
                 }
             }
@@ -4398,7 +4398,7 @@ namespace Game.Entities
                 {
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), aurEff.GetAmount(), sameEffectSpellGroup))
+                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auratype, aurEff.GetAmount(), sameEffectSpellGroup))
                         MathFunctions.AddPct(ref multiplier, aurEff.GetAmount());
                 }
             }
