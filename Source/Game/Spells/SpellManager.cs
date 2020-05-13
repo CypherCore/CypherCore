@@ -396,8 +396,7 @@ namespace Game.Entities
         {
             uint spellid_1 = spellInfo1.GetFirstRankSpell().Id;
             uint spellid_2 = spellInfo2.GetFirstRankSpell().Id;
-            if (spellid_1 == spellid_2)
-                return SpellGroupStackRule.Default;
+
             // find SpellGroups which are common for both spells
             var spellGroup1 = GetSpellSpellGroupMapBounds(spellid_1);
             List<SpellGroup> groups = new List<SpellGroup>();
