@@ -2621,11 +2621,12 @@ namespace Game.Spells
                     m_caster.SetInFront(m_targets.GetObjectTarget());
 
             // Should this be done for original caster?
-            if (m_caster.IsTypeId(TypeId.Player))
+            Player modOwner = m_caster.GetSpellModOwner();
+            if (modOwner !=null)
             {
                 // Set spell which will drop charges for triggered cast spells
                 // if not successfully casted, will be remove in finish(false)
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
+                modOwner.SetSpellModTakingSpell(this, true);
             }
 
             CallScriptBeforeCastHandlers();
@@ -2640,8 +2641,8 @@ namespace Game.Spells
                     SendCastResult(castResult, param1, param2);
                     SendInterrupted(0);
 
-                    if (m_caster.IsTypeId(TypeId.Player))
-                        m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+                    if (modOwner)
+                        modOwner.SetSpellModTakingSpell(this, false);
 
                     Finish(false);
                     SetExecutedCurrently(false);
@@ -2652,9 +2653,9 @@ namespace Game.Spells
                 // if trade not complete then remember it in trade data
                 if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.TradeItem))
                 {
-                    if (m_caster.IsTypeId(TypeId.Player))
+                    if (modOwner)
                     {
-                        TradeData my_trade = m_caster.ToPlayer().GetTradeData();
+                        TradeData my_trade = modOwner.GetTradeData();
                         if (my_trade != null)
                         {
                             if (!my_trade.IsInAcceptProcess())
@@ -2664,7 +2665,7 @@ namespace Game.Spells
                                 SendCastResult(SpellCastResult.DontReport);
                                 SendInterrupted(0);
 
-                                m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+                                modOwner.SetSpellModTakingSpell(this, false);
 
                                 Finish(false);
                                 SetExecutedCurrently(false);
@@ -2792,12 +2793,12 @@ namespace Game.Spells
                 }
             }
 
-            if (m_caster.IsTypeId(TypeId.Player))
+            if (modOwner != null)
             {
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+                modOwner.SetSpellModTakingSpell(this, false);
 
                 //Clear spell cooldowns after every spell is cast if .cheat cooldown is enabled.
-                if (m_caster.ToPlayer().GetCommandStatus(PlayerCommandStates.Cooldown))
+                if (modOwner.GetCommandStatus(PlayerCommandStates.Cooldown))
                 {
                     m_caster.GetSpellHistory().ResetCooldown(m_spellInfo.Id, true);
                     m_caster.GetSpellHistory().RestoreCharge(m_spellInfo.ChargeCategoryId);
@@ -2929,8 +2930,9 @@ namespace Game.Spells
             if (single_missile && offset == 0)
                 return m_delayMoment;
 
-            if (m_caster.IsTypeId(TypeId.Player))
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
+            Player modOwner = m_caster.GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.SetSpellModTakingSpell(this, true);
 
             PrepareTargetProcessing();
 
@@ -2969,8 +2971,8 @@ namespace Game.Spells
 
             FinishTargetProcessing();
 
-            if (m_caster.IsTypeId(TypeId.Player))
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+            if (modOwner)
+                modOwner.SetSpellModTakingSpell(this, false);
 
             // All targets passed - need finish phase
             if (next_time == 0)
