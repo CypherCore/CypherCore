@@ -3266,7 +3266,14 @@ namespace Game.Entities
                 _ => throw new NotImplementedException(),
             };
 
-            float amount = GetTotalAuraModifier(AuraType.ModDamageDone, auratype => CheckAttackFitToAuraRequirement(attackType, auratype));
+            float amount = GetTotalAuraModifier(AuraType.ModDamageDone, aurEff =>
+            {
+                if ((aurEff.GetMiscValue() & (int)SpellSchoolMask.Normal) == 0)
+                    return false;
+
+                return CheckAttackFitToAuraRequirement(attackType, aurEff);
+            });
+
             SetStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount);
         }
 
