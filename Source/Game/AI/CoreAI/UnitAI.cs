@@ -75,13 +75,21 @@ namespace Game.AI
             //Make sure our attack is ready and we aren't currently casting before checking distance
             if (me.IsAttackReady())
             {
-                me.AttackerStateUpdate(victim);
+                if (ShouldSparWith(victim))
+                    me.FakeAttackerStateUpdate(victim);
+                else
+                    me.AttackerStateUpdate(victim);
+
                 me.ResetAttackTimer();
             }
 
             if (me.HaveOffhandWeapon() && me.IsAttackReady(WeaponAttackType.OffAttack))
             {
-                me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+                if (ShouldSparWith(victim))
+                    me.FakeAttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+                else
+                    me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+
                 me.ResetAttackTimer(WeaponAttackType.OffAttack);
             }
         }
@@ -356,6 +364,8 @@ namespace Game.AI
 
         public virtual void OnCharmed(bool apply) { }
 
+        public virtual bool ShouldSparWith(Unit target) { return false;   }
+        
         public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }
         public virtual void SetData(uint id, uint value) { }
