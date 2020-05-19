@@ -87,7 +87,7 @@ namespace Game.Achievements
                 // requirements not found in the dbc
                 CriteriaDataSet data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
                 if (data != null)
-                    if (!data.Meets(referencePlayer, unit, (uint)miscValue1))
+                    if (!data.Meets(referencePlayer, unit, (uint)miscValue1, (uint)miscValue2))
                         continue;
 
                 switch (type)
@@ -3199,7 +3199,7 @@ namespace Game.Achievements
             }
         }
 
-        public bool Meets(uint criteria_id, Player source, Unit target, uint miscValue1 = 0)
+        public bool Meets(uint criteriaId, Player source, Unit target, uint miscValue1 = 0, uint miscValue2 = 0)
         {
             switch (DataType)
             {
@@ -3274,26 +3274,29 @@ namespace Game.Achievements
                         if (!map.IsDungeon())
                         {
                             Log.outError(LogFilter.Achievement, "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
-                                CriteriaDataType.InstanceScript, criteria_id, map.GetId());
+                                CriteriaDataType.InstanceScript, criteriaId, map.GetId());
                             return false;
                         }
                         InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
                         if (instance == null)
                         {
                             Log.outError(LogFilter.Achievement, "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
-                                CriteriaDataType.InstanceScript, criteria_id, map.GetId());
+                                CriteriaDataType.InstanceScript, criteriaId, map.GetId());
                             return false;
                         }
-                        return instance.CheckAchievementCriteriaMeet(criteria_id, source, target, miscValue1);
+                        return instance.CheckAchievementCriteriaMeet(criteriaId, source, target, miscValue1);
                     }
                 case CriteriaDataType.SEquippedItem:
                     {
-                        ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(miscValue1);
-                        if (pProto == null)
+                        Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
+
+                        uint itemId = entry.Entry.Type == CriteriaTypes.EquipEpicItem ? miscValue2 : miscValue1;
+                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+                        if (itemTemplate == null)
                             return false;
-                        return pProto.GetBaseItemLevel() >= EquippedItem.ItemLevel && (int)pProto.GetQuality() >= EquippedItem.ItemQuality;
+                        return itemTemplate.GetBaseItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
                     }
-                                case CriteriaDataType.MapId:
+                case CriteriaDataType.MapId:
                     return source.GetMapId() == MapId.Id;
                 case CriteriaDataType.SKnownTitle:
                     {
@@ -3485,10 +3488,10 @@ namespace Game.Achievements
     {
         public void Add(CriteriaData data) { storage.Add(data); }
 
-        public bool Meets(Player source, Unit target, uint miscValue = 0)
+        public bool Meets(Player source, Unit target, uint miscValue = 0, uint miscValue2 = 0)
         {
             foreach (var data in storage)
-                if (!data.Meets(criteria_id, source, target, miscValue))
+                if (!data.Meets(criteria_id, source, target, miscValue, miscValue2))
                     return false;
 
             return true;
