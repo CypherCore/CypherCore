@@ -131,6 +131,7 @@ namespace Game.Entities
         uint m_transform;
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
+        bool _instantCast;
 
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;

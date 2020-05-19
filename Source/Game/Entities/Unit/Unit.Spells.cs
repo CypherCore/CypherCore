@@ -35,6 +35,9 @@ namespace Game.Entities
             return false;
         }
 
+        public void SetInstantCast(bool set) { _instantCast = set; }
+        public bool CanInstantCast() { return _instantCast; }
+        
         // function uses real base points (typically value - 1)
         public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effect_index, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
         {
@@ -1954,7 +1957,7 @@ namespace Game.Entities
 
             if (!(spellInfo.HasAttribute(SpellAttr0.Ability | SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus))
                 && (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
-                castTime = (int)(castTime * m_unitData.ModCastingSpeed);
+                castTime = CanInstantCast() ? 0 : (int)(castTime * m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                 castTime = (int)(castTime * m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
             else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && HasAura(67556)) // cooking with Chef Hat.
