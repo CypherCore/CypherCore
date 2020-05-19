@@ -30,7 +30,10 @@ namespace Game.Entities
     {
         public virtual bool HasSpell(uint spellId) { return false; }
 
-
+        public virtual bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
+        {
+            return false;
+        }
 
         // function uses real base points (typically value - 1)
         public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effect_index, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
@@ -1394,6 +1397,9 @@ namespace Game.Entities
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.GetSpellInfo().IsMoveAllowedChannel())
                         return false;
+
+            if (IsFocusing(null, true))
+                return false;
 
             // prohibit movement for all other spell casts
             return true;
