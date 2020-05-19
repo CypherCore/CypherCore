@@ -602,7 +602,7 @@ namespace Game.Spells
 
         public bool IsMoveAllowedChannel()
         {
-            return IsChanneled() && HasAttribute(SpellAttr5.CanChannelWhenMoving);
+            return IsChanneled() && (HasAttribute(SpellAttr5.CanChannelWhenMoving) || !ChannelInterruptFlags[0].HasAnyFlag((uint)(SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Turning)));
         }
 
         public bool NeedsComboPoints()
