@@ -2611,6 +2611,9 @@ namespace Game.Achievements
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
+            for (var i = 0; i < (int)CriteriaCondition.Max; ++i)
+                _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
+
             // Load criteria
             uint criterias = 0;
             uint guildCriterias = 0;

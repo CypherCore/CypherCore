@@ -3417,6 +3417,7 @@ namespace Game.Spells
                                     case AuraType.ModStalked:
                                     case AuraType.PeriodicDamagePercent:
                                     case AuraType.PreventResurrection:
+                                    case AuraType.Empathy:
                                         return false;
                                     case AuraType.PeriodicDamage:            // used in positive spells also.
                                                                              // part of negative spell if casted at self (prevent cancel)

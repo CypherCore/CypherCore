@@ -3912,11 +3912,12 @@ namespace Game.Entities
                     pItem.RemoveFromWorld();
                     if (del)
                     {
-                        pItem.SetState(ItemUpdateState.Removed, this);
                         ItemTemplate itemTemplate = pItem.GetTemplate();
                         if (itemTemplate != null)
                             if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.HasLoot))
                                 Global.LootItemStorage.RemoveStoredLootForContainer(pItem.GetGUID().GetCounter());
+                        
+                        pItem.SetState(ItemUpdateState.Removed, this);
                     }
                 }
 

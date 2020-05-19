@@ -1696,12 +1696,13 @@ namespace Game.Entities
                 }
 
                 if (spell.Value.State == PlayerSpellState.Removed)
-                    m_spells.Remove(spell.Key);
-                else
                 {
-                    spell.Value.State = PlayerSpellState.Unchanged;
+                    m_spells.Remove(spell.Key);
                     continue;
                 }
+
+                if (spell.Value.State != PlayerSpellState.Temporary)
+                    spell.Value.State = PlayerSpellState.Unchanged;
             }
         }
         void _SaveAuras(SQLTransaction trans)
