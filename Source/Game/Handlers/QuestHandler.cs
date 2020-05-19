@@ -334,48 +334,46 @@ namespace Game
                         {
                             //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
                             Creature creatureQGiver = obj.ToCreature();
-                            if (!creatureQGiver || !Global.ScriptMgr.OnQuestReward(GetPlayer(), creatureQGiver, quest, packet.ItemChoiceID))
-                            {
-                                // Send next quest
-                                Quest nextQuest = GetPlayer().GetNextQuest(packet.QuestGiverGUID, quest);
-                                if (nextQuest != null)
-                                {
-                                    // Only send the quest to the player if the conditions are met
-                                    if (GetPlayer().CanTakeQuest(nextQuest, false))
-                                    {
-                                        if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
-                                            GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
-
-                                        GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
-                                    }
-                                }
-
-                                if (creatureQGiver)
-                                    creatureQGiver.GetAI().QuestReward(GetPlayer(), quest, packet.ItemChoiceID);
-                            }
-                            break;
-                        }
-                    case TypeId.GameObject:
-                        GameObject questGiver = obj.ToGameObject();
-                        if (!Global.ScriptMgr.OnQuestReward(GetPlayer(), questGiver, quest, packet.ItemChoiceID))
-                        {
                             // Send next quest
-                            Quest nextQuest = GetPlayer().GetNextQuest(packet.QuestGiverGUID, quest);
+                            Quest nextQuest = _player.GetNextQuest(packet.QuestGiverGUID, quest);
                             if (nextQuest != null)
                             {
                                 // Only send the quest to the player if the conditions are met
-                                if (GetPlayer().CanTakeQuest(nextQuest, false))
+                                if (_player.CanTakeQuest(nextQuest, false))
                                 {
-                                    if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
-                                        GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
+                                    if (nextQuest.IsAutoAccept() && _player.CanAddQuest(nextQuest, true))
+                                        _player.AddQuestAndCheckCompletion(nextQuest, obj);
 
-                                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
+                                    _player.PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
                                 }
                             }
 
-                            questGiver.GetAI().QuestReward(GetPlayer(), quest, packet.ItemChoiceID);
+                            if (creatureQGiver && !Global.ScriptMgr.OnQuestReward(_player, creatureQGiver, quest, packet.ItemChoiceID))
+                                creatureQGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
+                            break;
                         }
-                        break;
+                    case TypeId.GameObject:
+                        {
+                            GameObject questGiver = obj.ToGameObject();
+                            // Send next quest
+                            Quest nextQuest = _player.GetNextQuest(packet.QuestGiverGUID, quest);
+                            if (nextQuest != null)
+                            {
+                                // Only send the quest to the player if the conditions are met
+                                if (_player.CanTakeQuest(nextQuest, false))
+                                {
+                                    if (nextQuest.IsAutoAccept() && _player.CanAddQuest(nextQuest, true))
+                                        _player.AddQuestAndCheckCompletion(nextQuest, obj);
+
+                                    _player.PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
+                                }
+                            }
+
+                            if (!Global.ScriptMgr.OnQuestReward(_player, questGiver, quest, packet.ItemChoiceID))
+                                questGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
+
+                            break;
+                        }
                     default:
                         break;
                 }
