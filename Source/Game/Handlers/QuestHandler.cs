@@ -560,7 +560,11 @@ namespace Game
 
             Group group = sender.GetGroup();
             if (!group)
+            {
+                sender.SendPushToPartyResponse(sender, QuestPushReason.NotInParty);
                 return;
+            }
+
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player receiver = refe.GetSource();
@@ -577,6 +581,12 @@ namespace Game
                 if (receiver.GetQuestStatus(packet.QuestID) == QuestStatus.Complete)
                 {
                     sender.SendPushToPartyResponse(receiver, QuestPushReason.AlreadyDone);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestDay(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.DifferentServerDaily);
                     continue;
                 }
 

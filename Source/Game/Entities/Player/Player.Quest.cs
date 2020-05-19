@@ -1736,12 +1736,12 @@ namespace Game.Entities
                 var questStatusData = m_QuestStatus.LookupByKey(quest_id);
                 if (questStatusData != null)
                 {
-                    if (questStatusData.Status != QuestStatus.Incomplete)
-                        return false;
-
                     // in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
                     if (Global.PoolMgr.IsPartOfAPool<Quest>(quest_id) != 0 && !Global.PoolMgr.IsSpawnedObject<Quest>(quest_id))
+                    {
+                        SendPushToPartyResponse(this, QuestPushReason.NotDaily);
                         return false;
+                    }
 
                     return true;
                 }
