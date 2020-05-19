@@ -3984,10 +3984,13 @@ namespace Game.Spells
 
                 if (m_UniqueTargetInfo.Count == 1 && m_UniqueGOTargetInfo.Empty())
                 {
-                    Creature creatureCaster = m_caster.ToCreature();
-                    if (creatureCaster != null)
-                        if (!creatureCaster.IsFocusing(this))
-                            creatureCaster.FocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.targetGUID));
+                    if (target.targetGUID != m_caster.GetGUID())
+                    {
+                        Creature creatureCaster = m_caster.ToCreature();
+                        if (creatureCaster != null)
+                            if (!creatureCaster.IsFocusing(this))
+                                creatureCaster.FocusTarget(this, Global.ObjAccessor.GetWorldObject(creatureCaster, target.targetGUID));
+                    }
                 }
             }
 
