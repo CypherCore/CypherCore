@@ -6330,7 +6330,7 @@ namespace Game.Entities
             {
                 SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)offset), val);
 
-                UpdateCriteria(CriteriaTypes.ExploreArea);
+                UpdateCriteria(CriteriaTypes.ExploreArea, GetAreaId());
 
                 if (areaEntry.ExplorationLevel > 0)
                 {

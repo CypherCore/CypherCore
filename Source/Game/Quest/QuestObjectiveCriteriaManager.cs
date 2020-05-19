@@ -312,7 +312,7 @@ namespace Game
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type)
+        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }

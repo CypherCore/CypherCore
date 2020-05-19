@@ -772,7 +772,7 @@ namespace Game.BattleGrounds
                         // TODO: lose honor xp
                     }
 
-                    player.UpdateCriteria(CriteriaTypes.WinBg, 1);
+                    player.UpdateCriteria(CriteriaTypes.WinBg, player.GetMapId());
                     if (!guildAwarded)
                     {
                         guildAwarded = true;
@@ -781,7 +781,7 @@ namespace Game.BattleGrounds
                         {
                             Guild guild = Global.GuildMgr.GetGuildById(guildId);
                             if (guild)
-                                guild.UpdateCriteria(CriteriaTypes.WinBg, 1, 0, 0, null, player);
+                                guild.UpdateCriteria(CriteriaTypes.WinBg, player.GetMapId(), 0, 0, null, player);
                         }
                     }
                 }
@@ -802,7 +802,7 @@ namespace Game.BattleGrounds
                 Global.BattlegroundMgr.BuildBattlegroundStatusActive(out battlefieldStatus, this, player, player.GetBattlegroundQueueIndex(bgQueueTypeId), player.GetBattlegroundQueueJoinTime(bgQueueTypeId), GetArenaType());
                 player.SendPacket(battlefieldStatus);
 
-                player.UpdateCriteria(CriteriaTypes.CompleteBattleground, 1);
+                player.UpdateCriteria(CriteriaTypes.CompleteBattleground, player.GetMapId());
             }
         }
 

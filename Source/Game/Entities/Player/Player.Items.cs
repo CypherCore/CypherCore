@@ -1710,7 +1710,7 @@ namespace Game.Entities
 
             // only for full equip instead adding to stack
             UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-            UpdateCriteria(CriteriaTypes.EquipEpicItem, pItem.GetEntry(), slot);
+            UpdateCriteria(CriteriaTypes.EquipEpicItem, slot, pItem.GetEntry());
 
             return pItem;
         }
@@ -1836,7 +1836,7 @@ namespace Game.Entities
                     CheckTitanGripPenalty();
 
                 UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-                UpdateCriteria(CriteriaTypes.EquipEpicItem, pItem.GetEntry(), slot);
+                UpdateCriteria(CriteriaTypes.EquipEpicItem, slot, pItem.GetEntry());
             }
         }
         public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, uint itemId = 0)

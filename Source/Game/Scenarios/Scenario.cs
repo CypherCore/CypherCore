@@ -324,7 +324,7 @@ namespace Game.Scenarios
             return criteriasProgress;
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type)
+        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
         {
             return Global.CriteriaMgr.GetScenarioCriteriaByType(type);
         }

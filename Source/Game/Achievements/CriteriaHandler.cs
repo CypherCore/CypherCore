@@ -77,7 +77,7 @@ namespace Game.Achievements
 
             Log.outDebug(LogFilter.Achievement, "UpdateCriteria({0}, {1}, {2}, {3}) {4}", type, type, miscValue1, miscValue2, miscValue3, GetOwnerInfo());
 
-            List<Criteria> criteriaList = GetCriteriaByType(type);
+            List<Criteria> criteriaList = GetCriteriaByType(type, (uint)miscValue1);
             foreach (Criteria criteria in criteriaList)
             {
                 List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
@@ -93,6 +93,7 @@ namespace Game.Achievements
                 switch (type)
                 {
                     // std. case: increment at 1
+                    case CriteriaTypes.WinBg:
                     case CriteriaTypes.NumberOfTalentResets:
                     case CriteriaTypes.LoseDuel:
                     case CriteriaTypes.CreateAuction:
@@ -106,6 +107,7 @@ namespace Game.Achievements
                     case CriteriaTypes.ReceiveEpicItem:
                     case CriteriaTypes.Death:
                     case CriteriaTypes.CompleteDailyQuest:
+                    case CriteriaTypes.CompleteBattleground:
                     case CriteriaTypes.DeathAtMap:
                     case CriteriaTypes.DeathInDungeon:
                     case CriteriaTypes.KilledByCreature:
@@ -150,8 +152,6 @@ namespace Game.Achievements
                     case CriteriaTypes.TotalDamageReceived:
                     case CriteriaTypes.TotalHealingReceived:
                     case CriteriaTypes.UseLfdToGroupWithPlayers:
-                    case CriteriaTypes.WinBg:
-                    case CriteriaTypes.CompleteBattleground:
                     case CriteriaTypes.DamageDone:
                     case CriteriaTypes.HealingDone:
                     case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
@@ -1102,8 +1102,8 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaTypes.EquipEpicItem:
-                    // miscValue1 = itemid miscValue2 = itemSlot
-                    if (miscValue1 == 0 || miscValue2 != criteria.Entry.Asset)
+                    // miscValue1 = itemSlot miscValue2 = itemid
+                    if (miscValue2 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
                 case CriteriaTypes.RollNeedOnLoot:
@@ -2467,7 +2467,7 @@ namespace Game.Achievements
         public virtual bool RequiredAchievementSatisfied(uint achievementId) { return false; }
 
         public virtual string GetOwnerInfo() { return ""; }
-        public virtual List<Criteria> GetCriteriaByType(CriteriaTypes type) { return null; }
+        public virtual List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset) { return null; }
 
         protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new Dictionary<uint, CriteriaProgress>();
         Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new Dictionary<uint, uint>();
@@ -2767,8 +2767,55 @@ namespace Game.Achievements
             return _criteriaModifiers.LookupByKey(modifierTreeId);
         }
 
-        public List<Criteria> GetPlayerCriteriaByType(CriteriaTypes type)
+        bool IsCriteriaTypeStoredByAsset(CriteriaTypes type)
         {
+            switch (type)
+            {
+                case CriteriaTypes.KillCreature:
+                case CriteriaTypes.WinBg:
+                case CriteriaTypes.ReachSkillLevel:
+                case CriteriaTypes.CompleteAchievement:
+                case CriteriaTypes.CompleteQuestsInZone:
+                case CriteriaTypes.CompleteBattleground:
+                case CriteriaTypes.KilledByCreature:
+                case CriteriaTypes.CompleteQuest:
+                case CriteriaTypes.BeSpellTarget:
+                case CriteriaTypes.CastSpell:
+                case CriteriaTypes.BgObjectiveCapture:
+                case CriteriaTypes.HonorableKillAtArea:
+                case CriteriaTypes.LearnSpell:
+                case CriteriaTypes.OwnItem:
+                case CriteriaTypes.LearnSkillLevel:
+                case CriteriaTypes.UseItem:
+                case CriteriaTypes.LootItem:
+                case CriteriaTypes.ExploreArea:
+                case CriteriaTypes.GainReputation:
+                case CriteriaTypes.EquipEpicItem:
+                case CriteriaTypes.HkClass:
+                case CriteriaTypes.HkRace:
+                case CriteriaTypes.DoEmote:
+                case CriteriaTypes.EquipItem:
+                case CriteriaTypes.UseGameobject:
+                case CriteriaTypes.BeSpellTarget2:
+                case CriteriaTypes.FishInGameobject:
+                case CriteriaTypes.LearnSkilllineSpells:
+                case CriteriaTypes.LootType:
+                case CriteriaTypes.CastSpell2:
+                case CriteriaTypes.LearnSkillLine:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public List<Criteria> GetPlayerCriteriaByType(CriteriaTypes type, uint asset)
+        {
+            if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
+            {
+                if (_criteriasByAsset[(int)type].ContainsKey(asset))
+                    return _criteriasByAsset[(int)type][asset];
+            }
+
             return _criteriasByType.LookupByKey(type);
         }
 
@@ -2843,6 +2890,7 @@ namespace Game.Achievements
 
         // store criterias by type to speed up lookup
         MultiMap<CriteriaTypes, Criteria> _criteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
         MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
         MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
         MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();

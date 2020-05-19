@@ -500,7 +500,7 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _achievementPoints += achievement.Points;
 
-            UpdateCriteria(CriteriaTypes.CompleteAchievement, 0, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaTypes.CompleteAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaTypes.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
 
             // reward items and titles if any
@@ -654,9 +654,9 @@ namespace Game.Achievements
             _owner.SendPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type)
+        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
         {
-            return Global.CriteriaMgr.GetPlayerCriteriaByType(type);
+            return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
         }
 
         public override string GetOwnerInfo()
@@ -963,7 +963,7 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _achievementPoints += achievement.Points;
 
-            UpdateCriteria(CriteriaTypes.CompleteAchievement, 0, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaTypes.CompleteAchievement, achievement.Id, 0, 0, null, referencePlayer);
             UpdateCriteria(CriteriaTypes.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
         }
 
@@ -1018,7 +1018,7 @@ namespace Game.Achievements
             _owner.BroadcastPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type)
+        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
         {
             return Global.CriteriaMgr.GetGuildCriteriaByType(type);
         }
