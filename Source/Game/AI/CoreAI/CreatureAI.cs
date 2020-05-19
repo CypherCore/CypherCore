@@ -345,14 +345,13 @@ namespace Game.AI
 
         public bool CheckBoundary(Position who = null)
         {
+            if (_boundary == null)
+                return true;
+
             if (who == null)
                 who = me;
 
-            foreach (var boundary in _boundary)
-                if (!boundary.IsWithinBoundary(who))
-                    return false;
-
-            return true;
+            return IsInBounds(_boundary, who) != _negateBoundary;
         }
 
         public bool CheckInRoom()
@@ -386,9 +385,6 @@ namespace Game.AI
 
         public static bool IsInBounds(List<AreaBoundary> boundary, Position pos)
         {
-            if (boundary == null)
-                return true;
-
             foreach (AreaBoundary areaBoundary in boundary)
                 if (!areaBoundary.IsWithinBoundary(pos))
                     return false;
@@ -396,9 +392,10 @@ namespace Game.AI
             return true;
         }
         
-        public void SetBoundary(List<AreaBoundary> boundary)
+        public void SetBoundary(List<AreaBoundary> boundary, bool negateBoundaries = false)
         {
             _boundary = boundary;
+            _negateBoundary = negateBoundaries;
             me.DoImmediateBoundaryCheck();
         }
 
@@ -482,6 +479,7 @@ namespace Game.AI
         bool MoveInLineOfSight_locked;
         protected new Creature me;
         List<AreaBoundary> _boundary = new List<AreaBoundary>();
+        bool _negateBoundary;
 
         protected EventMap _events = new EventMap();
         protected TaskScheduler _scheduler = new TaskScheduler();
