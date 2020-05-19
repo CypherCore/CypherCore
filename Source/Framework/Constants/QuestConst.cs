@@ -338,7 +338,8 @@ namespace Framework.Constants
         Speakto = 0x100,   // Internal Flag Computed Only
         Kill = 0x200,   // Internal Flag Computed Only
         Timed = 0x400,   // Internal Flag Computed Only
-        PlayerKill = 0x800    // Internal Flag Computed Only
+        PlayerKill = 0x800,    // Internal Flag Computed Only
+        CompletedAtStart = 0x1000   // Internal flag computed only
     }
 
     public enum QuestSaveType

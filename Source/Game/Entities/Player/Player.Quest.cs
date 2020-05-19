@@ -462,7 +462,7 @@ namespace Game.Entities
                 if (qInfo == null)
                     return false;
 
-                if (!qInfo.IsRepeatable() && m_RewardedQuests.Contains(quest_id))
+                if (!qInfo.IsRepeatable() && GetQuestRewardStatus(quest_id))
                     return false;                                   // not allow re-complete quest
 
                 // auto complete quest
@@ -838,10 +838,10 @@ namespace Game.Entities
 
         public uint GetQuestXPReward(Quest quest)
         {
-            bool rewarded = m_RewardedQuests.Contains(quest.Id);
+            bool rewarded = IsQuestRewarded(quest.Id) && !quest.IsDFQuest();
 
             // Not give XP in case already completed once repeatable quest
-            if (rewarded && !quest.IsDFQuest())
+            if (rewarded)
                 return 0;
 
             uint XP = (uint)(quest.XPValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
@@ -995,7 +995,7 @@ namespace Game.Entities
                             SendNewItem(item, quest.RewardItemCount[i], true, false);
                         }
                         else if (quest.IsDFQuest())
-                            SendItemRetrievalMail(quest.RewardItemId[i], quest.RewardItemCount[i], ItemContext.QuestReward);
+                            SendItemRetrievalMail(itemId, quest.RewardItemCount[i], ItemContext.QuestReward);
                     }
                 }
             }
@@ -1081,11 +1081,6 @@ namespace Game.Entities
             if (quest.CanIncreaseRewardedQuestCounters())
                 SetRewardedQuest(quest_id);
 
-            // StoreNewItem, mail reward, etc. save data directly to the database
-            // to prevent exploitable data desynchronisation we save the quest status to the database too
-            // (to prevent rewarding this quest another time while rewards were already given out)
-            _SaveQuestStatus(null);
-
             SendQuestReward(quest, questGiver?.ToCreature(), XP, !announce);
 
             // cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
@@ -1128,6 +1123,9 @@ namespace Game.Entities
             UpdateCriteria(CriteriaTypes.CompleteQuestCount);
             UpdateCriteria(CriteriaTypes.CompleteQuest, quest.Id);
 
+            // make full db save
+            SaveToDB(false);
+
             uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
             if (questBit != 0)
                 SetQuestCompletedBit(questBit, true);
@@ -1159,13 +1157,15 @@ namespace Game.Entities
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
             if (quest != null)
             {
-                // Already complete quests shouldn't turn failed.
-                if (GetQuestStatus(questId) == QuestStatus.Complete && !quest.HasSpecialFlag(QuestSpecialFlags.Timed))
-                    return;
+                QuestStatus qStatus = GetQuestStatus(questId);
 
-                // You can't fail a quest if you don't have it, or if it's already rewarded.
-                if (GetQuestStatus(questId) == QuestStatus.None || GetQuestStatus(questId) == QuestStatus.Rewarded)
-                    return;
+                // we can only fail incomplete quest or...
+                if (qStatus != QuestStatus.Incomplete)
+                {
+                    // completed timed quest with no requirements
+                    if (qStatus != QuestStatus.Complete || !quest.HasSpecialFlag(QuestSpecialFlags.Timed) || !quest.HasSpecialFlag(QuestSpecialFlags.CompletedAtStart))
+                        return;
+                }
 
                 SetQuestStatus(questId, QuestStatus.Failed);
 
@@ -1548,7 +1548,7 @@ namespace Game.Entities
                 }
 
                 // alternative quest already started or completed - but don't check rewarded states if both are repeatable
-                if (GetQuestStatus(exclude_Id) != QuestStatus.None || (!(qInfo.IsRepeatable() && Nquest.IsRepeatable()) && m_RewardedQuests.Contains(exclude_Id)))
+                if (GetQuestStatus(exclude_Id) != QuestStatus.None || (!(qInfo.IsRepeatable() && Nquest.IsRepeatable()) && GetQuestRewardStatus(exclude_Id)))
                 {
                     if (msg)
                     {
@@ -1707,7 +1707,7 @@ namespace Game.Entities
 
                 // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
                 if (!qInfo.IsRepeatable())
-                    return m_RewardedQuests.Contains(quest_id);
+                    return IsQuestRewarded(quest_id);
 
                 return false;
             }
@@ -1722,15 +1722,8 @@ namespace Game.Entities
                 if (questStatusData != null)
                     return questStatusData.Status;
 
-                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
-                if (quest != null)
-                {
-                    if (quest.IsSeasonal() && !quest.IsRepeatable())
-                        return SatisfyQuestSeasonal(quest, false) ? QuestStatus.None : QuestStatus.Rewarded;
-
-                    if (!quest.IsRepeatable() && IsQuestRewarded(questId))
-                        return QuestStatus.Rewarded;
-                }
+                if (GetQuestRewardStatus(questId))
+                    return QuestStatus.Rewarded;
             }
             return QuestStatus.None;
         }
@@ -1738,7 +1731,22 @@ namespace Game.Entities
         public bool CanShareQuest(uint quest_id)
         {
             Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
-            return qInfo != null && qInfo.HasFlag(QuestFlags.Sharable) && IsActiveQuest(quest_id);
+            if (qInfo != null && qInfo.HasFlag(QuestFlags.Sharable))
+            {
+                var questStatusData = m_QuestStatus.LookupByKey(quest_id);
+                if (questStatusData != null)
+                {
+                    if (questStatusData.Status != QuestStatus.Incomplete)
+                        return false;
+
+                    // in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
+                    if (Global.PoolMgr.IsPartOfAPool<Quest>(quest_id) != 0 && !Global.PoolMgr.IsSpawnedObject<Quest>(quest_id))
+                        return false;
+
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void SetQuestStatus(uint questId, QuestStatus status, bool update = true)
@@ -1785,6 +1793,18 @@ namespace Game.Entities
             uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
             if (questBit != 0)
                 SetQuestCompletedBit(questBit, false);
+
+            // Remove seasonal quest also
+            Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
+            if (qInfo.IsSeasonal())
+            {
+                ushort eventId = qInfo.GetEventIdForQuest();
+                if (m_seasonalquests.ContainsKey(eventId))
+                {
+                    m_seasonalquests.Remove(eventId, questId);
+                    m_SeasonalQuestChanged = true;
+                }
+            }
 
             if (update)
                 SendQuestUpdate(questId);
@@ -2036,8 +2056,10 @@ namespace Game.Entities
                     {
                         q_status.Explored = true;
                         m_QuestStatusSave[questId] = QUEST_DEFAULT_SAVE_TYPE;
-                        SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
-                        SendQuestComplete(questId);
+                        
+                        // if we cannot complete quest send exploration succeded (to mark exploration on client)
+                        if (!CanCompleteQuest(questId))
+                            SendQuestComplete(questId)
                     }*/
                 }
                 if (CanCompleteQuest(questId))

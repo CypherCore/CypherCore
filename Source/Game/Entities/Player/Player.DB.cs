@@ -1996,13 +1996,18 @@ namespace Game.Entities
         }
         void _SaveSeasonalQuestStatus(SQLTransaction trans)
         {
-            if (!m_SeasonalQuestChanged || m_seasonalquests.Empty())
+            if (!m_SeasonalQuestChanged)
                 return;
 
             // we don't need transactions here.
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_SEASONAL);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
+
+            m_SeasonalQuestChanged = false;
+
+            if (m_seasonalquests.Empty())
+                return;
 
             foreach (var iter in m_seasonalquests)
             {
@@ -2012,8 +2017,6 @@ namespace Game.Entities
                 stmt.AddValue(2, iter.Key);
                 trans.Append(stmt);
             }
-
-            m_SeasonalQuestChanged = false;
         }
         void _SaveMonthlyQuestStatus(SQLTransaction trans)
         {

@@ -7114,6 +7114,27 @@ namespace Game
                     _exclusiveQuestGroups.Add(qinfo.ExclusiveGroup, qinfo.Id);
                 if (qinfo.LimitTime != 0)
                     qinfo.SetSpecialFlag(QuestSpecialFlags.Timed);
+
+                // Special flag to determine if quest is completed from the start, used to determine if we can fail timed quest if it is completed
+                if (!qinfo.HasSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast | QuestSpecialFlags.Speakto | QuestSpecialFlags.ExplorationOrEvent))
+                {
+                    bool addFlag = true;
+                    if (qinfo.HasSpecialFlag(QuestSpecialFlags.Deliver))
+                    {
+                        foreach (QuestObjective obj in qinfo.Objectives)
+                        {
+                            if (obj.Type == QuestObjectiveType.Item)
+                                if (obj.ObjectID != qinfo.SourceItemId || obj.Amount > qinfo.SourceItemIdCount)
+                                {
+                                    addFlag = false;
+                                    break;
+                                }
+                        }
+                    }
+
+                    if (addFlag)
+                        qinfo.SetSpecialFlag(QuestSpecialFlags.CompletedAtStart);
+                }
             }
 
             // check QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE
