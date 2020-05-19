@@ -26,28 +26,6 @@ namespace Game.Entities
 {
     public partial class Unit
     {
-        public void AddPetAura(PetAura petSpell)
-        {
-            if (!IsTypeId(TypeId.Player))
-                return;
-
-            m_petAuras.Add(petSpell);
-            Pet pet = ToPlayer().GetPet();
-            if (pet)
-                pet.CastPetAura(petSpell);
-        }
-
-        public void RemovePetAura(PetAura petSpell)
-        {
-            if (!IsTypeId(TypeId.Player))
-                return;
-
-            m_petAuras.Remove(petSpell);
-            Pet pet = ToPlayer().GetPet();
-            if (pet)
-                pet.RemoveAurasDueToSpell(petSpell.GetAura(pet.GetEntry()));
-        }
-
         public CharmInfo GetCharmInfo() { return m_charmInfo; }
 
         public CharmInfo InitCharmInfo()

@@ -30,11 +30,6 @@ namespace Game.Entities
     {
         public virtual bool HasSpell(uint spellId) { return false; }
 
-        public virtual bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
-        {
-            return false;
-        }
-
         public void SetInstantCast(bool set) { _instantCast = set; }
         public bool CanInstantCast() { return _instantCast; }
         
@@ -1388,7 +1383,12 @@ namespace Game.Entities
             return 0;
         }
 
-        public bool IsMovementPreventedByCasting()
+        public virtual bool IsFocusing(Spell focusSpell = null, bool withDelay = false) { return false; }
+
+        /// <summary>
+        /// Check if our current channel spell has attribute SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
+        /// </summary>
+        public virtual bool IsMovementPreventedByCasting()
         {
             // can always move when not casting
             if (!HasUnitState(UnitState.Casting))
@@ -1400,9 +1400,6 @@ namespace Game.Entities
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.GetSpellInfo().IsMoveAllowedChannel())
                         return false;
-
-            if (IsFocusing(null, true))
-                return false;
 
             // prohibit movement for all other spell casts
             return true;

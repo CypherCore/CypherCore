@@ -2976,6 +2976,10 @@ namespace Game.Entities
                         break;
                     case 69846: // Frost Bomb
                         spellInfo.Speed = 0.0f;    // This spell's summon happens instantly
+                        break;                    
+                    case 70106: // Chilled to the Bone                        
+                        spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
+                        spellInfo.AttributesEx6 |= SpellAttr6.NoDonePctDamageMods;
                         break;
                     case 71614: // Ice Lock
                         spellInfo.Mechanic = Mechanics.Stun;

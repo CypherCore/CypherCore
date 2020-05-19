@@ -641,15 +641,6 @@ namespace Game.AI
                                 return false;
                             break;
                         }
-                    case SmartEvents.DummyEffect:
-                        {
-                            if (!IsSpellValid(e, e.Event.dummy.spell))
-                                return false;
-
-                            if (e.Event.dummy.effIndex > 2)
-                                return false;
-                            break;
-                        }
                     case SmartEvents.IsBehindTarget:
                         {
                             if (!IsMinMaxValid(e, e.Event.behindTarget.cooldownMin, e.Event.behindTarget.cooldownMax))
@@ -1579,7 +1570,7 @@ namespace Game.AI
         {
             { SmartEvents.UpdateIc,                 SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist },
             { SmartEvents.UpdateOoc,                SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance },
-            { SmartEvents.HealthPct,                 SmartScriptTypeMaskId.Creature },
+            { SmartEvents.HealthPct,                SmartScriptTypeMaskId.Creature },
             { SmartEvents.ManaPct,                  SmartScriptTypeMaskId.Creature },
             { SmartEvents.Aggro,                    SmartScriptTypeMaskId.Creature },
             { SmartEvents.Kill,                     SmartScriptTypeMaskId.Creature },
@@ -1643,7 +1634,7 @@ namespace Game.AI
             { SmartEvents.JustCreated,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GossipHello,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.FollowCompleted,          SmartScriptTypeMaskId.Creature },
-            { SmartEvents.DummyEffect,              SmartScriptTypeMaskId.Spell    },
+            { SmartEvents.Unused66,                 SmartScriptTypeMaskId.None     },
             { SmartEvents.IsBehindTarget,           SmartScriptTypeMaskId.Creature },
             { SmartEvents.GameEventStart,           SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GameEventEnd,             SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },

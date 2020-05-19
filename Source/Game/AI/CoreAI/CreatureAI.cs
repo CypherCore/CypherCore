@@ -155,9 +155,9 @@ namespace Game.AI
             me.SendAIReaction(AiReaction.Alert);
 
             // Face the unit (stealthed player) and set distracted state for 5 seconds
-            me.SetFacingTo(me.GetAngle(who.GetPositionX(), who.GetPositionY()), true);
-            me.StopMoving();
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds);
+            me.StopMoving();
+            me.SetFacingTo(me.GetAngle(who));
         }
 
         // Called for reaction at stopping attack at no attackers or targets
@@ -193,7 +193,7 @@ namespace Game.AI
 
         void SetGazeOn(Unit target)
         {
-            if (me.IsValidAttackTarget(target))
+            if (me.IsValidAttackTarget(target) && target != me.GetVictim())
             {
                 if (!me.IsFocusing(null, true))
                     AttackStart(target);
@@ -217,7 +217,7 @@ namespace Game.AI
             Unit victim = me.SelectVictim();
             if (victim != null)
             {
-                if (!me.IsFocusing(null, true))
+                if (!me.IsFocusing(null, true) && victim != me.GetVictim())
                     AttackStart(victim);
             }
 

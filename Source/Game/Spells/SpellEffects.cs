@@ -306,25 +306,19 @@ namespace Game.Spells
             }
 
             // pet auras
-            PetAura petSpell = Global.SpellMgr.GetPetAura(m_spellInfo.Id, (byte)effIndex);
-            if (petSpell != null)
+            if (m_caster.GetTypeId() == TypeId.Player)
             {
-                m_caster.AddPetAura(petSpell);
-                return;
+                PetAura petSpell = Global.SpellMgr.GetPetAura(m_spellInfo.Id, (byte)effIndex);
+                if (petSpell != null)
+                {
+                    m_caster.ToPlayer().AddPetAura(petSpell);
+                    return;
+                }
             }
 
             // normal DB scripted effect
             Log.outDebug(LogFilter.Spells, "Spell ScriptStart spellid {0} in EffectDummy({1})", m_spellInfo.Id, effIndex);
             m_caster.GetMap().ScriptsStart(ScriptsType.Spell, (uint)((int)m_spellInfo.Id | (int)(effIndex << 24)), m_caster, unitTarget);
-
-            // Script based implementation. Must be used only for not good for implementation in core spell effects
-            // So called only for not proccessed cases
-            if (gameObjTarget)
-                Global.ScriptMgr.OnDummyEffect(m_caster, m_spellInfo.Id, effIndex, gameObjTarget);
-            else if (unitTarget && unitTarget.IsTypeId(TypeId.Unit))
-                Global.ScriptMgr.OnDummyEffect(m_caster, m_spellInfo.Id, effIndex, unitTarget.ToCreature());
-            else if (itemTarget)
-                Global.ScriptMgr.OnDummyEffect(m_caster, m_spellInfo.Id, effIndex, itemTarget);
         }
 
         [SpellEffectHandler(SpellEffectName.TriggerSpell)]
@@ -1957,11 +1951,11 @@ namespace Game.Spells
             if (unitTarget.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing))
                 return;
 
-            unitTarget.SetFacingTo(unitTarget.GetAngle(destTarget));
-            unitTarget.ClearUnitState(UnitState.Moving);
-
             if (unitTarget.IsTypeId(TypeId.Unit))
                 unitTarget.GetMotionMaster().MoveDistract((uint)(damage * Time.InMilliseconds));
+
+            unitTarget.StopMoving();
+            unitTarget.SetFacingTo(unitTarget.GetAngle(destTarget));
         }
 
         [SpellEffectHandler(SpellEffectName.Pickpocket)]

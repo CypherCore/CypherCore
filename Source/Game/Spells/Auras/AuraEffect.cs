@@ -3812,7 +3812,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModMeleeRangedHaste2)]
         void HandleModMeleeRangedSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             //! ToDo: Haste auras with the same handler _CAN'T_ stack together
@@ -4223,16 +4223,16 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
 
-            if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
+            // pet auras
+            if (target.GetTypeId() == TypeId.Player && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
-                // pet auras
                 PetAura petSpell = Global.SpellMgr.GetPetAura(GetId(), m_effIndex);
                 if (petSpell != null)
                 {
                     if (apply)
-                        target.AddPetAura(petSpell);
+                        target.ToPlayer().AddPetAura(petSpell);
                     else
-                        target.RemovePetAura(petSpell);
+                        target.ToPlayer().RemovePetAura(petSpell);
                 }
             }
 
@@ -5332,12 +5332,7 @@ namespace Game.Spells
                 }
             }
             else
-            {
-                Creature c = target.ToCreature();
-                if (c == null || caster == null || !Global.ScriptMgr.OnDummyEffect(caster, GetId(), GetEffIndex(), target.ToCreature()) ||
-                    !c.GetAI().OnDummyEffect(caster, GetId(), GetEffIndex()))
-                    Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
-            }
+                Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
         }
 
         void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)

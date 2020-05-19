@@ -2436,17 +2436,6 @@ namespace Game.Spells
             else
                 m_casttime = m_spellInfo.CalcCastTime(m_caster.GetLevel(), this);
 
-            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled)) // _UNIT actually means creature. for some reason.
-            {
-                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
-                {
-                    if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
-                        m_caster.ToCreature().FocusTarget(this, m_targets.GetObjectTarget());
-                    else if (m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
-                        m_caster.ToCreature().FocusTarget(this, null);
-                }
-            }
-
             // don't allow channeled spells / spells with cast time to be casted while moving
             // exception are only channeled spells that have no casttime and SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
             // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
@@ -2460,6 +2449,18 @@ namespace Game.Spells
                     SendCastResult(SpellCastResult.Moving);
                     Finish(false);
                     return;
+                }
+            }
+
+            // focus if not controlled creature
+            if (m_caster.GetTypeId() == TypeId.Unit && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled))
+            {
+                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
+                {
+                    if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
+                        m_caster.ToCreature().FocusTarget(this, m_targets.GetObjectTarget());
+                    else if (m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
+                        m_caster.ToCreature().FocusTarget(this, null);
                 }
             }
 

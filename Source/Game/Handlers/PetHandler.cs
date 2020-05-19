@@ -322,14 +322,16 @@ namespace Game
                             Unit unit_target2 = spell.m_targets.GetUnitTarget();
                             if (unit_target)
                             {
-                                pet.SetInFront(unit_target);
+                                if (!pet.IsFocusing())
+                                    pet.SetInFront(unit_target);
                                 Player player = unit_target.ToPlayer();
                                 if (player)
                                     pet.SendUpdateToPlayer(player);
                             }
                             else if (unit_target2)
                             {
-                                pet.SetInFront(unit_target2);
+                                if (!pet.IsFocusing())
+                                    pet.SetInFront(unit_target2);
                                 Player player = unit_target2.ToPlayer();
                                 if (player)
                                     pet.SendUpdateToPlayer(player);

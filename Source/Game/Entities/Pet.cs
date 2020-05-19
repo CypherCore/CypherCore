@@ -1386,11 +1386,9 @@ namespace Game.Entities
 
         void CastPetAuras(bool current)
         {
-            Unit owner = GetOwner();
-            if (!owner || !owner.IsTypeId(TypeId.Player))
-                return;
+            Player owner = GetOwner();
 
-            if (!IsPermanentPetFor(owner.ToPlayer()))
+            if (!IsPermanentPetFor(owner))
                 return;
 
             foreach (var pa in owner.m_petAuras)
@@ -1419,10 +1417,7 @@ namespace Game.Entities
 
         bool IsPetAura(Aura aura)
         {
-            Unit owner = GetOwner();
-
-            if (!owner || !owner.IsTypeId(TypeId.Player))
-                return false;
+            Player owner = GetOwner();
 
             // if the owner has that pet aura, return true
             foreach (var petAura in owner.m_petAuras)

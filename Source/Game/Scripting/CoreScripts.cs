@@ -268,9 +268,6 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when a dummy spell effect is triggered on the item.
-        public virtual bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Item target) { return false; }
-
         // Called when a player accepts a quest from the item.
         public virtual bool OnQuestAccept(Player player, Item item, Quest quest) { return false; }
 
@@ -336,9 +333,6 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when a dummy spell effect is triggered on the creature.
-        public virtual bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Creature target) { return false; }
-
         // Called when a player opens a gossip dialog with the creature.
         public virtual bool OnGossipHello(Player player, Creature creature) { return false; }
 
@@ -380,9 +374,6 @@ namespace Game.Scripting
         }
 
         public override bool IsDatabaseBound() { return true; }
-
-        // Called when a dummy spell effect is triggered on the gameobject.
-        public virtual bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, GameObject target) { return false; }
 
         // Called when a player opens a gossip dialog with the gameobject.
         public virtual bool OnGossipHello(Player player, GameObject go) { return false; }

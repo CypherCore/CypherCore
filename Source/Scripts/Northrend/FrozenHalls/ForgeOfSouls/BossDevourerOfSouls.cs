@@ -201,7 +201,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls.DevourerOfSouls
                 _scheduler.Schedule(TimeSpan.FromSeconds(3), tickTask =>
                 {
                     beamAngle += beamAngleDiff;
-                    me.SetFacingTo(beamAngle, true);
+                    me.SetFacingTo(beamAngle);
                     me.StopMoving();
 
                     DoCast(me, SpellIds.WailingSouls);

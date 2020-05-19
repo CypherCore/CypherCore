@@ -709,13 +709,6 @@ namespace Game.Scripting
         }
 
         //ItemScript
-        public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Item target)
-        {
-            Cypher.Assert(caster != null);
-            Cypher.Assert(target != null);
-
-            return RunScriptRet<ItemScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
-        }
         public bool OnQuestAccept(Player player, Item item, Quest quest)
         {
             Cypher.Assert(player != null);
@@ -756,13 +749,6 @@ namespace Game.Scripting
         }
 
         //CreatureScript
-        public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Creature target)
-        {
-            Cypher.Assert(caster);
-            Cypher.Assert(target);
-
-            return RunScriptRet<CreatureScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
-        }
         public bool OnGossipHello(Player player, Creature creature)
         {
             Cypher.Assert(player);
@@ -848,13 +834,6 @@ namespace Game.Scripting
         }
 
         //GameObjectScript
-        public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, GameObject target)
-        {
-            Cypher.Assert(caster != null);
-            Cypher.Assert(target != null);
-
-            return RunScriptRet<GameObjectScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
-        }
         public bool OnGossipHello(Player player, GameObject go)
         {
             Cypher.Assert(player != null);

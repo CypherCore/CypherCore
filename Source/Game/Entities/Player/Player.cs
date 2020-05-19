@@ -4995,6 +4995,24 @@ namespace Game.Entities
             }
         }
 
+        public void AddPetAura(PetAura petSpell)
+        {
+            m_petAuras.Add(petSpell);
+
+            Pet pet = GetPet();
+            if (pet != null)
+                pet.CastPetAura(petSpell);
+        }
+
+        public void RemovePetAura(PetAura petSpell)
+        {
+            m_petAuras.Remove(petSpell);
+
+            Pet pet = GetPet();
+            if (pet != null)
+                pet.RemoveAurasDueToSpell(petSpell.GetAura(pet.GetEntry()));
+        }
+        
         public bool InArena()
         {
             Battleground bg = GetBattleground();

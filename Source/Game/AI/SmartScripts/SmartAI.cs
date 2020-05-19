@@ -811,12 +811,6 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
 
-        public override bool OnDummyEffect(Unit caster, uint spellId, int effIndex)
-        {
-            GetScript().ProcessEventsFor(SmartEvents.DummyEffect, caster, spellId, (uint)effIndex);
-            return true;
-        }
-
         public void SetCombatMove(bool on)
         {
             if (mCanCombatMove == on)

@@ -3624,13 +3624,6 @@ namespace Game.AI
                         ProcessAction(e, unit, var0, var1);
                         break;
                     }
-                case SmartEvents.DummyEffect:
-                    {
-                        if (e.Event.dummy.spell != var0 || e.Event.dummy.effIndex != var1)
-                            return;
-                        ProcessAction(e, unit, var0, var1);
-                        break;
-                    }
                 case SmartEvents.GameEventStart:
                 case SmartEvents.GameEventEnd:
                     {

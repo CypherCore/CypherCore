@@ -92,7 +92,6 @@ namespace Game.Entities
         SpellHistory _spellHistory;
 
         //Auras
-        public List<PetAura> m_petAuras = new List<PetAura>();
         List<AuraEffect> AuraEffectList = new List<AuraEffect>();
         MultiMap<AuraType, AuraEffect> m_modAuras = new MultiMap<AuraType, AuraEffect>();
         List<Aura> m_removedAuras = new List<Aura>();

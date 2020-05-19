@@ -2304,11 +2304,14 @@ namespace Game.Spells
                         {
                             switch (Id)
                             {
+                                case 42292: // PvP trinket
+                                case 59752: // Every Man for Himself
+                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.UseNormalMovementSpeed);
+                                    break;
                                 case 34471: // The Beast Within
                                 case 19574: // Bestial Wrath
-                                case 42292: // PvP trinket
                                 case 46227: // Medallion of Immunity
-                                case 59752: // Every Man for Himself
                                 case 53490: // Bullheaded
                                 case 65547: // PvP Trinket
                                 case 134946: // Supremacy of the Alliance

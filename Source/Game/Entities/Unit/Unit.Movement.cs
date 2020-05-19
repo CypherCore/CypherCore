@@ -164,9 +164,10 @@ namespace Game.Entities
                 Orientation = GetAngle(target.GetPosition());
         }
 
-        public void SetFacingTo(float ori, bool force = false)
+        public void SetFacingTo(float ori, bool force = true)
         {
-            if (!force && !IsStopped())
+            // do not face when already moving
+            if (!force && (!IsStopped() || !MoveSpline.Finalized()))
                 return;
 
             MoveSplineInit init = new MoveSplineInit(this);
@@ -175,10 +176,10 @@ namespace Game.Entities
             init.Launch();
         }
 
-        public void SetFacingToObject(WorldObject obj, bool force = false)
+        public void SetFacingToObject(WorldObject obj, bool force = true)
         {
             // do not face when already moving
-            if (!force && !IsStopped())
+            if (!force && (!IsStopped() || !MoveSpline.Finalized()))
                 return;
 
             // @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.

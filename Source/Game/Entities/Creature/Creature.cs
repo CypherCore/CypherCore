@@ -930,6 +930,27 @@ namespace Game.Entities
                 && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
         }
 
+        public override bool IsMovementPreventedByCasting()
+        {
+            // first check if currently a movement allowed channel is active and we're not casting
+            Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell != null)
+            {
+                if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
+                    if (spell.GetSpellInfo().IsMoveAllowedChannel())
+                        if (HasUnitState(UnitState.Casting))
+                            return true;
+            }
+
+            if (IsFocusing(null, true))
+                return true;
+
+            if (HasUnitState(UnitState.Casting))
+                return true;
+
+            return false;
+        }
+        
         public void StartPickPocketRefillTimer()
         {
             _pickpocketLootRestore = Time.UnixTime + WorldConfig.GetIntValue(WorldCfg.CreaturePickpocketRefill);
@@ -2768,19 +2789,19 @@ namespace Game.Entities
             bool canTurnDuringCast = !focusSpell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast);
             // Face the target - we need to do this before the unit state is modified for no-turn spells
             if (target)
-                SetFacingToObject(target);
+                SetFacingToObject(target, false);
             else if (!canTurnDuringCast)
             {
                 Unit victim = GetVictim();
                 if (victim)
-                    SetFacingToObject(victim); // ensure server-side orientation is correct at beginning of cast
+                    SetFacingToObject(victim, false); // ensure server-side orientation is correct at beginning of cast
             }
 
             if (!canTurnDuringCast)
                 AddUnitState(UnitState.CannotTurn);
         }
 
-        public override bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
+        public bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
         {
             if (!IsAlive()) // dead creatures cannot focus
             {
@@ -2821,10 +2842,10 @@ namespace Game.Entities
                 {
                     WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);
                     if (objTarget)
-                        SetFacingToObject(objTarget);
+                        SetFacingToObject(objTarget, false);
                 }
                 else
-                    SetFacingTo(m_suppressedOrientation);
+                    SetFacingTo(m_suppressedOrientation, false);
             }
             else
                 // tell the creature that it should reacquire its actual target after the delay expires (this is handled in ::Update)
@@ -3156,7 +3177,7 @@ namespace Game.Entities
 
             if (target != null && _IsTargetAcceptable(target) && CanCreatureAttack(target))
             {
-                if (!IsFocusing())
+                if (!IsFocusing(null, true))
                     SetInFront(target);
                 return target;
             }

@@ -385,7 +385,6 @@ namespace Game.AI
         public virtual void QuestSelect(Player player, Quest quest) { }
         public virtual void QuestComplete(Player player, Quest quest) { }
         public virtual void QuestReward(Player player, Quest quest, uint opt) { }
-        public virtual bool OnDummyEffect(Unit caster, uint spellId, int effIndex) { return false; }
         public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         public static AISpellInfoType[] AISpellInfo;
