@@ -17,11 +17,6 @@
 
 namespace Game.DataStorage
 {
-    public sealed class GtArmorMitigationByLvlRecord
-    {
-        public float Mitigation;
-    }
-
     public sealed class GtArtifactKnowledgeMultiplierRecord
     {
         public float Multiplier;
@@ -108,41 +103,9 @@ namespace Game.DataStorage
         public float SocketCost;
     }
 
-    public sealed class GtNpcDamageByClassRecord
-    {
-        public float Rogue;
-        public float Druid;
-        public float Hunter;
-        public float Mage;
-        public float Paladin;
-        public float Priest;
-        public float Shaman;
-        public float Warlock;
-        public float Warrior;
-        public float DeathKnight;
-        public float Monk;
-        public float DemonHunter;
-    }
-
     public sealed class GtNpcManaCostScalerRecord
     {
         public float Scaler;
-    }
-
-    public sealed class GtNpcTotalHpRecord
-    {
-        public float Rogue;
-        public float Druid;
-        public float Hunter;
-        public float Mage;
-        public float Paladin;
-        public float Priest;
-        public float Shaman;
-        public float Warlock;
-        public float Warrior;
-        public float DeathKnight;
-        public float Monk;
-        public float DemonHunter;
     }
 
     public sealed class GtSpellScalingRecord

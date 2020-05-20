@@ -1150,17 +1150,17 @@ namespace Game.Entities
             byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
             SetLevel(level);
 
-            if (HasScalableLevels())
-            {
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), cInfo.levelScaling.Value.MinLevel);
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), cInfo.levelScaling.Value.MaxLevel);
+            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
 
-                int mindelta = Math.Min(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
-                int maxdelta = Math.Max(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
-                int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), scaling.MinLevel);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), scaling.MaxLevel);
 
-                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            }
+            int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
+            int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), scaling.ContentTuningID);
 
             UpdateLevelDependantStats();
         }
@@ -1169,12 +1169,13 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureEliteType rank = IsPet() ? 0 : cInfo.Rank;
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(GetLevel(), cInfo.UnitClass);
+            uint level = GetLevel();
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
 
             // health
             float healthmod = _GetHealthMod(rank);
 
-            uint basehp = stats.GenerateHealth(cInfo);
+            uint basehp = (uint)GetMaxHealthByLevel(level);
             uint health = (uint)(basehp * healthmod);
 
             SetCreateHealth(health);
@@ -1200,7 +1201,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, health);
 
             //Damage
-            float basedamage = stats.GenerateBaseDamage(cInfo);
+            float basedamage = GetBaseDamageForLevel(level);
             float weaponBaseMinDamage = basedamage;
             float weaponBaseMaxDamage = basedamage * 1.5f;
 
@@ -1216,7 +1217,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
             SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
 
-            float armor = stats.GenerateArmor(cInfo); // @todo Why is this treated as uint32 when it's a float?
+            float armor = GetBaseArmorForLevel(level); /// @todo Why is this treated as uint32 when it's a float?
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
@@ -2352,14 +2353,17 @@ namespace Game.Entities
         public bool HasScalableLevels()
         {
             CreatureTemplate cinfo = GetCreatureTemplate();
-            return cinfo.levelScaling.HasValue;
+            CreatureLevelScaling scaling = cinfo.GetLevelScaling(GetMap().GetDifficultyID());
+
+            return (scaling.MinLevel != 0 && scaling.MaxLevel != 0);
         }
 
         ulong GetMaxHealthByLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateHealth(cInfo);
+            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
@@ -2377,8 +2381,8 @@ namespace Game.Entities
         float GetBaseDamageForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateBaseDamage(cInfo);
+            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2394,8 +2398,9 @@ namespace Game.Entities
         float GetBaseArmorForLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
-            return stats.GenerateArmor(cInfo);
+            CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            return baseArmor * cInfo.ModArmor;
         }
 
         public override float GetArmorMultiplierForTarget(WorldObject target)

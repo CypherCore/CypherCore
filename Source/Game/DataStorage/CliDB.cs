@@ -359,7 +359,6 @@ namespace Game.DataStorage
 
             DataPath = dataPath + "/gt/";
 
-            ArmorMitigationByLvlGameTable = GameTableReader.Read<GtArmorMitigationByLvlRecord>("ArmorMitigationByLvl.txt");
             ArtifactKnowledgeMultiplierGameTable = GameTableReader.Read<GtArtifactKnowledgeMultiplierRecord>("ArtifactKnowledgeMultiplier.txt");
             ArtifactLevelXPGameTable = GameTableReader.Read<GtArtifactLevelXPRecord>("artifactLevelXP.txt");
             BarberShopCostBaseGameTable = GameTableReader.Read<GtBarberShopCostBaseRecord>("BarberShopCostBase.txt");
@@ -368,23 +367,7 @@ namespace Game.DataStorage
             CombatRatingsMultByILvlGameTable = GameTableReader.Read<GtGenericMultByILvlRecord>("CombatRatingsMultByILvl.txt");
             ItemSocketCostPerLevelGameTable = GameTableReader.Read<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             HpPerStaGameTable = GameTableReader.Read<GtHpPerStaRecord>("HpPerSta.txt");
-            NpcDamageByClassGameTable[0] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClass.txt");
-            NpcDamageByClassGameTable[1] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp1.txt");
-            NpcDamageByClassGameTable[2] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp2.txt");
-            NpcDamageByClassGameTable[3] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp3.txt");
-            NpcDamageByClassGameTable[4] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp4.txt");
-            NpcDamageByClassGameTable[5] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp5.txt");
-            NpcDamageByClassGameTable[6] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp6.txt");
-            NpcDamageByClassGameTable[7] = GameTableReader.Read<GtNpcDamageByClassRecord>("NpcDamageByClassExp7.txt");
             NpcManaCostScalerGameTable = GameTableReader.Read<GtNpcManaCostScalerRecord>("NPCManaCostScaler.txt");
-            NpcTotalHpGameTable[0] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHp.txt");
-            NpcTotalHpGameTable[1] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp1.txt");
-            NpcTotalHpGameTable[2] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp2.txt");
-            NpcTotalHpGameTable[3] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp3.txt");
-            NpcTotalHpGameTable[4] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp4.txt");
-            NpcTotalHpGameTable[5] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp5.txt");
-            NpcTotalHpGameTable[6] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp6.txt");
-            NpcTotalHpGameTable[7] = GameTableReader.Read<GtNpcTotalHpRecord>("NpcTotalHpExp7.txt");
             SpellScalingGameTable = GameTableReader.Read<GtSpellScalingRecord>("SpellScaling.txt");
             StaminaMultByILvlGameTable = GameTableReader.Read<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
             XpGameTable = GameTableReader.Read<GtXpRecord>("xp.txt");
@@ -648,7 +631,6 @@ namespace Game.DataStorage
         #endregion
 
         #region GameTables
-        public static GameTable<GtArmorMitigationByLvlRecord> ArmorMitigationByLvlGameTable;
         public static GameTable<GtArtifactKnowledgeMultiplierRecord> ArtifactKnowledgeMultiplierGameTable;
         public static GameTable<GtArtifactLevelXPRecord> ArtifactLevelXPGameTable;
         public static GameTable<GtBarberShopCostBaseRecord> BarberShopCostBaseGameTable;
@@ -657,9 +639,7 @@ namespace Game.DataStorage
         public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
-        public static GameTable<GtNpcDamageByClassRecord>[] NpcDamageByClassGameTable = new GameTable<GtNpcDamageByClassRecord>[(int)Expansion.Max];
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
-        public static GameTable<GtNpcTotalHpRecord>[] NpcTotalHpGameTable = new GameTable<GtNpcTotalHpRecord>[(int)Expansion.Max];
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
         public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;

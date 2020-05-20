@@ -2760,14 +2760,13 @@ namespace Game.Entities
                 return damage;
 
             uint attackerLevel = attacker.GetLevelForTarget(victim);
-            if (attackerLevel > CliDB.ArmorMitigationByLvlGameTable.GetTableRowCount())
-                attackerLevel = (uint)CliDB.ArmorMitigationByLvlGameTable.GetTableRowCount();
+            // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attacker.GetClass());
 
-            GtArmorMitigationByLvlRecord ambl = CliDB.ArmorMitigationByLvlGameTable.GetRow(attackerLevel);
-            if (ambl == null)
+            if (armorConstant == 0)
                 return damage;
 
-            float mitigation = Math.Min(armor / (armor + ambl.Mitigation), 0.85f);
+            float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);
             return Math.Max((uint)(damage * (1.0f - mitigation)), 1);
         }
 

@@ -2295,9 +2295,9 @@ namespace Game
             var time = Time.GetMSTime();
 
             creatureBaseStatsStorage.Clear();
-            //                                         0      1      2         3          4            5
-            SQLResult result = DB.World.Query("SELECT level, class, basemana, basearmor, attackpower, rangedattackpower FROM creature_classlevelstats");
 
+            //                                         0      1      2         3            4
+            SQLResult result = DB.World.Query("SELECT level, class, basemana, attackpower, rangedattackpower FROM creature_classlevelstats");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 creature base stats. DB table `creature_classlevelstats` is empty.");
@@ -2315,22 +2315,9 @@ namespace Game
 
                 CreatureBaseStats stats = new CreatureBaseStats();
 
-                for (var i = 0; i < (int)Expansion.Max; ++i)
-                {
-                    stats.BaseHealth[i] = (uint)CliDB.GetGameTableColumnForClass(CliDB.NpcTotalHpGameTable[i].GetRow(Level), (Class)_class);
-                    stats.BaseDamage[i] = CliDB.GetGameTableColumnForClass(CliDB.NpcDamageByClassGameTable[i].GetRow(Level), (Class)_class);
-                    if (stats.BaseDamage[i] < 0.0f)
-                    {
-                        Log.outError(LogFilter.Sql, "Creature base stats for class {0}, level {1} has invalid negative base damage[{2}] - set to 0.0", _class, Level, i);
-                        stats.BaseDamage[i] = 0.0f;
-                    }
-                }
-
                 stats.BaseMana = result.Read<uint>(2);
-                stats.BaseArmor = result.Read<uint>(3);
-
-                stats.AttackPower = result.Read<ushort>(4);
-                stats.RangedAttackPower = result.Read<ushort>(5);
+                stats.AttackPower = result.Read<ushort>(3);
+                stats.RangedAttackPower = result.Read<ushort>(4);
 
                 creatureBaseStatsStorage.Add(MathFunctions.MakePair16(Level, _class), stats);
 
@@ -2417,8 +2404,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                        0            1          2                 3                     4
-            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDeltaMin, LevelScalingDeltaMax FROM creature_template_scaling");
+            //                                         0      1             2                3                4                     5                     6
+            SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingMin, LevelScalingMax, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID FROM creature_template_scaling ORDER BY Entry");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
@@ -2429,6 +2416,7 @@ namespace Game
             do
             {
                 uint entry = result.Read<uint>(0);
+                Difficulty difficulty = (Difficulty)result.Read<byte>(1);
 
                 var template = _creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
@@ -2437,12 +2425,14 @@ namespace Game
                     continue;
                 }
 
-                CreatureLevelScaling creatureLevelScaling;
-                creatureLevelScaling.MinLevel = result.Read<ushort>(1);
-                creatureLevelScaling.MaxLevel = result.Read<ushort>(2);
-                creatureLevelScaling.DeltaLevelMin = result.Read<short>(3);
-                creatureLevelScaling.DeltaLevelMax = result.Read<short>(3);
-                template.levelScaling.Set(creatureLevelScaling);
+                CreatureLevelScaling creatureLevelScaling = new CreatureLevelScaling();
+                creatureLevelScaling.MinLevel = result.Read<ushort>(2);
+                creatureLevelScaling.MaxLevel = result.Read<ushort>(3);
+                creatureLevelScaling.DeltaLevelMin = result.Read<short>(4);
+                creatureLevelScaling.DeltaLevelMax = result.Read<short>(5);
+                creatureLevelScaling.ContentTuningID = result.Read<uint>(6);
+
+                template.scalingStorage[difficulty] = creatureLevelScaling;
 
                 ++count;
             } while (result.NextRow());
@@ -3505,6 +3495,8 @@ namespace Game
             if (!map)
                 return 0;
 
+            CreatureLevelScaling scaling = cInfo.GetLevelScaling(map.GetDifficultyID());
+
             ulong guid = GenerateCreatureSpawnId();
             CreatureData data = NewOrExistCreatureData(guid);
             data.id = entry;
@@ -3518,7 +3510,7 @@ namespace Game
             data.spawntimesecs = spawntimedelay;
             data.spawndist = 0;
             data.currentwaypoint = 0;
-            data.curhealth = stats.GenerateHealth(cInfo);
+            data.curhealth = (uint)(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass) * cInfo.ModHealth * cInfo.ModHealthExtra);
             data.curmana = stats.GenerateMana(cInfo);
             data.movementType = (byte)cInfo.MovementType;
             data.spawnDifficulties.Add(Difficulty.None);
@@ -10710,12 +10702,6 @@ namespace Game
     {
         public DefaultCreatureBaseStats()
         {
-            BaseArmor = 1;
-            for (byte j = 0; j < 4; ++j)
-            {
-                BaseHealth[j] = 1;
-                BaseDamage[j] = 0.0f;
-            }
             BaseMana = 0;
             AttackPower = 0;
             RangedAttackPower = 0;
