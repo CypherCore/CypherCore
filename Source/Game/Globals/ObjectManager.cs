@@ -5617,56 +5617,80 @@ namespace Game
             // Loading levels data (class/race dependent)
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Level Stats Data...");
             {
-                //                                         0     1      2      3    4    5    6  
-                SQLResult result = DB.World.Query("SELECT race, class, level, str, agi, sta, inte FROM player_levelstats");
+                short[][] raceStatModifiers = new short[(int)Race.Max][];
+                for (var i = 0; i < (int)Race.Max; ++i)
+                    raceStatModifiers[i] = new short[(int)Stats.Max];
 
+
+                //                                         0     1    2    3    4 
+                SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte FROM player_racestats");
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_levelstats` is empty.");
+                    Log.outError(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_racestats` is empty.");
                     Global.WorldMgr.StopNow();
                     return;
                 }
 
-                uint count = 0;
                 do
                 {
                     uint currentrace = result.Read<uint>(0);
                     if (currentrace >= (int)Race.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Wrong race {0} in `player_levelstats` table, ignoring.", currentrace);
+                        Log.outError(LogFilter.Sql, $"Wrong race {currentrace} in `player_racestats` table, ignoring.");
                         continue;
                     }
 
-                    uint currentclass = result.Read<uint>(1);
+                    for (int i = 0; i < (int)Stats.Max; ++i)
+                        raceStatModifiers[currentrace][i] = result.Read<short>(i + 1);
+
+                } while (result.NextRow());
+
+                //                               0      1      2    3    4    5
+                result = DB.World.Query("SELECT class, level, str, agi, sta, inte FROM player_classlevelstats");
+                if (result.IsEmpty())
+                {
+                    Log.outError(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_classlevelstats` is empty.");
+                    Global.WorldMgr.StopNow();
+                    return;
+                }
+
+                uint count = 0;
+
+                do
+                {
+                    uint currentclass = result.Read<byte>(0);
                     if (currentclass >= (int)Class.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Wrong class {0} in `player_levelstats` table, ignoring.", currentclass);
+                        Log.outError(LogFilter.Sql, "Wrong class {0} in `player_classlevelstats` table, ignoring.", currentclass);
                         continue;
                     }
 
-                    uint currentlevel = result.Read<uint>(2);
+                    uint currentlevel = result.Read<uint>(1);
                     if (currentlevel > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
                         if (currentlevel > 255)        // hardcoded level maximum
-                            Log.outError(LogFilter.Sql, "Wrong (> {0}) level {1} in `player_levelstats` table, ignoring.", 255, currentlevel);
+                            Log.outError(LogFilter.Sql, $"Wrong (> 255) level {currentlevel} in `player_classlevelstats` table, ignoring.");
                         else
-                        {
-                            Log.outError(LogFilter.Sql, "Unused (> MaxPlayerLevel in worldserver.conf) level {0} in `player_levelstats` table, ignoring.", currentlevel);
-                            ++count;                                // make result loading percent "expected" correct in case disabled detail mode for example.
-                        }
+                            Log.outError(LogFilter.Sql, $"Unused (> MaxPlayerLevel in worldserver.conf) level {currentlevel} in `player_levelstats` table, ignoring.");
+
                         continue;
                     }
 
-                    var pInfo = _playerInfo[currentrace][currentclass];
-                    if (pInfo == null)
-                        continue;
+                    for (var race = 0; race < raceStatModifiers.Length; ++race)
+                    {
+                        var pInfo = _playerInfo[race][currentclass];
+                        if (pInfo == null)
+                            continue;
 
-                    var levelinfo = new PlayerLevelInfo();
+                        if (pInfo.levelInfo[currentlevel - 1] == null)
+                            pInfo.levelInfo[currentlevel - 1] = new PlayerLevelInfo();
 
-                    for (var i = 0; i < (int)Stats.Max; i++)
-                        levelinfo.stats[i] = result.Read<ushort>(i + 3);
+                        var levelinfo = pInfo.levelInfo[currentlevel - 1];
 
-                    pInfo.levelInfo[currentlevel - 1] = levelinfo;
+                        for (var i = 0; i < (int)Stats.Max; i++)
+                            levelinfo.stats[i] = (ushort)(result.Read<ushort>(i + 2) + raceStatModifiers[race][i]);
+                    }
+
                     ++count;
                 } while (result.NextRow());
 
