@@ -220,7 +220,8 @@ namespace Framework.Constants
         AlreadyInGuild = 2,
         NeedMoreSignatures = 4,
         GuildPermissions = 11,
-        GuildNameInvalid = 12
+        GuildNameInvalid = 12,
+        HasRestriction = 13
     }
 
     public enum PetitionSigns
@@ -229,10 +230,11 @@ namespace Framework.Constants
         AlreadySigned = 1,
         AlreadyInGuild = 2,
         CantSignOwn = 3,
-        NotServer = 4,
-        Full = 5,
-        AlreadySignedOther = 6,
-        RestrictedAccount = 7
+        NotServer = 5,
+        Full = 8,
+        AlreadySignedOther = 10,
+        RestrictedAccountTrial = 11,
+        HasRestriction = 13
     }
 
     public enum CharterTypes
