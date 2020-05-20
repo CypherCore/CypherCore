@@ -836,6 +836,12 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Calendar data...");
             Global.CalendarMgr.LoadFromDB();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Petitions...");
+            Global.PetitionMgr.LoadPetitions();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Signatures...");
+            Global.PetitionMgr.LoadSignatures();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Item loot...");
             Global.LootItemStorage.LoadStorageFromDB();
 

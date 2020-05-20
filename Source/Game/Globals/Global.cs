@@ -48,6 +48,7 @@ public static class Global
     public static ServiceDispatcher ServiceMgr { get { return ServiceDispatcher.Instance; } }
 
     //Guild
+    public static PetitionManager PetitionMgr { get { return PetitionManager.Instance; } }
     public static GuildManager GuildMgr { get { return GuildManager.Instance; } }
     public static GuildFinderManager GuildFinderMgr { get { return GuildFinderManager.Instance; } }
 

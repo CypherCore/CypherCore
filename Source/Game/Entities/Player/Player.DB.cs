@@ -3584,38 +3584,8 @@ namespace Game.Entities
         }
         public static void RemovePetitionsAndSigns(ObjectGuid guid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PETITION_SIG_BY_GUID);
-            stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
-            {
-                do                                                  // this part effectively does nothing, since the deletion / modification only takes place _after_ the PetitionSelect. Though I don't know if the result remains intact if I execute the delete Select beforehand.
-                {                                                   // and SendPetitionSelectOpcode reads data from the DB
-                    ObjectGuid ownerguid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-                    ObjectGuid petitionguid = ObjectGuid.Create(HighGuid.Item, result.Read<ulong>(1));
-
-                    // send update if charter owner in game
-                    Player owner = Global.ObjAccessor.FindPlayer(ownerguid);
-                    if (owner != null)
-                        owner.GetSession().SendPetitionQuery(petitionguid);
-                } while (result.NextRow());
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_PETITION_SIGNATURES);
-                stmt.AddValue(0, guid.GetCounter());
-                DB.Characters.Execute(stmt);
-
-            }
-
-            SQLTransaction trans = new SQLTransaction();
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_OWNER);
-            stmt.AddValue(0, guid.GetCounter());
-            trans.Append(stmt);
-
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_OWNER);
-            stmt.AddValue(0, guid.GetCounter());
-            trans.Append(stmt);
-
-            DB.Characters.CommitTransaction(trans);
+            Global.PetitionMgr.RemoveSignaturesBySigner(guid);
+            Global.PetitionMgr.RemovePetitionsByOwner(guid);
         }
         public static void DeleteFromDB(ObjectGuid playerGuid, uint accountId, bool updateRealmChars = true, bool deleteFinally = false)
         {
