@@ -25,7 +25,7 @@ namespace Game.BattleGrounds.Zones
 {
     class BgEyeofStorm : Battleground
     {
-        public BgEyeofStorm()
+        public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             m_BuffChange = true;
             BgObjects = new ObjectGuid[ABObjectTypes.Max];

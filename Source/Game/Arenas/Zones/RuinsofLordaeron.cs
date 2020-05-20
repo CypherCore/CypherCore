@@ -18,11 +18,14 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Network.Packets;
+using Game.BattleGrounds;
 
 namespace Game.Arenas
 {
     class RuinsofLordaeronArena : Arena
     {
+        public RuinsofLordaeronArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+
         public override bool SetupBattleground()
         {
             bool result = true;

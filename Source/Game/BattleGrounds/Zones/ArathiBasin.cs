@@ -26,7 +26,7 @@ namespace Game.BattleGrounds.Zones
 {
     class BgArathiBasin : Battleground
     {
-        public BgArathiBasin()
+        public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             m_IsInformedNearVictory = false;
             m_BuffChange = true;

@@ -90,18 +90,18 @@ namespace Game.DataStorage
         public string ShortDescription;
         public string LongDescription;
         public sbyte InstanceType;
-        public sbyte MinLevel;
-        public sbyte MaxLevel;
+        public byte MinLevel;
+        public byte MaxLevel;
         public sbyte RatedPlayers;
-        public sbyte MinPlayers;
-        public sbyte MaxPlayers;
+        public byte MinPlayers;
+        public byte MaxPlayers;
         public sbyte GroupsAllowed;
         public sbyte MaxGroupSize;
         public ushort HolidayWorldState;
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
         public short RequiredPlayerConditionID;
-        public short[] MapId = new short[16];
+        public ushort[] MapId = new ushort[16];
     }
 
     public sealed class BroadcastTextRecord

@@ -18,11 +18,14 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Network.Packets;
+using Game.BattleGrounds;
 
 namespace Game.Arenas
 {
     public class NagrandArena : Arena
     {
+        public NagrandArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+
         public override void StartingEventCloseDoors()
         {
             for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)

@@ -19,12 +19,13 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using Game.Network.Packets;
+using Game.BattleGrounds;
 
 namespace Game.Arenas
 {
     class DalaranSewersArena : Arena
     {
-        public DalaranSewersArena()
+        public DalaranSewersArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             _events = new EventMap();
         }

@@ -26,7 +26,7 @@ namespace Game.BattleGrounds.Zones
 {
     public class BgStrandOfAncients : Battleground
     {
-        public BgStrandOfAncients()
+        public BgStrandOfAncients(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             StartMessageIds[BattlegroundConst.EventIdFourth] = 0;
 

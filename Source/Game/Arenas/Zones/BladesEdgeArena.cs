@@ -18,11 +18,14 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Network.Packets;
+using Game.BattleGrounds;
 
 namespace Game.Arenas
 {
     public class BladesEdgeArena : Arena
     {
+        public BladesEdgeArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate) { }
+
         public override void StartingEventCloseDoors()
         {
             for (int i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)

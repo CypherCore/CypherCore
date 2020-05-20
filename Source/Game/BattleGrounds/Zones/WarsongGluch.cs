@@ -25,7 +25,7 @@ namespace Game.BattleGrounds.Zones
 {
     class BgWarsongGluch : Battleground
     {
-        public BgWarsongGluch()
+        public BgWarsongGluch(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             BgObjects = new ObjectGuid[WSGObjectTypes.Max];
             BgCreatures = new ObjectGuid[WSGCreatureTypes.Max];

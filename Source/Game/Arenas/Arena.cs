@@ -27,7 +27,7 @@ namespace Game.Arenas
 {
     public class Arena : Battleground
     {        
-        public Arena()
+        public Arena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             StartDelayTimes[BattlegroundConst.EventIdFirst] = BattlegroundStartTimeIntervals.Delay1m;
             StartDelayTimes[BattlegroundConst.EventIdSecond] = BattlegroundStartTimeIntervals.Delay30s;

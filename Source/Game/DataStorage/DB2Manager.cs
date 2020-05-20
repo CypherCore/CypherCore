@@ -104,6 +104,20 @@ namespace Game.DataStorage
             foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in CliDB.AzeriteUnlockMappingStorage.Values)
                 azeriteUnlockMappings.Add(azeriteUnlockMapping.AzeriteUnlockMappingSetID, azeriteUnlockMapping);
 
+            foreach (BattlemasterListRecord battlemaster in CliDB.BattlemasterListStorage.Values)
+            {
+                if (battlemaster.MaxLevel < battlemaster.MinLevel)
+                {
+                    Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinLevel ({battlemaster.MinLevel}) and MaxLevel ({battlemaster.MaxLevel}). Swapping values.");
+                    MathFunctions.Swap(ref battlemaster.MaxLevel, ref battlemaster.MinLevel);
+                }
+                if (battlemaster.MaxPlayers < battlemaster.MinPlayers)
+                {
+                    Log.outError(LogFilter.ServerLoading, $"Battlemaster ({battlemaster.Id}) contains bad values for MinPlayers ({battlemaster.MinPlayers}) and MaxPlayers ({battlemaster.MaxPlayers}). Swapping values.");
+                    MathFunctions.Swap(ref battlemaster.MaxPlayers, ref battlemaster.MinPlayers);
+                }
+            }
+
             foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
                 _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
 
