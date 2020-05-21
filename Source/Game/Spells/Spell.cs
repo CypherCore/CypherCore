@@ -2386,7 +2386,7 @@ namespace Game.Spells
             LoadScripts();
 
             // Fill cost data (not use power for item casts
-            if (m_CastItem)
+            if (m_CastItem == null)
                 m_powerCost = m_spellInfo.CalcPowerCost(m_caster, m_spellSchoolMask, this);
 
             // Set combo point requirement
