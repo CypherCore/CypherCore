@@ -154,7 +154,7 @@ namespace Game
                 if (gain != 0 && creature)
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
-                    if ((creature.GetCreatureTemplate().HealthScalingExpansion < (int)GetExpansionForLevel(player.GetLevel())))
+                    if ((creature.GetCreatureTemplate().GetHealthScalingExpansion() < (int)GetExpansionForLevel(player.GetLevel())))
                         gain = (uint)Math.Round(gain / 10.0f);
 
                     if (creature.IsElite())

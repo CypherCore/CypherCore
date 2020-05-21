@@ -2527,14 +2527,14 @@ namespace Game
 
                 if (cInfo.DmgSchool != difficultyInfo.DmgSchool)
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `dmgschool`: {1}) has different `dmgschool` in difficulty {2} mode (Entry: {3}, `dmgschool`: {4}).", 
+                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `dmgschool`: {1}) has different `dmgschool` in difficulty {2} mode (Entry: {3}, `dmgschool`: {4}).",
                         cInfo.Entry, cInfo.DmgSchool, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.DmgSchool);
                     Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `dmgschool`={0} WHERE `entry`={1};", cInfo.DmgSchool, cInfo.DifficultyEntry[diff]);
                 }
 
                 if (cInfo.UnitFlags2 != difficultyInfo.UnitFlags2)
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `unit_flags2`: {1}) has different `unit_flags2` in difficulty {2} mode (Entry: {3}, `unit_flags2`: {4}).", 
+                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, `unit_flags2`: {1}) has different `unit_flags2` in difficulty {2} mode (Entry: {3}, `unit_flags2`: {4}).",
                         cInfo.Entry, cInfo.UnitFlags2, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.UnitFlags2);
                     Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `unit_flags2`=`unit_flags2`^{0} WHERE `entry`={1};", cInfo.UnitFlags2 ^ difficultyInfo.UnitFlags2, cInfo.DifficultyEntry[diff]);
                 }
@@ -2565,7 +2565,7 @@ namespace Game
 
                 if (cInfo.RegenHealth != difficultyInfo.RegenHealth)
                 {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, RegenHealth: {1}) has different `RegenHealth` in difficulty {2} mode (Entry: {3}, RegenHealth: {4}).", 
+                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}, RegenHealth: {1}) has different `RegenHealth` in difficulty {2} mode (Entry: {3}, RegenHealth: {4}).",
                         cInfo.Entry, cInfo.RegenHealth, diff + 1, cInfo.DifficultyEntry[diff], difficultyInfo.RegenHealth);
                     Log.outError(LogFilter.Sql, "Possible FIX: UPDATE `creature_template` SET `RegenHealth`={0} WHERE `entry`={1};", cInfo.RegenHealth, cInfo.DifficultyEntry[diff]);
                 }
@@ -2705,13 +2705,13 @@ namespace Game
                 cInfo.MovementType = (uint)MovementGeneratorType.Idle;
             }
 
-            if (cInfo.HealthScalingExpansion < (int)Expansion.LevelCurrent || cInfo.HealthScalingExpansion > ((int)Expansion.Max - 1))
+            if (cInfo.HealthScalingExpansion < (int)Expansion.LevelCurrent || cInfo.HealthScalingExpansion >= (int)Expansion.Max)
             {
                 Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Id: {0}) with invalid `HealthScalingExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.HealthScalingExpansion);
                 cInfo.HealthScalingExpansion = 0;
             }
 
-            if (cInfo.RequiredExpansion > (int)(Expansion.Max - 1))
+            if (cInfo.RequiredExpansion > (int)Expansion.Max)
             {
                 Log.outError(LogFilter.Sql, "Table `creature_template` lists creature (Entry: {0}) with `RequiredExpansion` {1}. Ignored and set to 0.", cInfo.Entry, cInfo.RequiredExpansion);
                 cInfo.RequiredExpansion = 0;
@@ -2724,26 +2724,17 @@ namespace Game
                 cInfo.FlagsExtra &= CreatureFlagsExtra.DBAllowed;
             }
 
-            // -1, as expansion, is used in CreatureDifficulty.db2 for
-            // auto-updating the levels of creatures having their expansion
-            // set to that value to the current expansion's max leveling level
-            if (cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent)
+            var levels = cInfo.GetMinMaxLevel();
+            if (levels[0] < 1 || levels[0] > SharedConst.StrongMaxLevel)
             {
-                cInfo.Minlevel = (short)(WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) + cInfo.Minlevel);
-                cInfo.Maxlevel = (short)(WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) + cInfo.Maxlevel);
-                cInfo.HealthScalingExpansion = (int)Expansion.WarlordsOfDraenor;
+                Log.outError(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated minLevel {cInfo.Minlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
+                cInfo.Minlevel = (short)(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? 0 : 1);
             }
 
-            if (cInfo.Minlevel < 1 || cInfo.Minlevel > SharedConst.StrongMaxLevel)
+            if (levels[1] < 1 || levels[1] > SharedConst.StrongMaxLevel)
             {
-                Log.outError(LogFilter.Sql, "Creature (ID: {0}): MinLevel {1} is not within [1, 255], value has been set to 1.", cInfo.Entry, cInfo.Minlevel);
-                cInfo.Minlevel = 1;
-            }
-
-            if (cInfo.Maxlevel < 1 || cInfo.Maxlevel > SharedConst.StrongMaxLevel)
-            {
-                Log.outError(LogFilter.Sql, "Creature (ID: {0}): MaxLevel {1} is not within [1, 255], value has been set to 1.", cInfo.Entry, cInfo.Maxlevel);
-                cInfo.Maxlevel = 1;
+                Log.outError(LogFilter.Sql, $"Creature (ID: {cInfo.Entry}): Calculated maxLevel {cInfo.Maxlevel} is not within [1, 255], value has been set to {(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? SharedConst.MaxLevel : 1)}.");
+                cInfo.Maxlevel = (short)(cInfo.HealthScalingExpansion == (int)Expansion.LevelCurrent ? 0 : 1);
             }
 
             cInfo.ModDamage *= Creature._GetDamageMod(cInfo.Rank);

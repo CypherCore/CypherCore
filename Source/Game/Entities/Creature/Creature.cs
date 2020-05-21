@@ -1145,10 +1145,11 @@ namespace Game.Entities
             CreatureTemplate cInfo = GetCreatureTemplate();
 
             // level
-            byte minlevel = (byte)Math.Min(cInfo.Maxlevel, cInfo.Minlevel);
-            byte maxlevel = (byte)Math.Max(cInfo.Maxlevel, cInfo.Minlevel);
-            byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
-            SetLevel(level);
+            var levels = cInfo.GetMinMaxLevel();
+            int minlevel = Math.Min(levels[0], levels[1]);
+            int maxlevel = Math.Max(levels[0], levels[1]);
+            int level = (minlevel == maxlevel ? minlevel : RandomHelper.IRand(minlevel, maxlevel));
+            SetLevel((uint)level);
 
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
 
@@ -2362,7 +2363,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
             return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
         }
 
@@ -2382,7 +2383,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2399,7 +2400,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, cInfo.HealthScalingExpansion, scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
             return baseArmor * cInfo.ModArmor;
         }
 
@@ -2428,12 +2429,29 @@ namespace Game.Entities
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
                 {
-                    int targetLevelWithDelta = (int)unitTarget.GetLevel() + m_unitData.ScalingLevelDelta;
+                    int scalingLevelMin = m_unitData.ScalingLevelMin;
+                    int scalingLevelMax = m_unitData.ScalingLevelMax;
+                    int scalingLevelDelta = m_unitData.ScalingLevelDelta;
+                    int scalingFactionGroup = m_unitData.ScalingFactionGroup;
+                    int targetLevel = unitTarget.m_unitData.EffectiveLevel;
+                    if (targetLevel == 0)
+                        targetLevel = (int)unitTarget.GetLevel();
 
-                    if (target.IsPlayer())
-                        targetLevelWithDelta += target.ToPlayer().m_activePlayerData.ScalingPlayerLevelDelta;
+                    int targetLevelDelta = 0;
 
-                    return (uint)MathFunctions.RoundToInterval(ref targetLevelWithDelta, m_unitData.ScalingLevelMin, m_unitData.ScalingLevelMax);
+                    Player playerTarget = target.ToPlayer();
+                    if (playerTarget != null)
+                    {
+                        if (scalingFactionGroup != 0 && CliDB.FactionTemplateStorage.LookupByKey(CliDB.ChrRacesStorage.LookupByKey(playerTarget.GetRace()).FactionID).FactionGroup != scalingFactionGroup)
+                            scalingLevelMin = scalingLevelMax;
+
+                        int maxCreatureScalingLevel = playerTarget.m_activePlayerData.MaxCreatureScalingLevel;
+                        targetLevelDelta = Math.Min(maxCreatureScalingLevel > 0 ? maxCreatureScalingLevel - targetLevel : 0, playerTarget.m_activePlayerData.ScalingPlayerLevelDelta);
+                    }
+
+                    int levelWithDelta = targetLevel + targetLevelDelta;
+                    int level = MathFunctions.RoundToInterval(ref levelWithDelta, scalingLevelMin, scalingLevelMax) + scalingLevelDelta;
+                    return (uint)MathFunctions.RoundToInterval(ref level, 1, SharedConst.MaxLevel + 3);
                 }
 
             }

@@ -157,6 +157,20 @@ namespace Game.Entities
             return CreatureModel.DefaultVisibleModel;
         }
 
+        public int[] GetMinMaxLevel()
+        {
+            return new[]
+            {
+                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Minlevel : Minlevel + SharedConst.MaxLevel,
+                HealthScalingExpansion != (int)Expansion.LevelCurrent ? Maxlevel : Maxlevel + SharedConst.MaxLevel
+            };
+        }
+
+        public int GetHealthScalingExpansion()
+        {
+            return HealthScalingExpansion == (int)Expansion.LevelCurrent ? (int)Expansion.WarlordsOfDraenor : HealthScalingExpansion;
+        }
+
         public SkillType GetRequiredLootSkill()
         {
             if (TypeFlags.HasAnyFlag(CreatureTypeFlags.HerbSkinningSkill))
