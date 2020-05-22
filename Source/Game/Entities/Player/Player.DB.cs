@@ -97,7 +97,12 @@ namespace Game.Entities
                                 item.CopyArtifactDataFromParent(parent);
                             }
                             else
-                                err = InventoryResult.WrongBagType3; // send by mail
+                            {
+                                Log.outError(LogFilter.Player, $"Player._LoadInventory: Player '{GetName()}' ({GetGUID().ToString()}) has child item ({item.GetGUID()}, entry: {item.GetEntry()}) which can't be loaded into inventory because parent item was not found (Bag {bagGuid}, slot: {slot}). Item will be sent by mail.");
+                                item.DeleteFromInventoryDB(trans);
+                                problematicItems.Enqueue(item);
+                                continue;
+                            }
                         }
 
                         // Item is not in bag
