@@ -900,7 +900,7 @@ namespace Game.Network.Packets
         public int Count;
         public int Charges;
         public List<ItemEnchantData> Enchantments = new List<ItemEnchantData>();
-        public int Flags;
+        public uint Flags;
         public uint AuctionID;
         public ObjectGuid Owner;
         public Optional<ulong> MinBid;
@@ -944,7 +944,7 @@ namespace Game.Network.Packets
 
             data.WriteInt32(Count);
             data.WriteInt32(Charges);
-            data.WriteInt32(Flags);
+            data.WriteUInt32(Flags);
             data.WriteUInt32(AuctionID);
             data.WritePackedGuid(Owner);
             data.WriteInt32(DurationLeft);
