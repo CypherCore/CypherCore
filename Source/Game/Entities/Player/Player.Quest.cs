@@ -119,12 +119,19 @@ namespace Game.Entities
             uint learned_0 = effect.TriggerSpell;
             if (!HasSpell(learned_0))
             {
-                SpellInfo learnedInfo = Global.SpellMgr.GetSpellInfo(learned_0);
-                if (learnedInfo == null)
-                    return;
+                found = false;
+                var skills = Global.SpellMgr.GetSkillLineAbilityMapBounds(learned_0);
+                foreach (var skillLine in skills)
+                {
+                    if (skillLine.AcquireMethod == AbilityLearnType.RewardedFromQuest)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
 
                 // profession specialization can be re-learned from npc
-                if (learnedInfo.GetEffect(0).Effect == SpellEffectName.TradeSkill && learnedInfo.GetEffect(1).Effect == 0 && learnedInfo.SpellLevel == 0)
+                if (!found)
                     return;
             }
 

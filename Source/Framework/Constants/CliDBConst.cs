@@ -42,7 +42,8 @@ namespace Framework.Constants
     public enum AbilityLearnType : byte
     {
         OnSkillValue = 1, // Spell state will update depending on skill value
-        OnSkillLearn = 2  // Spell will be learned/removed together with entire skill
+        OnSkillLearn = 2, // Spell will be learned/removed together with entire skill
+        RewardedFromQuest = 4 // Learned as quest reward, also re-learned if missing
     }
 
     public enum Anim
