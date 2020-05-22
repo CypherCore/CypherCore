@@ -208,7 +208,7 @@ namespace Framework.Constants
         IsBehindTarget = 67,      // Cooldownmin, Cooldownmax
         GameEventStart = 68,      // GameEvent.Entry
         GameEventEnd = 69,      // GameEvent.Entry
-        GoStateChanged = 70,      // Go State
+        GoLootStateChanged = 70,      // Go State
         GoEventInform = 71,      // Eventid
         ActionDone = 72,      // Eventid (Shareddefines.Eventid)
         OnSpellclick = 73,      // Clicker (Unit)

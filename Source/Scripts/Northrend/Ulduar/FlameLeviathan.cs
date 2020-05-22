@@ -1034,7 +1034,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             }
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == GossipIds.MenuLoreKeeper && gossipListId == GossipIds.OptionLoreKeeper)
             {
@@ -1062,6 +1062,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
                     }
                 }
             }
+            return false;
         }
 
         InstanceScript _instance;
@@ -1072,31 +1073,42 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
     {
         public go_ulduar_tower() : base("go_ulduar_tower") { }
 
-        public override void OnDestroyed(GameObject go, Player player)
+        class go_ulduar_towerAI : GameObjectAI
         {
-            InstanceScript instance = go.GetInstanceScript();
-            if (instance == null)
-                return;
-
-            switch (go.GetEntry())
+            public go_ulduar_towerAI(GameObject go) : base(go)
             {
-                case Towers.ofStorms:
-                    instance.ProcessEvent(go, InstanceEventIds.TowerOfStormDestroyed);
-                    break;
-                case Towers.ofFlames:
-                    instance.ProcessEvent(go, InstanceEventIds.TowerOfFlamesDestroyed);
-                    break;
-                case Towers.ofFrost:
-                    instance.ProcessEvent(go, InstanceEventIds.TowerOfFrostDestroyed);
-                    break;
-                case Towers.ofLife:
-                    instance.ProcessEvent(go, InstanceEventIds.TowerOfLifeDestroyed);
-                    break;
+                instance = go.GetInstanceScript();
             }
 
-            Creature trigger = go.FindNearestCreature(CreatureIds.UlduarGauntletGenerator, 15.0f, true);
-            if (trigger)
-                trigger.DisappearAndDie();
+            public override void Destroyed(Player player, uint eventId)
+            { 
+                switch (me.GetEntry())
+                {
+                    case Towers.ofStorms:
+                        instance.ProcessEvent(me, InstanceEventIds.TowerOfStormDestroyed);
+                        break;
+                    case Towers.ofFlames:
+                        instance.ProcessEvent(me, InstanceEventIds.TowerOfFlamesDestroyed);
+                        break;
+                    case Towers.ofFrost:
+                        instance.ProcessEvent(me, InstanceEventIds.TowerOfFrostDestroyed);
+                        break;
+                    case Towers.ofLife:
+                        instance.ProcessEvent(me, InstanceEventIds.TowerOfLifeDestroyed);
+                        break;
+                }
+
+                Creature trigger = me.FindNearestCreature(CreatureIds.UlduarGauntletGenerator, 15.0f, true);
+                if (trigger)
+                    trigger.DisappearAndDie();
+            }
+
+            InstanceScript instance;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return GetInstanceAI<go_ulduar_towerAI>(go);
         }
     }
 

@@ -757,7 +757,7 @@ namespace Game.AI
                         }
                         break;
                     case SmartEvents.Link:
-                    case SmartEvents.GoStateChanged:
+                    case SmartEvents.GoLootStateChanged:
                     case SmartEvents.GoEventInform:
                     case SmartEvents.TimedEventTriggered:
                     case SmartEvents.InstancePlayerEnter:
@@ -1638,7 +1638,7 @@ namespace Game.AI
             { SmartEvents.IsBehindTarget,           SmartScriptTypeMaskId.Creature },
             { SmartEvents.GameEventStart,           SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GameEventEnd,             SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
-            { SmartEvents.GoStateChanged,           SmartScriptTypeMaskId.Gameobject },
+            { SmartEvents.GoLootStateChanged,       SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GoEventInform,            SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.ActionDone,               SmartScriptTypeMaskId.Creature },
             { SmartEvents.OnSpellclick,             SmartScriptTypeMaskId.Creature },
@@ -1813,7 +1813,7 @@ namespace Game.AI
         public GameEvent gameEvent;
 
         [FieldOffset(16)]
-        public GoStateChanged goStateChanged;
+        public GoLootStateChanged goLootStateChanged;
 
         [FieldOffset(16)]
         public EventInform eventInform;
@@ -2009,9 +2009,9 @@ namespace Game.AI
         {
             public uint gameEventId;
         }
-        public struct GoStateChanged
+        public struct GoLootStateChanged
         {
-            public uint state;
+            public uint lootState;
         }
         public struct EventInform
         {

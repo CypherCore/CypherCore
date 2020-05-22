@@ -441,12 +441,22 @@ namespace Scripts.Northrend.IcecrownCitadel
     {
         public npc_alchemist_adrianna() : base("npc_alchemist_adrianna") { }
 
-        public override bool OnGossipHello(Player player, Creature creature)
+        class npc_alchemist_adriannaAI : ScriptedAI
         {
-            if (!creature.FindCurrentSpellBySpellId(InstanceSpells.HarvestBlightSpecimen) && !creature.FindCurrentSpellBySpellId(InstanceSpells.HarvestBlightSpecimen25))
-                if (player.HasAura(InstanceSpells.OrangeBlightResidue) && player.HasAura(InstanceSpells.GreenBlightResidue))
-                    creature.CastSpell(creature, InstanceSpells.HarvestBlightSpecimen, false);
-            return false;
+            public npc_alchemist_adriannaAI(Creature creature) : base(creature) { }
+
+            public override bool GossipHello(Player player)
+            {
+                if (!me.FindCurrentSpellBySpellId(InstanceSpells.HarvestBlightSpecimen) && !me.FindCurrentSpellBySpellId(InstanceSpells.HarvestBlightSpecimen25))
+                    if (player.HasAura(InstanceSpells.OrangeBlightResidue) && player.HasAura(InstanceSpells.GreenBlightResidue))
+                        DoCastSelf(InstanceSpells.HarvestBlightSpecimen, false);
+                return false;
+            }
+        }
+
+        public override CreatureAI GetAI(Creature creature)
+        {
+            return new npc_alchemist_adriannaAI(creature);
         }
     }
 

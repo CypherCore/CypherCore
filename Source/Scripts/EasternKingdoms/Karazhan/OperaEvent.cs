@@ -692,7 +692,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     {
         public npc_grandmother(Creature creature) : base(creature) { }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == RedRidingHood.OptionWhatPhatLewtsYouHave && gossipListId == 0)
             {
@@ -704,6 +704,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
                 me.DespawnOrUnsummon();
             }
+            return false;
         }
     }
 
@@ -1574,6 +1575,67 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                 }
             }
 
+            public override bool GossipHello(Player player)
+            {
+                // Check for death of Moroes and if opera event is not done already
+                if (instance.GetBossState(DataTypes.Moroes) == EncounterState.Done && instance.GetBossState(DataTypes.OperaPerformance) != EncounterState.Done)
+                {
+                    AddGossipItemFor(player, GossipOptionIcon.Chat, karazhanConst.OZ_GOSSIP1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+
+                    if (player.IsGameMaster())
+                    {
+                        AddGossipItemFor(player, GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                        AddGossipItemFor(player, GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                        AddGossipItemFor(player, GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+                    }
+
+                    if (!RaidWiped)
+                        SendGossipMenuFor(player, 8970, me.GetGUID());
+                    else
+                        SendGossipMenuFor(player, 8975, me.GetGUID());
+
+                    return true;
+                }
+
+                SendGossipMenuFor(player, 8978, me.GetGUID());
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                ClearGossipMenuFor(player);
+
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef + 1:
+                        AddGossipItemFor(player, GossipOptionIcon.Chat, karazhanConst.OZ_GOSSIP2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        SendGossipMenuFor(player, 8971, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:
+                        player.CLOSE_GOSSIP_MENU();
+                        StartEvent();
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 3:
+                        CloseGossipMenuFor(player);
+                        m_uiEventId = OperaEvents.Oz;
+                        Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_OZ", player.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 4:
+                        CloseGossipMenuFor(player);
+                        m_uiEventId = OperaEvents.Hood;
+                        Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_HOOD", player.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 5:
+                        CloseGossipMenuFor(player);
+                        m_uiEventId = OperaEvents.RAJ;
+                        Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_RAJ", player.GetGUID());
+                        break;
+                }
+
+                return true;
+            }
+
             InstanceScript instance;
 
             ObjectGuid m_uiSpotlightGUID;
@@ -1585,75 +1647,6 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             bool PerformanceReady;
             public bool RaidWiped;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            npc_barnesAI pBarnesAI = (npc_barnesAI)creature.GetAI();
-
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, karazhanConst.OZ_GOSSIP2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(8971, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.CLOSE_GOSSIP_MENU();
-                    pBarnesAI.StartEvent();
-                    break;
-                case eTradeskill.GossipActionInfoDef + 3:
-                    player.CLOSE_GOSSIP_MENU();
-                    pBarnesAI.m_uiEventId = OperaEvents.Oz;
-                    Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_OZ", player.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 4:
-                    player.CLOSE_GOSSIP_MENU();
-                    pBarnesAI.m_uiEventId = OperaEvents.Hood;
-                    Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_HOOD", player.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 5:
-                    player.CLOSE_GOSSIP_MENU();
-                    pBarnesAI.m_uiEventId = OperaEvents.RAJ;
-                    Log.outInfo(LogFilter.Scripts, "player (GUID {0}) manually set Opera event to EVENT_RAJ", player.GetGUID());
-                    break;
-            }
-
-            return true;
-        }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            InstanceScript instance = creature.GetInstanceScript();
-            if (instance != null)
-            {
-                // Check for death of Moroes and if opera event is not done already
-                if (instance.GetBossState(DataTypes.Moroes) == EncounterState.Done && instance.GetBossState(DataTypes.OperaPerformance) != EncounterState.Done)
-                {
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, karazhanConst.OZ_GOSSIP1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-
-                    if (player.IsGameMaster())
-                    {
-                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Dot, karazhanConst.OZ_GM_GOSSIP3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-                    }
-
-                    npc_barnesAI pBarnesAI = (npc_barnesAI)creature.GetAI();
-                    if (pBarnesAI != null)
-                    {
-                        if (!pBarnesAI.RaidWiped)
-                            player.SEND_GOSSIP_MENU(8970, creature.GetGUID());
-                        else
-                            player.SEND_GOSSIP_MENU(8975, creature.GetGUID());
-
-                        return true;
-                    }
-                }
-            }
-
-            player.SEND_GOSSIP_MENU(8978, creature.GetGUID());
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)

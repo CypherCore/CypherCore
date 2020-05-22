@@ -802,7 +802,6 @@ namespace Game.Entities
                         break;
                     }
             }
-            Global.ScriptMgr.OnGameObjectUpdate(this, diff);
         }
 
         public void Refresh()
@@ -1306,9 +1305,7 @@ namespace Game.Entities
             Player playerUser = user.ToPlayer();
             if (playerUser != null)
             {
-                if (Global.ScriptMgr.OnGossipHello(playerUser, this))
-                    return;
-
+                playerUser.PlayerTalkClass.ClearMenus();
                 if (GetAI().GossipHello(playerUser, false))
                     return;
             }
@@ -2207,7 +2204,7 @@ namespace Game.Entities
                 case GameObjectDestructibleState.Damaged:
                     {
                         EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, eventInvoker);
-                        Global.ScriptMgr.OnGameObjectDamaged(this, eventInvoker);
+                        GetAI().Damaged(eventInvoker, m_goInfo.DestructibleBuilding.DamagedEvent);
 
                         RemoveFlag(GameObjectFlags.Destroyed);
                         AddFlag(GameObjectFlags.Damaged);
@@ -2232,8 +2229,8 @@ namespace Game.Entities
                     }
                 case GameObjectDestructibleState.Destroyed:
                     {
-                        Global.ScriptMgr.OnGameObjectDestroyed(this, eventInvoker);
                         EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, eventInvoker);
+                        GetAI().Destroyed(eventInvoker, m_goInfo.DestructibleBuilding.DestroyedEvent);
                         if (eventInvoker != null)
                         {
                             Battleground bg = eventInvoker.GetBattleground();
@@ -2287,8 +2284,7 @@ namespace Game.Entities
         {
             m_lootState = state;
             m_lootStateUnitGUID = unit ? unit.GetGUID() : ObjectGuid.Empty;
-            GetAI().OnStateChanged((uint)state, unit);
-            Global.ScriptMgr.OnGameObjectLootStateChanged(this, (uint)state, unit);
+            GetAI().OnLootStateChanged((uint)state, unit);
 
             // only set collision for doors on SetGoState
             if (GetGoType() == GameObjectTypes.Door)
@@ -2308,7 +2304,8 @@ namespace Game.Entities
         public void SetGoState(GameObjectState state)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State), (sbyte)state);
-            Global.ScriptMgr.OnGameObjectStateChanged(this, state);
+            if (GetAI() != null)
+                GetAI().OnStateChanged(state);
             if (m_model != null && !IsTransport())
             {
                 if (!IsInWorld)

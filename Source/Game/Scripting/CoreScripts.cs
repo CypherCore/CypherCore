@@ -54,25 +54,25 @@ namespace Game.Scripting
             return null;
         }
 
-        public void ClearGossipMenuFor(Player player) { player.PlayerTalkClass.ClearMenus(); }
+        public static void ClearGossipMenuFor(Player player) { player.PlayerTalkClass.ClearMenus(); }
         // Using provided text, not from DB
-        public void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action)
+        public static void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action)
         {
             player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, "", 0);
         }
         // Using provided texts, not from DB
-        public void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        public static void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
         {
             player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, popupText, popupMoney, coded);
         }
         // Uses gossip item info from DB
-        public void AddGossipItemFor(Player player, uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
+        public static void AddGossipItemFor(Player player, uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
         {
             player.PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
         }
-        public void SendGossipMenuFor(Player player, uint npcTextID, ObjectGuid guid) { player.PlayerTalkClass.SendGossipMenu(npcTextID, guid); }
-        public void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
-        public void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
+        public static void SendGossipMenuFor(Player player, uint npcTextID, ObjectGuid guid) { player.PlayerTalkClass.SendGossipMenu(npcTextID, guid); }
+        public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
+        public static void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
 
         string _name;
     }
@@ -333,37 +333,11 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when a player opens a gossip dialog with the creature.
-        public virtual bool OnGossipHello(Player player, Creature creature) { return false; }
-
-        // Called when a player selects a gossip item in the creature's gossip menu.
-        public virtual bool OnGossipSelect(Player player, Creature creature, uint sender, uint action) { return false; }
-
-        // Called when a player selects a gossip with a code in the creature's gossip menu.
-        public virtual bool OnGossipSelectCode(Player player, Creature creature, uint sender, uint action, string code) { return false; }
-
-        // Called when a player accepts a quest from the creature.
-        public virtual bool OnQuestAccept(Player player, Creature creature, Quest quest) { return false; }
-
-        // Called when a player selects a quest in the creature's quest menu.
-        public virtual bool OnQuestSelect(Player player, Creature creature, Quest quest) { return false; }
-
-        // Called when a player completes a quest with the creature.
-        public virtual bool OnQuestComplete(Player player, Creature creature, Quest quest) { return false; }
-
-        // Called when a player selects a quest reward.
-        public virtual bool OnQuestReward(Player player, Creature creature, Quest quest, uint opt) { return false; }
-
-        // Called when the dialog status between a player and the creature is requested.
-        public virtual uint GetDialogStatus(Player player, Creature creature) { return (uint)QuestGiverStatus.ScriptedNoStatus; }
-
         // Called when the creature tries to spawn. Return false to block spawn and re-evaluate on next tick.
         public virtual bool CanSpawn(ulong spawnId, uint entry, CreatureTemplate baseTemplate, CreatureTemplate actTemplate, CreatureData cData, Map map) { return true; }
 
         // Called when a CreatureAI object is needed for the creature.
         public virtual CreatureAI GetAI(Creature creature) { return null; }
-
-        public virtual void OnUpdate(Creature obj, uint diff) { }
     }
 
     public class GameObjectScript : ScriptObject
@@ -375,40 +349,8 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when a player opens a gossip dialog with the gameobject.
-        public virtual bool OnGossipHello(Player player, GameObject go) { return false; }
-
-        // Called when a player selects a gossip item in the gameobject's gossip menu.
-        public virtual bool OnGossipSelect(Player player, GameObject go, uint sender, uint action) { return false; }
-
-        // Called when a player selects a gossip with a code in the gameobject's gossip menu.
-        public virtual bool OnGossipSelectCode(Player player, GameObject go, uint sender, uint action, string code) { return false; }
-
-        // Called when a player accepts a quest from the gameobject.
-        public virtual bool OnQuestAccept(Player player, GameObject go, Quest quest) { return false; }
-
-        // Called when a player selects a quest reward.
-        public virtual bool OnQuestReward(Player player, GameObject go, Quest quest, uint opt) { return false; }
-
-        // Called when the dialog status between a player and the gameobject is requested.
-        public virtual uint GetDialogStatus(Player player, GameObject go) { return 100; }
-
-        // Called when the game object is destroyed (destructible buildings only).
-        public virtual void OnDestroyed(GameObject go, Player player) { }
-
-        // Called when the game object is damaged (destructible buildings only).
-        public virtual void OnDamaged(GameObject go, Player player) { }
-
-        // Called when the game object loot state is changed.
-        public virtual void OnLootStateChanged(GameObject go, uint state, Unit unit) { }
-
-        // Called when the game object state is changed.
-        public virtual void OnGameObjectStateChanged(GameObject go, GameObjectState state) { }
-
         // Called when a GameObjectAI object is needed for the gameobject.
         public virtual GameObjectAI GetAI(GameObject go) { return null; }
-
-        public virtual void OnUpdate(GameObject obj, uint diff) { }
     }
 
     public class AreaTriggerScript : ScriptObject

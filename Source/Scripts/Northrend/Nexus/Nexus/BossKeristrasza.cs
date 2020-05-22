@@ -194,22 +194,34 @@ namespace Scripts.Northrend.Nexus.Nexus
     {
         public containment_sphere() : base("containment_sphere") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class containment_sphereAI : GameObjectAI
         {
-            InstanceScript instance = go.GetInstanceScript();
-
-            Creature pKeristrasza = ObjectAccessor.GetCreature(go, instance.GetGuidData(DataTypes.Keristrasza));
-            if (pKeristrasza && pKeristrasza.IsAlive())
+            public containment_sphereAI(GameObject go) : base(go)
             {
-                // maybe these are hacks :(
-                go.AddFlag(GameObjectFlags.NotSelectable);
-                go.SetGoState(GameObjectState.Active);
-
-                ((boss_keristrasza)pKeristrasza.GetAI()).CheckContainmentSpheres(true);
+                instance = go.GetInstanceScript();
             }
-            return true;
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                Creature pKeristrasza = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Keristrasza));
+                if (pKeristrasza && pKeristrasza.IsAlive())
+                {
+                    // maybe these are hacks :(
+                    me.AddFlag(GameObjectFlags.NotSelectable);
+                    me.SetGoState(GameObjectState.Active);
+
+                    ((boss_keristrasza)pKeristrasza.GetAI()).CheckContainmentSpheres(true);
+                }
+                return true;
+            } 
+            
+            InstanceScript instance;
         }
 
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return GetInstanceAI<containment_sphereAI>(go);
+        }
     }
 
     [Script]

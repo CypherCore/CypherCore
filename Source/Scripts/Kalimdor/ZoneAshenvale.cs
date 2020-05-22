@@ -319,22 +319,32 @@ namespace Scripts.Kalimdor.ZoneAshenvale
     {
         public go_naga_brazier() : base("go_naga_brazier") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_naga_brazierAI : GameObjectAI
         {
-            Creature creature = ScriptedAI.GetClosestCreatureWithEntry(go, CreatureIds.Muglash, SharedConst.InteractionDistance * 2);
-            if (creature)
+            public go_naga_brazierAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                npc_muglash pEscortAI = creature.GetAI<npc_muglash>();
-                if (pEscortAI != null)
+                Creature creature = ScriptedAI.GetClosestCreatureWithEntry(me, CreatureIds.Muglash, SharedConst.InteractionDistance * 2);
+                if (creature)
                 {
-                    creature.GetAI().Talk(TextIds.SayMugBrazierWait);
+                    npc_muglash pEscortAI = creature.GetAI<npc_muglash>();
+                    if (pEscortAI != null)
+                    {
+                        creature.GetAI().Talk(TextIds.SayMugBrazierWait);
 
-                    pEscortAI._isBrazierExtinguished = true;
-                    return false;
+                        pEscortAI._isBrazierExtinguished = true;
+                        return false;
+                    }
                 }
-            }
 
-            return true;
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_naga_brazierAI(go);
         }
     }
 

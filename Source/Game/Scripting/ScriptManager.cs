@@ -749,68 +749,6 @@ namespace Game.Scripting
         }
 
         //CreatureScript
-        public bool OnGossipHello(Player player, Creature creature)
-        {
-            Cypher.Assert(player);
-            Cypher.Assert(creature);
-
-            return RunScriptRet<CreatureScript>(p => p.OnGossipHello(player, creature), creature.GetScriptId());
-        }
-        public bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnGossipSelect(player, creature, sender, action), creature.GetScriptId());
-        }
-        public bool OnGossipSelectCode(Player player, Creature creature, uint sender, uint action, string code)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-            Cypher.Assert(code != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnGossipSelectCode(player, creature, sender, action, code), creature.GetScriptId());
-        }
-        public bool OnQuestAccept(Player player, Creature creature, Quest quest)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnQuestAccept(player, creature, quest), creature.GetScriptId());
-        }
-        public bool OnQuestSelect(Player player, Creature creature, Quest quest)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnQuestSelect(player, creature, quest), creature.GetScriptId());
-        }
-        public bool OnQuestComplete(Player player, Creature creature, Quest quest)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnQuestComplete(player, creature, quest), creature.GetScriptId());
-        }
-        public bool OnQuestReward(Player player, Creature creature, Quest quest, uint opt)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<CreatureScript>(p => p.OnQuestReward(player, creature, quest, opt), creature.GetScriptId());
-        }
-        public uint GetDialogStatus(Player player, Creature creature)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(creature != null);
-
-            player.PlayerTalkClass.ClearMenus();
-            return RunScriptRet<CreatureScript, uint>(p => p.GetDialogStatus(player, creature), creature.GetScriptId(), (uint)QuestGiverStatus.ScriptedNoStatus);
-        }
         public bool CanSpawn(ulong spawnId, uint entry, CreatureTemplate actTemplate, CreatureData cData, Map map)
         {
             Cypher.Assert(actTemplate != null);
@@ -826,90 +764,8 @@ namespace Game.Scripting
 
             return RunScriptRet<CreatureScript, CreatureAI>(p => p.GetAI(creature), creature.GetScriptId());
         }
-        public void OnCreatureUpdate(Creature creature, uint diff)
-        {
-            Cypher.Assert(creature != null);
-
-            RunScript<CreatureScript>(p => p.OnUpdate(creature, diff), creature.GetScriptId());
-        }
 
         //GameObjectScript
-        public bool OnGossipHello(Player player, GameObject go)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-
-            player.PlayerTalkClass.ClearMenus();
-            return RunScriptRet<GameObjectScript>(p => p.OnGossipHello(player, go), go.GetScriptId());
-        }
-        public bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-
-            return RunScriptRet<GameObjectScript>(p => p.OnGossipSelect(player, go, sender, action), go.GetScriptId());
-        }
-        public bool OnGossipSelectCode(Player player, GameObject go, uint sender, uint action, string code)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-            Cypher.Assert(code != null);
-
-            return RunScriptRet<GameObjectScript>(p => p.OnGossipSelectCode(player, go, sender, action, code), go.GetScriptId());
-        }
-        public bool OnQuestAccept(Player player, GameObject go, Quest quest)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<GameObjectScript>(p => p.OnQuestAccept(player, go, quest), go.GetScriptId());
-        }
-        public bool OnQuestReward(Player player, GameObject go, Quest quest, uint opt)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-            Cypher.Assert(quest != null);
-
-            return RunScriptRet<GameObjectScript>(p => p.OnQuestReward(player, go, quest, opt), go.GetScriptId());
-        }
-        public uint GetDialogStatus(Player player, GameObject go)
-        {
-            Cypher.Assert(player != null);
-            Cypher.Assert(go != null);
-
-            return RunScriptRet<GameObjectScript, uint>(p => p.GetDialogStatus(player, go), go.GetScriptId(), (uint)QuestGiverStatus.ScriptedNoStatus);
-        }
-        public void OnGameObjectDestroyed(GameObject go, Player player)
-        {
-            Cypher.Assert(go != null);
-
-            RunScript<GameObjectScript>(p => p.OnDestroyed(go, player), go.GetScriptId());
-        }
-        public void OnGameObjectDamaged(GameObject go, Player player)
-        {
-            Cypher.Assert(go != null);
-
-            RunScript<GameObjectScript>(p => p.OnDamaged(go, player), go.GetScriptId());
-        }
-        public void OnGameObjectLootStateChanged(GameObject go, uint state, Unit unit)
-        {
-            Cypher.Assert(go != null);
-
-            RunScript<GameObjectScript>(p => p.OnLootStateChanged(go, state, unit), go.GetScriptId());
-        }
-        public void OnGameObjectStateChanged(GameObject go, GameObjectState state)
-        {
-            Cypher.Assert(go != null);
-
-            RunScript<GameObjectScript>(p => p.OnGameObjectStateChanged(go, state), go.GetScriptId());
-        }
-        public void OnGameObjectUpdate(GameObject go, uint diff)
-        {
-            Cypher.Assert(go != null);
-
-            RunScript<GameObjectScript>(p => p.OnUpdate(go, diff), go.GetScriptId());
-        }
         public GameObjectAI GetGameObjectAI(GameObject go)
         {
             Cypher.Assert(go != null);

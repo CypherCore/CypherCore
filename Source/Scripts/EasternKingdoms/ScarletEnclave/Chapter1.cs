@@ -349,21 +349,31 @@ namespace Scripts.EasternKingdoms
     {
         public go_acherus_soul_prison() : base("go_acherus_soul_prison") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_acherus_soul_prisonAI : GameObjectAI
         {
-            Creature anchor = go.FindNearestCreature(29521, 15);
-            if (anchor)
-            {
-                ObjectGuid prisonerGUID = anchor.GetAI().GetGUID();
-                if (!prisonerGUID.IsEmpty())
-                {
-                    Creature prisoner = ObjectAccessor.GetCreature(player, prisonerGUID);
-                    if (prisoner)
-                        ((npc_unworthy_initiate)prisoner.GetAI()).EventStart(anchor, player);
-                }
-            }
+            public go_acherus_soul_prisonAI(GameObject go) : base(go) { }
 
-            return false;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                Creature anchor = me.FindNearestCreature(29521, 15);
+                if (anchor)
+                {
+                    ObjectGuid prisonerGUID = anchor.GetAI().GetGUID();
+                    if (!prisonerGUID.IsEmpty())
+                    {
+                        Creature prisoner = ObjectAccessor.GetCreature(player, prisonerGUID);
+                        if (prisoner)
+                            ((npc_unworthy_initiate)prisoner.GetAI()).EventStart(anchor, player);
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_acherus_soul_prisonAI(go);
         }
     }
 
@@ -545,52 +555,49 @@ namespace Scripts.EasternKingdoms
                 base.UpdateAI(uiDiff);
             }
 
+            public override bool GossipHello(Player player)
+            {
+                if (player.GetQuestStatus(MiscConst.QuestDeathChallenge) == QuestStatus.Incomplete && me.IsFullHealth())
+                {
+                    if (player.HealthBelowPct(10))
+                        return true;
+
+                    if (player.IsInCombat() || me.IsInCombat())
+                        return true;
+
+                    AddGossipItemFor(player, Player.GetDefaultGossipMenuForSource(me), 0, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                    SendGossipMenuFor(player, player.GetGossipTextId(me), me.GetGUID());
+                }
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                ClearGossipMenuFor(player);
+                if (action == eTradeskill.GossipActionInfoDef)
+                {
+                    CloseGossipMenuFor(player);
+
+                    if (player.IsInCombat() || me.IsInCombat())
+                        return true;
+
+                    if (m_bIsDuelInProgress)
+                        return true;
+
+                    me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
+                    me.RemoveUnitFlag(UnitFlags.Unk15);
+
+                    player.CastSpell(me, SpellIds.Duel, false);
+                    player.CastSpell(player, SpellIds.DuelFlag, true);
+                }
+                return true;
+            }
+
             bool lose;
             ObjectGuid m_uiDuelerGUID;
             uint m_uiDuelTimer;
             public bool m_bIsDuelInProgress;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            ClearGossipMenuFor(player);
-            if (action == eTradeskill.GossipActionInfoDef)
-            {
-                CloseGossipMenuFor(player);
-
-                if (player.IsInCombat() || creature.IsInCombat())
-                    return true;
-
-                npc_death_knight_initiateAI pInitiateAI = creature.GetAI<npc_death_knight_initiateAI>();
-                if (pInitiateAI != null)
-                {
-                    if (pInitiateAI.m_bIsDuelInProgress)
-                        return true;
-                }
-
-                creature.RemoveUnitFlag(UnitFlags.ImmuneToPc);
-                creature.RemoveUnitFlag(UnitFlags.Unk15);
-
-                player.CastSpell(creature, SpellIds.Duel, false);
-                player.CastSpell(player, SpellIds.DuelFlag, true);
-            }
-            return true;
-        }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            if (player.GetQuestStatus(MiscConst.QuestDeathChallenge) == QuestStatus.Incomplete && creature.IsFullHealth())
-            {
-                if (player.HealthBelowPct(10))
-                    return true;
-
-                if (player.IsInCombat() || creature.IsInCombat())
-                    return true;
-
-                AddGossipItemFor(player, Player.GetDefaultGossipMenuForSource(creature), 0, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                SendGossipMenuFor(player, player.GetGossipTextId(creature), creature.GetGUID());
-            }
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)
@@ -681,13 +688,14 @@ namespace Scripts.EasternKingdoms
     {
         public npc_salanar_the_horseman(Creature creature) : base(creature) { }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == MiscConst.GossipSalanarMenu && gossipListId == MiscConst.GossipSalanarOption)
             {
                 player.CastSpell(player, SpellIds.RealmOfShadows, true);
                 player.PlayerTalkClass.SendCloseGossip();
             }
+            return false;
         }
 
         public override void SpellHit(Unit caster, SpellInfo spell)

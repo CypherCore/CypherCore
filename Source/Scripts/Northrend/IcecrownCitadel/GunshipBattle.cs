@@ -955,7 +955,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
@@ -965,6 +965,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             _events.ScheduleEvent(GunshipEvents.IntroSummonSkybreaker, 24600, 0, GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroH3, 29600, 0, GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroH4, 39200, 0, GunshipMiscData.PhaseIntro);
+            return false;
         }
 
         public override void DamageTaken(Unit u, ref uint damage)
@@ -1200,7 +1201,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
@@ -1211,6 +1212,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             _events.ScheduleEvent(GunshipEvents.IntroA3, 33000, 0, GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroA4, 39000, 0, GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroA5, 45000, 0, GunshipMiscData.PhaseIntro);
+            return false;
         }
 
         public override void DamageTaken(Unit u, ref uint damage)
@@ -1358,10 +1360,11 @@ namespace Scripts.Northrend.IcecrownCitadel
             me.SetReactState(ReactStates.Passive);
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             player.AddItem(GunshipMiscData.ItemGoblinRocketPack, 1);
             player.PlayerTalkClass.SendCloseGossip();
+            return false;
         }
 
         public override void UpdateAI(uint diff)

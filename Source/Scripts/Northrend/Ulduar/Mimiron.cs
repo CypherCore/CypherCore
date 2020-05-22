@@ -24,6 +24,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 
 namespace Scripts.Northrend.Ulduar
@@ -1594,21 +1595,32 @@ namespace Scripts.Northrend.Ulduar
         {
             public go_mimiron_hardmode_button() : base("go_mimiron_hardmode_button") { }
 
-            public override bool OnGossipHello(Player player, GameObject go)
+            class go_mimiron_hardmode_buttonAI : GameObjectAI
             {
-                if (go.HasFlag(GameObjectFlags.NotSelectable))
+                go_mimiron_hardmode_buttonAI(GameObject go) : base(go)
+                {
+                    instance = go.GetInstanceScript();
+                }
+
+                public override bool GossipHello(Player player, bool reportUse)
+                {
+                    if (me.HasFlag(GameObjectFlags.NotSelectable))
+                        return true;
+
+                    Creature computer = ObjectAccessor.GetCreature(me, instance.GetGuidData(InstanceData.Computer));
+                    if (computer)
+                        computer.GetAI().DoAction(Actions.ActivateComputer);
+                    me.SetGoState(GameObjectState.Active);
+                    me.AddFlag(GameObjectFlags.NotSelectable);
                     return true;
+                }
 
-                InstanceScript instance = go.GetInstanceScript();
-                if (instance == null)
-                    return false;
+                InstanceScript instance;
+            }
 
-                Creature computer = ObjectAccessor.GetCreature(go, instance.GetGuidData(InstanceData.Computer));
-                if (computer)
-                    computer.GetAI().DoAction(Actions.ActivateComputer);
-                go.SetGoState(GameObjectState.Active);
-                go.AddFlag(GameObjectFlags.NotSelectable);
-                return true;
+            public override GameObjectAI GetAI(GameObject go)
+            {
+                return GetInstanceAI<go_mimiron_hardmode_buttonAI>(go);
             }
         }
 

@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.IO;
+using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
@@ -421,19 +422,28 @@ namespace Scripts.Northrend.Gundrak
     {
         public go_gundrak_altar() : base("go_gundrak_altar") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_gundrak_altarAI : GameObjectAI
         {
-            go.AddFlag(GameObjectFlags.NotSelectable);
-            go.SetGoState(GameObjectState.Active);
-
-            InstanceScript instance = go.GetInstanceScript();
-            if (instance != null)
+            public go_gundrak_altarAI(GameObject go) : base(go)
             {
-                instance.SetData(GDDataTypes.StatueActivate, go.GetEntry());
+                instance = go.GetInstanceScript();
+            }
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                me.AddFlag(GameObjectFlags.NotSelectable);
+                me.SetGoState(GameObjectState.Active);
+
+                instance.SetData(GDDataTypes.StatueActivate, me.GetEntry());
                 return true;
             }
 
-            return false;
+            InstanceScript instance;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return GetInstanceAI<go_gundrak_altarAI>(go);
         }
     }
 }

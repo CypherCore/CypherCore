@@ -789,17 +789,22 @@ namespace Game.AI
             mEvadeDisabled = disable;
         }
 
-        public override void GossipHello(Player player)
+        public override bool GossipHello(Player player)
         {
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player);
+            return false;
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId);
+            return false;
         }
 
-        public override void GossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { }
+        public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        {
+            return false;
+        }
 
         public override void QuestAccept(Player player, Quest quest)
         {
@@ -809,6 +814,11 @@ namespace Game.AI
         public override void QuestReward(Player player, Quest quest, uint opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
+        }
+
+        public override void OnGameEvent(bool start, ushort eventId)
+        {
+            GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }
 
         public void SetCombatMove(bool on)
@@ -897,11 +907,6 @@ namespace Game.AI
             if (invoker != null)
                 GetScript().mLastInvoker = invoker.GetGUID();
             GetScript().SetScript9(e, entry);
-        }
-
-        public override void OnGameEvent(bool start, ushort eventId)
-        {
-            GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }
 
         public override void OnSpellClick(Unit clicker, ref bool result)
@@ -1043,9 +1048,9 @@ namespace Game.AI
 
         public override void InitializeAI()
         {
-            GetScript().OnInitialize(go);
+            GetScript().OnInitialize(me);
             // do not call respawn event if go is not spawned
-            if (go.IsSpawned())
+            if (me.IsSpawned())
                 GetScript().ProcessEventsFor(SmartEvents.Respawn);
         }
 
@@ -1060,31 +1065,29 @@ namespace Game.AI
         public override bool GossipHello(Player player, bool reportUse)
         {
             Log.outDebug(LogFilter.ScriptsAi, "SmartGameObjectAI.GossipHello");
-            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, reportUse ? 1 : 0u, 0, false, null, go);
+            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, reportUse ? 1 : 0u, 0, false, null, me);
             return false;
         }
 
-        public override bool GossipSelect(Player player, uint sender, uint action)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, sender, action, false, null, go);
+            GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId, false, null, me);
             return false;
         }
 
-        public override bool GossipSelectCode(Player player, uint sender, uint action, string code)
+        public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
         {
             return false;
         }
 
-        public override bool QuestAccept(Player player, Quest quest)
+        public override void QuestAccept(Player player, Quest quest)
         {
-            GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, go);
-            return false;
+            GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, me);
         }
 
-        public override bool QuestReward(Player player, Quest quest, uint opt)
+        public override void QuestReward(Player player, Quest quest, uint opt)
         {
-            GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, go);
-            return false;
+            GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
 
         public override uint GetDialogStatus(Player player)
@@ -1094,7 +1097,7 @@ namespace Game.AI
 
         public override void Destroyed(Player player, uint eventId)
         {
-            GetScript().ProcessEventsFor(SmartEvents.Death, player, eventId, 0, false, null, go);
+            GetScript().ProcessEventsFor(SmartEvents.Death, player, eventId, 0, false, null, me);
         }
 
         public override void SetData(uint id, uint value)
@@ -1114,9 +1117,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }
 
-        public override void OnStateChanged(uint state, Unit unit)
+        public override void OnLootStateChanged(uint state, Unit unit)
         {
-            GetScript().ProcessEventsFor(SmartEvents.GoStateChanged, unit, state);
+            GetScript().ProcessEventsFor(SmartEvents.GoLootStateChanged, unit, state);
         }
 
         public override void EventInform(uint eventId)

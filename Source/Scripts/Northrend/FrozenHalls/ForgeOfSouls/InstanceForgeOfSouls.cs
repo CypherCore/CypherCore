@@ -220,7 +220,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             Initialize();
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == Misc.MenuIdSylvanas && gossipListId == Misc.GossipOptionId)
             {
@@ -231,6 +231,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
                 _events.Reset();
                 _events.ScheduleEvent(EventIds.Intro1, 1000);
             }
+            return false;
         }
 
         public override void UpdateAI(uint diff)
@@ -304,7 +305,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             Initialize();
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             if (menuId == Misc.MenuIdJaina && gossipListId == Misc.GossipOptionId)
             {
@@ -314,6 +315,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
                 _events.Reset();
                 _events.ScheduleEvent(EventIds.Intro1, 1000);
             }
+            return false;
         }
 
         public override void UpdateAI(uint diff)

@@ -364,33 +364,44 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
     {
         public go_prince_taldaram_sphere() : base("go_prince_taldaram_sphere") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_prince_taldaram_sphereAI : GameObjectAI
         {
-            InstanceScript instance = go.GetInstanceScript();
-            if (instance == null)
-                return false;
-
-            Creature PrinceTaldaram = ObjectAccessor.GetCreature(go, instance.GetGuidData(DataTypes.PrinceTaldaram));
-            if (PrinceTaldaram && PrinceTaldaram.IsAlive())
+            public go_prince_taldaram_sphereAI(GameObject go) : base(go)
             {
-                go.AddFlag(GameObjectFlags.NotSelectable);
-                go.SetGoState(GameObjectState.Active);
-
-                switch (go.GetEntry())
-                {
-                    case GameObjectIds.Sphere1:
-                        instance.SetData(DataTypes.Sphere1, (uint)EncounterState.InProgress);
-                        PrinceTaldaram.GetAI().Talk(TextIds.Say1);
-                        break;
-                    case GameObjectIds.Sphere2:
-                        instance.SetData(DataTypes.Sphere2, (uint)EncounterState.InProgress);
-                        PrinceTaldaram.GetAI().Talk(TextIds.Say1);
-                        break;
-                }
-
-                PrinceTaldaram.GetAI<boss_prince_taldaram>().CheckSpheres();
+                instance = go.GetInstanceScript();
             }
-            return true;
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                Creature PrinceTaldaram = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.PrinceTaldaram));
+                if (PrinceTaldaram && PrinceTaldaram.IsAlive())
+                {
+                    me.AddFlag(GameObjectFlags.NotSelectable);
+                    me.SetGoState(GameObjectState.Active);
+
+                    switch (me.GetEntry())
+                    {
+                        case GameObjectIds.Sphere1:
+                            instance.SetData(DataTypes.Sphere1, (uint)EncounterState.InProgress);
+                            PrinceTaldaram.GetAI().Talk(TextIds.Say1);
+                            break;
+                        case GameObjectIds.Sphere2:
+                            instance.SetData(DataTypes.Sphere2, (uint)EncounterState.InProgress);
+                            PrinceTaldaram.GetAI().Talk(TextIds.Say1);
+                            break;
+                    }
+
+                    PrinceTaldaram.GetAI<boss_prince_taldaram>().CheckSpheres();
+                }
+                return true;
+            }
+
+            InstanceScript instance;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return GetInstanceAI<go_prince_taldaram_sphereAI>(go);
         }
     }
 

@@ -22,6 +22,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using System.Linq;
 
 namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 {
@@ -779,7 +780,10 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         class npc_announcer_toc10AI : ScriptedAI
         {
-            public npc_announcer_toc10AI(Creature creature) : base(creature) { }
+            public npc_announcer_toc10AI(Creature creature) : base(creature)
+            {
+                instance = creature.GetInstanceScript();
+            }
 
             public override void Reset()
             {
@@ -794,101 +798,86 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             }
 
             public override void AttackStart(Unit who) { }
-        }
 
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            InstanceScript instance = creature.GetInstanceScript();
-            if (instance == null)
-                return true;
-
-            string _message = "We are ready!";
-
-            if (player.IsInCombat() || instance.IsEncounterInProgress() || instance.GetData(DataTypes.Event) != 0)
-                return true;
-
-            byte i = 0;
-            for (; i < MiscData._GossipMessage.Length; ++i)
+            public override bool GossipHello(Player player)
             {
-                if ((!MiscData._GossipMessage[i].state && instance.GetBossState(MiscData._GossipMessage[i].encounter) != EncounterState.Done)
-                    || (MiscData._GossipMessage[i].state && instance.GetBossState(MiscData._GossipMessage[i].encounter) == EncounterState.Done))
+                string _message = "We are ready!";
+
+                if (player.IsInCombat() || instance.IsEncounterInProgress() || instance.GetData(DataTypes.Event) != 0)
+                    return true;
+
+                byte i = 0;
+                for (; i < MiscData._GossipMessage.Length; ++i)
                 {
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, _message, eTradeskill.GossipSenderMain, MiscData._GossipMessage[i].id);
-                    break;
+                    if ((!MiscData._GossipMessage[i].state && instance.GetBossState(MiscData._GossipMessage[i].encounter) != EncounterState.Done)
+                        || (MiscData._GossipMessage[i].state && instance.GetBossState(MiscData._GossipMessage[i].encounter) == EncounterState.Done))
+                    {
+                        AddGossipItemFor(player, GossipOptionIcon.Chat, _message, eTradeskill.GossipSenderMain, MiscData._GossipMessage[i].id);
+                        break;
+                    }
                 }
-            }
 
-            if (i >= MiscData._GossipMessage.Length)
-                return false;
+                if (i >= MiscData._GossipMessage.Length)
+                    return false;
 
-            player.SEND_GOSSIP_MENU((uint)MiscData._GossipMessage[i].msgnum, creature.GetGUID());
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            player.CLOSE_GOSSIP_MENU();
-            InstanceScript instance = creature.GetInstanceScript();
-            if (instance == null)
+                SendGossipMenuFor(player, (uint)MiscData._GossipMessage[i].msgnum, me.GetGUID());
                 return true;
-
-            if (instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
-            {
-                instance.SetData(DataTypes.Event, 110);
-                instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.NotStarted);
-                instance.SetBossState(DataTypes.BossBeasts, EncounterState.NotStarted);
             }
-            else if (instance.GetBossState(DataTypes.BossJaraxxus) != EncounterState.Done)
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
             {
-                // if Jaraxxus is spawned, but the raid wiped
-                Creature jaraxxus = ObjectAccessor.GetCreature(player, instance.GetGuidData(CreatureIds.Jaraxxus));
-                if (jaraxxus)
+                ClearGossipMenuFor(player);
+                CloseGossipMenuFor(player);
+
+                if (instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
                 {
-                    jaraxxus.RemoveAurasDueToSpell(Spells.JaraxxusChains);
-                    jaraxxus.RemoveUnitFlag(UnitFlags.NonAttackable);
-                    jaraxxus.SetReactState(ReactStates.Defensive);
-                    jaraxxus.SetInCombatWithZone();
+                    instance.SetData(DataTypes.Event, 110);
+                    instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.NotStarted);
+                    instance.SetBossState(DataTypes.BossBeasts, EncounterState.NotStarted);
                 }
-                else
+                else if (instance.GetBossState(DataTypes.BossJaraxxus) != EncounterState.Done)
                 {
-                    instance.SetData(DataTypes.Event, 1010);
-                    instance.SetBossState(DataTypes.BossJaraxxus, EncounterState.NotStarted);
+                    // if Jaraxxus is spawned, but the raid wiped
+                    Creature jaraxxus = ObjectAccessor.GetCreature(player, instance.GetGuidData(CreatureIds.Jaraxxus));
+                    if (jaraxxus)
+                    {
+                        jaraxxus.RemoveAurasDueToSpell(Spells.JaraxxusChains);
+                        jaraxxus.RemoveUnitFlag(UnitFlags.NonAttackable);
+                        jaraxxus.SetReactState(ReactStates.Defensive);
+                        jaraxxus.SetInCombatWithZone();
+                    }
+                    else
+                    {
+                        instance.SetData(DataTypes.Event, 1010);
+                        instance.SetBossState(DataTypes.BossJaraxxus, EncounterState.NotStarted);
+                    }
                 }
+                else if (instance.GetBossState(DataTypes.BossCrusaders) != EncounterState.Done)
+                {
+                    if (player.GetTeam() == Team.Alliance)
+                        instance.SetData(DataTypes.Event, 3000);
+                    else
+                        instance.SetData(DataTypes.Event, 3001);
+                    instance.SetBossState(DataTypes.BossCrusaders, EncounterState.NotStarted);
+                }
+                else if (instance.GetBossState(DataTypes.BossValkiries) != EncounterState.Done)
+                {
+                    instance.SetData(DataTypes.Event, 4000);
+                    instance.SetBossState(DataTypes.BossValkiries, EncounterState.NotStarted);
+                }
+                else if (instance.GetBossState(DataTypes.BossLichKing) != EncounterState.Done)
+                {
+                    if (me.GetMap().GetPlayers().First().GetTeam() == Team.Alliance)
+                        instance.SetData(DataTypes.Event, 4020);
+                    else
+                        instance.SetData(DataTypes.Event, 4030);
+                    instance.SetBossState(DataTypes.BossLichKing, EncounterState.NotStarted);
+                }
+                me.RemoveNpcFlag(NPCFlags.Gossip);
+                return true;
             }
-            else if (instance.GetBossState(DataTypes.BossCrusaders) != EncounterState.Done)
-            {
-                if (player.GetTeam() == Team.Alliance)
-                    instance.SetData(DataTypes.Event, 3000);
-                else
-                    instance.SetData(DataTypes.Event, 3001);
-                instance.SetBossState(DataTypes.BossCrusaders, EncounterState.NotStarted);
-            }
-            else if (instance.GetBossState(DataTypes.BossValkiries) != EncounterState.Done)
-            {
-                instance.SetData(DataTypes.Event, 4000);
-                instance.SetBossState(DataTypes.BossValkiries, EncounterState.NotStarted);
-            }
-            else if (instance.GetBossState(DataTypes.BossLichKing) != EncounterState.Done)
-            {
-                GameObject floor = ObjectAccessor.GetGameObject(player, instance.GetGuidData(GameObjectIds.ArgentColiseumFloor));
-                if (floor)
-                    floor.SetDestructibleState(GameObjectDestructibleState.Damaged);
 
-                creature.CastSpell(creature, Spells.CorpseTeleport, false);
-                creature.CastSpell(creature, Spells.DestroyFloorKnockup, false);
-
-                Creature anubArak = ObjectAccessor.GetCreature(creature, instance.GetGuidData(CreatureIds.Anubarak));
-                if (!anubArak || !anubArak.IsAlive())
-                    anubArak = creature.SummonCreature(CreatureIds.Anubarak, MiscData.AnubarakLoc[0].GetPositionX(), MiscData.AnubarakLoc[0].GetPositionY(), MiscData.AnubarakLoc[0].GetPositionZ(), 3, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-
-                instance.SetBossState(DataTypes.BossAnubarak, EncounterState.NotStarted);
-
-                if (creature.IsVisible())
-                    creature.SetVisible(false);
-            }
-            creature.RemoveNpcFlag(NPCFlags.Gossip);
-            return true;
+            InstanceScript instance;
         }
 
         public override CreatureAI GetAI(Creature creature)

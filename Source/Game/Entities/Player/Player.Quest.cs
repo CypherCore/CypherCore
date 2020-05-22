@@ -578,7 +578,7 @@ namespace Game.Entities
             switch (questGiver.GetTypeId())
             {
                 case TypeId.Unit:
-                    Global.ScriptMgr.OnQuestAccept(this, (questGiver.ToCreature()), quest);
+                    PlayerTalkClass.ClearMenus();
                     questGiver.ToCreature().GetAI().QuestAccept(this, quest);
                     break;
                 case TypeId.Item:
@@ -606,7 +606,7 @@ namespace Game.Entities
                         break;
                     }
                 case TypeId.GameObject:
-                    Global.ScriptMgr.OnQuestAccept(this, questGiver.ToGameObject(), quest);
+                    PlayerTalkClass.ClearMenus();
                     questGiver.ToGameObject().GetAI().QuestAccept(this, quest);
                     break;
                 default:
@@ -1817,11 +1817,12 @@ namespace Game.Entities
             List<uint> qr;
             List<uint> qir;
 
+            PlayerTalkClass.ClearMenus();
             switch (questgiver.GetTypeId())
             {
                 case TypeId.GameObject:
                     {
-                        QuestGiverStatus questStatus = (QuestGiverStatus)Global.ScriptMgr.GetDialogStatus(this, questgiver.ToGameObject());
+                        QuestGiverStatus questStatus = (QuestGiverStatus)questgiver.ToGameObject().GetAI().GetDialogStatus(this);
                         if (questStatus != QuestGiverStatus.ScriptedNoStatus)
                             return questStatus;
                         qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
@@ -1830,7 +1831,7 @@ namespace Game.Entities
                     }
                 case TypeId.Unit:
                     {
-                        QuestGiverStatus questStatus = (QuestGiverStatus)Global.ScriptMgr.GetDialogStatus(this, questgiver.ToCreature());
+                        QuestGiverStatus questStatus = (QuestGiverStatus)questgiver.ToCreature().GetAI().GetDialogStatus(this);
                         if (questStatus != QuestGiverStatus.ScriptedNoStatus)
                             return questStatus;
                         qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());

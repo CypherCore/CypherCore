@@ -559,8 +559,6 @@ namespace Game.Entities
                     }
                     break;
             }
-            Global.ScriptMgr.OnCreatureUpdate(this, diff);
-
         }
 
         public void Regenerate(PowerType power)

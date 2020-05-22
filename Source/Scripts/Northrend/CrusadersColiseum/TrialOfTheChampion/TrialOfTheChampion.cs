@@ -518,6 +518,40 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                 }
             }
 
+            public override bool GossipHello(Player player)
+            {
+                if (((instance.GetData((uint)Data.BOSS_GRAND_CHAMPIONS) == (uint)EncounterState.Done &&
+                    instance.GetData((uint)Data.BOSS_BLACK_KNIGHT) == (uint)EncounterState.Done &&
+                    instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_E) == (uint)EncounterState.Done) ||
+                    instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_P) == (uint)EncounterState.Done))
+                    return false;
+
+                if (instance.GetData((uint)Data.BOSS_GRAND_CHAMPIONS) == (uint)EncounterState.NotStarted &&
+                    instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_E) == (uint)EncounterState.NotStarted &&
+                    instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_P) == (uint)EncounterState.NotStarted &&
+                    instance.GetData((uint)Data.BOSS_BLACK_KNIGHT) == (uint)EncounterState.NotStarted)
+                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, TrialOfTheChampionConst.GOSSIP_START_EVENT1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                else if (instance != null)
+                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, TrialOfTheChampionConst.GOSSIP_START_EVENT2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+
+                SendGossipMenuFor(player, player.GetGossipTextId(me), me.GetGUID());
+
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                ClearGossipMenuFor(player);
+                if (action == eTradeskill.GossipActionInfoDef + 1)
+                {
+                    CloseGossipMenuFor(player);
+                    StartEncounter();
+                }
+
+                return true;
+            }
+
             InstanceScript instance;
 
             byte uiSummonTimes;
@@ -541,43 +575,6 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             List<ObjectGuid> Champion3List = new List<ObjectGuid>();
 
             Position SpawnPosition = new Position(746.261f, 657.401f, 411.681f, 4.65f);
-        }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            InstanceScript instance = creature.GetInstanceScript();
-
-            if (instance != null &&
-                ((instance.GetData((uint)Data.BOSS_GRAND_CHAMPIONS) == (uint)EncounterState.Done &&
-                instance.GetData((uint)Data.BOSS_BLACK_KNIGHT) == (uint)EncounterState.Done &&
-                instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_E) == (uint)EncounterState.Done) ||
-                instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_P) == (uint)EncounterState.Done))
-                return false;
-
-            if (instance != null &&
-                instance.GetData((uint)Data.BOSS_GRAND_CHAMPIONS) == (uint)EncounterState.NotStarted &&
-                instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_E) == (uint)EncounterState.NotStarted &&
-                instance.GetData((uint)Data.BOSS_ARGENT_CHALLENGE_P) == (uint)EncounterState.NotStarted &&
-                instance.GetData((uint)Data.BOSS_BLACK_KNIGHT) == (uint)EncounterState.NotStarted)
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, TrialOfTheChampionConst.GOSSIP_START_EVENT1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-            else if (instance != null)
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, TrialOfTheChampionConst.GOSSIP_START_EVENT2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-
-            player.SEND_GOSSIP_MENU(player.GetGossipTextId(creature), creature.GetGUID());
-
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            if (action == eTradeskill.GossipActionInfoDef + 1)
-            {
-                player.CLOSE_GOSSIP_MENU();
-                ((npc_announcer_toc5AI)creature.GetAI()).StartEncounter();
-            }
-
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)

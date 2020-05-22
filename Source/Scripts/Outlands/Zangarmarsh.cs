@@ -29,108 +29,119 @@ namespace Scripts.Outlands
     {
         public npcs_ashyen_and_keleth() : base("npcs_ashyen_and_keleth") { }
 
-        public override bool OnGossipHello(Player player, Creature creature)
+        class npcs_ashyen_and_kelethAI : ScriptedAI
         {
-            if (player.GetReputationRank(942) > ReputationRank.Neutral)
+            public npcs_ashyen_and_kelethAI(Creature creature) : base(creature) { }
+
+            public override bool GossipHello(Player player)
             {
-                if (creature.GetEntry() == NPC_ASHYEN)
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_BLESS_ASH, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                if (player.GetReputationRank(942) > ReputationRank.Neutral)
+                {
+                    if (me.GetEntry() == NPC_ASHYEN)
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_BLESS_ASH, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
-                if (creature.GetEntry() == NPC_KELETH)
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_BLESS_KEL, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    if (me.GetEntry() == NPC_KELETH)
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_BLESS_KEL, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                }
+                player.SEND_GOSSIP_MENU(player.GetGossipTextId(me), me.GetGUID());
+
+                return true;
             }
-            player.SEND_GOSSIP_MENU(player.GetGossipTextId(creature), creature.GetGUID());
 
-            return true;
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                if (action == eTradeskill.GossipActionInfoDef + 1)
+                {
+                    me.SetPowerType(PowerType.Mana);
+                    me.SetMaxPower(PowerType.Mana, 200);             //set a "fake" mana value, we can't depend on database doing it in this case
+                    me.SetPower(PowerType.Mana, 200);
+
+                    if (me.GetEntry() == NPC_ASHYEN)                //check which Creature we are dealing with
+                    {
+                        uint spell = 0;
+                        switch (player.GetReputationRank(942))
+                        {                                               //mark of lore
+                            case ReputationRank.Friendly:
+                                spell = SPELL_BLESS_ASH_FRI;
+                                break;
+                            case ReputationRank.Honored:
+                                spell = SPELL_BLESS_ASH_HON;
+                                break;
+                            case ReputationRank.Revered:
+                                spell = SPELL_BLESS_ASH_REV;
+                                break;
+                            case ReputationRank.Exalted:
+                                spell = SPELL_BLESS_ASH_EXA;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (spell != 0)
+                        {
+                            DoCast(player, spell, true);
+                            me.GetAI().Talk(GOSSIP_REWARD_BLESS);
+                        }
+                    }
+
+                    if (me.GetEntry() == NPC_KELETH)
+                    {
+                        uint spell = 0;
+                        switch (player.GetReputationRank(942))         //mark of war
+                        {
+                            case ReputationRank.Friendly:
+                                spell = SPELL_BLESS_KEL_FRI;
+                                break;
+                            case ReputationRank.Honored:
+                                spell = SPELL_BLESS_KEL_HON;
+                                break;
+                            case ReputationRank.Revered:
+                                spell = SPELL_BLESS_KEL_REV;
+                                break;
+                            case ReputationRank.Exalted:
+                                spell = SPELL_BLESS_KEL_EXA;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (spell != 0)
+                        {
+                            DoCast(player, spell, true);
+                            me.GetAI().Talk(GOSSIP_REWARD_BLESS);
+                        }
+                    }
+                    player.CLOSE_GOSSIP_MENU();
+                    player.TalkedToCreature(me.GetEntry(), me.GetGUID());
+                }
+                return true;
+            }
+
+            const uint GOSSIP_REWARD_BLESS = 0;
+
+            const uint NPC_ASHYEN = 17900;
+            const uint NPC_KELETH = 17901;
+
+            const uint SPELL_BLESS_ASH_EXA = 31815;
+            const uint SPELL_BLESS_ASH_REV = 31811;
+            const uint SPELL_BLESS_ASH_HON = 31810;
+            const uint SPELL_BLESS_ASH_FRI = 31808;
+
+            const uint SPELL_BLESS_KEL_EXA = 31814;
+            const uint SPELL_BLESS_KEL_REV = 31813;
+            const uint SPELL_BLESS_KEL_HON = 31812;
+            const uint SPELL_BLESS_KEL_FRI = 31807;
+
+            const string GOSSIP_ITEM_BLESS_ASH = "Grant me your mark, wise ancient.";
+            const string GOSSIP_ITEM_BLESS_KEL = "Grant me your mark, mighty ancient.";
         }
 
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
+        public override CreatureAI GetAI(Creature creature)
         {
-            player.PlayerTalkClass.ClearMenus();
-            if (action == eTradeskill.GossipActionInfoDef + 1)
-            {
-                creature.SetPowerType(PowerType.Mana);
-                creature.SetMaxPower(PowerType.Mana, 200);             //set a "fake" mana value, we can't depend on database doing it in this case
-                creature.SetPower(PowerType.Mana, 200);
-
-                if (creature.GetEntry() == NPC_ASHYEN)                //check which Creature we are dealing with
-                {
-                    uint spell = 0;
-                    switch (player.GetReputationRank(942))
-                    {                                               //mark of lore
-                        case ReputationRank.Friendly:
-                            spell = SPELL_BLESS_ASH_FRI;
-                            break;
-                        case ReputationRank.Honored:
-                            spell = SPELL_BLESS_ASH_HON;
-                            break;
-                        case ReputationRank.Revered:
-                            spell = SPELL_BLESS_ASH_REV;
-                            break;
-                        case ReputationRank.Exalted:
-                            spell = SPELL_BLESS_ASH_EXA;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (spell != 0)
-                    {
-                        creature.CastSpell(player, spell, true);
-                        creature.GetAI().Talk(GOSSIP_REWARD_BLESS);
-                    }
-                }
-
-                if (creature.GetEntry() == NPC_KELETH)
-                {
-                    uint spell = 0;
-                    switch (player.GetReputationRank(942))         //mark of war
-                    {
-                        case ReputationRank.Friendly:
-                            spell = SPELL_BLESS_KEL_FRI;
-                            break;
-                        case ReputationRank.Honored:
-                            spell = SPELL_BLESS_KEL_HON;
-                            break;
-                        case ReputationRank.Revered:
-                            spell = SPELL_BLESS_KEL_REV;
-                            break;
-                        case ReputationRank.Exalted:
-                            spell = SPELL_BLESS_KEL_EXA;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (spell != 0)
-                    {
-                        creature.CastSpell(player, spell, true);
-                        creature.GetAI().Talk(GOSSIP_REWARD_BLESS);
-                    }
-                }
-                player.CLOSE_GOSSIP_MENU();
-                player.TalkedToCreature(creature.GetEntry(), creature.GetGUID());
-            }
-            return true;
+            return new npcs_ashyen_and_kelethAI(creature);
         }
-
-        const uint GOSSIP_REWARD_BLESS = 0;
-
-        const uint NPC_ASHYEN = 17900;
-        const uint NPC_KELETH = 17901;
-
-        const uint SPELL_BLESS_ASH_EXA = 31815;
-        const uint SPELL_BLESS_ASH_REV = 31811;
-        const uint SPELL_BLESS_ASH_HON = 31810;
-        const uint SPELL_BLESS_ASH_FRI = 31808;
-
-        const uint SPELL_BLESS_KEL_EXA = 31814;
-        const uint SPELL_BLESS_KEL_REV = 31813;
-        const uint SPELL_BLESS_KEL_HON = 31812;
-        const uint SPELL_BLESS_KEL_FRI = 31807;
-
-        const string GOSSIP_ITEM_BLESS_ASH = "Grant me your mark, wise ancient.";
-        const string GOSSIP_ITEM_BLESS_KEL = "Grant me your mark, mighty ancient.";
     }
 
     [Script]
@@ -171,32 +182,33 @@ namespace Scripts.Outlands
 
                 DoMeleeAttackIfReady();
             }
+
+            public override bool GossipHello(Player player)
+            {
+                if (player.GetQuestStatus(QUEST_CRACK_SKULLS) == QuestStatus.Incomplete)
+                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_COOSH, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+
+                player.SEND_GOSSIP_MENU(9441, me.GetGUID());
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                if (action == eTradeskill.GossipActionInfoDef)
+                {
+                    player.CLOSE_GOSSIP_MENU();
+                    me.SetFaction(FACTION_HOSTILE_CO);
+                    me.GetAI().AttackStart(player);
+                }
+                return true;
+            }
         }
 
         public override CreatureAI GetAI(Creature creature)
         {
             return new npc_cooshcooshAI(creature);
-        }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            if (player.GetQuestStatus(QUEST_CRACK_SKULLS) == QuestStatus.Incomplete)
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_COOSH, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-
-            player.SEND_GOSSIP_MENU(9441, creature.GetGUID());
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            if (action == eTradeskill.GossipActionInfoDef)
-            {
-                player.CLOSE_GOSSIP_MENU();
-                creature.SetFaction(FACTION_HOSTILE_CO);
-                creature.GetAI().AttackStart(player);
-            }
-            return true;
         }
 
         const uint SPELL_LIGHTNING_BOLT = 9532;
@@ -212,54 +224,64 @@ namespace Scripts.Outlands
     {
         public npc_elder_kuruti() : base("npc_elder_kuruti") { }
 
-        public override bool OnGossipHello(Player player, Creature creature)
+        class npc_elder_kurutiAI : ScriptedAI
         {
-            if (player.GetQuestStatus(9803) == QuestStatus.Incomplete)
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+            public npc_elder_kurutiAI(Creature creature) : base(creature) { }
 
-            player.SEND_GOSSIP_MENU(9226, creature.GetGUID());
-
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            switch (action)
+            public override bool GossipHello(Player player)
             {
-                case eTradeskill.GossipActionInfoDef:
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SEND_GOSSIP_MENU(9227, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(9229, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    {
-                        if (!player.HasItemCount(24573))
-                        {
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
-                            uint itemId = 24573;
-                            uint temp;
-                            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, 1, out temp);
-                            if (msg == InventoryResult.Ok)
-                            {
-                                player.StoreNewItem(dest, itemId, true);
-                            }
-                            else
-                                player.SendEquipError(msg, null, null, itemId);
-                        }
-                        player.SEND_GOSSIP_MENU(9231, creature.GetGUID());
-                        break;
-                    }
+                if (player.GetQuestStatus(9803) == QuestStatus.Incomplete)
+                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+
+                player.SEND_GOSSIP_MENU(9226, me.GetGUID());
+                return true;
             }
-            return true;
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef:
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                        player.SEND_GOSSIP_MENU(9227, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 1:
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_ITEM_KUR3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.SEND_GOSSIP_MENU(9229, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:
+                        {
+                            if (!player.HasItemCount(24573))
+                            {
+                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                uint itemId = 24573;
+                                uint temp;
+                                InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, 1, out temp);
+                                if (msg == InventoryResult.Ok)
+                                {
+                                    player.StoreNewItem(dest, itemId, true);
+                                }
+                                else
+                                    player.SendEquipError(msg, null, null, itemId);
+                            }
+                            player.SEND_GOSSIP_MENU(9231, me.GetGUID());
+                            break;
+                        }
+                }
+                return true;
+            }
+
+            const string GOSSIP_ITEM_KUR1 = "Greetings, elder. It is time for your people to end their hostility towards the draenei and their allies.";
+            const string GOSSIP_ITEM_KUR2 = "I did not mean to deceive you, elder. The draenei of Telredor thought to approach you in a way that would seem familiar to you.";
+            const string GOSSIP_ITEM_KUR3 = "I will tell them. Farewell, elder.";
         }
 
-        const string GOSSIP_ITEM_KUR1 = "Greetings, elder. It is time for your people to end their hostility towards the draenei and their allies.";
-        const string GOSSIP_ITEM_KUR2 = "I did not mean to deceive you, elder. The draenei of Telredor thought to approach you in a way that would seem familiar to you.";
-        const string GOSSIP_ITEM_KUR3 = "I will tell them. Farewell, elder.";
+        public override CreatureAI GetAI(Creature creature)
+        {
+            return new npc_elder_kurutiAI(creature);
+        }
     }
 
     [Script]
@@ -304,19 +326,15 @@ namespace Scripts.Outlands
                         break;
                 }
             }
-        }
 
-        public override bool OnQuestAccept(Player player, Creature creature, Quest quest)
-        {
-            if (quest.Id == QUEST_ESCAPE_FROM)
+            public override void QuestAccept(Player player, Quest quest)
             {
-                creature.GetAI().Talk(SAY_START, player);
-
-                NpcEscortAI pEscortAI = (npc_kayra_longmaneAI)creature.GetAI();
-                if (pEscortAI != null)
-                    pEscortAI.Start(false, false, player.GetGUID());
+                if (quest.Id == QUEST_ESCAPE_FROM)
+                {
+                    Talk(SAY_START, player);
+                    Start(false, false, player.GetGUID());
+                }
             }
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)

@@ -2736,16 +2736,16 @@ namespace Game.AI
                         if (go == null)
                             return;
                         //store hostage as id1
-                        AddEvent(SmartEvents.GoStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 1, 0, 0, 0, 0, 0, SmartTargets.ClosestCreature, e.Action.installTtemplate.param1, 10, 0, 0);
+                        AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 1, 0, 0, 0, 0, 0, SmartTargets.ClosestCreature, e.Action.installTtemplate.param1, 10, 0, 0);
                         //store invoker as id2
-                        AddEvent(SmartEvents.GoStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 2, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0);
+                        AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.StoreTargetList, 2, 0, 0, 0, 0, 0, SmartTargets.None, 0, 0, 0, 0);
                         //signal hostage
-                        AddEvent(SmartEvents.GoStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.SetData, 0, 0, 0, 0, 0, 0, SmartTargets.Stored, 1, 0, 0, 0);
+                        AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.SetData, 0, 0, 0, 0, 0, 0, SmartTargets.Stored, 1, 0, 0, 0);
                         //when hostage raeched end point, give credit to invoker
                         if (e.Action.installTtemplate.param2 != 0)
                             AddEvent(SmartEvents.DataSet, 0, 0, 0, 0, 0, 0, SmartActions.CallKilledmonster, e.Action.installTtemplate.param1, 0, 0, 0, 0, 0, SmartTargets.Stored, 2, 0, 0, 0);
                         else
-                            AddEvent(SmartEvents.GoStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.CallKilledmonster, e.Action.installTtemplate.param1, 0, 0, 0, 0, 0, SmartTargets.Stored, 2, 0, 0, 0);
+                            AddEvent(SmartEvents.GoLootStateChanged, 0, 2, 0, 0, 0, 0, SmartActions.CallKilledmonster, e.Action.installTtemplate.param1, 0, 0, 0, 0, 0, SmartTargets.Stored, 2, 0, 0, 0);
                         break;
                     }
                 default:
@@ -3632,9 +3632,9 @@ namespace Game.AI
                         ProcessAction(e, null, var0);
                         break;
                     }
-                case SmartEvents.GoStateChanged:
+                case SmartEvents.GoLootStateChanged:
                     {
-                        if (e.Event.goStateChanged.state != var0)
+                        if (e.Event.goLootStateChanged.lootState != var0)
                             return;
                         ProcessAction(e, unit, var0, var1);
                         break;

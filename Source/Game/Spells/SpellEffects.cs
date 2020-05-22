@@ -1321,9 +1321,7 @@ namespace Game.Spells
                     return;
                 }
 
-                if (Global.ScriptMgr.OnGossipHello(player, gameObjTarget))
-                    return;
-
+                player.PlayerTalkClass.ClearMenus();
                 if (gameObjTarget.GetAI().GossipHello(player, false))
                     return;
 

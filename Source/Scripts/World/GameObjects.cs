@@ -256,10 +256,20 @@ namespace Scripts.World
     {
         public go_cat_figurine() : base("go_cat_figurine") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_cat_figurineAI : GameObjectAI
         {
-            player.CastSpell(player, GameobjectConst.SpellSummonGhostSaber, true);
-            return false;
+            public go_cat_figurineAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                player.CastSpell(player, GameobjectConst.SpellSummonGhostSaber, true);
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_cat_figurineAI(go);
         }
     }
 
@@ -268,12 +278,22 @@ namespace Scripts.World
     {
         public go_barov_journal() : base("go_barov_journal") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_barov_journalAI : GameObjectAI
         {
-            if (player.HasSkill(SkillType.Tailoring) && player.GetBaseSkillValue(SkillType.Tailoring) >= 280 && !player.HasSpell(26086))
-                player.CastSpell(player, 26095, false);
+            public go_barov_journalAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.HasSkill(SkillType.Tailoring) && player.GetBaseSkillValue(SkillType.Tailoring) >= 280 && !player.HasSpell(26086))
+                    player.CastSpell(player, 26095, false);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_barov_journalAI(go);
         }
     }
 
@@ -282,18 +302,28 @@ namespace Scripts.World
     {
         public go_gilded_brazier() : base("go_gilded_brazier") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_gilded_brazierAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.Goober)
+            public go_gilded_brazierAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                if (player.GetQuestStatus(GameobjectConst.QuestTheFirstTrial) == QuestStatus.Incomplete)
+                if (me.GetGoType() == GameObjectTypes.Goober)
                 {
-                    Creature Stillblade = player.SummonCreature(GameobjectConst.NpcStillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, 60000);
-                    if (Stillblade)
-                        Stillblade.GetAI().AttackStart(player);
+                    if (player.GetQuestStatus(GameobjectConst.QuestTheFirstTrial) == QuestStatus.Incomplete)
+                    {
+                        Creature Stillblade = player.SummonCreature(GameobjectConst.NpcStillblade, 8106.11f, -7542.06f, 151.775f, 3.02598f, TempSummonType.DeadDespawn, 60000);
+                        if (Stillblade)
+                            Stillblade.GetAI().AttackStart(player);
+                    }
                 }
+                return true;
             }
-            return true;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_gilded_brazierAI(go);
         }
     }
 
@@ -302,12 +332,22 @@ namespace Scripts.World
     {
         public go_orb_of_command() : base("go_orb_of_command") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_orb_of_commandAI : GameObjectAI
         {
-            if (player.GetQuestRewardStatus(7761))
-                player.CastSpell(player, 23460, true);
+            public go_orb_of_commandAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.GetQuestRewardStatus(7761))
+                    player.CastSpell(player, 23460, true);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_orb_of_commandAI(go);
         }
     }
 
@@ -316,12 +356,22 @@ namespace Scripts.World
     {
         public go_tablet_of_madness() : base("go_tablet_of_madness") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_tablet_of_madnessAI : GameObjectAI
         {
-            if (player.HasSkill(SkillType.Alchemy) && player.GetSkillValue(SkillType.Alchemy) >= 300 && !player.HasSpell(24266))
-                player.CastSpell(player, 24267, false);
+            public go_tablet_of_madnessAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.HasSkill(SkillType.Alchemy) && player.GetSkillValue(SkillType.Alchemy) >= 300 && !player.HasSpell(24266))
+                    player.CastSpell(player, 24267, false);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_tablet_of_madnessAI(go);
         }
     }
 
@@ -330,16 +380,26 @@ namespace Scripts.World
     {
         public go_tablet_of_the_seven() : base("go_tablet_of_the_seven") { }
 
-        // @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_tablet_of_the_sevenAI : GameObjectAI
         {
-            if (go.GetGoType() != GameObjectTypes.QuestGiver)
+            public go_tablet_of_the_sevenAI(GameObject go) : base(go) { }
+
+            // @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (me.GetGoType() != GameObjectTypes.QuestGiver)
+                    return true;
+
+                if (player.GetQuestStatus(4296) == QuestStatus.Incomplete)
+                    player.CastSpell(player, 15065, false);
+
                 return true;
+            }
+        }
 
-            if (player.GetQuestStatus(4296) == QuestStatus.Incomplete)
-                player.CastSpell(player, 15065, false);
-
-            return true;
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_tablet_of_the_sevenAI(go);
         }
     }
 
@@ -348,12 +408,22 @@ namespace Scripts.World
     {
         public go_jump_a_tron() : base("go_jump_a_tron") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_jump_a_tronAI : GameObjectAI
         {
-            if (player.GetQuestStatus(10111) == QuestStatus.Incomplete)
-                player.CastSpell(player, 33382, true);
+            public go_jump_a_tronAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.GetQuestStatus(10111) == QuestStatus.Incomplete)
+                    player.CastSpell(player, 33382, true);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_jump_a_tronAI(go);
         }
     }
 
@@ -362,39 +432,49 @@ namespace Scripts.World
     {
         public go_ethereum_prison() : base("go_ethereum_prison") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_ethereum_prisonAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            int Random = (int)(RandomHelper.Rand32() % (GameobjectConst.NpcPrisonEntry.Length / sizeof(uint)));
-            Creature creature = player.SummonCreature(GameobjectConst.NpcPrisonEntry[Random], go.GetPositionX(), go.GetPositionY(), go.GetPositionZ(), go.GetAngle(player), TempSummonType.TimedDespawnOOC, 30000);
-            if (creature)
+            public go_ethereum_prisonAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                if (!creature.IsHostileTo(player))
+                me.UseDoorOrButton();
+                int Random = (int)(RandomHelper.Rand32() % (GameobjectConst.NpcPrisonEntry.Length / sizeof(uint)));
+                Creature creature = player.SummonCreature(GameobjectConst.NpcPrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOOC, 30000);
+                if (creature)
                 {
-                    FactionTemplateRecord pFaction = creature.GetFactionTemplateEntry();
-                    if (pFaction != null)
+                    if (!creature.IsHostileTo(player))
                     {
-                        uint Spell = 0;
-
-                        switch (pFaction.Faction)
+                        FactionTemplateRecord pFaction = creature.GetFactionTemplateEntry();
+                        if (pFaction != null)
                         {
-                            case 1011: Spell = GameobjectConst.SpellRepLc; break;
-                            case 935: Spell = GameobjectConst.SpellRepShat; break;
-                            case 942: Spell = GameobjectConst.SpellRepCe; break;
-                            case 933: Spell = GameobjectConst.SpellRepCon; break;
-                            case 989: Spell = GameobjectConst.SpellRepKt; break;
-                            case 970: Spell = GameobjectConst.SpellRepSpor; break;
-                        }
+                            uint Spell = 0;
 
-                        if (Spell != 0)
-                            creature.CastSpell(player, Spell, false);
-                        else
-                            Log.outError(LogFilter.Scripts, "go_ethereum_prison summoned Creature (entry {0}) but faction ({1}) are not expected by script.", creature.GetEntry(), creature.GetFaction());
+                            switch (pFaction.Faction)
+                            {
+                                case 1011: Spell = GameobjectConst.SpellRepLc; break;
+                                case 935: Spell = GameobjectConst.SpellRepShat; break;
+                                case 942: Spell = GameobjectConst.SpellRepCe; break;
+                                case 933: Spell = GameobjectConst.SpellRepCon; break;
+                                case 989: Spell = GameobjectConst.SpellRepKt; break;
+                                case 970: Spell = GameobjectConst.SpellRepSpor; break;
+                            }
+
+                            if (Spell != 0)
+                                creature.CastSpell(player, Spell, false);
+                            else
+                                Log.outError(LogFilter.Scripts, "go_ethereum_prison summoned Creature (entry {0}) but faction ({1}) are not expected by script.", creature.GetEntry(), creature.GetFaction());
+                        }
                     }
                 }
-            }
 
-            return false;
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_ethereum_prisonAI(go);
         }
     }
 
@@ -403,14 +483,24 @@ namespace Scripts.World
     {
         public go_ethereum_stasis() : base("go_ethereum_stasis") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_ethereum_stasisAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            int Random = (int)(RandomHelper.Rand32() % GameobjectConst.NpcStasisEntry.Length / sizeof(uint));
+            public go_ethereum_stasisAI(GameObject go) : base(go) { }
 
-            player.SummonCreature(GameobjectConst.NpcStasisEntry[Random], go.GetPositionX(), go.GetPositionY(), go.GetPositionZ(), go.GetAngle(player), TempSummonType.TimedDespawnOOC, 30000);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                me.UseDoorOrButton();
+                int Random = (int)(RandomHelper.Rand32() % GameobjectConst.NpcStasisEntry.Length / sizeof(uint));
 
-            return false;
+                player.SummonCreature(GameobjectConst.NpcStasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOOC, 30000);
+
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_ethereum_stasisAI(go);
         }
     }
 
@@ -419,12 +509,22 @@ namespace Scripts.World
     {
         public go_resonite_cask() : base("go_resonite_cask") { }
 
-        public override bool OnGossipHello(Player Player, GameObject go)
+        class go_resonite_caskAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.Goober)
-                go.SummonCreature(GameobjectConst.NpcGoggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOOC, 300000);
+            public go_resonite_caskAI(GameObject go) : base(go) { }
 
-            return false;
+            public override bool GossipHello(Player Player, bool reportUse)
+            {
+                if (me.GetGoType() == GameObjectTypes.Goober)
+                    me.SummonCreature(GameobjectConst.NpcGoggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOOC, 300000);
+
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_resonite_caskAI(go);
         }
     }
 
@@ -433,12 +533,22 @@ namespace Scripts.World
     {
         public go_sacred_fire_of_life() : base("go_sacred_fire_of_life") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_sacred_fire_of_lifeAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.Goober)
-                player.SummonCreature(GameobjectConst.NpcArikara, -5008.338f, -2118.894f, 83.657f, 0.874f, TempSummonType.TimedDespawnOOC, 30000);
+            public go_sacred_fire_of_lifeAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (me.GetGoType() == GameObjectTypes.Goober)
+                    player.SummonCreature(GameobjectConst.NpcArikara, -5008.338f, -2118.894f, 83.657f, 0.874f, TempSummonType.TimedDespawnOOC, 30000);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_sacred_fire_of_lifeAI(go);
         }
     }
 
@@ -447,30 +557,40 @@ namespace Scripts.World
     {
         public go_shrine_of_the_birds() : base("go_shrine_of_the_birds") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_shrine_of_the_birdsAI : GameObjectAI
         {
-            uint BirdEntry = 0;
+            public go_shrine_of_the_birdsAI(GameObject go) : base(go) { }
 
-            float fX, fY, fZ;
-            go.GetClosePoint(out fX, out fY, out fZ, go.GetCombatReach(), SharedConst.InteractionDistance);
-
-            switch (go.GetEntry())
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                case GameobjectConst.GoShrineHawk:
-                    BirdEntry = GameobjectConst.NpcHawkGuard;
-                    break;
-                case GameobjectConst.GoShrineEagle:
-                    BirdEntry = GameobjectConst.NpcEagleGuard;
-                    break;
-                case GameobjectConst.GoShrineFalcon:
-                    BirdEntry = GameobjectConst.NpcFalconGuard;
-                    break;
+                uint BirdEntry = 0;
+
+                float fX, fY, fZ;
+                me.GetClosePoint(out fX, out fY, out fZ, me.GetCombatReach(), SharedConst.InteractionDistance);
+
+                switch (me.GetEntry())
+                {
+                    case GameobjectConst.GoShrineHawk:
+                        BirdEntry = GameobjectConst.NpcHawkGuard;
+                        break;
+                    case GameobjectConst.GoShrineEagle:
+                        BirdEntry = GameobjectConst.NpcEagleGuard;
+                        break;
+                    case GameobjectConst.GoShrineFalcon:
+                        BirdEntry = GameobjectConst.NpcFalconGuard;
+                        break;
+                }
+
+                if (BirdEntry != 0)
+                    player.SummonCreature(BirdEntry, fX, fY, fZ, me.GetOrientation(), TempSummonType.TimedDespawnOOC, 60000);
+
+                return false;
             }
+        }
 
-            if (BirdEntry != 0)
-                player.SummonCreature(BirdEntry, fX, fY, fZ, go.GetOrientation(), TempSummonType.TimedDespawnOOC, 60000);
-
-            return false;
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_shrine_of_the_birdsAI(go);
         }
     }
 
@@ -479,16 +599,26 @@ namespace Scripts.World
     {
         public go_southfury_moonstone() : base("go_southfury_moonstone") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_southfury_moonstoneAI : GameObjectAI
         {
-            //implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
-            //player.CastSpell(player, SPELL_SUMMON_RIZZLE, false);
+            public go_southfury_moonstoneAI(GameObject go) : base(go) { }
 
-            Creature creature = player.SummonCreature(GameobjectConst.NpcRizzle, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.DeadDespawn, 0);
-            if (creature)
-                creature.CastSpell(player, GameobjectConst.SpellBlackjack, false);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                //implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
+                //player.CastSpell(player, SPELL_SUMMON_RIZZLE, false);
 
-            return false;
+                Creature creature = player.SummonCreature(GameobjectConst.NpcRizzle, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.DeadDespawn, 0);
+                if (creature)
+                    creature.CastSpell(player, GameobjectConst.SpellBlackjack, false);
+
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_southfury_moonstoneAI(go);
         }
     }
 
@@ -497,14 +627,24 @@ namespace Scripts.World
     {
         public go_tele_to_dalaran_crystal() : base("go_tele_to_dalaran_crystal") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_tele_to_dalaran_crystalAI : GameObjectAI
         {
-            if (player.GetQuestRewardStatus(GameobjectConst.QuestTeleCrystalFlag))
-                return false;
+            public go_tele_to_dalaran_crystalAI(GameObject go) : base(go) { }
 
-            player.GetSession().SendNotification(GameobjectConst.GoTeleToDalaranCrystalFailed);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.GetQuestRewardStatus(GameobjectConst.QuestTeleCrystalFlag))
+                    return false;
 
-            return true;
+                player.GetSession().SendNotification(GameobjectConst.GoTeleToDalaranCrystalFailed);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_tele_to_dalaran_crystalAI(go);
         }
     }
 
@@ -513,12 +653,22 @@ namespace Scripts.World
     {
         public go_tele_to_violet_stand() : base("go_tele_to_violet_stand") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_tele_to_violet_standAI : GameObjectAI
         {
-            if (player.GetQuestRewardStatus(GameobjectConst.QuestLearnLeaveReturn) || player.GetQuestStatus(GameobjectConst.QuestLearnLeaveReturn) == QuestStatus.Incomplete)
-                return false;
+            public go_tele_to_violet_standAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.GetQuestRewardStatus(GameobjectConst.QuestLearnLeaveReturn) || player.GetQuestStatus(GameobjectConst.QuestLearnLeaveReturn) == QuestStatus.Incomplete)
+                    return false;
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_tele_to_violet_standAI(go);
         }
     }
 
@@ -527,41 +677,52 @@ namespace Scripts.World
     {
         public go_fel_crystalforge() : base("go_fel_crystalforge") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_fel_crystalforgeAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
-                player.PrepareQuestMenu(go.GetGUID()); /* return true*/
+            public go_fel_crystalforgeAI(GameObject go) : base(go) { }
 
-            player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
+                    player.PrepareQuestMenu(me.GetGUID()); /* return true*/
 
-            player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeText, go.GetGUID());
+                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
-            return true;
+                player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeText, me.GetGUID());
+
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef:
+                        player.CastSpell(player, GameobjectConst.SpellCreate1FlaskOfBeast, false);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 1:
+                        player.CastSpell(player, GameobjectConst.SpellCreate5FlaskOfBeast, false);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeText, me.GetGUID());
+                        break;
+                }
+                return true;
+            }
         }
 
-        public override bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
+        public override GameObjectAI GetAI(GameObject go)
         {
-            player.PlayerTalkClass.ClearMenus();
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef:
-                    player.CastSpell(player, GameobjectConst.SpellCreate1FlaskOfBeast, false);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeItemTextReturn, go.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.CastSpell(player, GameobjectConst.SpellCreate5FlaskOfBeast, false);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeItemTextReturn, go.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipFelCrystalforgeText, go.GetGUID());
-                    break;
-            }
-            return true;
+            return new go_fel_crystalforgeAI(go);
         }
     }
 
@@ -570,41 +731,52 @@ namespace Scripts.World
     {
         public go_bashir_crystalforge() : base("go_bashir_crystalforge") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_bashir_crystalforgeAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
-                player.PrepareQuestMenu(go.GetGUID()); /* return true*/
+            public go_bashir_crystalforgeAI(GameObject go) : base(go) { }
 
-            player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
+                    player.PrepareQuestMenu(me.GetGUID()); /* return true*/
 
-            player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeText, go.GetGUID());
+                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
-            return true;
+                player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeText, me.GetGUID());
+
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef:
+                        player.CastSpell(player, GameobjectConst.SpellCreate1FlaskOfSorcerer, false);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 1:
+                        player.CastSpell(player, GameobjectConst.SpellCreate5FlaskOfBeast, false);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                        player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeText, me.GetGUID());
+                        break;
+                }
+                return true;
+            }
         }
 
-        public override bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
+        public override GameObjectAI GetAI(GameObject go)
         {
-            player.PlayerTalkClass.ClearMenus();
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef:
-                    player.CastSpell(player, GameobjectConst.SpellCreate1FlaskOfSorcerer, false);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeItemTextReturn, go.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.CastSpell(player, GameobjectConst.SpellCreate5FlaskOfBeast, false);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeItemTextReturn, go.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipBashirCrystalforgeText, go.GetGUID());
-                    break;
-            }
-            return true;
+            return new go_bashir_crystalforgeAI(go);
         }
     }
 
@@ -613,42 +785,52 @@ namespace Scripts.World
     {
         public go_matrix_punchograph() : base("go_matrix_punchograph") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_matrix_punchographAI : GameObjectAI
         {
-            switch (go.GetEntry())
+            public go_matrix_punchographAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                case GameobjectConst.MatrixPunchograph3005A:
-                    if (player.HasItemCount(GameobjectConst.ItemWhitePunchCard))
-                    {
-                        player.DestroyItemCount(GameobjectConst.ItemWhitePunchCard, 1, true);
-                        player.CastSpell(player, GameobjectConst.SpellYellowPunchCard, true);
-                    }
-                    break;
-                case GameobjectConst.MatrixPunchograph3005B:
-                    if (player.HasItemCount(GameobjectConst.ItemYellowPunchCard))
-                    {
-                        player.DestroyItemCount(GameobjectConst.ItemYellowPunchCard, 1, true);
-                        player.CastSpell(player, GameobjectConst.SpellBluePunchCard, true);
-                    }
-                    break;
-                case GameobjectConst.MatrixPunchograph3005C:
-                    if (player.HasItemCount(GameobjectConst.ItemBluePunchCard))
-                    {
-                        player.DestroyItemCount(GameobjectConst.ItemBluePunchCard, 1, true);
-                        player.CastSpell(player, GameobjectConst.SpellRedPunchCard, true);
-                    }
-                    break;
-                case GameobjectConst.MatrixPunchograph3005D:
-                    if (player.HasItemCount(GameobjectConst.ItemRedPunchCard))
-                    {
-                        player.DestroyItemCount(GameobjectConst.ItemRedPunchCard, 1, true);
-                        player.CastSpell(player, GameobjectConst.SpellPrismaticPunchCard, true);
-                    }
-                    break;
-                default:
-                    break;
+                switch (me.GetEntry())
+                {
+                    case GameobjectConst.MatrixPunchograph3005A:
+                        if (player.HasItemCount(GameobjectConst.ItemWhitePunchCard))
+                        {
+                            player.DestroyItemCount(GameobjectConst.ItemWhitePunchCard, 1, true);
+                            player.CastSpell(player, GameobjectConst.SpellYellowPunchCard, true);
+                        }
+                        break;
+                    case GameobjectConst.MatrixPunchograph3005B:
+                        if (player.HasItemCount(GameobjectConst.ItemYellowPunchCard))
+                        {
+                            player.DestroyItemCount(GameobjectConst.ItemYellowPunchCard, 1, true);
+                            player.CastSpell(player, GameobjectConst.SpellBluePunchCard, true);
+                        }
+                        break;
+                    case GameobjectConst.MatrixPunchograph3005C:
+                        if (player.HasItemCount(GameobjectConst.ItemBluePunchCard))
+                        {
+                            player.DestroyItemCount(GameobjectConst.ItemBluePunchCard, 1, true);
+                            player.CastSpell(player, GameobjectConst.SpellRedPunchCard, true);
+                        }
+                        break;
+                    case GameobjectConst.MatrixPunchograph3005D:
+                        if (player.HasItemCount(GameobjectConst.ItemRedPunchCard))
+                        {
+                            player.DestroyItemCount(GameobjectConst.ItemRedPunchCard, 1, true);
+                            player.CastSpell(player, GameobjectConst.SpellPrismaticPunchCard, true);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return false;
             }
-            return false;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_matrix_punchographAI(go);
         }
     }
 
@@ -657,17 +839,27 @@ namespace Scripts.World
     {
         public go_scourge_cage() : base("go_scourge_cage") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_scourge_cageAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            Creature pNearestPrisoner = go.FindNearestCreature(GameobjectConst.NpcScourgePrisoner, 5.0f, true);
-            if (pNearestPrisoner)
-            {
-                player.KilledMonsterCredit(GameobjectConst.NpcScourgePrisoner, pNearestPrisoner.GetGUID());
-                pNearestPrisoner.DisappearAndDie();
-            }
+            public go_scourge_cageAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                me.UseDoorOrButton();
+                Creature pNearestPrisoner = me.FindNearestCreature(GameobjectConst.NpcScourgePrisoner, 5.0f, true);
+                if (pNearestPrisoner)
+                {
+                    player.KilledMonsterCredit(GameobjectConst.NpcScourgePrisoner, pNearestPrisoner.GetGUID());
+                    pNearestPrisoner.DisappearAndDie();
+                }
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_scourge_cageAI(go);
         }
     }
 
@@ -676,15 +868,25 @@ namespace Scripts.World
     {
         public go_arcane_prison() : base("go_arcane_prison") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_arcane_prisonAI : GameObjectAI
         {
-            if (player.GetQuestStatus(GameobjectConst.QuestPrisonBreak) == QuestStatus.Incomplete)
+            public go_arcane_prisonAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                go.SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TempSummonType.TimedDespawn, 60000);
-                player.CastSpell(player, GameobjectConst.SpellArcanePrisonerKillCredit, true);
-                return true;
+                if (player.GetQuestStatus(GameobjectConst.QuestPrisonBreak) == QuestStatus.Incomplete)
+                {
+                    me.SummonCreature(25318, 3485.089844f, 6115.7422188f, 70.966812f, 0, TempSummonType.TimedDespawn, 60000);
+                    player.CastSpell(player, GameobjectConst.SpellArcanePrisonerKillCredit, true);
+                    return true;
+                }
+                return false;
             }
-            return false;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_arcane_prisonAI(go);
         }
     }
 
@@ -693,12 +895,22 @@ namespace Scripts.World
     {
         public go_blood_filled_orb() : base("go_blood_filled_orb") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_blood_filled_orbAI : GameObjectAI
         {
-            if (go.GetGoType() == GameObjectTypes.Goober)
-                player.SummonCreature(GameobjectConst.NpcZelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOOC, 30000);
+            public go_blood_filled_orbAI(GameObject go) : base(go) { }
 
-            return true;
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (me.GetGoType() == GameObjectTypes.Goober)
+                    player.SummonCreature(GameobjectConst.NpcZelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOOC, 30000);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_blood_filled_orbAI(go);
         }
     }
 
@@ -707,41 +919,51 @@ namespace Scripts.World
     {
         public go_jotunheim_cage() : base("go_jotunheim_cage") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_jotunheim_cageAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            Creature pPrisoner = go.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerHuman, 5.0f, true);
-            if (!pPrisoner)
+            public go_jotunheim_cageAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                pPrisoner = go.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerTroll, 5.0f, true);
+                me.UseDoorOrButton();
+                Creature pPrisoner = me.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerHuman, 5.0f, true);
                 if (!pPrisoner)
                 {
-                    pPrisoner = go.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerOrc, 5.0f, true);
+                    pPrisoner = me.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerTroll, 5.0f, true);
                     if (!pPrisoner)
-                        pPrisoner = go.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerNe, 5.0f, true);
+                    {
+                        pPrisoner = me.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerOrc, 5.0f, true);
+                        if (!pPrisoner)
+                            pPrisoner = me.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerNe, 5.0f, true);
+                    }
                 }
-            }
-            if (!pPrisoner || !pPrisoner.IsAlive())
-                return false;
+                if (!pPrisoner || !pPrisoner.IsAlive())
+                    return false;
 
-            pPrisoner.DisappearAndDie();
-            player.KilledMonsterCredit(GameobjectConst.NpcEbonBladePrisonerHuman);
-            switch (pPrisoner.GetEntry())
-            {
-                case GameobjectConst.NpcEbonBladePrisonerHuman:
-                    player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightH, true);
-                    break;
-                case GameobjectConst.NpcEbonBladePrisonerNe:
-                    player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightNe, true);
-                    break;
-                case GameobjectConst.NpcEbonBladePrisonerTroll:
-                    player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightTroll, true);
-                    break;
-                case GameobjectConst.NpcEbonBladePrisonerOrc:
-                    player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightOrc, true);
-                    break;
+                pPrisoner.DisappearAndDie();
+                player.KilledMonsterCredit(GameobjectConst.NpcEbonBladePrisonerHuman);
+                switch (pPrisoner.GetEntry())
+                {
+                    case GameobjectConst.NpcEbonBladePrisonerHuman:
+                        player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightH, true);
+                        break;
+                    case GameobjectConst.NpcEbonBladePrisonerNe:
+                        player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightNe, true);
+                        break;
+                    case GameobjectConst.NpcEbonBladePrisonerTroll:
+                        player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightTroll, true);
+                        break;
+                    case GameobjectConst.NpcEbonBladePrisonerOrc:
+                        player.CastSpell(player, GameobjectConst.SpellSummonBladeKnightOrc, true);
+                        break;
+                }
+                return true;
             }
-            return true;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_jotunheim_cageAI(go);
         }
     }
 
@@ -750,14 +972,24 @@ namespace Scripts.World
     {
         public go_table_theka() : base("go_table_theka") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_table_thekaAI : GameObjectAI
         {
-            if (player.GetQuestStatus(GameobjectConst.QuestSpiderGold) == QuestStatus.Incomplete)
-                player.AreaExploredOrEventHappens(GameobjectConst.QuestSpiderGold);
+            public go_table_thekaAI(GameObject go) : base(go) { }
 
-            player.SEND_GOSSIP_MENU(GameobjectConst.GossipTableTheka, go.GetGUID());
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.GetQuestStatus(GameobjectConst.QuestSpiderGold) == QuestStatus.Incomplete)
+                    player.AreaExploredOrEventHappens(GameobjectConst.QuestSpiderGold);
 
-            return true;
+                player.SEND_GOSSIP_MENU(GameobjectConst.GossipTableTheka, me.GetGUID());
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_table_thekaAI(go);
         }
     }
 
@@ -766,14 +998,24 @@ namespace Scripts.World
     {
         public go_inconspicuous_landmark() : base("go_inconspicuous_landmark") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_inconspicuous_landmarkAI : GameObjectAI
         {
-            if (player.HasItemCount(GameobjectConst.ItemCuergosKey))
-                return false;
+            public go_inconspicuous_landmarkAI(GameObject go) : base(go) { }
 
-            player.CastSpell(player, GameobjectConst.SpellSummonPiratesTreasureAndTriggerMob, true);
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                if (player.HasItemCount(GameobjectConst.ItemCuergosKey))
+                    return false;
 
-            return true;
+                player.CastSpell(player, GameobjectConst.SpellSummonPiratesTreasureAndTriggerMob, true);
+
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_inconspicuous_landmarkAI(go);
         }
     }
 
@@ -791,7 +1033,7 @@ namespace Scripts.World
                 if (!reportUse)
                     return true;
 
-                Unit owner = go.GetOwner();
+                Unit owner = me.GetOwner();
                 if (!owner || !owner.IsTypeId(TypeId.Player) || !player.IsInSameRaidWith(owner.ToPlayer()))
                     return true;
                 return false;
@@ -804,31 +1046,41 @@ namespace Scripts.World
     {
         public go_dragonflayer_cage() : base("go_dragonflayer_cage") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_dragonflayer_cageAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            if (player.GetQuestStatus(GameobjectConst.QuestPrisonersOfWyrmskull) != QuestStatus.Incomplete)
-                return true;
+            public go_dragonflayer_cageAI(GameObject go) : base(go) { }
 
-            Creature pPrisoner = go.FindNearestCreature(GameobjectConst.NpcPrisonerPriest, 2.0f);
-            if (!pPrisoner)
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                pPrisoner = go.FindNearestCreature(GameobjectConst.NpcPrisonerMage, 2.0f);
+                me.UseDoorOrButton();
+                if (player.GetQuestStatus(GameobjectConst.QuestPrisonersOfWyrmskull) != QuestStatus.Incomplete)
+                    return true;
+
+                Creature pPrisoner = me.FindNearestCreature(GameobjectConst.NpcPrisonerPriest, 2.0f);
                 if (!pPrisoner)
                 {
-                    pPrisoner = go.FindNearestCreature(GameobjectConst.NpcPrisonerWarrior, 2.0f);
+                    pPrisoner = me.FindNearestCreature(GameobjectConst.NpcPrisonerMage, 2.0f);
                     if (!pPrisoner)
-                        pPrisoner = go.FindNearestCreature(GameobjectConst.NpcPrisonerPaladin, 2.0f);
+                    {
+                        pPrisoner = me.FindNearestCreature(GameobjectConst.NpcPrisonerWarrior, 2.0f);
+                        if (!pPrisoner)
+                            pPrisoner = me.FindNearestCreature(GameobjectConst.NpcPrisonerPaladin, 2.0f);
+                    }
                 }
-            }
 
-            if (!pPrisoner || !pPrisoner.IsAlive())
+                if (!pPrisoner || !pPrisoner.IsAlive())
+                    return true;
+
+                // @todo prisoner should help player for a short period of time
+                player.KilledMonsterCredit(GameobjectConst.NpcCapturedValgardePrisonerProxy);
+                pPrisoner.DespawnOrUnsummon();
                 return true;
+            }
+        }
 
-            // @todo prisoner should help player for a short period of time
-            player.KilledMonsterCredit(GameobjectConst.NpcCapturedValgardePrisonerProxy);
-            pPrisoner.DespawnOrUnsummon();
-            return true;
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_dragonflayer_cageAI(go);
         }
     }
 
@@ -837,20 +1089,30 @@ namespace Scripts.World
     {
         public go_tadpole_cage() : base("go_tadpole_cage") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_tadpole_cageAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            if (player.GetQuestStatus(GameobjectConst.QuestOhNoesTheTadpoles) == QuestStatus.Incomplete)
+            public go_tadpole_cageAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                Creature pTadpole = go.FindNearestCreature(GameobjectConst.NpcWinterfinTadpole, 1.0f);
-                if (pTadpole)
+                me.UseDoorOrButton();
+                if (player.GetQuestStatus(GameobjectConst.QuestOhNoesTheTadpoles) == QuestStatus.Incomplete)
                 {
-                    pTadpole.DisappearAndDie();
-                    player.KilledMonsterCredit(GameobjectConst.NpcWinterfinTadpole);
-                    //FIX: Summon minion tadpole
+                    Creature pTadpole = me.FindNearestCreature(GameobjectConst.NpcWinterfinTadpole, 1.0f);
+                    if (pTadpole)
+                    {
+                        pTadpole.DisappearAndDie();
+                        player.KilledMonsterCredit(GameobjectConst.NpcWinterfinTadpole);
+                        //FIX: Summon minion tadpole
+                    }
                 }
+                return true;
             }
-            return true;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_tadpole_cageAI(go);
         }
     }
 
@@ -859,43 +1121,54 @@ namespace Scripts.World
     {
         public go_amberpine_outhouse() : base("go_amberpine_outhouse") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_amberpine_outhouseAI : GameObjectAI
         {
-            QuestStatus status = player.GetQuestStatus(GameobjectConst.QuestDoingYourDuty);
-            if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
-            {
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                player.SEND_GOSSIP_MENU(GameobjectConst.GossipOuthouseVacant, go.GetGUID());
-            }
-            else
-                player.SEND_GOSSIP_MENU(GameobjectConst.GossipOuthouseInuse, go.GetGUID());
+            public go_amberpine_outhouseAI(GameObject go) : base(go) { }
 
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            if (action == eTradeskill.GossipActionInfoDef + 1)
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                player.CLOSE_GOSSIP_MENU();
-                Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, GameobjectConst.NpcOuthouseBunny, 3.0f);
-                if (target)
+                QuestStatus status = player.GetQuestStatus(GameobjectConst.QuestDoingYourDuty);
+                if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
                 {
-                    target.GetAI().SetData(1, (uint)player.GetGender());
-                    go.CastSpell(target, GameobjectConst.SpellIndisposedIii);
+                    player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GameobjectConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipOuthouseVacant, me.GetGUID());
                 }
-                go.CastSpell(player, GameobjectConst.SpellIndisposed);
-                if (player.HasItemCount(GameobjectConst.ItemAnderholsSliderCider))
-                    go.CastSpell(player, GameobjectConst.SpellCreateAmberseeds);
+                else
+                    player.SEND_GOSSIP_MENU(GameobjectConst.GossipOuthouseInuse, me.GetGUID());
+
                 return true;
             }
-            else
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
             {
-                player.CLOSE_GOSSIP_MENU();
-                player.GetSession().SendNotification(GameobjectConst.GoAnderholsSliderCiderNotFound);
-                return false;
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                if (action == eTradeskill.GossipActionInfoDef + 1)
+                {
+                    player.CLOSE_GOSSIP_MENU();
+                    Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, GameobjectConst.NpcOuthouseBunny, 3.0f);
+                    if (target)
+                    {
+                        target.GetAI().SetData(1, (uint)player.GetGender());
+                        me.CastSpell(target, GameobjectConst.SpellIndisposedIii);
+                    }
+                    me.CastSpell(player, GameobjectConst.SpellIndisposed);
+                    if (player.HasItemCount(GameobjectConst.ItemAnderholsSliderCider))
+                        me.CastSpell(player, GameobjectConst.SpellCreateAmberseeds);
+                    return true;
+                }
+                else
+                {
+                    player.CLOSE_GOSSIP_MENU();
+                    player.GetSession().SendNotification(GameobjectConst.GoAnderholsSliderCiderNotFound);
+                    return false;
+                }
             }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_amberpine_outhouseAI(go);
         }
     }
 
@@ -904,12 +1177,22 @@ namespace Scripts.World
     {
         public go_hive_pod() : base("go_hive_pod") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_hive_podAI : GameObjectAI
         {
-            player.SendLoot(go.GetGUID(), LootType.Corpse);
-            go.SummonCreature(GameobjectConst.NpcHiveAmbusher, go.GetPositionX() + 1, go.GetPositionY(), go.GetPositionZ(), go.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
-            go.SummonCreature(GameobjectConst.NpcHiveAmbusher, go.GetPositionX(), go.GetPositionY() + 1, go.GetPositionZ(), go.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
-            return true;
+            public go_hive_podAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                player.SendLoot(me.GetGUID(), LootType.Corpse);
+                me.SummonCreature(GameobjectConst.NpcHiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
+                me.SummonCreature(GameobjectConst.NpcHiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_hive_podAI(go);
         }
     }
 
@@ -918,10 +1201,20 @@ namespace Scripts.World
     {
         public go_massive_seaforium_charge() : base("go_massive_seaforium_charge") { }
 
-        public override bool OnGossipHello(Player Player, GameObject go)
+        class go_massive_seaforium_chargeAI : GameObjectAI
         {
-            go.SetLootState(LootState.JustDeactivated);
-            return true;
+            public go_massive_seaforium_chargeAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player Player, bool reportUse)
+            {
+                me.SetLootState(LootState.JustDeactivated);
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_massive_seaforium_chargeAI(go);
         }
     }
 
@@ -930,23 +1223,33 @@ namespace Scripts.World
     {
         public go_veil_skith_cage() : base("go_veil_skith_cage") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_veil_skith_cageAI : GameObjectAI
         {
-            go.UseDoorOrButton();
-            if (player.GetQuestStatus(GameobjectConst.QuestMissingFriends) == QuestStatus.Incomplete)
+            public go_veil_skith_cageAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                List<Creature> childrenList = new List<Creature>();
-                go.GetCreatureListWithEntryInGrid(childrenList, GameobjectConst.NpcCaptiveChild, SharedConst.InteractionDistance);
-                foreach (var creature in childrenList)
+                me.UseDoorOrButton();
+                if (player.GetQuestStatus(GameobjectConst.QuestMissingFriends) == QuestStatus.Incomplete)
                 {
-                    player.KilledMonsterCredit(GameobjectConst.NpcCaptiveChild, creature.GetGUID());
-                    creature.DespawnOrUnsummon(5000);
-                    creature.GetMotionMaster().MovePoint(1, go.GetPositionX() + 5, go.GetPositionY(), go.GetPositionZ());
-                    creature.GetAI().Talk(GameobjectConst.SayFree0);
-                    creature.GetMotionMaster().Clear();
+                    List<Creature> childrenList = new List<Creature>();
+                    me.GetCreatureListWithEntryInGrid(childrenList, GameobjectConst.NpcCaptiveChild, SharedConst.InteractionDistance);
+                    foreach (var creature in childrenList)
+                    {
+                        player.KilledMonsterCredit(GameobjectConst.NpcCaptiveChild, creature.GetGUID());
+                        creature.DespawnOrUnsummon(5000);
+                        creature.GetMotionMaster().MovePoint(1, me.GetPositionX() + 5, me.GetPositionY(), me.GetPositionZ());
+                        creature.GetAI().Talk(GameobjectConst.SayFree0);
+                        creature.GetMotionMaster().Clear();
+                    }
                 }
+                return false;
             }
-            return false;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_veil_skith_cageAI(go);
         }
     }
 
@@ -955,16 +1258,26 @@ namespace Scripts.World
     {
         public go_frostblade_shrine() : base("go_frostblade_shrine") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_frostblade_shrineAI : GameObjectAI
         {
-            go.UseDoorOrButton(10);
-            if (!player.HasAura(GameobjectConst.SpellRecentMeditation))
-                if (player.GetQuestStatus(GameobjectConst.QuestTheCleansingHorde) == QuestStatus.Incomplete || player.GetQuestStatus(GameobjectConst.QuestTheCleansingAlliance) == QuestStatus.Incomplete)
-                {
-                    player.CastSpell(player, GameobjectConst.SpellCleansingSoul);
-                    player.SetStandState(UnitStandStateType.Sit);
-                }
-            return true;
+            public go_frostblade_shrineAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
+            {
+                me.UseDoorOrButton(10);
+                if (!player.HasAura(GameobjectConst.SpellRecentMeditation))
+                    if (player.GetQuestStatus(GameobjectConst.QuestTheCleansingHorde) == QuestStatus.Incomplete || player.GetQuestStatus(GameobjectConst.QuestTheCleansingAlliance) == QuestStatus.Incomplete)
+                    {
+                        player.CastSpell(player, GameobjectConst.SpellCleansingSoul);
+                        player.SetStandState(UnitStandStateType.Sit);
+                    }
+                return true;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_frostblade_shrineAI(go);
         }
     }
 
@@ -973,11 +1286,21 @@ namespace Scripts.World
     {
         public go_midsummer_bonfire() : base("go_midsummer_bonfire") { }
 
-        public override bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
+        class go_midsummer_bonfireAI : GameObjectAI
         {
-            player.CastSpell(player, GameobjectConst.StampOutBonfireQuestComplete, true);
-            player.CLOSE_GOSSIP_MENU();
-            return false;
+            public go_midsummer_bonfireAI(GameObject go) : base(go) { }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                player.CastSpell(player, GameobjectConst.StampOutBonfireQuestComplete, true);
+                player.CLOSE_GOSSIP_MENU();
+                return false;
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_midsummer_bonfireAI(go);
         }
     }
 
@@ -986,15 +1309,25 @@ namespace Scripts.World
     {
         public go_midsummer_ribbon_pole() : base("go_midsummer_ribbon_pole") { }
 
-        public override bool OnGossipHello(Player player, GameObject go)
+        class go_midsummer_ribbon_poleAI : GameObjectAI
         {
-            Creature creature = go.FindNearestCreature(GameobjectConst.NpcPoleRibbonBunny, 10.0f);
-            if (creature)
+            public go_midsummer_ribbon_poleAI(GameObject go) : base(go) { }
+
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                creature.GetAI().DoAction(0);
-                player.CastSpell(creature, GameobjectConst.SpellPoleDance, true);
+                Creature creature = me.FindNearestCreature(GameobjectConst.NpcPoleRibbonBunny, 10.0f);
+                if (creature)
+                {
+                    creature.GetAI().DoAction(0);
+                    player.CastSpell(creature, GameobjectConst.SpellPoleDance, true);
+                }
+                return true;
             }
-            return true;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_midsummer_ribbon_poleAI(go);
         }
     }
 
@@ -1009,7 +1342,7 @@ namespace Scripts.World
             {
                 _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
                 {
-                    go.CastSpell(null, GameobjectConst.SpellToyTrainPulse, true);
+                    me.CastSpell(null, GameobjectConst.SpellToyTrainPulse, true);
                     task.Repeat(TimeSpan.FromSeconds(6));
                 });
             }
@@ -1022,7 +1355,7 @@ namespace Scripts.World
             // triggered on wrecker'd
             public override void DoAction(int action)
             {
-                go.Delete();
+                me.Delete();
             }
         }
 
@@ -1063,39 +1396,39 @@ namespace Scripts.World
                             if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
                                 break;
                             // Check if gob is correct area, play music, set time of music
-                            if (go.GetAreaId() == GameobjectConst.Silvermoon || go.GetAreaId() == GameobjectConst.Undercity || go.GetAreaId() == GameobjectConst.Orgrimmar1 || go.GetAreaId() == GameobjectConst.Orgrimmar2 || go.GetAreaId() == GameobjectConst.Thunderbluff || go.GetAreaId() == GameobjectConst.Shattrath)
+                            if (me.GetAreaId() == GameobjectConst.Silvermoon || me.GetAreaId() == GameobjectConst.Undercity || me.GetAreaId() == GameobjectConst.Orgrimmar1 || me.GetAreaId() == GameobjectConst.Orgrimmar2 || me.GetAreaId() == GameobjectConst.Thunderbluff || me.GetAreaId() == GameobjectConst.Shattrath)
                             {
                                 if (rnd == 0)
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin01);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin01);
                                     musicTime = GameobjectConst.EventBrewfestgoblin01Time;
                                 }
                                 else if (rnd == 1)
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin02);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin02);
                                     musicTime = GameobjectConst.EventBrewfestgoblin02Time;
                                 }
                                 else
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin03);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin03);
                                     musicTime = GameobjectConst.EventBrewfestgoblin03Time;
                                 }
                             }
-                            if (go.GetAreaId() == GameobjectConst.Ironforge1 || go.GetAreaId() == GameobjectConst.Ironforge2 || go.GetAreaId() == GameobjectConst.Stormwind || go.GetAreaId() == GameobjectConst.Exodar || go.GetAreaId() == GameobjectConst.Darnassus || go.GetAreaId() == GameobjectConst.Shattrath)
+                            if (me.GetAreaId() == GameobjectConst.Ironforge1 || me.GetAreaId() == GameobjectConst.Ironforge2 || me.GetAreaId() == GameobjectConst.Stormwind || me.GetAreaId() == GameobjectConst.Exodar || me.GetAreaId() == GameobjectConst.Darnassus || me.GetAreaId() == GameobjectConst.Shattrath)
                             {
                                 if (rnd == 0)
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf01);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf01);
                                     musicTime = GameobjectConst.EventBrewfestdwarf01Time;
                                 }
                                 else if (rnd == 1)
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf02);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf02);
                                     musicTime = GameobjectConst.EventBrewfestdwarf02Time;
                                 }
                                 else
                                 {
-                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf03);
+                                    me.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf03);
                                     musicTime = GameobjectConst.EventBrewfestdwarf03Time;
                                 }
                             }
@@ -1131,13 +1464,13 @@ namespace Scripts.World
                     if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.FireFestival))
                         return;
 
-                    var playersNearby = go.GetPlayerListInGrid(go.GetMap().GetVisibilityRange());
+                    var playersNearby = me.GetPlayerListInGrid(me.GetMap().GetVisibilityRange());
                     foreach (var player in playersNearby)
                     {
                         if (player.GetTeam() == Team.Horde)
-                            go.PlayDirectMusic(12325, player);
+                            me.PlayDirectMusic(12325, player);
                         else
-                            go.PlayDirectMusic(12319, player);
+                            me.PlayDirectMusic(12319, player);
                     }
 
                     task.Repeat(TimeSpan.FromSeconds(5)); // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
@@ -1169,7 +1502,7 @@ namespace Scripts.World
                 {
                     if (Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireElwynn) || !Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireThunder) || !Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireShattrath))
                     {
-                        go.PlayDirectMusic(8440);
+                        me.PlayDirectMusic(8440);
                         task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
                     }
                 });
@@ -1200,7 +1533,7 @@ namespace Scripts.World
                 {
                     if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.PiratesDay))
                         return;
-                    go.PlayDirectMusic(12845);
+                    me.PlayDirectMusic(12845);
                     task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
                 });
             }
@@ -1228,16 +1561,16 @@ namespace Scripts.World
 
             public override void InitializeAI()
             {
-                switch (go.GetEntry())
+                switch (me.GetEntry())
                 {
                     case GameobjectConst.GoHordeBell:
-                        _soundId = go.GetAreaId() == GameobjectConst.UndercityArea ? GameobjectConst.BellTollhorde : GameobjectConst.BellTolltribal;
+                        _soundId = me.GetAreaId() == GameobjectConst.UndercityArea ? GameobjectConst.BellTollhorde : GameobjectConst.BellTolltribal;
                         break;
                     case GameobjectConst.GoAllianceBell:
                         {
-                            if (go.GetAreaId() == GameobjectConst.Ironforge1Area || go.GetAreaId() == GameobjectConst.Ironforge2Area)
+                            if (me.GetAreaId() == GameobjectConst.Ironforge1Area || me.GetAreaId() == GameobjectConst.Ironforge2Area)
                                 _soundId = GameobjectConst.BellTolldwarfgnome;
-                            else if (go.GetAreaId() == GameobjectConst.DarnassusArea || go.GetZoneId() == GameobjectConst.TeldrassilZone)
+                            else if (me.GetAreaId() == GameobjectConst.DarnassusArea || me.GetZoneId() == GameobjectConst.TeldrassilZone)
                                 _soundId = GameobjectConst.BellTollnightelf;
                             else
                                 _soundId = GameobjectConst.BellTollalliance;
@@ -1271,7 +1604,7 @@ namespace Scripts.World
                     switch (eventId)
                     {
                         case GameobjectConst.EventRingBell:
-                            go.PlayDirectSound(_soundId);
+                            me.PlayDirectSound(_soundId);
                             break;
                         default:
                             break;

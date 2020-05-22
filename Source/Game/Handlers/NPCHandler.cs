@@ -159,12 +159,12 @@ namespace Game
                 }
             }
 
-            if (!Global.ScriptMgr.OnGossipHello(GetPlayer(), unit))
+            _player.PlayerTalkClass.ClearMenus();
+            if (!unit.GetAI().GossipHello(_player))
             {
                 GetPlayer().PrepareGossipMenu(unit, unit.GetCreatureTemplate().GossipMenuId, true);
                 GetPlayer().SendPreparedGossip(unit);
             }
-            unit.GetAI().GossipHello(GetPlayer());
         }
 
         [WorldPacketHandler(ClientOpcodes.GossipSelectOption)]
@@ -220,30 +220,27 @@ namespace Game
             }
             if (!string.IsNullOrEmpty(packet.PromotionCode))
             {
-                if (unit)
+                if (unit != null)
                 {
-                    unit.GetAI().GossipSelectCode(GetPlayer(), packet.GossipID, packet.GossipIndex, packet.PromotionCode);
-                    if (!Global.ScriptMgr.OnGossipSelectCode(GetPlayer(), unit, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode))
+                    if (!unit.GetAI().GossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }
                 else
                 {
-                    go.GetAI().GossipSelectCode(GetPlayer(), packet.GossipID, packet.GossipIndex, packet.PromotionCode);
-                    Global.ScriptMgr.OnGossipSelectCode(GetPlayer(), go, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode);
+                    if (!go.GetAI().GossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode))
+                        _player.OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
                 }
             }
             else
             {
                 if (unit != null)
                 {
-                    unit.GetAI().GossipSelect(GetPlayer(), packet.GossipID, packet.GossipIndex);
-                    if (!Global.ScriptMgr.OnGossipSelect(GetPlayer(), unit, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex)))
+                    if (!unit.GetAI().GossipSelect(_player, packet.GossipID, packet.GossipIndex))
                         GetPlayer().OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
                 }
                 else
                 {
-                    go.GetAI().GossipSelect(GetPlayer(), packet.GossipID, packet.GossipIndex);
-                    if (!Global.ScriptMgr.OnGossipSelect(GetPlayer(), go, GetPlayer().PlayerTalkClass.GetGossipOptionSender(packet.GossipIndex), GetPlayer().PlayerTalkClass.GetGossipOptionAction(packet.GossipIndex)))
+                    if (!go.GetAI().GossipSelect(_player, packet.GossipID, packet.GossipIndex))
                         GetPlayer().OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
                 }
             }

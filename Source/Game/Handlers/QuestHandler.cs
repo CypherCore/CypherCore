@@ -74,13 +74,12 @@ namespace Game
             // Stop the npc if moving
             creature.StopMoving();
 
-            if (Global.ScriptMgr.OnGossipHello(GetPlayer(), creature))
+            _player.PlayerTalkClass.ClearMenus();
+            if (creature.GetAI().GossipHello(_player))
                 return;
 
             GetPlayer().PrepareGossipMenu(creature, creature.GetCreatureTemplate().GossipMenuId, true);
             GetPlayer().SendPreparedGossip(creature);
-
-            creature.GetAI().GossipHello(GetPlayer());
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest)]
@@ -348,8 +347,8 @@ namespace Game
                                 }
                             }
 
-                            if (creatureQGiver && !Global.ScriptMgr.OnQuestReward(_player, creatureQGiver, quest, packet.ItemChoiceID))
-                                creatureQGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
+                            _player.PlayerTalkClass.ClearMenus();
+                            creatureQGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
                             break;
                         }
                     case TypeId.GameObject:
@@ -369,9 +368,8 @@ namespace Game
                                 }
                             }
 
-                            if (!Global.ScriptMgr.OnQuestReward(_player, questGiver, quest, packet.ItemChoiceID))
-                                questGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
-
+                            _player.PlayerTalkClass.ClearMenus();
+                            questGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
                             break;
                         }
                     default:

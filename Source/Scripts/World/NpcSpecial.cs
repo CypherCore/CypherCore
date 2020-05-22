@@ -629,22 +629,18 @@ namespace Scripts.World.NpcSpecial
                         break;
                 }
             }
-        }
 
-        public override bool OnQuestAccept(Player player, Creature creature, Quest quest)
-        {
-            if (quest.Id == QuestConst.Cluck)
-                ((npc_chicken_cluckAI)creature.GetAI()).Reset();
+            public override void QuestAccept(Player player, Quest quest)
+            {
+                if (quest.Id == QuestConst.Cluck)
+                    Reset();
+            }
 
-            return true;
-        }
-
-        public override bool OnQuestReward(Player player, Creature creature, Quest quest, uint opt)
-        {
-            if (quest.Id == QuestConst.Cluck)
-                ((npc_chicken_cluckAI)creature.GetAI()).Reset();
-
-            return true;
+            public override void QuestReward(Player player, Quest quest, uint opt)
+            {
+                if (quest.Id == QuestConst.Cluck)
+                    Reset();
+            }
         }
 
         public override CreatureAI GetAI(Creature creature)
@@ -1022,6 +1018,12 @@ namespace Scripts.World.NpcSpecial
 
             public override void EnterCombat(Unit who) { }
 
+            public override void QuestAccept(Player player, Quest quest)
+            {
+                if ((quest.Id == 6624) || (quest.Id == 6622))
+                    BeginEvent(player);
+            }
+
             ObjectGuid PlayerGUID;
 
             uint SummonPatientTimer;
@@ -1033,14 +1035,6 @@ namespace Scripts.World.NpcSpecial
 
             List<ObjectGuid> Patients = new List<ObjectGuid>();
             List<Position> Coordinates = new List<Position>();
-        }
-
-        public override bool OnQuestAccept(Player player, Creature creature, Quest quest)
-        {
-            if ((quest.Id == 6624) || (quest.Id == 6622))
-                ((npc_doctorAI)creature.GetAI()).BeginEvent(player);
-
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)
@@ -1332,117 +1326,129 @@ namespace Scripts.World.NpcSpecial
     {
         public npc_sayge() : base("npc_sayge") { }
 
-        public override bool OnGossipHello(Player player, Creature creature)
+        class npc_saygeAI : ScriptedAI
         {
-            if (creature.IsQuestGiver())
-                player.PrepareQuestMenu(creature.GetGUID());
+            public npc_saygeAI(Creature creature) : base(creature) { }
 
-            if (player.GetSpellHistory().HasCooldown(Spells.Strength) ||
-                player.GetSpellHistory().HasCooldown(Spells.Agility) ||
-                player.GetSpellHistory().HasCooldown(Spells.Stamina) ||
-                player.GetSpellHistory().HasCooldown(Spells.Spirit) ||
-                player.GetSpellHistory().HasCooldown(Spells.Intellect) ||
-                player.GetSpellHistory().HasCooldown(Spells.Armor) ||
-                player.GetSpellHistory().HasCooldown(Spells.Damage) ||
-                player.GetSpellHistory().HasCooldown(Spells.Resistance))
-                player.SEND_GOSSIP_MENU(GossipMenus.CantGiveYouYour, creature.GetGUID());
-            else
+            public override bool GossipHello(Player player)
             {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.IAmReadyToDiscover, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                player.SEND_GOSSIP_MENU(GossipMenus.IHaveLongKnown, creature.GetGUID());
+                if (me.IsQuestGiver())
+                    player.PrepareQuestMenu(me.GetGUID());
+
+                if (player.GetSpellHistory().HasCooldown(Spells.Strength) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Agility) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Stamina) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Spirit) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Intellect) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Armor) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Damage) ||
+                    player.GetSpellHistory().HasCooldown(Spells.Resistance))
+                    player.SEND_GOSSIP_MENU(GossipMenus.CantGiveYouYour, me.GetGUID());
+                else
+                {
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.IAmReadyToDiscover, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.SEND_GOSSIP_MENU(GossipMenus.IHaveLongKnown, me.GetGUID());
+                }
+
+                return true;
             }
 
-            return true;
+            void SendAction(Player player, uint action)
+            {
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef + 1:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+                        player.SEND_GOSSIP_MENU(GossipMenus.YouHaveBeenTasked, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 1, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
+                        player.SEND_GOSSIP_MENU(GossipMenus.SwornExecutioner, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 3:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
+                        player.SEND_GOSSIP_MENU(GossipMenus.DiplomaticMission, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 4:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 6, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 7, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 8, eTradeskill.GossipActionInfoDef);
+                        player.SEND_GOSSIP_MENU(GossipMenus.YourBrotherSeeks, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 5:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
+                        player.SEND_GOSSIP_MENU(GossipMenus.ATerribleBeast, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef:
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge6, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+                        player.SEND_GOSSIP_MENU(GossipMenus.YourFortuneIsCast, me.GetGUID());
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 6:
+                        DoCast(player, Spells.Fortune, false);
+                        player.SEND_GOSSIP_MENU(GossipMenus.HereIsYourFortune, me.GetGUID());
+                        break;
+                }
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+                uint spellId = 0;
+                switch (sender)
+                {
+                    case eTradeskill.GossipSenderMain:
+                        SendAction(player, action);
+                        break;
+                    case eTradeskill.GossipSenderMain + 1:
+                        spellId = Spells.Damage;
+                        break;
+                    case eTradeskill.GossipSenderMain + 2:
+                        spellId = Spells.Resistance;
+                        break;
+                    case eTradeskill.GossipSenderMain + 3:
+                        spellId = Spells.Armor;
+                        break;
+                    case eTradeskill.GossipSenderMain + 4:
+                        spellId = Spells.Spirit;
+                        break;
+                    case eTradeskill.GossipSenderMain + 5:
+                        spellId = Spells.Intellect;
+                        break;
+                    case eTradeskill.GossipSenderMain + 6:
+                        spellId = Spells.Stamina;
+                        break;
+                    case eTradeskill.GossipSenderMain + 7:
+                        spellId = Spells.Strength;
+                        break;
+                    case eTradeskill.GossipSenderMain + 8:
+                        spellId = Spells.Agility;
+                        break;
+                }
+
+                if (spellId != 0)
+                {
+                    DoCast(player, spellId, false);
+                    player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
+                    SendAction(player, action);
+                }
+                return true;
+            }
         }
 
-        void SendAction(Player player, Creature creature, uint action)
+        public override CreatureAI GetAI(Creature creature)
         {
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-                    player.SEND_GOSSIP_MENU(GossipMenus.YouHaveBeenTasked, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 1, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                    player.SEND_GOSSIP_MENU(GossipMenus.SwornExecutioner, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 3:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                    player.SEND_GOSSIP_MENU(GossipMenus.DiplomaticMission, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 4:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 6, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 7, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 8, eTradeskill.GossipActionInfoDef);
-                    player.SEND_GOSSIP_MENU(GossipMenus.YourBrotherSeeks, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 5:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                    player.SEND_GOSSIP_MENU(GossipMenus.ATerribleBeast, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef:
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge6, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
-                    player.SEND_GOSSIP_MENU(GossipMenus.YourFortuneIsCast, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionInfoDef + 6:
-                    creature.CastSpell(player, Spells.Fortune, false);
-                    player.SEND_GOSSIP_MENU(GossipMenus.HereIsYourFortune, creature.GetGUID());
-                    break;
-            }
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            uint spellId = 0;
-            switch (sender)
-            {
-                case eTradeskill.GossipSenderMain:
-                    SendAction(player, creature, action);
-                    break;
-                case eTradeskill.GossipSenderMain + 1:
-                    spellId = Spells.Damage;
-                    break;
-                case eTradeskill.GossipSenderMain + 2:
-                    spellId = Spells.Resistance;
-                    break;
-                case eTradeskill.GossipSenderMain + 3:
-                    spellId = Spells.Armor;
-                    break;
-                case eTradeskill.GossipSenderMain + 4:
-                    spellId = Spells.Spirit;
-                    break;
-                case eTradeskill.GossipSenderMain + 5:
-                    spellId = Spells.Intellect;
-                    break;
-                case eTradeskill.GossipSenderMain + 6:
-                    spellId = Spells.Stamina;
-                    break;
-                case eTradeskill.GossipSenderMain + 7:
-                    spellId = Spells.Strength;
-                    break;
-                case eTradeskill.GossipSenderMain + 8:
-                    spellId = Spells.Agility;
-                    break;
-            }
-
-            if (spellId != 0)
-            {
-                creature.CastSpell(player, spellId, false);
-                player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
-                SendAction(player, creature, action);
-            }
-            return true;
+            return new npc_saygeAI(creature);
         }
     }
 
@@ -1627,69 +1633,65 @@ namespace Scripts.World.NpcSpecial
                 Initialize();
             }
 
-            public override uint GetData(uint type)
+            public override bool GossipHello(Player player)
             {
-                return (type == NpcSpecialConst.DataShowUnderground && _showUnderground) ? 1 : 0u;
+                if (me.IsSummon())
+                {
+                    if (player == me.ToTempSummon().GetSummoner())
+                    {
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+
+                        if (_showUnderground)
+                            player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+
+                        player.SEND_GOSSIP_MENU(Texts.Wormhole, me.GetGUID());
+                    }
+                }
+
+                return true;
+            }
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            {
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.BoreanTundra, false);
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.HowlingFjord, false);
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.SholazarBasin, false);
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 4: // Icecrown
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.Icecrown, false);
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.StormPeaks, false);
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 6: // Underground
+                        player.CLOSE_GOSSIP_MENU();
+                        DoCast(player, Spells.Underground, false);
+                        break;
+                }
+
+                return true;
             }
 
             bool _showUnderground;
-        }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            if (creature.IsSummon())
-            {
-                if (player == creature.ToTempSummon().GetSummoner())
-                {
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-
-                    if (creature.GetAI().GetData(NpcSpecialConst.DataShowUnderground) != 0)
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
-
-                    player.SEND_GOSSIP_MENU(Texts.Wormhole, creature.GetGUID());
-                }
-            }
-
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.BoreanTundra, false);
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.HowlingFjord, false);
-                    break;
-                case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.SholazarBasin, false);
-                    break;
-                case eTradeskill.GossipActionInfoDef + 4: // Icecrown
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.Icecrown, false);
-                    break;
-                case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.StormPeaks, false);
-                    break;
-                case eTradeskill.GossipActionInfoDef + 6: // Underground
-                    player.CLOSE_GOSSIP_MENU();
-                    creature.CastSpell(player, Spells.Underground, false);
-                    break;
-            }
-
-            return true;
         }
 
         public override CreatureAI GetAI(Creature creature)
@@ -1703,37 +1705,48 @@ namespace Scripts.World.NpcSpecial
     {
         public npc_experience() : base("npc_experience") { }
 
-        public override bool OnGossipHello(Player player, Creature creature)
+        class npc_experienceAI : ScriptedAI
         {
-            if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
+            public npc_experienceAI(Creature creature) : base(creature) { }
+
+            public override bool GossipHello(Player player)
             {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                player.SEND_GOSSIP_MENU(Texts.XpOnOff, creature.GetGUID());
+                if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
+                {
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.SEND_GOSSIP_MENU(Texts.XpOnOff, me.GetGUID());
+                }
+                else // currently gaining XP
+                {
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.SEND_GOSSIP_MENU(Texts.XpOnOff, me.GetGUID());
+                }
+                return true;
             }
-            else // currently gaining XP
+
+            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
             {
-                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                player.SEND_GOSSIP_MENU(Texts.XpOnOff, creature.GetGUID());
+                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+                player.PlayerTalkClass.ClearMenus();
+
+                switch (action)
+                {
+                    case eTradeskill.GossipActionInfoDef + 1:// XP ON selected
+                        player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
+                        break;
+                    case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
+                        player.AddPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
+                        break;
+                }
+
+                player.PlayerTalkClass.SendCloseGossip();
+                return true;
             }
-            return true;
         }
 
-        public override bool OnGossipSelect(Player player, Creature Creature, uint sender, uint action)
+        public override CreatureAI GetAI(Creature creature)
         {
-            player.PlayerTalkClass.ClearMenus();
-
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:// XP ON selected
-                    player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
-                    break;
-                case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
-                    player.AddPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
-                    break;
-            }
-
-            player.PlayerTalkClass.SendCloseGossip();
-            return true;
+            return new npc_experienceAI(creature);
         }
     }
 
@@ -2221,7 +2234,7 @@ namespace Scripts.World.NpcSpecial
             });
         }
 
-        public override void GossipSelect(Player player, uint menuId, uint gossipListId)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
             switch (gossipListId)
             {
@@ -2272,6 +2285,7 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
             player.PlayerTalkClass.SendCloseGossip();
+            return false;
         }
 
         public override void UpdateAI(uint diff)
