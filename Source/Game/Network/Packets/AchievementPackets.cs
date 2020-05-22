@@ -35,6 +35,20 @@ namespace Game.Network.Packets
         public AllAchievements Data = new AllAchievements();
     }
 
+    class AllAccountCriteria : ServerPacket
+    {
+        public AllAccountCriteria() : base(ServerOpcodes.AllAccountCriteria, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Progress.Count);
+            foreach (var progress in Progress)
+                progress.Write(_worldPacket);
+        }
+
+        public List<CriteriaProgressPkt> Progress = new List<CriteriaProgressPkt>();
+    }
+    
     public class RespondInspectAchievements : ServerPacket
     {
         public RespondInspectAchievements() : base(ServerOpcodes.RespondInspectAchievements, ConnectionType.Instance) { }
@@ -62,6 +76,11 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedTime(CurrentTime);
             _worldPacket.WriteUInt32(ElapsedTime);
             _worldPacket.WriteUInt32(CreationTime);
+            _worldPacket.WriteBit(RafAcceptanceID.HasValue);
+            _worldPacket.FlushBits();
+
+            if (RafAcceptanceID.HasValue)
+                _worldPacket.WriteUInt64(RafAcceptanceID.Value);
         }
 
         public uint CriteriaID;
@@ -71,8 +90,21 @@ namespace Game.Network.Packets
         public long CurrentTime;
         public uint ElapsedTime;
         public uint CreationTime;
+        public Optional<ulong> RafAcceptanceID;
     }
 
+    class AccountCriteriaUpdate : ServerPacket
+    {
+        public AccountCriteriaUpdate() : base(ServerOpcodes.AccountCriteriaUpdate) { }
+
+        public override void Write()
+        {
+            Progress.Write(_worldPacket);
+        }
+
+        public CriteriaProgressPkt Progress;
+    }
+    
     public class CriteriaDeleted : ServerPacket
     {
         public CriteriaDeleted() : base(ServerOpcodes.CriteriaDeleted, ConnectionType.Instance) { }

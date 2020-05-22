@@ -1596,6 +1596,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.HasAchievement: // 86
+                case CriteriaAdditionalCondition.HasAchievementOnCharacter: // 87
                     if (!referencePlayer.HasAchieved(reqValue))
                         return false;
                     break;
@@ -2498,12 +2499,9 @@ namespace Game.Achievements
             // Build tree
             foreach (var treeNode in _criteriaModifiers.Values)
             {
-                if (treeNode.Entry.Parent == 0)
-                    continue;
-
-                var parent = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
-                if (parent != null)
-                    parent.Children.Add(treeNode);
+                ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
+                if (parentNode != null)
+                    parentNode.Children.Add(treeNode);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -2534,12 +2532,6 @@ namespace Game.Achievements
         public void LoadCriteriaList()
         {
             uint oldMSTime = Time.GetMSTime();
-
-            if (CliDB.CriteriaTreeStorage.Empty())
-            {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 criteria.");
-                return;
-            }
 
             Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new Dictionary<uint, AchievementRecord>();
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
@@ -2589,25 +2581,11 @@ namespace Game.Achievements
             // Build tree
             foreach (var pair in _criteriaTrees)
             {
-                if (pair.Value.Entry.Parent == 0)
-                    continue;
-
-                var parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
+                CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
                 if (parent != null)
-                {
                     parent.Children.Add(pair.Value);
-                    while (parent != null)
-                    {
-                        var cur = parent;
-                        parent = _criteriaTrees.LookupByKey(parent.Entry.Parent);
-                        if (parent == null)
-                        {
-                            if (CliDB.CriteriaStorage.ContainsKey(pair.Value.Entry.CriteriaID))
-                                _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, cur);
-                        }
-                    }
-                }
-                else if (CliDB.CriteriaStorage.ContainsKey(pair.Value.Entry.CriteriaID))
+
+                if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
@@ -2633,14 +2611,14 @@ namespace Game.Achievements
                 Criteria criteria = new Criteria();
                 criteria.Id = criteriaEntry.Id;
                 criteria.Entry = criteriaEntry;
-                var mod = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
-                if (mod != null)
-                    criteria.Modifier = mod;
+                criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
 
                 _criteria[criteria.Id] = criteria;
 
                 foreach (CriteriaTree tree in treeList)
                 {
+                    tree.Criteria = criteria;
+
                     AchievementRecord achievement = tree.Achievement;
                     if (achievement != null)
                     {
@@ -2687,9 +2665,6 @@ namespace Game.Achievements
                 if (criteriaEntry.FailEvent != 0)
                     _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
             }
-
-            foreach (var p in _criteriaTrees)
-                p.Value.Criteria = GetCriteria(p.Value.Entry.CriteriaID);
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
