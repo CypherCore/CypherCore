@@ -61,7 +61,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SendMail)]
         void HandleSendMail(SendMail packet)
         {
-            if (packet.Info.Attachments.Count > SharedConst.MaxMailItems)                      // client limit
+            if (packet.Info.Attachments.Count > SharedConst.MaxClientMailItems)                      // client limit
             {
                 GetPlayer().SendMailResult(0, MailResponseType.Send, MailResponseResult.TooManyAttachments);
                 return;

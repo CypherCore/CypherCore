@@ -1213,7 +1213,9 @@ namespace Game
             Optional<ObjectGuid> uniqueSeller = new Optional<ObjectGuid>();
 
             // prepare items
-            List<Item> items = new List<Item>();
+            List<MailedItemsBatch> items = new List<MailedItemsBatch>();
+            items.Add(new MailedItemsBatch());
+
             remainingQuantity = quantity;
             List<int> removedItemsFromAuction = new List<int>();
 
@@ -1229,6 +1231,13 @@ namespace Game
                 int removedItems = 0;
                 foreach (Item auctionItem in auction.Items)
                 {
+                    MailedItemsBatch itemsBatch = items.Last();
+                    if (itemsBatch.IsFull())
+                    {
+                        items.Add(new MailedItemsBatch());
+                        itemsBatch = items.Last();
+                    }
+
                     if (auctionItem.GetCount() >= remainingQuantity)
                     {
                         Item clonedItem = auctionItem.CloneItem(remainingQuantity, player);
@@ -1241,14 +1250,14 @@ namespace Game
                         auctionItem.SetCount(auctionItem.GetCount() - remainingQuantity);
                         auctionItem.FSetState(ItemUpdateState.Changed);
                         auctionItem.SaveToDB(trans);
-                        items.Add(clonedItem);
+                        itemsBatch.AddItem(clonedItem, auction.BuyoutOrUnitPrice);
                         boughtFromAuction += remainingQuantity;
                         remainingQuantity = 0;
                         i = bucketItr.Auctions.Count;
                         break;
                     }
 
-                    items.Add(auctionItem);
+                    itemsBatch.AddItem(auctionItem, auction.BuyoutOrUnitPrice);
                     boughtFromAuction += auctionItem.GetCount();
                     remainingQuantity -= auctionItem.GetCount();
                     ++removedItems;
@@ -1262,12 +1271,12 @@ namespace Game
                     if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(auction.Owner, out string ownerName))
                         ownerName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
 
-                    Log.outCommand(bidderAccId, $"GM {player.GetName()} (Account: {bidderAccId}) bought commodity in auction: {items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {items[0].GetEntry()} " +
+                    Log.outCommand(bidderAccId, $"GM {player.GetName()} (Account: {bidderAccId}) bought commodity in auction: {items[0].Items[0].GetName(Global.WorldMgr.GetDefaultDbcLocale())} (Entry: {items[0].Items[0].GetEntry()} " +
                         $"Count: {boughtFromAuction}) and pay money: { auction.BuyoutOrUnitPrice * boughtFromAuction}. Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
                 }
 
                 ulong auctionHouseCut = CalcualteAuctionHouseCut(auction.BuyoutOrUnitPrice * boughtFromAuction);
-                ulong depositPart = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items[0].GetTemplate(), (auction.EndTime - auction.StartTime), boughtFromAuction);
+                ulong depositPart = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items[0].Items[0].GetTemplate(), (auction.EndTime - auction.StartTime), boughtFromAuction);
                 ulong profit = auction.BuyoutOrUnitPrice * boughtFromAuction + depositPart - auctionHouseCut;
 
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
@@ -1284,24 +1293,27 @@ namespace Game
                     .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckMask.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
             }
 
-            MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Won, itemId, quantity),
-                Global.AuctionHouseMgr.BuildAuctionWonMailBody(uniqueSeller.Value, totalPrice, quantity));
-
-            foreach (Item item in items)
+            foreach (MailedItemsBatch batch in items)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION_ITEMS_BY_ITEM);
-                stmt.AddValue(0, item.GetGUID().GetCounter());
-                trans.Append(stmt);
+                MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Won, itemId, batch.Quantity),
+                    Global.AuctionHouseMgr.BuildAuctionWonMailBody(uniqueSeller.Value, batch.TotalPrice, batch.Quantity));
 
-                item.SetOwnerGUID(player.GetGUID());
-                item.SaveToDB(trans);
-                mail.AddItem(item);
+                for (int i = 0; i < batch.ItemsCount; ++i)
+                {
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_AUCTION_ITEMS_BY_ITEM);
+                    stmt.AddValue(0, batch.Items[i].GetGUID().GetCounter());
+                    trans.Append(stmt);
+
+                    batch.Items[i].SetOwnerGUID(player.GetGUID());
+                    batch.Items[i].SaveToDB(trans);
+                    mail.AddItem(batch.Items[i]);
+                }
+
+                mail.SendMailTo(trans, player, new MailSender(this), MailCheckMask.Copied);
             }
 
-            mail.SendMailTo(trans, player, new MailSender(this), MailCheckMask.Copied);
-
             AuctionWonNotification packet = new AuctionWonNotification();
-            packet.Info.Initialize(auctions[0], items[0]);
+            packet.Info.Initialize(auctions[0], items[0].Items[0]);
             player.SendPacket(packet);
 
             for (int i = 0; i < auctions.Count; ++i)
@@ -1459,12 +1471,16 @@ namespace Game
                 if (owner)
                     owner.GetSession().SendAuctionClosedNotification(auction, 0.0f, false);
 
-                MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
+                int itemIndex = 0;
+                while (auction.Items.Count > itemIndex)
+                {  
+                    MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
 
-                foreach (Item item in auction.Items)
-                    mail.AddItem(item);
+                    for (int i = 0; i < SharedConst.MaxMailItems && auction.Items[itemIndex] != null; ++i, ++itemIndex)
+                        mail.AddItem(auction.Items[itemIndex]);
 
-                mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied, 0);
+                    mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied, 0);
+                }
             }
             else
             {
@@ -1476,12 +1492,16 @@ namespace Game
 
         public void SendAuctionRemoved(AuctionPosting auction, Player owner, SQLTransaction trans)
         {
-            MailDraft draft = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Cancelled, auction), "");
+            int itemIndex = 0;
+            while (auction.Items.Count > itemIndex)
+            {
+                MailDraft draft = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Cancelled, auction), "");
 
-            foreach (Item item in auction.Items)
-                draft.AddItem(item);
+                for (int i = 0; i < SharedConst.MaxMailItems && auction.Items[itemIndex] != null; ++i, ++itemIndex)
+                    draft.AddItem(auction.Items[itemIndex]);
 
-            draft.SendMailTo(trans, owner, new MailSender(this), MailCheckMask.Copied);
+                draft.SendMailTo(trans, owner, new MailSender(this), MailCheckMask.Copied);
+            }
         }
 
         //this function sends mail, when auction is cancelled to old bidder
@@ -1525,6 +1545,24 @@ namespace Game
             public bool IsReplicationInProgress() { return Cursor != Tombstone && Global != 0; }
         }
 
+        class MailedItemsBatch
+        {
+            public Item[] Items = new Item[SharedConst.MaxMailItems];
+            public ulong TotalPrice;
+            public uint Quantity;
+
+            public int ItemsCount;
+
+            public bool IsFull() { return ItemsCount >= Items.Length; }
+
+            public void AddItem(Item item, ulong unitPrice)
+            {
+                Items[ItemsCount++] = item;
+                Quantity += item.GetCount();
+                TotalPrice += unitPrice * item.GetCount();
+            }
+        }
+        
         AuctionHouseRecord _auctionHouse;
 
         SortedList<uint, AuctionPosting> _itemsByAuctionId = new SortedList<uint, AuctionPosting>(); // ordered for replicate

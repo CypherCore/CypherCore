@@ -28,7 +28,8 @@ namespace Framework.Constants
         public const int GTMaxRating = 32; // gtOCTClassCombatRatingScalar.dbc stores data for 32 ratings, look at MAX_COMBAT_RATING for real used amount
         public const int ReputationCap = 42999;
         public const int ReputationBottom = -42000;
-        public const int MaxMailItems = 12;
+        public const int MaxClientMailItems = 12; // max number of items a player is allowed to attach
+        public const int MaxMailItems = 16;
         public const int MaxDeclinedNameCases = 5;
         public const int MaxHolidayDurations = 10;
         public const int MaxHolidayDates = 26;
