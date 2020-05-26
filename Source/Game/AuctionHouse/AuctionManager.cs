@@ -1472,11 +1472,11 @@ namespace Game
                     owner.GetSession().SendAuctionClosedNotification(auction, 0.0f, false);
 
                 int itemIndex = 0;
-                while (auction.Items.Count > itemIndex)
+                while (itemIndex < auction.Items.Count)
                 {  
                     MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
 
-                    for (int i = 0; i < SharedConst.MaxMailItems && auction.Items[itemIndex] != null; ++i, ++itemIndex)
+                    for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                         mail.AddItem(auction.Items[itemIndex]);
 
                     mail.SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied, 0);
@@ -1493,11 +1493,11 @@ namespace Game
         public void SendAuctionRemoved(AuctionPosting auction, Player owner, SQLTransaction trans)
         {
             int itemIndex = 0;
-            while (auction.Items.Count > itemIndex)
+            while (itemIndex < auction.Items.Count)
             {
                 MailDraft draft = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Cancelled, auction), "");
 
-                for (int i = 0; i < SharedConst.MaxMailItems && auction.Items[itemIndex] != null; ++i, ++itemIndex)
+                for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                     draft.AddItem(auction.Items[itemIndex]);
 
                 draft.SendMailTo(trans, owner, new MailSender(this), MailCheckMask.Copied);

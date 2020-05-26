@@ -34,7 +34,6 @@ namespace Game.Movement
         public MotionMaster(Unit me)
         {
             _owner = me;
-            _expireList = null;
             _top = -1;
             _cleanFlag = MMCleanFlag.None;
 

@@ -2476,7 +2476,11 @@ namespace Game.Achievements
 
     public class CriteriaManager : Singleton<CriteriaManager>
     {
-        CriteriaManager() { }
+        CriteriaManager()
+        {
+            for (var i = 0; i < (int)CriteriaTypes.TotalTypes; ++i)
+                _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
+        }
 
         public void LoadCriteriaModifiersTree()
         {
@@ -2639,6 +2643,30 @@ namespace Game.Achievements
                 {
                     ++criterias;
                     _criteriasByType.Add(criteriaEntry.Type, criteria);
+                    if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
+                    {
+                        if (criteriaEntry.Type != CriteriaTypes.ExploreArea)
+                            _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
+                        else
+                        {
+                            var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
+                            if (worldOverlayEntry == null)
+                                break;
+
+                            for (byte j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
+                            {
+                                if (worldOverlayEntry.AreaID[j] != 0)
+                                {
+                                    bool valid = true;
+                                    for (byte i = 0; i < j; ++i)
+                                        if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
+                                            valid = false;
+                                    if (valid)
+                                        _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Guild))
