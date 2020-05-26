@@ -188,7 +188,7 @@ namespace Game
 
                 plrMover.UpdateFallInformationIfNeed(movementInfo, opcode);
 
-                if (movementInfo.Pos.posZ < plrMover.GetMap().GetMinHeight(movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY()))
+                if (movementInfo.Pos.posZ < plrMover.GetMap().GetMinHeight(plrMover.GetPhaseShift(), movementInfo.Pos.GetPositionX(), movementInfo.Pos.GetPositionY()))
                 {
                     if (!(plrMover.GetBattleground() && plrMover.GetBattleground().HandlePlayerUnderMap(GetPlayer())))
                     {

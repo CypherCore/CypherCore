@@ -4692,7 +4692,7 @@ namespace Game.Entities
             AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
 
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
-            if ((!IsAlive() && zone != null && zone.Flags[0].HasAnyFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPositionX(), GetPositionY()))
+            if ((!IsAlive() && zone != null && zone.Flags[0].HasAnyFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
                 ResurrectPlayer(0.5f);
                 SpawnCorpseBones();
@@ -4729,7 +4729,7 @@ namespace Game.Entities
                     SendPacket(packet);
                 }
             }
-            else if (GetPositionZ() < GetMap().GetMinHeight(GetPositionX(), GetPositionY()))
+            else if (GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
                 TeleportTo(homebind);
 
             RemovePlayerFlag(PlayerFlags.IsOutOfBounds);

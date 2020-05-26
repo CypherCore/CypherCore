@@ -21,6 +21,7 @@ using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Game.Collision;
 
 namespace Game.Maps
 {
@@ -36,41 +37,40 @@ namespace Game.Maps
             _liquidLevel = MapConst.InvalidHeight;
         }
 
-        public bool LoadData(string filename)
+        public LoadResult LoadData(string filename)
         {
             UnloadData();
             if (!File.Exists(filename))
-                return true;
+                return LoadResult.FileNotFound;
 
-            _fileExists = true;
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
                 MapFileHeader header = reader.Read<MapFileHeader>();
                 if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
                     Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
-                    return false;
+                    return LoadResult.InvalidFile;
                 }
 
                 if (header.areaMapOffset != 0 && !LoadAreaData(reader, header.areaMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map area data");
-                    return false;
+                    return LoadResult.InvalidFile;
                 }
 
                 if (header.heightMapOffset != 0 && !LoadHeightData(reader, header.heightMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map height data");
-                    return false;
+                    return LoadResult.InvalidFile;
                 }
 
                 if (header.liquidMapOffset != 0 && !LoadLiquidData(reader, header.liquidMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map liquids data");
-                    return false;
+                    return LoadResult.InvalidFile;
                 }
 
-                return true;
+                return LoadResult.Success;
             }
         }
 
@@ -83,7 +83,6 @@ namespace Game.Maps
             _liquidFlags = null;
             _liquidMap = null;
             _gridGetHeight = GetHeightFromFlat;
-            _fileExists = false;
         }
 
         bool LoadAreaData(BinaryReader reader, uint offset)
@@ -596,8 +595,6 @@ namespace Game.Maps
 
         public float GetHeight(float x, float y) { return _gridGetHeight(x, y); }
 
-        public bool GileExists() { return _fileExists; }
-
         #region Fields
         delegate float GetHeightDel(float x, float y);
 
@@ -630,7 +627,6 @@ namespace Game.Maps
         byte _liquidOffY;
         byte _liquidWidth;
         byte _liquidHeight;
-        bool _fileExists;
         #endregion
     }
 

@@ -32,6 +32,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace Game.Maps
 {
@@ -104,6 +105,22 @@ namespace Game.Maps
                 m_childTerrainMaps = null;
 
             Global.MMapMgr.UnloadMapInstance(GetId(), i_InstanceId);
+        }
+
+        public void DiscoverGridMapFiles()
+        {
+            for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
+                for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
+                    i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = ExistMap(GetId(), gx, gy);
+        }
+
+        Map GetRootParentTerrainMap()
+        {
+            Map map = this;
+            while (map != map.m_parentTerrainMap)
+                map = map.m_parentTerrainMap;
+
+            return map;
         }
 
         public static bool ExistMap(uint mapid, uint gx, uint gy)
@@ -195,29 +212,33 @@ namespace Game.Maps
             if (map.GridMaps[gx][gy] != null)
                 return;
 
-            Map parent = map.m_parentMap;
-            ++parent.GridMapReference[gx][gy];
+            // map file name
+            string fileName = $"{Global.WorldMgr.GetDataPath()}/maps/{map.GetId():D4}_{gx:D2}_{gy:D2}.map";
+            Log.outInfo(LogFilter.Maps, "Loading map {0}", fileName);
 
-            // load grid map for base map
-            if (parent != map)
+            // loading data
+            GridMap gridMap = new GridMap();
+            LoadResult gridMapLoadResult = gridMap.LoadData(fileName);
+            if (gridMapLoadResult == LoadResult.Success)
+                map.GridMaps[gx][gy] = gridMap;
+            else
             {
-                GridCoord ngridCoord = new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy);
-                if (parent.GridMaps[gx][gy] == null)
-                    parent.EnsureGridCreated(ngridCoord);
+                map.i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = false;
+                Map parentTerrain = map;
+                while (parentTerrain != parentTerrain.m_parentTerrainMap)
+                {
+                    map.GridMaps[gx][gy] = parentTerrain.m_parentTerrainMap.GridMaps[gx][gy];
+                    if (map.GridMaps[gx][gy] != null)
+                        break;
 
-                map.GridMaps[gx][gy] = parent.GridMaps[gx][gy];
-                return;
+                    parentTerrain = parentTerrain.m_parentTerrainMap;
+                }
             }
 
-            // map file name
-            string filename = $"{Global.WorldMgr.GetDataPath()}/maps/{map.GetId():D4}_{gx:D2}_{gy:D2}.map";
-            Log.outInfo(LogFilter.Maps, "Loading map {0}", filename);
-            // loading data
-            map.GridMaps[gx][gy] = new GridMap();
-            if (!map.GridMaps[gx][gy].LoadData(filename))
-                Log.outError(LogFilter.Maps, "Error loading map file: {0}", filename);
-
-            Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
+            if (map.GridMaps[gx][gy] != null)
+                Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
+            else if (gridMapLoadResult == LoadResult.InvalidFile)
+                Log.outError(LogFilter.Maps, $"Error loading map file: {fileName}");
         }
 
         void UnloadMap(uint gx, uint gy)
@@ -230,25 +251,18 @@ namespace Game.Maps
 
         void UnloadMapImpl(Map map, uint gx, uint gy)
         {
-            if (map.GridMaps[gx][gy] != null)
-            {
-                Map parent = map.m_parentMap;
-
-                if ((--parent.GridMapReference[gx][gy]) == 0)
-                {
-                    parent.GridMaps[gx][gy].UnloadData();
-                    parent.GridMaps[gx][gy] = null;
-                }
-            }
-
             map.GridMaps[gx][gy] = null;
         }
 
         void LoadMapAndVMap(uint gx, uint gy)
         {
             LoadMap(gx, gy);
-            LoadVMap(gx, gy);
-            LoadMMap(gx, gy);
+            // Only load the data for the base map
+            if (this == m_parentMap)
+            {
+                LoadVMap(gx, gy);
+                LoadMMap(gx, gy);
+            }
         }
 
         public void LoadAllCells()
@@ -404,7 +418,21 @@ namespace Game.Maps
                 uint gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
                 if (GridMaps[gx][gy] == null)
-                    m_parentTerrainMap.LoadMapAndVMap(gx, gy);
+                {
+                    Map rootParentTerrainMap = m_parentMap.GetRootParentTerrainMap();
+                    // because LoadMapAndVMap is always entered using rootParentTerrainMap, we can only lock that once and not have to do it for every child map
+                    if (this != rootParentTerrainMap)
+                        Monitor.Enter(rootParentTerrainMap._gridLock);
+
+                    if (m_parentMap.GridMaps[gx][gy] == null)
+                        rootParentTerrainMap.LoadMapAndVMap(gx, gy);
+
+                    if (m_parentMap.GridMaps[gx][gy] != null)
+                    {
+                        GridMaps[gx][gy] = m_parentMap.GridMaps[gx][gy];
+                        ++rootParentTerrainMap.GridMapReference[gx][gy];
+                    }
+                }                
             }
         }
 
@@ -1614,9 +1642,13 @@ namespace Game.Maps
             // delete grid map, but don't delete if it is from parent map (and thus only reference)
             if (GridMaps[gx][gy] != null)
             {
-                m_parentTerrainMap.UnloadMap(gx, gy);
-                Global.VMapMgr.UnloadMap(m_parentTerrainMap.GetId(), gx, gy);
-                Global.MMapMgr.UnloadMap(m_parentTerrainMap.GetId(), gx, gy);
+                Map terrainRoot = m_parentMap.GetRootParentTerrainMap();
+                if (--terrainRoot.GridMapReference[gx][gy] == 0)
+                {
+                    m_parentMap.GetRootParentTerrainMap().UnloadMap(gx, gy);
+                    Global.VMapMgr.UnloadMap(terrainRoot.GetId(), gx, gy);
+                    Global.MMapMgr.UnloadMap(terrainRoot.GetId(), gx, gy);
+                }
             }
 
             Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
@@ -1690,9 +1722,6 @@ namespace Game.Maps
 
         GridMap GetGridMap(uint mapId, float x, float y)
         {
-            if (GetId() == mapId)
-                return GetGridMap(x, y);
-
             // half opt method
             uint gx = (uint)(MapConst.CenterGridId - x / MapConst.SizeofGrids);                   //grid x
             uint gy = (uint)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
@@ -1702,16 +1731,16 @@ namespace Game.Maps
 
             GridMap grid = GridMaps[gx][gy];
             var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
-            if (childMap != null && childMap.GridMaps[gx][gy].GileExists())
+            if (childMap != null && childMap.GridMaps[gx][gy] != null)
                 grid = childMap.GridMaps[gx][gy];
 
             return grid;
         }
 
-        public bool HasGridMap(uint mapId, uint gx, uint gy)
+        public bool HasChildMapGridFile(uint mapId, uint gx, uint gy)
         {
             var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
-            return childMap != null && childMap.GridMaps[gx][gy] != null && childMap.GridMaps[gx][gy].GileExists();
+            return childMap != null && childMap.i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)];
         }
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z)
@@ -1722,7 +1751,7 @@ namespace Game.Maps
 
         public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false)
         {
-            if (GetGridMap(x, y) != null)
+            if (GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y) != null)
             {
                 // we need ground level (including grid height version) for proper return water level in point
                 float ground_z = GetHeight(phaseShift, x, y, z, true, 50.0f);
@@ -1742,7 +1771,7 @@ namespace Game.Maps
             // find raw .map surface under Z coordinates
             float mapHeight = MapConst.VMAPInvalidHeightValue;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
+            GridMap gmap = GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 float gridHeight = gmap.GetHeight(x, y);
@@ -1779,9 +1808,9 @@ namespace Game.Maps
             return mapHeight; // explicitly use map data
         }
 
-        public float GetMinHeight(float x, float y)
+        public float GetMinHeight(PhaseShift phaseShift, float x, float y)
         {
-            GridMap grid = GetGridMap(x, y);
+            GridMap grid = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (grid != null)
                 return grid.GetMinHeight(x, y);
 
@@ -1887,7 +1916,7 @@ namespace Game.Maps
             if (hasVmapAreaInfo || hasDynamicAreaInfo)
             {
                 // check if there's terrain between player height and object height
-                GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
+                GridMap gmap = GetGridMap(terrainMapId, x, y);
                 if (gmap != null)
                 {
                     float mapHeight = gmap.GetHeight(x, y);
@@ -1929,7 +1958,7 @@ namespace Game.Maps
 
             if (areaId == 0)
             {
-                GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+                GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
                 if (gmap != null)
                     areaId = gmap.GetArea(x, y);
 
@@ -1968,7 +1997,7 @@ namespace Game.Maps
 
         private byte GetTerrainType(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.GetTerrainType(x, y);
             return 0;
@@ -2046,7 +2075,7 @@ namespace Game.Maps
                 }
             }
 
-            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
+            GridMap gmap = GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 var map_data = new LiquidData();
@@ -2068,7 +2097,7 @@ namespace Game.Maps
 
         public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.GetLiquidLevel(x, y);
             return 0;
@@ -4320,6 +4349,7 @@ namespace Game.Maps
         List<Map> m_childTerrainMaps = new List<Map>(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new SortedMultiMap<long, ScriptAction>();
 
+        BitSet i_gridFileExists = new BitSet(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
         BitSet marked_cells = new BitSet(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
         public Dictionary<uint, CreatureGroup> CreatureGroupHolder = new Dictionary<uint, CreatureGroup>();
         internal uint i_InstanceId;

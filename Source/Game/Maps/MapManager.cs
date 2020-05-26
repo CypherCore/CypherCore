@@ -60,9 +60,9 @@ namespace Game.Entities
             {
                 var entry = CliDB.MapStorage.LookupByKey(id);
                 Cypher.Assert(entry != null);
-                if (entry.ParentMapID != -1)
+                if (entry.ParentMapID != -1 || entry.CosmeticParentMapID != -1)
                 {
-                    CreateBaseMap((uint)entry.ParentMapID);
+                    CreateBaseMap((uint)(entry.ParentMapID != -1 ? entry.ParentMapID : entry.CosmeticParentMapID));
 
                     // must have been created by parent map
                     map = FindBaseMap(id);
@@ -83,6 +83,8 @@ namespace Game.Entities
                 map = new MapInstanced(mapEntry.Id, i_gridCleanUpDelay);
             else
                 map = new Map(mapEntry.Id, i_gridCleanUpDelay, 0, Difficulty.None);
+
+            map.DiscoverGridMapFiles();
 
             i_maps[mapEntry.Id] = map;
 
@@ -265,16 +267,14 @@ namespace Game.Entities
 
         public void UnloadAll()
         {
-            // first unlink child maps
+            // first unload maps
             foreach (var pair in i_maps)
-                pair.Value.UnlinkAllChildTerrainMaps();
-
-            foreach (var pair in i_maps.ToList())
-            {
                 pair.Value.UnloadAll();
+
+            foreach (var pair in i_maps)
                 pair.Value.Dispose();
-                i_maps.Remove(pair.Key);
-            }
+
+            i_maps.Clear();
 
             if (m_updater != null)
                 m_updater.Deactivate();

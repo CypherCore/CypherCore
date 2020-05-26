@@ -233,8 +233,14 @@ namespace Game.Collision
             if (!File.Exists(tilefile))
             {
                 int parentMapId = vm.GetParentMapId(mapID);
-                if (parentMapId != -1)
+                while (parentMapId != -1)
+                {
                     tilefile = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
+                    if (File.Exists(tilefile))
+                        break;
+
+                    parentMapId = vm.GetParentMapId((uint)parentMapId);
+                }
             }
 
             if (!File.Exists(tilefile))

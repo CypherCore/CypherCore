@@ -360,7 +360,12 @@ namespace Game
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
             {
                 if (mapEntry.ParentMapID != -1)
+                {
+                    Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
                     mapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
+                }
+                else if (mapEntry.CosmeticParentMapID != -1)
+                    mapData.Add((uint)mapEntry.CosmeticParentMapID, mapEntry.Id);
             }
 
             Global.MapMgr.InitializeParentMapData(mapData);

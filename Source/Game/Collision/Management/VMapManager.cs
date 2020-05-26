@@ -33,7 +33,8 @@ namespace Game.Collision
     {
         Success,
         FileNotFound,
-        VersionMismatch
+        VersionMismatch,
+        InvalidFile
     }
 
     public class VMapManager : Singleton<VMapManager>

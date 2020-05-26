@@ -471,19 +471,12 @@ namespace Game
                 return phaseShift.VisibleMapIds.First().Key;
 
             GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
-            uint gx = (uint)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
-            uint gy = (uint)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
+            uint gx = ((MapConst.MaxGrids - 1) - gridCoord.X_coord);
+            uint gy = ((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
 
-            uint gxbegin = Math.Max(gx - 1, 0);
-            uint gxend = Math.Min(gx + 1, MapConst.MaxGrids);
-            uint gybegin = Math.Max(gy - 1, 0);
-            uint gyend = Math.Min(gy + 1, MapConst.MaxGrids);
-
-            foreach (var itr in phaseShift.VisibleMapIds)
-                for (uint gxi = gxbegin; gxi < gxend; ++gxi)
-                    for (uint gyi = gybegin; gyi < gyend; ++gyi)
-                        if (map.HasGridMap(itr.Key, gxi, gyi))
-                            return itr.Key;
+            foreach (var visibleMap in phaseShift.VisibleMapIds)
+                if (map.HasChildMapGridFile(visibleMap.Key, gx, gy))
+                    return visibleMap.Key;
 
             return map.GetId();
         }
