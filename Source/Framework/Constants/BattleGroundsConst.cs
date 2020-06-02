@@ -155,6 +155,15 @@ namespace Framework.Constants
         Max
     }
 
+    public enum BattlegroundQueueIdType
+    {
+        Battleground = 0,
+        Arena = 1,
+        Wargame = 2,
+        Cheat = 3,
+        ArenaSkirmish = 4
+    }
+
     public enum BattlegroundQueueInvitationType
     {
         NoBalance = 0, // no balance: N+M vs N players

@@ -245,7 +245,7 @@ namespace Game.Network.Packets
 
         public uint Timeout;
         public uint Mapid;
-        public BattlefieldStatusHeader Hdr;
+        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
         public byte Role;
     }
 
@@ -264,7 +264,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public BattlefieldStatusHeader Hdr;
+        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
         public uint ShutdownTimer;
         public byte ArenaFaction;
         public bool LeftEarly;
@@ -288,7 +288,7 @@ namespace Game.Network.Packets
         }
 
         public uint AverageWaitTime;
-        public BattlefieldStatusHeader Hdr;
+        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
         public bool AsGroup;
         public bool SuspendedQueue;
         public bool EligibleForMatchmaking;
@@ -570,23 +570,27 @@ namespace Game.Network.Packets
     }
 
     //Structs
-    public struct BattlefieldStatusHeader
+    public class BattlefieldStatusHeader
     {
         public void Write(WorldPacket data)
         {
             Ticket.Write(data);
-            data.WriteUInt64(QueueID);
+            data.WriteInt32(QueueID.Count);
             data.WriteUInt8(RangeMin);
             data.WriteUInt8(RangeMax);
             data.WriteUInt8(TeamSize);
             data.WriteUInt32(InstanceID);
+
+            foreach (ulong queueID in QueueID)
+                data.WriteUInt64(queueID);
+
             data.WriteBit(RegisteredMatch);
             data.WriteBit(TournamentRules);
             data.FlushBits();
         }
 
         public RideTicket Ticket;
-        public ulong QueueID;
+        public List<ulong> QueueID = new List<ulong>();
         public byte RangeMin;
         public byte RangeMax;
         public byte TeamSize;

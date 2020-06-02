@@ -124,14 +124,14 @@ namespace Game.BattleGrounds
             }
         }
 
-        void BuildBattlegroundStatusHeader(ref BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
+        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
         {
             header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
             header.Ticket.Id = ticketId;
             header.Ticket.Type = RideType.Battlegrounds;
             header.Ticket.Time = (int)joinTime;
-            header.QueueID = bg.GetQueueId();
+            header.QueueID.Add(bg.GetQueueId());
             header.RangeMin = (byte)bg.GetMinLevel();
             header.RangeMax = (byte)bg.GetMaxLevel();
             header.TeamSize = (byte)(bg.IsArena() ? arenaType : 0);
@@ -152,7 +152,7 @@ namespace Game.BattleGrounds
         public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint timeout, ArenaTypes arenaType)
         {
             battlefieldStatus = new BattlefieldStatusNeedConfirmation();
-            BuildBattlegroundStatusHeader(ref battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
             battlefieldStatus.Mapid = bg.GetMapId();
             battlefieldStatus.Timeout = timeout;
             battlefieldStatus.Role = 0;
@@ -161,7 +161,7 @@ namespace Game.BattleGrounds
         public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
         {
             battlefieldStatus = new BattlefieldStatusActive();
-            BuildBattlegroundStatusHeader(ref battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
             battlefieldStatus.ShutdownTimer = bg.GetRemainingTime();
             battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? TeamId.Horde : TeamId.Alliance);
             battlefieldStatus.LeftEarly = false;
@@ -172,7 +172,7 @@ namespace Game.BattleGrounds
         public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint avgWaitTime, ArenaTypes arenaType, bool asGroup)
         {
             battlefieldStatus = new BattlefieldStatusQueued();
-            BuildBattlegroundStatusHeader(ref battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
             battlefieldStatus.AverageWaitTime = avgWaitTime;
             battlefieldStatus.AsGroup = asGroup;
             battlefieldStatus.SuspendedQueue = false;

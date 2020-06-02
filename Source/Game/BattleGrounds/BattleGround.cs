@@ -1803,7 +1803,11 @@ namespace Game.BattleGrounds
 
         public ulong GetQueueId()
         {
-            return (ulong)_battlegroundTemplate.Id | 0x1F10000000000000ul;
+            BattlegroundQueueIdType type = BattlegroundQueueIdType.Battleground;
+            if (IsArena())
+                type = IsRated() ? BattlegroundQueueIdType.Arena : BattlegroundQueueIdType.ArenaSkirmish;
+
+            return (ulong)_battlegroundTemplate.Id | (ulong)type << 16 | 0x1F10000000000000;
         }
 
         public BattlegroundTypeId GetTypeID(bool getRandom = false)
