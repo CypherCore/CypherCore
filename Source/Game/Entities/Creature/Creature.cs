@@ -2822,7 +2822,7 @@ namespace Game.Entities
                 AddUnitState(UnitState.CannotTurn);
         }
 
-        public bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
+        public override bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
         {
             if (!IsAlive()) // dead creatures cannot focus
             {
