@@ -1736,8 +1736,6 @@ namespace Game.Groups
             uint arenaTeamId = reference.GetArenaTeamId((byte)arenaSlot);
             Team team = reference.GetTeam();
 
-            BattlegroundQueueTypeId bgQueueTypeIdRandom = Global.BattlegroundMgr.BGQueueTypeId(BattlegroundTypeId.RB, 0);
-
             // check every member of the group to be able to join
             memberscount = 0;
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next(), ++memberscount)
@@ -1762,11 +1760,13 @@ namespace Game.Groups
                 // don't let join if someone from the group is already in that bg queue
                 if (member.InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeId))
                     return GroupJoinBattlegroundResult.JoinFailed;            // not blizz-like
-                                                                              // don't let join if someone from the group is in bg queue random
-                if (member.InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRandom))
+                // don't let join if someone from the group is in bg queue random
+                bool isInRandomBgQueue = member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
+                    || member.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
+                if (isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InRandomBg;
                 // don't let join to bg queue random if someone from the group is already in bg queue
-                if (bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB && member.InBattlegroundQueue())
+                if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue() && !isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InNonRandomBg;
                 // check for deserter debuff in case not arena queue
                 if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && !member.CanJoinToBattleground(bgOrTemplate))

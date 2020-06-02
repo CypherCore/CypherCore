@@ -132,8 +132,8 @@ namespace Game
 
                 for (uint i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
                 {
-                    BattlegroundQueueTypeId bgQueueTypeId = GetPlayer().GetBattlegroundQueueTypeId(i);
-                    if (bgQueueTypeId != 0)
+                    BattlegroundQueueTypeId bgQueueTypeId = _player.GetBattlegroundQueueTypeId(i);
+                    if (bgQueueTypeId != default)
                     {
                         _player.RemoveBattlegroundQueueId(bgQueueTypeId);
                         BattlegroundQueue queue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);

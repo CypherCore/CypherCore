@@ -881,7 +881,7 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Weekly quest {{0}} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, "Weekly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
                 while (result.NextRow());
             }
@@ -907,7 +907,7 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Seasonal quest {{0}} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, "Seasonal quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
                 while (result.NextRow());
             }
@@ -936,7 +936,7 @@ namespace Game.Entities
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
 
-                    Log.outDebug(LogFilter.Player, "Monthly quest {{0}} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Player, "Monthly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
                 while (result.NextRow());
             }
@@ -2600,7 +2600,7 @@ namespace Game.Entities
                 {
                     map = currentBg.GetBgMap();
 
-                    BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(currentBg.GetTypeID(), currentBg.GetArenaType());
+                    BattlegroundQueueTypeId bgQueueTypeId = currentBg.GetQueueId();
                     AddBattlegroundQueueId(bgQueueTypeId);
 
                     m_bgData.bgTypeID = currentBg.GetTypeID();

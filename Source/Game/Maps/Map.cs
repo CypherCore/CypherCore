@@ -420,9 +420,6 @@ namespace Game.Maps
                 if (GridMaps[gx][gy] == null)
                 {
                     Map rootParentTerrainMap = m_parentMap.GetRootParentTerrainMap();
-                    // because LoadMapAndVMap is always entered using rootParentTerrainMap, we can only lock that once and not have to do it for every child map
-                    if (this != rootParentTerrainMap)
-                        Monitor.Enter(rootParentTerrainMap._gridLock);
 
                     if (m_parentMap.GridMaps[gx][gy] == null)
                         rootParentTerrainMap.LoadMapAndVMap(gx, gy);

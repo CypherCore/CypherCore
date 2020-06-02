@@ -101,7 +101,7 @@ namespace Game.DataStorage
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
         public short RequiredPlayerConditionID;
-        public ushort[] MapId = new ushort[16];
+        public short[] MapId = new short[16];
     }
 
     public sealed class BroadcastTextRecord

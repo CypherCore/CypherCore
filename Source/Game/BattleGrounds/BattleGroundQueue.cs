@@ -30,8 +30,10 @@ namespace Game.BattleGrounds
 {
     public class BattlegroundQueue
     {
-        public BattlegroundQueue()
+        public BattlegroundQueue(BattlegroundQueueTypeId queueId)
         {
+            m_queueId = queueId;
+
             for (var i = 0; i < (int)BattlegroundBracketId.Max; ++i)
             {
                 m_QueuedGroups[i] = new List<GroupQueueInfo>[BattlegroundConst.BgQueueTypesCount];
@@ -329,14 +331,13 @@ namespace Game.BattleGrounds
                 Player plr2 = Global.ObjAccessor.FindConnectedPlayer(group.Players.FirstOrDefault().Key);
                 if (plr2)
                 {
-                    BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(group.BgTypeId, group.ArenaType);
-                    uint queueSlot = plr2.GetBattlegroundQueueIndex(bgQueueTypeId);
+                    uint queueSlot = plr2.GetBattlegroundQueueIndex(m_queueId);
 
-                    plr2.RemoveBattlegroundQueueId(bgQueueTypeId); // must be called this way, because if you move this call to
+                    plr2.RemoveBattlegroundQueueId(m_queueId); // must be called this way, because if you move this call to
                                                                    // queue.removeplayer, it causes bugs
 
                     BattlefieldStatusNone battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, plr2, queueSlot, plr2.GetBattlegroundQueueJoinTime(bgQueueTypeId));
+                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, plr2, queueSlot, plr2.GetBattlegroundQueueJoinTime(m_queueId));
                     plr2.SendPacket(battlefieldStatus);
                 }
                 // then actually delete, this may delete the group as well!
@@ -381,7 +382,7 @@ namespace Game.BattleGrounds
                 // set invitation
                 ginfo.IsInvitedToBGInstanceGUID = bg.GetInstanceID();
                 BattlegroundTypeId bgTypeId = bg.GetTypeID();
-                BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(bgTypeId, bg.GetArenaType());
+                BattlegroundQueueTypeId bgQueueTypeId = bg.GetQueueId();
                 BattlegroundBracketId bracket_id = bg.GetBracketId();
 
                 // set ArenaTeamId for rated matches
@@ -411,7 +412,7 @@ namespace Game.BattleGrounds
                     BGQueueInviteEvent inviteEvent = new BGQueueInviteEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, ginfo.RemoveInviteTime);
                     m_events.AddEvent(inviteEvent, m_events.CalculateTime(BattlegroundConst.InvitationRemindTime));
                     // create automatic remove events
-                    BGQueueRemoveEvent removeEvent = new BGQueueRemoveEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, bgQueueTypeId, ginfo.RemoveInviteTime);
+                    BGQueueRemoveEvent removeEvent = new BGQueueRemoveEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo.RemoveInviteTime);
                     m_events.AddEvent(removeEvent, m_events.CalculateTime(BattlegroundConst.InviteAcceptWaitTime));
 
                     uint queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
@@ -730,7 +731,7 @@ namespace Game.BattleGrounds
         /// <param name="arenaType"></param>
         /// <param name="isRated"></param>
         /// <param name="arenaRating"></param>
-        public void BattlegroundQueueUpdate(uint diff, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id, byte arenaType, bool isRated, uint arenaRating)
+        public void BattlegroundQueueUpdate(uint diff, BattlegroundBracketId bracket_id, uint arenaRating)
         {
             //if no players in queue - do nothing
             if (m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance].Empty() &&
@@ -741,11 +742,11 @@ namespace Game.BattleGrounds
 
             // Battleground with free slot for player should be always in the beggining of the queue
             // maybe it would be better to create bgfreeslotqueue for each bracket_id
-            var bgQueues = Global.BattlegroundMgr.GetBGFreeSlotQueueStore(bgTypeId);
+            var bgQueues = Global.BattlegroundMgr.GetBGFreeSlotQueueStore(m_queueId);
             foreach (var bg in bgQueues)
             {
                 // DO NOT allow queue manager to invite new player to rated games
-                if (!bg.IsRated() && bg.GetTypeID() == bgTypeId && bg.GetBracketId() == bracket_id &&
+                if (!bg.IsRated() && bg.GetBracketId() == bracket_id &&
                     bg.GetStatus() > BattlegroundStatus.WaitQueue && bg.GetStatus() < BattlegroundStatus.WaitLeave)
                 {
                     // clear selection pools
@@ -769,10 +770,10 @@ namespace Game.BattleGrounds
 
             // finished iterating through the bgs with free slots, maybe we need to create a new bg
 
-            Battleground bg_template = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
+            Battleground bg_template = Global.BattlegroundMgr.GetBattlegroundTemplate((BattlegroundTypeId)m_queueId.BattlemasterListId);
             if (!bg_template)
             {
-                Log.outError(LogFilter.Battleground, "Battleground: Update: bg template not found for {0}", bgTypeId);
+                Log.outError(LogFilter.Battleground, $"Battleground: Update: bg template not found for {m_queueId.BattlemasterListId}");
                 return;
             }
 
@@ -789,8 +790,8 @@ namespace Game.BattleGrounds
 
             if (bg_template.IsArena())
             {
-                MaxPlayersPerTeam = arenaType;
-                MinPlayersPerTeam = (uint)(Global.BattlegroundMgr.IsArenaTesting() ? 1 : arenaType);
+                MaxPlayersPerTeam = m_queueId.TeamSize;
+                MinPlayersPerTeam = Global.BattlegroundMgr.IsArenaTesting() ? 1u : m_queueId.TeamSize;
             }
             else if (Global.BattlegroundMgr.IsTesting())
                 MinPlayersPerTeam = 1;
@@ -803,10 +804,10 @@ namespace Game.BattleGrounds
                 if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
                 {
                     // create new Battleground
-                    Battleground bg2 = Global.BattlegroundMgr.CreateNewBattleground(bgTypeId, bracketEntry, 0, false);
+                    Battleground bg2 = Global.BattlegroundMgr.CreateNewBattleground(m_queueId, bracketEntry);
                     if (bg2 == null)
                     {
-                        Log.outError(LogFilter.Battleground, "BattlegroundQueue.Update - Cannot create Battleground: {0}", bgTypeId);
+                        Log.outError(LogFilter.Battleground, $"BattlegroundQueue.Update - Cannot create Battleground: {m_queueId.BattlemasterListId}");
                         return;
                     }
                     // invite those selection pools
@@ -822,17 +823,17 @@ namespace Game.BattleGrounds
             }
 
             // now check if there are in queues enough players to start new game of (normal Battleground, or non-rated arena)
-            if (!isRated)
+            if (!m_queueId.Rated)
             {
                 // if there are enough players in pools, start new Battleground or non rated arena
                 if (CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam)
                     || (bg_template.IsArena() && CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam)))
                 {
                     // we successfully created a pool
-                    Battleground bg2 = Global.BattlegroundMgr.CreateNewBattleground(bgTypeId, bracketEntry, (ArenaTypes)arenaType, false);
+                    Battleground bg2 = Global.BattlegroundMgr.CreateNewBattleground(m_queueId, bracketEntry);
                     if (bg2 == null)
                     {
-                        Log.outError(LogFilter.Battleground, "BattlegroundQueue.Update - Cannot create Battleground: {0}", bgTypeId);
+                        Log.outError(LogFilter.Battleground, $"BattlegroundQueue.Update - Cannot create Battleground: {m_queueId.BattlemasterListId}");
                         return;
                     }
 
@@ -928,7 +929,7 @@ namespace Game.BattleGrounds
                 {
                     GroupQueueInfo aTeam = queueArray[TeamId.Alliance];
                     GroupQueueInfo hTeam = queueArray[TeamId.Horde];
-                    Battleground arena = Global.BattlegroundMgr.CreateNewBattleground(bgTypeId, bracketEntry, (ArenaTypes)arenaType, true);
+                    Battleground arena = Global.BattlegroundMgr.CreateNewBattleground(m_queueId, bracketEntry);
                     if (!arena)
                     {
                         Log.outError(LogFilter.Battleground, "BattlegroundQueue.Update couldn't create arena instance for rated arena match!");
@@ -964,6 +965,8 @@ namespace Game.BattleGrounds
                 }
             }
         }
+
+        BattlegroundQueueTypeId m_queueId;
 
         Dictionary<ObjectGuid, PlayerQueueInfo> m_QueuedPlayers = new Dictionary<ObjectGuid, PlayerQueueInfo>();
 
@@ -1046,6 +1049,85 @@ namespace Game.BattleGrounds
 
     }
 
+    public struct BattlegroundQueueTypeId
+    {  
+        public ushort BattlemasterListId;
+        public byte BgType;
+        public bool Rated;
+        public byte TeamSize;
+
+        public BattlegroundQueueTypeId(ushort battlemasterListId, byte bgType, bool rated, byte teamSize)
+        {
+            BattlemasterListId = battlemasterListId;
+            BgType = bgType;
+            Rated = rated;
+            TeamSize = teamSize;
+        }
+
+        public static BattlegroundQueueTypeId FromPacked(ulong packedQueueId)
+        {
+            return new BattlegroundQueueTypeId((ushort)(packedQueueId & 0xFFFF), (byte)((packedQueueId >> 16) & 0xF), ((packedQueueId >> 20) & 1) != 0, (byte)((packedQueueId >> 24) & 0x3F));
+        }
+
+        public ulong GetPacked()
+        {
+            return (ulong)BattlemasterListId
+                | ((ulong)(BgType & 0xF) << 16)
+                | ((ulong)(Rated ? 1 : 0) << 20)
+                | ((ulong)(TeamSize & 0x3F) << 24)
+                | 0x1F10000000000000;
+        }
+
+        public static bool operator ==(BattlegroundQueueTypeId left, BattlegroundQueueTypeId right)
+        {
+            return left.BattlemasterListId == right.BattlemasterListId
+                && left.BgType == right.BgType
+                && left.Rated == right.Rated
+                && left.TeamSize == right.TeamSize;
+        }
+
+        public static bool operator !=(BattlegroundQueueTypeId left, BattlegroundQueueTypeId right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator <(BattlegroundQueueTypeId left, BattlegroundQueueTypeId right)
+        {
+            if (left.BattlemasterListId != right.BattlemasterListId)
+                return left.BattlemasterListId < right.BattlemasterListId;
+            if (left.BgType != right.BgType)
+                return left.BgType < right.BgType;
+            if (left.Rated != right.Rated)
+                return (left.Rated ? 1 : 0) < (right.Rated ? 1 : 0);
+            return left.TeamSize < right.TeamSize;
+        }
+        public static bool operator >(BattlegroundQueueTypeId left, BattlegroundQueueTypeId right)
+        {
+            if (left.BattlemasterListId != right.BattlemasterListId)
+                return left.BattlemasterListId > right.BattlemasterListId;
+            if (left.BgType != right.BgType)
+                return left.BgType > right.BgType;
+            if (left.Rated != right.Rated)
+                return (left.Rated ? 1 : 0) > (right.Rated ? 1 : 0);
+            return left.TeamSize > right.TeamSize;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return BattlemasterListId.GetHashCode() ^ BgType.GetHashCode() ^ Rated.GetHashCode() ^ TeamSize.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{{ BattlemasterListId: {BattlemasterListId}, Type: {BgType}, Rated: {Rated}, TeamSize: {TeamSize} }}";
+        }
+    }
+
     /// <summary>
     /// stores information for players in queue
     /// </summary>
@@ -1081,11 +1163,11 @@ namespace Game.BattleGrounds
     /// </summary>
     class BGQueueInviteEvent : BasicEvent
     {
-        public BGQueueInviteEvent(ObjectGuid pl_guid, uint BgInstanceGUID, BattlegroundTypeId BgTypeId, ArenaTypes arenaType, uint removeTime)
+        public BGQueueInviteEvent(ObjectGuid plGuid, uint bgInstanceGUID, BattlegroundTypeId bgTypeId, ArenaTypes arenaType, uint removeTime)
         {
-            m_PlayerGuid = pl_guid;
-            m_BgInstanceGUID = BgInstanceGUID;
-            m_BgTypeId = BgTypeId;
+            m_PlayerGuid = plGuid;
+            m_BgInstanceGUID = bgInstanceGUID;
+            m_BgTypeId = bgTypeId;
             m_ArenaType = arenaType;
             m_RemoveTime = removeTime;
         }
@@ -1102,7 +1184,7 @@ namespace Game.BattleGrounds
             if (bg == null)
                 return true;
 
-            BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(bg.GetTypeID(), bg.GetArenaType());
+            BattlegroundQueueTypeId bgQueueTypeId = bg.GetQueueId();
             uint queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
             if (queueSlot < SharedConst.BGTeamsCount)         // player is in queue or in Battleground
             {
@@ -1134,12 +1216,11 @@ namespace Game.BattleGrounds
     /// </summary>
     class BGQueueRemoveEvent : BasicEvent
     {
-        public BGQueueRemoveEvent(ObjectGuid pl_guid, uint bgInstanceGUID, BattlegroundTypeId BgTypeId, BattlegroundQueueTypeId bgQueueTypeId, uint removeTime)
+        public BGQueueRemoveEvent(ObjectGuid plGuid, uint bgInstanceGUID, BattlegroundQueueTypeId bgQueueTypeId, uint removeTime)
         {
-            m_PlayerGuid = pl_guid;
+            m_PlayerGuid = plGuid;
             m_BgInstanceGUID = bgInstanceGUID;
             m_RemoveTime = removeTime;
-            m_BgTypeId = BgTypeId;
             m_BgQueueTypeId = bgQueueTypeId;
         }
 
@@ -1150,7 +1231,7 @@ namespace Game.BattleGrounds
                 // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
                 return true;
 
-            Battleground bg = Global.BattlegroundMgr.GetBattleground(m_BgInstanceGUID, m_BgTypeId);
+            Battleground bg = Global.BattlegroundMgr.GetBattleground(m_BgInstanceGUID, (BattlegroundTypeId)m_BgQueueTypeId.BattlemasterListId);
             //Battleground can be deleted already when we are removing queue info
             //bg pointer can be NULL! so use it carefully!
 
@@ -1167,7 +1248,7 @@ namespace Game.BattleGrounds
                     bgQueue.RemovePlayer(m_PlayerGuid, true);
                     //update queues if Battleground isn't ended
                     if (bg && bg.IsBattleground() && bg.GetStatus() != BattlegroundStatus.WaitLeave)
-                        Global.BattlegroundMgr.ScheduleQueueUpdate(0, 0, m_BgQueueTypeId, m_BgTypeId, bg.GetBracketId());
+                        Global.BattlegroundMgr.ScheduleQueueUpdate(0, m_BgQueueTypeId, bg.GetBracketId());
 
                     BattlefieldStatusNone battlefieldStatus;
                     Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, queueSlot, player.GetBattlegroundQueueJoinTime(m_BgQueueTypeId));
@@ -1184,7 +1265,6 @@ namespace Game.BattleGrounds
         ObjectGuid m_PlayerGuid;
         uint m_BgInstanceGUID;
         uint m_RemoveTime;
-        BattlegroundTypeId m_BgTypeId;
         BattlegroundQueueTypeId m_BgQueueTypeId;
     }
 }

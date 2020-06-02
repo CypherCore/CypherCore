@@ -134,25 +134,8 @@ namespace Framework.Constants
                    // 809 = "New Nagrand Arena (Legion)"
         AF = 816, // Ashamane'S Fall
                   // 844 = "New Blade'S Edge Arena (Legion)"
-        Max = 845
-    }
-
-    public enum BattlegroundQueueTypeId
-    {
-        None = 0,
-        AV = 1,
-        WS = 2,
-        AB = 3,
-        EY = 4,
-        SA = 5,
-        IC = 6,
-        TP = 7,
-        BFG = 8,
-        RB = 9,
-        Arena2v2 = 10,
-        Arena3v3 = 11,
-        Arena5v5 = 12,
-        Max
+        RandomEpic = 901,
+        Max = 902
     }
 
     public enum BattlegroundQueueIdType

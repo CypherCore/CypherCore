@@ -27,6 +27,7 @@ using Game.Misc;
 using Game.Spells;
 using System.Collections;
 using System.Collections.Generic;
+using Game.BattleGrounds;
 
 namespace Game.Entities
 {

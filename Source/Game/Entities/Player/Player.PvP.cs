@@ -534,7 +534,7 @@ namespace Game.Entities
         public bool InBattlegroundQueue()
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != BattlegroundQueueTypeId.None)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != default)
                     return true;
             return false;
         }
@@ -544,7 +544,7 @@ namespace Game.Entities
             if (index < SharedConst.MaxPlayerBGQueues)
                 return m_bgBattlegroundQueueID[index].bgQueueTypeId;
 
-            return BattlegroundQueueTypeId.None;
+            return default;
         }
 
         public uint GetBattlegroundQueueIndex(BattlegroundQueueTypeId bgQueueTypeId)
@@ -578,11 +578,11 @@ namespace Game.Entities
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
             {
-                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == BattlegroundQueueTypeId.None || m_bgBattlegroundQueueID[i].bgQueueTypeId == val)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == default || m_bgBattlegroundQueueID[i].bgQueueTypeId == val)
                 {
                     m_bgBattlegroundQueueID[i].bgQueueTypeId = val;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
-                    m_bgBattlegroundQueueID[i].joinTime = Time.GetMSTime();
+                    m_bgBattlegroundQueueID[i].joinTime = (uint)GameTime.GetGameTime();
                     return i;
                 }
             }
@@ -592,7 +592,7 @@ namespace Game.Entities
         public bool HasFreeBattlegroundQueueId()
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == BattlegroundQueueTypeId.None)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId == default)
                     return true;
             return false;
         }
@@ -603,7 +603,7 @@ namespace Game.Entities
             {
                 if (m_bgBattlegroundQueueID[i].bgQueueTypeId == val)
                 {
-                    m_bgBattlegroundQueueID[i].bgQueueTypeId = BattlegroundQueueTypeId.None;
+                    m_bgBattlegroundQueueID[i].bgQueueTypeId = default;
                     m_bgBattlegroundQueueID[i].invitedToInstance = 0;
                     m_bgBattlegroundQueueID[i].joinTime = 0;
                     return;

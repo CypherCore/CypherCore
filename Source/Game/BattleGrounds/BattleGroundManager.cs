@@ -33,20 +33,20 @@ namespace Game.BattleGrounds
         BattlegroundManager()
         {
             m_NextRatedArenaUpdate = WorldConfig.GetUIntValue(WorldCfg.ArenaRatedUpdateTimer);
-
-            for (var i = 0; i < (int)BattlegroundQueueTypeId.Max; ++i)
-                m_BattlegroundQueues[i] = new BattlegroundQueue();
         }
 
         public void DeleteAllBattlegrounds()
         {
-            foreach (var data in bgDataStore.Values)
-            {
-                data.m_Battlegrounds.Clear();
-                data.BGFreeSlotQueue.Clear();
-            }
+            foreach (var data in bgDataStore.Values.ToList())
+                while(data.m_Battlegrounds.Empty())
+                    data.m_Battlegrounds.First().Value.Dispose();
 
             bgDataStore.Clear();
+
+            foreach (var bg in m_BGFreeSlotQueue.Values.ToList())
+                bg.Dispose();
+
+            m_BGFreeSlotQueue.Clear();
         }
 
         public void Update(uint diff)
@@ -79,23 +79,21 @@ namespace Game.BattleGrounds
                 m_UpdateTimer = 0;
             }
             // update events timer
-            for (var qtype = BattlegroundQueueTypeId.None; qtype < BattlegroundQueueTypeId.Max; ++qtype)
-                m_BattlegroundQueues[(int)qtype].UpdateEvents(diff);
+            foreach (var pair in m_BattlegroundQueues)
+                pair.Value.UpdateEvents(diff);
 
             // update scheduled queues
             if (!m_QueueUpdateScheduler.Empty())
             {
-                List<ulong> scheduled = new List<ulong>();
+                List<ScheduledQueueUpdate> scheduled = new List<ScheduledQueueUpdate>();
                 Extensions.Swap(ref scheduled, ref m_QueueUpdateScheduler);
 
                 for (byte i = 0; i < scheduled.Count; i++)
                 {
-                    uint arenaMMRating = (uint)(scheduled[i] >> 32);
-                    byte arenaType = (byte)(scheduled[i] >> 24 & 255);
-                    BattlegroundQueueTypeId bgQueueTypeId = (BattlegroundQueueTypeId)(scheduled[i] >> 16 & 255);
-                    BattlegroundTypeId bgTypeId = (BattlegroundTypeId)((scheduled[i] >> 8) & 255);
-                    BattlegroundBracketId bracket_id = (BattlegroundBracketId)(scheduled[i] & 255);
-                    m_BattlegroundQueues[(int)bgQueueTypeId].BattlegroundQueueUpdate(diff, bgTypeId, bracket_id, arenaType, arenaMMRating > 0, arenaMMRating);
+                    uint arenaMMRating = scheduled[i].ArenaMatchmakerRating;
+                    BattlegroundQueueTypeId bgQueueTypeId = scheduled[i].QueueId;
+                    BattlegroundBracketId bracket_id = scheduled[i].BracketId;
+                    GetBattlegroundQueue(bgQueueTypeId).BattlegroundQueueUpdate(diff, bracket_id, arenaMMRating);
                 }
             }
 
@@ -107,14 +105,11 @@ namespace Game.BattleGrounds
                 {
                     // forced update for rated arenas (scan all, but skipped non rated)
                     Log.outDebug(LogFilter.Arena, "BattlegroundMgr: UPDATING ARENA QUEUES");
-                    for (var qtype = BattlegroundQueueTypeId.Arena2v2; qtype <= BattlegroundQueueTypeId.Arena5v5; ++qtype)
+                    foreach (ArenaTypes teamSize in new[] { ArenaTypes.Team2v2, ArenaTypes.Team3v3, ArenaTypes.Team5v5 })
                     {
-                        for (int bracket = (int)BattlegroundBracketId.First; bracket < (int)BattlegroundBracketId.Max; ++bracket)
-                        {
-                            m_BattlegroundQueues[(int)qtype].BattlegroundQueueUpdate(diff,
-                                BattlegroundTypeId.AA, (BattlegroundBracketId)bracket,
-                                (byte)BGArenaType(qtype), true, 0);
-                        }
+                        BattlegroundQueueTypeId ratedArenaQueueId = BGQueueTypeId((ushort)BattlegroundTypeId.AA, BattlegroundQueueIdType.Arena, true, teamSize);
+                        for (var bracket = BattlegroundBracketId.First; bracket < BattlegroundBracketId.Max; ++bracket)
+                            GetBattlegroundQueue(ratedArenaQueueId).BattlegroundQueueUpdate(diff, bracket, 0);
                     }
 
                     m_NextRatedArenaUpdate = WorldConfig.GetUIntValue(WorldCfg.ArenaRatedUpdateTimer);
@@ -124,14 +119,14 @@ namespace Game.BattleGrounds
             }
         }
 
-        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
+        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, ArenaTypes arenaType)
         {
             header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
             header.Ticket.Id = ticketId;
             header.Ticket.Type = RideType.Battlegrounds;
             header.Ticket.Time = (int)joinTime;
-            header.QueueID.Add(bg.GetQueueId());
+            header.QueueID.Add(queueId.GetPacked());
             header.RangeMin = (byte)bg.GetMinLevel();
             header.RangeMax = (byte)bg.GetMaxLevel();
             header.TeamSize = (byte)(bg.IsArena() ? arenaType : 0);
@@ -152,7 +147,7 @@ namespace Game.BattleGrounds
         public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint timeout, ArenaTypes arenaType)
         {
             battlefieldStatus = new BattlefieldStatusNeedConfirmation();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, bg.GetQueueId(), arenaType);
             battlefieldStatus.Mapid = bg.GetMapId();
             battlefieldStatus.Timeout = timeout;
             battlefieldStatus.Role = 0;
@@ -161,7 +156,7 @@ namespace Game.BattleGrounds
         public void BuildBattlegroundStatusActive(out BattlefieldStatusActive battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
         {
             battlefieldStatus = new BattlefieldStatusActive();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, bg.GetQueueId(), arenaType);
             battlefieldStatus.ShutdownTimer = bg.GetRemainingTime();
             battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? TeamId.Horde : TeamId.Alliance);
             battlefieldStatus.LeftEarly = false;
@@ -169,10 +164,10 @@ namespace Game.BattleGrounds
             battlefieldStatus.Mapid = bg.GetMapId();
         }
 
-        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint avgWaitTime, ArenaTypes arenaType, bool asGroup)
+        public void BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, uint avgWaitTime, ArenaTypes arenaType, bool asGroup)
         {
             battlefieldStatus = new BattlefieldStatusQueued();
-            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, arenaType);
+            BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, bg, player, ticketId, joinTime, queueId, arenaType);
             battlefieldStatus.AverageWaitTime = avgWaitTime;
             battlefieldStatus.AsGroup = asGroup;
             battlefieldStatus.SuspendedQueue = false;
@@ -180,14 +175,14 @@ namespace Game.BattleGrounds
             battlefieldStatus.WaitTime = Time.GetMSTimeDiffToNow(joinTime);
         }
 
-        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, Battleground bg, Player pPlayer, uint ticketId, ArenaTypes arenaType, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
+        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, Battleground bg, Player pPlayer, uint ticketId, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
         {
             battlefieldStatus = new BattlefieldStatusFailed();
             battlefieldStatus.Ticket.RequesterGuid = pPlayer.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
             battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
-            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(BGQueueTypeId(bg.GetTypeID(), arenaType));
-            battlefieldStatus.QueueID = bg.GetQueueId();
+            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(bg.GetQueueId());
+            battlefieldStatus.QueueID = bg.GetQueueId().GetPacked();
             battlefieldStatus.Reason = (int)result;
             if (!errorGuid.IsEmpty() && (result == GroupJoinBattlegroundResult.NotInBattleground || result == GroupJoinBattlegroundResult.JoinTimedOut))
                 battlefieldStatus.ClientID = errorGuid;
@@ -198,7 +193,7 @@ namespace Game.BattleGrounds
             if (instanceId == 0)
                 return null;
 
-            if (bgTypeId != BattlegroundTypeId.None)
+            if (bgTypeId != BattlegroundTypeId.None || bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.RandomEpic)
             {
                 var data = bgDataStore.LookupByKey(bgTypeId);
                 return data.m_Battlegrounds.LookupByKey(instanceId);
@@ -249,9 +244,9 @@ namespace Game.BattleGrounds
         }
 
         // create a new Battleground that will really be used to play
-        public Battleground CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PvpDifficultyRecord bracketEntry, ArenaTypes arenaType, bool isRated)
+        public Battleground CreateNewBattleground(BattlegroundQueueTypeId queueId, PvpDifficultyRecord bracketEntry)
         {
-            BattlegroundTypeId bgTypeId = GetRandomBG(originalBgTypeId);
+            BattlegroundTypeId bgTypeId = GetRandomBG((BattlegroundTypeId)queueId.BattlemasterListId);
 
             // get the template BG
             Battleground bg_template = GetBattlegroundTemplate(bgTypeId);
@@ -261,22 +256,23 @@ namespace Game.BattleGrounds
                 return null;
             }
 
-            if (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.AA)
+            if (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.RandomEpic)
                 return null;
 
             // create a copy of the BG template
             Battleground bg = bg_template.GetCopy();
 
-            bool isRandom = bgTypeId != originalBgTypeId && !bg.IsArena();
+            bool isRandom = bgTypeId != (BattlegroundTypeId)queueId.BattlemasterListId && !bg.IsArena();
 
+            bg.SetQueueId(queueId);
             bg.SetBracket(bracketEntry);
             bg.SetInstanceID(Global.MapMgr.GenerateInstanceId());
-            bg.SetClientInstanceID(CreateClientVisibleInstanceId(isRandom ? BattlegroundTypeId.RB : bgTypeId, bracketEntry.GetBracketId()));
+            bg.SetClientInstanceID(CreateClientVisibleInstanceId((BattlegroundTypeId)queueId.BattlemasterListId, bracketEntry.GetBracketId()));
             bg.Reset();                     // reset the new bg (set status to status_wait_queue from status_none)
             bg.SetStatus(BattlegroundStatus.WaitJoin); // start the joining of the bg
-            bg.SetArenaType(arenaType);
+            bg.SetArenaType((ArenaTypes)queueId.TeamSize);
             bg.SetRandomTypeID(bgTypeId);
-            bg.SetRated(isRated);
+            bg.SetRated(queueId.Rated);
             bg.SetRandom(isRandom);
 
             return bg;
@@ -339,12 +335,14 @@ namespace Game.BattleGrounds
                     bg = new BattlegroundBFG(bgTemplate);
                     break;
                     */
+                    case BattlegroundTypeId.RandomEpic:
+                        bg = new Battleground(bgTemplate);
+                        bg.SetRandom(true);
+                        break;
                     default:
                         return false;
                 }
             }
-
-            bg.SetInstanceID(0);
 
             if (!bgDataStore.ContainsKey(bg.GetTypeID()))
                 bgDataStore[bg.GetTypeID()] = new BattlegroundData();
@@ -390,7 +388,7 @@ namespace Game.BattleGrounds
                 bgTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(5));
                 bgTemplate.BattlemasterEntry = bl;
 
-                if (bgTemplate.Id != BattlegroundTypeId.AA && bgTemplate.Id != BattlegroundTypeId.RB)
+                if (bgTemplate.Id != BattlegroundTypeId.AA && bgTemplate.Id != BattlegroundTypeId.RB && bgTemplate.Id != BattlegroundTypeId.RandomEpic)
                 {
                     uint startId = result.Read<uint>(1);
                     WorldSafeLocsEntry start = Global.ObjectMgr.GetWorldSafeLoc(startId);
@@ -486,94 +484,9 @@ namespace Game.BattleGrounds
                 || bgTypeId == BattlegroundTypeId.DS || bgTypeId == BattlegroundTypeId.RV || bgTypeId == BattlegroundTypeId.RL;
         }
 
-        public BattlegroundQueueTypeId BGQueueTypeId(BattlegroundTypeId bgTypeId, ArenaTypes arenaType)
+        public BattlegroundQueueTypeId BGQueueTypeId(ushort battlemasterListId, BattlegroundQueueIdType type, bool rated, ArenaTypes teamSize)
         {
-            switch (bgTypeId)
-            {
-                case BattlegroundTypeId.AB:
-                    return BattlegroundQueueTypeId.AB;
-                case BattlegroundTypeId.AV:
-                    return BattlegroundQueueTypeId.AV;
-                case BattlegroundTypeId.EY:
-                    return BattlegroundQueueTypeId.EY;
-                case BattlegroundTypeId.IC:
-                    return BattlegroundQueueTypeId.IC;
-                case BattlegroundTypeId.TP:
-                    return BattlegroundQueueTypeId.TP;
-                case BattlegroundTypeId.BFG:
-                    return BattlegroundQueueTypeId.BFG;
-                case BattlegroundTypeId.RB:
-                    return BattlegroundQueueTypeId.RB;
-                case BattlegroundTypeId.SA:
-                    return BattlegroundQueueTypeId.SA;
-                case BattlegroundTypeId.WS:
-                    return BattlegroundQueueTypeId.WS;
-                case BattlegroundTypeId.AA:
-                case BattlegroundTypeId.BE:
-                case BattlegroundTypeId.DS:
-                case BattlegroundTypeId.NA:
-                case BattlegroundTypeId.RL:
-                case BattlegroundTypeId.RV:
-                    switch (arenaType)
-                    {
-                        case ArenaTypes.Team2v2:
-                            return BattlegroundQueueTypeId.Arena2v2;
-                        case ArenaTypes.Team3v3:
-                            return BattlegroundQueueTypeId.Arena3v3;
-                        case ArenaTypes.Team5v5:
-                            return BattlegroundQueueTypeId.Arena5v5;
-                        default:
-                            return BattlegroundQueueTypeId.None;
-                    }
-                default:
-                    return BattlegroundQueueTypeId.None;
-            }
-        }
-
-        public BattlegroundTypeId BGTemplateId(BattlegroundQueueTypeId bgQueueTypeId)
-        {
-            switch (bgQueueTypeId)
-            {
-                case BattlegroundQueueTypeId.WS:
-                    return BattlegroundTypeId.WS;
-                case BattlegroundQueueTypeId.AB:
-                    return BattlegroundTypeId.AB;
-                case BattlegroundQueueTypeId.AV:
-                    return BattlegroundTypeId.AV;
-                case BattlegroundQueueTypeId.EY:
-                    return BattlegroundTypeId.EY;
-                case BattlegroundQueueTypeId.SA:
-                    return BattlegroundTypeId.SA;
-                case BattlegroundQueueTypeId.IC:
-                    return BattlegroundTypeId.IC;
-                case BattlegroundQueueTypeId.TP:
-                    return BattlegroundTypeId.TP;
-                case BattlegroundQueueTypeId.BFG:
-                    return BattlegroundTypeId.BFG;
-                case BattlegroundQueueTypeId.RB:
-                    return BattlegroundTypeId.RB;
-                case BattlegroundQueueTypeId.Arena2v2:
-                case BattlegroundQueueTypeId.Arena3v3:
-                case BattlegroundQueueTypeId.Arena5v5:
-                    return BattlegroundTypeId.AA;
-                default:
-                    return 0;                   // used for unknown template (it existed and do nothing)
-            }
-        }
-
-        public ArenaTypes BGArenaType(BattlegroundQueueTypeId bgQueueTypeId)
-        {
-            switch (bgQueueTypeId)
-            {
-                case BattlegroundQueueTypeId.Arena2v2:
-                    return ArenaTypes.Team2v2;
-                case BattlegroundQueueTypeId.Arena3v3:
-                    return ArenaTypes.Team3v3;
-                case BattlegroundQueueTypeId.Arena5v5:
-                    return ArenaTypes.Team5v5;
-                default:
-                    return 0;
-            }
+            return new BattlegroundQueueTypeId(battlemasterListId, (byte)type, rated, (byte)teamSize);
         }
 
         public void ToggleTesting()
@@ -599,10 +512,51 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void ScheduleQueueUpdate(uint arenaMatchmakerRating, ArenaTypes arenaType, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
+        public bool IsValidQueueId(BattlegroundQueueTypeId bgQueueTypeId)
+        {
+            BattlemasterListRecord battlemasterList = CliDB.BattlemasterListStorage.LookupByKey(bgQueueTypeId.BattlemasterListId);
+            if (battlemasterList == null)
+                return false;
+
+            switch ((BattlegroundQueueIdType)bgQueueTypeId.BgType)
+            {
+                case BattlegroundQueueIdType.Battleground:
+                    if (battlemasterList.InstanceType != (int)MapTypes.Battleground)
+                        return false;
+                    if (bgQueueTypeId.TeamSize != 0)
+                        return false;
+                    break;
+                case BattlegroundQueueIdType.Arena:
+                    if (battlemasterList.InstanceType != (int)MapTypes.Arena)
+                        return false;
+                    if (!bgQueueTypeId.Rated)
+                        return false;
+                    if (bgQueueTypeId.TeamSize == 0)
+                        return false;
+                    break;
+                case BattlegroundQueueIdType.Wargame:
+                    if (bgQueueTypeId.Rated)
+                        return false;
+                    break;
+                case BattlegroundQueueIdType.ArenaSkirmish:
+                    if (battlemasterList.InstanceType != (int)MapTypes.Arena)
+                        return false;
+                    if (bgQueueTypeId.Rated)
+                        return false;
+                    if (bgQueueTypeId.TeamSize != 0)
+                        return false;
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
+        }
+
+        public void ScheduleQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundBracketId bracket_id)
         {
             //we will use only 1 number created of bgTypeId and bracket_id
-            ulong scheduleId = ((ulong)arenaMatchmakerRating << 32) | ((uint)arenaType << 24) | ((uint)bgQueueTypeId << 16) | ((uint)bgTypeId << 8) | (uint)bracket_id;
+            ScheduledQueueUpdate scheduleId = new ScheduledQueueUpdate(arenaMatchmakerRating, bgQueueTypeId, bracket_id);
             if (!m_QueueUpdateScheduler.Contains(scheduleId))
                 m_QueueUpdateScheduler.Add(scheduleId);
         }
@@ -766,19 +720,19 @@ namespace Game.BattleGrounds
             return BattlegroundTypeId.None;
         }
 
-        public List<Battleground> GetBGFreeSlotQueueStore(BattlegroundTypeId bgTypeId)
+        public List<Battleground> GetBGFreeSlotQueueStore(BattlegroundQueueTypeId bgTypeId)
         {
-            return bgDataStore[bgTypeId].BGFreeSlotQueue;
+            return m_BGFreeSlotQueue[bgTypeId];
         }
 
-        public void AddToBGFreeSlotQueue(BattlegroundTypeId bgTypeId, Battleground bg)
+        public void AddToBGFreeSlotQueue(BattlegroundQueueTypeId bgTypeId, Battleground bg)
         {
-            bgDataStore[bgTypeId].BGFreeSlotQueue.Insert(0, bg);
+            m_BGFreeSlotQueue.Add(bgTypeId, bg);
         }
 
-        public void RemoveFromBGFreeSlotQueue(BattlegroundTypeId bgTypeId, uint instanceId)
+        public void RemoveFromBGFreeSlotQueue(BattlegroundQueueTypeId bgTypeId, uint instanceId)
         {
-            var queues = bgDataStore[bgTypeId].BGFreeSlotQueue;
+            var queues = m_BGFreeSlotQueue[bgTypeId];
             foreach (var bg in queues)
             {
                 if (bg.GetInstanceID() == instanceId)
@@ -800,7 +754,13 @@ namespace Game.BattleGrounds
             bgDataStore[bgTypeId].m_Battlegrounds.Remove(instanceId);
         }
 
-        public BattlegroundQueue GetBattlegroundQueue(BattlegroundQueueTypeId bgQueueTypeId) { return m_BattlegroundQueues[(int)bgQueueTypeId]; }
+        public BattlegroundQueue GetBattlegroundQueue(BattlegroundQueueTypeId bgQueueTypeId) 
+        {
+            if (!m_BattlegroundQueues.ContainsKey(bgQueueTypeId))
+                m_BattlegroundQueues[bgQueueTypeId] = new BattlegroundQueue(bgQueueTypeId);
+
+            return m_BattlegroundQueues[bgQueueTypeId];
+        }
 
         public bool IsArenaTesting() { return m_ArenaTesting; }
         public bool IsTesting() { return m_Testing; }
@@ -821,11 +781,46 @@ namespace Game.BattleGrounds
         }
 
         Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new Dictionary<BattlegroundTypeId, BattlegroundData>();
-        BattlegroundQueue[] m_BattlegroundQueues = new BattlegroundQueue[(int)BattlegroundQueueTypeId.Max];
+        Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new Dictionary<BattlegroundQueueTypeId, BattlegroundQueue>();
+        MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new MultiMap<BattlegroundQueueTypeId, Battleground>();
         Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new Dictionary<uint, BattlegroundTypeId>();
         Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new Dictionary<BattlegroundTypeId, BattlegroundTemplate>();
         Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new Dictionary<uint, BattlegroundTemplate>();
-        List<ulong> m_QueueUpdateScheduler = new List<ulong>();
+
+        struct ScheduledQueueUpdate
+        {
+            public ScheduledQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
+            {
+                ArenaMatchmakerRating = arenaMatchmakerRating;
+                QueueId = queueId;
+                BracketId = bracketId;
+            }
+
+            public uint ArenaMatchmakerRating;
+            public BattlegroundQueueTypeId QueueId;
+            public BattlegroundBracketId BracketId;
+
+            public static bool operator ==(ScheduledQueueUpdate right, ScheduledQueueUpdate left)
+            {
+                return left.ArenaMatchmakerRating == right.ArenaMatchmakerRating && left.QueueId == right.QueueId && left.BracketId == right.BracketId;
+            }
+
+            public static bool operator !=(ScheduledQueueUpdate right, ScheduledQueueUpdate left)
+            {
+                return !(right == left);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return base.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return ArenaMatchmakerRating.GetHashCode() ^ QueueId.GetHashCode() ^ BracketId.GetHashCode();
+            }
+        }
+        List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new List<ScheduledQueueUpdate>();
         uint m_NextRatedArenaUpdate;
         uint m_UpdateTimer;
         bool m_ArenaTesting;
@@ -842,7 +837,6 @@ namespace Game.BattleGrounds
 
         public Dictionary<uint, Battleground> m_Battlegrounds = new Dictionary<uint, Battleground>();
         public List<uint>[] m_ClientBattlegroundIds = new List<uint>[(int)BattlegroundBracketId.Max];
-        public List<Battleground> BGFreeSlotQueue = new List<Battleground>();
         public Battleground Template;
     }
 

@@ -305,7 +305,7 @@ namespace Game
 
                 if (log && packet.Info.SendMoney > 0)
                 {
-                    Log.outCommand(GetAccountId(), "GM {0} ({1}) (Account: {{2}) mail money: {3} to player: {4} ({5}) (Account: {6})",
+                    Log.outCommand(GetAccountId(), "GM {0} ({1}) (Account: {2}) mail money: {3} to player: {4} ({5}) (Account: {6})",
                         GetPlayerName(), GetPlayer().GetGUID().ToString(), GetAccountId(), packet.Info.SendMoney, packet.Info.Target, receiverGuid.ToString(), receiverAccountId);
                 }
             }

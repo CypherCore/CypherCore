@@ -188,15 +188,15 @@ namespace Game.Entities
 
             // in PvP, any not controlled zone (except zone.team == 6, default case)
             // in PvE, only opposition team capital
-            switch ((AreaTeams)zone.FactionGroupMask)
+            switch ((ArenaTeams)zone.FactionGroupMask)
             {
-                case AreaTeams.Ally:
+                case ArenaTeams.Ally:
                     pvpInfo.IsInHostileArea = GetTeam() != Team.Alliance && (Global.WorldMgr.IsPvPRealm() || zone.Flags[0].HasAnyFlag(AreaFlags.Capital));
                     break;
-                case AreaTeams.Horde:
+                case ArenaTeams.Horde:
                     pvpInfo.IsInHostileArea = GetTeam() != Team.Horde && (Global.WorldMgr.IsPvPRealm() || zone.Flags[0].HasAnyFlag(AreaFlags.Capital));
                     break;
-                case AreaTeams.None:
+                case ArenaTeams.None:
                     // overwrite for Battlegrounds, maybe batter some zone flags but current known not 100% fit to this
                     pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm() || InBattleground() || zone.Flags[0].HasAnyFlag(AreaFlags.Wintergrasp);
                     break;

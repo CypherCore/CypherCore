@@ -80,143 +80,16 @@ namespace Game.Network.Packets
         public override void Read() { }
     }
 
-    public class PVPLogData : ServerPacket
+    public class PVPLogDataMessage : ServerPacket
     {
-        public PVPLogData() : base(ServerOpcodes.PvpLogData, ConnectionType.Instance) { }
+        public PVPLogDataMessage() : base(ServerOpcodes.PvpLogData, ConnectionType.Instance) { }
 
         public override void Write()
         {
-            _worldPacket.WriteBit(Ratings.HasValue);
-            _worldPacket.WriteInt32(Statistics.Count);
-            foreach (var id in PlayerCount)
-                _worldPacket.WriteInt8(id);
-
-            if (Ratings.HasValue)
-                Ratings.Value.Write(_worldPacket);
-
-            foreach (PVPMatchPlayerStatistics player in Statistics)
-                player.Write(_worldPacket);
+            Data.Write(_worldPacket);
         }
 
-        public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();
-        public Optional<RatingData> Ratings;
-        public sbyte[] PlayerCount = new sbyte[2];
-
-        public class RatingData
-        {
-            public void Write(WorldPacket data)
-            {
-                foreach (var id in Prematch)
-                    data.WriteUInt32(id);
-
-                foreach (var id in Postmatch)
-                    data.WriteUInt32(id);
-
-                foreach (var id in PrematchMMR)
-                    data.WriteUInt32(id);
-            }
-
-            public uint[] Prematch = new uint[2];
-            public uint[] Postmatch = new uint[2];
-            public uint[] PrematchMMR = new uint[2];
-        }
-
-        public struct HonorData
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WriteUInt32(HonorKills);
-                data.WriteUInt32(Deaths);
-                data.WriteUInt32(ContributionPoints);
-            }
-
-            public uint HonorKills;
-            public uint Deaths;
-            public uint ContributionPoints;
-        }
-
-        public struct PVPMatchPlayerPVPStat
-        {
-            public int PvpStatID;
-            public uint PvpStatValue;
-
-            public PVPMatchPlayerPVPStat(int pvpStatID, uint pvpStatValue)
-            {
-                PvpStatID = pvpStatID;
-                PvpStatValue = pvpStatValue;
-            }
-
-            public void Write(WorldPacket data)
-            {
-                data.WriteInt32(PvpStatID);
-                data.WriteUInt32(PvpStatValue);
-            }
-
-        }
-
-        public class PVPMatchPlayerStatistics
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WritePackedGuid(PlayerGUID);
-                data.WriteUInt32(Kills);
-                data.WriteUInt32(DamageDone);
-                data.WriteUInt32(HealingDone);
-                data.WriteInt32(Stats.Count);
-                data.WriteInt32(PrimaryTalentTree);
-                data.WriteInt32(Sex);
-                data.WriteUInt32((uint)PlayerRace);
-                data.WriteInt32(PlayerClass);
-                data.WriteInt32(CreatureID);
-                data.WriteInt32(HonorLevel);
-
-                foreach (var pvpStat in Stats)
-                        pvpStat.Write(data);
-
-                data.WriteBit(Faction);
-                data.WriteBit(IsInWorld);
-                data.WriteBit(Honor.HasValue);
-                data.WriteBit(PreMatchRating.HasValue);
-                data.WriteBit(RatingChange.HasValue);
-                data.WriteBit(PreMatchMMR.HasValue);
-                data.WriteBit(MmrChange.HasValue);
-                data.FlushBits();
-
-                if (Honor.HasValue)
-                    Honor.Value.Write(data);
-
-                if (PreMatchRating.HasValue)
-                    data.WriteUInt32(PreMatchRating.Value);
-
-                if (RatingChange.HasValue)
-                    data.WriteInt32(RatingChange.Value);
-
-                if (PreMatchMMR.HasValue)
-                    data.WriteUInt32(PreMatchMMR.Value);
-
-                if (MmrChange.HasValue)
-                    data.WriteInt32(MmrChange.Value);
-            }
-
-            public ObjectGuid PlayerGUID;
-            public uint Kills;
-            public byte Faction;
-            public bool IsInWorld;
-            public Optional<HonorData> Honor;
-            public uint DamageDone;
-            public uint HealingDone;
-            public Optional<uint> PreMatchRating;
-            public Optional<int> RatingChange;
-            public Optional<uint> PreMatchMMR;
-            public Optional<int> MmrChange;
-            public List<PVPMatchPlayerPVPStat> Stats = new List<PVPMatchPlayerPVPStat>();
-            public int PrimaryTalentTree;
-            public int Sex;
-            public Race PlayerRace;
-            public int PlayerClass;
-            public int CreatureID;
-            public int HonorLevel;
-        }
+        public PVPLogData Data;
     }
 
     public class BattlefieldStatusNone : ServerPacket
@@ -569,7 +442,198 @@ namespace Game.Network.Packets
         public override void Read() { }
     }
 
+    class PVPMatchInit : ServerPacket
+    {
+        public PVPMatchInit() : base(ServerOpcodes.PvpMatchInit, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteUInt8((byte)State);
+            _worldPacket.WriteInt32((int)StartTime);
+            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteUInt8(ArenaFaction);
+            _worldPacket.WriteUInt32(BattlemasterListID);
+            _worldPacket.WriteBit(Registered);
+            _worldPacket.WriteBit(AffectsRating);
+            _worldPacket.FlushBits();
+        }
+
+        public enum MatchState
+        {
+            InProgress = 1,
+            Complete = 3,
+            Inactive = 4
+        }
+
+        public uint MapID;
+        public MatchState State = MatchState.Inactive;
+        public long StartTime;
+        public int Duration;
+        public byte ArenaFaction;
+        public uint BattlemasterListID;
+        public bool Registered;
+        public bool AffectsRating;
+    }
+
+    class PVPMatchEnd : ServerPacket
+    {
+        public PVPMatchEnd() : base(ServerOpcodes.PvpMatchEnd, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Winner);
+            _worldPacket.WriteInt32(Duration);
+            _worldPacket.WriteBit(LogData.HasValue);
+            _worldPacket.FlushBits();
+
+            if (LogData.HasValue)
+                LogData.Value.Write(_worldPacket);
+        }
+
+        public byte Winner;
+        public int Duration;
+        public Optional<PVPLogData> LogData;
+    }
+
     //Structs
+    public class PVPLogData
+    {
+        public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();
+        public Optional<RatingData> Ratings;
+        public sbyte[] PlayerCount = new sbyte[2];
+
+        public class RatingData
+        {
+            public void Write(WorldPacket data)
+            {
+                foreach (var id in Prematch)
+                    data.WriteUInt32(id);
+
+                foreach (var id in Postmatch)
+                    data.WriteUInt32(id);
+
+                foreach (var id in PrematchMMR)
+                    data.WriteUInt32(id);
+            }
+
+            public uint[] Prematch = new uint[2];
+            public uint[] Postmatch = new uint[2];
+            public uint[] PrematchMMR = new uint[2];
+        }
+
+        public struct HonorData
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt32(HonorKills);
+                data.WriteUInt32(Deaths);
+                data.WriteUInt32(ContributionPoints);
+            }
+
+            public uint HonorKills;
+            public uint Deaths;
+            public uint ContributionPoints;
+        }
+
+        public struct PVPMatchPlayerPVPStat
+        {
+            public int PvpStatID;
+            public uint PvpStatValue;
+
+            public PVPMatchPlayerPVPStat(int pvpStatID, uint pvpStatValue)
+            {
+                PvpStatID = pvpStatID;
+                PvpStatValue = pvpStatValue;
+            }
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteInt32(PvpStatID);
+                data.WriteUInt32(PvpStatValue);
+            }
+
+        }
+
+        public class PVPMatchPlayerStatistics
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WritePackedGuid(PlayerGUID);
+                data.WriteUInt32(Kills);
+                data.WriteUInt32(DamageDone);
+                data.WriteUInt32(HealingDone);
+                data.WriteInt32(Stats.Count);
+                data.WriteInt32(PrimaryTalentTree);
+                data.WriteInt32(Sex);
+                data.WriteUInt32((uint)PlayerRace);
+                data.WriteInt32(PlayerClass);
+                data.WriteInt32(CreatureID);
+                data.WriteInt32(HonorLevel);
+
+                foreach (var pvpStat in Stats)
+                    pvpStat.Write(data);
+
+                data.WriteBit(Faction);
+                data.WriteBit(IsInWorld);
+                data.WriteBit(Honor.HasValue);
+                data.WriteBit(PreMatchRating.HasValue);
+                data.WriteBit(RatingChange.HasValue);
+                data.WriteBit(PreMatchMMR.HasValue);
+                data.WriteBit(MmrChange.HasValue);
+                data.FlushBits();
+
+                if (Honor.HasValue)
+                    Honor.Value.Write(data);
+
+                if (PreMatchRating.HasValue)
+                    data.WriteUInt32(PreMatchRating.Value);
+
+                if (RatingChange.HasValue)
+                    data.WriteInt32(RatingChange.Value);
+
+                if (PreMatchMMR.HasValue)
+                    data.WriteUInt32(PreMatchMMR.Value);
+
+                if (MmrChange.HasValue)
+                    data.WriteInt32(MmrChange.Value);
+            }
+
+            public ObjectGuid PlayerGUID;
+            public uint Kills;
+            public byte Faction;
+            public bool IsInWorld;
+            public Optional<HonorData> Honor;
+            public uint DamageDone;
+            public uint HealingDone;
+            public Optional<uint> PreMatchRating;
+            public Optional<int> RatingChange;
+            public Optional<uint> PreMatchMMR;
+            public Optional<int> MmrChange;
+            public List<PVPMatchPlayerPVPStat> Stats = new List<PVPMatchPlayerPVPStat>();
+            public int PrimaryTalentTree;
+            public int Sex;
+            public Race PlayerRace;
+            public int PlayerClass;
+            public int CreatureID;
+            public int HonorLevel;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(Ratings.HasValue);
+            data.WriteInt32(Statistics.Count);
+            foreach (var count in PlayerCount)
+                data.WriteInt8(count);
+
+            if (Ratings.HasValue)
+                Ratings.Value.Write(data);
+
+            foreach (var player in Statistics)
+                player.Write(data);
+        }
+    }
+
     public class BattlefieldStatusHeader
     {
         public void Write(WorldPacket data)

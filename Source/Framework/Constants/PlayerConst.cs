@@ -472,7 +472,7 @@ namespace Framework.Constants
         InvisibilityGlow = 0x40
     }
 
-    public enum AreaTeams
+    public enum ArenaTeams
     {
         None = 0,
         Ally = 2,
