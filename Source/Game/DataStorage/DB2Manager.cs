@@ -257,16 +257,8 @@ namespace Game.DataStorage
 
             CliDB.ItemBonusListLevelDeltaStorage.Clear();
 
-            foreach (var key in CliDB.ItemBonusTreeNodeStorage.Keys)
-            {
-                ItemBonusTreeNodeRecord bonusTreeNode = CliDB.ItemBonusTreeNodeStorage[key];
-                uint bonusTreeId = bonusTreeNode.ParentItemBonusTreeID;
-                while (bonusTreeNode != null)
-                {
-                    _itemBonusTrees.Add(bonusTreeId, bonusTreeNode);
-                    bonusTreeNode = CliDB.ItemBonusTreeNodeStorage.LookupByKey(bonusTreeNode.ChildItemBonusTreeID);
-                }
-            }
+            foreach (var bonusTreeNode in CliDB.ItemBonusTreeNodeStorage.Values)
+                _itemBonusTrees.Add(bonusTreeNode.ParentItemBonusTreeID, bonusTreeNode);
 
             CliDB.ItemBonusTreeNodeStorage.Clear();
 
@@ -752,7 +744,7 @@ namespace Game.DataStorage
             // TEMP: well... AnimationData.db2 in 8.3.0 has more rows than max hardcoded anim id in client
             // return sAnimationDataStore.GetNumRows();
         }
-        
+
         public List<uint> GetAreasForGroup(uint areaGroupId)
         {
             return _areaGroupMembers.LookupByKey(areaGroupId);
@@ -1221,24 +1213,21 @@ namespace Game.DataStorage
             return _itemLevelDeltaToBonusListContainer.LookupByKey(delta);
         }
 
-        void VisitItemBonusTree(uint itemId, Action<ItemBonusTreeNodeRecord> visitor)
+        void VisitItemBonusTree(uint itemBonusTreeId, bool visitChildren, Action<ItemBonusTreeNodeRecord> visitor)
         {
-            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
-            if (itemIdRange.Empty())
+            var bonusTreeNodeList = _itemBonusTrees.LookupByKey(itemBonusTreeId);
+            if (bonusTreeNodeList.Empty())
                 return;
 
-            foreach (var itemTreeId in itemIdRange)
+            foreach (var bonusTreeNode in bonusTreeNodeList)
             {
-                var treeList = _itemBonusTrees.LookupByKey(itemTreeId);
-                if (treeList.Empty())
-                    continue;
-
-                foreach (ItemBonusTreeNodeRecord bonusTreeNode in treeList)
-                    visitor(bonusTreeNode);
+                visitor(bonusTreeNode);
+                if (visitChildren && bonusTreeNode.ChildItemBonusTreeID != 0)
+                    VisitItemBonusTree(bonusTreeNode.ChildItemBonusTreeID, true, visitor);
             }
         }
 
-        public List<uint> GetItemBonusTree(uint itemId, ItemContext itemContext)
+        public List<uint> GetDefaultItemBonusTree(uint itemId, ItemContext itemContext)
         {
             List<uint> bonusListIDs = new List<uint>();
 
@@ -1246,102 +1235,124 @@ namespace Game.DataStorage
             if (proto == null)
                 return bonusListIDs;
 
-            VisitItemBonusTree(itemId, bonusTreeNode =>
-            {
-                if ((ItemContext)bonusTreeNode.ItemContext != itemContext)
-                    return;
+            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
+            if (itemIdRange == null)
+                return bonusListIDs;
 
-                if (bonusTreeNode.ChildItemBonusListID != 0)
+            ushort itemLevelSelectorId = 0;
+            foreach (var itemBonusTreeId in itemIdRange)
+            {
+                uint matchingNodes = 0;
+                VisitItemBonusTree(itemBonusTreeId, false, bonusTreeNode =>
                 {
-                    bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
-                }
-                else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
+                    if ((ItemContext)bonusTreeNode.ItemContext == ItemContext.None || itemContext == (ItemContext)bonusTreeNode.ItemContext)
+                        ++matchingNodes;
+                });
+
+                if (matchingNodes != 1)
+                    continue;
+
+                VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
                 {
-                    ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
-                    if (selector == null)
+                    ItemContext requiredContext = (ItemContext)bonusTreeNode.ItemContext != ItemContext.ForceToNone ? (ItemContext)bonusTreeNode.ItemContext : ItemContext.None;
+                    if ((ItemContext)bonusTreeNode.ItemContext != ItemContext.None && itemContext != requiredContext)
                         return;
 
-                    short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
-
-                    uint bonus = GetItemBonusListForItemLevelDelta(delta);
-                    if (bonus != 0)
-                        bonusListIDs.Add(bonus);
-
-                    ItemLevelSelectorQualitySetRecord selectorQualitySet = CliDB.ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                    if (selectorQualitySet != null)
+                    if (bonusTreeNode.ChildItemBonusListID != 0)
                     {
-                        var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
-                        if (itemSelectorQualities != null)
-                        {
-                            ItemQuality quality = ItemQuality.Uncommon;
-                            if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
-                                quality = ItemQuality.Epic;
-                            else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
-                                quality = ItemQuality.Rare;
-
-                            var itemSelectorQuality = itemSelectorQualities.FirstOrDefault(p => p.Quality < (byte)quality);
-
-                            if (itemSelectorQuality != null)
-                                bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
-                        }
+                        bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
                     }
-
-                    AzeriteUnlockMappingRecord azeriteUnlockMapping = _azeriteUnlockMappings.LookupByKey((proto.Id, itemContext));
-                    if (azeriteUnlockMapping != null)
+                    else if (bonusTreeNode.ChildItemLevelSelectorID != 0)
                     {
-                        switch (proto.inventoryType)
-                        {
-                            case InventoryType.Head:
-                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListHead);
-                                break;
-                            case InventoryType.Shoulders:
-                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListShoulders);
-                                break;
-                            case InventoryType.Chest:
-                            case InventoryType.Robe:
-                                bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListChest);
-                                break;
-                        }
+                        itemLevelSelectorId = bonusTreeNode.ChildItemLevelSelectorID;
                     }
+                });
+            }
+            ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(itemLevelSelectorId);
+            if (selector != null)
+            {
+                short delta = (short)(selector.MinItemLevel - proto.ItemLevel);
 
+                uint bonus = GetItemBonusListForItemLevelDelta(delta);
+                if (bonus != 0)
+                    bonusListIDs.Add(bonus);
+
+                ItemLevelSelectorQualitySetRecord selectorQualitySet = CliDB.ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                if (selectorQualitySet != null)
+                {
+                    var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                    if (itemSelectorQualities != null)
+                    {
+                        ItemQuality quality = ItemQuality.Uncommon;
+                        if (selector.MinItemLevel >= selectorQualitySet.IlvlEpic)
+                            quality = ItemQuality.Epic;
+                        else if (selector.MinItemLevel >= selectorQualitySet.IlvlRare)
+                            quality = ItemQuality.Rare;
+
+                        var itemSelectorQuality = itemSelectorQualities.Find(p => p.Quality < (sbyte)quality);
+
+                        if (itemSelectorQuality != null)
+                            bonusListIDs.Add(itemSelectorQuality.QualityItemBonusListID);
+                    }
                 }
-            });
+
+                AzeriteUnlockMappingRecord azeriteUnlockMapping = _azeriteUnlockMappings.LookupByKey((proto.Id, itemContext));
+                if (azeriteUnlockMapping != null)
+                {
+                    switch (proto.inventoryType)
+                    {
+                        case InventoryType.Head:
+                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListHead);
+                            break;
+                        case InventoryType.Shoulders:
+                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListShoulders);
+                            break;
+                        case InventoryType.Chest:
+                        case InventoryType.Robe:
+                            bonusListIDs.Add(azeriteUnlockMapping.ItemBonusListChest);
+                            break;
+                    }
+                }
+            }
 
             return bonusListIDs;
         }
 
         void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
         {
-            ItemSparseRecord proto = CliDB.ItemSparseStorage.LookupByKey(itemId);
-            if (proto == null)
+            var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
+            if (itemIdRange == null)
                 return;
 
-            VisitItemBonusTree(itemId, bonusTreeNode =>
+            foreach (var itemTreeItr in itemIdRange)
             {
-                if (bonusTreeNode.ChildItemBonusListID == 0 && bonusTreeNode.ChildItemLevelSelectorID != 0)
+                VisitItemBonusTree(itemTreeItr, true, bonusTreeNode =>
                 {
-                    ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
-                    if (selector == null)
-                        return;
-
-                    var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
-                    if (azeriteUnlockMappings != null)
+                    if (bonusTreeNode.ChildItemBonusListID == 0 && bonusTreeNode.ChildItemLevelSelectorID != 0)
                     {
-                        AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
-                        foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
+                        ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ChildItemLevelSelectorID);
+                        if (selector == null)
+                            return;
+
+                        var azeriteUnlockMappings = azeriteUnlockMappingsBySet.LookupByKey(selector.AzeriteUnlockMappingSet);
+                        if (azeriteUnlockMappings != null)
                         {
-                            if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
-                                (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
-                                continue;
+                            AzeriteUnlockMappingRecord selectedAzeriteUnlockMapping = null;
+                            foreach (AzeriteUnlockMappingRecord azeriteUnlockMapping in azeriteUnlockMappings)
+                            {
+                                if (azeriteUnlockMapping.ItemLevel > selector.MinItemLevel ||
+                                    (selectedAzeriteUnlockMapping != null && selectedAzeriteUnlockMapping.ItemLevel > azeriteUnlockMapping.ItemLevel))
+                                    continue;
 
-                            selectedAzeriteUnlockMapping = azeriteUnlockMapping;
+                                selectedAzeriteUnlockMapping = azeriteUnlockMapping;
+                            }
+
+                            if (selectedAzeriteUnlockMapping != null)
+                                _azeriteUnlockMappings[(itemId, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
                         }
-
-                        if (selectedAzeriteUnlockMapping != null)
-                            _azeriteUnlockMappings[(proto.Id, (ItemContext)bonusTreeNode.ItemContext)] = selectedAzeriteUnlockMapping;
                     }
-                }
-            });
+                });
+            }
         }
 
         public ItemChildEquipmentRecord GetItemChildEquipment(uint itemId)

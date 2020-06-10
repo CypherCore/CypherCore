@@ -412,7 +412,8 @@ namespace Framework.Constants
         WorldQuest12 = 54,
         WorldQuest13 = 55,
         PvpRankedJackpot = 56,
-        TournamentRealm = 57
+        TournamentRealm = 57,
+        Relinquished = 58
     }
 
     public enum ItemEnchantmentType : byte

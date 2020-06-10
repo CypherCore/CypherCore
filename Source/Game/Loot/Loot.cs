@@ -165,7 +165,7 @@ namespace Game.Loots
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
                 if (_itemContext != 0)
                 {
-                    List<uint> bonusListIDs = Global.DB2Mgr.GetItemBonusTree(generatedLoot.itemid, _itemContext);
+                    List<uint> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
                     generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
                 lootItems.Add(generatedLoot);
