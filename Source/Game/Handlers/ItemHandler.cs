@@ -1052,10 +1052,10 @@ namespace Game
             if (!item)
                 return;
 
-            if (item.GetTemplate().Effects.Count < 2)
+            if (item.GetBonus().EffectCount < 2)
                 return;
 
-            uint spellToLearn = (uint)item.GetTemplate().Effects[1].SpellID;
+            uint spellToLearn = (uint)item.GetEffect(1).SpellID;
 
             var entry = Global.SpellMgr.GetBattlePetSpecies(spellToLearn);
             if (entry != null)

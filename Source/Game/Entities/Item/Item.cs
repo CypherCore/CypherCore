@@ -70,10 +70,8 @@ namespace Game.Entities
             SetDurability(itemProto.MaxDurability);
 
             for (int i = 0; i < itemProto.Effects.Count; ++i)
-            {
-                if (i < 5)
-                    SetSpellCharges(i, itemProto.Effects[i].Charges);
-            }
+                if (itemProto.Effects[i].LegacySlotIndex < 5)
+                    SetSpellCharges(itemProto.Effects[i].LegacySlotIndex, itemProto.Effects[i].Charges);
 
             SetExpiration(itemProto.GetDuration());
             SetCreatePlayedTime(0);
@@ -162,7 +160,7 @@ namespace Game.Entities
                         stmt.AddValue(++index, (uint)m_itemData.Expiration);
 
                         StringBuilder ss = new StringBuilder();
-                        for (byte i = 0; i < ItemConst.MaxSpells; ++i)
+                        for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
                             ss.AppendFormat("{0} ", GetSpellCharges(i));
 
                         stmt.AddValue(++index, ss.ToString());
@@ -423,16 +421,6 @@ namespace Game.Entities
                 need_save = true;
             }
 
-            var tokens = new StringArray(fields.Read<string>(6), ' ');
-            if (tokens.Length == ItemConst.MaxProtoSpells)
-            {
-                for (byte i = 0; i < ItemConst.MaxProtoSpells; ++i)
-                {
-                    if (int.TryParse(tokens[i], out int value))
-                        SetSpellCharges(i, value);
-                }
-            }
-
             SetItemFlags((ItemFieldFlags)itemFlags);
 
             uint durability = fields.Read<uint>(10);
@@ -465,6 +453,14 @@ namespace Game.Entities
                     bonusListIDs.Add(bonusListID);
             }
             SetBonuses(bonusListIDs);
+
+            // load charges after bonuses, they can add more item effects
+            var tokens = new StringArray(fields.Read<string>(6), ' ');
+            for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount && i < tokens.Length; ++i)
+            {
+                if (int.TryParse(tokens[i], out int value))
+                    SetSpellCharges(i, value);
+            }
 
             SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(19));
             SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(20));
@@ -505,14 +501,14 @@ namespace Game.Entities
 
             // Enchants must be loaded after all other bonus/scaling data
             var enchantmentTokens = new StringArray(fields.Read<string>(8), ' ');
-            if (enchantmentTokens.Length == (int)EnchantmentSlot.Max * (int)EnchantmentOffset.Max)
+            if (enchantmentTokens.Length == (int)EnchantmentSlot.Max * 3)
             {
                 for (int i = 0; i < (int)EnchantmentSlot.Max; ++i)
                 {
                     ItemEnchantment enchantmentField = m_itemData.ModifyValue(m_itemData.Enchantment, i);
-                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), uint.Parse(enchantmentTokens[i * (int)EnchantmentOffset.Max + 0]));
-                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * (int)EnchantmentOffset.Max + 1]));
-                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * (int)EnchantmentOffset.Max + 2]));
+                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), uint.Parse(enchantmentTokens[i * 3 + 0]));
+                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * 3 + 1]));
+                    SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * 3 + 2]));
                 }
             }
 
@@ -2527,6 +2523,13 @@ namespace Game.Entities
         public ObjectGuid GetChildItem() { return m_childItem; }
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
+        public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
+        public ItemEffectRecord GetEffect(int i)
+        {
+            Cypher.Assert(i < _bonusData.EffectCount, $"Attempted to get effect at index {i} but item has only {_bonusData.EffectCount} effects!");
+            return _bonusData.Effects[i];
+        }
+
         //Static
         public static bool ItemCanGoIntoBag(ItemTemplate pProto, ItemTemplate pBagProto)
         {
@@ -2657,14 +2660,6 @@ namespace Game.Entities
         public uint count;
     }
 
-    public enum EnchantmentOffset
-    {
-        Id = 0,
-        Duration = 1,
-        Charges = 2,                         // now here not only charges, but something new in wotlk
-        Max = 3
-    }
-
     public class ItemSetEffect
     {
         public uint ItemSetID;
@@ -2712,6 +2707,13 @@ namespace Game.Entities
             AzeriteEmpoweredItemRecord azeriteEmpoweredItem = Global.DB2Mgr.GetAzeriteEmpoweredItem(proto.GetId());
             if (azeriteEmpoweredItem != null)
                 AzeriteTierUnlockSetId = azeriteEmpoweredItem.AzeriteTierUnlockSetID;
+
+            EffectCount = 0;
+            foreach (ItemEffectRecord itemEffect in proto.Effects)
+                Effects[EffectCount++] = itemEffect;
+
+            for (int i = EffectCount; i < Effects.Length; ++i)
+                Effects[i] = null;
 
             CanDisenchant = !proto.GetFlags().HasAnyFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.GetFlags4().HasAnyFlag(ItemFlags4.Scrapable);
@@ -2835,6 +2837,11 @@ namespace Game.Entities
                 case ItemBonusType.OverrideCanScrap:
                     CanScrap = values[0] != 0;
                     break;
+                case ItemBonusType.ItemEffectId:
+                    ItemEffectRecord itemEffect = CliDB.ItemEffectStorage.LookupByKey(values[0]);
+                    if (itemEffect != null)
+                        Effects[EffectCount++] = itemEffect;
+                    break;
             }
         }
 
@@ -2858,6 +2865,8 @@ namespace Game.Entities
         public int RequiredLevelOverride;
         public uint AzeriteTierUnlockSetId;
         public uint Suffix;
+        public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
+        public int EffectCount;
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;

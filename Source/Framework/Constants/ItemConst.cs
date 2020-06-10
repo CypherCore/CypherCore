@@ -347,8 +347,10 @@ namespace Framework.Constants
         RelicType = 17,
         OverrideRequiredLevel = 18,
         AzeriteTierUnlockSet = 19,
+        ScrappingLootId = 20,
         OverrideCanDisenchant = 21,
-        OverrideCanScrap = 22
+        OverrideCanScrap = 22,
+        ItemEffectId = 23,
     }
 
     public enum ItemContext : byte

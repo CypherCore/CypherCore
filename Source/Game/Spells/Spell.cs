@@ -4051,34 +4051,34 @@ namespace Game.Spells
             bool expendable = false;
             bool withoutCharges = false;
 
-            for (int i = 0; i < proto.Effects.Count && i < 5; ++i)
+            foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
             {
-                if (proto.Effects[i].SpellID != 0)
+                if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
+                    continue;
+
+                // item has limited charges
+                if (itemEffect.Charges != 0)
                 {
-                    // item has limited charges
-                    if (proto.Effects[i].Charges != 0)
+                    if (itemEffect.Charges < 0)
+                        expendable = true;
+
+                    int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+
+                    // item has charges left
+                    if (charges != 0)
                     {
-                        if (proto.Effects[i].Charges < 0)
-                            expendable = true;
+                        if (charges > 0)
+                            --charges;
+                        else
+                            ++charges;
 
-                        int charges = m_CastItem.GetSpellCharges(i);
-
-                        // item has charges left
-                        if (charges != 0)
-                        {
-                            if (charges > 0)
-                                --charges;
-                            else
-                                ++charges;
-
-                            if (proto.GetMaxStackSize() == 1)
-                                m_CastItem.SetSpellCharges(i, charges);
-                            m_CastItem.SetState(ItemUpdateState.Changed, m_caster.ToPlayer());
-                        }
-
-                        // all charges used
-                        withoutCharges = (charges == 0);
+                        if (proto.GetMaxStackSize() == 1)
+                            m_CastItem.SetSpellCharges(itemEffect.LegacySlotIndex, charges);
+                        m_CastItem.SetState(ItemUpdateState.Changed, m_caster.ToPlayer());
                     }
+
+                    // all charges used
+                    withoutCharges = (charges == 0);
                 }
             }
 
@@ -4215,10 +4215,8 @@ namespace Game.Spells
             if (!m_caster.IsTypeId(TypeId.Player))
                 return;
 
-            ItemTemplate castItemTemplate = m_CastItem?.GetTemplate();
-
             // do not take reagents for these item casts
-            if (castItemTemplate != null && Convert.ToBoolean(castItemTemplate.GetFlags() & ItemFlags.NoReagentCost))
+            if (m_CastItem != null && m_CastItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoReagentCost))
                 return;
 
             Player p_caster = m_caster.ToPlayer();
@@ -4234,13 +4232,16 @@ namespace Game.Spells
                 uint itemcount = m_spellInfo.ReagentCount[x];
 
                 // if CastItem is also spell reagent
-                if (castItemTemplate != null && castItemTemplate.GetId() == itemid)
+                if (m_CastItem != null && m_CastItem.GetEntry() == itemid)
                 {
-                    for (int s = 0; s < castItemTemplate.Effects.Count && s < 5; ++s)
+                    foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
                     {
+                        if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
+                            continue;
+
                         // CastItem will be used up and does not count as reagent
-                        int charges = m_CastItem.GetSpellCharges(s);
-                        if (castItemTemplate.Effects[s].Charges < 0 && Math.Abs(charges) < 2)
+                        int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+                        if (itemEffect.Charges < 0 && Math.Abs(charges) < 2)
                         {
                             ++itemcount;
                             break;
@@ -5826,9 +5827,9 @@ namespace Game.Spells
                 if (proto == null)
                     return SpellCastResult.ItemNotReady;
 
-                for (int i = 0; i < proto.Effects.Count && i < 5; ++i)
-                    if (proto.Effects[i].Charges > 0)
-                        if (m_CastItem.GetSpellCharges(i) == 0)
+                foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
+                    if (itemEffect.LegacySlotIndex < m_CastItem.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0)
+                        if (m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex) == 0)
                             return SpellCastResult.NoChargesRemain;
 
                 // consumable cast item checks
@@ -5931,11 +5932,15 @@ namespace Game.Spells
                             ItemTemplate proto = m_CastItem.GetTemplate();
                             if (proto == null)
                                 return SpellCastResult.ItemNotReady;
-                            for (int s = 0; s < proto.Effects.Count && s < 5; ++s)
+
+                            foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
                             {
+                                if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
+                                    continue;
+
                                 // CastItem will be used up and does not count as reagent
-                                int charges = m_CastItem.GetSpellCharges(s);
-                                if (proto.Effects[s].Charges < 0 && Math.Abs(charges) < 2)
+                                int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+                                if (itemEffect.Charges < 0 && Math.Abs(charges) < 2)
                                 {
                                     ++itemcount;
                                     break;
@@ -6060,10 +6065,9 @@ namespace Game.Spells
                                 return SpellCastResult.Lowlevel;
 
                             bool isItemUsable = false;
-                            ItemTemplate proto = targetItem.GetTemplate();
-                            for (byte e = 0; e < proto.Effects.Count; ++e)
+                            foreach (ItemEffectRecord itemEffect in targetItem.GetEffects())
                             {
-                                if (proto.Effects[e].SpellID != 0 && proto.Effects[e].TriggerType == ItemSpelltriggerType.OnUse)
+                                if (itemEffect.SpellID != 0 && itemEffect.TriggerType == ItemSpelltriggerType.OnUse)
                                 {
                                     isItemUsable = true;
                                     break;
@@ -6238,8 +6242,8 @@ namespace Game.Spells
                             Item item = player.GetItemByEntry(itemId);
                             if (item != null)
                             {
-                                for (int x = 0; x < proto.Effects.Count && x < 5; ++x)
-                                    if (proto.Effects[x].Charges != 0 && item.GetSpellCharges(x) == proto.Effects[x].Charges)
+                                foreach (ItemEffectRecord itemEffect in item.GetEffects())
+                                    if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0 && item.GetSpellCharges(itemEffect.LegacySlotIndex) == itemEffect.Charges)
                                         return SpellCastResult.ItemAtMaxCharges;
                             }
                             break;

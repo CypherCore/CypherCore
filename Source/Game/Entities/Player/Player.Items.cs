@@ -4265,24 +4265,14 @@ namespace Game.Entities
             if (item == null)
                 return;
 
-            ItemTemplate proto = item.GetTemplate();
-            if (proto == null)
-                return;
-
-            for (byte i = 0; i < proto.Effects.Count; ++i)
+            foreach (ItemEffectRecord effectData in item.GetEffects())
             {
-                var spellData = proto.Effects[i];
-
-                // no spell
-                if (spellData.SpellID == 0)
-                    continue;
-
                 // wrong triggering type
-                if (apply && spellData.TriggerType != ItemSpelltriggerType.OnEquip)
+                if (apply && effectData.TriggerType != ItemSpelltriggerType.OnEquip)
                     continue;
 
                 // check if it is valid spell
-                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
+                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
                 if (spellproto == null)
                     continue;
 
@@ -4290,7 +4280,7 @@ namespace Game.Entities
                     && Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
                     continue;
 
-                if (spellData.ChrSpecializationID != 0 && spellData.ChrSpecializationID != GetPrimarySpecialization())
+                if (effectData.ChrSpecializationID != 0 && effectData.ChrSpecializationID != GetPrimarySpecialization())
                     continue;
 
                 ApplyEquipSpell(spellproto, item, apply, formChange);
@@ -4340,15 +4330,12 @@ namespace Game.Entities
 
         void ApplyEquipCooldown(Item pItem)
         {
-            ItemTemplate proto = pItem.GetTemplate();
-            if (proto.GetFlags().HasAnyFlag(ItemFlags.NoEquipCooldown))
+            if (pItem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.NoEquipCooldown))
                 return;
 
             DateTime now = GameTime.GetGameTimeSteadyPoint();
-            for (byte i = 0; i < proto.Effects.Count; ++i)
+            foreach (ItemEffectRecord effectData in pItem.GetEffects())
             {
-                var effectData = proto.Effects[i];
-
                 // apply proc cooldown to equip auras if we have any
                 if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {

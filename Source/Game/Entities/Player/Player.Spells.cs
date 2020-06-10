@@ -1499,19 +1499,18 @@ namespace Game.Entities
 
         public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
         {
-            ItemTemplate proto = item.GetTemplate();
             // special learning case
-            if (proto.Effects.Count >= 2)
+            if (item.GetBonus().EffectCount >= 2)
             {
-                if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
+                if (item.GetEffect(0).SpellID == 483 || item.GetEffect(0).SpellID == 55884)
                 {
-                    uint learn_spell_id = (uint)proto.Effects[0].SpellID;
-                    uint learning_spell_id = (uint)proto.Effects[1].SpellID;
+                    uint learn_spell_id = (uint)item.GetEffect(0).SpellID;
+                    uint learning_spell_id = (uint)item.GetEffect(1).SpellID;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", proto.GetId(), learn_spell_id);
+                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", item.GetEntry(), learn_spell_id);
                         SendEquipError(InventoryResult.InternalBagError, item);
                         return;
                     }
@@ -1532,22 +1531,16 @@ namespace Game.Entities
             }
 
             // item spells casted at use
-            for (byte i = 0; i < proto.Effects.Count; ++i)
+            foreach (ItemEffectRecord effectData in item.GetEffects())
             {
-                var spellData = proto.Effects[i];
-
-                // no spell
-                if (spellData.SpellID == 0)
-                    continue;
-
                 // wrong triggering type
-                if (spellData.TriggerType != ItemSpelltriggerType.OnUse)
+                if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
                 if (spellInfo == null)
                 {
-                    Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", proto.GetId(), spellData.SpellID);
+                    Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", item.GetEntry(), effectData.SpellID);
                     continue;
                 }
 
@@ -1791,13 +1784,12 @@ namespace Game.Entities
 
         void ApplyItemObtainSpells(Item item, bool apply)
         {
-            ItemTemplate itemTemplate = item.GetTemplate();
-            for (byte i = 0; i < itemTemplate.Effects.Count; ++i)
+            foreach (ItemEffectRecord effect in item.GetEffects())
             {
-                if (itemTemplate.Effects[i].TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
+                if (effect.TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
                     continue;
 
-                int spellId = itemTemplate.Effects[i].SpellID;
+                int spellId = effect.SpellID;
                 if (spellId <= 0)
                     continue;
 
@@ -3331,22 +3323,16 @@ namespace Game.Entities
             bool canTrigger = damageInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb);
             if (canTrigger)
             {
-                for (byte i = 0; i < proto.Effects.Count; ++i)
+                foreach (ItemEffectRecord effectData in item.GetEffects())
                 {
-                    var spellData = proto.Effects[i];
-
-                    // no spell
-                    if (spellData.SpellID == 0)
-                        continue;
-
                     // wrong triggering type
-                    if (spellData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
+                    if (effectData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", spellData.SpellID);
+                        Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", effectData.SpellID);
                         continue;
                     }
 

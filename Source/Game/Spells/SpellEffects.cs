@@ -5275,9 +5275,9 @@ namespace Game.Spells
             Item item = player.GetItemByEntry(effectInfo.ItemType);
             if (item != null)
             {
-                ItemTemplate proto = item.GetTemplate();
-                for (int x = 0; x < proto.Effects.Count && x < 5; ++x)
-                    item.SetSpellCharges(x, proto.Effects[x].Charges);
+                foreach (ItemEffectRecord itemEffect in item.GetEffects())
+                    if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize())
+                        item.SetSpellCharges(itemEffect.LegacySlotIndex, itemEffect.Charges);
 
                 item.SetState(ItemUpdateState.Changed, player);
             }
