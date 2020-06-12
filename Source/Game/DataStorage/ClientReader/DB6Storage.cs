@@ -45,11 +45,10 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    var id = result.Read<uint>(indexField == -1 ? 0 : indexField);
-
                     var obj = new T();
 
                     int dbIndex = 0;
+                    var fields = typeof(T).GetFields();
                     foreach (var f in typeof(T).GetFields())
                     {
                         Type type = f.FieldType;
@@ -81,6 +80,12 @@ namespace Game.DataStorage
                                 case TypeCode.UInt32:
                                     f.SetValue(obj, ReadArray<uint>(result, dbIndex, array.Length));
                                     break;
+                                case TypeCode.Int64:
+                                    f.SetValue(obj, ReadArray<long>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.UInt64:
+                                    f.SetValue(obj, ReadArray<ulong>(result, dbIndex, array.Length));
+                                    break;
                                 case TypeCode.Single:
                                     f.SetValue(obj, ReadArray<float>(result, dbIndex, array.Length));
                                     break;
@@ -89,8 +94,18 @@ namespace Game.DataStorage
                                     break;
                                 case TypeCode.Object:
                                     if (arrayElementType == typeof(Vector3))
-                                        f.SetValue(obj, new Vector3(ReadArray<float>(result, dbIndex, 3)));
-                                    break;
+                                    {
+                                        float[] values = ReadArray<float>(result, dbIndex, array.Length * 3);
+
+                                        Vector3[] vectors = new Vector3[array.Length];
+                                        for (var i = 0; i < array.Length; ++i)
+                                            vectors[i] = new Vector3(values[(i * 3)..(3 + (i * 3))]);
+
+                                        f.SetValue(obj, vectors);
+
+                                        dbIndex += array.Length * 3;
+                                    }
+                                    continue;
                                 default:
                                     Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", arrayElementType.Name);
                                     break;
@@ -123,6 +138,12 @@ namespace Game.DataStorage
                                 case TypeCode.UInt32:
                                     f.SetValue(obj, result.Read<uint>(dbIndex++));
                                     break;
+                                case TypeCode.Int64:
+                                    f.SetValue(obj, result.Read<long>(dbIndex++));
+                                    break;
+                                case TypeCode.UInt64:
+                                    f.SetValue(obj, result.Read<ulong>(dbIndex++));
+                                    break;
                                 case TypeCode.Single:
                                     f.SetValue(obj, result.Read<float>(dbIndex++));
                                     break;
@@ -150,7 +171,7 @@ namespace Game.DataStorage
                                     }
                                     else if (type == typeof(FlagArray128))
                                     {
-                                        f.SetValue(obj, new FlagArray128(ReadArray<uint>(result, dbIndex, 4)));
+                                        f.SetValue(obj, new FlagArray128(ReadArray<int>(result, dbIndex, 4)));
                                         dbIndex += 4;
                                     }
                                     break;
@@ -161,6 +182,7 @@ namespace Game.DataStorage
                         }
                     }
 
+                    var id = (uint)fields[indexField == -1 ? 0 : indexField].GetValue(obj);
                     base[id] = obj;
                 }
                 while (result.NextRow());

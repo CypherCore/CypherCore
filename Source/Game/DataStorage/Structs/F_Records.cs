@@ -21,7 +21,7 @@ namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
-        public ulong[] ReputationRaceMask = new ulong[4];
+        public long[] ReputationRaceMask = new long[4];
         public LocalizedString Name;
         public string Description;
         public uint Id;

@@ -91,7 +91,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.GetRaceMask();
+            long raceMask = _player.GetRaceMask();
             uint classMask = _player.GetClassMask();
             for (var i = 0; i < 4; i++)
             {
@@ -149,7 +149,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.GetRaceMask();
+            long raceMask = _player.GetRaceMask();
             uint classMask = _player.GetClassMask();
             for (int i = 0; i < 4; i++)
             {

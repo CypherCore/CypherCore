@@ -343,7 +343,7 @@ namespace Game.DataStorage
         public uint VendorStackCount;
         public float PriceVariance;
         public float PriceRandomValue;
-        public uint[] Flags = new uint[4];
+        public int[] Flags = new int[4];
         public int FactionRelated;
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;

@@ -147,6 +147,15 @@ namespace Framework.Constants
         ArenaSkirmish = 4
     }
 
+    public enum BattlegroundPointCaptureStatus
+    {
+        AllianceControlled,
+        AllianceCapturing,
+        Neutral,
+        HordeCapturing,
+        HordeControlled
+    }
+
     public enum BattlegroundQueueInvitationType
     {
         NoBalance = 0, // no balance: N+M vs N players

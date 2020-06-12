@@ -6352,11 +6352,11 @@ namespace Game.Entities
                             if (exploration_percent < 0)
                                 exploration_percent = 0;
 
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(Global.ObjectMgr.GetBaseXP((byte)areaEntry.ExplorationLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else
                         {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaEntry.ExplorationLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(Global.ObjectMgr.GetBaseXP((byte)areaEntry.ExplorationLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
 
                         GiveXP(XP, null);
@@ -7220,7 +7220,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            ulong racemask = GetRaceMask();
+            long racemask = GetRaceMask();
             uint classmask = GetClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);

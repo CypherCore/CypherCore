@@ -2904,7 +2904,7 @@ namespace Game.Entities
                 uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
 
                 // Shred, Maul - "Effects which increase Bleed damage also increase Shred damage"
-                if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00008800))
+                if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[0].HasAnyFlag(0x00008800u))
                     mechanicMask |= (1 << (int)Mechanics.Bleed);
 
                 if (mechanicMask != 0)

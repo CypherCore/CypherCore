@@ -3640,7 +3640,7 @@ namespace Game.Entities
                     return false;
 
             if (raceMask != 0)                                // not in expected race
-                if (player == null || !Convert.ToBoolean(raceMask & player.GetRaceMask()))
+                if (player == null || !Convert.ToBoolean(raceMask & (ulong)player.GetRaceMask()))
                     return false;
 
             if (areaId != 0)                                  // not in expected zone

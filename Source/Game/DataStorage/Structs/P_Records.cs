@@ -34,7 +34,7 @@ namespace Game.DataStorage
 
     public sealed class PlayerConditionRecord
     {
-        public ulong RaceMask;
+        public long RaceMask;
         public string FailureDescription;
         public uint Id;
         public ushort MinLevel;

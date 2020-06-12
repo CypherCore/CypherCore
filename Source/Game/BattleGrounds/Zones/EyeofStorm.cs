@@ -20,6 +20,7 @@ using Framework.Constants;
 using System.Collections.Generic;
 using Game.Network.Packets;
 using Game.DataStorage;
+using Game.BattleGrounds;
 
 namespace Game.BattleGrounds.Zones
 {
@@ -28,7 +29,7 @@ namespace Game.BattleGrounds.Zones
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
             m_BuffChange = true;
-            BgObjects = new ObjectGuid[ABObjectTypes.Max];
+            BgObjects = new ObjectGuid[EotSObjectTypes.Max];
             BgCreatures= new ObjectGuid[EotSCreaturesTypes.Max];
             m_Points_Trigger[EotSPoints.FelReaver] = EotSPointsTrigger.FelReaverBuff;
             m_Points_Trigger[EotSPoints.BloodElf] = EotSPointsTrigger.BloodElfBuff;
@@ -52,6 +53,7 @@ namespace Game.BattleGrounds.Zones
                 m_PointOwnedByTeam[i] = Team.Other;
                 m_PointState[i] = EotSPointState.Uncontrolled;
                 m_PointBarStatus[i] = EotSProgressBarConsts.ProgressBarStateMiddle;
+                m_LastPointCaptureStatus[i] = BattlegroundPointCaptureStatus.Neutral;
             }
 
             for (byte i = 0; i < EotSPoints.PointsMax + 1; ++i)
@@ -96,7 +98,7 @@ namespace Game.BattleGrounds.Zones
                     /*I used this order of calls, because although we will check if one player is in gameobject's distance 2 times
                       but we can count of players on current point in CheckSomeoneLeftPoint
                     */
-                    CheckSomeoneJoinedPo();
+                    CheckSomeoneJoinedPoint();
                     //check if player left point
                     CheckSomeoneLeftPo();
                     UpdatePointStatuses();
@@ -161,7 +163,23 @@ namespace Game.BattleGrounds.Zones
             UpdateTeamScore(team_index);
         }
 
-        void CheckSomeoneJoinedPo()
+        BattlegroundPointCaptureStatus GetPointCaptureStatus(uint point)
+        {
+            if (m_PointBarStatus[point] >= EotSProgressBarConsts.ProgressBarAliControlled)
+                return BattlegroundPointCaptureStatus.AllianceControlled;
+
+            if (m_PointBarStatus[point] <= EotSProgressBarConsts.ProgressBarHordeControlled)
+                return BattlegroundPointCaptureStatus.HordeControlled;
+
+            if (m_CurrentPointPlayersCount[2 * point] == m_CurrentPointPlayersCount[2 * point + 1])
+                return BattlegroundPointCaptureStatus.Neutral;
+
+            return m_CurrentPointPlayersCount[2 * point] > m_CurrentPointPlayersCount[2 * point + 1]
+                ? BattlegroundPointCaptureStatus.AllianceCapturing
+                : BattlegroundPointCaptureStatus.HordeCapturing;
+        }
+        
+        void CheckSomeoneJoinedPoint()
         {
             GameObject obj;
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
@@ -244,51 +262,62 @@ namespace Game.BattleGrounds.Zones
         {
             for (byte point = 0; point < EotSPoints.PointsMax; ++point)
             {
-                if (m_PlayersNearPoint[point].Empty())
-                    continue;
-                //count new point bar status:
-                m_PointBarStatus[point] += (m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] < (int)EotSProgressBarConsts.PointMaxCapturersCount) ? m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] : (int)EotSProgressBarConsts.PointMaxCapturersCount;
-
-                if (m_PointBarStatus[point] > EotSProgressBarConsts.ProgressBarAliControlled)
-                    //point is fully alliance's
-                    m_PointBarStatus[point] = EotSProgressBarConsts.ProgressBarAliControlled;
-                if (m_PointBarStatus[point] < EotSProgressBarConsts.ProgressBarHordeControlled)
-                    //point is fully horde's
-                    m_PointBarStatus[point] = EotSProgressBarConsts.ProgressBarHordeControlled;
-
-                uint pointOwnerTeamId;
-                //find which team should own this point
-                if (m_PointBarStatus[point] <= EotSProgressBarConsts.ProgressBarNeutralLow)
-                    pointOwnerTeamId = (uint)Team.Horde;
-                else if (m_PointBarStatus[point] >= EotSProgressBarConsts.ProgressBarNeutralHigh)
-                    pointOwnerTeamId = (uint)Team.Alliance;
-                else
-                    pointOwnerTeamId = (uint)Team.Other;
-
-                for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
+                if (!m_PlayersNearPoint[point].Empty())
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
-                    if (player)
+                    //count new point bar status:
+                    int pointDelta = (int)(m_CurrentPointPlayersCount[2 * point]) - (int)(m_CurrentPointPlayersCount[2 * point + 1]);
+                    MathFunctions.RoundToInterval(ref pointDelta, -(int)EotSProgressBarConsts.PointMaxCapturersCount, EotSProgressBarConsts.PointMaxCapturersCount);
+                    m_PointBarStatus[point] += pointDelta;
+
+                    if (m_PointBarStatus[point] > EotSProgressBarConsts.ProgressBarAliControlled)
+                        //point is fully alliance's
+                        m_PointBarStatus[point] = EotSProgressBarConsts.ProgressBarAliControlled;
+                    if (m_PointBarStatus[point] < EotSProgressBarConsts.ProgressBarHordeControlled)
+                        //point is fully horde's
+                        m_PointBarStatus[point] = EotSProgressBarConsts.ProgressBarHordeControlled;
+
+                    uint pointOwnerTeamId;
+                    //find which team should own this point
+                    if (m_PointBarStatus[point] <= EotSProgressBarConsts.ProgressBarNeutralLow)
+                        pointOwnerTeamId = (uint)Team.Horde;
+                    else if (m_PointBarStatus[point] >= EotSProgressBarConsts.ProgressBarNeutralHigh)
+                        pointOwnerTeamId = (uint)Team.Alliance;
+                    else
+                        pointOwnerTeamId = (uint)EotSPointState.NoOwner;
+
+                    for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
                     {
-                        player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
-                        //if point owner changed we must evoke event!
-                        if (pointOwnerTeamId != (uint)m_PointOwnedByTeam[point])
+                        Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
+                        if (player)
                         {
-                            //point was uncontrolled and player is from team which captured point
-                            if (m_PointState[point] == EotSPointState.Uncontrolled && (uint)player.GetTeam() == pointOwnerTeamId)
-                                EventTeamCapturedPoint(player, point);
+                            player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
+                            //if point owner changed we must evoke event!
+                            if (pointOwnerTeamId != (uint)m_PointOwnedByTeam[point])
+                            {
+                                //point was uncontrolled and player is from team which captured point
+                                if (m_PointState[point] == EotSPointState.Uncontrolled && (uint)player.GetTeam() == pointOwnerTeamId)
+                                    EventTeamCapturedPoint(player, point);
 
-                            //point was under control and player isn't from team which controlled it
-                            if (m_PointState[point] == EotSPointState.UnderControl && player.GetTeam() != m_PointOwnedByTeam[point])
-                                EventTeamLostPoint(player, point);
+                                //point was under control and player isn't from team which controlled it
+                                if (m_PointState[point] == EotSPointState.UnderControl && player.GetTeam() != m_PointOwnedByTeam[point])
+                                    EventTeamLostPoint(player, point);
+                            }
+
+                            // @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
+                            if (point == EotSPoints.FelReaver && m_PointOwnedByTeam[point] == player.GetTeam())
+                                if (m_FlagState != 0 && GetFlagPickerGUID() == player.GetGUID())
+                                    if (player.GetDistance(2044.0f, 1729.729f, 1190.03f) < 3.0f)
+                                        EventPlayerCapturedFlag(player, EotSObjectTypes.FlagFelReaver);
                         }
-
-                        // @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
-                        if (point == EotSPoints.FelReaver && m_PointOwnedByTeam[point] == player.GetTeam())
-                            if (m_FlagState != 0 && GetFlagPickerGUID() == player.GetGUID())
-                                if (player.GetDistance(2044.0f, 1729.729f, 1190.03f) < 3.0f)
-                                    EventPlayerCapturedFlag(player, EotSObjectTypes.FlagFelReaver);
                     }
+                }
+
+                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
+                if (m_LastPointCaptureStatus[point] != captureStatus)
+                {
+                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, (uint)(captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0)));
+                    UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, (uint)(captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0)));
+                    m_LastPointCaptureStatus[point] = captureStatus;
                 }
             }
         }
@@ -811,6 +840,9 @@ namespace Game.BattleGrounds.Zones
             if (m_TeamPointsCount[team_id] > 0)
                 AddPoints(player.GetTeam(), EotSMisc.FlagPoints[m_TeamPointsCount[team_id] - 1]);
 
+            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateHorde, (int)EotSFlagState.OnBase);
+            UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (int)EotSFlagState.OnBase);
+
             UpdatePlayerScore(player, ScoreType.FlagCaptures, 1);
         }
 
@@ -860,14 +892,22 @@ namespace Game.BattleGrounds.Zones
             packet.AddState(0xAD2, 0x1);
             packet.AddState(0xAD1, 0x1);
 
-            packet.AddState(0xABE, (int)GetTeamScore(TeamId.Horde));
-            packet.AddState(0xABD, (int)GetTeamScore(TeamId.Alliance));
+            packet.AddState(EotSWorldStateIds.HordeResources, (int)GetTeamScore(TeamId.Horde));
+            packet.AddState(EotSWorldStateIds.AllianceResources, (int)GetTeamScore(TeamId.Alliance));
+            packet.AddState(EotSWorldStateIds.MaxResources, (int)EotSScoreIds.MaxTeamScore);
 
             packet.AddState(0xA05, 0x8E);
             packet.AddState(0xAA0, 0x0);
             packet.AddState(0xA9F, 0x0);
             packet.AddState(0xA9E, 0x0);
             packet.AddState(0xC0D, 0x17B);
+
+            for (byte point = 0; point < EotSPoints.PointsMax; ++point)
+            {
+                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
+                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0));
+                packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0));
+            }
         }
 
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
@@ -949,13 +989,9 @@ namespace Game.BattleGrounds.Zones
         public override ObjectGuid GetFlagPickerGUID(int team = -1) { return m_FlagKeeper; }
         void SetFlagPicker(ObjectGuid guid) { m_FlagKeeper = guid; }
         bool IsFlagPickedup() { return !m_FlagKeeper.IsEmpty(); }
-        byte GetFlagState() { return (byte)m_FlagState; }
 
         public override void SetDroppedFlagGUID(ObjectGuid guid, int TeamID = -1) { m_DroppedFlagGUID = guid; }
         ObjectGuid GetDroppedFlagGUID() { return m_DroppedFlagGUID; }
-
-        void RemovePo(Team TeamID, uint Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
-        void SetTeamPo(Team TeamID, uint Points = 0) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points; }
 
         uint[] m_HonorScoreTics = new uint[2];
         uint[] m_TeamPointsCount = new uint[2];
@@ -972,6 +1008,7 @@ namespace Game.BattleGrounds.Zones
         Team[] m_PointOwnedByTeam = new Team[EotSPoints.PointsMax];
         EotSPointState[] m_PointState = new EotSPointState[EotSPoints.PointsMax];
         EotSProgressBarConsts[] m_PointBarStatus = new EotSProgressBarConsts[EotSPoints.PointsMax];
+        BattlegroundPointCaptureStatus[] m_LastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.PointsMax];
         List<ObjectGuid>[] m_PlayersNearPoint = new List<ObjectGuid>[EotSPoints.PointsMax + 1];
         byte[] m_CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
 
@@ -1010,16 +1047,20 @@ namespace Game.BattleGrounds.Zones
 
     struct BattlegroundEYPointIconsStruct
     {
-        public BattlegroundEYPointIconsStruct(uint _WorldStateControlIndex, uint _WorldStateAllianceControlledIndex, uint _WorldStateHordeControlledIndex)
+        public BattlegroundEYPointIconsStruct(uint worldStateControlIndex, uint worldStateAllianceControlledIndex, uint worldStateHordeControlledIndex, uint worldStateAllianceStatusBarIcon, uint worldStateHordeStatusBarIcon)
         {
-            WorldStateControlIndex = _WorldStateControlIndex;
-            WorldStateAllianceControlledIndex = _WorldStateAllianceControlledIndex;
-            WorldStateHordeControlledIndex = _WorldStateHordeControlledIndex;
+            WorldStateControlIndex = worldStateControlIndex;
+            WorldStateAllianceControlledIndex = worldStateAllianceControlledIndex;
+            WorldStateHordeControlledIndex = worldStateHordeControlledIndex;
+            WorldStateAllianceStatusBarIcon = worldStateAllianceStatusBarIcon;
+            WorldStateHordeStatusBarIcon = worldStateHordeStatusBarIcon;
         }
 
         public uint WorldStateControlIndex;
         public uint WorldStateAllianceControlledIndex;
         public uint WorldStateHordeControlledIndex;
+        public uint WorldStateAllianceStatusBarIcon;
+        public uint WorldStateHordeStatusBarIcon;
     }
 
     struct BattlegroundEYLosingPointStruct
@@ -1090,10 +1131,10 @@ namespace Game.BattleGrounds.Zones
 
         public static BattlegroundEYPointIconsStruct[] m_PointsIconStruct =
         {
-            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.FelReaverUncontrol, EotSWorldStateIds.FelReaverAllianceControl, EotSWorldStateIds.FelReaverHordeControl),
-            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.BloodElfUncontrol, EotSWorldStateIds.BloodElfAllianceControl, EotSWorldStateIds.BloodElfHordeControl),
-            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.DraeneiRuinsUncontrol, EotSWorldStateIds.DraeneiRuinsAllianceControl, EotSWorldStateIds.DraeneiRuinsHordeControl),
-            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.MageTowerUncontrol, EotSWorldStateIds.MageTowerAllianceControl, EotSWorldStateIds.MageTowerHordeControl)
+            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.FelReaverUncontrol, EotSWorldStateIds.FelReaverAllianceControl, EotSWorldStateIds.FelReaverHordeControl, EotSWorldStateIds.FelReaverAllianceControlState, EotSWorldStateIds.FelReaverHordeControlState),
+            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.BloodElfUncontrol, EotSWorldStateIds.BloodElfAllianceControl, EotSWorldStateIds.BloodElfHordeControl, EotSWorldStateIds.BloodElfAllianceControlState, EotSWorldStateIds.BloodElfHordeControlState),
+            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.DraeneiRuinsUncontrol, EotSWorldStateIds.DraeneiRuinsAllianceControl, EotSWorldStateIds.DraeneiRuinsHordeControl, EotSWorldStateIds.DraeneiRuinsAllianceControlState, EotSWorldStateIds.DraeneiRuinsHordeControlState),
+            new BattlegroundEYPointIconsStruct(EotSWorldStateIds.MageTowerUncontrol, EotSWorldStateIds.MageTowerAllianceControl, EotSWorldStateIds.MageTowerHordeControl, EotSWorldStateIds.MageTowerAllianceControlState, EotSWorldStateIds.MageTowerHordeControlState)
         };
         public static BattlegroundEYLosingPointStruct[] m_LosingPointTypes =
         {
@@ -1142,8 +1183,9 @@ namespace Game.BattleGrounds.Zones
 
     struct EotSWorldStateIds
     {
-        public const uint AllianceResources = 2749;
-        public const uint HordeResources = 2750;
+        public const uint AllianceResources = 1776;
+        public const uint HordeResources = 1777;
+        public const uint MaxResources = 1780;
         public const uint AllianceBase = 2752;
         public const uint HordeBase = 2753;
         public const uint DraeneiRuinsHordeControl = 2733;
@@ -1163,8 +1205,17 @@ namespace Game.BattleGrounds.Zones
         public const uint ProgressBarShow = 2718;                 //1 Init; 0 Druhy Send - Bez Messagu; 1 = Controlled Aliance
         public const uint NetherstormFlag = 2757;
         //Set To 2 When Flag Is Picked Up; And To 1 If It Is Dropped
-        public const uint NetherstormFlagStateAlliance = 2769;
-        public const uint NetherstormFlagStateHorde = 2770;
+        public const uint NetherstormFlagStateAlliance = 9808;
+        public const uint NetherstormFlagStateHorde = 9809;
+
+        public const uint DraeneiRuinsHordeControlState = 17362;
+        public const uint DraeneiRuinsAllianceControlState = 17366;
+        public const uint MageTowerHordeControlState = 17361;
+        public const uint MageTowerAllianceControlState = 17368;
+        public const uint FelReaverHordeControlState = 17364;
+        public const uint FelReaverAllianceControlState = 17367;
+        public const uint BloodElfHordeControlState = 17363;
+        public const uint BloodElfAllianceControlState = 17365;
     }
 
     enum EotSProgressBarConsts

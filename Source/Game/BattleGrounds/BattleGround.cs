@@ -855,7 +855,6 @@ namespace Game.BattleGrounds
 
             RemovePlayer(player, guid, team);                           // BG subclass specific code
 
-            BattlegroundTypeId bgTypeId = GetTypeID();
             BattlegroundQueueTypeId bgQueueTypeId = GetQueueId();
 
             if (participant) // if the player was a match participant, remove auras, calc rating, update queue
@@ -867,8 +866,6 @@ namespace Game.BattleGrounds
                     // if arena, remove the specific arena auras
                     if (IsArena())
                     {
-                        bgTypeId = BattlegroundTypeId.AA;                   // set the bg type to all arenas (it will be used for queue refreshing)
-
                         // unsummon current and summon old pet if there was one and there isn't a current pet
                         player.RemovePet(null, PetSaveMode.NotInSlot);
                         player.ResummonPetTemporaryUnSummonedIfAny();

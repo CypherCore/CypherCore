@@ -190,9 +190,8 @@ namespace Game.Spells
             if (_interrupt != null)
             {
                 InterruptFlags = (SpellInterruptFlags)_interrupt.InterruptFlags;
-                // TODO: 6.x these flags have 2 parts
-                AuraInterruptFlags = _interrupt.AuraInterruptFlags;
-                ChannelInterruptFlags = _interrupt.ChannelInterruptFlags;
+                Array.Copy(_interrupt.AuraInterruptFlags, AuraInterruptFlags, 2);
+                Array.Copy(_interrupt.ChannelInterruptFlags, ChannelInterruptFlags, 2);
             }
 
             // SpellLevelsEntry
@@ -1271,11 +1270,11 @@ namespace Game.Spells
 
                 var vehicleSeat = vehicle.GetSeatForPassenger(caster);
                 if (!HasAttribute(SpellAttr6.CastableWhileOnVehicle) && !HasAttribute(SpellAttr0.CastableWhileMounted)
-                    && (vehicleSeat.Flags & checkMask) != checkMask)
+                    && (vehicleSeat.Flags & (int)checkMask) != (int)checkMask)
                     return SpellCastResult.CantDoThatRightNow;
 
                 // Can only summon uncontrolled minions/guardians when on controlled vehicle
-                if (vehicleSeat.Flags.HasAnyFlag((VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2)))
+                if (vehicleSeat.HasSeatFlag(VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2))
                 {
                     foreach (SpellEffectInfo effect in GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
                     {

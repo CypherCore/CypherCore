@@ -49,8 +49,8 @@ namespace Game.DataStorage
         public uint Id;
         public Vector3 AttachmentOffset;
         public Vector3 CameraOffset;
-        public VehicleSeatFlags Flags;
-        public VehicleSeatFlagsB FlagsB;
+        public int Flags;
+        public int FlagsB;
         public int FlagsC;
         public sbyte AttachmentID;
         public float EnterPreDelay;
@@ -111,17 +111,27 @@ namespace Game.DataStorage
 
         public bool CanEnterOrExit()
         {
-            return (Flags.HasAnyFlag(VehicleSeatFlags.CanEnterOrExit) ||
+            return (HasSeatFlag(VehicleSeatFlags.CanEnterOrExit) ||
                 //If it has anmation for enter/ride, means it can be entered/exited by logic
-                Flags.HasAnyFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
+                HasSeatFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
         }
-        public bool CanSwitchFromSeat() { return (Flags & VehicleSeatFlags.CanSwitch) != 0; }
+        public bool CanSwitchFromSeat() { return Flags.HasAnyFlag((int)VehicleSeatFlags.CanSwitch); }
         public bool IsUsableByOverride()
         {
-            return Flags.HasAnyFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)
-                || FlagsB.HasAnyFlag(VehicleSeatFlagsB.UsableForced | VehicleSeatFlagsB.UsableForced2 |
+            return HasSeatFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)
+                || HasSeatFlag(VehicleSeatFlagsB.UsableForced | VehicleSeatFlagsB.UsableForced2 |
                     VehicleSeatFlagsB.UsableForced3 | VehicleSeatFlagsB.UsableForced4);
         }
-        public bool IsEjectable() { return FlagsB.HasAnyFlag(VehicleSeatFlagsB.Ejectable); }
+        public bool IsEjectable() { return HasSeatFlag(VehicleSeatFlagsB.Ejectable); }
+
+        public bool HasSeatFlag(VehicleSeatFlags flag)
+        {
+            return Flags.HasAnyFlag((int)flag);
+        }
+
+        public bool HasSeatFlag(VehicleSeatFlagsB flag)
+        {
+            return FlagsB.HasAnyFlag((int)flag);
+        }
     }
 }

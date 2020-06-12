@@ -919,8 +919,6 @@ namespace Game.BattleGrounds.Zones
         ObjectGuid GetDroppedFlagGUID(Team team) { return m_DroppedFlagGUID[GetTeamIndexByTeamId(team)]; }
 
         void AddPoint(Team team, uint Points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] += Points; }
-        void SetTeamPoint(Team team, uint Points = 0) { m_TeamScores[GetTeamIndexByTeamId(team)] = Points; }
-        void RemovePoint(Team team, uint Points = 1) { m_TeamScores[GetTeamIndexByTeamId(team)] -= Points; }
 
         ObjectGuid[] m_FlagKeepers = new ObjectGuid[2];                            // 0 - alliance, 1 - horde
         ObjectGuid[] m_DroppedFlagGUID = new ObjectGuid[2];

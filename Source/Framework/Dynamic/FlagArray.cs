@@ -28,6 +28,13 @@ namespace Framework.Dynamic
                 _values[i] = parts[i];
         }
 
+        public FlagArray128(int[] parts)
+        {
+            _values = new uint[4];
+            for (var i = 0; i < parts.Length; ++i)
+                _values[i] = (uint)parts[i];
+        }
+
         public bool IsEqual(params uint[] parts)
         {
             for (var i = 0; i < _values.Length; ++i)

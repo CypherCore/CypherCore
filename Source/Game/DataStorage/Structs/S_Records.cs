@@ -107,7 +107,7 @@ namespace Game.DataStorage
 
     public sealed class SkillLineAbilityRecord
     {
-        public ulong RaceMask;
+        public long RaceMask;
         public uint Id;
         public ushort SkillLine;
         public uint Spell;
@@ -326,8 +326,8 @@ namespace Game.DataStorage
         public uint Id;
         public byte DifficultyID;
         public short InterruptFlags;
-        public uint[] AuraInterruptFlags = new uint[2];
-        public uint[] ChannelInterruptFlags = new uint[2];
+        public int[] AuraInterruptFlags = new int[2];
+        public int[] ChannelInterruptFlags = new int[2];
         public uint SpellID;
     }
 

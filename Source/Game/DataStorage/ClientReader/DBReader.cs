@@ -439,6 +439,9 @@ namespace Game.DataStorage
                         case TypeCode.UInt32:
                             f.SetValue(obj, GetFieldValueArray<uint>(fieldIndex, atr.Length));
                             break;
+                        case TypeCode.Int64:
+                            f.SetValue(obj, GetFieldValueArray<long>(fieldIndex, atr.Length));
+                            break;
                         case TypeCode.UInt64:
                             f.SetValue(obj, GetFieldValueArray<ulong>(fieldIndex, atr.Length));
                             break;

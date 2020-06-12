@@ -2092,7 +2092,7 @@ namespace Game.Entities
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
-        public ulong GetRaceMask() { return 1ul << ((int)GetRace() - 1); }
+        public long GetRaceMask() { return 1L << ((int)GetRace() - 1); }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
         public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
         public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }

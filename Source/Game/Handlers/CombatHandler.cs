@@ -52,7 +52,7 @@ namespace Game
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
                 Cypher.Assert(seat != null);
-                if (!seat.Flags.HasAnyFlag(VehicleSeatFlags.CanAttack))
+                if (!seat.HasSeatFlag(VehicleSeatFlags.CanAttack))
                 {
                     SendAttackStop(enemy);
                     return;

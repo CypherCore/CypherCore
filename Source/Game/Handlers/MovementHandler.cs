@@ -163,7 +163,7 @@ namespace Game
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(mover);
                 if (seat != null)
                 {
-                    if (seat.Flags.HasAnyFlag(VehicleSeatFlags.AllowTurning))
+                    if (seat.HasSeatFlag(VehicleSeatFlags.AllowTurning))
                     {
                         if (movementInfo.Pos.GetOrientation() != mover.GetOrientation())
                         {

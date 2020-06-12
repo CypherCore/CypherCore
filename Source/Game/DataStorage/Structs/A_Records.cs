@@ -79,13 +79,13 @@ namespace Game.DataStorage
         public ushort UwAmbience;
         public ushort ZoneMusic;
         public ushort UwZoneMusic;
-        public byte ExplorationLevel;
+        public sbyte ExplorationLevel;
         public ushort IntroSound;
         public uint UwIntroSound;
         public byte FactionGroupMask;
         public float AmbientMultiplier;
         public byte MountFlags;
-        public ushort PvpCombastWorldStateID;
+        public short PvpCombastWorldStateID;
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
