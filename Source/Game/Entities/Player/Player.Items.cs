@@ -4183,14 +4183,11 @@ namespace Game.Entities
                     case ItemModType.PvpPower:
                         ApplyRatingMod(CombatRating.PvpPower, val, apply);
                         break;
-                    case ItemModType.CrAmplify:
-                        ApplyRatingMod(CombatRating.Amplify, val, apply);
+                    case ItemModType.Corruption:
+                        ApplyRatingMod(CombatRating.Corruption, val, apply);
                         break;
-                    case ItemModType.CrMultistrike:
-                        ApplyRatingMod(CombatRating.Multistrike, val, apply);
-                        break;
-                    case ItemModType.CrReadiness:
-                        ApplyRatingMod(CombatRating.Readiness, (int)(val * combatRatingMultiplier), apply);
+                    case ItemModType.CorruptionResistance:
+                        ApplyRatingMod(CombatRating.CorruptionResistance, val, apply);
                         break;
                     case ItemModType.CrSpeed:
                         ApplyRatingMod(CombatRating.Speed, (int)(val * combatRatingMultiplier), apply);
@@ -4203,15 +4200,6 @@ namespace Game.Entities
                         break;
                     case ItemModType.CrSturdiness:
                         ApplyRatingMod(CombatRating.Studiness, (int)(val * combatRatingMultiplier), apply);
-                        break;
-                    case ItemModType.CrUnused7:
-                        ApplyRatingMod(CombatRating.Unused7, val, apply);
-                        break;
-                    case ItemModType.CrCleave:
-                        ApplyRatingMod(CombatRating.Cleave, val, apply);
-                        break;
-                    case ItemModType.CrUnused12:
-                        ApplyRatingMod(CombatRating.Unused12, val, apply);
                         break;
                     case ItemModType.AgiStrInt:
                         HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);

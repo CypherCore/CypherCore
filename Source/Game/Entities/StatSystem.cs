@@ -1377,6 +1377,10 @@ namespace Game.Entities
                     if (affectStats)
                         UpdateSpellCritChance();
                     break;
+                case CombatRating.Corruption:
+                case CombatRating.CorruptionResistance:
+                    UpdateCorruption();
+                    break;
                 case CombatRating.HasteMelee:
                 case CombatRating.HasteRanged:
                 case CombatRating.HasteSpell:
@@ -1487,6 +1491,34 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref value, auraEffect.GetAmount());
 
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent), value);
+        }
+
+        void UpdateCorruption()
+        {
+            float effectiveCorruption = GetRatingBonusValue(CombatRating.Corruption) - GetRatingBonusValue(CombatRating.CorruptionResistance);
+            foreach (var corruptionEffect in CliDB.CorruptionEffectsStorage.Values)
+            {
+                if (((CorruptionEffectsFlag)corruptionEffect.Flags).HasAnyFlag(CorruptionEffectsFlag.Disabled))
+                    continue;
+
+                if (effectiveCorruption < corruptionEffect.MinCorruption)
+                {
+                    RemoveAura(corruptionEffect.Aura);
+                    continue;
+                }
+
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(corruptionEffect.PlayerConditionID);
+                if (playerCondition != null)
+                {
+                    if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    {
+                        RemoveAura(corruptionEffect.Aura);
+                        continue;
+                    }
+                }
+
+                CastSpell(this, corruptionEffect.Aura, true);
+            }
         }
 
         void UpdateArmorPenetration(int amount)
@@ -1702,10 +1734,10 @@ namespace Game.Entities
                     return row.CritRanged;
                 case CombatRating.CritSpell:
                     return row.CritSpell;
-                case CombatRating.Multistrike:
-                    return row.MultiStrike;
-                case CombatRating.Readiness:
-                    return row.Readiness;
+                case CombatRating.Corruption:
+                    return row.Corruption;
+                case CombatRating.CorruptionResistance:
+                    return row.CorruptionResistance;
                 case CombatRating.Speed:
                     return row.Speed;
                 case CombatRating.ResilienceCritTaken:

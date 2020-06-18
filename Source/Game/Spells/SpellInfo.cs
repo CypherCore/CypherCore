@@ -3820,7 +3820,7 @@ namespace Game.Spells
                         }
                     }
 
-                    if (IsAura(AuraType.ModRating))
+                    if (IsAura(AuraType.ModRating) && (MiscValue & ((1 << (int)CombatRating.Corruption) | 1 << ((int)CombatRating.CorruptionResistance))) == 0)
                     {
                         GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
                         if (ratingMult != null)

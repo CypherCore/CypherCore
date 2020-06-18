@@ -62,8 +62,8 @@ namespace Game.DataStorage
         public float CritMelee;
         public float CritRanged;
         public float CritSpell;
-        public float MultiStrike;
-        public float Readiness;
+        public float Corruption;
+        public float CorruptionResistance;
         public float Speed;
         public float ResilienceCritTaken;
         public float ResiliencePlayerDamage;

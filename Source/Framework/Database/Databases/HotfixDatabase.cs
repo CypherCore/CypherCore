@@ -257,6 +257,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CONVERSATION_LINE, "SELECT ID, BroadcastTextID, SpellVisualKitID, AdditionalDuration, NextConversationLineID, " +        
                 "AnimKitID, SpeechType, StartAnimation, EndAnimation FROM conversation_line");
 
+            // CorruptionEffects.db2
+            PrepareStatement(HotfixStatements.SEL_CORRUPTION_EFFECTS, "SELECT ID, MinCorruption, Aura, PlayerConditionID, Flags FROM corruption_effects");
+
             // CreatureDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_DISPLAY_INFO, "SELECT ID, ModelID, SoundID, SizeClass, CreatureModelScale, CreatureModelAlpha, BloodID, " +        
                 "ExtendedDisplayInfoID, NPCSoundID, ParticleColorID, PortraitCreatureDisplayInfoID, PortraitTextureFileDataID, ObjectEffectPackageID, " +        
@@ -1259,6 +1262,8 @@ namespace Framework.Database
         SEL_CONTENT_TUNING_X_EXPECTED,
 
         SEL_CONVERSATION_LINE,
+
+        SEL_CORRUPTION_EFFECTS,
 
         SEL_CREATURE_DISPLAY_INFO,
 

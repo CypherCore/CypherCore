@@ -91,6 +91,7 @@ namespace Game.DataStorage
             ContentTuningStorage = DBReader.Read<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
             ContentTuningXExpectedStorage = DBReader.Read<ContentTuningXExpectedRecord>("ContentTuningXExpected.db2", HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED);
             ConversationLineStorage = DBReader.Read<ConversationLineRecord>("ConversationLine.db2", HotfixStatements.SEL_CONVERSATION_LINE);
+            CorruptionEffectsStorage = DBReader.Read<CorruptionEffectsRecord>("CorruptionEffects.db2", HotfixStatements.SEL_CORRUPTION_EFFECTS);
             CreatureDisplayInfoStorage = DBReader.Read<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
             CreatureDisplayInfoExtraStorage = DBReader.Read<CreatureDisplayInfoExtraRecord>("CreatureDisplayInfoExtra.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO_EXTRA);
             CreatureFamilyStorage = DBReader.Read<CreatureFamilyRecord>("CreatureFamily.db2", HotfixStatements.SEL_CREATURE_FAMILY, HotfixStatements.SEL_CREATURE_FAMILY_LOCALE);
@@ -432,6 +433,7 @@ namespace Game.DataStorage
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
         public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;
         public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
+        public static DB6Storage<CorruptionEffectsRecord> CorruptionEffectsStorage;
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
         public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage;
         public static DB6Storage<CreatureFamilyRecord> CreatureFamilyStorage;

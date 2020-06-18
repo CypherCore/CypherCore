@@ -663,7 +663,6 @@ namespace Game.DataStorage
                 hotfixRecord.RecordID = recordId;
                 hotfixRecord.HotfixID = id;
                 _hotfixData.Add(hotfixRecord);
-                ++_hotfixCount;
                 deletedRecords[Tuple.Create(tableHash, recordId)] = deleted;
 
                 ++count;
@@ -711,7 +710,8 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_hotfixBlob.Count} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public uint GetHotfixCount() { return _hotfixCount; }
+        public uint GetHotfixCount() { return (uint)_hotfixData.Count; }
+        
         public List<HotfixRecord> GetHotfixData() { return _hotfixData; }
 
         public byte[] GetHotfixBlobData(uint tableHash, int recordId)
@@ -2054,7 +2054,6 @@ namespace Game.DataStorage
         }
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
-        uint _hotfixCount = 0;
         List<HotfixRecord> _hotfixData = new List<HotfixRecord>();
         Dictionary<Tuple<uint, int>, byte[]> _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>();
 

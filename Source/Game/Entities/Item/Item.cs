@@ -1810,6 +1810,15 @@ namespace Game.Entities
         public int GetItemStatValue(uint index, Player owner)
         {
             Cypher.Assert(index < ItemConst.MaxStats);
+            switch ((ItemModType)GetItemStatType(index))
+            {
+                case ItemModType.Corruption:
+                case ItemModType.CorruptionResistance:
+                    return _bonusData.ItemStatAllocation[index];
+                default:
+                    break;
+            }
+
             uint itemLevel = GetItemLevel(owner);
             uint randomPropPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
             if (randomPropPoints != 0)

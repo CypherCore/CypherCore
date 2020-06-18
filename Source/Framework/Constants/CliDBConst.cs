@@ -1945,4 +1945,10 @@ namespace Framework.Constants
 
         Max,
     }
+
+    public enum CorruptionEffectsFlag
+    {
+        None = 0,
+        Disabled = 0x1
+    }
 }
