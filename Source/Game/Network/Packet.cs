@@ -240,6 +240,6 @@ namespace Game.Network
             byteBuffer.WriteBytes(Tag, 12);
         }
 
-        public bool IsValidSize() { return Size < 0x10000; }
+        public bool IsValidSize() { return Size < 0x40000; }
     }
 }

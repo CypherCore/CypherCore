@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.GameMath;
+using Game.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -657,7 +658,11 @@ namespace Game.DataStorage
                     continue;
                 }
 
-                _hotfixData.Add(id, Tuple.Create(tableHash, recordId));
+                HotfixRecord hotfixRecord = new HotfixRecord();
+                hotfixRecord.TableHash = tableHash;
+                hotfixRecord.RecordID = recordId;
+                hotfixRecord.HotfixID = id;
+                _hotfixData.Add(hotfixRecord);
                 ++_hotfixCount;
                 deletedRecords[Tuple.Create(tableHash, recordId)] = deleted;
 
@@ -707,7 +712,7 @@ namespace Game.DataStorage
         }
 
         public uint GetHotfixCount() { return _hotfixCount; }
-        public MultiMap<int, Tuple<uint, int>> GetHotfixData() { return _hotfixData; }
+        public List<HotfixRecord> GetHotfixData() { return _hotfixData; }
 
         public byte[] GetHotfixBlobData(uint tableHash, int recordId)
         {
@@ -2050,7 +2055,7 @@ namespace Game.DataStorage
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
         uint _hotfixCount = 0;
-        MultiMap<int, Tuple<uint, int>> _hotfixData = new MultiMap<int, Tuple<uint, int>>();
+        List<HotfixRecord> _hotfixData = new List<HotfixRecord>();
         Dictionary<Tuple<uint, int>, byte[]> _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>();
 
         MultiMap<uint, uint> _areaGroupMembers = new MultiMap<uint, uint>();
@@ -2282,6 +2287,27 @@ namespace Game.DataStorage
         }
     }
 
+    public struct HotfixRecord
+    {
+        public uint TableHash;
+        public int RecordID;
+        public int HotfixID;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TableHash);
+            data.WriteInt32(RecordID);
+            data.WriteInt32(HotfixID);
+        }
+
+        public void Read(WorldPacket data)
+        {
+            TableHash = data.ReadUInt32();
+            RecordID = data.ReadInt32();
+            HotfixID = data.ReadInt32();
+        }
+    }
+    
     class ChrClassesXPowerTypesRecordComparer : IComparer<ChrClassesXPowerTypesRecord>
     {
         public int Compare(ChrClassesXPowerTypesRecord left, ChrClassesXPowerTypesRecord right)

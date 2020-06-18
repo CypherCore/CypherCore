@@ -70,33 +70,29 @@ namespace Game
             HotfixResponse hotfixQueryResponse = new HotfixResponse();
             foreach (HotfixRecord hotfixRecord in hotfixQuery.Hotfixes)
             {
-                var hotfixedRecords = hotfixes.LookupByKey(hotfixRecord.HotfixID);
-                if (!hotfixedRecords.Empty())
+                if (hotfixes.Contains(hotfixRecord))
                 {
-                    foreach (var tableRecord in hotfixedRecords)
+                    var storage = Global.DB2Mgr.GetStorage(hotfixRecord.TableHash);
+
+                    HotfixResponse.HotfixData hotfixData = new HotfixResponse.HotfixData();
+                    hotfixData.Record = hotfixRecord;
+                    if (storage != null && storage.HasRecord((uint)hotfixRecord.RecordID))
                     {
-                        var storage = Global.DB2Mgr.GetStorage(hotfixRecord.TableHash);
-
-                        HotfixResponse.HotfixData hotfixData = new HotfixResponse.HotfixData();
-                        hotfixData.Record = hotfixRecord;
-                        if (storage != null && storage.HasRecord((uint)hotfixData.Record.RecordID))
-                        {
-                            uint pos = hotfixQueryResponse.HotfixContent.GetSize();
-                            storage.WriteRecord((uint)hotfixData.Record.RecordID, GetSessionDbcLocale(), hotfixQueryResponse.HotfixContent);
-                            hotfixData.Size.Set(hotfixQueryResponse.HotfixContent.GetSize() - pos);
-                        }
-                        else
-                        {
-                            byte[] blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixData.Record.TableHash, hotfixData.Record.RecordID);
-                            if (blobData != null)
-                            {
-                                hotfixData.Size.Set((uint)blobData.Length);
-                                hotfixQueryResponse.HotfixContent.WriteBytes(blobData);
-                            }
-                        }
-
-                        hotfixQueryResponse.Hotfixes.Add(hotfixData);
+                        uint pos = hotfixQueryResponse.HotfixContent.GetSize();
+                        storage.WriteRecord((uint)hotfixRecord.RecordID, GetSessionDbcLocale(), hotfixQueryResponse.HotfixContent);
+                        hotfixData.Size.Set(hotfixQueryResponse.HotfixContent.GetSize() - pos);
                     }
+                    else
+                    {
+                        byte[] blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID);
+                        if (blobData != null)
+                        {
+                            hotfixData.Size.Set((uint)blobData.Length);
+                            hotfixQueryResponse.HotfixContent.WriteBytes(blobData);
+                        }
+                    }
+
+                    hotfixQueryResponse.Hotfixes.Add(hotfixData);
                 }
             }
 

@@ -21,6 +21,7 @@ using Framework.IO;
 using Game.Entities;
 using System.Collections.Generic;
 using System;
+using Game.DataStorage;
 
 namespace Game.Network.Packets
 {
@@ -77,7 +78,7 @@ namespace Game.Network.Packets
 
     class AvailableHotfixes : ServerPacket
     {
-        public AvailableHotfixes(int hotfixCacheVersion, uint hotfixCount, MultiMap<int, Tuple<uint, int>> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
+        public AvailableHotfixes(int hotfixCacheVersion, uint hotfixCount, List<HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
             HotfixCacheVersion = hotfixCacheVersion;
             HotfixCount = hotfixCount;
@@ -89,20 +90,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(HotfixCacheVersion);
             _worldPacket.WriteUInt32(HotfixCount);
 
-            foreach (var key in Hotfixes.Keys)
-            {
-                foreach (var tableRecord in Hotfixes[key])
-                {
-                    _worldPacket.WriteUInt32(tableRecord.Item1);
-                    _worldPacket.WriteInt32(tableRecord.Item2);
-                    _worldPacket.WriteInt32(key);
-                }
-            }
+            foreach (HotfixRecord hotfixRecord in Hotfixes)
+                hotfixRecord.Write(_worldPacket);
         }
 
         public int HotfixCacheVersion;
         public uint HotfixCount;
-        public MultiMap<int, Tuple<uint, int>> Hotfixes;
+        public List<HotfixRecord> Hotfixes;
     }
 
     class HotfixRequest : ClientPacket
@@ -116,7 +110,11 @@ namespace Game.Network.Packets
 
             uint hotfixCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < hotfixCount; ++i)
-                Hotfixes.Add(new HotfixRecord(_worldPacket));
+            {
+                HotfixRecord hotfixRecord = new HotfixRecord();
+                hotfixRecord.Read(_worldPacket);
+                Hotfixes.Add(hotfixRecord);
+            }
         }
 
         public uint ClientBuild;
@@ -162,26 +160,5 @@ namespace Game.Network.Packets
             public HotfixRecord Record;
             public Optional<uint> Size;
         }
-    }
-
-    public struct HotfixRecord
-    {
-        public HotfixRecord(WorldPacket data)
-        {
-            TableHash = data.ReadUInt32();
-            RecordID = data.ReadInt32();
-            HotfixID = data.ReadInt32();
-        }
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(TableHash);
-            data.WriteInt32(RecordID);
-            data.WriteInt32(HotfixID);
-        }
-
-        public uint TableHash;
-        public int RecordID;
-        public int HotfixID;
     }
 }
