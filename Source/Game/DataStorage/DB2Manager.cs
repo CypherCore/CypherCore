@@ -652,9 +652,9 @@ namespace Game.DataStorage
                 uint tableHash = result.Read<uint>(1);
                 int recordId = result.Read<int>(2);
                 bool deleted = result.Read<bool>(3);
-                if (!_storage.ContainsKey(tableHash) && !_hotfixBlob.ContainsKey(Tuple.Create(tableHash, recordId)))
+                if (!deleted && !_storage.ContainsKey(tableHash) && !_hotfixBlob.ContainsKey(Tuple.Create(tableHash, recordId)))
                 {
-                    Log.outError(LogFilter.Sql, "Table `hotfix_data` references unknown DB2 store by hash 0x{0:X} and has no reference to `hotfix_blob` in hotfix id {1}", tableHash, id);
+                    Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
                     continue;
                 }
 
