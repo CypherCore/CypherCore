@@ -228,7 +228,7 @@ namespace Game.Chat
 
         static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandNospellfound);

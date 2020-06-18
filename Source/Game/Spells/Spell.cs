@@ -40,10 +40,9 @@ namespace Game.Spells
         {
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
-            m_spellValue = new SpellValue(caster.GetMap().GetDifficultyID(), m_spellInfo, caster);
+            m_spellValue = new SpellValue(m_spellInfo, caster);
             m_preGeneratedPath = new PathGenerator(m_caster);
             m_castItemLevel = -1;
-            _effects = info.GetEffectsForDifficulty(caster.GetMap().GetDifficultyID());
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
             m_SpellVisual = caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
@@ -235,7 +234,7 @@ namespace Game.Spells
             SelectExplicitTargets();
 
             uint processedAreaEffectsMask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -330,11 +329,11 @@ namespace Game.Spells
                     // targets for effect already selected
                     if (Convert.ToBoolean(effectMask & processedEffectMask))
                         return;
-                    SpellEffectInfo _effect = GetEffect(effIndex);
+                    SpellEffectInfo _effect = m_spellInfo.GetEffect(effIndex);
                     if (_effect != null)
                     {
                         // choose which targets we can select at once
-                        foreach (SpellEffectInfo effect in GetEffects())
+                        foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                         {
                             if (effect == null || effect.EffectIndex <= effIndex)
                                 continue;
@@ -509,7 +508,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
 
@@ -644,7 +643,7 @@ namespace Game.Spells
             List<WorldObject> targets = new List<WorldObject>();
             SpellTargetObjectTypes objectType = targetType.GetObjectType();
             SpellTargetCheckTypes selectionType = targetType.GetCheckType();
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
 
@@ -732,7 +731,7 @@ namespace Game.Spells
                     return;
             }
             List<WorldObject> targets = new List<WorldObject>();
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
 
@@ -830,7 +829,7 @@ namespace Game.Spells
                         break;
                     }
                 default:
-                    SpellEffectInfo effect = GetEffect(effIndex);
+                    SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
                     if (effect != null)
                     {
                         float dist = effect.CalcRadius(m_caster);
@@ -882,11 +881,11 @@ namespace Game.Spells
 
             switch (targetType.GetTarget())
             {
-                case Targets.DestEnemy:
+                case Targets.DestTargetEnemy:
                 case Targets.DestAny:
                     break;
                 default:
-                    SpellEffectInfo effect = GetEffect(effIndex);
+                    SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
                     if (effect != null)
                     {
                         float angle = targetType.CalcDirectionAngle();
@@ -927,7 +926,7 @@ namespace Game.Spells
                 case Targets.DestDest:
                     return;
                 default:
-                    SpellEffectInfo effect = GetEffect(effIndex);
+                    SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
                     if (effect != null)
                     {
                         float angle = targetType.CalcDirectionAngle();
@@ -1018,7 +1017,7 @@ namespace Game.Spells
 
         void SelectImplicitChainTargets(uint effIndex, SpellImplicitTargetInfo targetType, WorldObject target, uint effMask)
         {
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
 
@@ -1030,7 +1029,7 @@ namespace Game.Spells
             if (maxTargets > 1)
             {
                 // mark damage multipliers as used
-                foreach (SpellEffectInfo eff in GetEffects())
+                foreach (SpellEffectInfo eff in m_spellInfo.GetEffects())
                     if (eff != null && Convert.ToBoolean(effMask & (1 << (int)eff.EffectIndex)))
                         m_damageMultipliers[eff.EffectIndex] = 1.0f;
                 m_applyMultiplierMask |= (byte)effMask;
@@ -1090,7 +1089,7 @@ namespace Game.Spells
             // We should check if triggered spell has greater range (which is true in many cases, and initial spell has too short max range)
             // limit max range to 300 yards, sometimes triggered spells can have 50000yds
             float bestDist = m_spellInfo.GetMaxRange(false);
-            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, GetCastDifficulty());
             if (triggerSpellInfo != null)
                 bestDist = Math.Min(Math.Max(bestDist, triggerSpellInfo.GetMaxRange(false)), Math.Min(dist2d, 300.0f));
 
@@ -1153,7 +1152,7 @@ namespace Game.Spells
         {
             // special case for SPELL_EFFECT_SUMMON_RAF_FRIEND and SPELL_EFFECT_SUMMON_PLAYER
             // @todo this is a workaround - target shouldn't be stored in target map for those spells
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
             switch (effect.Effect)
@@ -1505,7 +1504,7 @@ namespace Game.Spells
         void AddUnitTarget(Unit target, uint effectMask, bool checkIfValid = true, bool Implicit = true, Position losPosition = null)
         {
             uint validEffectMask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && (effectMask & (1 << (int)effect.EffectIndex)) != 0 && CheckEffectTarget(target, effect, losPosition))
                     validEffectMask |= 1u << (int)effect.EffectIndex;
 
@@ -1520,7 +1519,7 @@ namespace Game.Spells
                     return;
 
             // Check for effect immune skip if immuned
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && target.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex, m_caster))
                     effectMask &= ~(uint)(1 << (int)effect.EffectIndex);
 
@@ -1603,7 +1602,7 @@ namespace Game.Spells
         void AddGOTarget(GameObject go, uint effectMask)
         {
             uint validEffectMask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && (effectMask & (1 << (int)effect.EffectIndex)) != 0 && CheckEffectTarget(go, effect))
                     validEffectMask |= (uint)(1 << (int)effect.EffectIndex);
 
@@ -1660,7 +1659,7 @@ namespace Game.Spells
         void AddItemTarget(Item item, uint effectMask)
         {
             uint validEffectMask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && (effectMask & (1 << (int)effect.EffectIndex)) != 0 && CheckEffectTarget(item, effect))
                     validEffectMask |= 1u << (int)effect.EffectIndex;
 
@@ -1709,7 +1708,7 @@ namespace Game.Spells
             {
                 uint farMask = 0;
                 // create far target mask
-                foreach (SpellEffectInfo effect in GetEffects())
+                foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 {
                     if (effect != null && effect.IsFarUnitTargetEffect())
                         if (Convert.ToBoolean((1 << (int)effect.EffectIndex) & mask))
@@ -1726,7 +1725,7 @@ namespace Game.Spells
 
                 // do far effects on the unit
                 // can't use default call because of threading, do stuff as fast as possible
-                foreach (SpellEffectInfo effect in GetEffects())
+                foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                     if (effect != null && Convert.ToBoolean(farMask & (1 << (int)effect.EffectIndex)))
                         HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
                 return;
@@ -1885,7 +1884,7 @@ namespace Game.Spells
             else if (m_damage > 0)
             {
                 // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellSchoolMask, m_castId);
+                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask, m_castId);
 
                 // Check damage immunity
                 if (unitTarget.IsImmunedToDamage(m_spellInfo))
@@ -1926,7 +1925,7 @@ namespace Game.Spells
             else
             {
                 // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellSchoolMask);
+                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask);
                 hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
                 // Do triggers for unit
                 if (canEffectTrigger)
@@ -1996,7 +1995,7 @@ namespace Game.Spells
 
             // disable effects to which unit is immune
             SpellMissInfo returnVal = SpellMissInfo.Immune;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
                     if (unit.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex, m_caster))
                         effectMask &= (uint)~(1 << (int)effect.EffectIndex);
@@ -2051,7 +2050,7 @@ namespace Game.Spells
             }
 
             uint aura_effmask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && (Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.IsUnitOwnedAuraEffect()))
                     aura_effmask |= (1u << (int)effect.EffectIndex);
 
@@ -2075,7 +2074,7 @@ namespace Game.Spells
                 if (m_originalCaster != null)
                 {
                     int[] basePoints = new int[SpellConst.MaxEffects];
-                    foreach (SpellEffectInfo auraSpellEffect in GetEffects())
+                    foreach (SpellEffectInfo auraSpellEffect in m_spellInfo.GetEffects())
                         if (auraSpellEffect != null)
                             basePoints[auraSpellEffect.EffectIndex] =  (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
                                 m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] : auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
@@ -2083,7 +2082,7 @@ namespace Game.Spells
                     bool refresh = false;
                     bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
                     m_spellAura = Aura.TryRefreshStackOrCreate(m_spellInfo, m_castId, (byte)effectMask, unit,
-                        m_originalCaster, out refresh, basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
+                        m_originalCaster, GetCastDifficulty(), out refresh, basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
                     if (m_spellAura != null)
                     {
                         // Set aura stack amount to desired value
@@ -2117,7 +2116,7 @@ namespace Game.Spells
                         {
                             m_spellAura.Remove();
                             bool found = false;
-                            foreach (SpellEffectInfo effect in GetEffects())
+                            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                                 if (effect != null && (Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.Effect != SpellEffectName.ApplyAura))
                                     found = true;
                             if (!found)
@@ -2137,7 +2136,7 @@ namespace Game.Spells
                                 {
                                     int origDuration = duration;
                                     duration = 0;
-                                    foreach (SpellEffectInfo effect in GetEffects())
+                                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                                     {
                                         if (effect != null)
                                         {
@@ -2168,7 +2167,7 @@ namespace Game.Spells
                 }
             }
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
                     HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
 
@@ -2244,7 +2243,7 @@ namespace Game.Spells
             PrepareScriptHitHandlers();
             CallScriptBeforeHitHandlers(SpellMissInfo.None);
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
                     HandleEffects(null, null, go, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
 
@@ -2264,7 +2263,7 @@ namespace Game.Spells
             PrepareScriptHitHandlers();
             CallScriptBeforeHitHandlers(SpellMissInfo.None);
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
                     HandleEffects(null, target.item, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
 
@@ -2281,7 +2280,7 @@ namespace Game.Spells
 
             uint channelTargetEffectMask = m_channelTargetEffectMask;
             uint channelAuraMask = 0;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && effect.Effect == SpellEffectName.ApplyAura)
                     channelAuraMask |= (1u << (int)effect.EffectIndex);
 
@@ -2481,7 +2480,7 @@ namespace Game.Spells
                 if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth())
                 {
                     m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Cast);
-                    foreach (SpellEffectInfo effect in GetEffects())
+                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                     {
                         if (effect != null && effect.GetUsedTargetObjectType() == SpellTargetObjectTypes.Unit)
                         {
@@ -2999,7 +2998,7 @@ namespace Game.Spells
             PrepareScriptHitHandlers();
 
             // handle effects with SPELL_EFFECT_HANDLE_HIT mode
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 // don't do anything for empty effect
                 if (effect == null || !effect.IsEffect())
@@ -3078,7 +3077,7 @@ namespace Game.Spells
 
             // check if the player caster has moved before the spell finished
             // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
-            SpellEffectInfo effect = GetEffect(0);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(0);
             if ((m_caster.IsTypeId(TypeId.Player) && m_timer != 0) &&
                 m_caster.IsMoving() && m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Movement) &&
                 ((effect != null && effect.Effect != SpellEffectName.Stuck) || !m_caster.HasUnitMovementFlag(MovementFlag.FallingFar)) &&
@@ -3187,7 +3186,7 @@ namespace Game.Spells
             {
                 // Unsummon statue
                 uint spell = m_caster.m_unitData.CreatedBySpell;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, GetCastDifficulty());
                 if (spellInfo != null && spellInfo.IconFileDataId == 134230)
                 {
                     Log.outDebug(LogFilter.Spells, "Statue {0} is unsummoned in spell {1} finish", m_caster.GetGUID().ToString(), m_spellInfo.Id);
@@ -3325,7 +3324,7 @@ namespace Game.Spells
                         else
                         {
                             uint item = 0;
-                            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
+                            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                                 if (effect.ItemType != 0)
                                     item = effect.ItemType;
                             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
@@ -3799,7 +3798,7 @@ namespace Game.Spells
             spellExecuteLog.Caster = m_caster.GetGUID();
             spellExecuteLog.SpellID = m_spellInfo.Id;
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -4321,7 +4320,7 @@ namespace Game.Spells
             gameObjTarget = pGOTarget;
             destTarget = m_destTargets[i].Position;
 
-            effectInfo = GetEffect(i);
+            effectInfo = m_spellInfo.GetEffect(i);
             if (effectInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Spell: {0} HandleEffects at EffectIndex: {1} missing effect", m_spellInfo.Id, i);
@@ -4477,7 +4476,7 @@ namespace Game.Spells
             if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().IsMoving() && (!m_caster.IsCharmed() || !m_caster.GetCharmerGUID().IsCreature()) && !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
             {
                 // skip stuck spell to allow use it in falling case and apply spell limitations at movement
-                SpellEffectInfo effect = GetEffect(0);
+                SpellEffectInfo effect = m_spellInfo.GetEffect(0);
                 if ((!m_caster.HasUnitMovementFlag(MovementFlag.FallingFar) || (effect != null && effect.Effect != SpellEffectName.Stuck)) &&
                     (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated)))
                     return SpellCastResult.Moving;
@@ -4584,7 +4583,7 @@ namespace Game.Spells
             }
 
             // check pet presence
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect != null && effect.TargetA.GetTarget() == Targets.UnitPet)
                 {
@@ -4678,7 +4677,7 @@ namespace Game.Spells
             if (castResult != SpellCastResult.SpellCastOk)
                 return castResult;
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -4712,11 +4711,10 @@ namespace Game.Spells
                                 break;
 
                             Pet pet = m_caster.ToPlayer().GetPet();
-
                             if (pet == null)
                                 return SpellCastResult.NoPet;
 
-                            SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+                            SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
 
                             if (learn_spellproto == null)
                                 return SpellCastResult.NotKnown;
@@ -4749,7 +4747,7 @@ namespace Game.Spells
                                 if (pet == null || pet.GetOwner() != m_caster)
                                     return SpellCastResult.BadTargets;
 
-                                SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+                                SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
                                 if (learn_spellproto == null)
                                     return SpellCastResult.NotKnown;
 
@@ -5194,7 +5192,7 @@ namespace Game.Spells
                 }
             }
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -5255,7 +5253,7 @@ namespace Game.Spells
                         }
                     case AuraType.Mounted:
                         {
-                            if (m_caster.IsInWater() && m_spellInfo.HasAura(m_caster.GetMap().GetDifficultyID(), AuraType.ModIncreaseMountedFlightSpeed))
+                            if (m_caster.IsInWater() && m_spellInfo.HasAura(AuraType.ModIncreaseMountedFlightSpeed))
                                 return SpellCastResult.OnlyAbovewater;
 
                             // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
@@ -5613,7 +5611,7 @@ namespace Game.Spells
             ObjectGuid targetguid = target.GetGUID();
 
             // check if target already has the same or a more powerful aura
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -5837,7 +5835,7 @@ namespace Game.Spells
                 {
                     // such items should only fail if there is no suitable effect at all - see Rejuvenation Potions for example
                     SpellCastResult failReason = SpellCastResult.SpellCastOk;
-                    foreach (SpellEffectInfo effect in GetEffects())
+                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                     {
                         // skip check, pet not required like checks, and for TARGET_UNIT_PET m_targets.GetUnitTarget() is not the real target but the caster
                         if (effect == null || effect.TargetA.GetTarget() == Targets.UnitPet)
@@ -5993,7 +5991,7 @@ namespace Game.Spells
             }
 
             // special checks for spell effects
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -6028,7 +6026,7 @@ namespace Game.Spells
                                             player.SendEquipError(msg, null, null, effect.ItemType);
                                             return SpellCastResult.DontReport;
                                         }
-                                        else if ((efi = GetEffect(1)) != null)
+                                        else if ((efi = m_spellInfo.GetEffect(1)) != null)
                                             player.CastSpell(m_caster, (uint)efi.CalcValue(), false);        // move this to anywhere
                                         return SpellCastResult.DontReport;
                                     }
@@ -6437,7 +6435,7 @@ namespace Game.Spells
             WorldObject transport = null;
 
             // update effect destinations (in case of moved transport dest target)
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -6471,6 +6469,11 @@ namespace Game.Spells
             return CurrentSpellTypes.Generic;
         }
 
+        public Difficulty GetCastDifficulty()
+        {
+            return m_caster.GetMap().GetDifficultyID();
+        }
+        
         bool CheckEffectTarget(Unit target, SpellEffectInfo effect, Position losPosition)
         {
             if (!effect.IsEffect())
@@ -6632,7 +6635,7 @@ namespace Game.Spells
         void HandleLaunchPhase()
         {
             // handle effects with SPELL_EFFECT_HANDLE_LAUNCH mode
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 // don't do anything for empty effect
                 if (effect == null || !effect.IsEffect())
@@ -6642,7 +6645,7 @@ namespace Game.Spells
             }
 
             float[] multiplier = new float[SpellConst.MaxEffects];
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                 if (effect != null && Convert.ToBoolean(m_applyMultiplierMask & (1 << (int)effect.EffectIndex)))
                     multiplier[effect.EffectIndex] = effect.CalcDamageMultiplier(m_originalCaster, this);
 
@@ -6674,7 +6677,7 @@ namespace Game.Spells
             if (unit == null)
                 return;
 
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect != null && Convert.ToBoolean(targetInfo.effectMask & (1 << (int)effect.EffectIndex)))
                 {
@@ -6723,7 +6726,7 @@ namespace Game.Spells
             if (lockInfo == null)
                 return SpellCastResult.BadTargets;
 
-            SpellEffectInfo effect = GetEffect(effIndex);
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return SpellCastResult.BadTargets; // no idea about correct error
 
@@ -7054,7 +7057,7 @@ namespace Game.Spells
         {
             bool only_on_caster = (triggeredByAura != null && triggeredByAura.HasAttribute(SpellAttr4.ProcOnlyOnCaster));
             // If triggeredByAura has SPELL_ATTR4_PROC_ONLY_ON_CASTER then it can only proc on a casted spell with TARGET_UNIT_CASTER
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect != null && (Convert.ToBoolean(effMask & (1 << (int)effect.EffectIndex)) && (!only_on_caster || (effect.TargetA.GetTarget() == Targets.UnitCaster))))
                     return true;
@@ -7073,7 +7076,7 @@ namespace Game.Spells
                 if (!aurEff.IsAffectingSpell(m_spellInfo))
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(aurEff.GetSpellEffectInfo().TriggerSpell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(aurEff.GetSpellEffectInfo().TriggerSpell, GetCastDifficulty());
                 if (spellInfo != null)
                 {
                     // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
@@ -7279,25 +7282,6 @@ namespace Game.Spells
 
         public SpellInfo GetTriggeredByAuraSpell() { return m_triggeredByAuraSpell; }
 
-        SpellEffectInfo[] GetEffects() { return _effects; }
-        public SpellEffectInfo GetEffect(uint index)
-        {
-            if (index >= _effects.Length)
-                return null;
-
-            return _effects[index];
-        }
-
-        bool HasEffect(SpellEffectName effect)
-        {
-            foreach (SpellEffectInfo eff in GetEffects())
-            {
-                if (eff != null && eff.IsEffect(effect))
-                    return true;
-            }
-            return false;
-        }
-
         public static implicit operator bool(Spell spell)
         {
             return spell != null;
@@ -7411,8 +7395,6 @@ namespace Game.Spells
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         public SpellInfo m_triggeredByAuraSpell;
-
-        SpellEffectInfo[] _effects = new SpellEffectInfo[SpellConst.MaxEffects];
 
         bool m_skipCheck;
         #endregion
@@ -7605,11 +7587,9 @@ namespace Game.Spells
 
     public class SpellValue
     {
-        public SpellValue(Difficulty difficulty, SpellInfo proto, Unit caster)
+        public SpellValue(SpellInfo proto, Unit caster)
         {
-            var effects = proto.GetEffectsForDifficulty(difficulty);
-            Cypher.Assert(effects.Length <= SpellConst.MaxEffects);
-            foreach (SpellEffectInfo effect in effects)
+            foreach (SpellEffectInfo effect in proto.GetEffects())
                 if (effect != null)
                     EffectBasePoints[effect.EffectIndex] = effect.CalcBaseValue(caster, null, 0, -1);
 

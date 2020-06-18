@@ -239,7 +239,7 @@ namespace Game.Entities
 
         public SpellInfo GetSpellInfo()
         {
-            return Global.SpellMgr.GetSpellInfo(GetSpellId());
+            return Global.SpellMgr.GetSpellInfo(GetSpellId(), GetMap().GetDifficultyID());
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)

@@ -1182,7 +1182,7 @@ namespace Game.Entities
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; ++i)
             {
                 uint spellId = vehicle.m_spells[i];
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                 if (spellInfo == null)
                     continue;
 
@@ -1193,7 +1193,7 @@ namespace Game.Entities
                 }
 
                 if (spellInfo.IsPassive())
-                    vehicle.CastSpell(vehicle, spellId, true);
+                    vehicle.CastSpell(vehicle, spellInfo, true);
 
                 petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, i + 8);
             }
@@ -1429,7 +1429,7 @@ namespace Game.Entities
             switch ((ActionButtonType)type)
             {
                 case ActionButtonType.Spell:
-                    if (Global.SpellMgr.GetSpellInfo(action) == null)
+                    if (!Global.SpellMgr.HasSpellInfo(action, Difficulty.None))
                     {
                         Log.outError(LogFilter.Player, "Spell action {0} not added into button {1} for player {2} (GUID: {3}): spell not exist", action, button, GetName(), GetGUID());
                         return false;
@@ -3723,7 +3723,7 @@ namespace Game.Entities
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
+            SpellEffectInfo effect = spellInfo.GetEffect(index);
             if (effect == null || !effect.IsEffect())
                 return false;
 
@@ -4937,7 +4937,7 @@ namespace Game.Entities
             {
                 //returning of reagents only for players, so best done here
                 uint spellId = pet ? pet.m_unitData.CreatedBySpell : m_oldpetspell;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
 
                 if (spellInfo != null)
                 {

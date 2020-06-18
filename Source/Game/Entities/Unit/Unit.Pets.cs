@@ -194,7 +194,7 @@ namespace Game.Entities
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().StartCooldown(spellInfo, 0, null, true);
             }
@@ -222,10 +222,10 @@ namespace Game.Entities
                 else if (minion.IsTotem())
                 {
                     // All summoned by totem minions must disappear when it is removed.
-                    SpellInfo spInfo = Global.SpellMgr.GetSpellInfo(minion.ToTotem().GetSpell());
+                    SpellInfo spInfo = Global.SpellMgr.GetSpellInfo(minion.ToTotem().GetSpell(), GetMap().GetDifficultyID());
                     if (spInfo != null)
                     {
-                        foreach (SpellEffectInfo effect in spInfo.GetEffectsForDifficulty(Difficulty.None))
+                        foreach (SpellEffectInfo effect in spInfo.GetEffects())
                         {
                             if (effect == null || effect.Effect != SpellEffectName.Summon)
                                 continue;
@@ -235,7 +235,7 @@ namespace Game.Entities
                     }
                 }
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 // Remove infinity cooldown
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().SendCooldownEvent(spellInfo);

@@ -442,18 +442,12 @@ namespace Game.Misc
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
             // RewardSpell can teach multiple spells in trigger spell effects. But not all effects must be SPELL_EFFECT_LEARN_SPELL. See example spell 33950
-            if (quest.RewardSpell != 0)
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, Difficulty.None);
+            if (spellInfo != null)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell);
-                if (spellInfo.HasEffect(SpellEffectName.LearnSpell))
-                {
-                    var effects = spellInfo.GetEffectsForDifficulty(Difficulty.None);
-                    foreach (var spellEffectInfo in effects)
-                    {
-                        if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
-                            packet.LearnSpells.Add(spellEffectInfo.TriggerSpell);
-                    }
-                }
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                    if (effect.IsEffect(SpellEffectName.LearnSpell))
+                        packet.LearnSpells.Add(effect.TriggerSpell);
             }
 
             quest.BuildQuestRewards(packet.Rewards, _session.GetPlayer());

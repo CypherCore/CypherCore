@@ -57,7 +57,7 @@ namespace Game.Chat
                 if (spellIid == 0)
                     return false;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellIid);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellIid, target.GetMap().GetDifficultyID());
                 if (spellInfo == null)
                 {
                     handler.SendSysMessage(CypherStrings.UnknownSpell, owner == handler.GetSession().GetPlayer() ? handler.GetCypherString(CypherStrings.You) : nameLink);
@@ -72,7 +72,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
-        static bool Auracommand(StringArguments args, CommandHandler handler)
+        static bool HandleAuraCommand(StringArguments args, CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
@@ -85,11 +85,11 @@ namespace Game.Chat
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
             uint spellId = handler.ExtractSpellIdFromLink(args);
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, target.GetMap().GetDifficultyID());
             if (spellInfo != null)
             {
                 ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, target.GetMapId(), spellId, target.GetMap().GenerateLowGuid(HighGuid.Cast));
-                Aura.TryRefreshStackOrCreate(spellInfo, castId, SpellConst.MaxEffectMask, target, target);
+                Aura.TryRefreshStackOrCreate(spellInfo, castId, SpellConst.MaxEffectMask, target, target, target.GetMap().GetDifficultyID());
             }
 
             return true;

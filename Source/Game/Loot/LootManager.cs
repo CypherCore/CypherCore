@@ -20,6 +20,7 @@ using Framework.Database;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 
@@ -378,8 +379,12 @@ namespace Game.Loots
             uint count = Spell.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
-            foreach (var spellInfo in Global.SpellMgr.GetSpellInfoStorage().Values)
+            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
             {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                if (spellInfo == null)
+                    continue;
+
                 // possible cases
                 if (!spellInfo.IsLootCrafting())
                     continue;

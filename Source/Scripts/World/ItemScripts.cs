@@ -126,7 +126,7 @@ namespace Scripts.World
                         disabled = true;
                     break;
                 case 34475:
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellArcaneCharges);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellArcaneCharges, player.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                         Spell.SendCastResult(player, spellInfo, 0, castId, SpellCastResult.NotOnGround);
                     break;
@@ -275,7 +275,7 @@ namespace Scripts.World
 
             if (!player.GetTransport() || player.GetAreaId() != ItemScriptConst.AreaIdShatteredStraits)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellPetrovBomb);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellPetrovBomb, Difficulty.None);
                 if (spellInfo != null)
                     Spell.SendCastResult(player, spellInfo, 0, castId, SpellCastResult.NotHere);
 

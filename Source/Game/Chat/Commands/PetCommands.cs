@@ -107,7 +107,7 @@ namespace Game.Chat
             }
 
             uint spellId = handler.ExtractSpellIdFromLink(args);
-            if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId))
+            if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 return false;
 
             // Check if pet already has it
@@ -118,7 +118,7 @@ namespace Game.Chat
             }
 
             // Check if spell is valid
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);

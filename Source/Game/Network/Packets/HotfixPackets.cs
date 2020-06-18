@@ -139,7 +139,7 @@ namespace Game.Network.Packets
         }
 
         public List<HotfixData> Hotfixes = new List<HotfixData>();
-        public ByteBuffer HotfixContent;
+        public ByteBuffer HotfixContent = new ByteBuffer();
 
         public class HotfixData
         {

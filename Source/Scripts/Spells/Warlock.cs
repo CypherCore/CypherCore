@@ -226,7 +226,7 @@ namespace Scripts.Spells.Warlock
                 // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
                 // If not in range remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
 
                 if (GetTarget().IsWithinDist(circle, spellInfo.GetMaxRange(true)))
                 {
@@ -338,7 +338,7 @@ namespace Scripts.Spells.Warlock
                             break;
                         case CreatureFamily.Voidwalker:
                             {
-                                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicEmpowermentVoidwalker);
+                                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicEmpowermentVoidwalker, GetCastDifficulty());
                                 int hp = (int)targetCreature.CountPctFromMaxHealth(GetCaster().CalculateSpellDamage(targetCreature, spellInfo, 0));
                                 targetCreature.CastCustomSpell(targetCreature, SpellIds.DemonicEmpowermentVoidwalker, hp, 0, 0, true);
                                 break;
@@ -556,7 +556,7 @@ namespace Scripts.Spells.Warlock
             if (modOwner)
                 modOwner.ApplySpellMod(GetId(), SpellModOp.Cost, ref damage);
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo().Id, GetAura().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
             damageInfo.periodicLog = true;
             damageInfo.damage = damage;
             caster.DealSpellDamage(damageInfo, false);

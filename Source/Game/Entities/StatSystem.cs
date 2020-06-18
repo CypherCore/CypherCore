@@ -913,12 +913,12 @@ namespace Game.Entities
                 return 0;
 
             int resistMech = 0;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
             {
                 if (effect == null || !effect.IsEffect())
                     break;
 
-                int effect_mech = (int)spellInfo.GetEffectMechanic(effect.EffectIndex, GetMap().GetDifficultyID());
+                int effect_mech = (int)spellInfo.GetEffectMechanic(effect.EffectIndex);
                 if (effect_mech != 0)
                 {
                     int temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
@@ -1451,7 +1451,7 @@ namespace Game.Entities
                 Aura aura = GetAura(chrSpec.MasterySpellID[i]);
                 if (aura != null)
                 {
-                    foreach (SpellEffectInfo effect in aura.GetSpellEffectInfos())
+                    foreach (SpellEffectInfo effect in aura.GetSpellInfo().GetEffects())
                     {
                         if (effect == null)
                             continue;

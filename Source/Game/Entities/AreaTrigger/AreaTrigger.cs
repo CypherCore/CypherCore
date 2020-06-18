@@ -539,9 +539,9 @@ namespace Game.Entities
             switch (action.TargetType)
             {
                 case AreaTriggerActionUserTypes.Friend:
-                        return caster._IsValidAssistTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param));
+                        return caster._IsValidAssistTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
                 case AreaTriggerActionUserTypes.Enemy:
-                        return caster._IsValidAttackTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param));
+                        return caster._IsValidAttackTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param, caster.GetMap().GetDifficultyID()));
                 case AreaTriggerActionUserTypes.Raid:
                         return caster.IsInRaidWith(unit);
                 case AreaTriggerActionUserTypes.Party:

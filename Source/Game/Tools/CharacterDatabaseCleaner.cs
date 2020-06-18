@@ -130,7 +130,7 @@ namespace Game
 
         static bool SpellCheck(uint spell_id)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
             return spellInfo != null && !spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
         }
 

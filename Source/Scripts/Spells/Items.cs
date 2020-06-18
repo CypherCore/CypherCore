@@ -555,9 +555,9 @@ namespace Scripts.Spells.Items
             uint spellId = 0;
             int amount = (int)(eventInfo.GetDamageInfo().GetDamage() * 0.4f);
 
-            if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(Difficulty.None, SpellEffectName.Heal))
+            if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(SpellEffectName.Heal))
                 spellId = SpellIds.AlchemistStoneExtraHeal;
-            else if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(Difficulty.None, SpellEffectName.Energize))
+            else if (eventInfo.GetDamageInfo().GetSpellInfo().HasEffect(SpellEffectName.Energize))
                 spellId = SpellIds.AlchemistStoneExtraMana;
 
             if (spellId == 0)
@@ -779,7 +779,7 @@ namespace Scripts.Spells.Items
 
         void HandleDummy(uint effIndex)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision, GetCastDifficulty());
             GetCaster().CastCustomSpell(spellInfo.Id, SpellValueMod.AuraStack, (int)spellInfo.StackAmount, GetCaster(), true);
         }
 

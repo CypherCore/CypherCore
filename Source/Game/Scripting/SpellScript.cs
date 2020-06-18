@@ -48,7 +48,7 @@ namespace Game.Scripting
             bool allValid = true;
             foreach (uint spellId in spellIds)
             {
-                if (!Global.SpellMgr.HasSpellInfo(spellId))
+                if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 {
                     Log.outError(LogFilter.Scripts, "BaseSpellScript.ValidateSpellInfo: Spell {0} does not exist.", spellId);
                     allValid = false;
@@ -494,11 +494,12 @@ namespace Game.Scripting
         public Unit GetCaster() { return m_spell.GetCaster(); }
         public Unit GetOriginalCaster() { return m_spell.GetOriginalCaster(); }
         public SpellInfo GetSpellInfo() { return m_spell.GetSpellInfo(); }
+        public Difficulty GetCastDifficulty() { return m_spell.GetCastDifficulty(); }
         public SpellValue GetSpellValue() { return m_spell.m_spellValue; }
 
         public SpellEffectInfo GetEffectInfo(uint effIndex)
         {
-            return m_spell.GetEffect(effIndex);
+            return GetSpellInfo().GetEffect(effIndex);
         }
 
         // methods useable after spell is prepared
@@ -773,7 +774,7 @@ namespace Game.Scripting
         public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
         public delegate bool AuraCheckProcDelegate(ProcEventInfo info);
-        public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura , ProcEventInfo info);
+        public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
         public delegate void AuraProcDelegate(ProcEventInfo info);
         public delegate void AuraEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
 
@@ -1422,5 +1423,10 @@ namespace Game.Scripting
         }
         // returns AuraApplication object of currently processed target
         public AuraApplication GetTargetApplication() { return m_auraApplication; }
+
+        public Difficulty GetCastDifficulty()
+        {
+            return GetAura().GetCastDifficulty();
+        }
     }
 }

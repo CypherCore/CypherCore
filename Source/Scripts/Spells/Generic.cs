@@ -1628,7 +1628,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId);
+            SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
 
             if (spell.HasEffect(SpellEffectName.ScriptEffect))
                 OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));

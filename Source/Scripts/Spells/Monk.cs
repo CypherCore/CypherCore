@@ -110,7 +110,7 @@ namespace Scripts.Spells.Monk
         {
             if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
             {
-                SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget);
+                SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget, GetCastDifficulty());
                 SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
                 if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
                     return singleTargetExplicitResult;

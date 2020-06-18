@@ -15,7 +15,7 @@ namespace Game.Entities
         public Array<uint> ReqAbility = new Array<uint>(3);
         public byte ReqLevel;
 
-        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId).HasEffect(SpellEffectName.LearnSpell); }
+        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell); }
     }
 
     public class Trainer
@@ -98,7 +98,7 @@ namespace Game.Entities
             if (state != TrainerSpellState.Available)
                 return false;
 
-            SpellInfo trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId);
+            SpellInfo trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None);
             if (trainerSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
                 return false;
 
@@ -129,7 +129,7 @@ namespace Game.Entities
             // check ranks
             bool hasLearnSpellEffect = false;
             bool knowsAllLearnedSpells = true;
-            foreach (SpellEffectInfo spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId).GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
             {
                 if (spellEffect == null || !spellEffect.IsEffect(SpellEffectName.LearnSpell))
                     continue;

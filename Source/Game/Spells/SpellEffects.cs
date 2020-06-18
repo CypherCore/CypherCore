@@ -133,7 +133,7 @@ namespace Game.Spells
                 DamageInfo damageInfo = new DamageInfo(m_caster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 m_caster.CalcAbsorbResist(damageInfo);
 
-                SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
+                SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
                 log.damage = damageInfo.GetDamage();
                 log.originalDamage = (uint)damage;
                 log.absorb = damageInfo.GetAbsorb();
@@ -359,7 +359,7 @@ namespace Game.Spells
                     case 29284:
                         {
                             // Brittle Armor
-                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(24575);
+                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(24575, GetCastDifficulty());
                             if (spell == null)
                                 return;
 
@@ -371,7 +371,7 @@ namespace Game.Spells
                     case 29286:
                         {
                             // Mercurial Shield
-                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(26464);
+                            SpellInfo spell = Global.SpellMgr.GetSpellInfo(26464, GetCastDifficulty());
                             if (spell == null)
                                 return;
 
@@ -401,7 +401,7 @@ namespace Game.Spells
             }
 
             // normal case
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
             {
                 Log.outDebug(LogFilter.Spells, "Spell.EffectTriggerSpell spell {0} tried to trigger unknown spell {1}", m_spellInfo.Id, triggered_spell_id);
@@ -411,13 +411,13 @@ namespace Game.Spells
             SpellCastTargets targets = new SpellCastTargets();
             if (effectHandleMode == SpellEffectHandleMode.LaunchTarget)
             {
-                if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, m_caster.GetMap().GetDifficultyID()))
+                if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
                     return;
                 targets.SetUnitTarget(unitTarget);
             }
             else //if (effectHandleMode == SpellEffectHandleMode.Launch)
             {
-                if (spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, m_caster.GetMap().GetDifficultyID()) && effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask))
+                if (spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) && effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask))
                     return;
 
                 if (spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.DestLocation))
@@ -450,7 +450,7 @@ namespace Game.Spells
             uint triggered_spell_id = effectInfo.TriggerSpell;
 
             // normal case
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
             {
                 Log.outDebug(LogFilter.Spells, "Spell.EffectTriggerMissileSpell spell {0} tried to trigger unknown spell {1}", m_spellInfo.Id, triggered_spell_id);
@@ -460,13 +460,13 @@ namespace Game.Spells
             SpellCastTargets targets = new SpellCastTargets();
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
             {
-                if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, m_caster.GetMap().GetDifficultyID()))
+                if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
                     return;
                 targets.SetUnitTarget(unitTarget);
             }
             else //if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
-                if (spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, m_caster.GetMap().GetDifficultyID()) && effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask))
+                if (spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) && effectInfo.GetProvidedTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask))
                     return;
 
                 if (spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.DestLocation))
@@ -503,7 +503,7 @@ namespace Game.Spells
             uint triggered_spell_id = effectInfo.TriggerSpell;
 
             // normal case
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Spell.EffectForceCast of spell {0}: triggering unknown spell id {1}", m_spellInfo.Id, triggered_spell_id);
@@ -548,7 +548,7 @@ namespace Game.Spells
                 return;
 
             uint triggered_spell_id = effectInfo.TriggerSpell;
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id, GetCastDifficulty());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "EffectTriggerRitualOfSummoning of spell {0}: triggering unknown spell id {1}", m_spellInfo.Id, triggered_spell_id);
@@ -1217,7 +1217,7 @@ namespace Game.Spells
                 if (!dynObj.CreateDynamicObject(caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), caster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
                     return;
 
-                Aura aura = Aura.TryCreate(m_spellInfo, m_castId, SpellConst.MaxEffectMask, dynObj, caster, m_spellValue.EffectBasePoints, null, ObjectGuid.Empty, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
+                Aura aura = Aura.TryCreate(m_spellInfo, m_castId, SpellConst.MaxEffectMask, dynObj, caster, GetCastDifficulty(), m_spellValue.EffectBasePoints, null, ObjectGuid.Empty, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
                 if (aura != null)
                 {
                     m_spellAura = aura;
@@ -1775,8 +1775,8 @@ namespace Game.Spells
                     int basePoints = effectInfo.CalcValue();
                     if (basePoints > SharedConst.MaxVehicleSeats)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints);
-                        if (spellInfo != null && spellInfo.HasAura(m_originalCaster.GetMap().GetDifficultyID(), AuraType.ControlVehicle))
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints, GetCastDifficulty());
+                        if (spellInfo != null && spellInfo.HasAura(AuraType.ControlVehicle))
                             spellId = spellInfo.Id;
                     }
 
@@ -2435,7 +2435,7 @@ namespace Game.Spells
             if (pet == null)
                 return;
 
-            SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effectInfo.TriggerSpell);
+            SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effectInfo.TriggerSpell, Difficulty.None);
             if (learn_spellproto == null)
                 return;
 
@@ -2497,7 +2497,7 @@ namespace Game.Spells
             // and handle all effects at once
             for (var i = effIndex + 1; i < SpellConst.MaxEffects; ++i)
             {
-                var effect = GetEffect(i);
+                var effect = m_spellInfo.GetEffect(i);
                 if (effect == null)
                     continue;
 
@@ -2588,7 +2588,7 @@ namespace Game.Spells
                         // Blood Strike
                         if (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x400000u))
                         {
-                            SpellEffectInfo effect = GetEffect(2);
+                            SpellEffectInfo effect = m_spellInfo.GetEffect(2);
                             if (effect != null)
                             {
                                 float bonusPct = effect.CalcValue(m_caster) * unitTarget.GetDiseasesByCaster(m_caster.GetGUID()) / 2.0f;
@@ -2606,7 +2606,7 @@ namespace Game.Spells
 
             bool normalized = false;
             float weaponDamagePercentMod = 1.0f;
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -2659,7 +2659,7 @@ namespace Game.Spells
             uint weaponDamage = m_caster.CalculateDamage(m_attackType, normalized, addPctMods);
 
             // Sequence is important
-            foreach (SpellEffectInfo effect in GetEffects())
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
                 if (effect == null)
                     continue;
@@ -3118,8 +3118,8 @@ namespace Game.Spells
                                     if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player) || effIndex != 0)
                                         return;
 
-                                    uint spellID = (uint)GetEffect(0).CalcValue();
-                                    uint questID = (uint)GetEffect(1).CalcValue();
+                                    uint spellID = (uint)m_spellInfo.GetEffect(0).CalcValue();
+                                    uint questID = (uint)m_spellInfo.GetEffect(1).CalcValue();
 
                                     if (unitTarget.ToPlayer().GetQuestStatus(questID) == QuestStatus.Complete)
                                         unitTarget.CastSpell(unitTarget, spellID, true);
@@ -3192,7 +3192,7 @@ namespace Game.Spells
                                             {
                                                 // @todo a hack, range = 11, should after some time cast, otherwise too far
                                                 m_caster.CastSpell(parent, 62496, true);
-                                                unitTarget.CastSpell(parent, (uint)GetEffect(0).CalcValue());
+                                                unitTarget.CastSpell(parent, (uint)m_spellInfo.GetEffect(0).CalcValue());
                                             }
                                         }
                                     }
@@ -3286,64 +3286,6 @@ namespace Game.Spells
                                     unitTarget.CastSpell(unitTarget, spellTarget[RandomHelper.IRand(0, 4)], true);
                                     break;
                                 }
-                        }
-                        break;
-                    }
-                case SpellFamilyNames.Paladin:
-                    {
-                        // Judgement (seal trigger)
-                        if (m_spellInfo.GetCategory() == (int)SpellCategories.Judgement)
-                        {
-                            if (unitTarget == null || !unitTarget.IsAlive())
-                                return;
-                            uint spellId1;
-                            uint spellId2 = 0;
-
-                            // Judgement self add switch
-                            switch (m_spellInfo.Id)
-                            {
-                                case 53407: spellId1 = 20184; break;    // Judgement of Justice
-                                case 20271:                             // Judgement of Light
-                                case 57774: spellId1 = 20185; break;    // Judgement of Light
-                                case 53408: spellId1 = 20186; break;    // Judgement of Wisdom
-                                default:
-                                    Log.outError(LogFilter.Spells, "Unsupported Judgement (seal trigger) spell (Id: {0}) in Spell.EffectScriptEffect", m_spellInfo.Id);
-                                    return;
-                            }
-                            // all seals have aura dummy in 2 effect
-                            foreach (var app in m_caster.GetAppliedAuras())
-                            {
-                                Aura aura = app.Value.GetBase();
-                                if (aura.GetSpellInfo().GetSpellSpecific() == SpellSpecificType.Seal)
-                                {
-                                    AuraEffect aureff = aura.GetEffect(2);
-                                    if (aureff != null)
-                                        if (aureff.GetAuraType() == AuraType.Dummy)
-                                        {
-                                            if (Global.SpellMgr.GetSpellInfo((uint)aureff.GetAmount()) != null)
-                                                spellId2 = (uint)aureff.GetAmount();
-                                            break;
-                                        }
-                                    if (spellId2 == 0)
-                                    {
-                                        switch (app.Key)
-                                        {
-                                            // Seal of light, Seal of wisdom, Seal of justice
-                                            case 20165:
-                                            case 20166:
-                                            case 20164:
-                                                spellId2 = 54158;
-                                                break;
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                            if (spellId1 != 0)
-                                m_caster.CastSpell(unitTarget, spellId1, true);
-                            if (spellId2 != 0)
-                                m_caster.CastSpell(unitTarget, spellId2, true);
-                            return;
                         }
                         break;
                     }
@@ -3535,7 +3477,7 @@ namespace Game.Spells
             player.TeleportTo(player.GetHomebind(), TeleportToOptions.Spell);
 
             // Stuck spell trigger Hearthstone cooldown
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(8690);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(8690, GetCastDifficulty());
             if (spellInfo == null)
                 return;
 
@@ -4399,7 +4341,7 @@ namespace Game.Spells
                 if (totem != null && totem.IsTotem())
                 {
                     uint spell_id = totem.m_unitData.CreatedBySpell;
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
                     if (spellInfo != null)
                     {
                         var costs = spellInfo.CalcPowerCost(m_caster, spellInfo.GetSchoolMask());
@@ -5244,7 +5186,7 @@ namespace Game.Spells
                 if (spell_id == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
                 if (spellInfo == null)
                     continue;
 
@@ -5255,7 +5197,7 @@ namespace Game.Spells
                     continue;
 
                 TriggerCastFlags triggerFlags = (TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError);
-                m_caster.CastSpell(m_caster, spell_id, triggerFlags);
+                m_caster.CastSpell(m_caster, spellInfo, triggerFlags);
             }
         }
 
@@ -5365,7 +5307,7 @@ namespace Game.Spells
             uint health = (uint)target.CountPctFromMaxHealth(damage);
             uint mana = (uint)MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), damage);
             uint resurrectAura = 0;
-            if (Global.SpellMgr.GetSpellInfo(effectInfo.TriggerSpell) != null)
+            if (Global.SpellMgr.HasSpellInfo(effectInfo.TriggerSpell, Difficulty.None))
                 resurrectAura = effectInfo.TriggerSpell;
 
             if (resurrectAura != 0 && target.HasAura(resurrectAura))

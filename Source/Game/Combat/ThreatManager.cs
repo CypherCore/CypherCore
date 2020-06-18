@@ -275,7 +275,7 @@ namespace Game.Combat
                         threat *= threatEntry.pctMod;
 
                 // Energize is not affected by Mods
-                foreach (SpellEffectInfo effect in threatSpell.GetEffectsForDifficulty(hatedUnit.GetMap().GetDifficultyID()))
+                foreach (SpellEffectInfo effect in threatSpell.GetEffects())
                     if (effect != null && (effect.Effect == SpellEffectName.Energize || effect.ApplyAuraName == AuraType.PeriodicEnergize))
                         return threat;
 

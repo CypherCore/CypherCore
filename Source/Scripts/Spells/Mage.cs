@@ -149,7 +149,7 @@ namespace Scripts.Spells.Mage
             }
 
             GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(effect1.GetAmount()));
-            GetTarget().CastSpell(GetTarget(), GetAura().GetSpellEffectInfo(2).TriggerSpell, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(2).TriggerSpell, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, TriggerCastFlags.FullMask);
         }
@@ -288,10 +288,10 @@ namespace Scripts.Spells.Mage
         {
             PreventDefaultAction();
 
-            SpellInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite);
+            SpellInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty());
             int pct = aurEff.GetAmount();
 
-            int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks(Difficulty.None));
+            int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
             amount += (int)eventInfo.GetProcTarget().GetRemainingPeriodicAmount(eventInfo.GetActor().GetGUID(), SpellIds.Ignite, AuraType.PeriodicDamage);
             GetTarget().CastCustomSpell(SpellIds.Ignite, SpellValueMod.BasePoint0, amount, eventInfo.GetProcTarget(), true, null, aurEff);
         }
@@ -464,7 +464,7 @@ namespace Scripts.Spells.Mage
         void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             List<TempSummon> minions = new List<TempSummon>();
-            GetTarget().GetAllMinionsByEntry(minions, (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon).GetEffect(0).MiscValue);
+            GetTarget().GetAllMinionsByEntry(minions, (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
 
             // Get the last summoned RoF, save it and despawn older ones
             foreach (var summon in minions)
@@ -513,7 +513,7 @@ namespace Scripts.Spells.Mage
         void FilterTargets(List<WorldObject> targets)
         {
             WorldLocation dest = GetExplTargetDest();
-            float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon).GetEffect(0).CalcRadius();
+            float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
             float inRadius = 6.5f;
 
             targets.RemoveAll(target =>

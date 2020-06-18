@@ -1065,84 +1065,87 @@ namespace Game.Chat
                 bool found = false;
                 uint count = 0;
 
-                // Search in Spell.dbc
-                foreach (var spellInfo in Global.SpellMgr.GetSpellInfoStorage().Values)
+                // Search in SpellName.dbc
+                foreach (SpellNameRecord spellName in CliDB.SpellNameStorage.Values)
                 {
-                    LocaleConstant locale = handler.GetSessionDbcLocale();
-                    string name = spellInfo.SpellName[locale];
-                    if (name.IsEmpty())
-                        continue;
-
-                    if (!name.Like(namePart))
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellName.Id, Difficulty.None);
+                    if (spellInfo != null)
                     {
-                        locale = 0;
-                        for (; locale < LocaleConstant.Total; ++locale)
+                        LocaleConstant locale = handler.GetSessionDbcLocale();
+                        string name = spellInfo.SpellName[locale];
+                        if (name.IsEmpty())
+                            continue;
+
+                        if (!name.Like(namePart))
                         {
-                            if (locale == handler.GetSessionDbcLocale())
-                                continue;
+                            locale = 0;
+                            for (; locale < LocaleConstant.Total; ++locale)
+                            {
+                                if (locale == handler.GetSessionDbcLocale())
+                                    continue;
 
-                            name = spellInfo.SpellName[locale];
-                            if (name.IsEmpty())
-                                continue;
+                                name = spellInfo.SpellName[locale];
+                                if (name.IsEmpty())
+                                    continue;
 
-                            if (name.Like(namePart))
-                                break;
-                        }
-                    }
-
-                    if (locale < LocaleConstant.Total)
-                    {
-                        if (maxlookup != 0 && count++ == maxlookup)
-                        {
-                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
-                            return true;
+                                if (name.Like(namePart))
+                                    break;
+                            }
                         }
 
-                        bool known = target && target.HasSpell(spellInfo.Id);
-                        SpellEffectInfo effect = spellInfo.GetEffect(0);
-                        bool learn = (effect.Effect == SpellEffectName.LearnSpell);
+                        if (locale < LocaleConstant.Total)
+                        {
+                            if (maxlookup != 0 && count++ == maxlookup)
+                            {
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                                return true;
+                            }
 
-                        SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+                            bool known = target && target.HasSpell(spellInfo.Id);
+                            SpellEffectInfo effect = spellInfo.GetEffect(0);
+                            bool learn = (effect.Effect == SpellEffectName.LearnSpell);
 
-                        bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
-                        bool passive = spellInfo.IsPassive();
-                        bool active = target && target.HasAura(spellInfo.Id);
+                            SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
 
-                        // unit32 used to prevent interpreting public byte as char at output
-                        // find rank of learned spell for learning spell, or talent rank
-                        uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
+                            bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
+                            bool passive = spellInfo.IsPassive();
+                            bool active = target && target.HasAura(spellInfo.Id);
 
-                        // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                        StringBuilder ss = new StringBuilder();
-                        if (handler.GetSession() != null)
-                            ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + name);
-                        else
-                            ss.Append(spellInfo.Id + " - " + name);
+                            // unit32 used to prevent interpreting public byte as char at output
+                            // find rank of learned spell for learning spell, or talent rank
+                            uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
-                        // include rank in link name
-                        if (rank != 0)
-                            ss.Append(handler.GetCypherString(CypherStrings.SpellRank) + rank);
+                            // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
+                            StringBuilder ss = new StringBuilder();
+                            if (handler.GetSession() != null)
+                                ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + name);
+                            else
+                                ss.Append(spellInfo.Id + " - " + name);
 
-                        if (handler.GetSession() != null)
-                            ss.Append("]|h|r");
+                            // include rank in link name
+                            if (rank != 0)
+                                ss.Append(handler.GetCypherString(CypherStrings.SpellRank) + rank);
 
-                        if (talent)
-                            ss.Append(handler.GetCypherString(CypherStrings.Talent));
-                        if (passive)
-                            ss.Append(handler.GetCypherString(CypherStrings.Passive));
-                        if (learn)
-                            ss.Append(handler.GetCypherString(CypherStrings.Learn));
-                        if (known)
-                            ss.Append(handler.GetCypherString(CypherStrings.Known));
-                        if (active)
-                            ss.Append(handler.GetCypherString(CypherStrings.Active));
+                            if (handler.GetSession() != null)
+                                ss.Append("]|h|r");
 
-                        handler.SendSysMessage(ss.ToString());
+                            if (talent)
+                                ss.Append(handler.GetCypherString(CypherStrings.Talent));
+                            if (passive)
+                                ss.Append(handler.GetCypherString(CypherStrings.Passive));
+                            if (learn)
+                                ss.Append(handler.GetCypherString(CypherStrings.Learn));
+                            if (known)
+                                ss.Append(handler.GetCypherString(CypherStrings.Known));
+                            if (active)
+                                ss.Append(handler.GetCypherString(CypherStrings.Active));
 
-                        if (!found)
-                            found = true;
+                            handler.SendSysMessage(ss.ToString());
+
+                            if (!found)
+                                found = true;
+                        }
                     }
-
                 }
                 if (!found)
                     handler.SendSysMessage(CypherStrings.CommandNospellfound);
@@ -1161,7 +1164,7 @@ namespace Game.Chat
 
                 uint id = args.NextUInt32();
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(id);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(id, Difficulty.None);
                 if (spellInfo != null)
                 {
                     LocaleConstant locale = handler.GetSessionDbcLocale();
@@ -1176,7 +1179,7 @@ namespace Game.Chat
                     SpellEffectInfo effect = spellInfo.GetEffect(0);
                     bool learn = (effect.Effect == SpellEffectName.LearnSpell);
 
-                    SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+                    SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
 
                     bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                     bool passive = spellInfo.IsPassive();

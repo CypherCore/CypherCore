@@ -41,7 +41,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                 player.PlayerTalkClass.ClearMenus();
                 player.CLOSE_GOSSIP_MENU();
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(TeleportSpells[gossipListId]);
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(TeleportSpells[gossipListId], Difficulty.None);
                 if (spell == null)
                     return false;
 
@@ -84,7 +84,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         {
             if (player.IsInCombat())
             {
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(TeleporterSpells.FROZEN_THRONE_TELEPORT);
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(TeleporterSpells.FROZEN_THRONE_TELEPORT, Difficulty.None);
                 if (spell != null)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), spell.Id, player.GetMap().GenerateLowGuid(HighGuid.Cast));

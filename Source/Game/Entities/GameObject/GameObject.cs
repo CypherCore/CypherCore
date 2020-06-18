@@ -1215,7 +1215,7 @@ namespace Game.Entities
             if (trapInfo == null || trapInfo.type != GameObjectTypes.Trap)
                 return;
 
-            SpellInfo trapSpell = Global.SpellMgr.GetSpellInfo(trapInfo.Trap.spell);
+            SpellInfo trapSpell = Global.SpellMgr.GetSpellInfo(trapInfo.Trap.spell, GetMap().GetDifficultyID());
             if (trapSpell == null)                                          // checked at load already
                 return;
 
@@ -1945,7 +1945,7 @@ namespace Game.Entities
             if (spellId == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 if (!user.IsTypeId(TypeId.Player) || !Global.OutdoorPvPMgr.HandleCustomSpell(user.ToPlayer(), spellId, this))
@@ -1972,12 +1972,12 @@ namespace Game.Entities
 
         public void CastSpell(Unit target, uint spellId, TriggerCastFlags triggered)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
             bool self = false;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
             {
                 if (effect != null && effect.TargetA.GetTarget() == Targets.UnitCaster)
                 {

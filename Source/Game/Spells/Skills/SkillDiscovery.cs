@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.DataStorage;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +63,7 @@ namespace Game.Spells
                 if (reqSkillOrSpell > 0)                            // spell case
                 {
                     uint absReqSkillOrSpell = (uint)reqSkillOrSpell;
-                    SpellInfo reqSpellInfo = Global.SpellMgr.GetSpellInfo(absReqSkillOrSpell);
+                    SpellInfo reqSpellInfo = Global.SpellMgr.GetSpellInfo(absReqSkillOrSpell, Difficulty.None);
                     if (reqSpellInfo == null)
                     {
                         if (!reportedReqSpells.Contains(absReqSkillOrSpell))
@@ -117,8 +118,12 @@ namespace Game.Spells
                 Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
 
             // report about empty data for explicit discovery spells
-            foreach (var spellEntry in Global.SpellMgr.GetSpellInfoStorage().Values)
+            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
             {
+                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                if (spellEntry == null)
+                    continue;
+
                 // skip not explicit discovery spells
                 if (!spellEntry.IsExplicitDiscovery())
                     continue;

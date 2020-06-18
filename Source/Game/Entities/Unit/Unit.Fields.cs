@@ -306,7 +306,7 @@ namespace Game.Entities
             m_attacker = spellNonMeleeDamage.attacker;
             m_victim = spellNonMeleeDamage.target;
             m_damage = spellNonMeleeDamage.damage;
-            m_spellInfo = Global.SpellMgr.GetSpellInfo(spellNonMeleeDamage.SpellId);
+            m_spellInfo = spellNonMeleeDamage.Spell;
             m_schoolMask = spellNonMeleeDamage.schoolMask;
             m_damageType = damageType;
             m_attackType = attackType;
@@ -450,11 +450,11 @@ namespace Game.Entities
 
     public class SpellNonMeleeDamage
     {
-        public SpellNonMeleeDamage(Unit _attacker, Unit _target, uint _SpellID, uint _SpellXSpellVisualID, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
+        public SpellNonMeleeDamage(Unit _attacker, Unit _target, SpellInfo _spellInfo, uint _SpellXSpellVisualID, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
         {
             target = _target;
             attacker = _attacker;
-            SpellId = _SpellID;
+            Spell = _spellInfo;
             SpellXSpellVisualID = _SpellXSpellVisualID;
             schoolMask = _schoolMask;
             castId = _castId;
@@ -464,7 +464,7 @@ namespace Game.Entities
         public Unit target;
         public Unit attacker;
         public ObjectGuid castId;
-        public uint SpellId;
+        public SpellInfo Spell;
         public uint SpellXSpellVisualID;
         public uint damage;
         public uint originalDamage;

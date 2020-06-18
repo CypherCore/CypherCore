@@ -45,7 +45,7 @@ namespace Game.Chat.Commands
                 {
                     case DisableType.Spell:
                         {
-                            if (!Global.SpellMgr.HasSpellInfo(entry))
+                            if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
                             {
                                 handler.SendSysMessage(CypherStrings.CommandNospellfound);
                                 return false;

@@ -2340,7 +2340,7 @@ namespace Game.Entities
                 if (eff.SetBonuses.Contains(itemSetSpell))
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Player, "WORLD: unknown spell id {0} in items set {1} effects", itemSetSpell.SpellID, setid);
@@ -2392,7 +2392,7 @@ namespace Game.Entities
                 if (!eff.SetBonuses.Contains(itemSetSpell))
                     continue;
 
-                player.ApplyEquipSpell(Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID), null, false);
+                player.ApplyEquipSpell(Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None), null, false);
                 eff.SetBonuses.Remove(itemSetSpell);
             }
 

@@ -2093,10 +2093,10 @@ namespace Game.Entities
                 CreatureTemplate cinfo = unit.ToCreature().GetCreatureTemplate();
 
                 // this also applies for transform auras
-                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransForm());
+                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransForm(), unit.GetMap().GetDifficultyID());
                 if (transform != null)
                 {
-                    foreach (SpellEffectInfo effect in transform.GetEffectsForDifficulty(unit.GetMap().GetDifficultyID()))
+                    foreach (SpellEffectInfo effect in transform.GetEffects())
                     {
                         if (effect != null && effect.IsAura(AuraType.Transform))
                         {

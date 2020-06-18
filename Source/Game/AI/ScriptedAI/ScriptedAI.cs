@@ -136,7 +136,8 @@ namespace Game.AI
             //Check if each spell is viable(set it to null if not)
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; i++)
             {
-                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i]);
+                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
+                AISpellInfoType aiSpell = GetAISpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
 
                 //This spell doesn't exist
                 if (tempSpell == null)
@@ -144,11 +145,11 @@ namespace Game.AI
 
                 // Targets and Effects checked first as most used restrictions
                 //Check the spell targets if specified
-                if (targets != 0 && !Convert.ToBoolean(Global.ScriptMgr.spellSummaryStorage[me.m_spells[i]].Targets & (1 << ((int)targets - 1))))
+                if (targets != 0 && !Convert.ToBoolean(aiSpell.Targets & (1 << ((int)targets - 1))))
                     continue;
 
                 //Check the type of spell if we are looking for a specific spell type
-                if (effect != 0 && !Convert.ToBoolean(Global.ScriptMgr.spellSummaryStorage[me.m_spells[i]].Effects & (1 << ((int)effect - 1))))
+                if (effect != 0 && !Convert.ToBoolean(aiSpell.Effects & (1 << ((int)effect - 1))))
                     continue;
 
                 //Check for school if specified

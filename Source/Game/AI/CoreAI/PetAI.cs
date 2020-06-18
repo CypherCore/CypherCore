@@ -138,7 +138,7 @@ namespace Game.AI
                     if (spellID == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, me.GetMap().GetDifficultyID());
                     if (spellInfo == null)
                         continue;
 

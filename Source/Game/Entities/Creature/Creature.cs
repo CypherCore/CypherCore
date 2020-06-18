@@ -1760,7 +1760,7 @@ namespace Game.Entities
                 return false;
 
             bool immunedToAllEffects = true;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
             {
                 if (effect == null || !effect.IsEffect())
                     continue;
@@ -1780,7 +1780,7 @@ namespace Game.Entities
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
+            SpellEffectInfo effect = spellInfo.GetEffect(index);
             if (effect == null)
                 return true;
 
@@ -1816,7 +1816,7 @@ namespace Game.Entities
             {
                 if (m_spells[i] == 0)
                     continue;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(m_spells[i]);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(m_spells[i], GetMap().GetDifficultyID());
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Unit, "WORLD: unknown spell id {0}", m_spells[i]);
@@ -1824,7 +1824,7 @@ namespace Game.Entities
                 }
 
                 bool bcontinue = true;
-                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                 {
                     if (effect != null && ((effect.Effect == SpellEffectName.SchoolDamage) || (effect.Effect == SpellEffectName.Instakill)
                         || (effect.Effect == SpellEffectName.EnvironmentalDamage) || (effect.Effect == SpellEffectName.HealthLeech)))
@@ -1865,7 +1865,7 @@ namespace Game.Entities
             {
                 if (m_spells[i] == 0)
                     continue;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(m_spells[i]);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(m_spells[i], GetMap().GetDifficultyID());
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Unit, "WORLD: unknown spell id {0}", m_spells[i]);
@@ -1873,7 +1873,7 @@ namespace Game.Entities
                 }
 
                 bool bcontinue = true;
-                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                 {
                     if (effect != null && effect.Effect == SpellEffectName.Heal)
                     {
@@ -2209,7 +2209,7 @@ namespace Game.Entities
             {
                 foreach (var id in cainfo.auras)
                 {
-                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(id);
+                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(id, GetMap().GetDifficultyID());
                     if (AdditionalSpellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Creature ({0}) has wrong spell {1} defined in `auras` field.", GetGUID().ToString(), id);
@@ -2593,7 +2593,7 @@ namespace Game.Entities
                 if (spellID == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, GetMap().GetDifficultyID());
                 if (spellInfo != null)
                 {
                     if (spellInfo.GetRecoveryTime() == 0  // No cooldown
@@ -2771,7 +2771,7 @@ namespace Game.Entities
             SpellInfo spellInfo = focusSpell.GetSpellInfo();
 
             // don't use spell focus for vehicle spells
-            if (spellInfo.HasAura(Difficulty.None, AuraType.ControlVehicle))
+            if (spellInfo.HasAura(AuraType.ControlVehicle))
                 return;
 
             if ((!target || target == this) && focusSpell.GetCastTime() == 0) // instant cast, untargeted (or self-targeted) spell doesn't need any facing updates

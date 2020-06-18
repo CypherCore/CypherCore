@@ -456,7 +456,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyShockR1);
+            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyShockR1, Difficulty.None);
             if (firstRankSpellInfo == null)
                 return false;
 
@@ -596,7 +596,7 @@ namespace Scripts.Spells.Paladin
             {
                 if (eff.GetSpellInfo().GetSpellSpecific() == SpellSpecificType.Seal && eff.GetEffIndex() == 2)
                 {
-                    if (Global.SpellMgr.HasSpellInfo((uint)eff.GetAmount()))
+                    if (Global.SpellMgr.HasSpellInfo((uint)eff.GetAmount(), GetCastDifficulty()))
                     {
                         spellId = (uint)eff.GetAmount();
                         break;
@@ -923,9 +923,9 @@ namespace Scripts.Spells.Paladin
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.HolyMending, AuraType.PeriodicHeal);
 

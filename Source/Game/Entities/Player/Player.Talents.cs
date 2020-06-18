@@ -58,7 +58,7 @@ namespace Game.Entities
 
         public bool AddTalent(TalentRecord talent, byte spec, bool learning)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Player.AddTalent: Spell (ID: {0}) does not exist.", talent.SpellID);
@@ -84,14 +84,14 @@ namespace Game.Entities
 
         public void RemoveTalent(TalentRecord talent)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
             RemoveSpell(talent.SpellID, true);
 
             // search for spells that the talent teaches and unlearn them
-            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                 if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                     RemoveSpell(effect.TriggerSpell, true);
 
@@ -294,14 +294,14 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                     if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                         RemoveSpell(effect.TriggerSpell, true);
 
@@ -311,14 +311,14 @@ namespace Game.Entities
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                     if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                         RemoveSpell(effect.TriggerSpell, true);
 
@@ -575,7 +575,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, "Player {0} has unknown talent spell: {1}", GetName(), talentInfo.SpellID);
@@ -597,7 +597,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent spell: {talentInfo.SpellID}");

@@ -40,7 +40,7 @@ namespace Game.Spells
                 do
                 {
                     uint spellId = cooldownsResult.Read<uint>(0);
-                    if (!Global.SpellMgr.HasSpellInfo(spellId))
+                    if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                         continue;
 
                     int index = (typeof(T) == typeof(Pet) ? 1 : 2);
@@ -222,7 +222,7 @@ namespace Game.Spells
                 if (IsSchoolLocked(spellInfo.GetSchoolMask()))
                     return false;
 
-            if (HasCooldown(spellInfo.Id, itemId, ignoreCategoryCooldown))
+            if (HasCooldown(spellInfo, itemId, ignoreCategoryCooldown))
                 return false;
 
             if (!HasCharge(spellInfo.ChargeCategoryId))
@@ -459,7 +459,7 @@ namespace Game.Spells
                     player.SendPacket(new CooldownEvent(player != _owner, categoryEntry.SpellId));
 
                     if (startCooldown)
-                        StartCooldown(Global.SpellMgr.GetSpellInfo(categoryEntry.SpellId), itemId, spell);
+                        StartCooldown(Global.SpellMgr.GetSpellInfo(categoryEntry.SpellId, _owner.GetMap().GetDifficultyID()), itemId, spell);
                 }
 
                 player.SendPacket(new CooldownEvent(player != _owner, spellInfo.Id));
@@ -581,7 +581,7 @@ namespace Game.Spells
 
         public bool HasCooldown(uint spellId, uint itemId = 0, bool ignoreCategoryCooldown = false)
         {
-            return HasCooldown(Global.SpellMgr.GetSpellInfo(spellId), itemId, ignoreCategoryCooldown);
+            return HasCooldown(Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID()), itemId, ignoreCategoryCooldown);
         }
 
         public bool HasCooldown(SpellInfo spellInfo, uint itemId = 0, bool ignoreCategoryCooldown = false)
@@ -663,7 +663,7 @@ namespace Game.Spells
             spellCooldown.Flags = SpellCooldownFlags.None;
             foreach (uint spellId in knownSpells)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID());
                 if (spellInfo.IsCooldownStartedOnEvent())
                     continue;
 
@@ -904,7 +904,7 @@ namespace Game.Spells
                 // add all profession CDs created while in duel (if any)
                 foreach (var c in _spellCooldowns)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(c.Key, Difficulty.None);
 
                     if (spellInfo.RecoveryTime > 10 * Time.Minute * Time.InMilliseconds || spellInfo.CategoryRecoveryTime > 10 * Time.Minute * Time.InMilliseconds)
                         _spellCooldownsBeforeDuel[c.Key] = _spellCooldowns[c.Key];

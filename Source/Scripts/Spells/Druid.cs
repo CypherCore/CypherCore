@@ -701,7 +701,7 @@ namespace Scripts.Spells.Druid
             if (player.GetSkillValue(SkillType.Riding) < 75)
                 return SpellCastResult.ApprenticeRidingRequirement;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(player.IsInWater() ? SpellIds.FormAquatic : SpellIds.FormStag);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(player.IsInWater() ? SpellIds.FormAquatic : SpellIds.FormStag, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
         }
 
@@ -758,7 +758,7 @@ namespace Scripts.Spells.Druid
         SpellCastResult CheckLocationForForm(uint spell)
         {
             Player player = GetTarget().ToPlayer();
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
         }
     }
@@ -821,7 +821,7 @@ namespace Scripts.Spells.Druid
         SpellCastResult CheckLocationForForm(uint spell_id)
         {
             Player player = GetTarget().ToPlayer();
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
 
             if (!player.GetMap().IsOutdoors(player.GetPhaseShift(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()))
                 return SpellCastResult.OnlyOutdoors;
@@ -900,9 +900,9 @@ namespace Scripts.Spells.Druid
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
 

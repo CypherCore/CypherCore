@@ -612,7 +612,7 @@ namespace Scripts.Spells.Shaman
 
         void ResetCooldown()
         {
-            GetCaster().GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurst).ChargeCategoryId);
+            GetCaster().GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurst, GetCastDifficulty()).ChargeCategoryId);
         }
 
         public override void Register()
@@ -747,9 +747,9 @@ namespace Scripts.Spells.Shaman
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
@@ -781,9 +781,9 @@ namespace Scripts.Spells.Shaman
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
@@ -847,9 +847,9 @@ namespace Scripts.Spells.Shaman
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to healing done
             Unit caster = eventInfo.GetActor();

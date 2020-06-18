@@ -501,7 +501,7 @@ namespace Game.AI
                                         // unless target is outside spell range, out of mana, or LOS.
 
                                         bool _allowMove = false;
-                                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell);
+                                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, me.GetMap().GetDifficultyID());
                                         var costs = spellInfo.CalcPowerCost(me, spellInfo.GetSchoolMask());
                                         bool hasPower = true;
                                         foreach (var cost in costs)
@@ -3438,7 +3438,7 @@ namespace Game.AI
                         RecalcTimer(e, e.Event.kill.cooldownMin, e.Event.kill.cooldownMax);
                         break;
                     }
-                case SmartEvents.SpellhitTarget:
+                case SmartEvents.SpellHitTarget:
                 case SmartEvents.SpellHit:
                     {
                         if (spell == null)

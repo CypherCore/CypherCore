@@ -492,6 +492,9 @@ namespace Game.AI
         public uint cooldown;
         public uint realCooldown;
         public float maxRange;
+
+        public byte Targets;                                          // set of enum SelectTarget
+        public byte Effects;                                          // set of enum SelectEffect
     }
 
     public enum AITarget

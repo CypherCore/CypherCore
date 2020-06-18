@@ -309,7 +309,7 @@ namespace Game.Entities
             {
                 foreach (uint spellId in overrides)
                 {
-                    SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                    SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
                     if (newInfo != null)
                         return GetCastSpellInfo(newInfo);
                 }
@@ -338,7 +338,7 @@ namespace Game.Entities
                 for (int j = 0; j < specSpells.Count; ++j)
                 {
                     SpecializationSpellsRecord specSpell = specSpells[j];
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
                     if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 
@@ -1027,7 +1027,7 @@ namespace Game.Entities
                     {
                         if (proto.Effects[idx].SpellID != 0 && proto.Effects[idx].TriggerType == ItemSpelltriggerType.OnUse)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[idx].SpellID);
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[idx].SpellID, Difficulty.None);
                             if (spellInfo != null)
                                 GetSpellHistory().SendCooldownEvent(spellInfo, m_lastPotionId);
                         }
@@ -1267,7 +1267,7 @@ namespace Game.Entities
                     uint SkillValue = GetPureSkillValue((SkillType)_spell_idx.SkillupSkillLineID);
 
                     // Alchemy Discoveries here
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellid);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellid, Difficulty.None);
                     if (spellEntry != null && spellEntry.Mechanic == Mechanics.Discovery)
                     {
                         uint discoveredSpell = SkillDiscovery.GetSkillDiscoverySpell(_spell_idx.SkillupSkillLineID, spellid, this);
@@ -1507,7 +1507,7 @@ namespace Game.Entities
                     uint learn_spell_id = (uint)item.GetEffect(0).SpellID;
                     uint learning_spell_id = (uint)item.GetEffect(1).SpellID;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", item.GetEntry(), learn_spell_id);
@@ -1537,7 +1537,7 @@ namespace Game.Entities
                 if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", item.GetEntry(), effectData.SpellID);
@@ -1571,7 +1571,7 @@ namespace Game.Entities
                     if (pEnchant.Effect[s] != ItemEnchantmentType.UseSpell)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s]);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s], Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "Player.CastItemUseSpell Enchant {0}, cast unknown spell {1}", enchant_id, pEnchant.EffectArg[s]);
@@ -1609,7 +1609,7 @@ namespace Game.Entities
                 if (ability.SkillLine != skillId)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.Spell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.Spell, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
@@ -1855,7 +1855,7 @@ namespace Game.Entities
                     if (pair.Value.State == PlayerSpellState.Removed || pair.Value.Disabled)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
                     if (spellInfo == null || !spellInfo.IsPassive() || spellInfo.EquippedItemClass < 0)
                         continue;
 
@@ -2107,7 +2107,7 @@ namespace Game.Entities
             uint nextSpell = Global.SpellMgr.GetNextSpellInChain(spellId);
             if (nextSpell != 0)
             {
-                SpellInfo spellInfo1 = Global.SpellMgr.GetSpellInfo(nextSpell);
+                SpellInfo spellInfo1 = Global.SpellMgr.GetSpellInfo(nextSpell, Difficulty.None);
                 if (HasSpell(nextSpell) && !spellInfo1.HasAttribute(SpellCustomAttributes.IsTalent))
                     RemoveSpell(nextSpell, disabled, false);
             }
@@ -2149,7 +2149,7 @@ namespace Game.Entities
             }
 
             // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo != null && spellInfo.IsPrimaryProfessionFirstRank())
             {
                 uint freeProfs = GetFreePrimaryProfessionPoints() + 1;
@@ -2283,7 +2283,7 @@ namespace Game.Entities
             // passive spells which apply aura and have an item requirement are to be added manually, instead of casted
             if (spellInfo.EquippedItemClass >= 0)
             {
-                foreach (SpellEffectInfo effectInfo in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                foreach (SpellEffectInfo effectInfo in spellInfo.GetEffects())
                 {
                     if (effectInfo != null && effectInfo.IsAura())
                     {
@@ -2309,7 +2309,7 @@ namespace Game.Entities
 
         bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 // do character spell book cleanup (all characters)
@@ -2476,7 +2476,7 @@ namespace Game.Entities
                         if (_spell.Value.State == PlayerSpellState.Removed)
                             continue;
 
-                        SpellInfo i_spellInfo = Global.SpellMgr.GetSpellInfo(_spell.Key);
+                        SpellInfo i_spellInfo = Global.SpellMgr.GetSpellInfo(_spell.Key, Difficulty.None);
                         if (i_spellInfo == null)
                             continue;
 
@@ -2708,7 +2708,7 @@ namespace Game.Entities
 
         public void ApplySpellMod(uint spellId, SpellModOp op, ref int basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -2807,7 +2807,7 @@ namespace Game.Entities
 
         public void ApplySpellMod(uint spellId, SpellModOp op, ref uint basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -2906,7 +2906,7 @@ namespace Game.Entities
 
         public void ApplySpellMod(uint spellId, SpellModOp op, ref float basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -3117,7 +3117,7 @@ namespace Game.Entities
 
                 foreach (ItemSetSpellRecord itemSetSpell in eff.SetBonuses)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
 
                     if (itemSetSpell.ChrSpecID != 0 && itemSetSpell.ChrSpecID != GetPrimarySpecialization())
                         ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
@@ -3137,7 +3137,7 @@ namespace Game.Entities
             // remove cooldowns on spells that have < 10 min CD
             GetSpellHistory().ResetCooldowns(p =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, Difficulty.None);
                 return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds && spellInfo.CategoryRecoveryTime < 10 * Time.Minute * Time.InMilliseconds;
             }, true);
 
@@ -3329,7 +3329,7 @@ namespace Game.Entities
                     if (effectData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", effectData.SpellID);
@@ -3387,7 +3387,7 @@ namespace Game.Entities
                     if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.WhiteHit) && damageInfo.GetSpellInfo() != null)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s]);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s], Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "Player.CastItemCombatSpell(GUID: {0}, name: {1}, enchant: {2}): unknown spell {3} is casted, ignoring...",
@@ -3435,8 +3435,8 @@ namespace Game.Entities
 
                             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                             {
-                                if (spellInfo.GetEffect(Difficulty.None, i).IsEffect())
-                                    values.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(Difficulty.None, i).CalcValue(this), effectPct));
+                                if (spellInfo.GetEffect(i).IsEffect())
+                                    values.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
                             }
                         }
 
@@ -3478,7 +3478,7 @@ namespace Game.Entities
 
                 foreach (var spellId in smap.Keys)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (spellInfo == null)
                         continue;
 

@@ -28,7 +28,7 @@ namespace Game.AI
         public override void InitializeAI()
         {
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-                if (me.m_spells[i] != 0 && Global.SpellMgr.GetSpellInfo(me.m_spells[i]) != null)
+                if (me.m_spells[i] != 0 && Global.SpellMgr.HasSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID()))
                     spells.Add(me.m_spells[i]);
 
             base.InitializeAI();
@@ -42,18 +42,22 @@ namespace Game.AI
         public override void JustDied(Unit killer)
         {
             foreach (var id in spells)
-                if (AISpellInfo[id].condition == AICondition.Die)
+            {
+                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                if (info.condition == AICondition.Die)
                     me.CastSpell(killer, id, true);
+            }
         }
 
         public override void EnterCombat(Unit victim)
         {
             foreach (var id in spells)
             {
-                if (AISpellInfo[id].condition == AICondition.Aggro)
+                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                if (info.condition == AICondition.Aggro)
                     me.CastSpell(victim, id, false);
-                else if (AISpellInfo[id].condition == AICondition.Combat)
-                    _events.ScheduleEvent(id, AISpellInfo[id].cooldown + RandomHelper.Rand32() % AISpellInfo[id].cooldown);
+                else if (info.condition == AICondition.Combat)
+                    _events.ScheduleEvent(id, info.cooldown + RandomHelper.Rand32() % info.cooldown);
             }
         }
 
@@ -71,10 +75,11 @@ namespace Game.AI
             if (spellId != 0)
             {
                 DoCast(spellId);
-                _events.ScheduleEvent(spellId, AISpellInfo[spellId].cooldown + RandomHelper.Rand32() % AISpellInfo[spellId].cooldown);
+                AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
+                _events.ScheduleEvent(spellId, info.cooldown + RandomHelper.Rand32() % info.cooldown);
             }
-
-            DoMeleeAttackIfReady();
+            else
+                DoMeleeAttackIfReady();
         }
 
         public override void SpellInterrupted(uint spellId, uint unTimeMs)
@@ -112,8 +117,12 @@ namespace Game.AI
 
             m_attackDist = 30.0f;
             foreach (var id in spells)
-                if (AISpellInfo[id].condition == AICondition.Combat && m_attackDist > AISpellInfo[id].maxRange)
-                    m_attackDist = AISpellInfo[id].maxRange;
+            {
+                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                if (info.condition == AICondition.Combat && m_attackDist > info.maxRange)
+                    m_attackDist = info.maxRange;
+            }
+
             if (m_attackDist == 30.0f)
                 m_attackDist = SharedConst.MeleeRange;
         }
@@ -132,12 +141,12 @@ namespace Game.AI
             uint count = 0;
             foreach (var id in spells)
             {
-
-                if (AISpellInfo[id].condition == AICondition.Aggro)
+                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                if (info.condition == AICondition.Aggro)
                     me.CastSpell(victim, id, false);
-                else if (AISpellInfo[id].condition == AICondition.Combat)
+                else if (info.condition == AICondition.Combat)
                 {
-                    uint cooldown = AISpellInfo[id].realCooldown;
+                    uint cooldown = info.realCooldown;
                     if (count == spell)
                     {
                         DoCast(spells[spell]);
@@ -169,7 +178,8 @@ namespace Game.AI
             {
                 DoCast(spellId);
                 uint casttime = (uint)me.GetCurrentSpellCastTime(spellId);
-                _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + AISpellInfo[spellId].realCooldown);
+                AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
+                _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
             }
         }
 
@@ -184,7 +194,7 @@ namespace Game.AI
             if (me.m_spells[0] == 0)
                 Log.outError(LogFilter.ScriptsAi, "ArcherAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0]);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
             m_minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
 
             if (m_minRange == 0)
@@ -234,7 +244,7 @@ namespace Game.AI
             if (me.m_spells[0] == 0)
                 Log.outError(LogFilter.Server, "TurretAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0]);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
             m_minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
             me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
             me.m_SightDistance = me.m_CombatDistance;

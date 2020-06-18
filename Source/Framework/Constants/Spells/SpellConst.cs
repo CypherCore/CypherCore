@@ -32,6 +32,8 @@ namespace Framework.Constants
         public const int EffectAll = 255;
 
         public const float TrajectoryMissileSize = 3.0f;
+
+        public const int MaxPowersPerSpell = 4;
     }
 
 
@@ -2323,7 +2325,7 @@ namespace Framework.Constants
         UnitNearbyParty = 3,
         UnitNearbyAlly = 4,
         UnitPet = 5,
-        UnitEnemy = 6,
+        UnitTargetEnemy = 6,
         UnitSrcAreaEntry = 7,
         UnitDestAreaEntry = 8,
         DestHome = 9,
@@ -2333,11 +2335,11 @@ namespace Framework.Constants
         DestDb = 17,
         DestCaster = 18,
         UnitCasterAreaParty = 20,
-        UnitAlly = 21,
+        UnitTargetAlly = 21,
         SrcCaster = 22,
         GameobjectTarget = 23,
         UnitConeEnemy24 = 24,
-        UnitAny = 25,
+        UnitTargetAny = 25,
         GameobjectItemTarget = 26,
         UnitMaster = 27,
         DestDynobjEnemy = 28,
@@ -2347,9 +2349,9 @@ namespace Framework.Constants
         DestCasterSummon = 32, // Front Left, Doesn'T Use Radius
         UnitSrcAreaParty = 33,
         UnitDestAreaParty = 34,
-        UnitParty = 35,
+        UnitTargetParty = 35,
         DestCasterUnk36 = 36,
-        UnitLastAreaParty = 37,
+        UnitLastTargetAreaParty = 37,
         UnitNearbyEntry = 38,
         DestCasterFishing = 39,
         GameobjectNearbyEntry = 40,
@@ -2365,7 +2367,7 @@ namespace Framework.Constants
         DestCasterLeft = 50,
         GameobjectSrcArea = 51,
         GameobjectDestArea = 52,
-        DestEnemy = 53,
+        DestTargetEnemy = 53,
         UnitConeEnemy54 = 54,
         DestCasterFrontLeap = 55, // For A Leap Spell
         UnitCasterAreaRaid = 56,

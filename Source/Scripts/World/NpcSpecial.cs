@@ -1907,7 +1907,7 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffectName.SummonObjectWild)
                 return (uint)spellInfo.GetEffect(0).MiscValue;
 

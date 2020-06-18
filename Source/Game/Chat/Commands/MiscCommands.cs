@@ -1009,7 +1009,7 @@ namespace Game.Chat
 
             if (player.IsInFlight() || player.IsInCombat())
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID, Difficulty.None);
                 if (spellInfo == null)
                     return false;
 
@@ -2065,11 +2065,11 @@ namespace Game.Chat
             if (spellid == 0)
                 return false;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellid, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
             attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);

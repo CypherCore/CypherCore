@@ -146,7 +146,7 @@ namespace Game.Entities
                 return false;
 
             uint summonSpellId = result.Read<uint>(14);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(summonSpellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(summonSpellId, owner.GetMap().GetDifficultyID());
 
             bool isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
             if (current && isTemporarySummon)
@@ -887,15 +887,22 @@ namespace Game.Entities
 
                     AuraKey key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
                     uint recalculateMask = result.Read<uint>(3);
-                    byte stackCount = result.Read<byte>(4);
-                    int maxDuration = result.Read<int>(5);
-                    int remainTime = result.Read<int>(6);
-                    byte remainCharges = result.Read<byte>(7);
+                    Difficulty difficulty = (Difficulty)result.Read<byte>(4);
+                    byte stackCount = result.Read<byte>(5);
+                    int maxDuration = result.Read<int>(6);
+                    int remainTime = result.Read<int>(7);
+                    byte remainCharges = result.Read<byte>(8);
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Pet, "Unknown aura (spellid {0}), ignore.", key.SpellId);
+                        Log.outError(LogFilter.Pet, "Pet._LoadAuras: Unknown aura (spellid {0}), ignore.", key.SpellId);
+                        continue;
+                    }
+
+                    if (difficulty != Difficulty.None && !CliDB.DifficultyStorage.ContainsKey(difficulty))
+                    {
+                        Log.outError(LogFilter.Pet, $"Pet._LoadAuras: Unknown difficulty {difficulty} (spellid {key.SpellId}), ignore.");
                         continue;
                     }
 
@@ -919,7 +926,7 @@ namespace Game.Entities
 
                     var info = effectInfo[key];
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, info.BaseAmounts, null, casterGuid);
+                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, difficulty, info.BaseAmounts, null, casterGuid);
                     if (aura != null)
                     {
                         if (!aura.CanBeSaved())
@@ -969,6 +976,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, key.SpellId);
                 stmt.AddValue(index++, key.EffectMask);
                 stmt.AddValue(index++, recalculateMask);
+                stmt.AddValue(index++, aura.GetCastDifficulty());
                 stmt.AddValue(index++, aura.GetStackAmount());
                 stmt.AddValue(index++, aura.GetMaxDuration());
                 stmt.AddValue(index++, aura.GetDuration());
@@ -996,7 +1004,7 @@ namespace Game.Entities
 
         bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 // do pet spell book cleanup
@@ -1062,7 +1070,7 @@ namespace Game.Entities
                     if (pair.Value.state == PetSpellState.Removed)
                         continue;
 
-                    SpellInfo oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key);
+                    SpellInfo oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
 
                     if (oldRankSpellInfo == null)
                         continue;
@@ -1156,7 +1164,7 @@ namespace Game.Entities
             {
                 for (byte i = 0; i < SharedConst.MaxCreatureSpellDataSlots; ++i)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(defSpells.spellid[i]);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(defSpells.spellid[i], Difficulty.None);
                     if (spellInfo == null)
                         continue;
 
@@ -1254,7 +1262,7 @@ namespace Game.Entities
                             GetCharmInfo().SetActionBar(i, 0, ActiveStates.Passive);
                         else if (ab.GetActiveState() == ActiveStates.Enabled)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.GetAction());
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.GetAction(), Difficulty.None);
                             if (spellInfo != null)
                                 ToggleAutocast(spellInfo, true);
                         }
@@ -1518,7 +1526,7 @@ namespace Game.Entities
             {
                 foreach (var specSpell in specSpells)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
                     if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 

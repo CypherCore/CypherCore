@@ -823,7 +823,7 @@ namespace Scripts.Spells.Warrior
             //Get the Remaining Damage from the aura (if exist)
             int remainingDamage = (int)target.GetRemainingPeriodicAmount(target.GetGUID(), SpellIds.TraumaEffect, AuraType.PeriodicDamage);
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect).GetMaxTicks(Difficulty.None)) + remainingDamage;
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks()) + remainingDamage;
             GetCaster().CastCustomSpell(SpellIds.TraumaEffect, SpellValueMod.BasePoint0, damage, target, true);
         }
 

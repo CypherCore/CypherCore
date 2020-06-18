@@ -379,7 +379,7 @@ namespace Game.Entities
         bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
         {
             //ASSERT(talent);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
@@ -406,7 +406,7 @@ namespace Game.Entities
 
         void RemovePvpTalent(PvpTalentRecord talent)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 

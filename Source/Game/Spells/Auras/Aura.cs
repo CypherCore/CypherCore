@@ -123,7 +123,7 @@ namespace Game.Spells
             if (IsSelfcasted() || caster == null || !caster.IsFriendlyTo(GetTarget()))
             {
                 bool negativeFound = false;
-                foreach (SpellEffectInfo effect in GetBase().GetSpellEffectInfos())
+                foreach (SpellEffectInfo effect in GetBase().GetSpellInfo().GetEffects())
                 {
                     if (effect != null && (Convert.ToBoolean((1 << (int)effect.EffectIndex) & effMask) && !GetBase().GetSpellInfo().IsPositiveEffect(effect.EffectIndex)))
                     {
@@ -138,7 +138,7 @@ namespace Game.Spells
             else
             {
                 bool positiveFound = false;
-                foreach (SpellEffectInfo effect in GetBase().GetSpellEffectInfos())
+                foreach (SpellEffectInfo effect in GetBase().GetSpellInfo().GetEffects())
                 {
                     if (effect != null && (Convert.ToBoolean((1 << (int)effect.EffectIndex) & effMask) && GetBase().GetSpellInfo().IsPositiveEffect(effect.EffectIndex)))
                     {
@@ -284,9 +284,10 @@ namespace Game.Spells
     {
         const int UPDATE_TARGET_MAP_INTERVAL = 500;
 
-        public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+        public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Difficulty castDifficulty, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
         {
             m_spellInfo = spellproto;
+            m_castDifficulty = castDifficulty;
             m_castGuid = castId;
             m_casterGuid = !casterGUID.IsEmpty() ? casterGUID : caster.GetGUID();
             m_castItemGuid = castItem != null ? castItem.GetGUID() : castItemGuid;
@@ -306,9 +307,8 @@ namespace Game.Spells
             m_lastProcAttemptTime = (DateTime.Now - TimeSpan.FromSeconds(10));
             m_lastProcSuccessTime = (DateTime.Now - TimeSpan.FromSeconds(120));
 
-            var powers = Global.DB2Mgr.GetSpellPowers(GetId(), caster ? caster.GetMap().GetDifficultyID() : Difficulty.None);
-            foreach (var power in powers)
-                if (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f)
+            foreach (SpellPowerRecord power in m_spellInfo.PowerCosts)
+                if (power != null && (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f))
                     m_periodicCosts.Add(power);
 
             if (!m_periodicCosts.Empty())
@@ -337,11 +337,9 @@ namespace Game.Spells
         public void _InitEffects(uint effMask, Unit caster, int[] baseAmount)
         {
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
-            _spellEffectInfos = m_spellInfo.GetEffectsForDifficulty(GetOwner().GetMap().GetDifficultyID());
+            _effects = new AuraEffect[GetSpellInfo().GetEffects().Count];
 
-            _effects = new AuraEffect[GetSpellEffectInfos().Length];
-
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect != null && Convert.ToBoolean(effMask & (1 << (int)effect.EffectIndex)))
                     _effects[effect.EffectIndex] = new AuraEffect(this, effect.EffectIndex, baseAmount != null ? baseAmount[effect.EffectIndex] : (int?)null, caster);
@@ -897,7 +895,7 @@ namespace Game.Spells
         public bool HasMoreThanOneEffectForType(AuraType auraType)
         {
             uint count = 0;
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect != null && HasEffect(effect.EffectIndex) && effect.ApplyAuraName == auraType)
                     ++count;
@@ -908,7 +906,7 @@ namespace Game.Spells
 
         public bool IsArea()
         {
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect != null && HasEffect(effect.EffectIndex) && effect.IsAreaAuraEffect())
                     return true;
@@ -1287,7 +1285,7 @@ namespace Game.Spells
                                 // check cooldown
                                 if (caster.IsTypeId(TypeId.Player))
                                 {
-                                    if (caster.GetSpellHistory().HasCooldown(aura.GetId()))
+                                    if (caster.GetSpellHistory().HasCooldown(aura.GetSpellInfo()))
                                     {
                                         // This additional check is needed to add a minimal delay before cooldown in in effect
                                         // to allow all bubbles broken by a single damage source proc mana return
@@ -1502,14 +1500,14 @@ namespace Game.Spells
             if (IsPassive() && sameCaster && (m_spellInfo.IsDifferentRankOf(existingSpellInfo) || (m_spellInfo.Id == existingSpellInfo.Id && m_castItemGuid.IsEmpty())))
                 return false;
 
-            foreach (SpellEffectInfo effect in existingAura.GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in existingSpellInfo.GetEffects())
             {
                 // prevent remove triggering aura by triggered aura
                 if (effect != null && effect.TriggerSpell == GetId())
                     return true;
             }
 
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 // prevent remove triggered aura by triggering aura refresh
                 if (effect != null && effect.TriggerSpell == existingAura.GetId())
@@ -1552,7 +1550,7 @@ namespace Game.Spells
                 // check same periodic auras
                 for (byte i = 0; i < SpellConst.MaxEffects; i++)
                 {
-                    SpellEffectInfo effect = GetSpellEffectInfo(i);
+                    SpellEffectInfo effect = m_spellInfo.GetEffect(i);
                     if (effect == null)
                         continue;
 
@@ -1570,7 +1568,7 @@ namespace Game.Spells
                         case AuraType.ObsModPower:
                         case AuraType.ObsModHealth:
                         case AuraType.PeriodicTriggerSpellWithValue:
-                            SpellEffectInfo existingEffect = GetSpellEffectInfo(i);
+                            SpellEffectInfo existingEffect = m_spellInfo.GetEffect(i);
                             // periodic auras which target areas are not allowed to stack this way (replenishment for example)
                             if (effect.IsTargetingArea() || (existingEffect != null && existingEffect.IsTargetingArea()))
                                 break;
@@ -1639,7 +1637,7 @@ namespace Game.Spells
                 SetNeedClientUpdateForTargets();
             }
 
-            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetId());
+            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
 
             Cypher.Assert(procEntry != null);
 
@@ -1651,7 +1649,7 @@ namespace Game.Spells
 
         public uint GetProcEffectMask(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
         {
-            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetId());
+            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
             // only auras with spell proc entry can trigger proc
             if (procEntry == null)
                 return 0;
@@ -1671,7 +1669,7 @@ namespace Game.Spells
             }
 
             // check don't break stealth attr present
-            if (m_spellInfo.HasAura(Difficulty.None, AuraType.ModStealth))
+            if (m_spellInfo.HasAura(AuraType.ModStealth))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
                 if (eventSpellInfo != null)
@@ -2240,6 +2238,7 @@ namespace Game.Spells
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public uint GetId() { return m_spellInfo.Id; }
+        public Difficulty GetCastDifficulty() { return m_castDifficulty; }
         public ObjectGuid GetCastGUID() { return m_castGuid; }
         public ObjectGuid GetCasterGUID() { return m_casterGuid; }
         public ObjectGuid GetCastItemGUID() { return m_castItemGuid; }
@@ -2297,7 +2296,7 @@ namespace Game.Spells
         byte CalcMaxCharges(Unit caster)
         {
             uint maxProcCharges = m_spellInfo.ProcCharges;
-            var procEntry = Global.SpellMgr.GetSpellProcEntry(GetId());
+            var procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
             if (procEntry != null)
                 maxProcCharges = procEntry.Charges;
 
@@ -2357,15 +2356,6 @@ namespace Game.Spells
 
         public AuraEffect[] GetAuraEffects() { return _effects; }
 
-        public SpellEffectInfo[] GetSpellEffectInfos() { return _spellEffectInfos; }
-        public SpellEffectInfo GetSpellEffectInfo(uint index)
-        {
-            if (index >= _spellEffectInfos.Length)
-                return null;
-
-            return _spellEffectInfos[index];
-        }
-
         public void SetLastProcAttemptTime(DateTime lastProcAttemptTime) { m_lastProcAttemptTime = lastProcAttemptTime; }
         public void SetLastProcSuccessTime(DateTime lastProcSuccessTime) { m_lastProcSuccessTime = lastProcSuccessTime; }
 
@@ -2379,14 +2369,14 @@ namespace Game.Spells
             {
                 case TypeId.Unit:
                 case TypeId.Player:
-                    foreach (SpellEffectInfo effect in spellProto.GetEffectsForDifficulty(owner.GetMap().GetDifficultyID()))
+                    foreach (SpellEffectInfo effect in spellProto.GetEffects())
                     {
                         if (effect != null && effect.IsUnitOwnedAuraEffect())
                             effMask |= (uint)(1 << (int)effect.EffectIndex);
                     }
                     break;
                 case TypeId.DynamicObject:
-                    foreach (SpellEffectInfo effect in spellProto.GetEffectsForDifficulty(owner.GetMap().GetDifficultyID()))
+                    foreach (SpellEffectInfo effect in spellProto.GetEffects())
                     {
                         if (effect != null && effect.Effect == SpellEffectName.PersistentAreaAura)
                             effMask |= (uint)(1 << (int)effect.EffectIndex);
@@ -2397,12 +2387,11 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
         {
-            bool throwway;
-            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemId, castItemLevel);
+            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, castDifficulty, out _, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemId, castItemLevel);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
         {
             Cypher.Assert(spellproto != null);
             Cypher.Assert(owner != null);
@@ -2425,9 +2414,9 @@ namespace Game.Spells
                 return foundAura;
             }
             else
-                return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                return Create(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
         }
-        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
         {
             Cypher.Assert(spellproto != null);
             Cypher.Assert(owner != null);
@@ -2436,9 +2425,9 @@ namespace Game.Spells
             uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
             if (effMask == 0)
                 return null;
-            return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+            return Create(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
         }
-        public static Aura Create(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+        public static Aura Create(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
         {
             Cypher.Assert(effMask != 0);
             Cypher.Assert(spellproto != null);
@@ -2468,10 +2457,10 @@ namespace Game.Spells
             {
                 case TypeId.Unit:
                 case TypeId.Player:
-                    aura = new UnitAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                    aura = new UnitAura(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
                     break;
                 case TypeId.DynamicObject:
-                    aura = new DynObjAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                    aura = new DynObjAura(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
                     break;
                 default:
                     Cypher.Assert(false);
@@ -2486,6 +2475,7 @@ namespace Game.Spells
         #region Fields
         List<AuraScript> m_loadedScripts = new List<AuraScript>();
         SpellInfo m_spellInfo;
+        Difficulty m_castDifficulty;
         ObjectGuid m_castGuid;
         ObjectGuid m_casterGuid;
         ObjectGuid m_castItemGuid;
@@ -2506,7 +2496,6 @@ namespace Game.Spells
         byte m_stackAmount;                                // Aura stack amount
 
         //might need to be arrays still
-        SpellEffectInfo[] _spellEffectInfos;
         AuraEffect[] _effects;
         Dictionary<ObjectGuid, AuraApplication> m_applications = new Dictionary<ObjectGuid, AuraApplication>();
 
@@ -2526,8 +2515,8 @@ namespace Game.Spells
 
     public class UnitAura : Aura
     {
-        public UnitAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
+        public UnitAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+            : base(spellproto, castId, owner, caster, castDifficulty, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
         {
             m_AuraDRGroup = DiminishingGroup.None;
             LoadScripts();
@@ -2560,7 +2549,7 @@ namespace Game.Spells
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
         {
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;
@@ -2637,8 +2626,8 @@ namespace Game.Spells
 
     public class DynObjAura : Aura
     {
-        public DynObjAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
+        public DynObjAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+            : base(spellproto, castId, owner, caster, castDifficulty, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
         {
             LoadScripts();
             Cypher.Assert(GetDynobjOwner() != null);
@@ -2661,7 +2650,7 @@ namespace Game.Spells
             Unit dynObjOwnerCaster = GetDynobjOwner().GetCaster();
             float radius = GetDynobjOwner().GetRadius();
 
-            foreach (SpellEffectInfo effect in GetSpellEffectInfos())
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;

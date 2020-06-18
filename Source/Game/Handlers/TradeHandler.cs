@@ -341,7 +341,7 @@ namespace Game
                 uint my_spell_id = my_trade.GetSpell();
                 if (my_spell_id != 0)
                 {
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id, _player.GetMap().GetDifficultyID());
                     Item castItem = my_trade.GetSpellCastItem();
 
                     if (spellEntry == null || !his_trade.GetItem(TradeSlots.NonTraded) ||
@@ -377,7 +377,7 @@ namespace Game
                 uint his_spell_id = his_trade.GetSpell();
                 if (his_spell_id != 0)
                 {
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id);
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());
                     Item castItem = his_trade.GetSpellCastItem();
 
                     if (spellEntry == null || !my_trade.GetItem(TradeSlots.NonTraded) || (his_trade.HasSpellCastItem() && !castItem))

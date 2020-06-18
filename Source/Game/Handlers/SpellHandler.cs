@@ -92,7 +92,7 @@ namespace Game
             {
                 foreach (ItemEffectRecord effect in item.GetEffects())
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, user.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
                         if (!spellInfo.CanBeUsedInCombat())
@@ -168,7 +168,7 @@ namespace Game
             uint lockId = proto.GetLockID();
             if (lockId != 0)
             {
-                LockRecord  lockInfo = CliDB.LockStorage.LookupByKey(lockId);
+                LockRecord lockInfo = CliDB.LockStorage.LookupByKey(lockId);
                 if (lockInfo == null)
                 {
                     player.SendEquipError(InventoryResult.ItemLocked, item);
@@ -274,7 +274,7 @@ namespace Game
             if (mover != GetPlayer() && mover.IsTypeId(TypeId.Player))
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "WORLD: unknown spell id {0}", cast.Cast.SpellID);
@@ -351,7 +351,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CancelAura)]
         void HandleCancelAura(CancelAura cancelAura)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -401,14 +401,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PetCancelAura)]
         void HandlePetCancelAura(PetCancelAura packet)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.SpellID);
-            if (spellInfo == null)
+            if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
             {
                 Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", packet.SpellID);
                 return;
             }
 
-            Creature pet= ObjectAccessor.GetCreatureOrPetOrVehicle(_player, packet.PetGUID);
+            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(_player, packet.PetGUID);
             if (pet == null)
             {
                 Log.outError(LogFilter.Network, "HandlePetCancelAura: Attempt to cancel an aura for non-existant {0} by player '{1}'", packet.PetGUID.ToString(), GetPlayer().GetName());
@@ -480,7 +479,7 @@ namespace Game
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
             if (spellInfo != null)
                 _player.CastSpell(_player, spellInfo, false, null);
 

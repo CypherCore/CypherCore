@@ -1393,7 +1393,7 @@ namespace Game
 
                     case ScriptCommands.RemoveAura:
                         {
-                            if (Global.SpellMgr.GetSpellInfo(tmp.RemoveAura.SpellID) == null)
+                            if (!Global.SpellMgr.HasSpellInfo(tmp.RemoveAura.SpellID, Difficulty.None))
                             {
                                 Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
                                     tableName, tmp.RemoveAura.SpellID, tmp.id);
@@ -1410,7 +1410,7 @@ namespace Game
 
                     case ScriptCommands.CastSpell:
                         {
-                            if (Global.SpellMgr.GetSpellInfo(tmp.CastSpell.SpellID) == null)
+                            if (!Global.SpellMgr.HasSpellInfo(tmp.CastSpell.SpellID, Difficulty.None))
                             {
                                 Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
                                     tableName, tmp.CastSpell.SpellID, tmp.id);
@@ -1493,7 +1493,7 @@ namespace Game
             foreach (var script in sSpellScripts)
             {
                 uint spellId = script.Key & 0x00FFFFFF;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Table `spell_scripts` has not existing spell (Id: {0}) as script id", spellId);
@@ -1521,16 +1521,17 @@ namespace Game
             }
 
             // Load all possible script entries from spells
-            foreach (var spell in Global.SpellMgr.GetSpellInfoStorage().Values)
+            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
             {
-                foreach (SpellEffectInfo effect in spell.GetEffectsForDifficulty(Difficulty.None))
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                if (spell != null)
                 {
-                    if (effect == null)
-                        continue;
-
-                    if (effect.Effect == SpellEffectName.SendEvent)
-                        if (effect.MiscValue != 0)
-                            evt_scripts.Add((uint)effect.MiscValue);
+                    foreach (SpellEffectInfo effect in spell.GetEffects())
+                    {
+                        if (effect != null && effect.Effect == SpellEffectName.SendEvent)
+                            if (effect.MiscValue != 0)
+                                evt_scripts.Add((uint)effect.MiscValue);
+                    }
                 }
             }
 
@@ -1612,7 +1613,7 @@ namespace Game
                     spellId = -spellId;
                 }
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellId, Difficulty.None);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Scriptname: `{0}` spell (Id: {1}) does not exist.", scriptName, spellId);
@@ -1663,7 +1664,7 @@ namespace Game
 
             foreach (var script in spellScriptsStorage.KeyValueList)
             {
-                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key);
+                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key, Difficulty.None);
 
                 Dictionary<SpellScriptLoader, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
                 foreach (var pair in SpellScriptLoaders)
@@ -1973,14 +1974,14 @@ namespace Game
                     if (!uint.TryParse(id, out uint spellId))
                         continue;
 
-                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (AdditionalSpellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong spell {1} defined in `auras` field in `creature_template_addon`.", entry, spellId);
                         continue;
                     }
 
-                    if (AdditionalSpellInfo.HasAura(Difficulty.None, AuraType.ControlVehicle))
+                    if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has SPELL_AURA_CONTROL_VEHICLE aura {1} defined in `auras` field in `creature_template_addon`.", entry, spellId);
 
                     if (creatureAddon.auras.Contains(spellId))
@@ -2087,14 +2088,14 @@ namespace Game
                     if (!uint.TryParse(id, out uint spellId))
                         continue;
 
-                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                    SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
                     if (AdditionalSpellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has wrong spell {1} defined in `auras` field in `creatureaddon`.", guid, spellId);
                         continue;
                     }
 
-                    if (AdditionalSpellInfo.HasAura(Difficulty.None, AuraType.ControlVehicle))
+                    if (AdditionalSpellInfo.HasAura(AuraType.ControlVehicle))
                         Log.outError(LogFilter.Sql, "Creature (GUID: {0}) has SPELL_AURA_CONTROL_VEHICLE aura {1} defined in `auras` field in `creature_addon`.", guid, spellId);
 
                     if (creatureAddon.auras.Contains(spellId))
@@ -2677,7 +2678,7 @@ namespace Game
 
             for (byte j = 0; j < SharedConst.MaxCreatureSpells; ++j)
             {
-                if (cInfo.Spells[j] != 0 && !Global.SpellMgr.HasSpellInfo(cInfo.Spells[j]))
+                if (cInfo.Spells[j] != 0 && !Global.SpellMgr.HasSpellInfo(cInfo.Spells[j], Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing Spell{1} ({2}), set to 0.", cInfo.Entry, j + 1, cInfo.Spells[j]);
                     cInfo.Spells[j] = 0;
@@ -2991,7 +2992,7 @@ namespace Game
                     spell.ReqAbility[2] = trainerSpellsResult.Read<uint>(7);
                     spell.ReqLevel = trainerSpellsResult.Read<byte>(8);
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.SpellId);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.SpellId, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (SpellId: {spell.SpellId}) for TrainerId {trainerId}, ignoring");
@@ -3008,7 +3009,7 @@ namespace Game
                     for (var i = 0; i < spell.ReqAbility.Count; ++i)
                     {
                         uint requiredSpell = spell.ReqAbility[i];
-                        if (requiredSpell != 0 && !Global.SpellMgr.HasSpellInfo(requiredSpell))
+                        if (requiredSpell != 0 && !Global.SpellMgr.HasSpellInfo(requiredSpell, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {spell.SpellId} and SpellId {trainerId}, ignoring");
                             allReqValid = false;
@@ -4439,7 +4440,7 @@ namespace Game
         }
         void CheckGOSpellId(GameObjectTemplate goInfo, uint dataN, uint N)
         {
-            if (Global.SpellMgr.HasSpellInfo(dataN))
+            if (Global.SpellMgr.HasSpellInfo(dataN, Difficulty.None))
                 return;
 
             Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3}  but Spell (Entry {4}) not exist.", goInfo.entry, goInfo.type, N, dataN, dataN);
@@ -5225,7 +5226,7 @@ namespace Game
                         break;
                         }
                     case EncounterCreditType.CastSpell:
-                        if (!Global.SpellMgr.HasSpellInfo(creditEntry))
+                        if (!Global.SpellMgr.HasSpellInfo(creditEntry, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid spell (entry {0}) linked to the encounter {1} ({2}), skipped!",
                                 creditEntry, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
@@ -6239,9 +6240,9 @@ namespace Game
                 uint alliance = result.Read<uint>(0);
                 uint horde = result.Read<uint>(1);
 
-                if (!Global.SpellMgr.HasSpellInfo(alliance))
+                if (!Global.SpellMgr.HasSpellInfo(alliance, Difficulty.None))
                     Log.outError(LogFilter.Sql, "Spell {0} (alliance_id) referenced in `player_factionchange_spells` does not exist, pair skipped!", alliance);
-                else if (!Global.SpellMgr.HasSpellInfo(horde))
+                else if (!Global.SpellMgr.HasSpellInfo(horde, Difficulty.None))
                     Log.outError(LogFilter.Sql, "Spell {0} (horde_id) referenced in `player_factionchange_spells` does not exist, pair skipped!", horde);
                 else
                     FactionChangeSpells[alliance] = horde;
@@ -6730,7 +6731,7 @@ namespace Game
 
                 if (qinfo.SourceSpellID != 0)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.SourceSpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.SourceSpellID, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} has `SourceSpellid` = {1} but spell {1} doesn't exist, quest can't be done.",
@@ -6810,7 +6811,7 @@ namespace Game
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid currency amount {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
                         case QuestObjectiveType.LearnSpell:
-                            if (!Global.SpellMgr.HasSpellInfo((uint)obj.ObjectID))
+                            if (!Global.SpellMgr.HasSpellInfo((uint)obj.ObjectID, Difficulty.None))
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing spell id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.WinPetBattleAgainstNpc:
@@ -6943,7 +6944,7 @@ namespace Game
                 {
                     if (qinfo.RewardDisplaySpell[i] != 0)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.RewardSpell);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.RewardSpell, Difficulty.None);
                         if (spellInfo == null)
                         {
                             Log.outError(LogFilter.Sql, "Quest {0} has `RewardSpell` = {1} but spell {2} does not exist, spell removed as display reward.",
@@ -6961,7 +6962,7 @@ namespace Game
 
                 if (qinfo.RewardSpell > 0)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.RewardSpell);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.RewardSpell, Difficulty.None);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} has `RewardSpellCast` = {1} but spell {2} does not exist, quest will not have a spell reward.",
@@ -7130,9 +7131,13 @@ namespace Game
             }
 
             // check QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE
-            foreach (var spellInfo in Global.SpellMgr.GetSpellInfoStorage().Values)
+            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
             {
-                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                if (spellInfo == null)
+                    continue;
+
+                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                 {
                     if (effect == null || effect.Effect != SpellEffectName.QuestComplete)
                         continue;
@@ -7736,7 +7741,7 @@ namespace Game
                 }
 
                 uint spellid = result.Read<uint>(1);
-                SpellInfo spellinfo = Global.SpellMgr.GetSpellInfo(spellid);
+                SpellInfo spellinfo = Global.SpellMgr.GetSpellInfo(spellid, Difficulty.None);
                 if (spellinfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Table npc_spellclick_spells creature: {0} references unknown spellid {1}. Skipping entry.", npc_entry, spellid);

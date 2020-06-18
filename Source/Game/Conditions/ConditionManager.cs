@@ -576,101 +576,103 @@ namespace Game
 
         bool AddToSpellImplicitTargetConditions(Condition cond)
         {
-            uint conditionEffMask = cond.SourceGroup;
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry);
-            Cypher.Assert(spellInfo != null);
-            List<uint> sharedMasks = new List<uint>();
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            Global.SpellMgr.ForEachSpellInfoDifficulty((uint)cond.SourceEntry, spellInfo =>
             {
-                SpellEffectInfo effect = spellInfo.GetEffect(i);
-                if (effect == null)
-                    continue;
-
-                // check if effect is already a part of some shared mask
-                bool found = false;
-                foreach (var value in sharedMasks)
+                uint conditionEffMask = cond.SourceGroup;
+                List<uint> sharedMasks = new List<uint>();
+                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                 {
-                    if (((1 << i) & value) != 0)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    continue;
-
-                // build new shared mask with found effect
-                uint sharedMask = (uint)(1 << i);
-                List<Condition> cmp = effect.ImplicitTargetConditions;
-                for (byte effIndex = (byte)(i + 1); effIndex < SpellConst.MaxEffects; ++effIndex)
-                {
-                    SpellEffectInfo inner = spellInfo.GetEffect(effIndex);
-                    if (inner == null)
-                        continue;
-                    if (inner.ImplicitTargetConditions == cmp)
-                        sharedMask |= (uint)(1 << effIndex);
-                }
-                sharedMasks.Add(sharedMask);
-            }
-
-            foreach (var value in sharedMasks)
-            {
-                // some effect indexes should have same data
-                uint commonMask = (value & conditionEffMask);
-                if (commonMask != 0)
-                {
-                    byte firstEffIndex = 0;
-                    for (; firstEffIndex < SpellConst.MaxEffects; ++firstEffIndex)
-                        if (((1 << firstEffIndex) & value) != 0)
-                            break;
-
-                    if (firstEffIndex >= SpellConst.MaxEffects)
-                        return false;
-
-                    SpellEffectInfo effect = spellInfo.GetEffect(firstEffIndex);
+                    SpellEffectInfo effect = spellInfo.GetEffect(i);
                     if (effect == null)
                         continue;
 
-                    // get shared data
-                    List<Condition> sharedList = effect.ImplicitTargetConditions;
-
-                    // there's already data entry for that sharedMask
-                    if (sharedList != null)
+                    // check if effect is already a part of some shared mask
+                    bool found = false;
+                    foreach (var value in sharedMasks)
                     {
-                        // we have overlapping masks in db
-                        if (conditionEffMask != value)
+                        if (((1 << i) & value) != 0)
                         {
-                            Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect SourceGroup {1} (spell effectMask) set - " +
-                               "effect masks are overlapping (all SourceGroup values having given bit set must be equal) - ignoring.", cond.ToString(), cond.SourceGroup);
-                            return false;
+                            found = true;
+                            break;
                         }
                     }
-                    // no data for shared mask, we can create new submask
-                    else
-                    {
-                        // add new list, create new shared mask
-                        sharedList = new List<Condition>();
-                        bool assigned = false;
-                        for (byte i = firstEffIndex; i < SpellConst.MaxEffects; ++i)
-                        {
-                            SpellEffectInfo eff = spellInfo.GetEffect(i);
-                            if (eff == null)
-                                continue;
+                    if (found)
+                        continue;
 
-                            if (((1 << i) & commonMask) != 0)
+                    // build new shared mask with found effect
+                    uint sharedMask = (uint)(1 << i);
+                    List<Condition> cmp = effect.ImplicitTargetConditions;
+                    for (byte effIndex = (byte)(i + 1); effIndex < SpellConst.MaxEffects; ++effIndex)
+                    {
+                        SpellEffectInfo inner = spellInfo.GetEffect(effIndex);
+                        if (inner == null)
+                            continue;
+
+                        if (inner.ImplicitTargetConditions == cmp)
+                            sharedMask |= (uint)(1 << effIndex);
+                    }
+                    sharedMasks.Add(sharedMask);
+                }
+
+                foreach (var value in sharedMasks)
+                {
+                    // some effect indexes should have same data
+                    uint commonMask = (value & conditionEffMask);
+                    if (commonMask != 0)
+                    {
+                        byte firstEffIndex = 0;
+                        for (; firstEffIndex < SpellConst.MaxEffects; ++firstEffIndex)
+                            if (((1 << firstEffIndex) & value) != 0)
+                                break;
+
+                        if (firstEffIndex >= SpellConst.MaxEffects)
+                            return;
+
+                        SpellEffectInfo effect = spellInfo.GetEffect(firstEffIndex);
+                        if (effect == null)
+                            continue;
+
+                        // get shared data
+                        List<Condition> sharedList = effect.ImplicitTargetConditions;
+
+                        // there's already data entry for that sharedMask
+                        if (sharedList != null)
+                        {
+                            // we have overlapping masks in db
+                            if (conditionEffMask != value)
                             {
-                                eff.ImplicitTargetConditions = sharedList;
-                                assigned = true;
+                                Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect SourceGroup {1} (spell effectMask) set - " +
+                                   "effect masks are overlapping (all SourceGroup values having given bit set must be equal) - ignoring.", cond.ToString(), cond.SourceGroup);
+                                return;
                             }
                         }
+                        // no data for shared mask, we can create new submask
+                        else
+                        {
+                            // add new list, create new shared mask
+                            sharedList = new List<Condition>();
+                            bool assigned = false;
+                            for (byte i = firstEffIndex; i < SpellConst.MaxEffects; ++i)
+                            {
+                                SpellEffectInfo eff = spellInfo.GetEffect(i);
+                                if (eff == null)
+                                    continue;
 
-                        if (!assigned)
-                            break;
+                                if (((1 << i) & commonMask) != 0)
+                                {
+                                    eff.ImplicitTargetConditions = sharedList;
+                                    assigned = true;
+                                }
+                            }
+
+                            if (!assigned)
+                                break;
+                        }
+                        sharedList.Add(cond);
+                        break;
                     }
-                    sharedList.Add(cond);
-                    break;
                 }
-            }
+            });
             return true;
         }
 
@@ -929,7 +931,7 @@ namespace Game
                     }
                 case ConditionSourceType.SpellImplicitTarget:
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
                         if (spellInfo == null)
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
@@ -949,7 +951,7 @@ namespace Game
                             if (((1 << i) & cond.SourceGroup) == 0)
                                 continue;
 
-                            SpellEffectInfo effect = spellInfo.GetEffect(Difficulty.None, i);
+                            SpellEffectInfo effect = spellInfo.GetEffect(i);
                             if (effect == null)
                                 continue;
 
@@ -998,7 +1000,7 @@ namespace Game
                 case ConditionSourceType.Spell:
                 case ConditionSourceType.SpellProc:
                     {
-                        SpellInfo spellProto = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry);
+                        SpellInfo spellProto = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
                         if (spellProto == null)
                         {
                             Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
@@ -1020,7 +1022,7 @@ namespace Game
                         return false;
                     }
 
-                    if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry))
+                    if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry, Difficulty.None))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
                         return false;
@@ -1033,7 +1035,7 @@ namespace Game
                         return false;
                     }
 
-                    if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry))
+                    if (!Global.SpellMgr.HasSpellInfo((uint)cond.SourceEntry, Difficulty.None))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
                         return false;
@@ -1093,7 +1095,7 @@ namespace Game
             {
                 case ConditionTypes.Aura:
                     {
-                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1))
+                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(), cond.ConditionValue1);
                             return false;
@@ -1268,7 +1270,7 @@ namespace Game
                     }
                 case ConditionTypes.Spell:
                     {
-                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1))
+                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(true), cond.ConditionValue1);
                             return false;

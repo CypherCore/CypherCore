@@ -1719,7 +1719,7 @@ Fall Time: 824
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            SpellInfo damageInfo = Global.SpellMgr.GetSpellInfo(GunshipSpells.RocketPackDamage);
+            SpellInfo damageInfo = Global.SpellMgr.GetSpellInfo(GunshipSpells.RocketPackDamage, GetCastDifficulty());
             GetTarget().CastCustomSpell(GunshipSpells.RocketPackDamage, SpellValueMod.BasePoint0, (int)(2 * (damageInfo.GetEffect(0).CalcValue() + aurEff.GetTickNumber() * aurEff.GetPeriod())), null, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(null, GunshipSpells.RocketBurst, TriggerCastFlags.FullMask);
         }

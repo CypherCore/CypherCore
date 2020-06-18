@@ -44,14 +44,14 @@ namespace Game.Spells
             {
                 uint spellId = result.Read<uint>(0);
 
-                if (!Global.SpellMgr.HasSpellInfo(spellId))
+                if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} has non-existent spell id in `skill_extra_item_template`!", spellId);
                     continue;
                 }
 
                 uint requiredSpecialization = result.Read<uint>(1);
-                if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization))
+                if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} have not existed required specialization spell id {1} in `skill_extra_item_template`!", spellId, requiredSpecialization);
                     continue;
@@ -144,14 +144,14 @@ namespace Game.Spells
             do
             {
                 uint spellId = result.Read<uint>(0);
-                if (!Global.SpellMgr.HasSpellInfo(spellId))
+                if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent spell id in `skill_perfect_item_template`!", spellId);
                     continue;
                 }
 
                 uint requiredSpecialization = result.Read<uint>(1);
-                if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization))
+                if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent required specialization spell id {1} in `skill_perfect_item_template`!", spellId, requiredSpecialization);
                     continue;

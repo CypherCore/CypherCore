@@ -32,14 +32,14 @@ namespace Game.Spells
 {
     public class AuraEffect
     {
-        public AuraEffect(Aura baseAura, uint effindex, int? baseAmount, Unit caster)
+        public AuraEffect(Aura baseAura, uint effIndex, int? baseAmount, Unit caster)
         {
             auraBase = baseAura;
             m_spellInfo = baseAura.GetSpellInfo();
-            _effectInfo = baseAura.GetSpellEffectInfo(effindex);
+            _effectInfo = m_spellInfo.GetEffect(effIndex);
             m_baseAmount = baseAmount.HasValue ? baseAmount.Value : _effectInfo.CalcBaseValue(caster, baseAura.GetAuraType() == AuraObjectType.Unit ? baseAura.GetOwner().ToUnit() : null, baseAura.GetCastItemId(), baseAura.GetCastItemLevel());
             m_donePct = 1.0f;
-            m_effIndex = (byte)effindex;
+            m_effIndex = (byte)effIndex;
             m_canBeRecalculated = true;
             m_isPeriodic = false;
 
@@ -683,7 +683,7 @@ namespace Game.Spells
                     {
                         // Don't proc extra attacks while already processing extra attack spell
                         uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-                        SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+                        SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
                         if (triggeredSpellInfo != null)
                             if (aurApp.GetTarget().ExtraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
                                 return false;
@@ -818,7 +818,7 @@ namespace Game.Spells
                         if (pair.Key == spellId || pair.Key == spellId2 || pair.Key == spellId3 || pair.Key == spellId4)
                             continue;
 
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
                         if (spellInfo == null || !(spellInfo.IsPassive() || spellInfo.HasAttribute(SpellAttr0.HiddenClientside)))
                             continue;
 
@@ -1340,7 +1340,7 @@ namespace Game.Spells
 
                 if (modelid > 0)
                 {
-                    SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm());
+                    SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm(), GetBase().GetCastDifficulty());
                     if (transformSpellInfo == null || !GetSpellInfo().IsPositive())
                         target.SetDisplayId(modelid);
                 }
@@ -1438,7 +1438,7 @@ namespace Game.Spells
             if (apply)
             {
                 // update active transform spell only when transform not set or not overwriting negative by positive case
-                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm());
+                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm(), GetBase().GetCastDifficulty());
                 if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
                 {
                     target.SetTransForm(GetId());
@@ -2168,7 +2168,7 @@ namespace Game.Spells
                     }
 
                     //some spell has one aura of mount and one of vehicle
-                    foreach (SpellEffectInfo effect in GetBase().GetSpellEffectInfos())
+                    foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
                         if (effect != null && GetSpellEffectInfo().Effect == SpellEffectName.Summon && effect.MiscValue == GetMiscValue())
                             displayId = 0;
                 }
@@ -4464,10 +4464,10 @@ namespace Game.Spells
                                     uint spellId = 24659;
                                     if (apply && caster != null)
                                     {
-                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId);
+                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
 
                                         for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell.Id, true, null, null, GetCasterGUID());
+                                            caster.CastSpell(target, spell, true, null, null, GetCasterGUID());
                                         break;
                                     }
                                     target.RemoveAurasDueToSpell(spellId);
@@ -4479,9 +4479,9 @@ namespace Game.Spells
                                     uint spellId = 24662;
                                     if (apply && caster != null)
                                     {
-                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId);
+                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
                                         for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell.Id, true, null, null, GetCasterGUID());
+                                            caster.CastSpell(target, spell, true, null, null, GetCasterGUID());
                                         break;
                                     }
                                     target.RemoveAurasDueToSpell(spellId);
@@ -4720,11 +4720,11 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             uint triggeredSpellId = GetSpellEffectInfo().TriggerSpell;
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggeredSpellId);
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggeredSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo == null)
                 return;
 
-            Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, target.GetMap().GetDifficultyID()) ? GetCaster() : target;
+            Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCaster() : target;
             if (!caster)
                 return;
 
@@ -4740,13 +4740,13 @@ namespace Game.Spells
                 }
                 else
                 {
-                    ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, caster.GetMap().GetDifficultyID()) ? GetCasterGUID() : target.GetGUID();
+                    ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCasterGUID() : target.GetGUID();
                     target.RemoveAura(triggeredSpellId, casterGUID, 0, aurApp.GetRemoveMode());
                 }
             }
             else if (mode.HasAnyFlag(AuraEffectHandleModes.Reapply) && apply)
             {
-                ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, caster.GetMap().GetDifficultyID()) ? GetCasterGUID() : target.GetGUID();
+                ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCasterGUID() : target.GetGUID();
                 // change the stack amount to be equal to stack amount of our aura
                 Aura triggeredAura = target.GetAura(triggeredSpellId, casterGUID);
                 if (triggeredAura != null)
@@ -5054,7 +5054,7 @@ namespace Game.Spells
             // generic casting code with custom spells and target/caster customs
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
 
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             SpellInfo auraSpellInfo = GetSpellInfo();
             uint auraId = auraSpellInfo.Id;
 
@@ -5320,11 +5320,11 @@ namespace Game.Spells
             }
 
             // Reget trigger spell proto
-            triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+            triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
 
             if (triggeredSpellInfo != null)
             {
-                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, target.GetMap().GetDifficultyID()) ? caster : target;
+                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
                 if (triggerCaster != null)
                 {
                     triggerCaster.CastSpell(target, triggeredSpellInfo, true, null, this);
@@ -5338,10 +5338,10 @@ namespace Game.Spells
         void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
         {
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
-                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo, target.GetMap().GetDifficultyID()) ? caster : target;
+                Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
                 if (triggerCaster != null)
                 {
                     int basepoints = GetAmount();
@@ -5571,7 +5571,7 @@ namespace Game.Spells
             uint resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetId(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
+            SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetSpellInfo(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
             log.damage = damage;
             log.originalDamage = dmg;
             log.absorb = absorb;
@@ -5876,7 +5876,7 @@ namespace Game.Spells
 
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, target, spellProto.Id, GetBase().GetSpellXSpellVisualId(), spellProto.SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, target, spellProto, GetBase().GetSpellXSpellVisualId(), spellProto.SchoolMask, GetBase().GetCastGUID());
             // no SpellDamageBonus for burn mana
             caster.CalculateSpellDamageTaken(damageInfo, (int)(gain * dmgMultiplier), spellProto);
 
@@ -5917,7 +5917,7 @@ namespace Game.Spells
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
                 Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {0} from aura {1} proc", triggeredSpellInfo.Id, GetId());
@@ -5933,7 +5933,7 @@ namespace Game.Spells
             Unit triggerTarget = eventInfo.GetProcTarget();
 
             uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
                 int basepoints0 = GetAmount();
@@ -5954,7 +5954,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetId(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect, GetSpellEffectInfo());
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
@@ -6128,7 +6128,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(GetSpellEffectInfo().TriggerSpell);
+            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(GetSpellEffectInfo().TriggerSpell, GetBase().GetCastDifficulty());
             if (triggerSpellInfo == null)
                 return;
 
@@ -6139,7 +6139,7 @@ namespace Game.Spells
             else
             {
                 List<uint> summonedEntries = new List<uint>();
-                foreach (var spellEffect in triggerSpellInfo.GetEffectsForDifficulty(target.GetMap().GetDifficultyID()))
+                foreach (var spellEffect in triggerSpellInfo.GetEffects())
                 {
                     if (spellEffect != null && spellEffect.Effect == SpellEffectName.Summon)
                     {

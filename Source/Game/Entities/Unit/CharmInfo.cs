@@ -106,7 +106,7 @@ namespace Game.Entities
                 for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 {
                     uint spellId = _unit.ToCreature().m_spells[i];
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
                         if (spellInfo.IsPassive())
@@ -133,7 +133,7 @@ namespace Game.Entities
             for (uint x = 0; x < SharedConst.MaxSpellCharm; ++x)
             {
                 uint spellId = _unit.ToCreature().m_spells[x];
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
 
                 if (spellInfo == null)
                 {
@@ -260,7 +260,7 @@ namespace Game.Entities
                 // check correctness
                 if (PetActionBar[index].IsActionBarForSpell())
                 {
-                    SpellInfo spelInfo = Global.SpellMgr.GetSpellInfo(PetActionBar[index].GetAction());
+                    SpellInfo spelInfo = Global.SpellMgr.GetSpellInfo(PetActionBar[index].GetAction(), _unit.GetMap().GetDifficultyID());
                     if (spelInfo == null)
                         SetActionBar(index, 0, ActiveStates.Passive);
                     else if (!spelInfo.IsAutocastable())

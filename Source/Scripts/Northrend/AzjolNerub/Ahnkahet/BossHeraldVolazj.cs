@@ -117,7 +117,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
                 // phase the player
                 target.CastSpell(target, SpellIds.InsanityTarget + insanityHandled, true);
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InsanityTarget + insanityHandled);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InsanityTarget + insanityHandled, GetDifficulty());
                 if (spellInfo == null)
                     return;
 

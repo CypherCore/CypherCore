@@ -73,7 +73,7 @@ namespace Game
                 switch (type)
                 {
                     case DisableType.Spell:
-                        if (!(Global.SpellMgr.HasSpellInfo(entry) || flags.HasAnyFlag<byte>(DisableFlags.SpellDeprecatedSpell)))
+                        if (!(Global.SpellMgr.HasSpellInfo(entry, Difficulty.None) || flags.HasAnyFlag<byte>(DisableFlags.SpellDeprecatedSpell)))
                         {
                             Log.outError(LogFilter.Sql, "Spell entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
                             continue;

@@ -487,7 +487,7 @@ namespace Game.AI
             if (knownRank == 0)
                 return null;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return null;
 

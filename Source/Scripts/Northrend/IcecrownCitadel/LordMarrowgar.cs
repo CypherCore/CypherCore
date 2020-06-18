@@ -519,7 +519,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 if (target.HasAura(Spells.Impaled))
                     return false;
 
-                SpellEffectInfo effect = GetSpellInfo().GetEffect(target.GetMap().GetDifficultyID(), 0);
+                SpellEffectInfo effect = GetSpellInfo().GetEffect(0);
                 if (effect != null)
                     if (target.GetExactDist2d(GetOwner()) > effect.CalcRadius())
                         return false;

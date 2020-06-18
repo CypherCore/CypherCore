@@ -3046,14 +3046,14 @@ namespace Game.Achievements
                 case CriteriaDataType.SAura:
                 case CriteriaDataType.TAura:
                     {
-                        SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId);
+                        SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
                         if (spellEntry == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell id in value1 ({3}), ignored.",
                                 criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
                             return false;
                         }
-                        SpellEffectInfo effect = spellEntry.GetEffect(Difficulty.None, Aura.EffectIndex);
+                        SpellEffectInfo effect = spellEntry.GetEffect(Aura.EffectIndex);
                         if (effect == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",

@@ -30,31 +30,20 @@ namespace Game.Spells
 {
     public class SpellInfo
     {
-        public SpellInfo(SpellInfoLoadHelper data, Dictionary<uint, SpellEffectRecord[]> effectsMap, MultiMap<uint, SpellXSpellVisualRecord> visuals)
+        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, SpellInfoLoadHelper data, List<SpellXSpellVisualRecord> visuals)
         {
-            Id = data.Entry.Id;
+            Id = spellName.Id;
+            Difficulty = difficulty;
 
-            _effects = new Dictionary<uint, SpellEffectInfo[]>();
-
-            if (effectsMap != null)
+            foreach (SpellEffectRecord spellEffect in data.Effects)
             {
-                foreach (var pair in effectsMap)
-                {
-                    if (!_effects.ContainsKey(pair.Key))
-                        _effects[pair.Key] = new SpellEffectInfo[pair.Value.Length];
+                if (spellEffect == null)
+                    continue;
 
-                    for (int i = 0; i < pair.Value.Length; ++i)
-                    {
-                        SpellEffectRecord effect = pair.Value[i];
-                        if (effect == null)
-                            continue;
+                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+            }            
 
-                        _effects[pair.Key][effect.EffectIndex] = new SpellEffectInfo(this, effect.EffectIndex, effect);
-                    }
-                }
-            }
-
-            SpellName = data.Entry.Name;
+            SpellName = spellName.Name;
 
             SpellMiscRecord _misc = data.Misc;
             if (_misc != null)
@@ -89,10 +78,6 @@ namespace Game.Spells
 
             if (visuals != null)
                 _visuals = visuals;
-
-            // sort all visuals so that the ones without a condition requirement are last on the list
-            foreach (var key in _visuals.Keys.ToList())
-                _visuals[key] = _visuals[key].OrderByDescending(x => x.CasterPlayerConditionID).ToList();
 
             // SpellScalingEntry
             SpellScalingRecord _scaling = data.Scaling;
@@ -204,7 +189,7 @@ namespace Game.Spells
             }
 
             // SpellPowerEntry
-            PowerCosts = Global.DB2Mgr.GetSpellPowers(Id, Difficulty.None, out _hasPowerDifficultyData);
+            PowerCosts = data.Powers;
 
             // SpellReagentsEntry
             SpellReagentsRecord _reagents = data.Reagents;
@@ -248,91 +233,53 @@ namespace Game.Spells
             _auraState = AuraStateType.None;
         }
 
-        public bool HasEffect(Difficulty difficulty, SpellEffectName effect)
-        {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (var eff in effects)
-            {
-                if (eff != null && eff.IsEffect(effect))
-                    return true;
-            }
-
-            return false;
-        }
-
         public bool HasEffect(SpellEffectName effect)
         {
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo eff in pair.Value)
-                {
-                    if (eff != null && eff.IsEffect(effect))
-                        return true;
-                }
+            foreach (SpellEffectInfo eff in _effects.Values)
+                if (eff != null && eff.IsEffect(effect))
+                    return true;
 
-            }
             return false;
         }
 
-        public bool HasAura(Difficulty difficulty, AuraType aura)
+        public bool HasAura(AuraType aura)
         {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
+            foreach (SpellEffectInfo effect in _effects.Values)
                 if (effect != null && effect.IsAura(aura))
                     return true;
-            }
-            return false;
-        }
-
-        public bool HasAreaAuraEffect(Difficulty difficulty)
-        {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
-                if (effect != null && effect.IsAreaAuraEffect())
-                    return true;
-            }
 
             return false;
         }
 
         public bool HasAreaAuraEffect()
         {
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect != null && effect.IsAreaAuraEffect())
-                        return true;
-                }
-            }
+            foreach (SpellEffectInfo effect in _effects.Values)
+                if (effect != null && effect.IsAreaAuraEffect())
+                    return true;
+
             return false;
         }
 
         public bool HasOnlyDamageEffects()
         {
-            foreach (var pair in _effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect == null)
-                        continue;
+                if (effect == null)
+                    continue;
 
-                    switch (effect.Effect)
-                    {
-                        case SpellEffectName.WeaponDamage:
-                        case SpellEffectName.WeaponDamageNoschool:
-                        case SpellEffectName.NormalizedWeaponDmg:
-                        case SpellEffectName.WeaponPercentDamage:
-                        case SpellEffectName.SchoolDamage:
-                        case SpellEffectName.EnvironmentalDamage:
-                        case SpellEffectName.HealthLeech:
-                        case SpellEffectName.DamageFromMaxHealthPCT:
-                            continue;
-                        default:
-                            return false;
-                    }
+                switch (effect.Effect)
+                {
+                    case SpellEffectName.WeaponDamage:
+                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.NormalizedWeaponDmg:
+                    case SpellEffectName.WeaponPercentDamage:
+                    case SpellEffectName.SchoolDamage:
+                    case SpellEffectName.EnvironmentalDamage:
+                    case SpellEffectName.HealthLeech:
+                    case SpellEffectName.DamageFromMaxHealthPCT:
+                        continue;
+                    default:
+                        return false;
                 }
             }
 
@@ -341,8 +288,8 @@ namespace Game.Spells
 
         public bool IsExplicitDiscovery()
         {
-            SpellEffectInfo effect0 = GetEffect(Difficulty.None, 0);
-            SpellEffectInfo effect1 = GetEffect(Difficulty.None, 1);
+            SpellEffectInfo effect0 = GetEffect(0);
+            SpellEffectInfo effect1 = GetEffect(1);
 
             return ((effect0 != null && (effect0.Effect == SpellEffectName.CreateRandomItem || effect0.Effect == SpellEffectName.CreateLoot))
                 && effect1 != null && effect1.Effect == SpellEffectName.ScriptEffect)
@@ -356,16 +303,15 @@ namespace Game.Spells
 
         public bool IsQuestTame()
         {
-            SpellEffectInfo effect0 = GetEffect(Difficulty.None, 0);
-            SpellEffectInfo effect1 = GetEffect(Difficulty.None, 1);
+            SpellEffectInfo effect0 = GetEffect(0);
+            SpellEffectInfo effect1 = GetEffect(1);
             return effect0 != null && effect1 != null && effect0.Effect == SpellEffectName.Threat && effect1.Effect == SpellEffectName.ApplyAura
                 && effect1.ApplyAuraName == AuraType.Dummy;
         }
 
-        public bool IsProfession(Difficulty difficulty = Difficulty.None)
+        public bool IsProfession()
         {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
                 if (effect != null && effect.Effect == SpellEffectName.Skill)
                 {
@@ -378,25 +324,19 @@ namespace Game.Spells
             return false;
         }
 
-        public bool IsPrimaryProfession(Difficulty difficulty)
+        public bool IsPrimaryProfession()
         {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
+            foreach (SpellEffectInfo effect in _effects.Values)
                 if (effect != null && effect.Effect == SpellEffectName.Skill)
-                {
-                    uint skill = (uint)effect.MiscValue;
-
-                    if (Global.SpellMgr.IsPrimaryProfessionSkill(skill))
+                    if (Global.SpellMgr.IsPrimaryProfessionSkill((uint)effect.MiscValue))
                         return true;
-                }
-            }
+
             return false;
         }
 
-        public bool IsPrimaryProfessionFirstRank(Difficulty difficulty = Difficulty.None)
+        public bool IsPrimaryProfessionFirstRank()
         {
-            return IsPrimaryProfession(difficulty) && GetRank() == 1;
+            return IsPrimaryProfession() && GetRank() == 1;
         }
 
         public bool IsAbilityOfSkillType(SkillType skillType)
@@ -410,26 +350,22 @@ namespace Game.Spells
             return false;
         }
 
-        public bool IsAffectingArea(Difficulty difficulty)
+        public bool IsAffectingArea()
         {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
+            foreach (SpellEffectInfo effect in _effects.Values)
                 if (effect != null && effect.IsEffect() && (effect.IsTargetingArea() || effect.IsEffect(SpellEffectName.PersistentAreaAura) || effect.IsAreaAuraEffect()))
                     return true;
-            }
+
             return false;
         }
 
         // checks if spell targets are selected from area, doesn't include spell effects in check (like area wide auras for example)
-        public bool IsTargetingArea(Difficulty difficulty)
+        public bool IsTargetingArea()
         {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
+            foreach (SpellEffectInfo effect in _effects.Values)
                 if (effect != null && effect.IsEffect() && effect.IsTargetingArea())
                     return true;
-            }
+
             return false;
         }
 
@@ -438,7 +374,7 @@ namespace Game.Spells
             return Convert.ToBoolean(GetExplicitTargetMask() & SpellCastTargetFlags.UnitMask);
         }
 
-        public bool NeedsToBeTriggeredByCaster(SpellInfo triggeringSpell, Difficulty difficulty)
+        public bool NeedsToBeTriggeredByCaster(SpellInfo triggeringSpell)
         {
             if (NeedsExplicitUnitTarget())
                 return true;
@@ -446,8 +382,7 @@ namespace Game.Spells
             if (triggeringSpell.IsChanneled())
             {
                 SpellCastTargetFlags mask = 0;
-                var effects = GetEffectsForDifficulty(difficulty);
-                foreach (SpellEffectInfo effect in effects)
+                foreach (SpellEffectInfo effect in _effects.Values)
                 {
                     if (effect != null && (effect.TargetA.GetTarget() != Targets.UnitCaster && effect.TargetA.GetTarget() != Targets.DestCaster
                         && effect.TargetB.GetTarget() != Targets.UnitCaster && effect.TargetB.GetTarget() != Targets.DestCaster))
@@ -483,8 +418,7 @@ namespace Game.Spells
                 return false;
 
             // All stance spells. if any better way, change it.
-            var effects = GetEffectsForDifficulty(Difficulty.None);
-            foreach (SpellEffectInfo effect in effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
                 if (effect == null)
                     continue;
@@ -550,8 +484,7 @@ namespace Game.Spells
 
         public bool IsGroupBuff()
         {
-            var effects = GetEffectsForDifficulty(Difficulty.None);
-            foreach (SpellEffectInfo effect in effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
                 if (effect == null)
                     continue;
@@ -704,7 +637,7 @@ namespace Game.Spells
             if (!IsAffectedBySpellMods())
                 return false;
 
-            SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.spellId);
+            SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.spellId, Difficulty);
             if (affectSpell == null)
                 return false;
 
@@ -1010,7 +943,7 @@ namespace Game.Spells
             // aura limitations
             if (player)
             {
-                foreach (SpellEffectInfo effect in GetEffectsForDifficulty(player.GetMap().GetDifficultyID()))
+                foreach (SpellEffectInfo effect in _effects.Values)
                 {
                     if (effect == null || !effect.IsAura())
                         continue;
@@ -1184,7 +1117,7 @@ namespace Game.Spells
                 return SpellCastResult.TargetAurastate;
 
             if (unitTarget.HasAuraType(AuraType.PreventResurrection))
-                if (HasEffect(caster.GetMap().GetDifficultyID(), SpellEffectName.SelfResurrect) || HasEffect(caster.GetMap().GetDifficultyID(), SpellEffectName.Resurrect))
+                if (HasEffect(SpellEffectName.SelfResurrect) || HasEffect(SpellEffectName.Resurrect))
                     return SpellCastResult.TargetCannotBeResurrected;
 
             if (HasAttribute(SpellAttr8.BattleResurrection))
@@ -1251,7 +1184,7 @@ namespace Game.Spells
             if (vehicle)
             {
                 VehicleSeatFlags checkMask = 0;
-                foreach (SpellEffectInfo effect in GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
+                foreach (SpellEffectInfo effect in _effects.Values)
                 {
                     if (effect != null && effect.ApplyAuraName == AuraType.ModShapeshift)
                     {
@@ -1262,7 +1195,7 @@ namespace Game.Spells
                     }
                 }
 
-                if (HasAura(caster.GetMap().GetDifficultyID(), AuraType.Mounted))
+                if (HasAura(AuraType.Mounted))
                     checkMask |= VehicleSeatFlags.CanCastMountSpell;
 
                 if (checkMask == 0)
@@ -1276,7 +1209,7 @@ namespace Game.Spells
                 // Can only summon uncontrolled minions/guardians when on controlled vehicle
                 if (vehicleSeat.HasSeatFlag(VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2))
                 {
-                    foreach (SpellEffectInfo effect in GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
+                    foreach (SpellEffectInfo effect in _effects.Values)
                     {
                         if (effect == null || effect.Effect != SpellEffectName.Summon)
                             continue;
@@ -1323,14 +1256,10 @@ namespace Game.Spells
             if (Mechanic != 0)
                 mask |= (uint)(1 << (int)Mechanic);
 
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect != null && effect.IsEffect() && effect.Mechanic != 0)
-                        mask |= (uint)(1 << (int)effect.Mechanic);
-                }
-            }
+            foreach (SpellEffectInfo effect in _effects.Values)
+                if (effect != null && effect.IsEffect() && effect.Mechanic != 0)
+                    mask |= 1u << (int)effect.Mechanic;
+
             return mask;
         }
 
@@ -1340,14 +1269,10 @@ namespace Game.Spells
             if (Mechanic != 0)
                 mask |= (uint)(1 << (int)Mechanic);
 
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect != null && effect.EffectIndex == effIndex && effect.IsEffect() && effect.Mechanic != 0)
-                        mask |= (uint)(1 << (int)effect.Mechanic);
-                }
-            }
+            var effect = _effects.LookupByKey(effIndex);
+            if (effect != null && effect.IsEffect() && effect.Mechanic != 0)
+                mask |= 1u << (int)effect.Mechanic;
+
             return mask;
         }
 
@@ -1357,24 +1282,22 @@ namespace Game.Spells
             if (Mechanic != 0)
                 mask |= (uint)(1 << (int)Mechanic);
 
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.Mechanic != 0)
-                        mask |= (uint)(1 << (int)effect.Mechanic);
-                }
-            }
+            foreach (SpellEffectInfo effect in _effects.Values)
+                if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.Mechanic != 0)
+                    mask |= 1u << (int)effect.Mechanic;
+
             return mask;
         }
 
-        public Mechanics GetEffectMechanic(uint effIndex, Difficulty difficulty)
+        public Mechanics GetEffectMechanic(uint effIndex)
         {
-            SpellEffectInfo effect = GetEffect(difficulty, effIndex);
+            SpellEffectInfo effect = GetEffect(effIndex);
             if (effect != null && effect.IsEffect() && effect.Mechanic != 0)
                 return effect.Mechanic;
+
             if (Mechanic != 0)
                 return Mechanic;
+
             return Mechanics.None;
         }
 
@@ -1448,10 +1371,9 @@ namespace Game.Spells
 
             if (Convert.ToBoolean(GetSchoolMask() & SpellSchoolMask.Frost))
             {
-                foreach (var pair in _effects)
-                    foreach (SpellEffectInfo effect in pair.Value)
-                        if (effect != null && (effect.IsAura(AuraType.ModStun) || effect.IsAura(AuraType.ModRoot)))
-                            _auraState = AuraStateType.Frozen;
+                foreach (SpellEffectInfo effect in _effects.Values)
+                    if (effect != null && (effect.IsAura(AuraType.ModStun) || effect.IsAura(AuraType.ModRoot)))
+                        _auraState = AuraStateType.Frozen;
             }
 
             switch (Id)
@@ -1483,27 +1405,25 @@ namespace Game.Spells
                         {
                             bool food = false;
                             bool drink = false;
-                            foreach (var pair in _effects)
+                            foreach (SpellEffectInfo effect in _effects.Values)
                             {
-                                foreach (SpellEffectInfo effect in pair.Value)
+                                if (effect == null || !effect.IsAura())
+                                    continue;
+
+                                switch (effect.ApplyAuraName)
                                 {
-                                    if (effect == null || !effect.IsAura())
-                                        continue;
-                                    switch (effect.ApplyAuraName)
-                                    {
-                                        // Food
-                                        case AuraType.ModRegen:
-                                        case AuraType.ObsModHealth:
-                                            food = true;
-                                            break;
-                                        // Drink
-                                        case AuraType.ModPowerRegen:
-                                        case AuraType.ObsModPower:
-                                            drink = true;
-                                            break;
-                                        default:
-                                            break;
-                                    }
+                                    // Food
+                                    case AuraType.ModRegen:
+                                    case AuraType.ObsModHealth:
+                                        food = true;
+                                        break;
+                                    // Drink
+                                    case AuraType.ModPowerRegen:
+                                    case AuraType.ObsModPower:
+                                        drink = true;
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
 
@@ -1541,7 +1461,8 @@ namespace Game.Spells
                         // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
                         if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
                             _spellSpecific = SpellSpecificType.MageArcaneBrillance;
-                        SpellEffectInfo effect = GetEffect(Difficulty.None, 0);
+
+                        SpellEffectInfo effect = GetEffect(0);
                         if (effect != null && SpellFamilyFlags[0].HasAnyFlag(0x1000000u) && effect.IsAura(AuraType.ModConfuse))
                             _spellSpecific = SpellSpecificType.MagePolymorph;
 
@@ -1626,30 +1547,27 @@ namespace Game.Spells
                     break;
             }
 
-            foreach (var pair in _effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
-                foreach (SpellEffectInfo effect in pair.Value)
+                if (effect != null && effect.Effect == SpellEffectName.ApplyAura)
                 {
-                    if (effect != null && effect.Effect == SpellEffectName.ApplyAura)
+                    switch (effect.ApplyAuraName)
                     {
-                        switch (effect.ApplyAuraName)
-                        {
-                            case AuraType.ModCharm:
-                            case AuraType.ModPossessPet:
-                            case AuraType.ModPossess:
-                            case AuraType.AoeCharm:
-                                _spellSpecific = SpellSpecificType.Charm;
-                                break;
-                            case AuraType.TrackCreatures:
-                                // @workaround For non-stacking tracking spells (We need generic solution)
-                                if (Id == 30645) // Gas Cloud Tracking
-                                    _spellSpecific = SpellSpecificType.Normal;
-                                break;
-                            case AuraType.TrackResources:
-                            case AuraType.TrackStealthed:
-                                _spellSpecific = SpellSpecificType.Tracker;
-                                break;
-                        }
+                        case AuraType.ModCharm:
+                        case AuraType.ModPossessPet:
+                        case AuraType.ModPossess:
+                        case AuraType.AoeCharm:
+                            _spellSpecific = SpellSpecificType.Charm;
+                            break;
+                        case AuraType.TrackCreatures:
+                            // @workaround For non-stacking tracking spells (We need generic solution)
+                            if (Id == 30645) // Gas Cloud Tracking
+                                _spellSpecific = SpellSpecificType.Normal;
+                            break;
+                        case AuraType.TrackResources:
+                        case AuraType.TrackStealthed:
+                            _spellSpecific = SpellSpecificType.Tracker;
+                            break;
                     }
                 }
             }
@@ -1691,7 +1609,7 @@ namespace Game.Spells
             if (IsPositive())
                 return DiminishingGroup.None;
 
-            if (HasAura(Difficulty.None, AuraType.ModTaunt))
+            if (HasAura(AuraType.ModTaunt))
                 return DiminishingGroup.Taunt;
 
             switch (Id)
@@ -2374,16 +2292,13 @@ namespace Game.Spells
                 _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
             });
 
-            foreach (var effects in _effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
-                foreach (SpellEffectInfo effect in effects.Value)
-                {
-                    if (effect == null)
-                        continue;
+                if (effect == null)
+                    continue;
 
-                    loadImmunityInfoFn(effect);
-                }
-            }
+                loadImmunityInfoFn(effect);
+            }            
 
             if (HasAttribute(SpellAttr5.UsableWhileStunned))
             {
@@ -2489,7 +2404,7 @@ namespace Game.Spells
             if (auraSpellInfo == null)
                 return false;
 
-            foreach (SpellEffectInfo effectInfo in GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo effectInfo in _effects.Values)
             {
                 if (effectInfo == null)
                     continue;
@@ -2515,7 +2430,7 @@ namespace Game.Spells
                         return true;
 
                 bool immuneToAllEffects = true;
-                foreach (SpellEffectInfo auraSpellEffectInfo in auraSpellInfo.GetEffectsForDifficulty(Difficulty.None))
+                foreach (SpellEffectInfo auraSpellEffectInfo in auraSpellInfo.GetEffects())
                 {
                     if (auraSpellEffectInfo == null)
                         continue;
@@ -2581,7 +2496,7 @@ namespace Game.Spells
             if (aurEff.GetSpellInfo().HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
                 return false;
 
-            foreach (SpellEffectInfo effectInfo in GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo effectInfo in _effects.Values)
             {
                 if (effectInfo == null)
                     continue;
@@ -2716,13 +2631,13 @@ namespace Game.Spells
             return (castTime > 0) ? castTime : 0;
         }
 
-        public uint GetMaxTicks(Difficulty difficulty)
+        public uint GetMaxTicks()
         {
             int DotDuration = GetDuration();
             if (DotDuration == 0)
                 return 1;
 
-            foreach (SpellEffectInfo effect in GetEffectsForDifficulty(difficulty))
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
                 if (effect != null && effect.Effect == SpellEffectName.ApplyAura)
                 {
@@ -2761,129 +2676,89 @@ namespace Game.Spells
         {
             List<SpellPowerCost> costs = new List<SpellPowerCost>();
 
-            var collector = new Action<List<SpellPowerRecord>>(powers =>
+            int healthCost = 0;
+
+            foreach (SpellPowerRecord power in PowerCosts)
             {
-                int healthCost = 0;
+                if (power == null)
+                    continue;
 
-                foreach (SpellPowerRecord power in powers)
+                if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
+                    continue;
+
+                // Spell drain all exist power on cast (Only paladin lay of Hands)
+                if (HasAttribute(SpellAttr1.DrainAllPower))
                 {
-                    if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
-                        continue;
-
-                    // Spell drain all exist power on cast (Only paladin lay of Hands)
-                    if (HasAttribute(SpellAttr1.DrainAllPower))
+                    // If power type - health drain all
+                    if (power.PowerType == PowerType.Health)
                     {
-                        // If power type - health drain all
-                        if (power.PowerType == PowerType.Health)
-                        {
-                            healthCost = (int)caster.GetHealth();
-                            continue;
-                        }
-                        // Else drain all power
-                        if (power.PowerType < PowerType.Max)
-                        {
-                            SpellPowerCost cost = new SpellPowerCost();
-                            cost.Power = power.PowerType;
-                            cost.Amount = caster.GetPower(cost.Power);
-                            costs.Add(cost);
-                            continue;
-                        }
-
-                        Log.outError(LogFilter.Spells, "SpellInfo.GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
+                        healthCost = (int)caster.GetHealth();
+                        continue;
+                    }
+                    // Else drain all power
+                    if (power.PowerType < PowerType.Max)
+                    {
+                        SpellPowerCost cost = new SpellPowerCost();
+                        cost.Power = power.PowerType;
+                        cost.Amount = caster.GetPower(cost.Power);
+                        costs.Add(cost);
                         continue;
                     }
 
-                    // Base powerCost
-                    int powerCost = power.ManaCost;
-                    // PCT cost from total amount
-                    if (power.PowerCostPct != 0)
+                    Log.outError(LogFilter.Spells, "SpellInfo.GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
+                    continue;
+                }
+
+                // Base powerCost
+                int powerCost = power.ManaCost;
+                // PCT cost from total amount
+                if (power.PowerCostPct != 0)
+                {
+                    switch (power.PowerType)
                     {
-                        switch (power.PowerType)
-                        {
-                            // health as power used
-                            case PowerType.Health:
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
-                                break;
-                            case PowerType.Mana:
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
-                                break;
-                            case PowerType.Rage:
-                            case PowerType.Focus:
-                            case PowerType.Energy:
-                                powerCost += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerCostPct);
-                                break;
-                            case PowerType.Runes:
-                            case PowerType.RunicPower:
-                                Log.outDebug(LogFilter.Spells, "GetCostDataList: Not implemented yet!");
-                                break;
-                            default:
-                                Log.outError(LogFilter.Spells, "GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
-                                continue;
-                        }
+                        // health as power used
+                        case PowerType.Health:
+                            powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
+                            break;
+                        case PowerType.Mana:
+                            powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
+                            break;
+                        case PowerType.Rage:
+                        case PowerType.Focus:
+                        case PowerType.Energy:
+                            powerCost += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerCostPct);
+                            break;
+                        case PowerType.Runes:
+                        case PowerType.RunicPower:
+                            Log.outDebug(LogFilter.Spells, "GetCostDataList: Not implemented yet!");
+                            break;
+                        default:
+                            Log.outError(LogFilter.Spells, "GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
+                            continue;
                     }
+                }
 
-                    if (power.PowerCostMaxPct != 0)
-                        healthCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
+                if (power.PowerCostMaxPct != 0)
+                    healthCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
 
-                    if (power.PowerType != PowerType.Health)
-                    {
-                        // Flat mod from caster auras by spell school and power type
-                        var auras = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool);
-                        foreach (var eff in auras)
-                        {
-                            if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                                continue;
+                int optionalCost = (int)power.OptionalCost;
+                optionalCost += caster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
+                {
+                    return aurEff.GetMiscValue() == (int)power.PowerType
+                        && aurEff.IsAffectingSpell(this);
+                });
 
-                            if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
-                                continue;
+                if (optionalCost != 0)
+                {
+                    int remainingPower = caster.GetPower(power.PowerType) - powerCost;
+                    powerCost += MathFunctions.RoundToInterval(ref remainingPower, 0, optionalCost);
+                }
 
-                            powerCost += eff.GetAmount();
-                        }
-                    }
-
-                    // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-                    if (HasAttribute(SpellAttr4.SpellVsExtendCost))
-                    {
-                        uint speed = 0;
-                        SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(caster.GetShapeshiftForm());
-                        if (ss != null)
-                            speed = ss.CombatRoundTime;
-                        else
-                        {
-                            WeaponAttackType slot = WeaponAttackType.BaseAttack;
-                            if (HasAttribute(SpellAttr3.ReqOffhand))
-                                slot = WeaponAttackType.OffAttack;
-
-                            speed = caster.GetBaseAttackTime(slot);
-                        }
-
-                        powerCost += (int)(speed / 100);
-                    }
-
-                    // Apply cost mod by spell
-                    Player modOwner = caster.GetSpellModOwner();
-                    if (modOwner)
-                    {
-                        if (power.OrderIndex == 0)
-                            modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
-                        else if (power.OrderIndex == 1)
-                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
-                    }
-
-                    if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0)
-                    {
-                        if (HasAttribute(SpellAttr0.LevelDamageCalculation))
-                        {
-                            GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
-                            GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
-                            if (spellScaler != null && casterScaler != null)
-                                powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
-                        }
-                    }
-
-                    // PCT mod from user auras by spell school and power type
-                    var aurasPct = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct);
-                    foreach (var eff in aurasPct)
+                if (power.PowerType != PowerType.Health)
+                {
+                    // Flat mod from caster auras by spell school and power type
+                    var auras = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool);
+                    foreach (var eff in auras)
                     {
                         if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
                             continue;
@@ -2891,48 +2766,96 @@ namespace Game.Spells
                         if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
                             continue;
 
-                        powerCost += MathFunctions.CalculatePct(powerCost, eff.GetAmount());
-                    }
-
-                    if (power.PowerType == PowerType.Health)
-                    {
-                        healthCost += powerCost;
-                        continue;
-                    }
-
-                    bool found = false;
-                    for (var i = 0; i < costs.Count; ++i)
-                    {
-                        var cost = costs[i];
-                        if (cost.Power == power.PowerType)
-                        {
-                            cost.Amount += powerCost;
-                            found = true;
-                        }
-                    }
-
-                    if (!found)
-                    {
-                        SpellPowerCost cost = new SpellPowerCost();
-                        cost.Power = power.PowerType;
-                        cost.Amount = powerCost;
-                        costs.Add(cost);
+                        powerCost += eff.GetAmount();
                     }
                 }
 
-                if (healthCost > 0)
+                // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
+                if (HasAttribute(SpellAttr4.SpellVsExtendCost))
+                {
+                    uint speed = 0;
+                    SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(caster.GetShapeshiftForm());
+                    if (ss != null)
+                        speed = ss.CombatRoundTime;
+                    else
+                    {
+                        WeaponAttackType slot = WeaponAttackType.BaseAttack;
+                        if (HasAttribute(SpellAttr3.ReqOffhand))
+                            slot = WeaponAttackType.OffAttack;
+
+                        speed = caster.GetBaseAttackTime(slot);
+                    }
+
+                    powerCost += (int)(speed / 100);
+                }
+
+                // Apply cost mod by spell
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner)
+                {
+                    if (power.OrderIndex == 0)
+                        modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
+                    else if (power.OrderIndex == 1)
+                        modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
+                }
+
+                if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0)
+                {
+                    if (HasAttribute(SpellAttr0.LevelDamageCalculation))
+                    {
+                        GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
+                        GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
+                        if (spellScaler != null && casterScaler != null)
+                            powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
+                    }
+                }
+
+                // PCT mod from user auras by spell school and power type
+                var aurasPct = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct);
+                foreach (var eff in aurasPct)
+                {
+                    if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
+                        continue;
+
+                    if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
+                        continue;
+
+                    powerCost += MathFunctions.CalculatePct(powerCost, eff.GetAmount());
+                }
+
+                if (power.PowerType == PowerType.Health)
+                {
+                    healthCost += powerCost;
+                    continue;
+                }
+
+                bool found = false;
+                for (var i = 0; i < costs.Count; ++i)
+                {
+                    var cost = costs[i];
+                    if (cost.Power == power.PowerType)
+                    {
+                        cost.Amount += powerCost;
+                        found = true;
+                    }
+                }
+
+                if (!found)
                 {
                     SpellPowerCost cost = new SpellPowerCost();
-                    cost.Power = PowerType.Health;
-                    cost.Amount = healthCost;
+                    cost.Power = power.PowerType;
+                    cost.Amount = powerCost;
                     costs.Add(cost);
                 }
-            });
+            }
 
-            if (!_hasPowerDifficultyData) // optimization - use static data for 99.5% cases (4753 of 4772 in build 6.1.0.19702)
-                collector(PowerCosts);
-            else
-                collector(Global.DB2Mgr.GetSpellPowers(Id, caster.GetMap().GetDifficultyID()));
+            if (healthCost > 0)
+            {
+                SpellPowerCost cost = new SpellPowerCost();
+                cost.Power = PowerType.Health;
+                cost.Amount = healthCost;
+                costs.Add(cost);
+            }
 
             return costs;
         }
@@ -3110,7 +3033,7 @@ namespace Game.Spells
                 return this;
 
             bool needRankSelection = false;
-            foreach (SpellEffectInfo effect in GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
                 if (effect != null && IsPositiveEffect(effect.EffectIndex) &&
                     (effect.Effect == SpellEffectName.ApplyAura ||
@@ -3165,36 +3088,12 @@ namespace Game.Spells
 
         public uint GetSpellXSpellVisualId(Unit caster = null)
         {
-            if (caster)
+            foreach (SpellXSpellVisualRecord visual in _visuals)
             {
-                Difficulty difficulty = caster.GetMap().GetDifficultyID();
-                DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
-                while (difficultyEntry != null)
-                {
-                    var visualList = _visuals.LookupByKey(difficulty);
-                    if (visualList != null)
-                    {
-                        foreach (SpellXSpellVisualRecord visual in visualList)
-                        {
-                            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
-                            if (playerCondition == null || (caster.IsTypeId(TypeId.Player) && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
-                                return visual.Id;
-                        }
-                    }
 
-                    difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-                }
-            }
-
-            var defaultList = _visuals.LookupByKey(Difficulty.None);
-            if (defaultList != null)
-            {
-                foreach (var visual in defaultList)
-                {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
-                    if (playerCondition == null || (caster && caster.IsTypeId(TypeId.Player) && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
-                        return visual.Id;
-                }
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
+                if (playerCondition == null || (caster && caster.GetTypeId() == TypeId.Player && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
+                    return visual.Id;
             }
 
             return 0;
@@ -3220,28 +3119,26 @@ namespace Game.Spells
             bool dstSet = false;
             SpellCastTargetFlags targetMask = targets;
             // prepare target mask using effect target entries
-            foreach (var pair in _effects)
+            foreach (SpellEffectInfo effect in _effects.Values)
             {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect == null || !effect.IsEffect())
-                        continue;
+                if (effect == null || !effect.IsEffect())
+                    continue;
 
-                    targetMask |= effect.TargetA.GetExplicitTargetMask(srcSet, dstSet);
-                    targetMask |= effect.TargetB.GetExplicitTargetMask(srcSet, dstSet);
+                targetMask |= effect.TargetA.GetExplicitTargetMask(srcSet, dstSet);
+                targetMask |= effect.TargetB.GetExplicitTargetMask(srcSet, dstSet);
 
-                    // add explicit target flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid target provided
-                    if (effect.GetImplicitTargetType() != SpellEffectImplicitTargetTypes.Explicit)
-                        continue;
+                // add explicit target flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid target provided
+                if (effect.GetImplicitTargetType() != SpellEffectImplicitTargetTypes.Explicit)
+                    continue;
 
-                    // extend explicit target mask only if valid targets for effect could not be provided by target types
-                    SpellCastTargetFlags effectTargetMask = effect.GetMissingTargetMask(srcSet, dstSet, targetMask);
+                // extend explicit target mask only if valid targets for effect could not be provided by target types
+                SpellCastTargetFlags effectTargetMask = effect.GetMissingTargetMask(srcSet, dstSet, targetMask);
 
-                    // don't add explicit object/dest flags when spell has no max range
-                    if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
-                        effectTargetMask &= ~(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseMask | SpellCastTargetFlags.DestLocation);
-                    targetMask |= effectTargetMask;
-                }
+                // don't add explicit object/dest flags when spell has no max range
+                if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
+                    effectTargetMask &= ~(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseMask | SpellCastTargetFlags.DestLocation);
+
+                targetMask |= effectTargetMask;
             }
 
             ExplicitTargetMask = (uint)targetMask;
@@ -3300,203 +3197,185 @@ namespace Game.Spells
                 return true;
 
             // Special case: effects which determine positivity of whole spell
-            foreach (var pair in _effects)
+            foreach (SpellEffectInfo effectInfo in _effects.Values)
+                if (effectInfo != null && effectInfo.IsAura() && effectInfo.ApplyAuraName == AuraType.ModStealth)
+                    return true;
+
+            SpellEffectInfo effect = GetEffect(effIndex);
+            if (effect != null)
             {
-                foreach (SpellEffectInfo effect in pair.Value)
+                switch (effect.Effect)
                 {
-                    if (effect != null && effect.IsAura() && effect.ApplyAuraName == AuraType.ModStealth)
+                    case SpellEffectName.Dummy:
+                        // some explicitly required dummy effect sets
+                        switch (Id)
+                        {
+                            case 28441:
+                                return false; // AB Effect 000
+                        }
+                        break;
+                    // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
+                    case SpellEffectName.Heal:
+                    case SpellEffectName.LearnSpell:
+                    case SpellEffectName.SkillStep:
+                    case SpellEffectName.HealPct:
+                    case SpellEffectName.EnergizePct:
                         return true;
-                }
-            }
+                    case SpellEffectName.ApplyAreaAuraEnemy:
+                        return false;
 
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect == null || effect.EffectIndex != effIndex)
-                        continue;
-
-                    switch (effect.Effect)
-                    {
-                        case SpellEffectName.Dummy:
-                            // some explicitly required dummy effect sets
-                            switch (Id)
+                    // non-positive aura use
+                    case SpellEffectName.ApplyAura:
+                    case SpellEffectName.ApplyAreaAuraFriend:
+                        {
+                            switch (effect.ApplyAuraName)
                             {
-                                case 28441:
-                                    return false; // AB Effect 000
-                            }
-                            break;
-                        // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
-                        case SpellEffectName.Heal:
-                        case SpellEffectName.LearnSpell:
-                        case SpellEffectName.SkillStep:
-                        case SpellEffectName.HealPct:
-                        case SpellEffectName.EnergizePct:
-                            return true;
-                        case SpellEffectName.ApplyAreaAuraEnemy:
-                            return false;
-
-                        // non-positive aura use
-                        case SpellEffectName.ApplyAura:
-                        case SpellEffectName.ApplyAreaAuraFriend:
-                            {
-                                switch (effect.ApplyAuraName)
-                                {
-                                    case AuraType.ModDamageDone:            // dependent from bas point sign (negative . negative)
-                                    case AuraType.ModStat:
-                                    case AuraType.ModSkill:
-                                    case AuraType.ModSkill2:
-                                    case AuraType.ModDodgePercent:
-                                    case AuraType.ModHealingPct:
-                                    case AuraType.ModHealingDone:
-                                    case AuraType.ModHealingDonePercent:
-                                        if (effect.CalcValue() < 0)
-                                            return false;
-                                        break;
-                                    case AuraType.ModDamageTaken:           // dependent from bas point sign (positive . negative)
-                                        if (effect.CalcValue() > 0)
-                                            return false;
-                                        break;
-                                    case AuraType.ModCritPct:
-                                    case AuraType.ModSpellCritChance:
-                                        if (effect.CalcValue() > 0)
-                                            return true;        // some expected positive spells have SPELL_ATTR1_NEGATIVE
-                                        break;
-                                    case AuraType.AddTargetTrigger:
-                                        return true;
-                                    case AuraType.PeriodicTriggerSpellWithValue:
-                                    case AuraType.PeriodicTriggerSpell:
-                                        if (!deep)
+                                case AuraType.ModDamageDone:            // dependent from bas point sign (negative . negative)
+                                case AuraType.ModStat:
+                                case AuraType.ModSkill:
+                                case AuraType.ModSkill2:
+                                case AuraType.ModDodgePercent:
+                                case AuraType.ModHealingPct:
+                                case AuraType.ModHealingDone:
+                                case AuraType.ModHealingDonePercent:
+                                    if (effect.CalcValue() < 0)
+                                        return false;
+                                    break;
+                                case AuraType.ModDamageTaken:           // dependent from bas point sign (positive . negative)
+                                    if (effect.CalcValue() > 0)
+                                        return false;
+                                    break;
+                                case AuraType.ModCritPct:
+                                case AuraType.ModSpellCritChance:
+                                    if (effect.CalcValue() > 0)
+                                        return true;        // some expected positive spells have SPELL_ATTR1_NEGATIVE
+                                    break;
+                                case AuraType.AddTargetTrigger:
+                                    return true;
+                                case AuraType.PeriodicTriggerSpellWithValue:
+                                case AuraType.PeriodicTriggerSpell:
+                                    if (!deep)
+                                    {
+                                        var spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
+                                        if (spellTriggeredProto != null)
                                         {
-                                            var spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
-                                            if (spellTriggeredProto != null)
+                                            // negative targets of main spell return early
+                                            foreach (SpellEffectInfo eff in spellTriggeredProto._effects.Values)
                                             {
-                                                // negative targets of main spell return early
-                                                foreach (var pair2 in spellTriggeredProto._effects)
+                                                if (eff == null || eff.Effect == 0)
+                                                    continue;
+                                                // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                                                // this will place this spell auras as debuffs
+                                                if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
+                                                    return false;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case AuraType.ProcTriggerSpell:
+                                    // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
+                                    break;
+                                case AuraType.ModStun:   //have positive and negative spells, we can't sort its correctly at this moment.
+                                    bool more = false;
+                                    foreach (SpellEffectInfo eff in _effects.Values)
+                                    {
+                                        if (eff != null && eff.EffectIndex != 0)
+                                        {
+                                            more = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (effIndex == 0 && !more)
+                                        return false;       // but all single stun aura spells is negative
+                                    break;
+                                case AuraType.ModPacifySilence:
+                                    if (Id == 24740)             // Wisp Costume
+                                        return true;
+                                    return false;
+                                case AuraType.ModRoot:
+                                case AuraType.ModRoot2:
+                                case AuraType.ModSilence:
+                                case AuraType.Ghost:
+                                case AuraType.PeriodicLeech:
+                                case AuraType.ModStalked:
+                                case AuraType.PeriodicDamagePercent:
+                                case AuraType.PreventResurrection:
+                                case AuraType.Empathy:
+                                    return false;
+                                case AuraType.PeriodicDamage:            // used in positive spells also.
+                                                                         // part of negative spell if casted at self (prevent cancel)
+                                    if (effect.TargetA.GetTarget() == Targets.UnitCaster)
+                                        return false;
+                                    break;
+                                case AuraType.ModDecreaseSpeed:         // used in positive spells also
+                                                                        // part of positive spell if casted at self
+                                    if (effect.TargetA.GetTarget() != Targets.UnitCaster)
+                                        return false;
+                                    // but not this if this first effect (didn't find better check)
+                                    if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
+                                        return false;
+                                    break;
+                                case AuraType.MechanicImmunity:
+                                    {
+                                        // non-positive immunities
+                                        switch ((Mechanics)effect.MiscValue)
+                                        {
+                                            case Mechanics.Bandage:
+                                            case Mechanics.Shield:
+                                            case Mechanics.Mount:
+                                            case Mechanics.Invulnerability:
+                                                return false;
+                                        }
+                                        break;
+                                    }
+                                case AuraType.AddFlatModifier:          // mods
+                                case AuraType.AddPctModifier:
+                                    {
+                                        // non-positive mods
+                                        switch ((SpellModOp)effect.MiscValue)
+                                        {
+                                            case SpellModOp.Cost: // dependent from bas point sign (negative . positive)
+                                                if (effect.CalcValue() > 0)
                                                 {
-                                                    foreach (SpellEffectInfo eff in pair2.Value)
+                                                    if (!deep)
                                                     {
-                                                        if (eff == null || eff.Effect == 0)
-                                                            continue;
-                                                        // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                                                        // this will place this spell auras as debuffs
-                                                        if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
+                                                        bool negative = true;
+                                                        for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                                                        {
+                                                            if (i != effIndex)
+                                                            {
+                                                                if (_IsPositiveEffect(i, true))
+                                                                {
+                                                                    negative = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (negative)
                                                             return false;
                                                     }
                                                 }
-                                            }
+                                                break;
                                         }
                                         break;
-                                    case AuraType.ProcTriggerSpell:
-                                        // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
-                                        break;
-                                    case AuraType.ModStun:   //have positive and negative spells, we can't sort its correctly at this moment.
-                                        bool more = false;
-                                        foreach (var pair2 in _effects)
-                                        {
-                                            foreach (SpellEffectInfo eff in pair2.Value)
-                                            {
-                                                if (eff != null && eff.EffectIndex != 0)
-                                                {
-                                                    more = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-
-                                        if (effIndex == 0 && !more)
-                                            return false;       // but all single stun aura spells is negative
-                                        break;
-                                    case AuraType.ModPacifySilence:
-                                        if (Id == 24740)             // Wisp Costume
-                                            return true;
-                                        return false;
-                                    case AuraType.ModRoot:
-                                    case AuraType.ModRoot2:
-                                    case AuraType.ModSilence:
-                                    case AuraType.Ghost:
-                                    case AuraType.PeriodicLeech:
-                                    case AuraType.ModStalked:
-                                    case AuraType.PeriodicDamagePercent:
-                                    case AuraType.PreventResurrection:
-                                    case AuraType.Empathy:
-                                        return false;
-                                    case AuraType.PeriodicDamage:            // used in positive spells also.
-                                                                             // part of negative spell if casted at self (prevent cancel)
-                                        if (effect.TargetA.GetTarget() == Targets.UnitCaster)
-                                            return false;
-                                        break;
-                                    case AuraType.ModDecreaseSpeed:         // used in positive spells also
-                                                                            // part of positive spell if casted at self
-                                        if (effect.TargetA.GetTarget() != Targets.UnitCaster)
-                                            return false;
-                                        // but not this if this first effect (didn't find better check)
-                                        if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
-                                            return false;
-                                        break;
-                                    case AuraType.MechanicImmunity:
-                                        {
-                                            // non-positive immunities
-                                            switch ((Mechanics)effect.MiscValue)
-                                            {
-                                                case Mechanics.Bandage:
-                                                case Mechanics.Shield:
-                                                case Mechanics.Mount:
-                                                case Mechanics.Invulnerability:
-                                                    return false;
-                                            }
-                                            break;
-                                        }
-                                    case AuraType.AddFlatModifier:          // mods
-                                    case AuraType.AddPctModifier:
-                                        {
-                                            // non-positive mods
-                                            switch ((SpellModOp)effect.MiscValue)
-                                            {
-                                                case SpellModOp.Cost: // dependent from bas point sign (negative . positive)
-                                                    if (effect.CalcValue() > 0)
-                                                    {
-                                                        if (!deep)
-                                                        {
-                                                            bool negative = true;
-                                                            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                                                            {
-                                                                if (i != effIndex)
-                                                                {
-                                                                    if (_IsPositiveEffect(i, true))
-                                                                    {
-                                                                        negative = false;
-                                                                        break;
-                                                                    }
-                                                                }
-                                                            }
-                                                            if (negative)
-                                                                return false;
-                                                        }
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        }
-                                }
-                                break;
+                                    }
                             }
-                    }
+                            break;
+                        }
+                }
 
+                // non-positive targets
+                if (!_IsPositiveTarget(effect.TargetA.GetTarget(), effect.TargetB.GetTarget()))
+                    return false;
 
-
-                    // non-positive targets
-                    if (!_IsPositiveTarget(effect.TargetA.GetTarget(), effect.TargetB.GetTarget()))
-                        return false;
-
-                    // negative spell if triggered spell is negative
-                    if (!deep && effect.ApplyAuraName == 0 && effect.TriggerSpell != 0)
-                    {
-                        SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
-                        if (spellTriggeredProto != null)
-                            if (!spellTriggeredProto._IsPositiveSpell())
-                                return false;
-                    }
+                // negative spell if triggered spell is negative
+                if (!deep && effect.ApplyAuraName == 0 && effect.TriggerSpell != 0)
+                {
+                    SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
+                    if (spellTriggeredProto != null)
+                        if (!spellTriggeredProto._IsPositiveSpell())
+                            return false;
                 }
             }
             // ok, positive
@@ -3519,13 +3398,13 @@ namespace Game.Spells
             switch (targetA)
             {
                 case Targets.UnitNearbyEnemy:
-                case Targets.UnitEnemy:
+                case Targets.UnitTargetEnemy:
                 case Targets.UnitSrcAreaEnemy:
                 case Targets.UnitDestAreaEnemy:
                 case Targets.UnitConeEnemy24:
                 case Targets.UnitConeEnemy104:
                 case Targets.DestDynobjEnemy:
-                case Targets.DestEnemy:
+                case Targets.DestTargetEnemy:
                     return false;
                 default:
                     break;
@@ -3538,21 +3417,19 @@ namespace Game.Spells
         public void _UnloadImplicitTargetConditionLists()
         {
             // find the same instances of ConditionList and delete them.
-            foreach (var pair in _effects)
+            var effectList = _effects.Values.ToList();
+            for (int i = 0; i < effectList.Count; ++i)
             {
-                for (uint i = 0; i < pair.Value.Length; ++i)
-                {
-                    SpellEffectInfo effect = pair.Value[i];
-                    if (effect == null)
-                        continue;
-
+                SpellEffectInfo effect = effectList[i];
+                if (effect != null)
+                { 
                     var cur = effect.ImplicitTargetConditions;
                     if (cur == null)
                         continue;
 
-                    for (var j = i; j < pair.Value.Length; ++j)
+                    for (var j = i; j < effectList.Count; ++j)
                     {
-                        SpellEffectInfo eff = pair.Value[j];
+                        SpellEffectInfo eff = effectList[j];
                         if (eff != null && eff.ImplicitTargetConditions == cur)
                             eff.ImplicitTargetConditions = null;
                     }
@@ -3594,90 +3471,16 @@ namespace Game.Spells
             return CategoryId;
         }
 
-        public SpellEffectInfo[] GetEffectsForDifficulty(Difficulty difficulty)
-        {
-            SpellEffectInfo[] effList = new SpellEffectInfo[SpellConst.MaxEffects];
+        public ICollection<SpellEffectInfo> GetEffects() { return _effects.Values; }
 
-            // downscale difficulty if original was not found
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
-            while (difficultyEntry != null)
-            {
-                var effectArray = _effects.LookupByKey(difficulty);
-                if (effectArray != null)
-                {
-                    foreach (SpellEffectInfo effect in effectArray)
-                    {
-                        if (effect == null)
-                            continue;
-
-                        if (effList[effect.EffectIndex] == null)
-                            effList[effect.EffectIndex] = effect;
-                    }
-                }
-
-                difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-            }
-
-            // DIFFICULTY_NONE effects are the default effects, always active if current difficulty's effects don't overwrite
-            var effects = _effects.LookupByKey(Difficulty.None);
-            if (effects != null)
-            {
-                foreach (SpellEffectInfo effect in effects)
-                {
-                    if (effect == null)
-                        continue;
-
-                    if (effList[effect.EffectIndex] == null)
-                        effList[effect.EffectIndex] = effect;
-                }
-            }
-
-            return effList;
-        }
-
-        public SpellEffectInfo GetEffect(uint index) { return GetEffect(Difficulty.None, index); }
-        public SpellEffectInfo GetEffect(Difficulty difficulty, uint index)
-        {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
-            while (difficultyEntry != null)
-            {
-                var effectArray = _effects.LookupByKey(difficulty);
-                if (effectArray != null)
-                    if (effectArray.Length > index && effectArray[index] != null)
-                        return effectArray[index];
-
-                difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
-            }
-
-            var spellEffectInfos = _effects.LookupByKey(Difficulty.None);
-            if (spellEffectInfos != null)
-                if (spellEffectInfos.Length > index)
-                    return spellEffectInfos[index];
-
-            return null;
-        }
+        public SpellEffectInfo GetEffect(uint index) { return _effects.LookupByKey(index); }
 
         public bool HasTargetType(Targets target)
         {
-            foreach (var pair in _effects)
-            {
-                foreach (SpellEffectInfo effect in pair.Value)
-                {
-                    if (effect != null && (effect.TargetA.GetTarget() == target || effect.TargetB.GetTarget() == target))
-                        return true;
-                }
-            }
-            return false;
-        }
-
-        public bool HasTargetType(Difficulty difficulty, Targets target)
-        {
-            var effects = GetEffectsForDifficulty(difficulty);
-            foreach (SpellEffectInfo effect in effects)
-            {
+            foreach (SpellEffectInfo effect in _effects.Values)
                 if (effect != null && (effect.TargetA.GetTarget() == target || effect.TargetB.GetTarget() == target))
                     return true;
-            }
+
             return false;
         }
 
@@ -3705,8 +3508,9 @@ namespace Game.Spells
 
 
         #region Fields
-        public uint Id;
-        uint CategoryId;
+        public uint Id { get; set; }
+        public Difficulty Difficulty { get; set; }
+        public uint CategoryId { get; set; }
         public DispelType Dispel { get; set; }
         public Mechanics Mechanic { get; set; }
         public SpellAttr0 Attributes { get; set; }
@@ -3756,7 +3560,7 @@ namespace Game.Spells
         public uint BaseLevel { get; set; }
         public uint SpellLevel { get; set; }
         public SpellDurationRecord DurationEntry { get; set; }
-        public List<SpellPowerRecord> PowerCosts = new List<SpellPowerRecord>();
+        public SpellPowerRecord[] PowerCosts = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
         public uint RangeIndex { get; set; }
         public SpellRangeRecord RangeEntry { get; set; }
         public float Speed { get; set; }
@@ -3789,8 +3593,8 @@ namespace Game.Spells
         public uint ExplicitTargetMask { get; set; }
         public SpellChainNode ChainEntry { get; set; }
 
-        internal Dictionary<uint, SpellEffectInfo[]> _effects;
-        MultiMap<uint, SpellXSpellVisualRecord> _visuals = new MultiMap<uint, SpellXSpellVisualRecord>();
+        Dictionary<uint, SpellEffectInfo> _effects = new Dictionary<uint, SpellEffectInfo>();
+        List<SpellXSpellVisualRecord> _visuals = new List<SpellXSpellVisualRecord>();
         bool _hasPowerDifficultyData;
         SpellSpecificType _spellSpecific;
         AuraStateType _auraState;
@@ -3810,44 +3614,35 @@ namespace Game.Spells
 
     public class SpellEffectInfo
     {
-        public SpellEffectInfo(SpellInfo spellInfo, uint effIndex, SpellEffectRecord _effect)
+        public SpellEffectInfo(SpellInfo spellInfo, SpellEffectRecord effect)
         {
             _spellInfo = spellInfo;
-            EffectIndex = effIndex;
-
-            TargetA = new SpellImplicitTargetInfo();
-            TargetB = new SpellImplicitTargetInfo();
-            SpellClassMask = new FlagArray128();
-
-            if (_effect != null)
-            {
-                EffectIndex = _effect.EffectIndex;
-                Effect = (SpellEffectName)_effect.Effect;
-                ApplyAuraName = (AuraType)_effect.EffectAura;
-                ApplyAuraPeriod = _effect.EffectAuraPeriod;
-                RealPointsPerLevel = _effect.EffectRealPointsPerLevel;
-                BasePoints = (int)_effect.EffectBasePoints;
-                PointsPerResource = _effect.EffectPointsPerResource;
-                Amplitude = _effect.EffectAmplitude;
-                ChainAmplitude = _effect.EffectChainAmplitude;
-                BonusCoefficient = _effect.EffectBonusCoefficient;
-                MiscValue = _effect.EffectMiscValue[0];
-                MiscValueB = _effect.EffectMiscValue[1];
-                Mechanic = (Mechanics)_effect.EffectMechanic;
-                PositionFacing = _effect.EffectPosFacing;
-                TargetA = new SpellImplicitTargetInfo((Targets)_effect.ImplicitTarget[0]);
-                TargetB = new SpellImplicitTargetInfo((Targets)_effect.ImplicitTarget[1]);
-                RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusIndex[0]);
-                MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusIndex[1]);
-                ChainTargets = _effect.EffectChainTargets;
-                ItemType = _effect.EffectItemType;
-                TriggerSpell = _effect.EffectTriggerSpell;
-                SpellClassMask = _effect.EffectSpellClassMask;
-                BonusCoefficientFromAP = _effect.BonusCoefficientFromAP;
-                Scaling.Coefficient = _effect.Coefficient;
-                Scaling.Variance = _effect.Variance;
-                Scaling.ResourceCoefficient = _effect.ResourceCoefficient;
-            }
+            EffectIndex = effect.EffectIndex;
+            Effect = (SpellEffectName)effect.Effect;
+            ApplyAuraName = (AuraType)effect.EffectAura;
+            ApplyAuraPeriod = effect.EffectAuraPeriod;
+            RealPointsPerLevel = effect.EffectRealPointsPerLevel;
+            BasePoints = (int)effect.EffectBasePoints;
+            PointsPerResource = effect.EffectPointsPerResource;
+            Amplitude = effect.EffectAmplitude;
+            ChainAmplitude = effect.EffectChainAmplitude;
+            BonusCoefficient = effect.EffectBonusCoefficient;
+            MiscValue = effect.EffectMiscValue[0];
+            MiscValueB = effect.EffectMiscValue[1];
+            Mechanic = (Mechanics)effect.EffectMechanic;
+            PositionFacing = effect.EffectPosFacing;
+            TargetA = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[0]);
+            TargetB = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[1]);
+            RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
+            MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
+            ChainTargets = effect.EffectChainTargets;
+            ItemType = effect.EffectItemType;
+            TriggerSpell = effect.EffectTriggerSpell;
+            SpellClassMask = effect.EffectSpellClassMask;
+            BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
+            Scaling.Coefficient = effect.Coefficient;
+            Scaling.Variance = effect.Variance;
+            Scaling.ResourceCoefficient = effect.ResourceCoefficient;
 
             ImplicitTargetConditions = null;
 
@@ -4612,7 +4407,7 @@ namespace Game.Spells
                 case Targets.UnitCasterAreaParty:
                 case Targets.UnitSrcAreaAlly:
                 case Targets.UnitSrcAreaParty:
-                case Targets.UnitLastAreaParty:
+                case Targets.UnitLastTargetAreaParty:
                 case Targets.GameobjectSrcArea:
                 case Targets.UnitCasterAreaRaid:
                 case Targets.CorpseSrcAreaEnemy:

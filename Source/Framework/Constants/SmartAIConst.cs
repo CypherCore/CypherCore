@@ -169,7 +169,7 @@ namespace Framework.Constants
         PassengerRemoved = 28,      // Cooldownmin, Cooldownmax
         Charmed = 29,      // onRemove (0 - on apply, 1 - on remove)
         CharmedTarget = 30,      // None
-        SpellhitTarget = 31,      // Spellid, School, Cooldownmin, Cooldownmax
+        SpellHitTarget = 31,      // Spellid, School, Cooldownmin, Cooldownmax
         Damaged = 32,      // Mindmg, Maxdmg, Cooldownmin, Cooldownmax
         DamagedTarget = 33,      // Mindmg, Maxdmg, Cooldownmin, Cooldownmax
         Movementinform = 34,      // Movementtype(Any), Pointid

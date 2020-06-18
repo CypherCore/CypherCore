@@ -102,7 +102,7 @@ namespace Game.AI
                             }
                         case SmartScriptType.Spell:
                             {
-                                if (!Global.SpellMgr.HasSpellInfo((uint)temp.entryOrGuid))
+                                if (!Global.SpellMgr.HasSpellInfo((uint)temp.entryOrGuid, Difficulty.None))
                                 {
                                     Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: Scene id ({0}) does not exist, skipped loading.", temp.entryOrGuid);
                                     continue;
@@ -505,10 +505,10 @@ namespace Game.AI
                             return false;
                         break;
                     case SmartEvents.SpellHit:
-                    case SmartEvents.SpellhitTarget:
+                    case SmartEvents.SpellHitTarget:
                         if (e.Event.spellHit.spell != 0)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Event.spellHit.spell);
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Event.spellHit.spell, Difficulty.None);
                             if (spellInfo == null)
                             {
                                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Spell entry {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Event.spellHit.spell);
@@ -571,6 +571,15 @@ namespace Game.AI
                             return false;
                         break;
                     case SmartEvents.VictimCasting:
+                        if (e.Event.targetCasting.spellId > 0 && !Global.SpellMgr.HasSpellInfo(e.Event.targetCasting.spellId, Difficulty.None))
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses non-existent Spell entry {e.Event.spellHit.spell}, skipped.");
+                            return false;
+                        }
+
+                        if (!IsMinMaxValid(e, e.Event.minMax.repeatMin, e.Event.minMax.repeatMax))
+                            return false;
+                        break;
                     case SmartEvents.PassengerBoarded:
                     case SmartEvents.PassengerRemoved:
                         if (!IsMinMaxValid(e, e.Event.minMax.repeatMin, e.Event.minMax.repeatMax))
@@ -912,8 +921,8 @@ namespace Game.AI
                         if (!IsSpellValid(e, e.Action.cast.spell))
                             return false;
 
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell);
-                        foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, Difficulty.None);
+                        foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                         {
                             if (effect != null && (effect.IsEffect(SpellEffectName.KillCredit) || effect.IsEffect(SpellEffectName.KillCredit2)))
                             {
@@ -1437,7 +1446,7 @@ namespace Game.AI
         }
         bool IsSpellValid(SmartScriptHolder e, uint entry)
         {
-            if (!Global.SpellMgr.HasSpellInfo(entry))
+            if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
             {
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Spell entry {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), entry);
                 return false;
@@ -1599,7 +1608,7 @@ namespace Game.AI
             { SmartEvents.PassengerRemoved,         SmartScriptTypeMaskId.Creature },
             { SmartEvents.Charmed,                  SmartScriptTypeMaskId.Creature },
             { SmartEvents.CharmedTarget,            SmartScriptTypeMaskId.Creature },
-            { SmartEvents.SpellhitTarget,           SmartScriptTypeMaskId.Creature },
+            { SmartEvents.SpellHitTarget,           SmartScriptTypeMaskId.Creature },
             { SmartEvents.Damaged,                  SmartScriptTypeMaskId.Creature },
             { SmartEvents.DamagedTarget,            SmartScriptTypeMaskId.Creature },
             { SmartEvents.Movementinform,           SmartScriptTypeMaskId.Creature },

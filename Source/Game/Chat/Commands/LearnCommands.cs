@@ -41,13 +41,13 @@ namespace Game.Chat.Commands
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
             uint spell = handler.ExtractSpellIdFromLink(args);
-            if (spell == 0 || !Global.SpellMgr.HasSpellInfo(spell))
+            if (spell == 0 || !Global.SpellMgr.HasSpellInfo(spell, Difficulty.None))
                 return false;
 
             string all = args.NextString();
             bool allRanks = !string.IsNullOrEmpty(all) && all == "all";
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, Difficulty.None);
             if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer()))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spell);
@@ -78,15 +78,13 @@ namespace Game.Chat.Commands
             [Command("gm", RBACPermissions.CommandLearnAllGm)]
             static bool HandleLearnAllGMCommand(StringArguments args, CommandHandler handler)
             {
-                foreach (var spellInfo in Global.SpellMgr.GetSpellInfoStorage().Values)
+                foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
                 {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
-                    if (!spellInfo.IsAbilityOfSkillType(SkillType.Internal))
-                        continue;
-
-                    handler.GetSession().GetPlayer().LearnSpell(spellInfo.Id, false);
+                    handler.GetSession().GetPlayer().LearnSpell(skillSpell.Spell, false);
                 }
 
                 handler.SendSysMessage(CypherStrings.LearningGmSkills);
@@ -228,7 +226,7 @@ namespace Game.Chat.Commands
                     if (skillLine.ClassMask != 0 && (skillLine.ClassMask & classmask) == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
                         continue;
 
@@ -257,7 +255,7 @@ namespace Game.Chat.Commands
 
                     foreach (var entry in CliDB.SkillLineAbilityStorage.Values)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell, Difficulty.None);
                         if (spellInfo == null)
                             continue;
 
@@ -295,7 +293,7 @@ namespace Game.Chat.Commands
                         if (playerClass != talentInfo.ClassID)
                             continue;
 
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                         if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                             continue;
 

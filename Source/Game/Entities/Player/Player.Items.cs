@@ -1634,7 +1634,7 @@ namespace Game.Entities
                     if (pProto != null && IsInCombat() && (pProto.GetClass() == ItemClass.Weapon || pProto.GetInventoryType() == InventoryType.Relic) && m_weaponChangeTimer == 0)
                     {
                         uint cooldownSpell = (uint)(GetClass() == Class.Rogue ? 6123 : 6119);
-                        var spellProto = Global.SpellMgr.GetSpellInfo(cooldownSpell);
+                        var spellProto = Global.SpellMgr.GetSpellInfo(cooldownSpell, Difficulty.None);
 
                         if (spellProto == null)
                             Log.outError(LogFilter.Player, "Weapon switch cooldown spell {0} couldn't be found in Spell.dbc", cooldownSpell);
@@ -4272,11 +4272,11 @@ namespace Game.Entities
                     continue;
 
                 // check if it is valid spell
-                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID);
+                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
                 if (spellproto == null)
                     continue;
 
-                if (spellproto.HasAura(GetMap().GetDifficultyID(), AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), GetLevel())
+                if (spellproto.HasAura(AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), GetLevel())
                     && Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
                     continue;
 
@@ -4336,10 +4336,11 @@ namespace Game.Entities
             DateTime now = GameTime.GetGameTimeSteadyPoint();
             foreach (ItemEffectRecord effectData in pItem.GetEffects())
             {
+                SpellInfo effectSpellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
                 // apply proc cooldown to equip auras if we have any
                 if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {
-                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry((uint)effectData.SpellID);
+                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectSpellInfo);
                     if (procEntry == null)
                         continue;
 
@@ -4358,7 +4359,7 @@ namespace Game.Entities
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
-                if (GetSpellHistory().GetRemainingCooldown(Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID)) > 30 * Time.InMilliseconds)
+                if (GetSpellHistory().GetRemainingCooldown(effectSpellInfo) > 30 * Time.InMilliseconds)
                     continue;
 
                 GetSpellHistory().AddCooldown((uint)effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
@@ -5468,7 +5469,7 @@ namespace Game.Entities
 
         public void ApplyArtifactPowerRank(Item artifact, ArtifactPowerRankRecord artifactPowerRank, bool apply)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(artifactPowerRank.SpellID);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(artifactPowerRank.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
@@ -5597,7 +5598,7 @@ namespace Game.Entities
 
         void ApplyAzeriteEssencePower(AzeriteItem item, AzeriteEssencePowerRecord azeriteEssencePower, bool major, bool apply)
         {
-            SpellInfo powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MinorPowerDescription);
+            SpellInfo powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MinorPowerDescription, Difficulty.None);
             if (powerSpell != null)
             {
                 if (apply)
@@ -5608,7 +5609,7 @@ namespace Game.Entities
 
             if (major)
             {
-                powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MajorPowerDescription);
+                powerSpell = Global.SpellMgr.GetSpellInfo(azeriteEssencePower.MajorPowerDescription, Difficulty.None);
                 if (powerSpell != null)
                 {
                     if (powerSpell.IsPassive())

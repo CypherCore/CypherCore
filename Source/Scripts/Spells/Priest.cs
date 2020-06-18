@@ -409,8 +409,8 @@ namespace Scripts.Spells.Priest
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.GlyphOfPrayerOfHealingHeal);
-            int heal = (int)(MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()) / triggeredSpellInfo.GetMaxTicks(Difficulty.None));
+            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.GlyphOfPrayerOfHealingHeal, GetCastDifficulty());
+            int heal = (int)(MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()) / triggeredSpellInfo.GetMaxTicks());
             GetTarget().CastCustomSpell(SpellIds.GlyphOfPrayerOfHealingHeal, SpellValueMod.BasePoint0, heal, eventInfo.GetProcTarget(), true, null, aurEff);
         }
 
@@ -566,7 +566,7 @@ namespace Scripts.Spells.Priest
             SpellCastTargets targets = new SpellCastTargets();
             targets.SetDst(destPos);
             targets.SetUnitTarget(GetCaster());
-            GetHitUnit().CastSpell(targets, Global.SpellMgr.GetSpellInfo((uint)GetEffectValue()), null);
+            GetHitUnit().CastSpell(targets, Global.SpellMgr.GetSpellInfo((uint)GetEffectValue(), GetCastDifficulty()), null);
         }
 
         public override void Register()
@@ -702,7 +702,7 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PenanceR1);
+            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PenanceR1, Difficulty.None);
             if (firstRankSpellInfo == null)
                 return false;
 
@@ -997,9 +997,9 @@ namespace Scripts.Spells.Priest
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty());
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
+            amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to healing done
             Unit caster = eventInfo.GetActor();
@@ -1134,7 +1134,7 @@ namespace Scripts.Spells.Priest
             {
                 SpellCastTargets targets = new SpellCastTargets();
                 targets.SetDst(destPos);
-                GetCaster().CastSpell(targets, Global.SpellMgr.GetSpellInfo(SpellIds.AngelicFeatherAreatrigger), null);
+                GetCaster().CastSpell(targets, Global.SpellMgr.GetSpellInfo(SpellIds.AngelicFeatherAreatrigger, GetCastDifficulty()), null);
             }
         }
 

@@ -269,7 +269,7 @@ namespace Game.Entities
 
         public bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
         {
-            SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(GetTransForm());
+            SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (transformSpellInfo != null)
                 if (transformSpellInfo.HasAttribute(SpellAttr0.CastableWhileMounted))
                     return false;
@@ -601,7 +601,7 @@ namespace Game.Entities
 
             if (gameObj.GetSpellId() != 0)
             {
-                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(gameObj.GetSpellId());
+                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(gameObj.GetSpellId(), GetMap().GetDifficultyID());
                 // Need disable spell use for owner
                 if (createBySpell != null && createBySpell.HasAttribute(SpellAttr0.DisabledWhileActive))
                     // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
@@ -634,7 +634,7 @@ namespace Game.Entities
             {
                 RemoveAurasDueToSpell(spellid);
 
-                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(spellid);
+                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(spellid, GetMap().GetDifficultyID());
                 // Need activate spell use for owner
                 if (createBySpell != null && createBySpell.IsCooldownStartedOnEvent())
                     // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
@@ -1772,7 +1772,7 @@ namespace Game.Entities
                        Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirBattle) ||
                        Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirGuardian)))
                     {
-                        SpellEffectInfo effect = spellProto.GetEffect(Difficulty.None, 0);
+                        SpellEffectInfo effect = spellProto.GetEffect(0);
                         if (target.HasAura(53042) && effect != null && target.HasSpell(effect.TriggerSpell))
                             duration *= 2;
                     }
@@ -2674,7 +2674,7 @@ namespace Game.Entities
                 if (effIndex != -1)
                 {
                     // bleeding effects are not reduced by armor
-                    SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), (uint)effIndex);
+                    SpellEffectInfo effect = spellInfo.GetEffect((uint)effIndex);
                     if (effect != null)
                     {
                         if (effect.ApplyAuraName == AuraType.PeriodicDamage || effect.Effect == SpellEffectName.SchoolDamage)

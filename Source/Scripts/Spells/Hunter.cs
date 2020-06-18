@@ -434,7 +434,7 @@ namespace Scripts.Spells.Hunter
             // immediately finishes the cooldown on your other Hunter abilities except Bestial Wrath
             GetCaster().GetSpellHistory().ResetCooldowns(p =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, GetCastDifficulty());
 
                 //! If spellId in cooldown map isn't valid, the above will return a null pointer.
                 if (spellInfo.SpellFamilyName == SpellFamilyNames.Hunter &&

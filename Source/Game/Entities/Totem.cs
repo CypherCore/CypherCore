@@ -75,7 +75,7 @@ namespace Game.Entities
             base.InitStats(duration);
 
             // Get spell cast by totem
-            SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell());
+            SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
             if (totemSpell != null)
                 if (totemSpell.CalcCastTime(GetLevel()) != 0)   // If spell has cast time . its an active totem
                     m_type = TotemType.Active;
@@ -124,7 +124,7 @@ namespace Game.Entities
             {
                 owner.SendAutoRepeatCancel(this);
 
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell);
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 if (spell != null)
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
@@ -149,7 +149,7 @@ namespace Game.Entities
             if (GetEntry() == 5925)
                 return false;
 
-            SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
+            SpellEffectInfo effect = spellInfo.GetEffect(index);
             if (effect == null)
                 return true;
 

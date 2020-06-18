@@ -93,13 +93,13 @@ namespace Game.Entities
                 return;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spell_id);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spell_id, Difficulty.None);
             if (spellInfo == null)
                 return;
 
             // check learned spells state
             bool found = false;
-            foreach (SpellEffectInfo eff in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+            foreach (SpellEffectInfo eff in spellInfo.GetEffects())
             {
                 if (eff != null && eff.Effect == SpellEffectName.LearnSpell && !HasSpell(eff.TriggerSpell))
                 {
@@ -784,16 +784,16 @@ namespace Game.Entities
 
             if (quest.SourceSpellID > 0)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.SourceSpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.SourceSpellID, GetMap().GetDifficultyID());
                 Unit caster = this;
                 if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit != null)
-                        unit.CastSpell(this, quest.SourceSpellID, true);
+                        caster = unit;
                 }
 
-                caster.CastSpell(this, quest.SourceSpellID, true);
+                caster.CastSpell(this, spellInfo, true);
             }
 
             SetQuestSlot(log_slot, quest_id, qtime);
@@ -1092,7 +1092,7 @@ namespace Game.Entities
             // cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
             if (quest.RewardSpell > 0)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, GetMap().GetDifficultyID());
                 Unit caster = this;
                 if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                 {
@@ -1101,7 +1101,7 @@ namespace Game.Entities
                         caster = unit;
                 }
 
-                caster.CastSpell(this, quest.RewardSpell, true);
+                caster.CastSpell(this, spellInfo, true);
             }
             else
             {
@@ -1109,7 +1109,7 @@ namespace Game.Entities
                 {
                     if (quest.RewardDisplaySpell[i] > 0)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i]);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i], GetMap().GetDifficultyID());
                         Unit caster = this;
                         if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                         {
@@ -1118,7 +1118,7 @@ namespace Game.Entities
                                 caster = unit;
                         }
 
-                        caster.CastSpell(this, quest.RewardDisplaySpell[i], true);
+                        caster.CastSpell(this, spellInfo, true);
                     }
                 }
             }

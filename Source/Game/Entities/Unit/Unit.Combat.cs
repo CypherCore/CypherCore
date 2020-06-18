@@ -1108,7 +1108,7 @@ namespace Game.Entities
                 if (!victim.IsTypeId(TypeId.Player))
                 {
                     // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
-                    if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(GetMap().GetDifficultyID(), AuraType.DamageShield)))
+                    if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
                         victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);
 
                     victim.AddThreat(this, damage, damageSchoolMask, spellProto);
@@ -2632,7 +2632,7 @@ namespace Game.Entities
                     uint split_absorb = 0;
                     DealDamageMods(caster, ref splitDamage, ref split_absorb);
 
-                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo().Id, itr.GetBase().GetSpellXSpellVisualId(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
+                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo(), itr.GetBase().GetSpellXSpellVisualId(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
                     CleanDamage cleanDamage = new CleanDamage(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
                     DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;
@@ -2806,7 +2806,7 @@ namespace Game.Entities
 
             if (APbonus != 0)                                       // Can be negative
             {
-                bool normalized = spellProto != null && spellProto.HasEffect(GetMap().GetDifficultyID(), SpellEffectName.NormalizedWeaponDmg);
+                bool normalized = spellProto != null && spellProto.HasEffect(SpellEffectName.NormalizedWeaponDmg);
                 DoneFlatBenefit += (int)(APbonus / 3.5f * GetAPMultiplier(attType, normalized));
             }
 
@@ -2986,7 +2986,7 @@ namespace Game.Entities
                 if (!spellInfo.IsChanneled() && DotDuration > 0)
                     DotFactor = DotDuration / 15000.0f;
 
-                uint DotTicks = spellInfo.GetMaxTicks(GetMap().GetDifficultyID());
+                uint DotTicks = spellInfo.GetMaxTicks();
                 if (DotTicks != 0)
                     DotFactor /= DotTicks;
             }
@@ -3051,12 +3051,12 @@ namespace Game.Entities
                 // can't attack invisible
                 if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible))
                 {
-                    if (obj && !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())))
+                    if (obj && !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
                         return false;
                     else if (!obj)
                     {
                         // ignore stealth for aoe spells. Ignore stealth if target is player and unit in combat with same player
-                        bool ignoreStealthCheck = (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) ||
+                        bool ignoreStealthCheck = (bySpell != null && bySpell.IsAffectingArea()) ||
                             (target.GetTypeId() == TypeId.Player && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target));
 
                         if (!CanSeeOrDetect(target, ignoreStealthCheck))
@@ -3185,7 +3185,7 @@ namespace Game.Entities
                     return false;
 
             // can't assist invisible
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
                 return false;
 
             // can't assist dead
