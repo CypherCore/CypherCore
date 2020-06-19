@@ -2616,20 +2616,6 @@ namespace Game.Entities
         }
         bool CanNotReachTarget() { return m_cannotReachTarget; }
 
-        public void SetPosition(float x, float y, float z, float o)
-        {
-            // prevent crash when a bad coord is sent by the client
-            if (!GridDefines.IsValidMapCoord(x, y, z, o))
-            {
-                Log.outDebug(LogFilter.Unit, "Creature.SetPosition({0}, {1}, {2}) .. bad coordinates!", x, y, z);
-                return;
-            }
-
-            GetMap().CreatureRelocation(ToCreature(), x, y, z, o);
-            if (IsVehicle())
-                GetVehicleKit().RelocatePassengers();
-        }
-
         public float GetAggroRange(Unit target)
         {
             // Determines the aggro range for creatures (usually pets), used mainly for aggressive pet target selection.

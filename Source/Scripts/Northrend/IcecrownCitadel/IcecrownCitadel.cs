@@ -96,7 +96,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             CreatureData data = creature.GetCreatureData();
             if (data != null)
-                creature.SetPosition(data.posX, data.posY, data.posZ, data.orientation);
+                creature.UpdatePosition(data.posX, data.posY, data.posZ, data.orientation);
             creature.DespawnOrUnsummon();
 
             creature.SetCorpseDelay(corpseDelay);

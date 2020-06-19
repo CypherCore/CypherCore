@@ -722,7 +722,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             me.GetPosition(out x, out y, out z);
             z = me.GetMap().GetHeight(me.GetPhaseShift(), x, y, z);
             me.GetMotionMaster().MovePoint(0, x, y, z);
-            me.SetPosition(x, y, z, 0);
+            me.UpdatePosition(x, y, z, 0);
         }
 
         public override void UpdateAI(uint diff)

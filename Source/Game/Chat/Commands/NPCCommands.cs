@@ -162,7 +162,7 @@ namespace Game.Chat
                     data.posZ = z;
                     data.orientation = o;
                 }
-                creature.SetPosition(x, y, z, o);
+                creature.UpdatePosition(x, y, z, o);
                 creature.GetMotionMaster().Initialize();
                 if (creature.IsAlive())                            // dead creature will reset movement generator at respawn
                 {
