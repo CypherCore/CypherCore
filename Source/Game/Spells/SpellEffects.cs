@@ -572,15 +572,12 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            float x, y, z;
-            unitTarget.GetContactPoint(m_caster, out x, out y, out z, SharedConst.ContactDistance);
-
             float speedXY, speedZ;
-            CalculateJumpSpeeds(effectInfo, m_caster.GetExactDist2d(x, y), out speedXY, out speedZ);
+            CalculateJumpSpeeds(effectInfo, m_caster.GetExactDist2d(unitTarget), out speedXY, out speedZ);
             JumpArrivalCastArgs arrivalCast = new JumpArrivalCastArgs();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             arrivalCast.Target = unitTarget.GetGUID();
-            m_caster.GetMotionMaster().MoveJump(x, y, z, 0.0f, speedXY, speedZ, EventId.Jump, false, arrivalCast);
+            m_caster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, false, arrivalCast);
         }
 
         [SpellEffectHandler(SpellEffectName.JumpDest)]
