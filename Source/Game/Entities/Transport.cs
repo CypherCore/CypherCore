@@ -183,8 +183,8 @@ namespace Game.Entities
 
                     if (timer < _currentFrame.DepartureTime)
                     {
+                        justStopped = IsMoving();
                         SetMoving(false);
-                        justStopped = true;
                         if (_pendingStop && GetGoState() != GameObjectState.Ready)
                         {
                             SetGoState(GameObjectState.Ready);
