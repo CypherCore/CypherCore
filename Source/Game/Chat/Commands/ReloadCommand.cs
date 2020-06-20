@@ -425,66 +425,66 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("locales_achievement_reward", RBACPermissions.CommandReloadLocalesAchievementReward, true)]
-        static bool HandleReloadLocalesAchievementRewardCommand(StringArguments args, CommandHandler handler)
+        [Command("achievement_reward_locale", RBACPermissions.CommandReloadAchievementRewardLocale, true)]
+        static bool HandleReloadAchievementRewardLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Achievement Reward Data...");
+            Log.outInfo(LogFilter.Server, "Re-Loading Achievement Reward Data Locale...");
             Global.AchievementMgr.LoadRewardLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_achievement_reward` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `achievement_reward_locale` reloaded.");
             return true;
         }
 
-        [Command("locales_creature", RBACPermissions.CommandReloadLocalesCreature, true)]
-        static bool HandleReloadLocalesCreatureCommand(StringArguments args, CommandHandler handler)
+        [Command("creature_template_locale", RBACPermissions.CommandReloadCreatureTemplateLocale, true)]
+        static bool HandleReloadCreatureTemplateLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Creature ...");
+            Log.outInfo(LogFilter.Server, "Re-Loading Creature Template Locale...");
             Global.ObjectMgr.LoadCreatureLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_creature` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `Creature Template Locale` reloaded.");
             return true;
         }
 
-        [Command("locales_creature_text", RBACPermissions.CommandReloadLocalesCreatureText, true)]
-        static bool HandleReloadLocalesCreatureTextCommand(StringArguments args, CommandHandler handler)
+        [Command("creature_text_locale", RBACPermissions.CommandReloadCreatureTextLocale, true)]
+        static bool HandleReloadCreatureTextLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Creature Texts...");
+            Log.outInfo(LogFilter.Server, "Re-Loading Creature Texts Locale...");
             Global.CreatureTextMgr.LoadCreatureTextLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_creature_text` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `creature_text_locale` reloaded.");
             return true;
         }
 
-        [Command("locales_gameobject", RBACPermissions.CommandReloadLocalesGameobject, true)]
-        static bool HandleReloadLocalesGameobjectCommand(StringArguments args, CommandHandler handler)
+        [Command("gameobject_template_locale", RBACPermissions.CommandReloadGameobjectTemplateLocale, true)]
+        static bool HandleReloadGameobjectTemplateLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Gameobject ... ");
+            Log.outInfo(LogFilter.Server, "Re-Loading Gameobject Template Locale... ");
             Global.ObjectMgr.LoadGameObjectLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_gameobject` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `gameobject_template_locale` reloaded.");
             return true;
         }
 
-        [Command("locales_gossip_menu_option", RBACPermissions.CommandReloadLocalesGossipMenuOption, true)]
-        static bool HandleReloadLocalesGossipMenuOptionCommand(StringArguments args, CommandHandler handler)
+        [Command("gossip_menu_option_locale", RBACPermissions.CommandReloadGossipMenuOptionLocale, true)]
+        static bool HandleReloadGossipMenuOptionLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Gossip Menu Option ... ");
+            Log.outInfo(LogFilter.Server, "Re-Loading Gossip Menu Option Locale... ");
             Global.ObjectMgr.LoadGossipMenuItemsLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_gossip_menu_option` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `gossip_menu_option_locale` reloaded.");
             return true;
         }
 
-        [Command("locales_page_text", RBACPermissions.CommandReloadLocalesPageText, true)]
-        static bool HandleReloadLocalesPageTextCommand(StringArguments args, CommandHandler handler)
+        [Command("page_text_locale", RBACPermissions.CommandReloadPageTextLocale, true)]
+        static bool HandleReloadPageTextLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Page Text ... ");
+            Log.outInfo(LogFilter.Server, "Re-Loading Page Text Locale... ");
             Global.ObjectMgr.LoadPageTextLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_page_text` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `page_text_locale` reloaded.");
             return true;
         }
 
-        [Command("locales_points_of_interest", RBACPermissions.CommandReloadLocalesPointsOfInterest, true)]
-        static bool HandleReloadLocalesPointsOfInterestCommand(StringArguments args, CommandHandler handler)
+        [Command("points_of_interest_locale", RBACPermissions.CommandReloadPointsOfInterestLocale, true)]
+        static bool HandleReloadPointsOfInterestLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Locales Points Of Interest ... ");
+            Log.outInfo(LogFilter.Server, "Re-Loading Points Of Interest Locale... ");
             Global.ObjectMgr.LoadPointOfInterestLocales();
-            handler.SendGlobalGMSysMessage("DB table `locales_points_of_interest` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `points_of_interest_locale` reloaded.");
             return true;
         }
 
@@ -586,10 +586,10 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("quest_locale", RBACPermissions.CommandReloadQuestLocale, true)]
-        static bool HandleReloadQuestLocaleCommand(StringArguments args, CommandHandler handler)
+        [Command("quest_locale", RBACPermissions.CommandReloadQuestTemplateLocale, true)]
+        static bool HandleReloadQuestTemplateLocaleCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Quest Locale ... ");
+            Log.outInfo(LogFilter.Server, "Re-Loading Quest Locale... ");
             Global.ObjectMgr.LoadQuestTemplateLocale();
             Global.ObjectMgr.LoadQuestObjectivesLocale();
             Global.ObjectMgr.LoadQuestGreetingLocales();
@@ -1025,14 +1025,14 @@ namespace Game.Chat
             [Command("locales", RBACPermissions.CommandReloadAllLocales, true)]
             static bool HandleReloadAllLocalesCommand(StringArguments args, CommandHandler handler)
             {
-                HandleReloadLocalesAchievementRewardCommand(null, handler);
-                HandleReloadLocalesCreatureCommand(null, handler);
-                HandleReloadLocalesCreatureTextCommand(null, handler);
-                HandleReloadLocalesGameobjectCommand(null, handler);
-                HandleReloadLocalesGossipMenuOptionCommand(null, handler);
-                HandleReloadLocalesPageTextCommand(null, handler);
-                HandleReloadLocalesPointsOfInterestCommand(null, handler);
-                HandleReloadQuestLocaleCommand(null, handler);
+                HandleReloadAchievementRewardLocaleCommand(null, handler);
+                HandleReloadCreatureTemplateLocaleCommand(null, handler);
+                HandleReloadCreatureTextLocaleCommand(null, handler);
+                HandleReloadGameobjectTemplateLocaleCommand(null, handler);
+                HandleReloadGossipMenuOptionLocaleCommand(null, handler);
+                HandleReloadPageTextLocaleCommand(null, handler);
+                HandleReloadPointsOfInterestCommand(null, handler);
+                HandleReloadQuestTemplateLocaleCommand(null, handler);
                 return true;
             }
 
