@@ -2015,7 +2015,8 @@ namespace Game.Entities
         {
             if (IsTypeId(TypeId.Player))
                 return ToPlayer();
-            if (IsPet() || IsTotem())
+
+            if (HasUnitTypeMask(UnitTypeMask.Pet | UnitTypeMask.Totem | UnitTypeMask.Guardian))
             {
                 Unit owner = GetOwner();
                 if (owner != null && owner.IsTypeId(TypeId.Player))
