@@ -561,6 +561,33 @@ namespace Game
                 bucket.ItemSubClass = (byte)itemTemplate.GetSubClass();
                 bucket.InventoryType = (byte)itemTemplate.GetInventoryType();
                 bucket.RequiredLevel = (byte)auction.Items[0].GetRequiredLevel();
+                switch (itemTemplate.GetClass())
+                {
+                    case ItemClass.Weapon:
+                    case ItemClass.Armor:
+                        bucket.SortLevel = (byte)key.ItemLevel;
+                        break;
+                    case ItemClass.Container:
+                        bucket.SortLevel = (byte)itemTemplate.GetContainerSlots();
+                        break;
+                    case ItemClass.Gem:
+                    case ItemClass.ItemEnhancement:
+                        bucket.SortLevel = (byte)itemTemplate.GetBaseItemLevel();
+                        break;
+                    case ItemClass.Consumable:
+                        bucket.SortLevel = Math.Max((byte)1, bucket.RequiredLevel);
+                        break;
+                    case ItemClass.Miscellaneous:
+                    case ItemClass.BattlePets:
+                        bucket.SortLevel = 1;
+                        break;
+                    case ItemClass.Recipe:
+                        bucket.SortLevel = (byte)((ItemSubClassRecipe)itemTemplate.GetSubClass() != ItemSubClassRecipe.Book ? itemTemplate.GetRequiredSkillRank() : (uint)itemTemplate.GetBaseRequiredLevel());
+                        break;
+                    default:
+                        break;
+                }
+
                 for (LocaleConstant locale = LocaleConstant.enUS; locale < LocaleConstant.Total; ++locale)
                 {
                     if (locale == LocaleConstant.None)
@@ -609,6 +636,7 @@ namespace Game
                         bucket.MinBattlePetLevel = battlePetLevel;
 
                     bucket.MaxBattlePetLevel = Math.Max(bucket.MaxBattlePetLevel, battlePetLevel);
+                    bucket.SortLevel = bucket.MaxBattlePetLevel;
                 }
             }
 
@@ -1733,8 +1761,8 @@ namespace Game
                         return left.Bucket.FullName[(int)_locale].CompareTo(right.Bucket.FullName[(int)_locale]);
                     case AuctionHouseSortOrder.Level:
                         {
-                            int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Items[0].GetRequiredLevel() : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
-                            int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Items[0].GetRequiredLevel() : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+                            int leftLevel = left.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? left.Bucket.SortLevel : (int)left.Items[0].GetModifier(ItemModifier.BattlePetLevel);
+                            int rightLevel = right.Items[0].GetModifier(ItemModifier.BattlePetSpeciesId) == 0 ? right.Bucket.SortLevel : (int)right.Items[0].GetModifier(ItemModifier.BattlePetLevel);
                             return leftLevel - rightLevel;
                         }
                     case AuctionHouseSortOrder.Bid:
@@ -1769,6 +1797,7 @@ namespace Game
         public ulong MinPrice; // for sort
         public (uint Id, uint Count)[] ItemModifiedAppearanceId = new (uint Id, uint Count)[4]; // for uncollected search
         public byte RequiredLevel = 0; // for usable search
+        public byte SortLevel = 0;
         public byte MinBattlePetLevel = 0;
         public byte MaxBattlePetLevel = 0;
         public string[] FullName = new string[(int)LocaleConstant.Total];
@@ -1847,11 +1876,7 @@ namespace Game
                     case AuctionHouseSortOrder.Name:
                         return left.FullName[(int)_locale].CompareTo(right.FullName[(int)_locale]);
                     case AuctionHouseSortOrder.Level:
-                        {
-                            int leftLevel = left.MaxBattlePetLevel == 0 ? left.RequiredLevel : left.MaxBattlePetLevel;
-                            int rightLevel = right.MaxBattlePetLevel == 0 ? right.RequiredLevel : right.MaxBattlePetLevel;
-                            return leftLevel - rightLevel;
-                        }
+                        return left.SortLevel - right.SortLevel;
                     default:
                         break;
                 }
