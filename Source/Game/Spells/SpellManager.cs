@@ -2596,6 +2596,9 @@ namespace Game.Entities
                 if (talentSpells.Contains(spellInfo.Id))
                     spellInfo.AttributesCu |= SpellCustomAttributes.IsTalent;
 
+                if (MathFunctions.fuzzyNe(spellInfo.Width, 0.0f))
+                    spellInfo.AttributesCu |= SpellCustomAttributes.ConeLine;
+
                 switch (spellInfo.SpellFamilyName)
                 {
                     case SpellFamilyNames.Warrior:

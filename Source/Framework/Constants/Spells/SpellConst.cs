@@ -2432,21 +2432,21 @@ namespace Framework.Constants
         Unk115 = 115,
         Unk116 = 116,
         Unk117 = 117,
-        Unk118 = 118,
-        Unk119 = 119,
-        Unk120 = 120,
+        UnitTargetAllyOrRaid = 118, // If target is in your party or raid, all party and raid members will be affected
+        CorpseSrcAreaRaid = 119,
+        UnitCasterAndSummons = 120,
         Unk121 = 121,
-        Unk122 = 122,
-        Unk123 = 123,
+        UnitAreaThreatList = 122, // any unit on threat list
+        UnitAreaTapList = 123,
         Unk124 = 124,
-        Unk125 = 125,
+        DestCasterGround = 125,
         Unk126 = 126,
         Unk127 = 127,
         Unk128 = 128,
         ConeEntry129 = 129,
         Unk130 = 130,
-        Unk131 = 131,
-        Unk132 = 132,
+        DestSummoner = 131,
+        DestTargetAlly = 132,
         Unk133 = 133,
         Unk134 = 134,
         Unk135 = 135,
@@ -2513,7 +2513,10 @@ namespace Framework.Constants
         Party,
         Raid,
         RaidClass,
-        Passenger
+        Passenger,
+        Summoned,
+        Threat,
+        Tap
     }
 
     public enum SpellTargetDirectionTypes

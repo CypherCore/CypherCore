@@ -661,7 +661,7 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
-                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), radius, m_caster, m_spellInfo, selectionType, condList);
+                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
                 SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
 
@@ -720,7 +720,7 @@ namespace Game.Spells
             if (referer == null)
                 return;
 
-            Position center = null;
+            Position center;
             switch (targetType.GetReferenceType())
             {
                 case SpellTargetReferenceTypes.Src:
@@ -742,6 +742,52 @@ namespace Game.Spells
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
+
+            switch (targetType.GetTarget())
+            {
+                case Targets.UnitTargetAllyOrRaid:
+                    Unit targetedUnit = m_targets.GetUnitTarget();
+                    if (targetedUnit != null)
+                    {
+                        if (!m_caster.IsInRaidWith(targetedUnit))
+                        {
+                            targets.Add(m_targets.GetUnitTarget());
+
+                            CallScriptObjectAreaTargetSelectHandlers(targets, effIndex, targetType);
+
+                            if (!targets.Empty())
+                            {
+                                // Other special target selection goes here
+                                uint maxTargets = m_spellValue.MaxAffectedTargets;
+                                if (maxTargets != 0)
+                                    targets.RandomResize(maxTargets);
+
+                                foreach (WorldObject target in targets)
+                                {
+                                    Unit unit = target.ToUnit();
+                                    if (unit != null)
+                                        AddUnitTarget(unit, effMask, false, true, center);
+                                    else
+                                    {
+                                        GameObject gObjTarget = target.ToGameObject();
+                                        if (gObjTarget != null)
+                                            AddGOTarget(gObjTarget, effMask);
+                                    }
+                                }
+                            }
+
+                            return;
+                        }
+
+                        center = targetedUnit;
+                    }
+                    break;
+                case Targets.UnitCasterAndSummons:
+                    targets.Add(m_caster);
+                    break;
+                default:
+                    break;
+            }
 
             float radius = effect.CalcRadius(m_caster) * m_spellValue.RadiusMod;
 
@@ -833,6 +879,18 @@ namespace Game.Spells
                         dest = new SpellDestination(x, y, liquidLevel, m_caster.GetOrientation());
                         break;
                     }
+                case Targets.DestCasterGround:
+                    m_caster.UpdateAllowedPositionZ(dest.Position.GetPositionX(), dest.Position.GetPositionY(), ref dest.Position.posZ);
+                    break;
+                case Targets.DestSummoner:
+                    TempSummon casterSummon = m_caster.ToTempSummon();
+                    if (casterSummon != null)
+                    {
+                        Unit summoner = casterSummon.GetSummoner();
+                        if (summoner != null)
+                            dest = new SpellDestination(summoner);
+                    }
+                    break;
                 default:
                     SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
                     if (effect != null)
@@ -888,6 +946,7 @@ namespace Game.Spells
             {
                 case Targets.DestTargetEnemy:
                 case Targets.DestAny:
+                case Targets.DestTargetAlly:
                     break;
                 default:
                     SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
@@ -7635,8 +7694,7 @@ namespace Game.Spells
 
     public class WorldObjectSpellTargetCheck : ICheck<WorldObject>
     {
-        public WorldObjectSpellTargetCheck(Unit caster, Unit referer, SpellInfo spellInfo,
-            SpellTargetCheckTypes selectionType, List<Condition> condList)
+        public WorldObjectSpellTargetCheck(Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
         {
             _caster = caster;
             _referer = referer;
@@ -7654,6 +7712,7 @@ namespace Game.Spells
         {
             if (_spellInfo.CheckTarget(_caster, obj, true) != SpellCastResult.SpellCastOk)
                 return false;
+
             Unit unitTarget = obj.ToUnit();
             Corpse corpseTarget = obj.ToCorpse();
             if (corpseTarget != null)
@@ -7665,6 +7724,7 @@ namespace Game.Spells
                 else
                     return false;
             }
+
             if (unitTarget != null)
             {
                 switch (_targetSelectionType)
@@ -7700,6 +7760,22 @@ namespace Game.Spells
                         if (!_referer.IsInRaidWith(unitTarget))
                             return false;
                         break;
+                    case SpellTargetCheckTypes.Summoned:
+                        if (!unitTarget.IsSummon())
+                            return false;
+                        if (unitTarget.ToTempSummon().GetSummonerGUID() != _caster.GetGUID())
+                            return false;
+                        break;
+                    case SpellTargetCheckTypes.Threat:
+                        if (_referer.GetThreatManager().GetThreat(unitTarget, true) <= 0.0f)
+                            return false;
+                        break;
+                    case SpellTargetCheckTypes.Tap:
+                        if (_referer.GetTypeId() != TypeId.Unit || unitTarget.GetTypeId() != TypeId.Player)
+                            return false;
+                        if (!_referer.ToCreature().IsTappedBy(unitTarget.ToPlayer()))
+                            return false;
+                        break;
                     default:
                         break;
                 }
@@ -7722,8 +7798,7 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
-        public WorldObjectSpellNearbyTargetCheck(float range, Unit caster, SpellInfo spellInfo,
-            SpellTargetCheckTypes selectionType, List<Condition> condList)
+        public WorldObjectSpellNearbyTargetCheck(float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
             : base(caster, caster, spellInfo, selectionType, condList)
         {
             _range = range;
@@ -7776,10 +7851,11 @@ namespace Game.Spells
 
     public class WorldObjectSpellConeTargetCheck : WorldObjectSpellAreaTargetCheck
     {
-        public WorldObjectSpellConeTargetCheck(float coneAngle, float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        public WorldObjectSpellConeTargetCheck(float coneAngle, float lineWidth, float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
             : base(range, caster.GetPosition(), caster, caster, spellInfo, selectionType, condList)
         {
             _coneAngle = coneAngle;
+            _lineWidth = lineWidth;
         }
 
         public override bool Invoke(WorldObject target)
@@ -7791,7 +7867,7 @@ namespace Game.Spells
             }
             else if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeLine))
             {
-                if (!_caster.HasInLine(target, target.GetCombatReach(), _caster.GetCombatReach()))
+                if (!_caster.HasInLine(target, target.GetCombatReach(), _lineWidth))
                     return false;
             }
             else
@@ -7806,6 +7882,7 @@ namespace Game.Spells
         }
 
         float _coneAngle;
+        float _lineWidth;
     }
 
     public class WorldObjectSpellTrajTargetCheck : WorldObjectSpellTargetCheck
