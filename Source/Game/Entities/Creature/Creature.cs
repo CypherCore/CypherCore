@@ -1695,27 +1695,34 @@ namespace Game.Entities
         {
             if (timeMSToDespawn != 0)
             {
-                ForcedDespawnDelayEvent pEvent = new ForcedDespawnDelayEvent(this, forceRespawnTimer);
-
-                m_Events.AddEvent(pEvent, m_Events.CalculateTime(timeMSToDespawn));
+                m_Events.AddEvent(new ForcedDespawnDelayEvent(this, forceRespawnTimer), m_Events.CalculateTime(timeMSToDespawn));
                 return;
             }
+
+            uint corpseDelay = GetCorpseDelay();
+            uint respawnDelay = GetRespawnDelay();
 
             // do it before killing creature
             DestroyForNearbyPlayers();
 
+            bool overrideRespawnTime = false;
             if (IsAlive())
-                SetDeathState(DeathState.JustDied);
-
-            bool overrideRespawnTime = true;
-            if (forceRespawnTimer > TimeSpan.Zero)
             {
-                SetRespawnTime((uint)forceRespawnTimer.TotalSeconds);
-                overrideRespawnTime = false;
+                if (forceRespawnTimer > TimeSpan.Zero)
+                {
+                    SetCorpseDelay(0);
+                    SetRespawnDelay((uint)forceRespawnTimer.TotalSeconds);
+                    overrideRespawnTime = false;
+                }
+
+                SetDeathState(DeathState.JustDied);
             }
 
             // Skip corpse decay time
             RemoveCorpse(overrideRespawnTime, false);
+
+            SetCorpseDelay(corpseDelay);
+            SetRespawnDelay(respawnDelay);
         }
 
         public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
@@ -2060,13 +2067,8 @@ namespace Game.Entities
             Unit targetVictim = target.GetAttackerForHelper();
 
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-            if (GetVictim() == target || IsHostileTo(target))
+            if (IsInCombatWith(target) || IsHostileTo(target))
                 return true;
-
-            // a player is targeting me, but I'm not hostile towards it, and not currently attacking it, the target is not acceptable
-            // (players may set their victim from a distance, and doesn't mean we should attack)
-            if (target.GetTypeId() == TypeId.Player && targetVictim == this)
-                return false;
 
             // if the target's victim is friendly, and the target is neutral, the target is acceptable
             if (targetVictim != null && IsFriendlyTo(targetVictim))

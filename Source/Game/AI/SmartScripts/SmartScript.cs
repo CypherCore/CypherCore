@@ -2189,7 +2189,7 @@ namespace Game.AI
                     }
                 case SmartActions.SendGossipMenu:
                     {
-                        if (GetBaseObject() == null)
+                        if (GetBaseObject() == null || !IsSmart())
                             break;
 
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SEND_GOSSIP_MENU: gossipMenuId {0}, gossipNpcTextId {1}",
@@ -2198,6 +2198,12 @@ namespace Game.AI
                         List<WorldObject> targets = GetTargets(e, unit);
                         if (targets.Empty())
                             break;
+
+                        // override default gossip
+                        if (me)
+                            ((SmartAI)me.GetAI()).SetGossipReturn(true);
+                        else if (go)
+                            ((SmartGameObjectAI)go.GetAI()).SetGossipReturn(true);
 
                         foreach (var obj in targets)
                         {

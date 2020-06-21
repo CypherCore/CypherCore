@@ -760,6 +760,7 @@ namespace Framework.Constants
         CommandGoOffset = 852,
         CommandReloadConversationTemplate = 853,
         CommandDebugConversation = 854,
+        CommandDebugPlayMusic = 855,
         CommandNpcSpawngroup = 856, // Reserved For DynamicSpawning
         CommandNpcDespawngroup = 857, // Reserved For DynamicSpawning
         CommandGobjectSpawngroup = 858, // Reserved For DynamicSpawning

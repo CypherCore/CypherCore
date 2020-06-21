@@ -3615,19 +3615,24 @@ namespace Game.Entities
 
         void ResurrectUsingRequestDataImpl()
         {
+            // save health and mana before resurrecting, _resurrectionData can be erased
+            uint resurrectHealth = _resurrectionData.Health;
+            uint resurrectMana = _resurrectionData.Mana;
+            uint resurrectAura = _resurrectionData.Aura;
+            ObjectGuid resurrectGUID = _resurrectionData.GUID;
+
             ResurrectPlayer(0.0f, false);
 
-            SetHealth(_resurrectionData.Health);
-            SetPower(PowerType.Mana, (int)_resurrectionData.Mana);
+            SetHealth(resurrectHealth);
+            SetPower(PowerType.Mana, (int)resurrectMana);
 
             SetPower(PowerType.Rage, 0);
             SetFullPower(PowerType.Energy);
             SetFullPower(PowerType.Focus);
             SetPower(PowerType.LunarPower, 0);
 
-            uint aura = _resurrectionData.Aura;
-            if (aura != 0)
-                CastSpell(this, aura, true, null, null, _resurrectionData.GUID);
+            if (resurrectAura != 0)
+                CastSpell(this, resurrectAura, true, null, null, resurrectGUID);
 
             SpawnCorpseBones();
         }
@@ -5562,8 +5567,8 @@ namespace Game.Entities
             if (creature.GetReactionTo(this) <= ReputationRank.Unfriendly)
                 return null;
 
-            // not too far
-            if (!creature.IsWithinDistInMap(this, SharedConst.InteractionDistance))
+            // not too far, taken from CGGameUI::SetInteractTarget
+            if (!creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
                 return null;
 
             return creature;
@@ -5571,34 +5576,36 @@ namespace Game.Entities
 
         public GameObject GetGameObjectIfCanInteractWith(ObjectGuid guid)
         {
-            GameObject go = GetMap().GetGameObject(guid);
-            if (go)
-            {
-                if (go.IsWithinDistInMap(this, go.GetInteractionDistance()))
-                    return go;
+            if (guid.IsEmpty())
+                return null;
 
-                Log.outDebug(LogFilter.Maps, "Player.GetGameObjectIfCanInteractWith: GameObject '{0}' ({1}) is too far away from player '{2}' ({3}) to be used by him (Distance: {4}, maximal {5} is allowed)",
-                    go.GetName(), go.GetGUID().ToString(), GetName(), GetGUID().ToString(), go.GetDistance(this), go.GetInteractionDistance());
-            }
+            if (!IsInWorld)
+                return null;
 
-            return null;
+            if (IsInFlight())
+                return null;
+
+            // exist
+            GameObject go = ObjectAccessor.GetGameObject(this, guid);
+            if (go == null)
+                return null;
+
+            if (!go.IsWithinDistInMap(this, go.GetInteractionDistance()))
+                return null;
+
+            return go;
         }
+
         public GameObject GetGameObjectIfCanInteractWith(ObjectGuid guid, GameObjectTypes type)
         {
-            GameObject go = GetMap().GetGameObject(guid);
-            if (go != null)
-            {
-                if (go.GetGoType() == type)
-                {
-                    if (go.IsWithinDistInMap(this, go.GetInteractionDistance()))
-                        return go;
+            GameObject go = GetGameObjectIfCanInteractWith(guid);
+            if (!go)
+                return null;
 
-                    Log.outDebug(LogFilter.Maps, "Player.GetGameObjectIfCanInteractWith: GameObject '{0}' ({1}) is too far away from player '{2}' ({3}) to be used by him (Distance: {4}, maximal {5} is allowed)",
-                        go.GetName(), go.GetGUID().ToString(), GetName(), GetGUID().ToString(), go.GetDistance(this), go.GetInteractionDistance());
-                }
-            }
+            if (go.GetGoType() != type)
+                return null;
 
-            return null;
+            return go;
         }
 
         public void SendInitialPacketsBeforeAddToMap()

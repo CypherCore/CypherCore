@@ -1057,12 +1057,12 @@ namespace Game.Chat
                     return false;
                 }
 
-                uint id = args.NextUInt32();
+                uint cinematicId = args.NextUInt32();
 
-                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(id);
+                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
                 if (cineSeq == null)
                 {
-                    handler.SendSysMessage(CypherStrings.CinematicNotExist, id);
+                    handler.SendSysMessage(CypherStrings.CinematicNotExist, cinematicId);
                     return false;
                 }
 
@@ -1070,7 +1070,7 @@ namespace Game.Chat
                 var list = M2Storage.GetFlyByCameras(cineSeq.Camera[0]);
                 if (list != null)
                 {
-                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", id, cineSeq.Camera[0]);
+                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", cinematicId, cineSeq.Camera[0]);
                     uint count = 1;
                     foreach (FlyByCamera cam in list)
                     {
@@ -1080,7 +1080,7 @@ namespace Game.Chat
                     handler.SendSysMessage("{0} waypoints dumped", list.Count);
                 }
 
-                handler.GetSession().GetPlayer().SendCinematicStart(id);
+                handler.GetSession().GetPlayer().SendCinematicStart(cinematicId);
                 return true;
             }
 
@@ -1095,15 +1095,41 @@ namespace Game.Chat
                     return false;
                 }
 
-                uint id = args.NextUInt32();
+                uint movieId = args.NextUInt32();
 
-                if (!CliDB.MovieStorage.ContainsKey(id))
+                if (!CliDB.MovieStorage.ContainsKey(movieId))
                 {
-                    handler.SendSysMessage(CypherStrings.MovieNotExist, id);
+                    handler.SendSysMessage(CypherStrings.MovieNotExist, movieId);
                     return false;
                 }
 
-                handler.GetSession().GetPlayer().SendMovieStart(id);
+                handler.GetSession().GetPlayer().SendMovieStart(movieId);
+                return true;
+            }
+
+            [Command("music", RBACPermissions.CommandDebugPlayMusic)]
+            static bool HandleDebugPlayMusicCommand(StringArguments args, CommandHandler handler)
+            {
+                // USAGE: .debug play music #musicId
+                // #musicId - ID decimal number from SoundEntries.dbc (1st column)
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+                }
+
+                uint musicId = args.NextUInt32();
+                if (!CliDB.SoundKitStorage.ContainsKey(musicId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, musicId);
+                    return false;
+                }
+
+                Player player = handler.GetSession().GetPlayer();
+
+                player.PlayDirectMusic(musicId, player);
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, musicId);
                 return true;
             }
 
@@ -1127,6 +1153,8 @@ namespace Game.Chat
                     return false;
                 }
 
+                Player player = handler.GetSession().GetPlayer();
+
                 Unit unit = handler.GetSelectedUnit();
                 if (!unit)
                 {
@@ -1134,10 +1162,10 @@ namespace Game.Chat
                     return false;
                 }
 
-                if (!handler.GetSession().GetPlayer().GetTarget().IsEmpty())
-                    unit.PlayDistanceSound(soundId, handler.GetSession().GetPlayer());
+                if (!player.GetTarget().IsEmpty())
+                    unit.PlayDistanceSound(soundId, player);
                 else
-                    unit.PlayDirectSound(soundId, handler.GetSession().GetPlayer());
+                    unit.PlayDirectSound(soundId, player);
 
                 handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
                 return true;

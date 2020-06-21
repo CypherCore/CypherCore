@@ -1824,7 +1824,6 @@ namespace Game.Entities
             List<uint> qr;
             List<uint> qir;
 
-            PlayerTalkClass.ClearMenus();
             switch (questgiver.GetTypeId())
             {
                 case TypeId.GameObject:

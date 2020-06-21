@@ -266,6 +266,14 @@ namespace Game.Spells
 
                 if (m_spellInfo.IsChanneled())
                 {
+                    // maybe do this for all spells?
+                    if (m_UniqueTargetInfo.Empty() && m_UniqueGOTargetInfo.Empty() && m_UniqueItemInfo.Empty() && !m_targets.HasDst())
+                    {
+                        SendCastResult(SpellCastResult.BadImplicitTargets);
+                        Finish(false);
+                        return;
+                    }
+
                     uint mask = (1u << (int)effect.EffectIndex);
                     foreach (var ihit in m_UniqueTargetInfo)
                     {
@@ -736,9 +744,6 @@ namespace Game.Spells
                 return;
 
             float radius = effect.CalcRadius(m_caster) * m_spellValue.RadiusMod;
-            // if this is a proximity based aoe (Frost Nova, Psychic Scream, ...), include the caster's own combat reach
-            if (targetType.IsProximityBasedAoe())
-                radius += GetCaster().GetCombatReach();
 
             SearchAreaTargets(targets, radius, center, referer, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions);
 
@@ -1816,7 +1821,8 @@ namespace Game.Spells
                 {
                     for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                     {
-                        if (!Convert.ToBoolean(target.effectMask & (1 << i)))
+                        // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
+                        if (target.effectMask != 0 && !Convert.ToBoolean(target.effectMask & (1 << i)))
                             continue;
 
                         if (!m_spellInfo.IsPositiveEffect(i))

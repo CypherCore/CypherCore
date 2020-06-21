@@ -689,7 +689,12 @@ namespace Game.Scripting
             CreatureTemplate baseTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (baseTemplate == null)
                 baseTemplate = actTemplate;
-            return RunScriptRet<CreatureScript, bool>(p => p.CanSpawn(spawnId, entry, baseTemplate, actTemplate, cData, map), cData != null ? cData.ScriptId : baseTemplate.ScriptID, true);
+
+            uint scriptId = baseTemplate.ScriptID;
+            if (cData != null && cData.ScriptId != 0)
+                scriptId = cData.ScriptId;
+
+            return RunScriptRet<CreatureScript, bool>(p => p.CanSpawn(spawnId, entry, baseTemplate, actTemplate, cData, map), scriptId, true);
         }
         public CreatureAI GetCreatureAI(Creature creature)
         {

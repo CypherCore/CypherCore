@@ -791,14 +791,16 @@ namespace Game.AI
 
         public override bool GossipHello(Player player)
         {
+            _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player);
-            return false;
+            return _gossipReturn;
         }
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
+            _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId);
-            return false;
+            return _gossipReturn;
         }
 
         public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
@@ -993,6 +995,8 @@ namespace Game.AI
 
         public void SetWPPauseTimer(uint time) { mWPPauseTimer = time; }
 
+        public void SetGossipReturn(bool val) { _gossipReturn = val; }
+
         bool mIsCharmed;
         uint mFollowCreditType;
         uint mFollowArrivedTimer;
@@ -1032,6 +1036,9 @@ namespace Game.AI
         // Vehicle conditions
         bool mHasConditions;
         uint mConditionsTimer;
+
+        // Gossip
+        bool _gossipReturn;
     }
 
     public class SmartGameObjectAI : GameObjectAI
@@ -1064,15 +1071,16 @@ namespace Game.AI
 
         public override bool GossipHello(Player player, bool reportUse)
         {
-            Log.outDebug(LogFilter.ScriptsAi, "SmartGameObjectAI.GossipHello");
+            _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, reportUse ? 1 : 0u, 0, false, null, me);
-            return false;
+            return _gossipReturn;
         }
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
+            _gossipReturn = false;
             GetScript().ProcessEventsFor(SmartEvents.GossipSelect, player, menuId, gossipListId, false, null, me);
-            return false;
+            return _gossipReturn;
         }
 
         public override bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
@@ -1132,9 +1140,14 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.SpellHit, unit, 0, 0, false, spellInfo);
         }
 
+        public void SetGossipReturn(bool val) { _gossipReturn = val; }
+
         public SmartScript GetScript() { return mScript; }
 
         SmartScript mScript;
+
+        // Gossip
+        bool _gossipReturn;
     }
 
     public enum SmartEscortState

@@ -1626,8 +1626,6 @@ namespace Game.Entities
 
             if (s == DeathState.JustDied)
             {
-                ModifyAuraState(AuraStateType.HealthLess20Percent, false);
-                ModifyAuraState(AuraStateType.HealthLess35Percent, false);
                 // remove aurastates allowing special moves
                 ClearAllReactives();
                 m_Diminishing.Clear();

@@ -376,6 +376,11 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player) && IsMounted())
                 return false;
 
+            Creature creature = ToCreature();
+            // creatures cannot attack while evading
+            if (creature != null && creature.IsInEvadeMode())
+                return false;
+
             if (HasUnitFlag(UnitFlags.Pacified))
                 return false;
 
@@ -436,7 +441,7 @@ namespace Game.Entities
             if (meleeAttack)
                 AddUnitState(UnitState.MeleeAttacking);
 
-            if (IsTypeId(TypeId.Unit) && !IsPet())
+            if (creature != null && !IsPet())
             {
                 // should not let player enter combat by right clicking target - doesn't helps
                 AddThreat(victim, 0.0f);
@@ -445,8 +450,8 @@ namespace Game.Entities
                 if (victim.IsTypeId(TypeId.Player))
                     victim.SetInCombatWith(this);
 
-                ToCreature().SendAIReaction(AiReaction.Hostile);
-                ToCreature().CallAssistance();
+                creature.SendAIReaction(AiReaction.Hostile);
+                creature.CallAssistance();
 
                 // Remove emote state - will be restored on creature reset
                 SetEmoteState(Emote.OneshotNone);
@@ -536,11 +541,27 @@ namespace Game.Entities
         }
         public Unit GetAttackerForHelper()
         {
-            if (GetVictim() != null)
-                return GetVictim();
+            Unit victim = GetVictim();
+            if (victim != null)
+                if (!IsControlledByPlayer() || IsInCombatWith(victim) || victim.IsInCombatWith(this))
+                    return victim;
 
-            if (attackerList.Count != 0)
+            if (!attackerList.Empty())
                 return attackerList[0];
+
+            Player owner = GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (owner != null)
+            {
+                HostileReference refe = owner.GetHostileRefManager().GetFirst();
+                while (refe != null)
+                {
+                    Unit hostile = refe.GetSource().GetOwner();
+                    if (hostile != null)
+                        return hostile;
+
+                    refe = refe.Next();
+                }
+            }
 
             return null;
         }

@@ -3965,9 +3965,22 @@ namespace Game.Entities
                     ToTotem().SetDeathState(DeathState.JustDied);
             }
 
-            // Remove aurastates only if were not found
-            if (!auraStateFound)
-                ModifyAuraState(auraState, false);
+            // Remove aurastates only if needed and were not found
+            if (auraState != 0)
+            {
+                if (!auraStateFound)
+                    ModifyAuraState(auraState, false);
+                else
+                {
+                    // update for casters, some shouldn't 'see' the aura state
+                    uint aStateMask = (1u << ((int)auraState - 1));
+                    if ((aStateMask & (uint)AuraStateType.PerCasterAuraStateMask) != 0)
+                    {
+                        m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState);
+                        ForceUpdateFieldChange();
+                    }
+                }
+            }
 
             aura.HandleAuraSpecificMods(aurApp, caster, false, false);
         }
@@ -4099,7 +4112,17 @@ namespace Game.Entities
             // Update target aura state flag
             AuraStateType aState = aura.GetSpellInfo().GetAuraState();
             if (aState != 0)
-                ModifyAuraState(aState, true);
+            {
+                uint aStateMask = (1u << ((int)aState - 1));
+                // force update so the new caster registers it
+                if (aStateMask.HasAnyFlag((uint)AuraStateType.PerCasterAuraStateMask) && (m_unitData.AuraState & aStateMask) != 0)
+                {
+                    m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState);
+                    ForceUpdateFieldChange();
+                }
+                else
+                    ModifyAuraState(aState, true);
+            }
 
             if (aurApp.HasRemoveMode())
                 return;
