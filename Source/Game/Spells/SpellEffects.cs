@@ -2447,12 +2447,9 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null)
-                return;
-
             // this effect use before aura Taunt apply for prevent taunt already attacking target
             // for spell as marked "non effective at already attacking target"
-            if (!unitTarget.CanHaveThreatList() || unitTarget.GetVictim() == m_caster)
+            if (unitTarget == null || !unitTarget.CanHaveThreatList() || unitTarget.GetVictim() == m_caster)
             {
                 SendCastResult(SpellCastResult.DontReport);
                 return;

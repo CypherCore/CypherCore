@@ -55,6 +55,7 @@ namespace Scripts.Spells.Druid
         public const uint LivingSeedProc = 48504;
         public const uint MoonfireDamage = 164812;
         public const uint RejuvenationT10Proc = 70691;
+        public const uint RestorationT102PBonus = 70658;
         public const uint SavageRoar = 62071;
         public const uint StampedeBearRank1 = 81016;
         public const uint StampedeCatRank1 = 81021;
@@ -1044,5 +1045,39 @@ namespace Scripts.Spells.Druid
         }
 
         List<WorldObject> _targets;
+    }
+
+    [Script]
+    class spell_dru_wild_growth_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RestorationT102PBonus);
+        }
+
+        void HandleTickUpdate(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (!caster)
+                return;
+
+            // calculate from base damage, not from aurEff->GetAmount() (already modified)
+            float damage = caster.CalculateSpellDamage(GetUnitOwner(), GetSpellInfo(), aurEff.GetEffIndex());
+
+            // Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
+            float reduction = 2.0f;
+            AuraEffect bonus = caster.GetAuraEffect(SpellIds.RestorationT102PBonus, 0);
+            if (bonus != null)
+                reduction -= MathFunctions.CalculatePct(reduction, bonus.GetAmount());
+            reduction *= (aurEff.GetTickNumber() - 1);
+
+            MathFunctions.AddPct(ref damage, 6.0f - reduction);
+            aurEff.SetAmount((int)damage);
+        }
+
+        public override void Register()
+        {
+            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(HandleTickUpdate, 0, AuraType.PeriodicHeal));
+        }
     }
 }

@@ -5690,19 +5690,6 @@ namespace Game.Spells
             }
             else
             {
-                // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
-                if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Druid && m_spellInfo.SpellFamilyFlags & new FlagArray128(0, 0x04000000, 0, 0))
-                {
-                    int addition = (int)((damage * GetTotalTicks()) * ((6 - (2 * (GetTickNumber() - 1))) / 100));
-
-                    // Item - Druid T10 Restoration 2P Bonus
-                    AuraEffect aurEff = caster.GetAuraEffect(70658, 0);
-                    if (aurEff != null)
-                        // divided by 50 instead of 100 because calculated as for every 2 tick
-                        addition += Math.Abs((addition * aurEff.GetAmount()) / 50);
-
-                    damage += addition;
-                }
                 if (isAreaAura)
                     damage = (int)(caster.SpellHealingBonusDone(target, GetSpellInfo(), (uint)damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()) * caster.SpellHealingPctDone(target, m_spellInfo));
                 damage = (int)target.SpellHealingBonusTaken(caster, GetSpellInfo(), (uint)damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount());

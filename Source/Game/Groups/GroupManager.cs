@@ -182,10 +182,12 @@ namespace Game.Groups
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                //                                                0           1        2              3             4             5            6           7
-                SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, COUNT(g.guid) " +
-                    "FROM group_instance gi INNER JOIN instance i ON gi.instance = i.id " +
-                    "LEFT JOIN character_instance ci LEFT JOIN groups g ON g.leaderGuid = ci.guid ON ci.instance = gi.instance AND ci.permanent = 1 GROUP BY gi.instance ORDER BY gi.guid");
+                //                                                 0       1       2            3            4             5            6
+                SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, " +
+                    //           7
+                    "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN groups g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
+                    "FROM group_instance gi LEFT JOIN instance i ON gi.instance = i.id ORDER BY guid");
+
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group-instance saves. DB table `group_instance` is empty!");
@@ -210,7 +212,7 @@ namespace Game.Groups
                     if (difficultyEntry == null || difficultyEntry.InstanceType != mapEntry.InstanceType)
                         continue;
 
-                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<uint>(5), result.Read<uint>(6), result.Read<ulong>(7) != 0, true);
+                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<uint>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
                     group.BindToInstance(save, result.Read<bool>(3), true);
                     ++count;
                 }
