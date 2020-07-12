@@ -2530,6 +2530,9 @@ namespace Game.Entities
                                 case SpellEffectName.ApplyAreaAuraEnemy:
                                 case SpellEffectName.ApplyAreaAuraPet:
                                 case SpellEffectName.ApplyAreaAuraOwner:
+                                case SpellEffectName.ApplyAuraOnPet:
+                                case SpellEffectName.Unk202:
+                                case SpellEffectName.ApplyAreaAuraPartyNonrandom:
                                     {
                                         if (effect.ApplyAuraName == AuraType.PeriodicDamage ||
                                             effect.ApplyAuraName == AuraType.PeriodicDamagePercent ||

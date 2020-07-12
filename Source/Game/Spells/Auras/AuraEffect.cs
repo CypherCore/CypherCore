@@ -934,14 +934,7 @@ namespace Game.Spells
         public bool IsEffect(SpellEffectName effectName) { return _effectInfo.Effect == effectName; }
         public bool IsAreaAuraEffect()
         {
-            if (_effectInfo.Effect == SpellEffectName.ApplyAreaAuraParty ||
-                _effectInfo.Effect == SpellEffectName.ApplyAreaAuraRaid ||
-                _effectInfo.Effect == SpellEffectName.ApplyAreaAuraFriend ||
-                _effectInfo.Effect == SpellEffectName.ApplyAreaAuraEnemy ||
-                _effectInfo.Effect == SpellEffectName.ApplyAreaAuraPet ||
-                _effectInfo.Effect == SpellEffectName.ApplyAreaAuraOwner)
-                return true;
-            return false;
+            return _effectInfo.IsAreaAuraEffect();
         }
 
         #region Fields

@@ -2556,7 +2556,7 @@ namespace Game.Spells
 
                 List<Unit> targetList = new List<Unit>();
                 // non-area aura
-                if (effect.Effect == SpellEffectName.ApplyAura)
+                if (effect.Effect == SpellEffectName.ApplyAura || effect.Effect == SpellEffectName.Unk202)
                 {
                     targetList.Add(GetUnitOwner());
                 }
@@ -2570,7 +2570,8 @@ namespace Game.Spells
                         {
                             case SpellEffectName.ApplyAreaAuraParty:
                             case SpellEffectName.ApplyAreaAuraRaid:
-                                {
+                            case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                            {
                                     targetList.Add(GetUnitOwner());
                                     var u_check = new AnyGroupedUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, effect.Effect == SpellEffectName.ApplyAreaAuraRaid, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
                                     var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
@@ -2601,6 +2602,13 @@ namespace Game.Spells
                                     if (owner != null)
                                         if (GetUnitOwner().IsWithinDistInMap(owner, radius))
                                             targetList.Add(owner);
+                                    break;
+                                }
+                            case SpellEffectName.ApplyAuraOnPet:
+                                {
+                                    Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
+                                    if (pet != null)
+                                        targetList.Add(pet);
                                     break;
                                 }
                         }

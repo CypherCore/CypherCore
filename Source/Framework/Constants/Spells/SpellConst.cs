@@ -2060,7 +2060,7 @@ namespace Framework.Constants
         Effect171 = 171, // Summons Gamebject
         ResurrectWithAura = 172, // Aoe Ressurection
         UnlockGuildVaultTab = 173, // Guild Tab Unlocked (Guild Perk)
-        ApllyAuraOnPet = 174,
+        ApplyAuraOnPet = 174,
         Effect175 = 175, // Unused (4.3.4)
         Sanctuary2 = 176,
         Effect177 = 177,

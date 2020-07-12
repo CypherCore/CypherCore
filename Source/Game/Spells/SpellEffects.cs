@@ -753,6 +753,8 @@ namespace Game.Spells
         }
 
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
+        [SpellEffectHandler(SpellEffectName.ApplyAuraOnPet)]
+        [SpellEffectHandler(SpellEffectName.Unk202)]
         void EffectApplyAura(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -771,6 +773,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraParty)]
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPet)]
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraRaid)]
+        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPartyNonrandom)]
         void EffectApplyAreaAura(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)

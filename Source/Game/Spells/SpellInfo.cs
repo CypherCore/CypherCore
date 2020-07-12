@@ -3681,7 +3681,8 @@ namespace Game.Spells
                 Effect == SpellEffectName.ApplyAreaAuraFriend ||
                 Effect == SpellEffectName.ApplyAreaAuraEnemy ||
                 Effect == SpellEffectName.ApplyAreaAuraPet ||
-                Effect == SpellEffectName.ApplyAreaAuraOwner)
+                Effect == SpellEffectName.ApplyAreaAuraOwner ||
+                Effect == SpellEffectName.ApplyAreaAuraPartyNonrandom)
                 return true;
             return false;
         }
@@ -3700,7 +3701,7 @@ namespace Game.Spells
 
         public bool IsUnitOwnedAuraEffect()
         {
-            return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura;
+            return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura || Effect == SpellEffectName.ApplyAuraOnPet || Effect == SpellEffectName.Unk202;
         }
 
         public int CalcValue(Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
@@ -3994,7 +3995,7 @@ namespace Game.Spells
                 case SpellEffectName.ApplyAreaAuraFriend:
                 case SpellEffectName.ApplyAreaAuraEnemy:
                 case SpellEffectName.ApplyAreaAuraOwner:
-                case SpellEffectName.ApllyAuraOnPet:
+                case SpellEffectName.ApplyAuraOnPet:
                 case SpellEffectName.Unk202:
                 case SpellEffectName.ApplyAreaAuraPartyNonrandom:
                     switch (ApplyAuraName)
