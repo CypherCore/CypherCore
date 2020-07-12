@@ -34,8 +34,8 @@ namespace Game.Chat
                 return false;
 
             // GM Level
-            AccountTypes gmLevel = handler.GetSession().GetSecurity();
-            handler.SendSysMessage(CypherStrings.AccountLevel, gmLevel);
+            AccountTypes securityLevel = handler.GetSession().GetSecurity();
+            handler.SendSysMessage(CypherStrings.AccountLevel, securityLevel);
 
             // Security level required
             WorldSession session = handler.GetSession();
@@ -511,8 +511,8 @@ namespace Game.Chat
                 return true;
             }
 
-            [Command("gmlevel", RBACPermissions.CommandAccountSetGmlevel, true)]
-            static bool HandleSetGmLevelCommand(StringArguments args, CommandHandler handler)
+            [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
+            static bool HandleSetSecLevelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -520,10 +520,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                string targetAccountName = "";
-                uint targetAccountId;
-                AccountTypes targetSecurity;
-                uint gm;
+                string accountName = "";
 
                 string arg1 = args.NextString();
                 string arg2 = args.NextString();
@@ -542,50 +539,50 @@ namespace Game.Chat
 
                 if (isAccountNameGiven)
                 {
-                    targetAccountName = arg1;
-                    if (Global.AccountMgr.GetId(targetAccountName) == 0)
+                    accountName = arg1;
+                    if (Global.AccountMgr.GetId(accountName) == 0)
                     {
-                        handler.SendSysMessage(CypherStrings.AccountNotExist, targetAccountName);
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
                         return false;
                     }
                 }
 
                 // Check for invalid specified GM level.
-                if (!uint.TryParse(isAccountNameGiven ? arg2 : arg1, out gm))
+                if (!uint.TryParse(isAccountNameGiven ? arg2 : arg1, out uint securityLevel))
                     return false;
 
-                if (gm > (uint)AccountTypes.Console)
+                if (securityLevel > (uint)AccountTypes.Console)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
                 }
 
                 // command.getSession() == NULL only for console
-                targetAccountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(targetAccountName) : handler.GetSelectedPlayer().GetSession().GetAccountId();
-                if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out int gmRealmID))
+                uint accountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(accountName) : handler.GetSelectedPlayer().GetSession().GetAccountId();
+                if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out int realmID))
                     return false;
 
                 AccountTypes playerSecurity;
                 if (handler.GetSession() != null)
-                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), gmRealmID);
+                    playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), realmID);
                 else
                     playerSecurity = AccountTypes.Console;
 
                 // can set security level only for target with less security and to less security that we have
                 // This is also reject self apply in fact
-                targetSecurity = Global.AccountMgr.GetSecurity(targetAccountId, gmRealmID);
-                if (targetSecurity >= playerSecurity || (AccountTypes)gm >= playerSecurity)
+                AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
+                if (targetSecurity >= playerSecurity || (AccountTypes)securityLevel >= playerSecurity)
                 {
                     handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
                     return false;
                 }
                 PreparedStatement stmt;
                 // Check and abort if the target gm has a higher rank on one of the realms and the new realm is -1
-                if (gmRealmID == -1 && !Global.AccountMgr.IsConsoleAccount(playerSecurity))
+                if (realmID == -1 && !Global.AccountMgr.IsConsoleAccount(playerSecurity))
                 {
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_GMLEVEL_TEST);
-                    stmt.AddValue(0, targetAccountId);
-                    stmt.AddValue(1, gm);
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ACCESS_SECLEVEL_TEST);
+                    stmt.AddValue(0, accountId);
+                    stmt.AddValue(1, securityLevel);
 
                     SQLResult result = DB.Login.Query(stmt);
 
@@ -597,15 +594,15 @@ namespace Game.Chat
                 }
 
                 // Check if provided realmID has a negative value other than -1
-                if (gmRealmID < -1)
+                if (realmID < -1)
                 {
                     handler.SendSysMessage(CypherStrings.InvalidRealmid);
                     return false;
                 }
 
                 RBACData rbac = isAccountNameGiven ? null : handler.GetSelectedPlayer().GetSession().GetRBACData();
-                Global.AccountMgr.UpdateAccountAccess(rbac, targetAccountId, (byte)gm, gmRealmID);
-                handler.SendSysMessage(CypherStrings.YouChangeSecurity, targetAccountName, gm);
+                Global.AccountMgr.UpdateAccountAccess(rbac, accountId, (byte)securityLevel, realmID);
+                handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
                 return true;
             }
 

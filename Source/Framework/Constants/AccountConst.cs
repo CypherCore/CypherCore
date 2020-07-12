@@ -133,7 +133,7 @@ namespace Framework.Constants
         CommandAccountPassword = 225,
         CommandAccountSet = 226,
         CommandAccountSetAddon = 227,
-        CommandAccountSetGmlevel = 228,
+        CommandAccountSetSecLevel = 228,
         CommandAccountSetPassword = 229,
         CommandAchievement = 230,
         CommandAchievementAdd = 231,
