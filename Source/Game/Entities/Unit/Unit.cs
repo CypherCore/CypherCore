@@ -25,12 +25,12 @@ using Game.Combat;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {
@@ -366,7 +366,7 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            LocaleConstant locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
             ChatPkt data = new ChatPkt();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, text, 0, "", locale);
             target.SendPacket(data);
@@ -413,7 +413,7 @@ namespace Game.Entities
                 return;
             }
 
-            LocaleConstant locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
             ChatPkt data = new ChatPkt();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()), 0, "", locale);
             target.SendPacket(data);

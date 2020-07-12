@@ -22,6 +22,14 @@ namespace Framework.Networking
 {
     public class NetworkThread<TSocketType> where TSocketType : ISocket
     {
+        int _connections;
+        volatile bool _stopped;
+
+        Thread _thread;
+
+        List<TSocketType> _Sockets = new List<TSocketType>();
+        List<TSocketType> _newSockets = new List<TSocketType>();
+
         public void Stop()
         {
             _stopped = true;
@@ -56,6 +64,7 @@ namespace Framework.Networking
         }
 
         protected virtual void SocketAdded(TSocketType sock) { }
+
         protected virtual void SocketRemoved(TSocketType sock) { }
 
         void AddNewSockets()
@@ -114,13 +123,5 @@ namespace Framework.Networking
             _newSockets.Clear();
             _Sockets.Clear();
         }
-
-        int _connections;
-        volatile bool _stopped;
-
-        Thread _thread;
-
-        List<TSocketType> _Sockets = new List<TSocketType>();
-        List<TSocketType> _newSockets = new List<TSocketType>();
     }
 }

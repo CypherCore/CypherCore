@@ -142,7 +142,7 @@ namespace Framework.Constants
         /// </summary>
         public const uint CalendarMaxInvites = 100;
         public const uint CalendarDefaultResponseTime = 946684800; // 01/01/2000 00:00:00
-        public const LocaleConstant DefaultLocale = LocaleConstant.enUS;
+        public const Locale DefaultLocale = Locale.enUS;
         public const int MaxAccountTutorialValues = 8;
         public const int MinAuctionTime = (12 * Time.Hour);
         public const int MaxConditionTargets = 3;
@@ -372,7 +372,7 @@ namespace Framework.Constants
         }
     }
 
-    public enum LocaleConstant
+    public enum Locale
     {
         enUS = 0,
         koKR = 1,

@@ -20,8 +20,8 @@ using Framework.Database;
 using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
@@ -230,7 +230,7 @@ namespace Game
                     Team team = Player.TeamForRace(characterInfo.RaceId);
                     uint friendAccountId = characterInfo.AccountId;
 
-                    if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Realm)))
+                    if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Index)))
                     {
                         if (friendGuid == GetPlayer().GetGUID())
                             friendResult = FriendsResult.Self;

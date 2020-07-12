@@ -17,10 +17,10 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Network;
+using Game.Networking;
 using Game.DataStorage;
 using System.Collections.Generic;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game
 {

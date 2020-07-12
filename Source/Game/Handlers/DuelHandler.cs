@@ -17,8 +17,8 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 
 namespace Game
 {

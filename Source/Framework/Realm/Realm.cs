@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Realm;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -94,7 +95,7 @@ public class Realm : IEquatable<Realm>
         return new { ExternalAddress, LocalAddress, LocalSubnetMask, Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
     }
 
-    public RealmHandle Id;
+    public RealmId Id;
     public uint Build;
     public IPAddress ExternalAddress;
     public IPAddress LocalAddress;
@@ -107,54 +108,5 @@ public class Realm : IEquatable<Realm>
     public byte Timezone;
     public AccountTypes AllowedSecurityLevel;
     public float PopulationLevel;
-}
-
-public struct RealmHandle : IEquatable<RealmHandle>
-{
-    public RealmHandle(byte region, byte battlegroup, uint index)
-    {
-        Region = region;
-        Site = battlegroup;
-        Realm = index;
-    }
-    public RealmHandle(uint realmAddress)
-    {
-        Region = (byte)((realmAddress >> 24) & 0xFF);
-        Site = (byte)((realmAddress >> 16) & 0xFF);
-        Realm = realmAddress & 0xFFFF;
-    }
-
-    public uint GetAddress()
-    {
-        return (uint)((Region << 24) | (Site << 16) | (ushort)Realm);
-    }
-    public string GetAddressString()
-    {
-        return $"{Region}-{Site}-{Realm}";
-    }
-
-    public string GetSubRegionAddress()
-    {
-        return $"{Region}-{Site}-0";
-    }
-
-    public override bool Equals(object obj)
-    {
-        return obj != null && obj is RealmHandle && Equals((RealmHandle)obj);
-    }
-
-    public bool Equals(RealmHandle other)
-    {
-        return other.Realm == Realm;
-    }
-
-    public override int GetHashCode()
-    {
-        return new { Site, Region, Realm }.GetHashCode();
-    }
-
-    public byte Region;
-    public byte Site;
-    public uint Realm; // primary key in `realmlist` table
 }
 

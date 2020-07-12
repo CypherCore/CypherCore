@@ -17,7 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Rest;
+using Framework.Web;
 using Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -25,6 +25,7 @@ using System.Linq;
 using System.Net;
 using System.Timers;
 using System.Collections.Concurrent;
+using Framework.Realm;
 
 public class RealmManager : Singleton<RealmManager>
 {
@@ -91,7 +92,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         SQLResult result = DB.Login.Query(stmt);
-        Dictionary<RealmHandle, string> existingRealms = new Dictionary<RealmHandle, string>();
+        Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
@@ -125,11 +126,11 @@ public class RealmManager : Singleton<RealmManager>
                 byte region = result.Read<byte>(12);
                 byte battlegroup = result.Read<byte>(13);
 
-                realm.Id = new RealmHandle(region, battlegroup, realmId);
+                realm.Id = new RealmId(region, battlegroup, realmId);
 
                 UpdateRealm(realm);
 
-                var subRegion = new RealmHandle(region, battlegroup, 0).GetAddressString();
+                var subRegion = new RealmId(region, battlegroup, 0).GetAddressString();
                 if (!_subRegions.Contains(subRegion))
                     _subRegions.Add(subRegion);
 
@@ -147,7 +148,7 @@ public class RealmManager : Singleton<RealmManager>
             Log.outInfo(LogFilter.Realmlist, "Removed realm \"{0}\".", pair.Value);
     }
 
-    public Realm GetRealm(RealmHandle id)
+    public Realm GetRealm(RealmId id)
     {
         return _realms.LookupByKey(id);
     }
@@ -177,7 +178,7 @@ public class RealmManager : Singleton<RealmManager>
         }
     }
 
-    public byte[] GetRealmEntryJSON(RealmHandle id, uint build)
+    public byte[] GetRealmEntryJSON(RealmId id, uint build)
     {
         byte[] compressed = new byte[0];
         Realm realm = GetRealm(id);
@@ -209,7 +210,7 @@ public class RealmManager : Singleton<RealmManager>
                 }
                 realmEntry.Version = version;
 
-                realmEntry.CfgRealmsID = (int)realm.Id.Realm;
+                realmEntry.CfgRealmsID = (int)realm.Id.Index;
                 realmEntry.Flags = (int)realm.Flags;
                 realmEntry.Name = realm.Name;
                 realmEntry.CfgConfigsID = (int)realm.GetConfigId();
@@ -256,7 +257,7 @@ public class RealmManager : Singleton<RealmManager>
                 realmListUpdate.Update.Version.Build = (int)realm.Value.Build;
             }
 
-            realmListUpdate.Update.CfgRealmsID = (int)realm.Value.Id.Realm;
+            realmListUpdate.Update.CfgRealmsID = (int)realm.Value.Id.Index;
             realmListUpdate.Update.Flags = (int)flag;
             realmListUpdate.Update.Name = realm.Value.Name;
             realmListUpdate.Update.CfgConfigsID = (int)realm.Value.GetConfigId();
@@ -270,9 +271,9 @@ public class RealmManager : Singleton<RealmManager>
         return Json.Deflate("JSONRealmListUpdates", realmList);
     }
 
-    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, Array<byte> clientSecret, LocaleConstant locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
-        Realm realm = GetRealm(new RealmHandle(realmAddress));
+        Realm realm = GetRealm(new RealmId(realmAddress));
         if (realm != null)
         {
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
@@ -328,7 +329,7 @@ public class RealmManager : Singleton<RealmManager>
     List<string> GetSubRegions() { return _subRegions; }
 
     List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    ConcurrentDictionary<RealmHandle, Realm> _realms = new ConcurrentDictionary<RealmHandle, Realm>();
+    ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
     List<string> _subRegions = new List<string>();
     Timer _updateTimer;
 }

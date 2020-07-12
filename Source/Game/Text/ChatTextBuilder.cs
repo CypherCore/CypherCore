@@ -18,16 +18,16 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game.Chat
 {
     public class MessageBuilder
     {
-        public virtual ServerPacket Invoke(LocaleConstant locale = LocaleConstant.enUS) { return null; }
-        public virtual void Invoke(List<ServerPacket> data, LocaleConstant locale = LocaleConstant.enUS) { }
+        public virtual ServerPacket Invoke(Locale locale = Locale.enUS) { return null; }
+        public virtual void Invoke(List<ServerPacket> data, Locale locale = Locale.enUS) { }
     }
 
     public class BroadcastTextBuilder : MessageBuilder
@@ -42,7 +42,7 @@ namespace Game.Chat
             _achievementId = achievementId;
         }
 
-        public override ServerPacket Invoke(LocaleConstant locale)
+        public override ServerPacket Invoke(Locale locale)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
             var packet = new ChatPkt();
@@ -69,7 +69,7 @@ namespace Game.Chat
             _target = target;
         }
 
-        public override ServerPacket Invoke(LocaleConstant locale)
+        public override ServerPacket Invoke(Locale locale)
         {
             var packet = new ChatPkt();
             packet.Initialize(_msgType, _language, _source, _target, _text, 0, "", locale);
@@ -94,7 +94,7 @@ namespace Game.Chat
             _args = args;
         }
 
-        public override ServerPacket Invoke(LocaleConstant locale)
+        public override ServerPacket Invoke(Locale locale)
         {
             ChatPkt packet = new ChatPkt();
 

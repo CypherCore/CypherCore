@@ -21,7 +21,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Mails;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -588,9 +588,9 @@ namespace Game
                         break;
                 }
 
-                for (LocaleConstant locale = LocaleConstant.enUS; locale < LocaleConstant.Total; ++locale)
+                for (Locale locale = Locale.enUS; locale < Locale.Total; ++locale)
                 {
-                    if (locale == LocaleConstant.None)
+                    if (locale == Locale.None)
                         continue;
 
                     bucket.FullName[(int)locale] = auction.Items[0].GetName(locale);
@@ -677,7 +677,7 @@ namespace Game
 
             _itemsByAuctionId[auction.Id] = auction;
 
-            AuctionPosting.Sorter insertSorter = new AuctionPosting.Sorter(LocaleConstant.enUS, new AuctionSortDef[] { new AuctionSortDef(AuctionHouseSortOrder.Price, false) }, 1);
+            AuctionPosting.Sorter insertSorter = new AuctionPosting.Sorter(Locale.enUS, new AuctionSortDef[] { new AuctionSortDef(AuctionHouseSortOrder.Price, false) }, 1);
             var auctionIndex = bucket.Auctions.BinarySearch(auction, insertSorter);
             if (auctionIndex < 0)
                 auctionIndex = ~auctionIndex;
@@ -1407,7 +1407,7 @@ namespace Game
             else
             {
                 bidderAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Bidder);
-                logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Realm);
+                logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Index);
 
                 if (logGmTrade && !Global.CharacterCacheStorage.GetCharacterNameByGuid(auction.Bidder, out bidderName))
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
@@ -1724,7 +1724,7 @@ namespace Game
 
         public class Sorter : IComparer<AuctionPosting>
         {
-            public Sorter(LocaleConstant locale, AuctionSortDef[] sorts, int sortCount)
+            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
             {
                 _locale = locale;
                 _sorts = sorts;
@@ -1776,7 +1776,7 @@ namespace Game
                 return 0;
             }
 
-            LocaleConstant _locale;
+            Locale _locale;
             AuctionSortDef[] _sorts;
             int _sortCount;
         }
@@ -1800,7 +1800,7 @@ namespace Game
         public byte SortLevel = 0;
         public byte MinBattlePetLevel = 0;
         public byte MaxBattlePetLevel = 0;
-        public string[] FullName = new string[(int)LocaleConstant.Total];
+        public string[] FullName = new string[(int)Locale.Total];
 
         public List<AuctionPosting> Auctions = new List<AuctionPosting>();
 
@@ -1846,7 +1846,7 @@ namespace Game
 
         public class Sorter : IComparer<AuctionsBucketData>
         {
-            public Sorter(LocaleConstant locale, AuctionSortDef[] sorts, int sortCount)
+            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
             {
                 _locale = locale;
                 _sorts = sorts;
@@ -1884,7 +1884,7 @@ namespace Game
                 return 0;
             }
 
-            LocaleConstant _locale;
+            Locale _locale;
             AuctionSortDef[] _sorts;
             int _sortCount;
         }

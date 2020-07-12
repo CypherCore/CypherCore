@@ -31,8 +31,8 @@ using Game.Loots;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using Game.PvP;
 using Game.Spells;
 using System;
@@ -2429,7 +2429,7 @@ namespace Game.Entities
                     string strBoxText = "";
                     BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.OptionBroadcastTextId);
                     BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.BoxBroadcastTextId);
-                    LocaleConstant locale = GetSession().GetSessionDbLocaleIndex();
+                    Locale locale = GetSession().GetSessionDbLocaleIndex();
 
                     if (optionBroadcastText != null)
                         strOptionText = Global.DB2Mgr.GetBroadcastTextValue(optionBroadcastText, locale, GetGender());
@@ -2441,7 +2441,7 @@ namespace Game.Entities
                     else
                         strBoxText = menuItems.BoxText;
 
-                    if (locale != LocaleConstant.enUS)
+                    if (locale != Locale.enUS)
                     {
                         if (optionBroadcastText == null)
                         {
@@ -5057,8 +5057,8 @@ namespace Game.Entities
             if (playerChoice == null)
                 return;
 
-            LocaleConstant locale = GetSession().GetSessionDbLocaleIndex();
-            PlayerChoiceLocale playerChoiceLocale = locale != LocaleConstant.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
+            Locale locale = GetSession().GetSessionDbLocaleIndex();
+            PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
             PlayerTalkClass.GetInteractionData().Reset();
             PlayerTalkClass.GetInteractionData().SourceGuid = sender;
@@ -5080,7 +5080,7 @@ namespace Game.Entities
             for (var i = 0; i < playerChoice.Responses.Count; ++i)
             {
                 PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
-                var playerChoiceResponse = new Network.Packets.PlayerChoiceResponse();
+                var playerChoiceResponse = new Networking.Packets.PlayerChoiceResponse();
 
                 playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
@@ -5111,7 +5111,7 @@ namespace Game.Entities
 
                 if (playerChoiceResponseTemplate.Reward.HasValue)
                 {
-                    var reward = new Network.Packets.PlayerChoiceResponseReward();
+                    var reward = new Networking.Packets.PlayerChoiceResponseReward();
                     reward.TitleID = playerChoiceResponseTemplate.Reward.Value.TitleId;
                     reward.PackageID = playerChoiceResponseTemplate.Reward.Value.PackageId;
                     reward.SkillLineID = playerChoiceResponseTemplate.Reward.Value.SkillLineId;
@@ -5123,7 +5123,7 @@ namespace Game.Entities
 
                     foreach (var item in playerChoiceResponseTemplate.Reward.Value.Items)
                     {
-                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = item.Id;
                         rewardEntry.Quantity = item.Quantity;
                         if (!item.BonusListIDs.Empty())
@@ -5136,7 +5136,7 @@ namespace Game.Entities
 
                     foreach (var currency in playerChoiceResponseTemplate.Reward.Value.Currency)
                     {
-                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = currency.Id;
                         rewardEntry.Quantity = currency.Quantity;
                         reward.Items.Add(rewardEntry);
@@ -5144,7 +5144,7 @@ namespace Game.Entities
 
                     foreach (var faction in playerChoiceResponseTemplate.Reward.Value.Faction)
                     {
-                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
                         rewardEntry.Item.ItemID = faction.Id;
                         rewardEntry.Quantity = faction.Quantity;
                         reward.Items.Add(rewardEntry);
@@ -6458,7 +6458,7 @@ namespace Game.Entities
                 return;
 
             ChatPkt data = new ChatPkt();
-            data.Initialize(ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, this, this, text, 0, "", LocaleConstant.enUS, prefix);
+            data.Initialize(ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, this, this, text, 0, "", Locale.enUS, prefix);
             receiver.SendPacket(data);
         }
         public override void Whisper(string text, Language language, Player target = null, bool something = false)
@@ -6508,7 +6508,7 @@ namespace Game.Entities
                 return;
             }
 
-            LocaleConstant locale = target.GetSession().GetSessionDbLocaleIndex();
+            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
             ChatPkt packet = new ChatPkt();
             packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);

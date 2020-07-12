@@ -260,7 +260,7 @@ namespace Game.Chat.Commands
             ObjectGuid targetGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(target);
             uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
             // Target must exist and have administrative rights
-            if (!Global.AccountMgr.HasPermission(accountId, RBACPermissions.CommandsBeAssignedTicket, Global.WorldMgr.GetRealm().Id.Realm))
+            if (!Global.AccountMgr.HasPermission(accountId, RBACPermissions.CommandsBeAssignedTicket, Global.WorldMgr.GetRealm().Id.Index))
             {
                 handler.SendSysMessage(CypherStrings.CommandTicketassignerrorA);
                 return true;
@@ -283,7 +283,7 @@ namespace Game.Chat.Commands
             }
 
             // Assign ticket
-            ticket.SetAssignedTo(targetGuid, Global.AccountMgr.IsAdminAccount(Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Realm)));
+            ticket.SetAssignedTo(targetGuid, Global.AccountMgr.IsAdminAccount(Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Index)));
             ticket.SaveToDB();
 
             string msg = ticket.FormatViewMessageString(handler, null, target, null, null);
@@ -448,7 +448,7 @@ namespace Game.Chat.Commands
             {
                 ObjectGuid guid = ticket.GetAssignedToGUID();
                 uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
-                security = Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Realm);
+                security = Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Index);
             }
 
             // Check security

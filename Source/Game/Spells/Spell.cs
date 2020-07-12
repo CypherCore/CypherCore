@@ -25,7 +25,7 @@ using Game.Entities;
 using Game.Loots;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scripting;
 using System;
 using System.Collections.Generic;

@@ -20,7 +20,7 @@ using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
 using System;

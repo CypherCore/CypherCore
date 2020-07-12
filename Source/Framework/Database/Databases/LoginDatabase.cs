@@ -25,11 +25,11 @@ namespace Framework.Database
             const string BnetGameAccountInfo = "a.id, a.username, ab.unbandate, ab.unbandate = ab.bandate, aa.gmlevel";
 
             PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
-            PrepareStatement(LoginStatements.DEL_EXPIRED_IP_BANS, "DELETE FROM ip_banned WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
-            PrepareStatement(LoginStatements.UPD_EXPIRED_ACCOUNT_BANS, "UPDATE account_banned SET active = 0 WHERE active = 1 AND unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
-            PrepareStatement(LoginStatements.SEL_IP_INFO, "SELECT unbandate > UNIX_TIMESTAMP() OR unbandate = bandate AS banned, NULL as country FROM ip_banned WHERE ip = ?");
+            PrepareStatement(LoginStatements.DelExpiredIpBans, "DELETE FROM ip_banned WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
+            PrepareStatement(LoginStatements.UpdExpiredAccountBans, "UPDATE account_banned SET active = 0 WHERE active = 1 AND unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
+            PrepareStatement(LoginStatements.SelIpInfo, "SELECT unbandate > UNIX_TIMESTAMP() OR unbandate = bandate AS banned, NULL as country FROM ip_banned WHERE ip = ?");
 
-            PrepareStatement(LoginStatements.INS_IP_AUTO_BANNED, "INSERT INTO ip_banned (ip, bandate, unbandate, bannedby, banreason) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Cypher Auth', 'Failed login autoban')");
+            PrepareStatement(LoginStatements.InsIpAutoBanned, "INSERT INTO ip_banned (ip, bandate, unbandate, bannedby, banreason) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Cypher Auth', 'Failed login autoban')");
             PrepareStatement(LoginStatements.SEL_IP_BANNED_ALL, "SELECT ip, bandate, unbandate, bannedby, banreason FROM ip_banned WHERE (bandate = unbandate OR unbandate > UNIX_TIMESTAMP()) ORDER BY unbandate");
             PrepareStatement(LoginStatements.SEL_IP_BANNED_BY_IP, "SELECT ip, bandate, unbandate, bannedby, banreason FROM ip_banned WHERE (bandate = unbandate OR unbandate > UNIX_TIMESTAMP()) AND ip LIKE CONCAT('%%', ?, '%%') ORDER BY unbandate");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL, "SELECT account.id, username FROM account, account_banned WHERE account.id = account_banned.id AND active = 1 GROUP BY account.id");
@@ -113,16 +113,16 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO, "SELECT mutedate, mutetime, mutereason, mutedby FROM account_muted WHERE guid = ? ORDER BY mutedate ASC");
             PrepareStatement(LoginStatements.DEL_ACCOUNT_MUTED, "DELETE FROM account_muted WHERE guid = ?");
 
-            PrepareStatement(LoginStatements.SEL_BNET_AUTHENTICATION, "SELECT ba.id, ba.sha_pass_hash, ba.failed_logins, ba.LoginTicket, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id WHERE email = ?");
-            PrepareStatement(LoginStatements.UPD_BNET_AUTHENTICATION, "UPDATE battlenet_accounts SET LoginTicket = ?, LoginTicketExpiry = ? WHERE id = ?");
-            PrepareStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo +
+            PrepareStatement(LoginStatements.SelBnetAuthentication, "SELECT ba.id, ba.sha_pass_hash, ba.failed_logins, ba.LoginTicket, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id WHERE email = ?");
+            PrepareStatement(LoginStatements.UpdBnetAuthentication, "UPDATE battlenet_accounts SET LoginTicket = ?, LoginTicketExpiry = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.SelBnetAccountInfo, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo +
                 " FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account a ON ba.id = a.battlenet_account" +
                 " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID = -1 WHERE ba.LoginTicket = ? ORDER BY a.id");
-            PrepareStatement(LoginStatements.UPD_BNET_LAST_LOGIN_INFO, "UPDATE battlenet_accounts SET last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.UpdBnetLastLoginInfo, "UPDATE battlenet_accounts SET last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO, "UPDATE account SET sessionkey = ?, last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE username = ?");
-            PrepareStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID, "SELECT rc.acctid, rc.numchars, r.id, r.Region, r.Battlegroup FROM realmcharacters rc INNER JOIN realmlist r ON rc.realmid = r.id WHERE rc.acctid = ?");
+            PrepareStatement(LoginStatements.SelBnetCharacterCountsByAccountId, "SELECT rc.acctid, rc.numchars, r.id, r.Region, r.Battlegroup FROM realmcharacters rc INNER JOIN realmlist r ON rc.realmid = r.id WHERE rc.acctid = ?");
             PrepareStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID, "SELECT rc.acctid, rc.numchars, r.id, r.Region, r.Battlegroup FROM realmcharacters rc INNER JOIN realmlist r ON rc.realmid = r.id LEFT JOIN account a ON rc.acctid = a.id WHERE a.battlenet_account = ?");
-            PrepareStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS, "SELECT lpc.accountId, lpc.region, lpc.battlegroup, lpc.realmId, lpc.characterName, lpc.characterGUID, lpc.lastPlayedTime FROM account_last_played_character lpc LEFT JOIN account a ON lpc.accountId = a.id WHERE a.battlenet_account = ?");
+            PrepareStatement(LoginStatements.SelBnetLastPlayerCharacters, "SELECT lpc.accountId, lpc.region, lpc.battlegroup, lpc.realmId, lpc.characterName, lpc.characterGUID, lpc.lastPlayedTime FROM account_last_played_character lpc LEFT JOIN account a ON lpc.accountId = a.id WHERE a.battlenet_account = ?");
             PrepareStatement(LoginStatements.DEL_BNET_LAST_PLAYER_CHARACTERS, "DELETE FROM account_last_played_character WHERE accountId = ? AND region = ? AND battlegroup = ?");
             PrepareStatement(LoginStatements.INS_BNET_LAST_PLAYER_CHARACTERS, "INSERT INTO account_last_played_character (accountId, region, battlegroup, realmId, characterName, characterGUID, lastPlayedTime) VALUES (?,?,?,?,?,?,?)");
             PrepareStatement(LoginStatements.INS_BNET_ACCOUNT, "INSERT INTO battlenet_accounts (`email`,`sha_pass_hash`) VALUES (?, ?)");
@@ -137,10 +137,10 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_BNET_MAX_ACCOUNT_INDEX, "SELECT MAX(battlenet_index) FROM account WHERE battlenet_account = ?");
             PrepareStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST, "SELECT a.id, a.username FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id WHERE ba.email = ?");
 
-            PrepareStatement(LoginStatements.UPD_BNET_FAILED_LOGINS, "UPDATE battlenet_accounts SET failed_logins = failed_logins + 1 WHERE id = ?");
-            PrepareStatement(LoginStatements.INS_BNET_ACCOUNT_AUTO_BANNED, "INSERT INTO battlenet_account_bans(id, bandate, unbandate, bannedby, banreason) VALUES(?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Trinity Auth', 'Failed login autoban')");
-            PrepareStatement(LoginStatements.DEL_BNET_EXPIRED_ACCOUNT_BANNED, "DELETE FROM battlenet_account_bans WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");          
-            PrepareStatement(LoginStatements.UPD_BNET_RESET_FAILED_LOGINS, "UPDATE battlenet_accounts SET failed_logins = 0 WHERE id = ?");
+            PrepareStatement(LoginStatements.UpdBnetFailedLogins, "UPDATE battlenet_accounts SET failed_logins = failed_logins + 1 WHERE id = ?");
+            PrepareStatement(LoginStatements.InsBnetAccountAutoBanned, "INSERT INTO battlenet_account_bans(id, bandate, unbandate, bannedby, banreason) VALUES(?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Trinity Auth', 'Failed login autoban')");
+            PrepareStatement(LoginStatements.DelBnetExpiredAccountBanned, "DELETE FROM battlenet_account_bans WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");          
+            PrepareStatement(LoginStatements.UpdBnetResetFailedLogins, "UPDATE battlenet_accounts SET failed_logins = 0 WHERE id = ?");
 
             PrepareStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE, "SELECT LastCharacterUndelete FROM battlenet_accounts WHERE Id = ?");
             PrepareStatement(LoginStatements.UPD_LAST_CHAR_UNDELETE, "UPDATE battlenet_accounts SET LastCharacterUndelete = UNIX_TIMESTAMP() WHERE Id = ?");
@@ -178,10 +178,10 @@ namespace Framework.Database
     public enum LoginStatements
     {
         SEL_REALMLIST,
-        DEL_EXPIRED_IP_BANS,
-        UPD_EXPIRED_ACCOUNT_BANS,
-        SEL_IP_INFO,
-        INS_IP_AUTO_BANNED,
+        DelExpiredIpBans,
+        UpdExpiredAccountBans,
+        SelIpInfo,
+        InsIpAutoBanned,
         SEL_ACCOUNT_BANNED_ALL,
         SEL_ACCOUNT_BANNED_BY_USERNAME,
         DEL_ACCOUNT_BANNED,
@@ -260,14 +260,14 @@ namespace Framework.Database
         SEL_ACCOUNT_MUTE_INFO,
         DEL_ACCOUNT_MUTED,
 
-        SEL_BNET_AUTHENTICATION,
-        UPD_BNET_AUTHENTICATION,
-        SEL_BNET_ACCOUNT_INFO,
-        UPD_BNET_LAST_LOGIN_INFO,
+        SelBnetAuthentication,
+        UpdBnetAuthentication,
+        SelBnetAccountInfo,
+        UpdBnetLastLoginInfo,
         UPD_BNET_GAME_ACCOUNT_LOGIN_INFO,
-        SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID,
+        SelBnetCharacterCountsByAccountId,
         SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID,
-        SEL_BNET_LAST_PLAYER_CHARACTERS,
+        SelBnetLastPlayerCharacters,
         DEL_BNET_LAST_PLAYER_CHARACTERS,
         INS_BNET_LAST_PLAYER_CHARACTERS,
         INS_BNET_ACCOUNT,
@@ -283,10 +283,10 @@ namespace Framework.Database
         SEL_BNET_MAX_ACCOUNT_INDEX,
         SEL_BNET_GAME_ACCOUNT_LIST,
 
-        UPD_BNET_FAILED_LOGINS,
-        INS_BNET_ACCOUNT_AUTO_BANNED,
-        DEL_BNET_EXPIRED_ACCOUNT_BANNED,
-        UPD_BNET_RESET_FAILED_LOGINS,
+        UpdBnetFailedLogins,
+        InsBnetAccountAutoBanned,
+        DelBnetExpiredAccountBanned,
+        UpdBnetResetFailedLogins,
 
         SEL_LAST_CHAR_UNDELETE,
         UPD_LAST_CHAR_UNDELETE,

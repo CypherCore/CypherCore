@@ -17,12 +17,13 @@
 
 using Framework.Constants;
 using Framework.GameMath;
+using Framework.Realm;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Misc;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game
@@ -74,8 +75,8 @@ namespace Game
 
                 QueryGameObjectResponse queryGameObjectResponse = info.QueryData;
 
-                LocaleConstant loc = GetSessionDbLocaleIndex();
-                if (loc != LocaleConstant.enUS)
+                Locale loc = GetSessionDbLocaleIndex();
+                if (loc != Locale.enUS)
                 {
                     GameObjectLocale gameObjectLocale = Global.ObjectMgr.GetGameObjectLocale(queryGameObjectResponse.GameObjectID);
                     if (gameObjectLocale != null)
@@ -110,8 +111,8 @@ namespace Game
 
                 QueryCreatureResponse queryCreatureResponse = ci.QueryData;
 
-                LocaleConstant loc = GetSessionDbLocaleIndex();
-                if (loc != LocaleConstant.enUS)
+                Locale loc = GetSessionDbLocaleIndex();
+                if (loc != Locale.enUS)
                 {
                     CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(ci.Entry);
                     if (creatureLocale != null)
@@ -187,8 +188,8 @@ namespace Game
                 page.PlayerConditionID = pageText.PlayerConditionID;
                 page.Flags = pageText.Flags;
 
-                LocaleConstant locale = GetSessionDbLocaleIndex();
-                if (locale != LocaleConstant.enUS)
+                Locale locale = GetSessionDbLocaleIndex();
+                if (locale != Locale.enUS)
                 {
                     PageTextLocale pageLocale = Global.ObjectMgr.GetPageTextLocale(pageID);
                     if (pageLocale != null)
@@ -353,8 +354,8 @@ namespace Game
             RealmQueryResponse realmQueryResponse = new RealmQueryResponse();
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;
 
-            RealmHandle realmHandle = new RealmHandle(queryRealmName.VirtualRealmAddress);
-            if (Global.ObjectMgr.GetRealmName(realmHandle.Realm, ref realmQueryResponse.NameInfo.RealmNameActual, ref realmQueryResponse.NameInfo.RealmNameNormalized))
+            RealmId realmHandle = new RealmId(queryRealmName.VirtualRealmAddress);
+            if (Global.ObjectMgr.GetRealmName(realmHandle.Index, ref realmQueryResponse.NameInfo.RealmNameActual, ref realmQueryResponse.NameInfo.RealmNameNormalized))
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;
                 realmQueryResponse.NameInfo.IsInternalRealm = false;

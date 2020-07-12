@@ -20,7 +20,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
@@ -698,35 +698,35 @@ namespace Game
 
     public class QuestGreetingLocale
     {
-        public StringArray Greeting = new StringArray((int)LocaleConstant.Total);
+        public StringArray Greeting = new StringArray((int)Locale.Total);
     }
 
     public class QuestTemplateLocale
     {
-        public StringArray LogTitle = new StringArray((int)LocaleConstant.Total);
-        public StringArray LogDescription = new StringArray((int)LocaleConstant.Total);
-        public StringArray QuestDescription = new StringArray((int)LocaleConstant.Total);
-        public StringArray AreaDescription = new StringArray((int)LocaleConstant.Total);
-        public StringArray PortraitGiverText = new StringArray((int)LocaleConstant.Total);
-        public StringArray PortraitGiverName = new StringArray((int)LocaleConstant.Total);
-        public StringArray PortraitTurnInText = new StringArray((int)LocaleConstant.Total);
-        public StringArray PortraitTurnInName = new StringArray((int)LocaleConstant.Total);
-        public StringArray QuestCompletionLog = new StringArray((int)LocaleConstant.Total);
+        public StringArray LogTitle = new StringArray((int)Locale.Total);
+        public StringArray LogDescription = new StringArray((int)Locale.Total);
+        public StringArray QuestDescription = new StringArray((int)Locale.Total);
+        public StringArray AreaDescription = new StringArray((int)Locale.Total);
+        public StringArray PortraitGiverText = new StringArray((int)Locale.Total);
+        public StringArray PortraitGiverName = new StringArray((int)Locale.Total);
+        public StringArray PortraitTurnInText = new StringArray((int)Locale.Total);
+        public StringArray PortraitTurnInName = new StringArray((int)Locale.Total);
+        public StringArray QuestCompletionLog = new StringArray((int)Locale.Total);
     }
 
     public class QuestRequestItemsLocale
     {
-        public StringArray CompletionText = new StringArray((int)LocaleConstant.Total);
+        public StringArray CompletionText = new StringArray((int)Locale.Total);
     }
 
     public class QuestObjectivesLocale
     {
-        public StringArray Description = new StringArray((int)LocaleConstant.Total);
+        public StringArray Description = new StringArray((int)Locale.Total);
     }
 
     public class QuestOfferRewardLocale
     {
-        public StringArray RewardText = new StringArray((int)LocaleConstant.Total);
+        public StringArray RewardText = new StringArray((int)Locale.Total);
     }
 
     public class QuestObjective

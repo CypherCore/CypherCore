@@ -45,7 +45,7 @@ namespace Game.Chat
             // Search in AreaTable.dbc
             foreach (var areaEntry in CliDB.AreaTableStorage.Values)
             {
-                LocaleConstant locale = handler.GetSessionDbcLocale();
+                Locale locale = handler.GetSessionDbcLocale();
                 string name = areaEntry.AreaName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
@@ -53,7 +53,7 @@ namespace Game.Chat
                 if (!name.Like(namePart))
                 {
                     locale = 0;
-                    for (; locale < LocaleConstant.Total; ++locale)
+                    for (; locale < Locale.Total; ++locale)
                     {
                         if (locale == handler.GetSessionDbcLocale())
                             continue;
@@ -67,7 +67,7 @@ namespace Game.Chat
                     }
                 }
 
-                if (locale < LocaleConstant.Total)
+                if (locale < Locale.Total)
                 {
                     if (maxlookup != 0 && count++ == maxlookup)
                     {
@@ -234,7 +234,7 @@ namespace Game.Chat
             {
                 FactionState factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
 
-                LocaleConstant locale = handler.GetSessionDbcLocale();
+                Locale locale = handler.GetSessionDbcLocale();
                 string name = factionEntry.Name[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
@@ -242,7 +242,7 @@ namespace Game.Chat
                 if (!name.Like(namePart))
                 {
                     locale = 0;
-                    for (; locale < LocaleConstant.Total; ++locale)
+                    for (; locale < Locale.Total; ++locale)
                     {
                         if (locale == handler.GetSessionDbcLocale())
                             continue;
@@ -256,7 +256,7 @@ namespace Game.Chat
                     }
                 }
 
-                if (locale < LocaleConstant.Total)
+                if (locale < Locale.Total)
                 {
                     if (maxlookup != 0 && count++ == maxlookup)
                     {
@@ -365,7 +365,7 @@ namespace Game.Chat
             // Search in ItemSet.dbc
             foreach (var set in CliDB.ItemSetStorage.Values)
             {
-                LocaleConstant locale = handler.GetSessionDbcLocale();
+                Locale locale = handler.GetSessionDbcLocale();
                 string name = set.Name[locale];
                 if (name.IsEmpty())
                     continue;
@@ -373,7 +373,7 @@ namespace Game.Chat
                 if (!name.Like(namePart))
                 {
                     locale = 0;
-                    for (; locale < LocaleConstant.Total; ++locale)
+                    for (; locale < Locale.Total; ++locale)
                     {
                         if (locale == handler.GetSessionDbcLocale())
                             continue;
@@ -387,7 +387,7 @@ namespace Game.Chat
                     }
                 }
 
-                if (locale < LocaleConstant.Total)
+                if (locale < Locale.Total)
                 {
                     if (maxlookup != 0 && count++ == maxlookup)
                     {
@@ -629,7 +629,7 @@ namespace Game.Chat
             // Search in SkillLine.dbc
             foreach (var skillInfo in CliDB.SkillLineStorage.Values)
             {
-                LocaleConstant locale = handler.GetSessionDbcLocale();
+                Locale locale = handler.GetSessionDbcLocale();
                 string name = skillInfo.DisplayName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
@@ -637,7 +637,7 @@ namespace Game.Chat
                 if (!name.Like(namePart))
                 {
                     locale = 0;
-                    for (; locale < LocaleConstant.Total; ++locale)
+                    for (; locale < Locale.Total; ++locale)
                     {
                         if (locale == handler.GetSessionDbcLocale())
                             continue;
@@ -651,7 +651,7 @@ namespace Game.Chat
                     }
                 }
 
-                if (locale < LocaleConstant.Total)
+                if (locale < Locale.Total)
                 {
                     if (maxlookup != 0 && count++ == maxlookup)
                     {
@@ -700,7 +700,7 @@ namespace Game.Chat
 
             bool found = false;
             uint count = 0;
-            LocaleConstant locale = handler.GetSessionDbcLocale();
+            Locale locale = handler.GetSessionDbcLocale();
 
             // Search in TaxiNodes.dbc
             foreach (var nodeEntry in CliDB.TaxiNodesStorage.Values)
@@ -802,7 +802,7 @@ namespace Game.Chat
                     if (target && target.GetGender() != gender)
                         continue;
 
-                    LocaleConstant locale = handler.GetSessionDbcLocale();
+                    Locale locale = handler.GetSessionDbcLocale();
                     string name = gender == Gender.Male ? titleInfo.Name[locale]: titleInfo.Name1[locale];
                     if (string.IsNullOrEmpty(name))
                         continue;
@@ -810,7 +810,7 @@ namespace Game.Chat
                     if (!name.Like(namePart))
                     {
                         locale = 0;
-                        for (; locale < LocaleConstant.Total; ++locale)
+                        for (; locale < Locale.Total; ++locale)
                         {
                             if (locale == handler.GetSessionDbcLocale())
                                 continue;
@@ -824,7 +824,7 @@ namespace Game.Chat
                         }
                     }
 
-                    if (locale < LocaleConstant.Total)
+                    if (locale < Locale.Total)
                     {
                         if (maxlookup != 0 && counter == maxlookup)
                         {
@@ -869,7 +869,7 @@ namespace Game.Chat
             // search in Map.dbc
             foreach (var mapInfo in CliDB.MapStorage.Values)
             {
-                LocaleConstant locale = handler.GetSessionDbcLocale();
+                Locale locale = handler.GetSessionDbcLocale();
                 string name = mapInfo.MapName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
@@ -877,7 +877,7 @@ namespace Game.Chat
                 if (!name.Like(namePart) && handler.GetSession())
                 {
                     locale = 0;
-                    for (; locale < LocaleConstant.Total; ++locale)
+                    for (; locale < Locale.Total; ++locale)
                     {
                         if (locale == handler.GetSessionDbcLocale())
                             continue;
@@ -891,7 +891,7 @@ namespace Game.Chat
                     }
                 }
 
-                if (locale < LocaleConstant.Total)
+                if (locale < Locale.Total)
                 { 
                     if (maxlookup != 0 && counter == maxlookup)
                     {
@@ -1071,7 +1071,7 @@ namespace Game.Chat
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellName.Id, Difficulty.None);
                     if (spellInfo != null)
                     {
-                        LocaleConstant locale = handler.GetSessionDbcLocale();
+                        Locale locale = handler.GetSessionDbcLocale();
                         string name = spellInfo.SpellName[locale];
                         if (name.IsEmpty())
                             continue;
@@ -1079,7 +1079,7 @@ namespace Game.Chat
                         if (!name.Like(namePart))
                         {
                             locale = 0;
-                            for (; locale < LocaleConstant.Total; ++locale)
+                            for (; locale < Locale.Total; ++locale)
                             {
                                 if (locale == handler.GetSessionDbcLocale())
                                     continue;
@@ -1093,7 +1093,7 @@ namespace Game.Chat
                             }
                         }
 
-                        if (locale < LocaleConstant.Total)
+                        if (locale < Locale.Total)
                         {
                             if (maxlookup != 0 && count++ == maxlookup)
                             {
@@ -1167,7 +1167,7 @@ namespace Game.Chat
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(id, Difficulty.None);
                 if (spellInfo != null)
                 {
-                    LocaleConstant locale = handler.GetSessionDbcLocale();
+                    Locale locale = handler.GetSessionDbcLocale();
                     string name = spellInfo.SpellName[locale];
                     if (string.IsNullOrEmpty(name))
                     {

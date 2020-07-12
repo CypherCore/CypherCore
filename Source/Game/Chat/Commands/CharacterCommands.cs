@@ -40,7 +40,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
-            LocaleConstant loc = handler.GetSessionDbcLocale();
+            Locale loc = handler.GetSessionDbcLocale();
             string targetName = target.GetName();
             string knownStr = handler.GetCypherString(CypherStrings.Known);
 
@@ -405,7 +405,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
-            LocaleConstant loc = handler.GetSessionDbcLocale();
+            Locale loc = handler.GetSessionDbcLocale();
 
             var targetFSL = target.GetReputationMgr().GetStateList();
             foreach (var pair in targetFSL)

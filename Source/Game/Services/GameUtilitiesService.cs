@@ -17,7 +17,7 @@
 
 using Bgs.Protocol.GameUtilities.V1;
 using Framework.Constants;
-using Framework.Rest;
+using Framework.Web;
 using Framework.Serialization;
 using Game.Services;
 using Google.Protobuf;

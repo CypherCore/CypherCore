@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Framework.Dynamic;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {

@@ -20,7 +20,7 @@ using Game.DataStorage;
 using Game.Maps;
 using Game.Spells;
 using System.Collections.Generic;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {

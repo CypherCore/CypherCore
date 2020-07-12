@@ -21,7 +21,7 @@ using Framework.GameMath;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -103,7 +103,7 @@ namespace Game.Misc
                     strBoxText = item.BoxText;
 
                 // Check need of localization.
-                if (GetLocale() != LocaleConstant.enUS)
+                if (GetLocale() != Locale.enUS)
                 {
                     if (optionBroadcastText == null)
                     {
@@ -181,8 +181,8 @@ namespace Game.Misc
 
         public void SetMenuId(uint menu_id) { _menuId = menu_id; }
         public uint GetMenuId() { return _menuId; }
-        public void SetLocale(LocaleConstant locale) { _locale = locale; }
-        LocaleConstant GetLocale() { return _locale; }
+        public void SetLocale(Locale locale) { _locale = locale; }
+        Locale GetLocale() { return _locale; }
 
         public int GetMenuItemCount()
         {
@@ -212,7 +212,7 @@ namespace Game.Misc
         Dictionary<uint, GossipMenuItem> _menuItems = new Dictionary<uint, GossipMenuItem>();
         Dictionary<uint, GossipMenuItemData> _menuItemData = new Dictionary<uint, GossipMenuItemData>();
         uint _menuId;
-        LocaleConstant _locale;
+        Locale _locale;
     }
 
     public class InteractionData
@@ -284,8 +284,8 @@ namespace Game.Misc
                     text.Repeatable = quest.IsRepeatable();
 
                     text.QuestTitle = quest.LogTitle;
-                    LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-                    if (locale != LocaleConstant.enUS)
+                    Locale locale = _session.GetSessionDbLocaleIndex();
+                    if (locale != Locale.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                         if (localeData != null)
@@ -319,8 +319,8 @@ namespace Game.Misc
             packet.Id = pointOfInterest.Id;
             packet.Name = pointOfInterest.Name;
 
-            LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
+            Locale locale = _session.GetSessionDbLocaleIndex();
+            if (locale != Locale.enUS)
             {
                 PointOfInterestLocale localeData = Global.ObjectMgr.GetPointOfInterestLocale(id);
                 if (localeData != null)
@@ -338,7 +338,7 @@ namespace Game.Misc
         public void SendQuestGiverQuestListMessage(WorldObject questgiver)
         {
             ObjectGuid guid = questgiver.GetGUID();
-            LocaleConstant localeConstant = _session.GetSessionDbLocaleIndex();
+            Locale localeConstant = _session.GetSessionDbLocaleIndex();
 
             QuestGiverQuestListMessage questList = new QuestGiverQuestListMessage();
             questList.QuestGiverGUID = guid;
@@ -350,7 +350,7 @@ namespace Game.Misc
                 questList.GreetEmoteType = questGreeting.EmoteType;
                 questList.Greeting = questGreeting.Text;
 
-                if (localeConstant != LocaleConstant.enUS)
+                if (localeConstant != Locale.enUS)
                 {
                     QuestGreetingLocale questGreetingLocale = Global.ObjectMgr.GetQuestGreetingLocale(questgiver.GetTypeId(), questgiver.GetEntry());
                     if (questGreetingLocale != null)
@@ -368,7 +368,7 @@ namespace Game.Misc
                 {
                     string title = quest.LogTitle;
 
-                    if (localeConstant != LocaleConstant.enUS)
+                    if (localeConstant != Locale.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                         if (localeData != null)
@@ -412,8 +412,8 @@ namespace Game.Misc
              packet.PortraitTurnInText = quest.PortraitTurnInText;
              packet.PortraitTurnInName = quest.PortraitTurnInName;
 
-            LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
+            Locale locale = _session.GetSessionDbLocaleIndex();
+            if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                 if (localeData != null)
@@ -479,8 +479,8 @@ namespace Game.Misc
 
             QueryQuestInfoResponse queryQuestInfoResponse = quest.QueryData;
 
-            LocaleConstant loc = _session.GetSessionDbLocaleIndex();
-            if (loc != LocaleConstant.enUS)
+            Locale loc = _session.GetSessionDbLocaleIndex();
+            if (loc != Locale.enUS)
             {
                 QuestTemplateLocale questTemplateLocale = Global.ObjectMgr.GetQuestLocale(queryQuestInfoResponse.QuestID);
                 if (questTemplateLocale != null)
@@ -519,8 +519,8 @@ namespace Game.Misc
             packet.PortraitTurnInText = quest.PortraitTurnInText;
             packet.PortraitTurnInName = quest.PortraitTurnInName;
 
-            LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
+            Locale locale = _session.GetSessionDbLocaleIndex();
+            if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                 if (localeData != null)
@@ -583,8 +583,8 @@ namespace Game.Misc
             packet.QuestTitle = quest.LogTitle;
             packet.CompletionText = quest.RequestItemsText;
 
-            LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
+            Locale locale = _session.GetSessionDbLocaleIndex();
+            if (locale != Locale.enUS)
             {
                 QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                 if (localeData != null)
@@ -747,7 +747,7 @@ namespace Game.Misc
 
     public class PageTextLocale
     {
-        public StringArray Text = new StringArray((int)LocaleConstant.Total);
+        public StringArray Text = new StringArray((int)Locale.Total);
     }
 
     public class GossipMenuItems
@@ -781,7 +781,7 @@ namespace Game.Misc
 
     public class PointOfInterestLocale
     {
-        public StringArray Name = new StringArray((int)LocaleConstant.Total); 
+        public StringArray Name = new StringArray((int)Locale.Total); 
     }
 
     public class GossipMenus

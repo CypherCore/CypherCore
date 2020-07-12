@@ -30,7 +30,7 @@ namespace Game.DataStorage
     {
         bool HasRecord(uint id);
 
-        void WriteRecord(uint id, LocaleConstant locale, ByteBuffer buffer);
+        void WriteRecord(uint id, Locale locale, ByteBuffer buffer);
 
         void EraseRecord(uint id);
     }
@@ -191,9 +191,9 @@ namespace Game.DataStorage
             if (preparedStatementLocale == 0)
                 return;
 
-            for (LocaleConstant locale = 0; locale < LocaleConstant.Total; ++locale)
+            for (Locale locale = 0; locale < Locale.Total; ++locale)
             {
-                if (Global.WorldMgr.GetDefaultDbcLocale() == locale || locale == LocaleConstant.None)
+                if (Global.WorldMgr.GetDefaultDbcLocale() == locale || locale == Locale.None)
                     continue;
 
                 PreparedStatement stmt = DB.Hotfix.GetPreparedStatement(preparedStatementLocale);
@@ -235,7 +235,7 @@ namespace Game.DataStorage
             return ContainsKey(id);
         }
 
-        public void WriteRecord(uint id, LocaleConstant locale, ByteBuffer buffer)
+        public void WriteRecord(uint id, Locale locale, ByteBuffer buffer)
         {
             T entry = this.LookupByKey(id);
 

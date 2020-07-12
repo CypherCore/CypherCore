@@ -17,7 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {

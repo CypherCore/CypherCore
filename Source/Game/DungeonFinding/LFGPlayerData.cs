@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game.DungeonFinding
 {

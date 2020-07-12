@@ -20,8 +20,8 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Loots;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -104,7 +104,7 @@ namespace Game.Entities
             return true;
         }
 
-        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
+        public override string GetName(Locale locale = Locale.enUS)
         {
             ItemTemplate itemTemplate = GetTemplate();
             var suffix = CliDB.ItemNameDescriptionStorage.LookupByKey(_bonusData.Suffix);

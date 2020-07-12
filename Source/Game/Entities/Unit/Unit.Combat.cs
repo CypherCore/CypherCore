@@ -23,7 +23,7 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.PvP;
 using Game.Spells;
 using System;

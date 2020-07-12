@@ -21,7 +21,7 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using Game.Spells;

@@ -20,8 +20,8 @@ using Framework.Database;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

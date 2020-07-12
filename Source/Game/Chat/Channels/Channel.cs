@@ -21,7 +21,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +106,7 @@ namespace Game.Chat
             }
         }
 
-        public static void GetChannelName(ref string channelName, uint channelId, LocaleConstant locale, AreaTableRecord zoneEntry)
+        public static void GetChannelName(ref string channelName, uint channelId, Locale locale, AreaTableRecord zoneEntry)
         {
             if (channelId != 0)
             {
@@ -123,7 +123,7 @@ namespace Game.Chat
             }
         }
 
-        public string GetName(LocaleConstant locale = LocaleConstant.enUS)
+        public string GetName(Locale locale = Locale.enUS)
         {
             string result = _channelName;
             GetChannelName(ref result, _channelId, locale, _zoneEntry);

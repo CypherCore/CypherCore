@@ -22,7 +22,7 @@ using Framework.GameMath;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

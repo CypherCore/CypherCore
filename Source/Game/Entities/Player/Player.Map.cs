@@ -21,7 +21,7 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

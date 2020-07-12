@@ -1,13 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\default.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>BNetServer.Server</StartupObject>
     <ApplicationIcon>Red.ico</ApplicationIcon>
-    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>

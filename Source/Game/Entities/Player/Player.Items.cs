@@ -25,7 +25,7 @@ using Game.Guilds;
 using Game.Loots;
 using Game.Mails;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;

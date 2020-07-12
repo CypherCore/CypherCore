@@ -20,12 +20,12 @@ using Framework.GameMath;
 using Game.AI;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {

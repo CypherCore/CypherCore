@@ -16,7 +16,7 @@
  */
 
 using Framework.Constants;
-using Game.Network;
+using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;

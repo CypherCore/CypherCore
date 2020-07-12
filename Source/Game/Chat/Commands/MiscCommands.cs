@@ -24,7 +24,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -263,7 +263,7 @@ namespace Game.Chat
                 {
                     var record = CliDB.ItemSparseStorage.Values.FirstOrDefault(itemSparse =>
                     {
-                        for (LocaleConstant i = 0; i < LocaleConstant.Total; ++i)
+                        for (Locale i = 0; i < Locale.Total; ++i)
                             if (itemName == itemSparse.Display[i])
                                 return true;
                         return false;
@@ -1359,7 +1359,7 @@ namespace Game.Chat
             Race raceid;
             Class classid;
             Gender gender;
-            LocaleConstant locale = handler.GetSessionDbcLocale();
+            Locale locale = handler.GetSessionDbcLocale();
             uint totalPlayerTime;
             uint level;
             string alive = handler.GetCypherString(CypherStrings.Error);
@@ -1437,7 +1437,7 @@ namespace Game.Chat
 
             // Query the prepared statement for login data
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO);
-            stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Realm);
+            stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
             stmt.AddValue(1, accId);
             SQLResult result0 = DB.Login.Query(stmt);
 

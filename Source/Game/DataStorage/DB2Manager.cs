@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.GameMath;
-using Game.Network;
+using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace Game.DataStorage
                     _powersByClass[i][j] = (uint)PowerType.Max;
             }
 
-            for (uint i = 0; i < (int)LocaleConstant.Total + 1; ++i)
+            for (uint i = 0; i < (int)Locale.Total + 1; ++i)
                 _nameValidators[i] = new List<string>();
         }
 
@@ -360,13 +360,13 @@ namespace Game.DataStorage
 
             foreach (var namesProfanity in CliDB.NamesProfanityStorage.Values)
             {
-                Cypher.Assert(namesProfanity.Language < (int)LocaleConstant.Total || namesProfanity.Language == -1);
+                Cypher.Assert(namesProfanity.Language < (int)Locale.Total || namesProfanity.Language == -1);
                 if (namesProfanity.Language != -1)
                     _nameValidators[namesProfanity.Language].Add(namesProfanity.Name);
                 else
-                    for (uint i = 0; i < (int)LocaleConstant.Total; ++i)
+                    for (uint i = 0; i < (int)Locale.Total; ++i)
                     {
-                        if (i == (int)LocaleConstant.None)
+                        if (i == (int)Locale.None)
                             continue;
 
                         _nameValidators[i].Add(namesProfanity.Name);
@@ -376,16 +376,16 @@ namespace Game.DataStorage
             CliDB.NamesProfanityStorage.Clear();
 
             foreach (var namesReserved in CliDB.NamesReservedStorage.Values)
-                _nameValidators[(int)LocaleConstant.Total].Add(namesReserved.Name);
+                _nameValidators[(int)Locale.Total].Add(namesReserved.Name);
 
             CliDB.NamesReservedStorage.Clear();
 
             foreach (var namesReserved in CliDB.NamesReservedLocaleStorage.Values)
             {
-                Cypher.Assert(!Convert.ToBoolean(namesReserved.LocaleMask & ~((1 << (int)LocaleConstant.Total) - 1)));
-                for (int i = 0; i < (int)LocaleConstant.Total; ++i)
+                Cypher.Assert(!Convert.ToBoolean(namesReserved.LocaleMask & ~((1 << (int)Locale.Total) - 1)));
+                for (int i = 0; i < (int)Locale.Total; ++i)
                 {
-                    if (i == (int)LocaleConstant.None)
+                    if (i == (int)Locale.None)
                         continue;
 
                     if (Convert.ToBoolean(namesReserved.LocaleMask & (1 << i)))
@@ -816,7 +816,7 @@ namespace Game.DataStorage
             return (uint)CliDB.AzeriteLevelInfoStorage.Count;
         }
 
-        public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, LocaleConstant locale = LocaleConstant.enUS, Gender gender = Gender.Male, bool forceGender = false)
+        public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, Locale locale = Locale.enUS, Gender gender = Gender.Male, bool forceGender = false)
         {
             if ((gender == Gender.Female || gender == Gender.None) && (forceGender || broadcastText.Text1.HasString(SharedConst.DefaultLocale)))
             {
@@ -857,7 +857,7 @@ namespace Game.DataStorage
             return _charStartOutfits.LookupByKey(race | (class_ << 8) | (gender << 16));
         }
 
-        public string GetClassName(Class class_, LocaleConstant locale = LocaleConstant.enUS)
+        public string GetClassName(Class class_, Locale locale = Locale.enUS)
         {
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(class_);
             if (classEntry == null)
@@ -866,7 +866,7 @@ namespace Game.DataStorage
             if (classEntry.Name[locale][0] != '\0')
                 return classEntry.Name[locale];
 
-            return classEntry.Name[LocaleConstant.enUS];
+            return classEntry.Name[Locale.enUS];
         }
 
         public uint GetPowerIndexByClass(PowerType powerType, Class classId)
@@ -874,7 +874,7 @@ namespace Game.DataStorage
             return _powersByClass[(int)classId][(int)powerType];
         }
 
-        public string GetChrRaceName(Race race, LocaleConstant locale = LocaleConstant.enUS)
+        public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
         {
             ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(race);
             if (raceEntry == null)
@@ -883,7 +883,7 @@ namespace Game.DataStorage
             if (raceEntry.Name[locale][0] != '\0')
                 return raceEntry.Name[locale];
 
-            return raceEntry.Name[LocaleConstant.enUS];
+            return raceEntry.Name[Locale.enUS];
         }
 
         public ChrSpecializationRecord GetChrSpecializationByIndex(Class class_, uint index)
@@ -896,7 +896,7 @@ namespace Game.DataStorage
             return _defaultChrSpecializationsByClass.LookupByKey(class_);
         }
 
-        public string GetCreatureFamilyPetName(CreatureFamily petfamily, LocaleConstant locale)
+        public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
         {
             if (petfamily == CreatureFamily.None)
                 return null;
@@ -1526,14 +1526,14 @@ namespace Game.DataStorage
             return listNameGen[gender].SelectRandom().Name;
         }
 
-        public ResponseCodes ValidateName(string name, LocaleConstant locale)
+        public ResponseCodes ValidateName(string name, Locale locale)
         {
             foreach (var testName in _nameValidators[(int)locale])
                 if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameProfane;
 
             // regexes at TOTAL_LOCALES are loaded from NamesReserved which is not locale specific
-            foreach (var testName in _nameValidators[(int)LocaleConstant.Total])
+            foreach (var testName in _nameValidators[(int)Locale.Total])
                 if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameReserved;
 
@@ -2099,7 +2099,7 @@ namespace Game.DataStorage
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new MultiMap<uint, MountTypeXCapabilityRecord>();
         MultiMap<uint, MountXDisplayRecord> _mountDisplays = new MultiMap<uint, MountXDisplayRecord>();
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new Dictionary<uint, List<NameGenRecord>[]>();
-        List<string>[] _nameValidators = new List<string>[(int)LocaleConstant.Total + 1];
+        List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         MultiMap<uint, uint> _phasesByGroup = new MultiMap<uint, uint>();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new Dictionary<PowerType, PowerTypeRecord>();
         Dictionary<uint, byte> _pvpItemBonus = new Dictionary<uint, byte>();

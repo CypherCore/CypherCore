@@ -22,7 +22,7 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Cache;
 using Game.DataStorage;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.PvP;
 using Game.Spells;
 using System;

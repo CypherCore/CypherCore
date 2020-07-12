@@ -18,8 +18,8 @@
 using Framework.Constants;
 using Game.Chat;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -836,7 +836,7 @@ namespace Game.Maps
 
         public void Invoke(Player player)
         {
-            LocaleConstant loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
             int cache_idx = (int)loc_idx + 1;
             ServerPacket data;
 
@@ -857,7 +857,7 @@ namespace Game.Maps
         }
 
         MessageBuilder Builder;
-        ServerPacket[] i_data_cache = new ServerPacket[(int)LocaleConstant.Total];     // 0 = default, i => i-1 locale index
+        ServerPacket[] i_data_cache = new ServerPacket[(int)Locale.Total];     // 0 = default, i => i-1 locale index
     }
 
     public class LocalizedPacketListDo : IDoWork<Player>
@@ -869,7 +869,7 @@ namespace Game.Maps
 
         public void Invoke(Player p)
         {
-            LocaleConstant loc_idx = p.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = p.GetSession().GetSessionDbLocaleIndex();
             int cache_idx = (int)loc_idx + 1;
             List<ServerPacket> data_list = new List<ServerPacket>();
 

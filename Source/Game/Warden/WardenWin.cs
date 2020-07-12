@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Framework.Cryptography;
 using Framework.IO;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

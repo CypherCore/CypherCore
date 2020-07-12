@@ -4,7 +4,7 @@ using Game.Entities;
 using Framework.Database;
 using Framework.Constants;
 using Game.Arenas;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game.Cache
 {

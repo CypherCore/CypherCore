@@ -20,7 +20,7 @@ using Framework.Constants;
 using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game.Entities
 {
@@ -309,10 +309,10 @@ namespace Game.Entities
 
     public class CreatureLocale
     {
-        public StringArray Name = new StringArray((int)LocaleConstant.Total);
-        public StringArray NameAlt = new StringArray((int)LocaleConstant.Total);
-        public StringArray Title = new StringArray((int)LocaleConstant.Total);
-        public StringArray TitleAlt = new StringArray((int)LocaleConstant.Total);
+        public StringArray Name = new StringArray((int)Locale.Total);
+        public StringArray NameAlt = new StringArray((int)Locale.Total);
+        public StringArray Title = new StringArray((int)Locale.Total);
+        public StringArray TitleAlt = new StringArray((int)Locale.Total);
     }
 
     public struct EquipmentItem

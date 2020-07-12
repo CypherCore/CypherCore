@@ -25,12 +25,12 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {
@@ -2086,9 +2086,9 @@ namespace Game.Entities
             return GetGoInfo().ScriptId;
         }
 
-        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
+        public override string GetName(Locale locale = Locale.enUS)
         {
-            if (locale != LocaleConstant.enUS)
+            if (locale != Locale.enUS)
             {
                 GameObjectLocale cl = Global.ObjectMgr.GetGameObjectLocale(GetEntry());
                 if (cl != null)

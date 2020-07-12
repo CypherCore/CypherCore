@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scripting;
 
 namespace Game.PvP

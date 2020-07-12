@@ -20,7 +20,7 @@ using Framework.Database;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Maps;
-using Game.Network;
+using Game.Networking;
 using System;
 using System.Collections.Generic;
 

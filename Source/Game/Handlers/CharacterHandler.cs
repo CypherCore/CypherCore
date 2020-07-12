@@ -24,8 +24,8 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
@@ -470,13 +470,13 @@ namespace Game
 
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
                     stmt.AddValue(0, GetAccountId());
-                    stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Realm);
+                    stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Index);
                     loginTransaction.Append(stmt);
 
                     stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS);
                     stmt.AddValue(0, createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
-                    stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Realm);
+                    stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);
                     loginTransaction.Append(stmt);
 
                     DB.Login.CommitTransaction(loginTransaction);

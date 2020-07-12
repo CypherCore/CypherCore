@@ -23,8 +23,8 @@ using Game.BattlePets;
 using Game.Entities;
 using Game.Guilds;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -32,12 +32,13 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Framework.Realm;
 
 namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, LocaleConstant locale, uint recruiter, bool isARecruiter)
+        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, Locale locale, uint recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
             AntiDOS = new DosProtection(this);
@@ -691,9 +692,9 @@ namespace Game
             AccountTypes secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Realm, secLevel);
+                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
 
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Realm, (byte)secLevel);
+            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             _RBACData.LoadFromDB();
         }
 
@@ -703,9 +704,9 @@ namespace Game
             AccountTypes secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
-                id, _accountName, Global.WorldMgr.GetRealm().Id.Realm, secLevel);
+                id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
 
-            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Realm, (byte)secLevel);
+            _RBACData = new RBACData(id, _accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)secLevel);
             return _RBACData.LoadFromDBAsync();
         }
 
@@ -749,7 +750,7 @@ namespace Game
             {
                 do
                 {
-                    _realmCharacterCounts[new RealmHandle(result.Read<byte>(3), result.Read<byte>(4), result.Read<uint>(2)).GetAddress()] = result.Read<byte>(1);
+                    _realmCharacterCounts[new RealmId(result.Read<byte>(3), result.Read<byte>(4), result.Read<uint>(2)).GetAddress()] = result.Read<byte>(1);
 
                 } while (result.NextRow());
             }
@@ -776,7 +777,7 @@ namespace Game
 
             bool hasPermission = _RBACData.HasPermission(permission);
             Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Realm);
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
 
             return hasPermission;
         }
@@ -784,7 +785,7 @@ namespace Game
         public void InvalidateRBACData()
         {
             Log.outDebug(LogFilter.Rbac, "WorldSession:Invalidaterbac:RBACData [AccountId: {0}, Name: {1}, realmId: {2}]",
-                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Realm);
+                           _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
             _RBACData = null;
         }
 
@@ -801,8 +802,8 @@ namespace Game
             }
         }
 
-        public LocaleConstant GetSessionDbcLocale() { return m_sessionDbcLocale; }
-        public LocaleConstant GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
+        public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
+        public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
 
         public uint GetLatency() { return m_latency; }
         public void SetLatency(uint latency) { m_latency = latency; }
@@ -866,8 +867,8 @@ namespace Game
         bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
         bool m_playerSave;
-        LocaleConstant m_sessionDbcLocale;
-        LocaleConstant m_sessionDbLocaleIndex;
+        Locale m_sessionDbcLocale;
+        Locale m_sessionDbLocaleIndex;
         uint m_latency;
         uint m_clientTimeDelay;
         AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
@@ -1048,7 +1049,7 @@ namespace Game
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.Mounts, stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID);
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.GlobalRealmCharacterCounts, stmt);
 

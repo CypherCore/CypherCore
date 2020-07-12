@@ -25,12 +25,15 @@ namespace Framework.Networking
 
     public class AsyncAcceptor
     {
+        TcpListener _listener;
+        volatile bool _closed;
+
         public bool Start(string ip, int port)
         {
             IPAddress bindIP;
             if (!IPAddress.TryParse(ip, out bindIP))
             {
-                Log.outError(LogFilter.Network, "Server can't be started: Invalid IP-Address ({0})", ip);
+                Log.outError(LogFilter.Network, $"Server can't be started: Invalid IP-Address: {ip}");
                 return false;
             }
 
@@ -73,8 +76,5 @@ namespace Framework.Networking
             _closed = true;
             _listener.Stop();
         }
-
-        TcpListener _listener;
-        volatile bool _closed;
     }
 }

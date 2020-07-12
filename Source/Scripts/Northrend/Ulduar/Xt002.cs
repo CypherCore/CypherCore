@@ -24,7 +24,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Scripts.Northrend.Ulduar.Xt002
 {

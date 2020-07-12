@@ -19,7 +19,7 @@ using Framework.Constants;
 using Framework.IO;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scripting;
 using System;
 using System.Collections.Generic;

@@ -21,8 +21,8 @@ using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1437,7 +1437,7 @@ namespace Game.Guilds
             if (session != null && session.GetPlayer() != null && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
                 ChatPkt data = new ChatPkt();
-                data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, isLogged ? Language.AddonLogged : Language.Addon, session.GetPlayer(), null, msg, 0, "", LocaleConstant.enUS, prefix);
+                data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, isLogged ? Language.AddonLogged : Language.Addon, session.GetPlayer(), null, msg, 0, "", Locale.enUS, prefix);
                 foreach (var member in m_members.Values)
                 {
                     Player player = member.FindPlayer();
@@ -1744,7 +1744,7 @@ namespace Game.Guilds
             DB.Characters.CommitTransaction(trans);
         }
 
-        void _CreateDefaultGuildRanks(SQLTransaction trans, LocaleConstant loc = LocaleConstant.enUS)
+        void _CreateDefaultGuildRanks(SQLTransaction trans, Locale loc = Locale.enUS)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_RANKS);
             stmt.AddValue(0, m_id);

@@ -1,30 +1,17 @@
-﻿/*
- * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
+// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
-using Framework.Database;
-using Framework.Networking;
-using Framework.Rest;
-using Framework.Serialization;
-using Framework.Web;
 using System;
-using System.Net.Sockets;
-using System.Security.Cryptography;
+using System.Collections.Generic;
 using System.Text;
+using Framework.Networking;
+using System.Net.Sockets;
+using Framework.Web;
+using Framework.Constants;
+using Framework.Database;
+using Framework.Configuration;
+using Framework.Serialization;
+using System.Security.Cryptography;
 
 namespace BNetServer.Networking
 {
@@ -32,14 +19,14 @@ namespace BNetServer.Networking
     {
         public RestSession(Socket socket) : base(socket) { }
 
-        public override void Start()
+        public override void Accept()
         {
-            AsyncHandshake(Global.SessionMgr.GetCertificate());
+            AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
         }
 
-        public override void ReadHandler(int transferredBytes)
-        {            
-            var httpRequest = HttpHelper.ParseRequest(GetReceiveBuffer(), transferredBytes);
+        public async override void ReadHandler(byte[] data, int receivedLength)
+        {
+            var httpRequest = HttpHelper.ParseRequest(data, receivedLength);
             if (httpRequest == null)
                 return;
 
@@ -47,20 +34,14 @@ namespace BNetServer.Networking
             {
                 case "GET":
                 default:
-                    HandleConnectRequest(httpRequest);
+                    SendResponse(HttpCode.Ok, Global.LoginServiceMgr.GetFormInput());
                     break;
                 case "POST":
                     HandleLoginRequest(httpRequest);
                     return;
             }
 
-            AsyncRead();
-        }
-
-        public void HandleConnectRequest(HttpHeader request)
-        {
-            // Login form is the same for all clients...
-            SendResponse(HttpCode.Ok, Global.SessionMgr.GetFormInput());
+            await AsyncRead();
         }
 
         public void HandleLoginRequest(HttpHeader request)
@@ -92,7 +73,7 @@ namespace BNetServer.Networking
                 }
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_AUTHENTICATION);
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAuthentication);
             stmt.AddValue(0, login);
 
             SQLResult result = DB.Login.Query(stmt);
@@ -113,7 +94,7 @@ namespace BNetServer.Networking
                         loginTicket = "TC-" + ticket.ToHexString();
                     }
 
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_AUTHENTICATION);
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetAuthentication);
                     stmt.AddValue(0, loginTicket);
                     stmt.AddValue(1, Time.UnixTime + 3600);
                     stmt.AddValue(2, accountId);
@@ -126,39 +107,39 @@ namespace BNetServer.Networking
                     uint maxWrongPassword = ConfigMgr.GetDefaultValue("WrongPass.MaxCount", 0u);
 
                     if (ConfigMgr.GetDefaultValue("WrongPass.Logging", false))
-                        Log.outDebug(LogFilter.Network, "[{0}, Account {1}, Id {2}] Attempted to connect with wrong password!", request.Host, login, accountId);
+                        Log.outDebug(LogFilter.Network, $"[{request.Host}, Account {login}, Id {accountId}] Attempted to connect with wrong password!");
 
                     if (maxWrongPassword != 0)
                     {
                         SQLTransaction trans = new SQLTransaction();
-                        stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_FAILED_LOGINS);
+                        stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetFailedLogins);
                         stmt.AddValue(0, accountId);
                         trans.Append(stmt);
 
                         ++failedLogins;
 
-                        Log.outDebug(LogFilter.Network, "MaxWrongPass : {0}, failed_login : {1}", maxWrongPassword, accountId);
+                        Log.outDebug(LogFilter.Network, "MaxWrongPass : {maxWrongPassword}, failed_login : {accountId}");
 
                         if (failedLogins >= maxWrongPassword)
                         {
-                            BanMode banType = ConfigMgr.GetDefaultValue("WrongPass.BanType", BanMode.Ip);
+                            BanMode banType = ConfigMgr.GetDefaultValue("WrongPass.BanType", BanMode.IP);
                             int banTime = ConfigMgr.GetDefaultValue("WrongPass.BanTime", 600);
 
                             if (banType == BanMode.Account)
                             {
-                                stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_ACCOUNT_AUTO_BANNED);
+                                stmt = DB.Login.GetPreparedStatement(LoginStatements.InsBnetAccountAutoBanned);
                                 stmt.AddValue(0, accountId);
                             }
                             else
                             {
-                                stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_IP_AUTO_BANNED);
+                                stmt = DB.Login.GetPreparedStatement(LoginStatements.InsIpAutoBanned);
                                 stmt.AddValue(0, request.Host);
                             }
 
                             stmt.AddValue(1, banTime);
                             trans.Append(stmt);
 
-                            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_RESET_FAILED_LOGINS);
+                            stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetResetFailedLogins);
                             stmt.AddValue(0, accountId);
                             trans.Append(stmt);
                         }
@@ -171,7 +152,7 @@ namespace BNetServer.Networking
                 SendResponse(HttpCode.Ok, loginResult);
             }
             else
-            { 
+            {
                 loginResult.AuthenticationState = "LOGIN";
                 loginResult.ErrorCode = "UNABLE_TO_DECODE";
                 loginResult.ErrorMessage = "There was an internal error while connecting to Battle.net. Please try again later.";
@@ -179,9 +160,9 @@ namespace BNetServer.Networking
             }
         }
 
-        void SendResponse<T>(HttpCode code, T response)
+        async void SendResponse<T>(HttpCode code, T response)
         {
-           AsyncWrite(HttpHelper.CreateResponse(code, Json.CreateString(response)));
+            await AsyncWrite(HttpHelper.CreateResponse(code, Json.CreateString(response)));
         }
 
         string CalculateShaPassHash(string name, string password)

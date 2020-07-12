@@ -317,7 +317,7 @@ namespace Game.Chat.Commands
         [Command("account", RBACPermissions.CommandBanlistAccount, true)]
         static bool HandleBanListAccountCommand(StringArguments args, CommandHandler handler)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS);
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
             string filterStr = args.NextString();
@@ -433,7 +433,7 @@ namespace Game.Chat.Commands
         [Command("ip", RBACPermissions.CommandBanlistIp, true)]
         static bool HandleBanListIPCommand(StringArguments args, CommandHandler handler)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS);
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans);
             DB.Login.Execute(stmt);
 
             string filterStr = args.NextString();

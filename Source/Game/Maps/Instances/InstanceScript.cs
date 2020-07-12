@@ -20,7 +20,7 @@ using Framework.Database;
 using Framework.IO;
 using Game.Entities;
 using Game.Groups;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scenarios;
 using System.Collections.Generic;
 using System.Text;

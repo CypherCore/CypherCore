@@ -19,14 +19,15 @@ using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
+using Framework.Realm;
 using Game.BattlePets;
 using Game.Chat;
 using Game.Collision;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Concurrent;
@@ -335,7 +336,7 @@ namespace Game
             RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
             uint realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
-            DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Realm);      // One-time query
+            DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index);      // One-time query
 
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
@@ -857,7 +858,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Initialize game time and timers");
             GameTime.UpdateGameTimers();
 
-            DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Realm, GameTime.GetStartTime(), "");       // One-time query
+            DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Index, GameTime.GetStartTime(), "");       // One-time query
 
             m_timers[WorldTimers.Auctions].SetInterval(Time.Minute * Time.InMilliseconds);
             m_timers[WorldTimers.AuctionsPending].SetInterval(250);
@@ -987,19 +988,19 @@ namespace Game
                 });
             }
 
-            Log.SetRealmId(_realm.Id.Realm);
+            Log.SetRealmId(_realm.Id.Index);
         }
 
         public void LoadConfigSettings(bool reload = false)
         {
             WorldConfig.Load(reload);
 
-            m_defaultDbcLocale = (LocaleConstant)ConfigMgr.GetDefaultValue("DBC.Locale", 0);
+            m_defaultDbcLocale = (Locale)ConfigMgr.GetDefaultValue("DBC.Locale", 0);
 
-            if (m_defaultDbcLocale >= LocaleConstant.Total || m_defaultDbcLocale == LocaleConstant.None)
+            if (m_defaultDbcLocale >= Locale.Total || m_defaultDbcLocale == Locale.None)
             {
-                Log.outError(LogFilter.ServerLoading, "Incorrect DBC.Locale! Must be >= 0 and < {0} and not {1} (set to 0)", LocaleConstant.Total, LocaleConstant.None);
-                m_defaultDbcLocale = LocaleConstant.enUS;
+                Log.outError(LogFilter.ServerLoading, "Incorrect DBC.Locale! Must be >= 0 and < {0} and not {1} (set to 0)", Locale.Total, Locale.None);
+                m_defaultDbcLocale = Locale.enUS;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Using {0} DBC Locale", m_defaultDbcLocale);
@@ -1111,7 +1112,7 @@ namespace Game
             m_Autobroadcasts.Clear();
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
-            stmt.AddValue(0, _realm.Id.Realm);
+            stmt.AddValue(0, _realm.Id.Index);
 
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -1239,7 +1240,7 @@ namespace Game
 
                 stmt.AddValue(0, tmpDiff);
                 stmt.AddValue(1, maxOnlinePlayers);
-                stmt.AddValue(2, _realm.Id.Realm);
+                stmt.AddValue(2, _realm.Id.Index);
                 stmt.AddValue(3, (uint)GameTime.GetStartTime());
 
                 DB.Login.Execute(stmt);
@@ -1255,7 +1256,7 @@ namespace Game
                     PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
                     stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
                     stmt.AddValue(1, 0);
-                    stmt.AddValue(2, GetRealm().Id.Realm);
+                    stmt.AddValue(2, GetRealm().Id.Index);
 
                     DB.Login.Execute(stmt);
                 }
@@ -1806,13 +1807,13 @@ namespace Game
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
                 stmt.AddValue(0, Id);
-                stmt.AddValue(1, _realm.Id.Realm);
+                stmt.AddValue(1, _realm.Id.Index);
                 trans.Append(stmt);
 
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS);
                 stmt.AddValue(0, charCount);
                 stmt.AddValue(1, Id);
-                stmt.AddValue(2, _realm.Id.Realm);
+                stmt.AddValue(2, _realm.Id.Index);
                 trans.Append(stmt);
 
                 DB.Login.CommitTransaction(trans);
@@ -1961,7 +1962,7 @@ namespace Game
         public void LoadDBAllowedSecurityLevel()
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
-            stmt.AddValue(0, _realm.Id.Realm);
+            stmt.AddValue(0, _realm.Id.Index);
             SQLResult result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
@@ -2226,11 +2227,11 @@ namespace Game
             return WorldConfig.GetIntValue(WorldCfg.GameType) == (int)RealmType.FFAPVP;
         }
 
-        public LocaleConstant GetDefaultDbcLocale() { return m_defaultDbcLocale; }
+        public Locale GetDefaultDbcLocale() { return m_defaultDbcLocale; }
 
         public bool LoadRealmInfo()
         {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Realm);
+            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
             if (result.IsEmpty())
                 return false;
 
@@ -2251,7 +2252,7 @@ namespace Game
         }
 
         public Realm GetRealm() { return _realm; }
-        public RealmHandle GetRealmId() { return _realm.Id; }
+        public RealmId GetRealmId() { return _realm.Id; }
 
         public void RemoveOldCorpses()
         {
@@ -2271,7 +2272,7 @@ namespace Game
         public int GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances; }
         public int GetVisibilityNotifyPeriodInBGArenas() { return m_visibility_notify_periodInBGArenas; }
 
-        public LocaleConstant GetAvailableDbcLocale(LocaleConstant locale)
+        public Locale GetAvailableDbcLocale(Locale locale)
         {
             //if (m_availableDbcLocaleMask & (1 << locale))
                 //return locale;
@@ -2319,7 +2320,7 @@ namespace Game
         Dictionary<uint, uint> m_worldstates = new Dictionary<uint, uint>();
         uint m_playerLimit;
         AccountTypes m_allowedSecurityLevel;
-        LocaleConstant m_defaultDbcLocale;                     // from config for one from loaded DBC locales
+        Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
         List<string> m_motd = new List<string>();
 
         // scheduled reset times
@@ -2405,7 +2406,7 @@ namespace Game
             i_args = args;
         }
 
-        public override void Invoke(List<ServerPacket> data_list, LocaleConstant loc_idx)
+        public override void Invoke(List<ServerPacket> data_list, Locale loc_idx)
         {
             string text = Global.ObjectMgr.GetCypherString(i_textId, loc_idx);
 

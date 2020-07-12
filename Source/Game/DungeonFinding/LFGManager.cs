@@ -26,7 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game.DungeonFinding
 {

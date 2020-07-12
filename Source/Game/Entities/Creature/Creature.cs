@@ -23,7 +23,7 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -2561,9 +2561,9 @@ namespace Game.Entities
             return vCount.count;
         }
 
-        public override string GetName(LocaleConstant locale = LocaleConstant.enUS)
+        public override string GetName(Locale locale = Locale.enUS)
         {
-            if (locale != LocaleConstant.enUS)
+            if (locale != Locale.enUS)
             {
                 CreatureLocale cl = Global.ObjectMgr.GetCreatureLocale(GetEntry());
                 if (cl != null)

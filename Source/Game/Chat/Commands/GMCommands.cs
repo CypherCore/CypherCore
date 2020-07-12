@@ -170,7 +170,7 @@ namespace Game.Chat
             // Get the accounts with GM Level >0
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
             stmt.AddValue(0, AccountTypes.Moderator);
-            stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Realm);
+            stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Index);
             SQLResult result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())

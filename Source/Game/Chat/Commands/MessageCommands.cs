@@ -20,7 +20,7 @@ using Framework.Database;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 
 namespace Game.Chat

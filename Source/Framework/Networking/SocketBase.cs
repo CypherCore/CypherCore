@@ -18,42 +18,50 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Framework.Networking
 {
+    public interface ISocket
+    {
+        void Accept();
+        bool Update();
+        bool IsOpen();
+        void CloseSocket();
+    }
+
     public abstract class SocketBase : ISocket, IDisposable
     {
+        Socket _socket;
+        IPEndPoint _remoteIPEndPoint;
+        byte[] _receiveBuffer;
+
         protected SocketBase(Socket socket)
         {
             _socket = socket;
-            _remoteAddress = ((IPEndPoint)_socket.RemoteEndPoint).Address;
-            _remotePort = (ushort)((IPEndPoint)_socket.RemoteEndPoint).Port;
+            _remoteIPEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
             _receiveBuffer = new byte[ushort.MaxValue];
         }
 
         public virtual void Dispose()
         {
             _receiveBuffer = null;
+            _socket.Dispose();
         }
 
-        public abstract void Start();
+        public abstract void Accept();
 
         public virtual bool Update()
         {
             return IsOpen();
         }
 
-        public IPAddress GetRemoteIpAddress()
+        public IPEndPoint GetRemoteIpAddress()
         {
-            return _remoteAddress;
+            return _remoteIPEndPoint;
         }
 
-        public ushort GetRemotePort()
-        {
-            return _remotePort;
-        }
-
-        public void AsyncRead()
+        public async Task AsyncRead()
         {
             if (!IsOpen())
                 return;
@@ -63,12 +71,12 @@ namespace Framework.Networking
                 using (var socketEventargs = new SocketAsyncEventArgs())
                 {
                     socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
-                    socketEventargs.Completed += (sender, args) => ReadHandlerInternal(args);
+                    socketEventargs.Completed += async (sender, args) => await ProcessReadAsync(args);
                     socketEventargs.SocketFlags = SocketFlags.None;
                     socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
 
                     if (!_socket.ReceiveAsync(socketEventargs))
-                        ReadHandlerInternal(socketEventargs);
+                        await ProcessReadAsync(socketEventargs);
                 }
             }
             catch (Exception ex)
@@ -77,8 +85,7 @@ namespace Framework.Networking
             }
         }
 
-        public delegate void SocketReadCallback(SocketAsyncEventArgs args);
-        public void AsyncReadWithCallback(SocketReadCallback callback)
+        public async Task AsyncReadWithCallback(SocketReadCallback callback)
         {
             if (!IsOpen())
                 return;
@@ -92,7 +99,7 @@ namespace Framework.Networking
                     socketEventargs.UserToken = _socket;
                     socketEventargs.SocketFlags = SocketFlags.None;
                     if (!_socket.ReceiveAsync(socketEventargs))
-                        callback(socketEventargs);
+                        await callback(socketEventargs);
                 }
             }
             catch (Exception ex)
@@ -101,7 +108,7 @@ namespace Framework.Networking
             }
         }
 
-        void ReadHandlerInternal(SocketAsyncEventArgs args)
+        async Task ProcessReadAsync(SocketAsyncEventArgs args)
         {
             if (args.SocketError != SocketError.Success)
             {
@@ -115,31 +122,19 @@ namespace Framework.Networking
                 return;
             }
 
-            ReadHandler(args.BytesTransferred);
+            byte[] data = new byte[args.BytesTransferred];
+            Buffer.BlockCopy(_receiveBuffer, 0, data, 0, args.BytesTransferred);
+            await ReadHandler(data, args.BytesTransferred);
         }
 
-        public abstract void ReadHandler(int transferredBytes);
+        public abstract Task ReadHandler(byte[] data, int bytesTransferred);
 
-        public void AsyncWrite(byte[] data)
+        public async void AsyncWrite(byte[] data)
         {
             if (!IsOpen())
                 return;
 
-            using (var socketEventargs = new SocketAsyncEventArgs())
-            {
-                socketEventargs.SetBuffer(data, 0, data.Length);
-                socketEventargs.Completed += WriteHandlerInternal;
-                socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
-                socketEventargs.UserToken = _socket;
-                socketEventargs.SocketFlags = SocketFlags.None;
-
-                _socket.SendAsync(socketEventargs);
-            }
-        }
-
-        void WriteHandlerInternal(object sender, SocketAsyncEventArgs args)
-        {
-            args.Completed -= WriteHandlerInternal;
+            await _socket.SendAsync(data, SocketFlags.None);
         }
 
         public void CloseSocket()
@@ -149,46 +144,26 @@ namespace Framework.Networking
 
             try
             {
-                _closed = true;
                 _socket.Shutdown(SocketShutdown.Both);
                 _socket.Close();
             }
             catch (Exception ex)
             {
-                Log.outDebug(LogFilter.Network, "WorldSocket.CloseSocket: {0} errored when shutting down socket: {1}", GetRemoteIpAddress().ToString(), ex.Message);
+                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpAddress()} errored when shutting down socket: {ex.Message}");
             }
 
             OnClose();
         }
+
+        public virtual void OnClose() { Dispose(); }
+
+        public bool IsOpen() { return _socket.Connected; }
 
         public void SetNoDelay(bool enable)
         {
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
         }
 
-        public virtual void OnClose() { Dispose(); }
-
-        public bool IsOpen() { return !_closed; }
-
-        public byte[] GetReceiveBuffer()
-        {
-            return _receiveBuffer;
-        }
-
-        Socket _socket;
-        byte[] _receiveBuffer;
-
-        volatile bool _closed;
-
-        IPAddress _remoteAddress;
-        ushort _remotePort;
-    }
-
-    public interface ISocket
-    {
-        void Start();
-        bool Update();
-        bool IsOpen();
-        void CloseSocket();
+        public delegate Task SocketReadCallback(SocketAsyncEventArgs args);
     }
 }

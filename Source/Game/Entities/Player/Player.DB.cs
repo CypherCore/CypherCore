@@ -27,7 +27,7 @@ using Game.Groups;
 using Game.Guilds;
 using Game.Mails;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -3532,7 +3532,7 @@ namespace Game.Entities
             stmt.AddValue(0, GetSession().GetAccountId());
             stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
             stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
-            stmt.AddValue(3, Global.WorldMgr.GetRealmId().Realm);
+            stmt.AddValue(3, Global.WorldMgr.GetRealmId().Index);
             stmt.AddValue(4, GetName());
             stmt.AddValue(5, GetGUID().GetCounter());
             stmt.AddValue(6, Time.UnixTime);

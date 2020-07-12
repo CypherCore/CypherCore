@@ -50,6 +50,15 @@ namespace Framework.Database
             return (T)value;
         }
 
+        public T[] ReadValues<T>(int startIndex, int numColumns)
+        {
+            T[] values = new T[numColumns];
+            for (var c = 0; c < numColumns; ++c)
+                values[c] = Read<T>(startIndex + c);
+
+            return values;
+        }
+
         public bool IsNull(int column)
         {
             return _reader.IsDBNull(column);

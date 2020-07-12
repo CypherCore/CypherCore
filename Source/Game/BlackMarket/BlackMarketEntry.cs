@@ -19,7 +19,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game.BlackMarket

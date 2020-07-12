@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Framework.GameMath;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 
 namespace Game.Movement

@@ -18,7 +18,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Game.DataStorage;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Text;
 using System;
@@ -34,15 +34,11 @@ namespace Game.Entities
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
         {
             // class specific initial known nodes
-            var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
-            switch (chrClass)
+            if (chrClass == Class.Deathknight)
             {
-                case Class.Deathknight:
-                    {
-                        for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
-                            m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
-                        break;
-                    }
+                var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
+                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                    m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
             }
 
             // race specific initial known nodes: capital and taxi hub masks

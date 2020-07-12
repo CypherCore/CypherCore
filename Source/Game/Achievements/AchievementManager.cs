@@ -25,8 +25,8 @@ using Game.Groups;
 using Game.Guilds;
 using Game.Mails;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -554,8 +554,8 @@ namespace Game.Achievements
                     string subject = reward.Subject;
                     string text = reward.Body;
 
-                    LocaleConstant localeConstant = _owner.GetSession().GetSessionDbLocaleIndex();
-                    if (localeConstant != LocaleConstant.enUS)
+                    Locale localeConstant = _owner.GetSession().GetSessionDbLocaleIndex();
+                    if (localeConstant != Locale.enUS)
                     {
                         AchievementRewardLocale loc = Global.AchievementMgr.GetAchievementRewardLocale(achievement);
                         if (loc != null)
@@ -1327,8 +1327,8 @@ namespace Game.Achievements
                 }
 
                 AchievementRewardLocale data = new AchievementRewardLocale();
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 ObjectManager.AddLocaleString(result.Read<string>(2), locale, data.Subject);
@@ -1363,8 +1363,8 @@ namespace Game.Achievements
 
     public class AchievementRewardLocale
     {
-        public StringArray Subject = new StringArray((int)LocaleConstant.Total);
-        public StringArray Body = new StringArray((int)LocaleConstant.Total);
+        public StringArray Subject = new StringArray((int)Locale.Total);
+        public StringArray Body = new StringArray((int)Locale.Total);
     }
 
     public class CompletedAchievementData

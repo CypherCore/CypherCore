@@ -195,7 +195,7 @@ namespace Game
             }
         }
 
-        public static ResponseCodes CheckPlayerName(string name, LocaleConstant locale, bool create = false)
+        public static ResponseCodes CheckPlayerName(string name, Locale locale, bool create = false)
         {
             if (name.Length > 12)
                 return ResponseCodes.CharNameTooLong;
@@ -243,12 +243,12 @@ namespace Game
 
             return IsValidString(name, strictMask, true);
         }
-        public static void AddLocaleString(string value, LocaleConstant locale, StringArray data)
+        public static void AddLocaleString(string value, Locale locale, StringArray data)
         {
             if (!string.IsNullOrEmpty(value))
                 data[(int)locale] = value;
         }
-        public static void GetLocaleString(StringArray data, LocaleConstant locale, ref string value)
+        public static void GetLocaleString(StringArray data, Locale locale, ref string value)
         {
             if (data.Length > (int)locale && !string.IsNullOrEmpty(data[(int)locale]))
                 value = data[(int)locale];
@@ -535,7 +535,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} realm names in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public string GetCypherString(uint entry, LocaleConstant locale = LocaleConstant.enUS)
+        public string GetCypherString(uint entry, Locale locale = Locale.enUS)
         {
             if (!CypherStringStorage.ContainsKey(entry))
             {
@@ -549,7 +549,7 @@ namespace Game
 
             return cs[(int)SharedConst.DefaultLocale];
         }
-        public string GetCypherString(CypherStrings cmd, LocaleConstant locale = LocaleConstant.enUS)
+        public string GetCypherString(CypherStrings cmd, Locale locale = Locale.enUS)
         {
             return GetCypherString((uint)cmd, locale);
         }
@@ -3059,8 +3059,8 @@ namespace Game
                     uint trainerId = trainerLocalesResult.Read<uint>(0);
                     string localeName = trainerLocalesResult.Read<string>(1);
 
-                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                    if (locale == LocaleConstant.enUS)
+                    Locale locale = localeName.ToEnum<Locale>();
+                    if (locale == Locale.enUS)
                         continue;
 
                     Trainer trainer = _trainers.LookupByKey(trainerId);
@@ -7883,8 +7883,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_creatureLocaleStorage.ContainsKey(id))
@@ -7915,8 +7915,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
@@ -7946,8 +7946,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
@@ -7981,8 +7981,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
@@ -8034,8 +8034,8 @@ namespace Game
 
                 string localeName = result.Read<string>(2);
 
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_questGreetingLocaleStorage[type].ContainsKey(id))
@@ -8063,8 +8063,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
@@ -8090,8 +8090,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
@@ -8120,8 +8120,8 @@ namespace Game
                 uint optionIndex = result.Read<uint>(1);
                 string localeName = result.Read<string>(2);
 
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 GossipMenuItemsLocale data = new GossipMenuItemsLocale();
@@ -8149,8 +8149,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
@@ -8177,8 +8177,8 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
@@ -9171,8 +9171,8 @@ namespace Game
                 {
                     int choiceId = result.Read<int>(0);
                     string localeName = result.Read<string>(1);
-                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                    if (locale == LocaleConstant.enUS)
+                    Locale locale = localeName.ToEnum<Locale>();
+                    if (locale == Locale.enUS)
                         continue;
 
                     if (GetPlayerChoice(choiceId) == null)
@@ -9203,8 +9203,8 @@ namespace Game
                     int choiceId = result.Read<int>(0);
                     int responseId = result.Read<int>(1);
                     string localeName = result.Read<string>(2);
-                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                    if (locale == LocaleConstant.enUS)
+                    Locale locale = localeName.ToEnum<Locale>();
+                    if (locale == Locale.enUS)
                         continue;
 
                     var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);
@@ -10715,24 +10715,24 @@ namespace Game
 
     public class GossipMenuItemsLocale
     {
-        public StringArray OptionText = new StringArray((int)LocaleConstant.Total);
-        public StringArray BoxText = new StringArray((int)LocaleConstant.Total);
+        public StringArray OptionText = new StringArray((int)Locale.Total);
+        public StringArray BoxText = new StringArray((int)Locale.Total);
     }
 
     public class PlayerChoiceLocale
     {
-        public StringArray Question = new StringArray((int)LocaleConstant.Total);
+        public StringArray Question = new StringArray((int)Locale.Total);
         public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new Dictionary<int, PlayerChoiceResponseLocale>();
     }
 
     public class PlayerChoiceResponseLocale
     {
-        public StringArray Answer = new StringArray((int)LocaleConstant.Total);
-        public StringArray Header = new StringArray((int)LocaleConstant.Total);
-        public StringArray SubHeader = new StringArray((int)LocaleConstant.Total);
-        public StringArray ButtonTooltip = new StringArray((int)LocaleConstant.Total);
-        public StringArray Description = new StringArray((int)LocaleConstant.Total);
-        public StringArray Confirmation = new StringArray((int)LocaleConstant.Total);
+        public StringArray Answer = new StringArray((int)Locale.Total);
+        public StringArray Header = new StringArray((int)Locale.Total);
+        public StringArray SubHeader = new StringArray((int)Locale.Total);
+        public StringArray ButtonTooltip = new StringArray((int)Locale.Total);
+        public StringArray Description = new StringArray((int)Locale.Total);
+        public StringArray Confirmation = new StringArray((int)Locale.Total);
     }
 
     public class PlayerChoiceResponseRewardItem

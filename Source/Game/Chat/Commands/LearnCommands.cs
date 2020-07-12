@@ -164,7 +164,7 @@ namespace Game.Chat.Commands
                         skillInfo.CanLink == 0)                            // only prof with recipes have set
                         continue;
 
-                    LocaleConstant locale = handler.GetSessionDbcLocale();
+                    Locale locale = handler.GetSessionDbcLocale();
                     name = skillInfo.DisplayName[locale];
                     if (string.IsNullOrEmpty(name))
                         continue;
@@ -172,7 +172,7 @@ namespace Game.Chat.Commands
                     if (!name.Like(namePart))
                     {
                         locale = 0;
-                        for (; locale < LocaleConstant.Total; ++locale)
+                        for (; locale < Locale.Total; ++locale)
                         {
                             if (locale == handler.GetSessionDbcLocale())
                                 continue;
@@ -186,7 +186,7 @@ namespace Game.Chat.Commands
                         }
                     }
 
-                    if (locale < LocaleConstant.Total)
+                    if (locale < Locale.Total)
                     {
                         skillId = skillInfo.Id;
                         break;

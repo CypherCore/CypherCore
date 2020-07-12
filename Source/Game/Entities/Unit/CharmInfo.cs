@@ -18,7 +18,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.GameMath;
-using Game.Network;
+using Game.Networking;
 using Game.Spells;
 using System;
 

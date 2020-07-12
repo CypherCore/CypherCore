@@ -23,7 +23,7 @@ using Game.Maps;
 using System.Collections.Generic;
 using System.Text;
 using Framework.Collections;
-using Game.Network;
+using Game.Networking;
 
 namespace Game.Entities
 {

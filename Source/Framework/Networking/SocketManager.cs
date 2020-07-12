@@ -22,6 +22,10 @@ namespace Framework.Networking
 {
     public class SocketManager<TSocketType> where TSocketType : ISocket
     {
+        public AsyncAcceptor Acceptor;
+        NetworkThread<TSocketType>[] _threads;
+        int _threadCount;
+
         public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
             Cypher.Assert(threadCount > 0);
@@ -74,7 +78,7 @@ namespace Framework.Networking
             try
             {
                 TSocketType newSocket = (TSocketType)Activator.CreateInstance(typeof(TSocketType), sock);
-                newSocket.Start();
+                newSocket.Accept();
 
                 _threads[SelectThreadWithMinConnections()].AddSocket(newSocket);
             }
@@ -96,9 +100,5 @@ namespace Framework.Networking
 
             return min;
         }
-
-        public AsyncAcceptor Acceptor;
-        NetworkThread<TSocketType>[] _threads;
-        int _threadCount;
     }
 }

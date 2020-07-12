@@ -23,7 +23,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Movement;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
 using System;

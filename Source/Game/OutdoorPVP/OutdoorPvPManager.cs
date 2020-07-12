@@ -218,7 +218,7 @@ namespace Game.PvP
                 outdoor.HandlePlayerResurrects(player, zoneid);
         }
 
-        public string GetDefenseMessage(uint zoneId, uint id, LocaleConstant locale)
+        public string GetDefenseMessage(uint zoneId, uint id, Locale locale)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(id);
             if (bct != null)

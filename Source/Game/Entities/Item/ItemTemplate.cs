@@ -35,7 +35,7 @@ namespace Game.Entities
             Specializations[2] = new BitSet((int)Class.Max * PlayerConst.MaxSpecializations);
         }
 
-        public string GetName(LocaleConstant locale = SharedConst.DefaultLocale)
+        public string GetName(Locale locale = SharedConst.DefaultLocale)
         {
             return ExtendedData.Display[locale];
         }

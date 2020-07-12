@@ -21,8 +21,8 @@ using Framework.GameMath;
 using Game.AI;
 using Game.BattleFields;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
@@ -1671,7 +1671,7 @@ namespace Game.Entities
         public virtual ushort GetMovementAnimKitId() { return 0; }
         public virtual ushort GetMeleeAnimKitId() { return 0; }
 
-        public virtual string GetName(LocaleConstant locale = LocaleConstant.enUS) { return _name; }
+        public virtual string GetName(Locale locale = Locale.enUS) { return _name; }
         public void SetName(string name) { _name = name; }
 
         public ObjectGuid GetGUID() { return m_guid; }

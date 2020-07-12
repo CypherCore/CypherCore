@@ -16,8 +16,8 @@
  */
 
 using Framework.Constants;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Linq;
 
 namespace Game

@@ -19,8 +19,8 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Achievements;
 using Game.Entities;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game

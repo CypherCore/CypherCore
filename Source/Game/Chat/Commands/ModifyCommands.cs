@@ -19,7 +19,7 @@ using Framework.Constants;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

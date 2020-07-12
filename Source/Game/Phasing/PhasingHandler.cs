@@ -7,7 +7,7 @@ using Framework.Constants;
 using Game.Conditions;
 using Game.Spells;
 using System.Linq;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Chat;
 using Game.Maps;
 

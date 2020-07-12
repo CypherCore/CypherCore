@@ -20,7 +20,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game.Entities
 {
@@ -1235,9 +1235,9 @@ namespace Game.Entities
 
     public class GameObjectLocale
     {
-        public StringArray Name = new StringArray((int)LocaleConstant.Total);
-        public StringArray CastBarCaption = new StringArray((int)LocaleConstant.Total);
-        public StringArray Unk1 = new StringArray((int)LocaleConstant.Total);
+        public StringArray Name = new StringArray((int)Locale.Total);
+        public StringArray CastBarCaption = new StringArray((int)Locale.Total);
+        public StringArray Unk1 = new StringArray((int)Locale.Total);
     }
 
     public class GameObjectAddon

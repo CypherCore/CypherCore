@@ -5,15 +5,6 @@
 ###################################################################################################
 # BNet SERVER SETTINGS
 #
-#    LogsDir
-#        Description: Logs directory setting.
-#        Important:   LogsDir needs to be quoted, as the string might contain space characters.
-#                     Logs directory must exists, or log file creation will be disabled.
-#        Default:     "Logs" - (Log files will be stored in the current path)
-
-LogsDir = "Logs"
-
-#
 #    BattlenetPort
 #        Description: TCP port to reach the auth server for battle.net connections.
 #        Default:     1119
@@ -177,6 +168,15 @@ Updates.CleanDeadRefMaxCount = 3
 ###################################################################################################
 #
 #  LOGGING SYSTEM SETTINGS
+#
+#    LogsDir
+#        Description: Logs directory setting.
+#        Important:   LogsDir needs to be quoted, as the string might contain space characters.
+#                     Logs directory must exists, or log file creation will be disabled.
+#        Default:     "Logs" - (Log files will be stored in the current path)
+
+LogsDir = "Logs"
+
 #
 #  Appender config values: Given a appender "name"
 #    Appender.name

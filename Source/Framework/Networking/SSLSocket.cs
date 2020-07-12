@@ -20,46 +20,56 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace Framework.Networking
 {
-    public abstract class SSLSocket : ISocket
+    public abstract class SSLSocket : ISocket, IDisposable
     {
+        Socket _socket;
+        internal SslStream _stream;
+        IPEndPoint _remoteEndPoint;
+        byte[] _receiveBuffer;
+
         protected SSLSocket(Socket socket)
         {
             _socket = socket;
-            _remoteAddress = ((IPEndPoint)_socket.RemoteEndPoint).Address;
-            _remotePort = (ushort)((IPEndPoint)_socket.RemoteEndPoint).Port;
+            _remoteEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
             _receiveBuffer = new byte[ushort.MaxValue];
 
             _stream = new SslStream(new NetworkStream(socket), false);
         }
 
-        public abstract void Start();
+        public virtual void Dispose()
+        {
+            _receiveBuffer = null;
+            _stream.Dispose();
+        }
+
+        public abstract void Accept();
 
         public virtual bool Update()
         {
-            return IsOpen();
+            return _socket.Connected;
         }
 
-        public IPAddress GetRemoteIpAddress()
+        public IPEndPoint GetRemoteIpEndPoint()
         {
-            return _remoteAddress;
+            return _remoteEndPoint;
         }
 
-        public ushort GetRemotePort()
-        {
-            return _remotePort;
-        }
-
-        public void AsyncRead()
+        public async Task AsyncRead()
         {
             if (!IsOpen())
                 return;
 
             try
             {
-                _stream.BeginRead(_receiveBuffer, 0, _receiveBuffer.Length, ReadHandlerInternal, _stream);
+                var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
+
+                byte[] data = new byte[result];
+                Buffer.BlockCopy(_receiveBuffer, 0, data, 0, result);
+                ReadHandler(data, result);
             }
             catch (Exception ex)
             {
@@ -67,28 +77,11 @@ namespace Framework.Networking
             }
         }
 
-        void ReadHandlerInternal(IAsyncResult result)
-        {
-            int bytes = 0;
-            try
-            {
-                bytes = _stream.EndRead(result);
-            }
-            catch (Exception ex)
-            {
-                Log.outException(ex);
-            }
-
-            ReadHandler(bytes);
-        }
-
-        public abstract void ReadHandler(int transferredBytes);
-
-        public void AsyncHandshake(X509Certificate2 certificate)
+        public async Task AsyncHandshake(X509Certificate2 certificate)
         {
             try
             {
-                _stream.AuthenticateAsServer(certificate, false, System.Security.Authentication.SslProtocols.Tls, false);
+                await _stream.AuthenticateAsServerAsync(certificate, false, System.Security.Authentication.SslProtocols.Tls, false);
             }
             catch(Exception ex)
             {
@@ -96,17 +89,20 @@ namespace Framework.Networking
                 CloseSocket();
                 return;
             }
-            AsyncRead();
+
+            await AsyncRead();
         }
 
-        public void AsyncWrite(byte[] data)
+        public abstract void ReadHandler(byte[] data, int receivedLength);
+
+        public async Task AsyncWrite(byte[] data)
         {
             if (!IsOpen())
                 return;
 
             try
             {
-                _stream.Write(data, 0, data.Length);
+                await _stream.WriteAsync(data, 0, data.Length);
             }
             catch (Exception ex)
             {
@@ -118,39 +114,22 @@ namespace Framework.Networking
         {
             try
             {
-                _closed = true;
                 _socket.Shutdown(SocketShutdown.Both);
                 _socket.Close();
             }
             catch (Exception ex)
             {
-                Log.outDebug(LogFilter.Network, "WorldSocket.CloseSocket: {0} errored when shutting down socket: {1}", GetRemoteIpAddress().ToString(), ex.Message);
+                Log.outDebug(LogFilter.Network, $"WorldSocket.CloseSocket: {GetRemoteIpEndPoint()} errored when shutting down socket: {ex.Message}");
             }
-
-            OnClose();
         }
+
+        public virtual void OnClose() { Dispose(); }
+
+        public bool IsOpen() { return _socket.Connected; }
 
         public void SetNoDelay(bool enable)
         {
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
         }
-
-        public virtual void OnClose() { }
-
-        public bool IsOpen() { return !_closed; }
-
-        public byte[] GetReceiveBuffer()
-        {
-            return _receiveBuffer;
-        }
-        
-        Socket _socket;
-        internal SslStream _stream;
-        byte[] _receiveBuffer;
-
-        volatile bool _closed;
-
-        IPAddress _remoteAddress;
-        ushort _remotePort;
     }
 }

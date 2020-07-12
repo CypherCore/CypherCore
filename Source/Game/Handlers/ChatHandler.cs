@@ -21,8 +21,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -447,7 +447,7 @@ namespace Game
                         }
 
                         ChatPkt data = new ChatPkt();
-                        data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", LocaleConstant.enUS, prefix);
+                        data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", Locale.enUS, prefix);
                         group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
                         break;
                     }

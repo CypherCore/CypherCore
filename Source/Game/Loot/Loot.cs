@@ -21,7 +21,7 @@ using Framework.Dynamic;
 using Game.Conditions;
 using Game.Entities;
 using Game.Groups;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

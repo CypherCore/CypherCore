@@ -23,8 +23,8 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
@@ -142,8 +142,8 @@ namespace Game
                 uint groupId = result.Read<byte>(1);
                 uint id = result.Read<byte>(2);
                 string localeName = result.Read<string>(3);
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
+                Locale locale = localeName.ToEnum<Locale>();
+                if (locale == Locale.enUS)
                     continue;
 
                 var key = new CreatureTextId(creatureId, groupId, id);
@@ -377,7 +377,7 @@ namespace Game
             return true;
         }
 
-        public string GetLocalizedChatString(uint entry, Gender gender, byte textGroup, uint id, LocaleConstant locale = LocaleConstant.enUS)
+        public string GetLocalizedChatString(uint entry, Gender gender, byte textGroup, uint id, Locale locale = Locale.enUS)
         {
             var multiMap = mTextMap.LookupByKey(entry);
             if (multiMap == null)
@@ -398,8 +398,8 @@ namespace Game
             if (creatureTextEntry == null)
                 return "";
 
-            if (locale >= LocaleConstant.Total)
-                locale = LocaleConstant.enUS;
+            if (locale >= Locale.Total)
+                locale = Locale.enUS;
 
             string baseText = "";
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(creatureTextEntry.BroadcastTextId);
@@ -409,7 +409,7 @@ namespace Game
             else
                 baseText = creatureTextEntry.text;
 
-            if (locale != LocaleConstant.enUS && bct == null)
+            if (locale != Locale.enUS && bct == null)
             {
                 var creatureTextLocale = mLocaleTextMap.LookupByKey(new CreatureTextId(entry, textGroup, id));
                 if (creatureTextLocale != null)
@@ -560,7 +560,7 @@ namespace Game
     }
     public class CreatureTextLocale
     {
-        public StringArray Text = new StringArray((int)LocaleConstant.Total);
+        public StringArray Text = new StringArray((int)Locale.Total);
     }
     public class CreatureTextId
     {
@@ -595,7 +595,7 @@ namespace Game
 
         public void Invoke(Player player)
         {
-            LocaleConstant loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
             ServerPacket messageTemplate;
 
             // create if not cached yet
@@ -621,7 +621,7 @@ namespace Game
             player.SendPacket(message);
         }
 
-        Dictionary<LocaleConstant, ServerPacket> _packetCache = new Dictionary<LocaleConstant, ServerPacket>();
+        Dictionary<Locale, ServerPacket> _packetCache = new Dictionary<Locale, ServerPacket>();
         MessageBuilder _builder;
         ChatMsg _msgType;
     }
@@ -639,7 +639,7 @@ namespace Game
             _target = target;
         }
 
-        public override ServerPacket Invoke(LocaleConstant locale = LocaleConstant.enUS)
+        public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
             string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, locale);
             var packet = new ChatPkt();
@@ -670,7 +670,7 @@ namespace Game
             _target = target;
         }
 
-        public override ServerPacket Invoke(LocaleConstant loc_idx = LocaleConstant.enUS)
+        public override ServerPacket Invoke(Locale loc_idx = Locale.enUS)
         {
             string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, loc_idx);
             var packet = new ChatPkt();

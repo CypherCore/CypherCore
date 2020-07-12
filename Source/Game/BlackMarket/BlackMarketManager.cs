@@ -19,7 +19,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Mails;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game.BlackMarket
@@ -232,7 +232,7 @@ namespace Game.BlackMarket
                 if (bidderAccId == 0) // Account exists
                     return;
 
-                logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Realm);
+                logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Index);
 
                 if (logGmTrade && !Global.CharacterCacheStorage.GetCharacterNameByGuid(bidderGuid, out bidderName))
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);

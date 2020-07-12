@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.BattleGrounds;
 
 namespace Game.Arenas

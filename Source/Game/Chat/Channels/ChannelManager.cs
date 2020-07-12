@@ -18,7 +18,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
@@ -145,7 +145,7 @@ namespace Game.Chat
         {
             ulong high = 0;
             high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Realm << 42;
+            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
             ObjectGuid channelGuid = new ObjectGuid();
@@ -163,7 +163,7 @@ namespace Game.Chat
 
             ulong high = 0;
             high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Realm << 42;
+            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
             high |= 1ul << 25; // built-in
             if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly2))
                 high |= 1ul << 24; // trade

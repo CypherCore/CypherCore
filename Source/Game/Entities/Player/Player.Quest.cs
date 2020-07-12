@@ -23,7 +23,7 @@ using Game.Groups;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -2803,8 +2803,8 @@ namespace Game.Entities
 
             packet.QuestTitle = quest.LogTitle;
 
-            LocaleConstant loc_idx = receiver.GetSession().GetSessionDbLocaleIndex();
-            if (loc_idx != LocaleConstant.enUS)
+            Locale loc_idx = receiver.GetSession().GetSessionDbLocaleIndex();
+            if (loc_idx != Locale.enUS)
             {
                 QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(quest.Id);
                 if (questLocale != null)

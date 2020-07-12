@@ -17,7 +17,7 @@
 
 using Framework.Constants;
 using Game.BattleFields;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 
 namespace Game
 {

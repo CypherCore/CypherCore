@@ -22,7 +22,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -735,7 +735,7 @@ namespace Game.Chat
             return Global.ObjectMgr.GetCypherString(str);
         }
 
-        public virtual LocaleConstant GetSessionDbcLocale()
+        public virtual Locale GetSessionDbcLocale()
         {
             return _session.GetSessionDbcLocale();
         }
@@ -864,7 +864,7 @@ namespace Game.Chat
             return true;
         }
 
-        public override LocaleConstant GetSessionDbcLocale()
+        public override Locale GetSessionDbcLocale()
         {
             return Global.WorldMgr.GetDefaultDbcLocale();
         }

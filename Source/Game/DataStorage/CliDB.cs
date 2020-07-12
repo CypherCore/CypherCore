@@ -28,7 +28,7 @@ namespace Game.DataStorage
         internal static int LoadedFileCount;
         internal static string DataPath;
 
-        public static void LoadStores(string dataPath, LocaleConstant defaultLocale)
+        public static void LoadStores(string dataPath, Locale defaultLocale)
         {
             uint oldMSTime = Time.GetMSTime();
             LoadedFileCount = 0;
@@ -36,7 +36,7 @@ namespace Game.DataStorage
             DataPath = dataPath + "/dbc/" + defaultLocale + "/";
 
             AchievementStorage = DBReader.Read<AchievementRecord>("Achievement.db2", HotfixStatements.SEL_ACHIEVEMENT, HotfixStatements.SEL_ACHIEVEMENT_LOCALE);
-            AnimationDataStorage = DBReader.Read<AnimationDataRecord>("AnimationData.db2", HotfixStatements.SEL_ANIMATION_DATA);
+            //AnimationDataStorage = DBReader.Read<AnimationDataRecord>("AnimationData.db2", HotfixStatements.SEL_ANIMATION_DATA);
             AnimKitStorage = DBReader.Read<AnimKitRecord>("AnimKit.db2", HotfixStatements.SEL_ANIM_KIT);
             AreaGroupMemberStorage = DBReader.Read<AreaGroupMemberRecord>("AreaGroupMember.db2", HotfixStatements.SEL_AREA_GROUP_MEMBER);
             AreaTableStorage = DBReader.Read<AreaTableRecord>("AreaTable.db2", HotfixStatements.SEL_AREA_TABLE, HotfixStatements.SEL_AREA_TABLE_LOCALE);

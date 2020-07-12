@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Framework.Constants;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.Spells;
 
 namespace Game.Entities
@@ -26,10 +26,10 @@ namespace Game.Entities
             _type = type;
             _spells = spells;
 
-            _greeting[(int)LocaleConstant.enUS] = greeting;
+            _greeting[(int)Locale.enUS] = greeting;
         }
 
-        public void SendSpells(Creature npc, Player player, LocaleConstant locale)
+        public void SendSpells(Creature npc, Player player, Locale locale)
         {
             float reputationDiscount = player.GetReputationPriceDiscount(npc);
 
@@ -171,15 +171,15 @@ namespace Game.Entities
             player.SendPacket(trainerBuyFailed);
         }
 
-        string GetGreeting(LocaleConstant locale)
+        string GetGreeting(Locale locale)
         {
             if (_greeting[(int)locale].IsEmpty())
-                return _greeting[(int)LocaleConstant.enUS];
+                return _greeting[(int)Locale.enUS];
 
             return _greeting[(int)locale];
         }
 
-        public void AddGreetingLocale(LocaleConstant locale, string greeting)
+        public void AddGreetingLocale(Locale locale, string greeting)
         {
             _greeting[(int)locale] = greeting;
         }
@@ -187,6 +187,6 @@ namespace Game.Entities
         uint _id;
         TrainerType _type;
         List<TrainerSpell> _spells;
-        Array<string> _greeting = new Array<string>((int)LocaleConstant.Total);
+        Array<string> _greeting = new Array<string>((int)Locale.Total);
     }
 }

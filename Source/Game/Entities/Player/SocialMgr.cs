@@ -17,8 +17,8 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

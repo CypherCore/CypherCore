@@ -19,8 +19,8 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
 using Game.Guilds;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Text;
 

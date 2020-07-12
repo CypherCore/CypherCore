@@ -16,8 +16,8 @@
  */
 
 using Framework.IO;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System.Collections.Generic;
 
 namespace Game.Entities

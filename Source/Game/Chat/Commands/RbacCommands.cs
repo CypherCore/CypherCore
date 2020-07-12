@@ -296,7 +296,7 @@ namespace Game.Chat.Commands
 
             if (rdata == null)
             {
-                data.rbac = new RBACData(accountId, accountName, (int)Global.WorldMgr.GetRealm().Id.Realm, (byte)Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Realm));
+                data.rbac = new RBACData(accountId, accountName, (int)Global.WorldMgr.GetRealm().Id.Index, (byte)Global.AccountMgr.GetSecurity(accountId, (int)Global.WorldMgr.GetRealm().Id.Index));
                 data.rbac.LoadFromDB();
                 data.needDelete = true;
             }

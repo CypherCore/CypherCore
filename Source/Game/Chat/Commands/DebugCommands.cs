@@ -23,7 +23,7 @@ using Game.Combat;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Text;

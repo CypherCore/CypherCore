@@ -536,13 +536,13 @@ namespace Game.DataStorage
                                 LocalizedString localized = new LocalizedString();
                                 if (_stringsTable == null)
                                 {
-                                    localized[LocaleConstant.enUS] = _data.ReadCString();
+                                    localized[Locale.enUS] = _data.ReadCString();
                                 }
                                 else
                                 {
                                     var pos = _recordsOffset + (_data.Position >> 3);
                                     int ofs = GetFieldValue<int>(fieldIndex);
-                                    localized[LocaleConstant.enUS] = _stringsTable.LookupByKey(pos + ofs);
+                                    localized[Locale.enUS] = _stringsTable.LookupByKey(pos + ofs);
                                 }
 
                                 f.SetValue(obj, localized);
@@ -732,12 +732,12 @@ namespace Game.DataStorage
 
     public class LocalizedString
     {
-        public bool HasString(LocaleConstant locale = SharedConst.DefaultLocale)
+        public bool HasString(Locale locale = SharedConst.DefaultLocale)
         {
             return !string.IsNullOrEmpty(stringStorage[(int)locale]);
         }
 
-        public string this[LocaleConstant locale]
+        public string this[Locale locale]
         {
             get
             {
@@ -749,6 +749,6 @@ namespace Game.DataStorage
             }
         }
 
-        StringArray stringStorage = new StringArray((int)LocaleConstant.Total);
+        StringArray stringStorage = new StringArray((int)Locale.Total);
     }
 }

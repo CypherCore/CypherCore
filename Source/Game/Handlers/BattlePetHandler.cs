@@ -17,8 +17,8 @@
 
 using Framework.Constants;
 using Game.BattlePets;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 
 namespace Game
 {

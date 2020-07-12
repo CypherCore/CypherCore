@@ -23,8 +23,8 @@ using Game.Entities;
 using Game.Groups;
 using Game.Maps;
 using Game.Misc;
-using Game.Network;
-using Game.Network.Packets;
+using Game.Networking;
+using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -735,7 +735,7 @@ namespace Game.PvP
             _id = id;
         }
 
-        public override ServerPacket Invoke(LocaleConstant locale = LocaleConstant.enUS)
+        public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
             string text = Global.OutdoorPvPMgr.GetDefenseMessage(_zoneId, _id, locale);
 

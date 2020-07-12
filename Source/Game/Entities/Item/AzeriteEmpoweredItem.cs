@@ -18,10 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Game.Network;
+using Game.Networking;
 using Framework.Constants;
 using Framework.Database;
-using Game.Network.Packets;
+using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Linq;
 

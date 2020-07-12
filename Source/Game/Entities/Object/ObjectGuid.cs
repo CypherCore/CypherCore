@@ -83,11 +83,11 @@ namespace Game.Entities
             if (type == HighGuid.Transport)
                 return new ObjectGuid((ulong)type << 58 | (counter << 38), 0);
             else
-                return new ObjectGuid((ulong)type << 58 | (ulong)Global.WorldMgr.GetRealm().Id.Realm << 42, counter);
+                return new ObjectGuid((ulong)type << 58 | (ulong)Global.WorldMgr.GetRealm().Id.Index << 42, counter);
         }
         static ObjectGuid MapSpecificCreate(HighGuid type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
         {
-            return new ObjectGuid((((ulong)type << 58) | ((ulong)(Global.WorldMgr.GetRealm().Id.Realm & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
+            return new ObjectGuid((((ulong)type << 58) | ((ulong)(Global.WorldMgr.GetRealm().Id.Index & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
                 (((ulong)(serverId & 0xFFFFFF) << 40) | (counter & 0xFFFFFFFFFF)));
         }
 
