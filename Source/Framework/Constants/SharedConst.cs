@@ -1033,7 +1033,6 @@ namespace Framework.Constants
         AllowTwoSideInteractionGroup,
         AllowTwoSideInteractionGuild,
         AllowTwoSideTrade,
-        AlwaysMaxskill,
         ArenaLogExtendedInfo,
         ArenaMaxRatingDifference,
         ArenaQueueAnnouncerEnable,

@@ -5409,9 +5409,6 @@ namespace Game.Entities
 
             UpdateAllStats();
 
-            if (WorldConfig.GetBoolValue(WorldCfg.AlwaysMaxskill)) // Max weapon skill when leveling up
-                UpdateSkillsToMaxSkillsForLevel();
-
             _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
 
             Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);

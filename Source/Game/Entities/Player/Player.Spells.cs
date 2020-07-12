@@ -46,51 +46,17 @@ namespace Game.Entities
 
                 if (Global.SpellMgr.GetSkillRangeType(rcEntry) == SkillRangeType.Level)
                 {
-                    ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
-
-                    // update only level dependent max skill values
-                    if (max != 1)
-                    {
+                    if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         SetSkillRank(pair.Value.Pos, maxSkill);
-                        SetSkillMaxRank(pair.Value.Pos, maxSkill);
-                        if (pair.Value.State != SkillState.New)
-                            pair.Value.State = SkillState.Changed;
-                    }
+
+                    SetSkillRank(pair.Value.Pos, maxSkill);
+                    SetSkillMaxRank(pair.Value.Pos, maxSkill);
+                    if (pair.Value.State != SkillState.New)
+                        pair.Value.State = SkillState.Changed;
                 }
 
                 // Update level dependent skillline spells
                 LearnSkillRewardedSpells(rcEntry.SkillID, skillInfoField.SkillRank[pair.Value.Pos]);
-            }
-        }
-
-        public void UpdateSkillsToMaxSkillsForLevel()
-        {
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
-
-            foreach (var pair in mSkillStatus)
-            {
-                if (pair.Value.State == SkillState.Deleted || skillInfoField.SkillRank[pair.Value.Pos] == 0)
-                    continue;
-
-                uint pskill = pair.Key;
-                SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(pskill, GetRace(), GetClass());
-                if (rcEntry == null)
-                    continue;
-
-                if (Global.SpellMgr.IsProfessionOrRidingSkill(rcEntry.SkillID))
-                    continue;
-
-                if (Global.SpellMgr.IsWeaponSkill(rcEntry.SkillID))
-                    continue;
-
-                ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
-                if (max > 1)
-                {
-                    SetSkillRank(pair.Value.Pos, max);
-
-                    if (pair.Value.State != SkillState.New)
-                        pair.Value.State = SkillState.Changed;
-                }
             }
         }
 
@@ -1999,8 +1965,6 @@ namespace Game.Entities
                             skillValue = maxValue;
                         else if (GetClass() == Class.Deathknight)
                             skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
-                        else if (skillId == SkillType.FistWeapons)
-                            skillValue = Math.Max((ushort)1, GetSkillValue(SkillType.Unarmed));
 
                         SetSkill(skillId, 0, skillValue, maxValue);
                         break;

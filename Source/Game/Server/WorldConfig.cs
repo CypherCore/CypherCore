@@ -799,7 +799,6 @@ namespace Game
             Values[WorldCfg.ResetDuelHealthMana] = GetDefaultValue("ResetDuelHealthMana", false);
             Values[WorldCfg.StartAllExplored] = GetDefaultValue("PlayerStart.MapsExplored", false);
             Values[WorldCfg.StartAllRep] = GetDefaultValue("PlayerStart.AllReputation", false);
-            Values[WorldCfg.AlwaysMaxskill] = GetDefaultValue("AlwaysMaxWeaponSkill", false);
             Values[WorldCfg.PvpTokenEnable] = GetDefaultValue("PvPToken.Enable", false);
             Values[WorldCfg.PvpTokenMapType] = GetDefaultValue("PvPToken.MapAllowType", 4);
             Values[WorldCfg.PvpTokenId] = GetDefaultValue("PvPToken.ItemID", 29434);

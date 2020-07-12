@@ -123,21 +123,6 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("maxskill", RBACPermissions.CommandMaxskill)]
-        static bool HandleMaxSkillCommand(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSelectedPlayerOrSelf();
-            if (!player)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            // each skills that have max skill value dependent from level seted to current level max skill value
-            player.UpdateSkillsToMaxSkillsForLevel();
-            return true;
-        }
-
         [CommandNonGroup("setskill", RBACPermissions.CommandSetskill)]
         static bool SetSkill(StringArguments args, CommandHandler handler)
         {
