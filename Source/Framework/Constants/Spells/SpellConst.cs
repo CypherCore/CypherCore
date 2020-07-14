@@ -1865,9 +1865,9 @@ namespace Framework.Constants
         DirectDamage = 0x100,
         Charge = 0x200,
         PickPocket = 0x400,
-        NegativeEff0 = 0x1000,
-        NegativeEff1 = 0x2000,
-        NegativeEff2 = 0x4000,
+        DeprecatedNegativeEff0 = 0x1000, // DO NOT REUSE
+        DeprecatedNegativeEff1 = 0x2000, // DO NOT REUSE
+        DeprecatedNegativeEff2 = 0x4000, // DO NOT REUSE
         IgnoreArmor = 0x8000,
         ReqTargetFacingCaster = 0x10000,
         ReqCasterBehindTarget = 0x20000,
@@ -1876,9 +1876,7 @@ namespace Framework.Constants
         BinarySpell = 0x00100000,
         SchoolmaskNormalWithMagic = 0x00200000,
         LiquidAura = 0x00400000,
-        IsTalent = 0x00800000,
-
-        Negative = NegativeEff0 | NegativeEff1 | NegativeEff2
+        IsTalent = 0x00800000
     }
     #endregion
 

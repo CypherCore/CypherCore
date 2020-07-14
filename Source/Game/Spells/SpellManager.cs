@@ -2499,6 +2499,9 @@ namespace Game.Entities
                                 break;
                             }
                     }
+
+                    if (!spellInfo._IsPositiveEffect(effect.EffectIndex, false))
+                        spellInfo.NegativeEffects[(int)effect.EffectIndex] = true;
                 }
 
                 // spells ignoring hit result should not be binary
@@ -2586,15 +2589,6 @@ namespace Game.Entities
                     spellInfo.SchoolMask &= ~SpellSchoolMask.Normal;
                     spellInfo.AttributesCu |= SpellCustomAttributes.SchoolmaskNormalWithMagic;
                 }
-
-                if (!spellInfo._IsPositiveEffect(0, false))
-                    spellInfo.AttributesCu |= SpellCustomAttributes.NegativeEff0;
-
-                if (!spellInfo._IsPositiveEffect(1, false))
-                    spellInfo.AttributesCu |= SpellCustomAttributes.NegativeEff1;
-
-                if (!spellInfo._IsPositiveEffect(2, false))
-                    spellInfo.AttributesCu |= SpellCustomAttributes.NegativeEff2;
 
                 if (talentSpells.Contains(spellInfo.Id))
                     spellInfo.AttributesCu |= SpellCustomAttributes.IsTalent;

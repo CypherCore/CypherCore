@@ -23,6 +23,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -510,21 +511,16 @@ namespace Game.Spells
 
         public bool IsPositive()
         {
-            return !HasAttribute(SpellCustomAttributes.Negative);
+            for (var index = 0; index < NegativeEffects.Length; ++index)
+                if (NegativeEffects.Get(index))
+                    return false;
+
+            return true;
         }
 
         public bool IsPositiveEffect(uint effIndex)
         {
-            switch (effIndex)
-            {
-                default:
-                case 0:
-                    return !HasAttribute(SpellCustomAttributes.NegativeEff0);
-                case 1:
-                    return !HasAttribute(SpellCustomAttributes.NegativeEff1);
-                case 2:
-                    return !HasAttribute(SpellCustomAttributes.NegativeEff2);
-            }
+            return NegativeEffects.Get((int)effIndex);
         }
 
         public bool IsChanneled()
@@ -3528,6 +3524,7 @@ namespace Game.Spells
         public SpellAttr12 AttributesEx12 { get; set; }
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
+        public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }
         public ulong StancesNot { get; set; }
         public SpellCastTargetFlags targets { get; set; }
