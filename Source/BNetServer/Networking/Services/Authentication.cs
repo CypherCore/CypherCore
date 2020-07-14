@@ -30,7 +30,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadPlatform;
             }
 
-            if (logonRequest.Locale.ToEnum<Locale>() == Locale.enUS && logonRequest.Locale != "enUS")
+            if (!SharedConst.IsValidLocale(logonRequest.Locale.ToEnum<Locale>()))
             {
                 Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with unsupported locale (using {logonRequest.Locale})!");
                 return BattlenetRpcErrorCode.BadLocale;

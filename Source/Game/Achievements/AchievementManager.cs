@@ -1328,7 +1328,7 @@ namespace Game.Achievements
 
                 AchievementRewardLocale data = new AchievementRewardLocale();
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale  == Locale.enUS)
                     continue;
 
                 ObjectManager.AddLocaleString(result.Read<string>(2), locale, data.Subject);

@@ -3060,7 +3060,7 @@ namespace Game
                     string localeName = trainerLocalesResult.Read<string>(1);
 
                     Locale locale = localeName.ToEnum<Locale>();
-                    if (locale == Locale.enUS)
+                    if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                         continue;
 
                     Trainer trainer = _trainers.LookupByKey(trainerId);
@@ -7884,7 +7884,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_creatureLocaleStorage.ContainsKey(id))
@@ -7916,7 +7916,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
@@ -7947,7 +7947,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
@@ -7982,7 +7982,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
@@ -8035,7 +8035,7 @@ namespace Game
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_questGreetingLocaleStorage[type].ContainsKey(id))
@@ -8064,7 +8064,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
@@ -8091,7 +8091,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
@@ -8121,7 +8121,7 @@ namespace Game
                 string localeName = result.Read<string>(2);
 
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 GossipMenuItemsLocale data = new GossipMenuItemsLocale();
@@ -8150,7 +8150,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
@@ -8178,7 +8178,7 @@ namespace Game
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
@@ -9172,7 +9172,7 @@ namespace Game
                     int choiceId = result.Read<int>(0);
                     string localeName = result.Read<string>(1);
                     Locale locale = localeName.ToEnum<Locale>();
-                    if (locale == Locale.enUS)
+                    if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                         continue;
 
                     if (GetPlayerChoice(choiceId) == null)
@@ -9204,7 +9204,7 @@ namespace Game
                     int responseId = result.Read<int>(1);
                     string localeName = result.Read<string>(2);
                     Locale locale = localeName.ToEnum<Locale>();
-                    if (locale == Locale.enUS)
+                    if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                         continue;
 
                     var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);

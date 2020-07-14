@@ -370,6 +370,11 @@ namespace Framework.Constants
             }
             return SkillType.None;
         }
+
+        public static bool IsValidLocale(Locale locale)
+        {
+            return locale < Locale.Total && locale != Locale.None;
+        }
     }
 
     public enum Locale

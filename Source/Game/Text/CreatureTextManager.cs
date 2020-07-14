@@ -143,7 +143,7 @@ namespace Game
                 uint id = result.Read<byte>(2);
                 string localeName = result.Read<string>(3);
                 Locale locale = localeName.ToEnum<Locale>();
-                if (locale == Locale.enUS)
+                if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
                 var key = new CreatureTextId(creatureId, groupId, id);
