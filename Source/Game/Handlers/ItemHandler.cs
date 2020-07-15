@@ -613,15 +613,15 @@ namespace Game
             GetPlayer().StoreItem(dest, item, true);
         }
 
-        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint slot)
+        public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
         {
-            EnchantmentLog packet = new EnchantmentLog();
-            packet.Caster = caster;
+            EnchantmentLog packet = new EnchantmentLog(); 
             packet.Owner = owner;
+            packet.Caster = caster;
             packet.ItemGUID = itemGuid;
             packet.ItemID = itemId;
             packet.Enchantment = enchantId;
-            packet.EnchantSlot = slot;
+            packet.EnchantSlot = enchantSlot;
 
             GetPlayer().SendMessageToSet(packet, true);
         }

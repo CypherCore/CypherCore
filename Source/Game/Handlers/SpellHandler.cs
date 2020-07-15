@@ -422,7 +422,7 @@ namespace Game
 
             if (!pet.IsAlive())
             {
-                pet.SendPetActionFeedback(packet.SpellID, ActionFeedback.PetDead);
+                pet.SendPetActionFeedback(PetActionFeedback.Dead, 0);
                 return;
             }
 

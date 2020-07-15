@@ -102,6 +102,28 @@ namespace Game.Networking.Packets
         public List<LootRequest> Loot = new List<LootRequest>();
     }
 
+    class MasterLootItem : ClientPacket
+    {
+        public MasterLootItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint Count = _worldPacket.ReadUInt32();
+            Target = _worldPacket.ReadPackedGuid();
+
+            for (uint i = 0; i < Count; ++i)
+            {
+                LootRequest lootRequest = new LootRequest();
+                lootRequest.Object = _worldPacket.ReadPackedGuid();
+                lootRequest.LootListID = _worldPacket.ReadUInt8();
+                Loot.Add(lootRequest);
+            }
+        }
+
+        public Array<LootRequest> Loot = new Array<LootRequest>(1000);
+        public ObjectGuid Target;
+    }
+    
     class LootRemoved : ServerPacket
     {
         public LootRemoved() : base(ServerOpcodes.LootRemoved, ConnectionType.Instance) { }
@@ -337,6 +359,21 @@ namespace Game.Networking.Packets
         public byte LootListID;
     }
 
+    class MasterLootCandidateList : ServerPacket
+    {
+        public MasterLootCandidateList() : base(ServerOpcodes.MasterLootCandidateList, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(LootObj);
+            _worldPacket.WriteInt32(Players.Count);
+            Players.ForEach(guid => _worldPacket.WritePackedGuid(guid));
+        }
+
+        public List<ObjectGuid> Players = new List<ObjectGuid>();
+        public ObjectGuid LootObj;
+    }
+
     class AELootTargets : ServerPacket
     {
         public AELootTargets(uint count) : base(ServerOpcodes.AeLootTargets, ConnectionType.Instance)
@@ -357,21 +394,6 @@ namespace Game.Networking.Packets
         public AELootTargetsAck() : base(ServerOpcodes.AeLootTargetAck, ConnectionType.Instance) { }
 
         public override void Write() { }
-    }
-
-    class MasterLootCandidateList : ServerPacket
-    {
-        public MasterLootCandidateList() : base(ServerOpcodes.MasterLootCandidateList) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(LootObj);
-            _worldPacket.WriteInt32(Players.Count);
-            Players.ForEach(guid => _worldPacket.WritePackedGuid(guid));
-        }
-
-        public List<ObjectGuid> Players = new List<ObjectGuid>();
-        public ObjectGuid LootObj;
     }
 
     //Structs

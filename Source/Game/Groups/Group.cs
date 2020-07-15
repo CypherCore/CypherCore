@@ -1050,8 +1050,8 @@ namespace Game.Groups
 
         public void MasterLoot(Loot loot, WorldObject pLootedObject)
         {
-            MasterLootCandidateList data = new MasterLootCandidateList();
-            data.LootObj = loot.GetGUID();
+            MasterLootCandidateList masterLootCandidateList = new MasterLootCandidateList();
+            masterLootCandidateList.LootObj = loot.GetGUID();
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
             {
@@ -1060,14 +1060,16 @@ namespace Game.Groups
                     continue;
 
                 if (looter.IsAtGroupRewardDistance(pLootedObject))
-                    data.Players.Add(looter.GetGUID());
+                    masterLootCandidateList.Players.Add(looter.GetGUID());
             }
+
+            masterLootCandidateList.Write();
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
             {
                 Player looter = refe.GetSource();
                 if (looter.IsAtGroupRewardDistance(pLootedObject))
-                    looter.SendPacket(data);
+                    looter.SendPacket(masterLootCandidateList);
             }
         }
 

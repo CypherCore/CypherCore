@@ -580,29 +580,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestRatedBattlefieldInfo)]
         void HandleRequestRatedBattlefieldInfo(RequestRatedBattlefieldInfo packet)
         {
-            // @Todo: perfome research in this case
-            // The unk fields are related to arenas
-            WorldPacket data = new WorldPacket(ServerOpcodes.RatedBattlefieldInfo);
-            data.WriteInt32(0);      // BgWeeklyWins20vs20
-            data.WriteInt32(0);      // BgWeeklyPlayed20vs20
-            data.WriteInt32(0);      // BgWeeklyPlayed15vs15
-            data.WriteInt32(0);
-            data.WriteInt32(0);      // BgWeeklyWins10vs10
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);      // BgWeeklyWins15vs15
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-            data.WriteInt32(0);      // BgWeeklyPlayed10vs10
-            data.WriteInt32(0);
-            data.WriteInt32(0);
-
-            //SendPacket(data);
+            RatedBattlefieldInfo ratedBattlefieldInfo = new RatedBattlefieldInfo();
+            SendPacket(ratedBattlefieldInfo);
         }
 
         [WorldPacketHandler(ClientOpcodes.GetPvpOptionsEnabled, Processing = PacketProcessing.Inplace)]

@@ -105,6 +105,13 @@ namespace Game.Networking.Packets
         public int GameTimeHolidayOffset;
     }
 
+    public class ResetWeeklyCurrency : ServerPacket
+    {
+        public ResetWeeklyCurrency() : base(ServerOpcodes.ResetWeeklyCurrency, ConnectionType.Instance) { }
+
+        public override void Write() { }
+    }
+
     public class SetCurrency : ServerPacket
     {
         public SetCurrency() : base(ServerOpcodes.SetCurrency, ConnectionType.Instance) { }
@@ -166,13 +173,6 @@ namespace Game.Networking.Packets
 
         public uint MaxWeeklyQuantity;
         public uint Type;
-    }
-
-    public class ResetWeeklyCurrency : ServerPacket
-    {
-        public ResetWeeklyCurrency() : base(ServerOpcodes.ResetWeeklyCurrency, ConnectionType.Instance) { }
-
-        public override void Write() { }
     }
 
     public class SetSelection : ClientPacket

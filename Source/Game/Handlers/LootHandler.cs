@@ -456,103 +456,102 @@ namespace Game
                 DoLootRelease(lootPair.Value);
         }
 
-        //[WorldPacketHandler(ClientOpcodes.MasterLootItem)]
-        void HandleLootMasterGive(WorldPacket packet)
+        [WorldPacketHandler(ClientOpcodes.MasterLootItem)]
+        void HandleLootMasterGive(MasterLootItem masterLootItem)
         {
-            ObjectGuid lootguid = packet.ReadPackedGuid();
-            byte slotid = packet.ReadUInt8();
-            ObjectGuid target_playerguid = packet.ReadPackedGuid();
+            AELootResult aeResult = new AELootResult();
 
             if (GetPlayer().GetGroup() == null || GetPlayer().GetGroup().GetLooterGuid() != GetPlayer().GetGUID() || GetPlayer().GetGroup().GetLootMethod() != LootMethod.MasterLoot)
             {
-                GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.DidntKill);
+                GetPlayer().SendLootError(ObjectGuid.Empty, ObjectGuid.Empty, LootError.DidntKill);
                 return;
             }
 
             // player on other map
-            Player target = Global.ObjAccessor.GetPlayer(_player, target_playerguid);
+            Player target = Global.ObjAccessor.GetPlayer(_player, masterLootItem.Target);
             if (!target)
             {
-                GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.PlayerNotFound);
+                GetPlayer().SendLootError(ObjectGuid.Empty, ObjectGuid.Empty, LootError.PlayerNotFound);
                 return;
             }
 
-            Log.outDebug(LogFilter.Network, "HandleLootMasterGive (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [{0}].", target.GetName());
-
-            if (GetPlayer().GetLootGUID() != lootguid)
+            foreach (LootRequest req in masterLootItem.Loot)
             {
-                GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.DidntKill);
-                return;
-            }
+                Loot loot = null;
+                ObjectGuid lootguid = _player.GetLootWorldObjectGUID(req.Object);
 
-            if (!GetPlayer().IsInRaidWith(target) || !GetPlayer().IsInMap(target))
-            {
-                GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.MasterOther);
-                Log.outInfo(LogFilter.Loot, "MasterLootItem: Player {0} tried to give an item to ineligible player {1}!", GetPlayer().GetName(), target.GetName());
-                return;
-            }
+                if (!_player.IsInRaidWith(target) || !_player.IsInMap(target))
+                {
+                    _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterOther);
+                    Log.outInfo(LogFilter.Cheat, $"MasterLootItem: Player {GetPlayer().GetName()} tried to give an item to ineligible player {target.GetName()} !");
+                    return;
+                }
 
-            Loot loot = null;
+                if (GetPlayer().GetLootGUID().IsCreatureOrVehicle())
+                {
+                    Creature creature = GetPlayer().GetMap().GetCreature(lootguid);
+                    if (!creature)
+                        return;
 
-            if (GetPlayer().GetLootGUID().IsCreatureOrVehicle())
-            {
-                Creature creature = GetPlayer().GetMap().GetCreature(lootguid);
-                if (creature == null)
+                    loot = creature.loot;
+                }
+                else if (GetPlayer().GetLootGUID().IsGameObject())
+                {
+                    GameObject pGO = GetPlayer().GetMap().GetGameObject(lootguid);
+                    if (!pGO)
+                        return;
+
+                    loot = pGO.loot;
+                }
+
+                if (loot == null)
                     return;
 
-                loot = creature.loot;
-            }
-            else if (GetPlayer().GetLootGUID().IsGameObject())
-            {
-                GameObject pGO = GetPlayer().GetMap().GetGameObject(lootguid);
-                if (pGO == null)
+                byte slotid = (byte)(req.LootListID - 1);
+                if (slotid >= loot.items.Count + loot.quest_items.Count)
+                {
+                    Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {slotid}, size {loot.items.Count})");
                     return;
+                }
 
-                loot = pGO.loot;
+                LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
+
+                List<ItemPosCount> dest = new List<ItemPosCount>();
+                InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
+                if (item.follow_loot_rules && !item.AllowedForPlayer(target))
+                    msg = InventoryResult.CantEquipEver;
+                if (msg != InventoryResult.Ok)
+                {
+                    if (msg == InventoryResult.ItemMaxCount)
+                        _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterUniqueItem);
+                    else if (msg == InventoryResult.InvFull)
+                        _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterInvFull);
+                    else
+                        _player.SendLootError(req.Object, ObjectGuid.Empty, LootError.MasterOther);
+
+                    target.SendEquipError(msg, null, null, item.itemid);
+                    return;
+                }
+
+                // now move item from loot to target inventory
+                Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                aeResult.Add(newitem, item.count, loot.loot_type);
+
+                // mark as looted
+                item.count = 0;
+                item.is_looted = true;
+
+                loot.NotifyItemRemoved(slotid);
+                --loot.unlootedCount;
             }
 
-            if (loot == null)
-                return;
-
-            if (slotid >= loot.items.Count + loot.quest_items.Count)
+            foreach (var resultValue in aeResult.GetByOrder())
             {
-                Log.outDebug(LogFilter.Loot, "MasterLootItem: Player {0} might be using a hack! (slot {1}, size {2})",
-                    GetPlayer().GetName(), slotid, loot.items.Count);
-                return;
+                target.SendNewItem(resultValue.item, resultValue.count, false, false, true);
+                target.UpdateCriteria(CriteriaTypes.LootItem, resultValue.item.GetEntry(), resultValue.count);
+                target.UpdateCriteria(CriteriaTypes.LootType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
+                target.UpdateCriteria(CriteriaTypes.LootEpicItem, resultValue.item.GetEntry(), resultValue.count);
             }
-
-            LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
-
-            List<ItemPosCount> dest = new List<ItemPosCount>();
-            InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
-            if (item.follow_loot_rules && !item.AllowedForPlayer(target))
-                msg = InventoryResult.CantEquipEver;
-            if (msg != InventoryResult.Ok)
-            {
-                if (msg == InventoryResult.ItemMaxCount)
-                    GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.MasterUniqueItem);
-                else if (msg == InventoryResult.InvFull)
-                    GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.MasterInvFull);
-                else
-                    GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.MasterOther);
-
-                target.SendEquipError(msg, null, null, item.itemid);
-                return;
-            }
-
-            // not move item from loot to target inventory
-            Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
-            target.SendNewItem(newitem, item.count, false, false, true);
-            target.UpdateCriteria(CriteriaTypes.LootItem, item.itemid, item.count);
-            target.UpdateCriteria(CriteriaTypes.LootType, item.itemid, item.count, (ulong)loot.loot_type);
-            target.UpdateCriteria(CriteriaTypes.LootEpicItem, item.itemid, item.count);
-
-            // mark as looted
-            item.count = 0;
-            item.is_looted = true;
-
-            loot.NotifyItemRemoved(slotid);
-            --loot.unlootedCount;
         }
 
         [WorldPacketHandler(ClientOpcodes.SetLootSpecialization)]

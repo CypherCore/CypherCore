@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
 
 namespace Framework.Constants
 {
@@ -63,12 +63,13 @@ namespace Framework.Constants
         Talent = 2
     }
 
-    public enum ActionFeedback
+    public enum PetActionFeedback
     {
         None = 0,
-        PetDead = 1,
-        NothingToAtt = 2,
-        CantAttTarget = 3
+        Dead = 1,
+        NoTarget = 2,
+        InvalidTarget = 3,
+        NoPath = 4
     }
 
     public enum PetTalk
@@ -110,5 +111,16 @@ namespace Framework.Constants
     {
         Active = 1,
         Inactive = 2
+    }
+
+    public enum StableResult
+    {
+        NotEnoughMoney = 1,                              // "you don't have enough money"
+        InvalidSlot = 3,                              // "That slot is locked"
+        StableSuccess = 8,                              // stable success
+        UnstableSuccess = 9,                              // unstable/swap success
+        BuySlotSuccess = 10,                             // buy slot success
+        CantControlExotic = 11,                             // "you are unable to control exotic creatures"
+        InternalError = 12,                             // "Internal pet error"
     }
 }

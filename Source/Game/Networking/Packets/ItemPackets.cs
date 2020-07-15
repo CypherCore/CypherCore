@@ -525,24 +525,24 @@ namespace Game.Networking.Packets
 
     class EnchantmentLog : ServerPacket
     {
-        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog) { }
+        public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
 
         public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Caster);
+        {    
             _worldPacket.WritePackedGuid(Owner);
+            _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteUInt32(ItemID);
             _worldPacket.WriteUInt32(Enchantment);
             _worldPacket.WriteUInt32(EnchantSlot);
         }
 
-        public ObjectGuid Caster;
         public ObjectGuid Owner;
+        public ObjectGuid Caster;
         public ObjectGuid ItemGUID;
         public uint ItemID;
-        public uint EnchantSlot;
         public uint Enchantment;
+        public uint EnchantSlot;
     }
 
     class CancelTempEnchantment : ClientPacket
@@ -572,7 +572,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public uint Cooldown;
     }
-
+    
     class ItemEnchantTimeUpdate : ServerPacket
     {
         public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance) { }

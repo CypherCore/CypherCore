@@ -121,7 +121,10 @@ namespace Game
         void HandleBuyBankSlot(BuyBankSlot packet)
         {
             if (!CanUseBank(packet.Guid))
+            {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBuyBankSlot - {0} not found or you can't interact with him.", packet.Guid.ToString());
+                return;
+            }
 
             uint slot = GetPlayer().GetBankBagSlotCount();
             // next slot

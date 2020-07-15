@@ -442,6 +442,19 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
+    class RatedBattlefieldInfo : ServerPacket
+    {
+        public RatedBattlefieldInfo() : base(ServerOpcodes.RatedBattlefieldInfo) { }
+
+        public override void Write()
+        {
+            foreach (BracketInfo bracket in Bracket)
+                bracket.Write(_worldPacket);
+        }
+
+        BracketInfo[] Bracket = new BracketInfo[6];
+    }
+    
     class PVPMatchInit : ServerPacket
     {
         public PVPMatchInit() : base(ServerOpcodes.PvpMatchInit, ConnectionType.Instance) { }
@@ -497,6 +510,43 @@ namespace Game.Networking.Packets
     }
 
     //Structs
+    class BracketInfo
+    {
+        public int PersonalRating;
+        public int Ranking;
+        public int SeasonPlayed;
+        public int SeasonWon;
+        public int Unused1;
+        public int Unused2;
+        public int WeeklyPlayed;
+        public int WeeklyWon;
+        public int BestWeeklyRating;
+        public int LastWeeksBestRating;
+        public int BestSeasonRating;
+        public int PvpTierID;
+        public int Unused3;
+        public bool Unused4;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(PersonalRating);
+            data.WriteInt32(Ranking);
+            data.WriteInt32(SeasonPlayed);
+            data.WriteInt32(SeasonWon);
+            data.WriteInt32(Unused1);
+            data.WriteInt32(Unused2);
+            data.WriteInt32(WeeklyPlayed);
+            data.WriteInt32(WeeklyWon);
+            data.WriteInt32(BestWeeklyRating);
+            data.WriteInt32(LastWeeksBestRating);
+            data.WriteInt32(BestSeasonRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteInt32(Unused3);
+            data.WriteBit(Unused4);
+            data.FlushBits();
+        }
+    }
+
     public class PVPLogData
     {
         public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();

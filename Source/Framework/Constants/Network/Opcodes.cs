@@ -1803,7 +1803,6 @@ namespace Framework.Constants
 
         // Opcodes that are not generated automatically
         AccountHeirloomUpdate = 0xBADD, // No Client Handler
-        ItemUpgradeResult = 0xBADD,     // No Client Handler
         CompressedPacket = 0x3052,
         MultiplePackets = 0x3051,
 

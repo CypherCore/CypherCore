@@ -401,9 +401,11 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendPetStableResult(byte res)
+        void SendPetStableResult(StableResult result)
         {
-            SendPacket(new PetStableResult(res));
+            PetStableResult petStableResult = new PetStableResult();
+            petStableResult.Result = result;
+            SendPacket(petStableResult);
         }
 
         [WorldPacketHandler(ClientOpcodes.RepairItem)]

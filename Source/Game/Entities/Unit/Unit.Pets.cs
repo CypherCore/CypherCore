@@ -21,6 +21,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Constants;
 
 namespace Game.Entities
 {
@@ -691,13 +692,13 @@ namespace Game.Entities
                 Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its charm {1}", GetEntry(), GetCharmGUID());
         }
 
-        public void SendPetActionFeedback(uint spellId, ActionFeedback msg)
+        public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
         {
             Unit owner = GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            PetActionFeedback petActionFeedback = new PetActionFeedback();
+            PetActionFeedbackPacket petActionFeedback = new PetActionFeedbackPacket();
             petActionFeedback.SpellID = spellId;
             petActionFeedback.Response = msg;
             owner.ToPlayer().SendPacket(petActionFeedback);

@@ -164,6 +164,18 @@ namespace Game.Networking.Packets
         public List<PetStableInfo> Pets = new List<PetStableInfo>();
     }
 
+    class PetStableResult : ServerPacket
+    {
+        public PetStableResult() : base(ServerOpcodes.PetStableResult, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Result);
+        }
+
+        public StableResult Result;
+    }
+
     class PetLearnedSpells : ServerPacket
     {
         public PetLearnedSpells() : base(ServerOpcodes.PetLearnedSpells, ConnectionType.Instance) { }
@@ -288,34 +300,6 @@ namespace Game.Networking.Packets
         public uint Action;
     }
 
-    class PetActionSound : ServerPacket
-    {
-        public PetActionSound() : base(ServerOpcodes.PetStableResult) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteUInt32((uint)Action);
-        }
-
-        public ObjectGuid UnitGUID;
-        public PetTalk Action;
-    }
-
-    class PetActionFeedback : ServerPacket
-    {
-        public PetActionFeedback() : base(ServerOpcodes.PetStableResult) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt8((byte)Response);
-        }
-
-        public uint SpellID;
-        public ActionFeedback Response;
-    }
-
     class PetCancelAura : ClientPacket
     {
         public PetCancelAura(WorldPacket packet) : base(packet) { }
@@ -330,22 +314,6 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-
-    class PetStableResult : ServerPacket
-    {
-        public PetStableResult(byte result) : base(ServerOpcodes.PetStableResult)
-        {
-            Result = result;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt8(Result);
-        }
-
-        public byte Result;
-    }
-
     class SetPetSpecialization : ServerPacket
     {
         public SetPetSpecialization() : base(ServerOpcodes.SetPetSpecialization) { }
@@ -356,6 +324,34 @@ namespace Game.Networking.Packets
         }
 
         public ushort SpecID;
+    }
+
+    class PetActionFeedbackPacket : ServerPacket
+    {
+        public PetActionFeedbackPacket() : base(ServerOpcodes.PetStableResult) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt8((byte)Response);
+        }
+
+        public uint SpellID;
+        public PetActionFeedback Response;
+    }
+
+    class PetActionSound : ServerPacket
+    {
+        public PetActionSound() : base(ServerOpcodes.PetStableResult) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(UnitGUID);
+            _worldPacket.WriteUInt32((uint)Action);
+        }
+
+        public ObjectGuid UnitGUID;
+        public PetTalk Action;
     }
 
     //Structs
