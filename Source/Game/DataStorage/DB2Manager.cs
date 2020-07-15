@@ -39,6 +39,9 @@ namespace Game.DataStorage
 
             for (uint i = 0; i < (int)Locale.Total + 1; ++i)
                 _nameValidators[i] = new List<string>();
+
+            for (var i = 0; i < (int)Locale.Total; ++i)
+                _hotfixBlob[i] = new Dictionary<Tuple<uint, int>, byte[]>();
         }
 
         public void LoadStores()
@@ -652,10 +655,17 @@ namespace Game.DataStorage
                 uint tableHash = result.Read<uint>(1);
                 int recordId = result.Read<int>(2);
                 bool deleted = result.Read<bool>(3);
-                if (!deleted && !_storage.ContainsKey(tableHash) && !_hotfixBlob.ContainsKey(Tuple.Create(tableHash, recordId)))
+                if (!deleted && !_storage.ContainsKey(tableHash))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
-                    continue;
+                    var key = Tuple.Create(tableHash, recordId);
+                    foreach (var dic in _hotfixBlob)
+                    {
+                        if (!dic.ContainsKey(key))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
+                            continue;
+                        }
+                    }
                 }
 
                 HotfixRecord hotfixRecord = new HotfixRecord();
@@ -684,15 +694,15 @@ namespace Game.DataStorage
         public void LoadHotfixBlob()
         {
             uint oldMSTime = Time.GetMSTime();
-            _hotfixBlob.Clear();
 
-            SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, `Blob` FROM hotfix_blob ORDER BY TableHash");
+            SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Blob` FROM hotfix_blob ORDER BY TableHash");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix blob entries.");
                 return;
             }
 
+            uint hotfixBlobCount = 0;
             do
             {
                 uint tableHash = result.Read<uint>(0);
@@ -704,19 +714,31 @@ namespace Game.DataStorage
                 }
 
                 int recordId = result.Read<int>(1);
-                _hotfixBlob[Tuple.Create(tableHash, recordId)] = result.Read<byte[]>(2);
+                string localeName = result.Read<string>(2);
+
+                Locale locale = localeName.ToEnum<Locale>();
+                if (!SharedConst.IsValidLocale(locale))
+                {
+                    Log.outError(LogFilter.ServerLoading, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    continue;
+                }
+
+                _hotfixBlob[(int)locale][Tuple.Create(tableHash, recordId)] = result.Read<byte[]>(2);
+                hotfixBlobCount++;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_hotfixBlob.Count} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixBlobCount} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public uint GetHotfixCount() { return (uint)_hotfixData.Count; }
         
         public List<HotfixRecord> GetHotfixData() { return _hotfixData; }
 
-        public byte[] GetHotfixBlobData(uint tableHash, int recordId)
+        public byte[] GetHotfixBlobData(uint tableHash, int recordId, Locale locale)
         {
-            return _hotfixBlob.LookupByKey(Tuple.Create(tableHash, recordId));
+            Cypher.Assert(SharedConst.IsValidLocale(locale), "Locale {locale} is invalid locale");
+
+            return _hotfixBlob[(int)locale].LookupByKey(Tuple.Create(tableHash, recordId));
         }
 
         public uint GetEmptyAnimStateID()
@@ -2055,7 +2077,7 @@ namespace Game.DataStorage
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
         List<HotfixRecord> _hotfixData = new List<HotfixRecord>();
-        Dictionary<Tuple<uint, int>, byte[]> _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>();
+        Dictionary<Tuple<uint, int>, byte[]>[] _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>[(int)Locale.Total];
 
         MultiMap<uint, uint> _areaGroupMembers = new MultiMap<uint, uint>();
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();

@@ -84,7 +84,7 @@ namespace Game
                     }
                     else
                     {
-                        byte[] blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID);
+                        byte[] blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID, GetSessionDbcLocale());
                         if (blobData != null)
                         {
                             hotfixData.Size.Set((uint)blobData.Length);
