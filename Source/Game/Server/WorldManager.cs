@@ -30,6 +30,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -340,10 +341,15 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
-            CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
+            m_availableDbcLocaleMask = CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
+            if (!m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
+            {
+                Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
+                ShutdownServ(1, ShutdownMask.Force, ShutdownExitCode.Error);
+            }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix blobs...");
-            Global.DB2Mgr.LoadHotfixBlob();
+            Global.DB2Mgr.LoadHotfixBlob(m_availableDbcLocaleMask);
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix info...");
             Global.DB2Mgr.LoadHotfixData();
@@ -2274,9 +2280,9 @@ namespace Game
 
         public Locale GetAvailableDbcLocale(Locale locale)
         {
-            //if (m_availableDbcLocaleMask & (1 << locale))
-                //return locale;
-            //else
+            if (m_availableDbcLocaleMask[(int)locale])
+                return locale;
+            else
                 return m_defaultDbcLocale;
         }
 
@@ -2321,6 +2327,7 @@ namespace Game
         uint m_playerLimit;
         AccountTypes m_allowedSecurityLevel;
         Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
+        BitSet m_availableDbcLocaleMask;                       // by loaded DBC
         List<string> m_motd = new List<string>();
 
         // scheduled reset times

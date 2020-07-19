@@ -23,6 +23,7 @@ using Framework.IO;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Collections;
 
 namespace Game.DataStorage
 {
@@ -38,7 +39,7 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        public void LoadData(int indexField, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
+        public void LoadData(int indexField, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
@@ -193,7 +194,7 @@ namespace Game.DataStorage
 
             for (Locale locale = 0; locale < Locale.Total; ++locale)
             {
-                if (Global.WorldMgr.GetDefaultDbcLocale() == locale || locale == Locale.None)
+                if (Global.WorldMgr.GetDefaultDbcLocale() == locale || !availableDb2Locales[(int)locale])
                     continue;
 
                 PreparedStatement stmt = DB.Hotfix.GetPreparedStatement(preparedStatementLocale);

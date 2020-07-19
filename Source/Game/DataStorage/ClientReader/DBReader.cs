@@ -27,26 +27,26 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections;
 
 namespace Game.DataStorage
 {
     class DBReader
     {
-        private const int HeaderSize = 72;
         private const uint WDC3FmtSig = 0x33434457; // WDC3
 
-        public static DB6Storage<T> Read<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
+        public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
         {
             DB6Storage<T> storage = new DB6Storage<T>();
 
-            if (!File.Exists(CliDB.DataPath + fileName))
+            if (!File.Exists(db2Path + fileName))
             {
                 Log.outError(LogFilter.ServerLoading, $"File {fileName} not found.");
                 return storage;
             }
 
             DBReader reader = new DBReader();
-            using (var stream = new FileStream(CliDB.DataPath + fileName, FileMode.Open))
+            using (var stream = new FileStream(db2Path + fileName, FileMode.Open))
             {
                 if (!reader.Load(stream))
                 {
@@ -58,10 +58,10 @@ namespace Game.DataStorage
             foreach (var b in reader._records)
                 storage.Add((uint)b.Key, b.Value.As<T>());
 
-            storage.LoadData(reader.Header.IdIndex, preparedStatement, preparedStatementLocale);
+            storage.LoadData(reader.Header.IdIndex, availableDb2Locales, preparedStatement, preparedStatementLocale);
 
             Global.DB2Mgr.AddDB2(reader.Header.TableHash, storage);
-            CliDB.LoadedFileCount++;
+            loadedFileCount++;
             return storage;
         }
 

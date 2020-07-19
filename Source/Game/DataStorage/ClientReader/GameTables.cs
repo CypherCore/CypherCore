@@ -24,16 +24,16 @@ namespace Game.DataStorage
 {
     public class GameTableReader
     {
-        internal static GameTable<T> Read<T>(string fileName) where T : new()
+        internal static GameTable<T> Read<T>(string path, string fileName, ref uint loadedFileCount) where T : new()
         {
             GameTable<T> storage = new GameTable<T>();
 
-            if (!File.Exists(CliDB.DataPath + fileName))
+            if (!File.Exists(path + fileName))
             {
                 Log.outError(LogFilter.ServerLoading, "File {0} not found.", fileName);
                 return storage;
             }
-            using (var reader = new StreamReader(CliDB.DataPath + fileName))
+            using (var reader = new StreamReader(path + fileName))
             {
                 string headers = reader.ReadLine();
                 if (headers.IsEmpty())
@@ -73,7 +73,7 @@ namespace Game.DataStorage
                 storage.SetData(data);
             }
 
-            CliDB.LoadedFileCount++;
+            loadedFileCount++;
             return storage;
         }
     }

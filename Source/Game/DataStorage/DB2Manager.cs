@@ -22,6 +22,7 @@ using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 namespace Game.DataStorage
 {
@@ -658,13 +659,10 @@ namespace Game.DataStorage
                 if (!deleted && !_storage.ContainsKey(tableHash))
                 {
                     var key = Tuple.Create(tableHash, recordId);
-                    foreach (var dic in _hotfixBlob)
+                    if (!_hotfixBlob.Any(p => p.ContainsKey(key)))
                     {
-                        if (!dic.ContainsKey(key))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
-                            continue;
-                        }
+                        Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
+                        continue;
                     }
                 }
 
@@ -691,7 +689,7 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.Server, "Loaded {0} hotfix info entries in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void LoadHotfixBlob()
+        public void LoadHotfixBlob(BitSet availableDb2Locales)
         {
             uint oldMSTime = Time.GetMSTime();
 
@@ -723,7 +721,10 @@ namespace Game.DataStorage
                     continue;
                 }
 
-                _hotfixBlob[(int)locale][Tuple.Create(tableHash, recordId)] = result.Read<byte[]>(2);
+                if (!availableDb2Locales[(int)locale])
+                    continue;
+
+                _hotfixBlob[(int)locale][Tuple.Create(tableHash, recordId)] = result.Read<byte[]>(3);
                 hotfixBlobCount++;
             } while (result.NextRow());
 
