@@ -345,7 +345,7 @@ namespace Framework.Constants
         ModNoActions = 321,
         InterfereTargetting = 322,
         Unk323 = 323,  // Not Used In 4.3.4
-        Unk324 = 324,  // Spell Critical Chance (Probably By School Mask)
+        OverrideUnlockedAzeriteEssenceRank = 324,  // testing aura
         LearnPvpTalent = 325,  // NYI
         PhaseGroup = 326,  // Phase Related
         Unk327 = 327,  // Not Used In 4.3.4
@@ -501,7 +501,7 @@ namespace Framework.Constants
         Unk477 = 477,
         Unk478 = 478,
         Unk479 = 479,
-        Unk480 = 480,
+        ModArtifactItemLevel = 480,
         ConvertConsumedRune = 481,
         Unk482 = 482,
         SuppressTransforms = 483, // NYI

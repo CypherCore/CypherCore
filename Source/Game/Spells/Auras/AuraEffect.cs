@@ -978,7 +978,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Unk311)]
         [AuraEffectHandler(AuraType.AnimReplacementSet)]
         [AuraEffectHandler(AuraType.ModSpellPowerPct)]
-        [AuraEffectHandler(AuraType.Unk324)]
+        [AuraEffectHandler(AuraType.OverrideUnlockedAzeriteEssenceRank)]
         [AuraEffectHandler(AuraType.ModBlind)]
         [AuraEffectHandler(AuraType.Unk335)]
         [AuraEffectHandler(AuraType.MountRestrictions)]
