@@ -993,11 +993,12 @@ namespace Game.AI
                             e.Action.randomPhase.phase5 >= (uint)SmartPhase.Max ||
                             e.Action.randomPhase.phase6 >= (uint)SmartPhase.Max)
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} attempts to set invalid phase, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} attempts to set invalid phase, skipped.");
                             return false;
                         }
+
+                        break;
                     }
-                    break;
                 case SmartActions.RandomPhaseRange:       //PhaseMin, PhaseMax
                     {
                         if (e.Action.randomPhaseRange.phaseMin >= (uint)SmartPhase.Max ||
@@ -1114,7 +1115,7 @@ namespace Game.AI
                     }
                 case SmartActions.CallRandomRangeTimedActionlist:
                     {
-                        if (!IsMinMaxValid(e, e.Action.randTimedActionList.entry1, e.Action.randTimedActionList.entry2))
+                        if (!IsMinMaxValid(e, e.Action.randTimedActionList.actionList1, e.Action.randTimedActionList.actionList2))
                             return false;
                         break;
                     }
@@ -2701,12 +2702,12 @@ namespace Game.AI
         }
         public struct RandTimedActionList
         {
-            public uint entry1;
-            public uint entry2;
-            public uint entry3;
-            public uint entry4;
-            public uint entry5;
-            public uint entry6;
+            public uint actionList1;
+            public uint actionList2;
+            public uint actionList3;
+            public uint actionList4;
+            public uint actionList5;
+            public uint actionList6;
         }
         public struct InterruptSpellCasting
         {

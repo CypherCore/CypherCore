@@ -161,7 +161,7 @@ namespace Framework.Constants
         public const int MaxVehicleSeats = 8;
         public const int AttackDisplayDelay = 200;
         public const float MaxPlayerStealthDetectRange = 30.0f;               // max distance for detection targets by player
-        public const uint MaxEquipmentItems = 3;
+        public const int MaxEquipmentItems = 3;
 
         /// <summary>
         /// Creature Const

@@ -220,7 +220,7 @@ namespace Game.AI
             else
                 GetScript().SetPathId(0);
 
-            List<WorldObject> targets = GetScript().GetTargetList(SharedConst.SmartEscortTargets);
+            List<WorldObject> targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
             if (targets != null && mEscortQuestID != 0)
             {
                 if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
@@ -386,7 +386,7 @@ namespace Game.AI
 
         bool IsEscortInvokerInRange()
         {
-            var targets = GetScript().GetTargetList(SharedConst.SmartEscortTargets);
+            var targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
             if (targets != null)
             {
                 float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;

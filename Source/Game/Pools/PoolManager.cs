@@ -379,7 +379,7 @@ namespace Game
                     }
                     while (result.NextRow());
 
-                    Log.outDebug(LogFilter.Pool, "Pool handling system initialized, {0} pools spawned in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    Log.outInfo(LogFilter.ServerLoading, "Pool handling system initialized, {0} pools spawned in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 
                 }
             }
