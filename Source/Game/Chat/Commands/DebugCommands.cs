@@ -641,31 +641,60 @@ namespace Game.Chat
         [Command("raidreset", RBACPermissions.CommandInstanceUnbind)]
         static bool HandleDebugRaidResetCommand(StringArguments args, CommandHandler handler)
         {
-            string map_str = args.NextString();
-            string difficulty_str = args.NextString();
-
-            if (!int.TryParse(map_str, out int map) || map <= 0)
+            if (!int.TryParse(args.NextString(), out int map) || map <= 0)
                 return false;
 
-            MapRecord mEntry = CliDB.MapStorage.LookupByKey(map);
-            if (mEntry == null || !mEntry.IsRaid())
+            uint mapId = (uint)map;
+            MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapId);
+            if (mEntry == null)
+            {
+                handler.SendSysMessage("Invalid map specified.");
+                return false;
+            }
+
+            if (!mEntry.IsDungeon())
+            {
+                handler.SendSysMessage($"'{mEntry.MapName[handler.GetSessionDbcLocale()]}' is not a dungeon map.");
+                return true;
+            }
+
+            if (!int.TryParse(args.NextString(), out int difficulty) || difficulty < -1)
                 return false;
 
-            if (!int.TryParse(difficulty_str, out int difficulty))
-                difficulty = -1;
-            if (CliDB.DifficultyStorage.HasRecord((uint)difficulty) || difficulty < -1)
+            if (CliDB.DifficultyStorage.HasRecord((uint)difficulty))
+            {
+                handler.SendSysMessage($"Invalid difficulty {difficulty}.");
                 return false;
+            }
+
+            if (difficulty >= 0 && Global.DB2Mgr.GetMapDifficultyData(mEntry.Id, (Difficulty)difficulty) == null)
+            {
+                handler.SendSysMessage($"Difficulty {(Difficulty)difficulty} is not valid for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
+                return true;
+            }
 
             if (difficulty == -1)
             {
-                foreach (var diffRecord in CliDB.DifficultyStorage.Values)
+                handler.SendSysMessage($"Resetting all difficulties for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
+                foreach (var diff in CliDB.DifficultyStorage.Values)
                 {
-                    if (Global.DB2Mgr.GetMapDifficultyData((uint)map, (Difficulty)diffRecord.Id) != null)
-                        Global.InstanceSaveMgr.ForceGlobalReset((uint)map, (Difficulty)diffRecord.Id);
+                    if (Global.DB2Mgr.GetMapDifficultyData(mapId, (Difficulty)diff.Id) != null)
+                    {
+                        handler.SendSysMessage($"Resetting difficulty {diff.Id} for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
+                        Global.InstanceSaveMgr.ForceGlobalReset(mapId, (Difficulty)diff.Id);
+                    }
                 }
             }
+            else if (mEntry.IsNonRaidDungeon() && difficulty == (int)Difficulty.Normal)
+            {
+                handler.SendSysMessage($"'{mEntry.MapName[handler.GetSessionDbcLocale()]}' does not have any permanent saves for difficulty {(Difficulty)difficulty}.");
+            }
             else
-                Global.InstanceSaveMgr.ForceGlobalReset((uint)map, (Difficulty)difficulty);
+            {
+                handler.SendSysMessage($"Resetting difficulty {(Difficulty)difficulty} for '{mEntry.MapName[handler.GetSessionDbcLocale()]}'.");
+                Global.InstanceSaveMgr.ForceGlobalReset(mapId, (Difficulty)difficulty);
+            }
+
             return true;
         }
 
