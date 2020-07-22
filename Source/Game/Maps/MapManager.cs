@@ -16,12 +16,13 @@
  */
 
 using Framework.Constants;
+using Framework.Database;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Maps;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -321,35 +322,59 @@ namespace Game.Entities
         public void InitInstanceIds()
         {
             _nextInstanceId = 1;
+
+            SQLResult result = DB.Characters.Query("SELECT IFNULL(MAX(id), 0) FROM instance");
+            if (!result.IsEmpty())
+                _freeInstanceIds = new BitSet(result.Read<int>(0) + 2, true); // make space for one extra to be able to access [_nextInstanceId] index in case all slots are taken
+            else
+                _freeInstanceIds = new BitSet((int)_nextInstanceId + 1, true);
+
+            // never allow 0 id
+            _freeInstanceIds[0] = false;
         }
 
         public void RegisterInstanceId(uint instanceId)
         {
-            // Allocation and sizing was done in InitInstanceIds()
-            _instanceIds[instanceId] = true;
+            _freeInstanceIds[(int)instanceId] = false;
+
+            // Instances are pulled in ascending order from db and nextInstanceId is initialized with 1,
+            // so if the instance id is used, increment until we find the first unused one for a potential new instance
+            if (_nextInstanceId == instanceId)
+                ++_nextInstanceId;
         }
 
         public uint GenerateInstanceId()
-        {
+        {  
+            if (_nextInstanceId == 0xFFFFFFFF)
+            {
+                Log.outError(LogFilter.Maps, "Instance ID overflow!! Can't continue, shutting down server. ");
+                Global.WorldMgr.StopNow();
+                return _nextInstanceId;
+            }
+
             uint newInstanceId = _nextInstanceId;
+            Cypher.Assert(newInstanceId < _freeInstanceIds.Length);
+            _freeInstanceIds[(int)newInstanceId] = false;
 
             // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
-            for (uint i = ++_nextInstanceId; i < 0xFFFFFFFF; ++i)
+            int nextFreeId = -1;
+            for (var i = (int)_nextInstanceId++; i < _freeInstanceIds.Length; i++)
             {
-                if ((i < _instanceIds.Count && !_instanceIds[i]) || i >= _instanceIds.Count)
+                if (_freeInstanceIds[i])
                 {
-                    _nextInstanceId = i;
+                    nextFreeId = i;
                     break;
                 }
             }
 
-            if (newInstanceId == _nextInstanceId)
+            if (nextFreeId == -1)
             {
-                Log.outError(LogFilter.Maps, "Instance ID overflow!! Can't continue, shutting down server. ");
-                Global.WorldMgr.StopNow();
+                _nextInstanceId = (uint)_freeInstanceIds.Length;
+                _freeInstanceIds.Length += 1;
+                _freeInstanceIds[(int)_nextInstanceId] = true;
             }
-
-            _instanceIds[newInstanceId] = true;
+            else
+                _nextInstanceId = (uint)nextFreeId;
 
             return newInstanceId;
         }
@@ -357,10 +382,8 @@ namespace Game.Entities
         public void FreeInstanceId(uint instanceId)
         {
             // If freed instance id is lower than the next id available for new instances, use the freed one instead
-            if (instanceId < _nextInstanceId)
-                SetNextInstanceId(instanceId);
-
-            _instanceIds[instanceId] = false;
+            _nextInstanceId = Math.Min(instanceId, _nextInstanceId);
+            _freeInstanceIds[(int)instanceId] = true;
         }
 
         public void SetGridCleanUpDelay(uint t)
@@ -455,7 +478,7 @@ namespace Game.Entities
         IntervalTimer i_timer = new IntervalTimer();
         object _mapsLock= new object();
         uint i_gridCleanUpDelay;
-        Dictionary<uint, bool> _instanceIds = new Dictionary<uint, bool>();
+        BitSet _freeInstanceIds;
         uint _nextInstanceId;
         MapUpdater m_updater;
         uint _scheduledScripts;

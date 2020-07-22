@@ -199,11 +199,6 @@ namespace Game.Maps
                 {
                     uint instanceId = result.Read<uint>(0);
 
-                    // Instances are pulled in ascending order from db and nextInstanceId is initialized with 1,
-                    // so if the instance id is used, increment until we find the first unused one for a potential new instance
-                    if (Global.MapMgr.GetNextInstanceId() == instanceId)
-                        Global.MapMgr.SetNextInstanceId(instanceId + 1);
-
                     // Mark instance id as being used
                     Global.MapMgr.RegisterInstanceId(instanceId);
                     long resettime = result.Read<long>(3);
