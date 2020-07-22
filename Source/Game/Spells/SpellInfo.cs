@@ -2301,6 +2301,7 @@ namespace Game.Spells
                 switch (Id)
                 {
                     case 22812: // Barkskin
+                    case 47585: // Dispersion
                         _allowedMechanicMask |=
                             (1 << (int)Mechanics.Stun) |
                             (1 << (int)Mechanics.Freeze) |
@@ -2322,8 +2323,8 @@ namespace Game.Spells
             {
                 switch (Id)
                 {
-                    case 47585: // Dispersion
                     case 22812: // Barkskin
+                    case 47585: // Dispersion
                         _allowedMechanicMask |= (1 << (int)Mechanics.Fear) | (1 << (int)Mechanics.Horror);
                         break;
                     default:
