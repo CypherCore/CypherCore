@@ -2986,8 +2986,8 @@ namespace Game.AI
                 case SmartEvents.ReceiveEmote:
                     if (e.Event.emote.emoteId == var0)
                     {
-                        ProcessAction(e, unit);
                         RecalcTimer(e, e.Event.emote.cooldownMin, e.Event.emote.cooldownMax);
+                        ProcessAction(e, unit);
                     }
                     break;
                 case SmartEvents.Kill:
@@ -2998,8 +2998,8 @@ namespace Game.AI
                             return;
                         if (e.Event.kill.creature != 0 && unit.GetEntry() != e.Event.kill.creature)
                             return;
-                        ProcessAction(e, unit);
                         RecalcTimer(e, e.Event.kill.cooldownMin, e.Event.kill.cooldownMax);
+                        ProcessAction(e, unit);
                         break;
                     }
                 case SmartEvents.SpellHitTarget:
@@ -3010,8 +3010,8 @@ namespace Game.AI
                         if ((e.Event.spellHit.spell == 0 || spell.Id == e.Event.spellHit.spell) &&
                             (e.Event.spellHit.school == 0 || Convert.ToBoolean((uint)spell.SchoolMask & e.Event.spellHit.school)))
                         {
-                            ProcessAction(e, unit, 0, 0, bvar, spell);
                             RecalcTimer(e, e.Event.spellHit.cooldownMin, e.Event.spellHit.cooldownMax);
+                            ProcessAction(e, unit, 0, 0, bvar, spell);
                         }
                         break;
                     }
@@ -3029,8 +3029,8 @@ namespace Game.AI
                             if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) ||
                                 (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
                             {
-                                ProcessAction(e, unit);
                                 RecalcTimer(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax);
+                                ProcessAction(e, unit);
                             }
                         }
                         break;
@@ -3049,8 +3049,8 @@ namespace Game.AI
                             if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) ||
                                 (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
                             {
-                                ProcessAction(e, unit);
                                 RecalcTimer(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax);
+                                ProcessAction(e, unit);
                             }
                         }
                         break;
@@ -3072,8 +3072,8 @@ namespace Game.AI
                             return;
                         if (e.Event.summoned.creature != 0 && unit.GetEntry() != e.Event.summoned.creature)
                             return;
-                        ProcessAction(e, unit);
                         RecalcTimer(e, e.Event.summoned.cooldownMin, e.Event.summoned.cooldownMax);
+                        ProcessAction(e, unit);
                         break;
                     }
                 case SmartEvents.ReceiveHeal:
@@ -3082,8 +3082,8 @@ namespace Game.AI
                     {
                         if (var0 > e.Event.minMaxRepeat.max || var0 < e.Event.minMaxRepeat.min)
                             return;
-                        ProcessAction(e, unit);
                         RecalcTimer(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
+                        ProcessAction(e, unit);
                         break;
                     }
                 case SmartEvents.Movementinform:
@@ -3116,16 +3116,16 @@ namespace Game.AI
                     {
                         if (e.Event.summoned.creature != 0 && e.Event.summoned.creature != var0)
                             return;
-                        ProcessAction(e, unit, var0);
                         RecalcTimer(e, e.Event.summoned.cooldownMin, e.Event.summoned.cooldownMax);
+                        ProcessAction(e, unit, var0);
                         break;
                     }
                 case SmartEvents.InstancePlayerEnter:
                     {
                         if (e.Event.instancePlayerEnter.team != 0 && var0 != e.Event.instancePlayerEnter.team)
                             return;
-                        ProcessAction(e, unit, var0);
                         RecalcTimer(e, e.Event.instancePlayerEnter.cooldownMin, e.Event.instancePlayerEnter.cooldownMax);
+                        ProcessAction(e, unit, var0);
                         break;
                     }
                 case SmartEvents.AcceptedQuest:
@@ -3161,8 +3161,8 @@ namespace Game.AI
                     {
                         if (e.Event.dataSet.id != var0 || e.Event.dataSet.value != var1)
                             return;
-                        ProcessAction(e, unit, var0, var1);
                         RecalcTimer(e, e.Event.dataSet.cooldownMin, e.Event.dataSet.cooldownMax);
+                        ProcessAction(e, unit, var0, var1);
                         break;
                     }
                 case SmartEvents.PassengerRemoved:
@@ -3170,8 +3170,8 @@ namespace Game.AI
                     {
                         if (unit == null)
                             return;
-                        ProcessAction(e, unit);
                         RecalcTimer(e, e.Event.minMax.repeatMin, e.Event.minMax.repeatMax);
+                        ProcessAction(e, unit);
                         break;
                     }
                 case SmartEvents.TimedEventTriggered:
