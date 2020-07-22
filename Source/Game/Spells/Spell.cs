@@ -2054,6 +2054,12 @@ namespace Game.Spells
             if (unit == null || effectMask == 0)
                 return SpellMissInfo.Evade;
 
+            // Target may have begun evading between launch and hit phases - re-check now
+            Creature creatureTarget = unit.ToCreature();
+            if (creatureTarget != null)
+                if (creatureTarget.IsEvadingAttacks())
+                    return SpellMissInfo.Evade;
+
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
             if (m_spellInfo.HasHitDelay() && unit.IsImmunedToSpell(m_spellInfo, m_caster))
                 return SpellMissInfo.Immune;
