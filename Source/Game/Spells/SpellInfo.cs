@@ -2319,7 +2319,18 @@ namespace Game.Spells
                 _allowedMechanicMask |= (1 << (int)Mechanics.Disoriented);
 
             if (HasAttribute(SpellAttr5.UsableWhileFeared))
-                _allowedMechanicMask |= (1 << (int)Mechanics.Fear);
+            {
+                switch (Id)
+                {
+                    case 47585: // Dispersion
+                    case 22812: // Barkskin
+                        _allowedMechanicMask |= (1 << (int)Mechanics.Fear) | (1 << (int)Mechanics.Horror);
+                        break;
+                    default:
+                        _allowedMechanicMask |= (1 << (int)Mechanics.Fear);
+                        break;
+                }
+            }
         }
 
         public void ApplyAllSpellImmunitiesTo(Unit target, SpellEffectInfo effect, bool apply)
