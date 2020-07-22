@@ -371,7 +371,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
                 instance = go.GetInstanceScript();
             }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 Creature PrinceTaldaram = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.PrinceTaldaram));
                 if (PrinceTaldaram && PrinceTaldaram.IsAlive())

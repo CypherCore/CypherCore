@@ -1322,7 +1322,7 @@ namespace Game.Spells
                 }
 
                 player.PlayerTalkClass.ClearMenus();
-                if (gameObjTarget.GetAI().GossipHello(player, false))
+                if (gameObjTarget.GetAI().GossipHello(player))
                     return;
 
                 switch (gameObjTarget.GetGoType())

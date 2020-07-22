@@ -353,7 +353,7 @@ namespace Scripts.EasternKingdoms
         {
             public go_acherus_soul_prisonAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 Creature anchor = me.FindNearestCreature(29521, 15);
                 if (anchor)

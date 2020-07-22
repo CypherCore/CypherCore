@@ -45,7 +45,7 @@ namespace Game.AI
         /// <summary>
         /// Called when a player opens a gossip dialog with the gameobject.
         /// </summary>
-        public virtual bool GossipHello(Player player, bool reportUse) { return false; }
+        public virtual bool GossipHello(Player player) { return false; }
 
         /// <summary>
         /// Called when a player selects a gossip item in the gameobject's gossip menu.
@@ -71,6 +71,11 @@ namespace Game.AI
         /// Called when the dialog status between a player and the gameobject is requested.
         /// </summary>
         public virtual uint GetDialogStatus(Player player) { return 100; }
+
+        // Called when a Player clicks a GameObject, before GossipHello
+        // prevents achievement tracking if returning true
+        public virtual bool OnReportUse(Player player) { return false; }
+
         public virtual void Destroyed(Player player, uint eventId) { }
         public virtual void Damaged(Player player, uint eventId) { }
 

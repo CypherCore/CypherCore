@@ -1069,10 +1069,17 @@ namespace Game.AI
             GetScript().OnReset();
         }
 
-        public override bool GossipHello(Player player, bool reportUse)
+        public override bool GossipHello(Player player)
         {
             _gossipReturn = false;
-            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, reportUse ? 1 : 0u, 0, false, null, me);
+            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, 0, 0, false, null, me);
+            return _gossipReturn;
+        }
+
+        public override bool OnReportUse(Player player)
+        {
+            _gossipReturn = false;
+            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, 1, 0, false, null, me);
             return _gossipReturn;
         }
 

@@ -1602,7 +1602,7 @@ namespace Scripts.Northrend.Ulduar
                     instance = go.GetInstanceScript();
                 }
 
-                public override bool GossipHello(Player player, bool reportUse)
+                public override bool GossipHello(Player player)
                 {
                     if (me.HasFlag(GameObjectFlags.NotSelectable))
                         return true;

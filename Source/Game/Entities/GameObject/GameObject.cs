@@ -1306,7 +1306,7 @@ namespace Game.Entities
             if (playerUser != null)
             {
                 playerUser.PlayerTalkClass.ClearMenus();
-                if (GetAI().GossipHello(playerUser, false))
+                if (GetAI().GossipHello(playerUser))
                     return;
             }
 

@@ -260,7 +260,7 @@ namespace Scripts.World
         {
             public go_cat_figurineAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 player.CastSpell(player, GameobjectConst.SpellSummonGhostSaber, true);
                 return false;
@@ -282,7 +282,7 @@ namespace Scripts.World
         {
             public go_barov_journalAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.HasSkill(SkillType.Tailoring) && player.GetBaseSkillValue(SkillType.Tailoring) >= 280 && !player.HasSpell(26086))
                     player.CastSpell(player, 26095, false);
@@ -306,7 +306,7 @@ namespace Scripts.World
         {
             public go_gilded_brazierAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.Goober)
                 {
@@ -336,7 +336,7 @@ namespace Scripts.World
         {
             public go_orb_of_commandAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestRewardStatus(7761))
                     player.CastSpell(player, 23460, true);
@@ -360,7 +360,7 @@ namespace Scripts.World
         {
             public go_tablet_of_madnessAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.HasSkill(SkillType.Alchemy) && player.GetSkillValue(SkillType.Alchemy) >= 300 && !player.HasSpell(24266))
                     player.CastSpell(player, 24267, false);
@@ -385,7 +385,7 @@ namespace Scripts.World
             public go_tablet_of_the_sevenAI(GameObject go) : base(go) { }
 
             // @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() != GameObjectTypes.QuestGiver)
                     return true;
@@ -412,7 +412,7 @@ namespace Scripts.World
         {
             public go_jump_a_tronAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestStatus(10111) == QuestStatus.Incomplete)
                     player.CastSpell(player, 33382, true);
@@ -436,7 +436,7 @@ namespace Scripts.World
         {
             public go_ethereum_prisonAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 int Random = (int)(RandomHelper.Rand32() % (GameobjectConst.NpcPrisonEntry.Length / sizeof(uint)));
@@ -487,7 +487,7 @@ namespace Scripts.World
         {
             public go_ethereum_stasisAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 int Random = (int)(RandomHelper.Rand32() % GameobjectConst.NpcStasisEntry.Length / sizeof(uint));
@@ -513,7 +513,7 @@ namespace Scripts.World
         {
             public go_resonite_caskAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player Player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.Goober)
                     me.SummonCreature(GameobjectConst.NpcGoggeroc, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOOC, 300000);
@@ -537,7 +537,7 @@ namespace Scripts.World
         {
             public go_sacred_fire_of_lifeAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.Goober)
                     player.SummonCreature(GameobjectConst.NpcArikara, -5008.338f, -2118.894f, 83.657f, 0.874f, TempSummonType.TimedDespawnOOC, 30000);
@@ -561,7 +561,7 @@ namespace Scripts.World
         {
             public go_shrine_of_the_birdsAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 uint BirdEntry = 0;
 
@@ -603,7 +603,7 @@ namespace Scripts.World
         {
             public go_southfury_moonstoneAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 //implicitTarget=48 not implemented as of writing this code, and manual summon may be just ok for our purpose
                 //player.CastSpell(player, SPELL_SUMMON_RIZZLE, false);
@@ -631,7 +631,7 @@ namespace Scripts.World
         {
             public go_tele_to_dalaran_crystalAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestRewardStatus(GameobjectConst.QuestTeleCrystalFlag))
                     return false;
@@ -657,7 +657,7 @@ namespace Scripts.World
         {
             public go_tele_to_violet_standAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestRewardStatus(GameobjectConst.QuestLearnLeaveReturn) || player.GetQuestStatus(GameobjectConst.QuestLearnLeaveReturn) == QuestStatus.Incomplete)
                     return false;
@@ -681,7 +681,7 @@ namespace Scripts.World
         {
             public go_fel_crystalforgeAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
                     player.PrepareQuestMenu(me.GetGUID()); /* return true*/
@@ -735,7 +735,7 @@ namespace Scripts.World
         {
             public go_bashir_crystalforgeAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
                     player.PrepareQuestMenu(me.GetGUID()); /* return true*/
@@ -789,7 +789,7 @@ namespace Scripts.World
         {
             public go_matrix_punchographAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 switch (me.GetEntry())
                 {
@@ -843,7 +843,7 @@ namespace Scripts.World
         {
             public go_scourge_cageAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 Creature pNearestPrisoner = me.FindNearestCreature(GameobjectConst.NpcScourgePrisoner, 5.0f, true);
@@ -872,7 +872,7 @@ namespace Scripts.World
         {
             public go_arcane_prisonAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestStatus(GameobjectConst.QuestPrisonBreak) == QuestStatus.Incomplete)
                 {
@@ -899,7 +899,7 @@ namespace Scripts.World
         {
             public go_blood_filled_orbAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (me.GetGoType() == GameObjectTypes.Goober)
                     player.SummonCreature(GameobjectConst.NpcZelemar, -369.746f, 166.759f, -21.50f, 5.235f, TempSummonType.TimedDespawnOOC, 30000);
@@ -923,7 +923,7 @@ namespace Scripts.World
         {
             public go_jotunheim_cageAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 Creature pPrisoner = me.FindNearestCreature(GameobjectConst.NpcEbonBladePrisonerHuman, 5.0f, true);
@@ -976,7 +976,7 @@ namespace Scripts.World
         {
             public go_table_thekaAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.GetQuestStatus(GameobjectConst.QuestSpiderGold) == QuestStatus.Incomplete)
                     player.AreaExploredOrEventHappens(GameobjectConst.QuestSpiderGold);
@@ -1002,7 +1002,7 @@ namespace Scripts.World
         {
             public go_inconspicuous_landmarkAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 if (player.HasItemCount(GameobjectConst.ItemCuergosKey))
                     return false;
@@ -1028,11 +1028,8 @@ namespace Scripts.World
         {
             public go_soulwellAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
-                if (!reportUse)
-                    return true;
-
                 Unit owner = me.GetOwner();
                 if (!owner || !owner.IsTypeId(TypeId.Player) || !player.IsInSameRaidWith(owner.ToPlayer()))
                     return true;
@@ -1050,7 +1047,7 @@ namespace Scripts.World
         {
             public go_dragonflayer_cageAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 if (player.GetQuestStatus(GameobjectConst.QuestPrisonersOfWyrmskull) != QuestStatus.Incomplete)
@@ -1093,7 +1090,7 @@ namespace Scripts.World
         {
             public go_tadpole_cageAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 if (player.GetQuestStatus(GameobjectConst.QuestOhNoesTheTadpoles) == QuestStatus.Incomplete)
@@ -1125,7 +1122,7 @@ namespace Scripts.World
         {
             public go_amberpine_outhouseAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 QuestStatus status = player.GetQuestStatus(GameobjectConst.QuestDoingYourDuty);
                 if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
@@ -1181,7 +1178,7 @@ namespace Scripts.World
         {
             public go_hive_podAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 player.SendLoot(me.GetGUID(), LootType.Corpse);
                 me.SummonCreature(GameobjectConst.NpcHiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
@@ -1205,7 +1202,7 @@ namespace Scripts.World
         {
             public go_massive_seaforium_chargeAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player Player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.SetLootState(LootState.JustDeactivated);
                 return true;
@@ -1227,7 +1224,7 @@ namespace Scripts.World
         {
             public go_veil_skith_cageAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton();
                 if (player.GetQuestStatus(GameobjectConst.QuestMissingFriends) == QuestStatus.Incomplete)
@@ -1262,7 +1259,7 @@ namespace Scripts.World
         {
             public go_frostblade_shrineAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.UseDoorOrButton(10);
                 if (!player.HasAura(GameobjectConst.SpellRecentMeditation))
@@ -1313,7 +1310,7 @@ namespace Scripts.World
         {
             public go_midsummer_ribbon_poleAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 Creature creature = me.FindNearestCreature(GameobjectConst.NpcPoleRibbonBunny, 10.0f);
                 if (creature)

@@ -323,7 +323,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
         {
             public go_naga_brazierAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 Creature creature = ScriptedAI.GetClosestCreatureWithEntry(me, CreatureIds.Muglash, SharedConst.InteractionDistance * 2);
                 if (creature)

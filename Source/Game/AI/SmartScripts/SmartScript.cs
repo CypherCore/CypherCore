@@ -2228,9 +2228,8 @@ namespace Game.AI
             // We may want to execute action rarely and because of this if condition is not fulfilled the action will be rechecked in a long time
             if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(e.entryOrGuid, e.event_id, e.source_type, unit, GetBaseObject()))
             {
-                ProcessAction(e, unit, var0, var1, bvar, spell, gob, varString);
-
                 RecalcTimer(e, min, max);
+                ProcessAction(e, unit, var0, var1, bvar, spell, gob, varString);
             }
             else
                 RecalcTimer(e, Math.Min(min, 5000), Math.Min(min, 5000));

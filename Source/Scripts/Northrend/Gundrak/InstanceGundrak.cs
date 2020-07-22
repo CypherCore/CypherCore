@@ -429,7 +429,7 @@ namespace Scripts.Northrend.Gundrak
                 instance = go.GetInstanceScript();
             }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 me.AddFlag(GameObjectFlags.NotSelectable);
                 me.SetGoState(GameObjectState.Active);

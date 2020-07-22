@@ -201,7 +201,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                 instance = go.GetInstanceScript();
             }
 
-            public override bool GossipHello(Player player, bool reportUse)
+            public override bool GossipHello(Player player)
             {
                 Creature pKeristrasza = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Keristrasza));
                 if (pKeristrasza && pKeristrasza.IsAlive())
