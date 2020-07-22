@@ -2678,10 +2678,17 @@ namespace Game.Spells
                 // This prevents spells such as Hunter's Mark from triggering pet attack
                 if (m_spellInfo.DmgClass != SpellDmgClass.None)
                 {
-                    Pet playerPet = playerCaster.GetPet();
-                    if (playerPet != null)
-                        if (playerPet.IsAlive() && playerPet.IsControlled() && Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Unit))
-                            playerPet.GetAI().OwnerAttacked(m_targets.GetUnitTarget());
+                    Unit unitTarget = m_targets.GetUnitTarget();
+                    if (unitTarget)
+                    {
+                        foreach (Unit controlled in playerCaster.m_Controlled)
+                        {
+                            Creature cControlled = controlled.ToCreature();
+                            if (cControlled != null)
+                                if (cControlled.IsAIEnabled)
+                                    cControlled.GetAI().OwnerAttacked(unitTarget);
+                        }
+                    }
                 }
             }
 

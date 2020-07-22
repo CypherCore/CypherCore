@@ -129,11 +129,22 @@ namespace Game.AI
             if (me.GetVictim() != null)
                 return;
 
-            if (me.GetCreatureType() == CreatureType.NonCombatPet)
-                return;
-
             if (me.HasReactState(ReactStates.Aggressive) && me.CanStartAttack(who, false))
                 AttackStart(who);
+        }
+
+        void _OnOwnerCombatInteraction(Unit target)
+        {
+            if (target == null || !me.IsAlive())
+                return;
+
+            if (!me.HasReactState(ReactStates.Passive) && me.CanStartAttack(target, true))
+            {
+                if (me.IsInCombat())
+                    me.AddThreat(target, 0.0f);
+                else
+                    AttackStart(target);
+            }
         }
 
         // Distract creature, if player gets too close while stealthed/prowling
@@ -433,8 +444,6 @@ namespace Game.AI
         // Called when spell hits a target
         public virtual void SpellHitTarget(Unit target, SpellInfo spell) {}
         
-        // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
-        public virtual void AttackedBy(Unit attacker) { }
         public virtual bool IsEscorted() { return false; }
 
         // Called when creature is spawned or respawned
@@ -455,10 +464,10 @@ namespace Game.AI
         public virtual void ReceiveEmote(Player player, TextEmotes emoteId) { }
 
         // Called when owner takes damage
-        public virtual void OwnerAttackedBy(Unit attacker) {}
+        public virtual void OwnerAttackedBy(Unit attacker) { _OnOwnerCombatInteraction(attacker); }
 
         // Called when owner attacks something
-        public virtual void OwnerAttacked(Unit target) {}
+        public virtual void OwnerAttacked(Unit target) { _OnOwnerCombatInteraction(target); }
 
         // called when the corpse of this creature gets removed
         public virtual void CorpseRemoved(long respawnDelay) {}

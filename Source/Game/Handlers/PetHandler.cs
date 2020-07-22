@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.AI;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
@@ -199,7 +200,12 @@ namespace Game
                                         charmInfo.SetIsCommandFollow(false);
                                         charmInfo.SetIsReturning(false);
 
-                                        pet.ToCreature().GetAI().AttackStart(TargetUnit);
+                                        CreatureAI AI = pet.ToCreature().GetAI();
+                                        PetAI petAI = (PetAI)AI;
+                                        if (petAI != null)
+                                            petAI._AttackStart(TargetUnit); // force target switch
+                                        else
+                                            AI.AttackStart(TargetUnit);
 
                                         //10% chance to play special pet attack talk, else growl
                                         if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.IRand(0, 100) < 10)
@@ -367,7 +373,14 @@ namespace Game
                                 {
                                     pet.GetMotionMaster().Clear();
                                     if (pet.ToCreature().IsAIEnabled)
-                                        pet.ToCreature().GetAI().AttackStart(unit_target);
+                                    {
+                                        CreatureAI AI = pet.ToCreature().GetAI();
+                                        PetAI petAI = (PetAI)AI;
+                                        if (petAI != null)
+                                            petAI._AttackStart(unit_target); // force victim switch
+                                        else
+                                            AI.AttackStart(unit_target);
+                                    }
                                 }
                             }
 

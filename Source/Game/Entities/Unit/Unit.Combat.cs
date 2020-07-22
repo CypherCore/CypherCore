@@ -468,10 +468,13 @@ namespace Game.Entities
             // Spells such as auto-shot and others handled in WorldSession.HandleCastSpellOpcode
             if (IsTypeId(TypeId.Player))
             {
-                Pet playerPet = ToPlayer().GetPet();
-
-                if (playerPet != null && playerPet.IsAlive())
-                    playerPet.GetAI().OwnerAttacked(victim);
+                foreach (Unit controlled in m_Controlled)
+                {
+                    Creature cControlled = controlled.ToCreature();
+                    if (cControlled != null)
+                        if (cControlled.IsAIEnabled)
+                            cControlled.GetAI().OwnerAttacked(victim);
+                }
             }
             return true;
         }
@@ -962,19 +965,18 @@ namespace Game.Entities
                 // Signal to pets that their owner was attacked - except when DOT.
                 if (damagetype != DamageEffectType.DOT)
                 {
-                    Pet pet = victim.ToPlayer().GetPet();
-
-                    if (pet != null && pet.IsAlive())
-                        pet.GetAI().OwnerAttackedBy(this);
+                    foreach (Unit controlled in victim.m_Controlled)
+                    {
+                        Creature cControlled = controlled.ToCreature();
+                        if (cControlled != null)
+                            if (cControlled.IsAIEnabled)
+                                cControlled.GetAI().OwnerAttackedBy(this);
+                    }
                 }
 
                 if (victim.ToPlayer().GetCommandStatus(PlayerCommandStates.God))
                     return 0;
             }
-
-            // Signal the pet it was attacked so the AI can respond if needed
-            if (victim.IsTypeId(TypeId.Unit) && this != victim && victim.IsPet() && victim.IsAlive())
-                victim.ToPet().GetAI().AttackedBy(this);
 
             if (damagetype != DamageEffectType.NoDamage)
             {
@@ -1322,12 +1324,7 @@ namespace Game.Entities
 
                 if (!target.IsInCombat() && !target.IsTypeId(TypeId.Player)
                     && !target.ToCreature().HasReactState(ReactStates.Passive) && target.ToCreature().IsAIEnabled)
-                {
-                    if (target.IsPet())
-                        target.ToCreature().GetAI().AttackedBy(this); // PetAI has special handler before AttackStart()
-                    else
                         target.ToCreature().GetAI().AttackStart(this);
-                }
 
                 SetInCombatWith(target);
                 target.SetInCombatWith(this);

@@ -115,7 +115,7 @@ namespace Game.AI
                     // Aggressive - Allow auto select if owner or pet don't have a target
                     // Stay - Only pick from pet or owner targets / attackers so targets won't run by
                     //   while chasing our owner. Don't do auto select.
-                    // All other cases (ie: defensive) - Targets are assigned by AttackedBy(), OwnerAttackedBy(), OwnerAttacked(), etc.
+                    // All other cases (ie: defensive) - Targets are assigned by DamageTaken(), OwnerAttackedBy(), OwnerAttacked(), etc.
                     Unit nextTarget = SelectNextTarget(me.HasReactState(ReactStates.Aggressive));
 
                     if (nextTarget)
@@ -307,16 +307,26 @@ namespace Game.AI
                 HandleReturnMovement(); // Return
         }
 
-        public override void AttackStart(Unit victim)
+        public override void AttackStart(Unit target)
         {
-            // Overrides Unit.AttackStart to correctly evaluate Pet states
+            // Overrides Unit.AttackStart to prevent pet from switching off its assigned target
+            if (target == null || target == me)
+                return;
 
+            if (me.GetVictim() != null && me.GetVictim().IsAlive())
+                return;
+
+            _AttackStart(target);
+        }
+
+        public void _AttackStart(Unit target)
+        {
             // Check all pet states to decide if we can attack this target
-            if (!CanAIAttack(victim))
+            if (!CanAIAttack(target))
                 return;
 
             // Only chase if not commanded to stay or if stay but commanded to attack
-            DoAttack(victim, (!me.GetCharmInfo().HasCommandState(CommandStates.Stay) || me.GetCharmInfo().IsCommandAttack()));
+            DoAttack(target, (!me.GetCharmInfo().HasCommandState(CommandStates.Stay) || me.GetCharmInfo().IsCommandAttack()));
         }
 
         public override void OwnerAttackedBy(Unit attacker)
@@ -324,7 +334,7 @@ namespace Game.AI
             // Called when owner takes damage. This function helps keep pets from running off
             //  simply due to owner gaining aggro.
 
-            if (!attacker)
+            if (attacker == null || !me.IsAlive())
                 return;
 
             // Passive pets don't do anything
@@ -345,7 +355,7 @@ namespace Game.AI
             //  that they need to assist
 
             // Target might be null if called from spell with invalid cast targets
-            if (!target)
+            if (target == null || !me.IsAlive())
                 return;
 
             // Passive pets don't do anything
@@ -620,23 +630,8 @@ namespace Game.AI
             }
         }
 
-        public override void AttackedBy(Unit attacker)
+        public override void DamageTaken(Unit attacker, ref uint damage)
         {
-            // Called when pet takes damage. This function helps keep pets from running off
-            //  simply due to gaining aggro.
-
-            if (!attacker)
-                return;
-
-            // Passive pets don't do anything
-            if (me.HasReactState( ReactStates.Passive))
-                return;
-
-            // Prevent pet from disengaging from current target
-            if (me.GetVictim() && me.GetVictim().IsAlive())
-                return;
-
-            // Continue to evaluate and attack if necessary
             AttackStart(attacker);
         }
 
