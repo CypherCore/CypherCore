@@ -916,6 +916,9 @@ namespace Game
             Values[WorldCfg.CreatureCheckInvalidPostion] = GetDefaultValue("Creature.CheckInvalidPosition", false);
             Values[WorldCfg.GameobjectCheckInvalidPostion] = GetDefaultValue("GameObject.CheckInvalidPosition", false);
 
+            // Whether to use LoS from game objects
+            Values[WorldCfg.CheckGobjectLos] = GetDefaultValue("CheckGameObjectLoS", true);
+
             // call ScriptMgr if we're reloading the configuration
             if (reload)
                 Global.ScriptMgr.OnConfigLoad(reload);

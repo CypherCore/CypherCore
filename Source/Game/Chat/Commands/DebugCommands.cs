@@ -494,8 +494,15 @@ namespace Game.Chat
         {
             Unit unit = handler.GetSelectedUnit();
             if (unit)
-                handler.SendSysMessage("Unit {0} (GuidLow: {1}) is {2}in LoS", unit.GetName(), unit.GetGUID().ToString(), handler.GetSession().GetPlayer().IsWithinLOSInMap(unit) ? "" : "not ");
-            return true;
+            {
+                Player player = handler.GetSession().GetPlayer();
+                handler.SendSysMessage($"Checking LoS {player.GetName()} -> {unit.GetName()}:");
+                handler.SendSysMessage($"    VMAP LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Vmap) ? "clear" : "obstructed")}");
+                handler.SendSysMessage($"    GObj LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Gobject) ? "clear" : "obstructed")}");
+                handler.SendSysMessage($"{unit.GetName()} is {(player.IsWithinLOSInMap(unit) ? "" : "not ")}in line of sight of {player.GetName()}.");
+                return true;
+            }
+            return false;
         }
 
         [Command("moveflags", RBACPermissions.CommandDebugMoveflags)]

@@ -1452,7 +1452,7 @@ namespace Game.Spells
                         if (unitTarget != null)
                         {
                             uint deficit = (uint)(unitTarget.GetMaxHealth() - unitTarget.GetHealth());
-                            if ((deficit > maxHPDeficit || found == null) && target.IsWithinDist(unitTarget, jumpRadius) && target.IsWithinLOSInMap(unitTarget, ModelIgnoreFlags.M2))
+                            if ((deficit > maxHPDeficit || found == null) && target.IsWithinDist(unitTarget, jumpRadius) && target.IsWithinLOSInMap(unitTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             {
                                 found = obj;
                                 maxHPDeficit = deficit;
@@ -1467,10 +1467,10 @@ namespace Game.Spells
                     {
                         if (found == null)
                         {
-                            if ((!isBouncingFar || target.IsWithinDist(obj, jumpRadius)) && target.IsWithinLOSInMap(obj, ModelIgnoreFlags.M2))
+                            if ((!isBouncingFar || target.IsWithinDist(obj, jumpRadius)) && target.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                                 found = obj;
                         }
-                        else if (target.GetDistanceOrder(obj, found) && target.IsWithinLOSInMap(obj, ModelIgnoreFlags.M2))
+                        else if (target.GetDistanceOrder(obj, found) && target.IsWithinLOSInMap(obj, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             found = obj;
                     }
                 }
@@ -4643,7 +4643,7 @@ namespace Game.Spells
                         }
 
                         if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
-                            && !unitTarget.IsWithinLOSInMap(losTarget, ModelIgnoreFlags.M2))
+                            && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return SpellCastResult.LineOfSight;
                     }
                 }
@@ -4656,7 +4656,7 @@ namespace Game.Spells
                 m_targets.GetDstPos().GetPosition(out x, out y, out z);
 
                 if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
-                    && !m_caster.IsWithinLOS(x, y, z, ModelIgnoreFlags.M2))
+                    && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                     return SpellCastResult.LineOfSight;
             }
 
@@ -6594,7 +6594,7 @@ namespace Game.Spells
                     {
                         if (m_targets.GetCorpseTargetGUID().IsEmpty())
                         {
-                            if (target.IsWithinLOSInMap(m_caster, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
+                            if (target.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
                                 return true;
 
                             return false;
@@ -6610,7 +6610,7 @@ namespace Game.Spells
                         if (!corpse.HasDynamicFlag(UnitDynFlags.Lootable))
                             return false;
 
-                        if (!corpse.IsWithinLOSInMap(m_caster, ModelIgnoreFlags.M2))
+                        if (!corpse.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return false;
 
                         break;
@@ -6618,7 +6618,7 @@ namespace Game.Spells
                 default:
                     {
                         if (losPosition != null)
-                            return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), ModelIgnoreFlags.M2);
+                            return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2);
                         else
                         {
                             // Get GO cast coordinates if original caster -> GO
@@ -6627,7 +6627,7 @@ namespace Game.Spells
                                 caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
                             if (!caster)
                                 caster = m_caster;
-                            if (target != m_caster && !target.IsWithinLOSInMap(caster, ModelIgnoreFlags.M2))
+                            if (target != m_caster && !target.IsWithinLOSInMap(caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                                 return false;
                         }
 

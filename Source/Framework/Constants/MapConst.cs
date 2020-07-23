@@ -192,4 +192,12 @@ namespace Framework.Constants
         Nothing = 0x00,
         M2 = 0x01
     }
+
+    public enum LineOfSightChecks
+    {
+        Vmap = 0x1, // check static floor layout data
+        Gobject = 0x2, // check dynamic game object data
+
+        All = Vmap | Gobject
+    }
 }

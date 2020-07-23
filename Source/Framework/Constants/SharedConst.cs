@@ -1109,6 +1109,7 @@ namespace Framework.Constants
         ChatStrictLinkCheckingSeverity,
         ChatWhisperLevelReq,
         ChatYellLevelReq,
+        CheckGobjectLos,
         CleanCharacterDb,
         ClientCacheVersion,
         Compression,

@@ -1806,20 +1806,6 @@ namespace Game.Entities
                 return thisOrTransport.IsInDist2d(objOrObjTransport, maxdist);
         }
 
-        public bool IsWithinLOSInMap(WorldObject obj, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags.Nothing)
-        {
-            if (!IsInMap(obj))
-                return false;
-
-            float x, y, z;
-            if (obj.IsTypeId(TypeId.Player))
-                obj.GetPosition(out x, out y, out z);
-            else
-                obj.GetHitSpherePointFor(GetPosition(), out x, out y, out z);
-
-            return IsWithinLOS(x, y, z, ignoreFlags);
-        }
-
         public float GetDistance(WorldObject obj)
         {
             float d = GetExactDist(obj.GetPosition()) - GetCombatReach() - obj.GetCombatReach();
@@ -1895,7 +1881,7 @@ namespace Game.Entities
             return obj && IsInMap(obj) && IsInPhase(obj) && _IsWithinDist(obj, dist2compare, is3D, incOwnRadius, incTargetRadius);
         }
 
-        public bool IsWithinLOS(float ox, float oy, float oz, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags.Nothing)
+        public bool IsWithinLOS(float ox, float oy, float oz, LineOfSightChecks checks = LineOfSightChecks.All, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags.Nothing)
         {
             if (IsInWorld)
             {
@@ -1905,10 +1891,24 @@ namespace Game.Entities
                 else
                     GetHitSpherePointFor(new Position(ox, oy, oz), out x, out y, out z);
 
-                return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f, ignoreFlags);
+                return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f, checks, ignoreFlags);
             }
 
             return true;
+        }
+
+        public bool IsWithinLOSInMap(WorldObject obj, LineOfSightChecks checks = LineOfSightChecks.All, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags.Nothing)
+        {
+            if (!IsInMap(obj))
+                return false;
+
+            float x, y, z;
+            if (obj.IsTypeId(TypeId.Player))
+                obj.GetPosition(out x, out y, out z);
+            else
+                obj.GetHitSpherePointFor(GetPosition(), out x, out y, out z);
+
+            return IsWithinLOS(x, y, z, checks, ignoreFlags);
         }
 
         Position GetHitSpherePointFor(Position dest)
