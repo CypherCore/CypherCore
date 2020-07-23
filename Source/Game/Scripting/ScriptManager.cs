@@ -729,10 +729,9 @@ namespace Game.Scripting
         }
 
         // OutdoorPvPScript
-        public OutdoorPvP CreateOutdoorPvP(OutdoorPvPData data)
+        public OutdoorPvP CreateOutdoorPvP(uint scriptId)
         {
-            Cypher.Assert(data != null);
-            return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(), data.ScriptId, null);
+            return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(), scriptId, null);
         }
 
         // WeatherScript

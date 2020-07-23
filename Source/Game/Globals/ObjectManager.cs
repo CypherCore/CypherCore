@@ -3460,7 +3460,7 @@ namespace Game
                 cellguids.creatures.Remove(guid);
             }
         }
-        public ulong AddCreatureData(uint entry, uint team, uint mapId, float x, float y, float z, float o, uint spawntimedelay)
+        public ulong AddCreatureData(uint entry, uint mapId, Position pos, uint spawntimedelay)
         {
             CreatureTemplate cInfo = GetCreatureTemplate(entry);
             if (cInfo == null)
@@ -3480,10 +3480,7 @@ namespace Game
             data.mapid = (ushort)mapId;
             data.displayid = 0;
             data.equipmentId = 0;
-            data.posX = x;
-            data.posY = y;
-            data.posZ = z;
-            data.orientation = o;
+            pos.GetPosition(out data.posX, out data.posY, out data.posZ, out data.orientation);
             data.spawntimesecs = spawntimedelay;
             data.spawndist = 0;
             data.currentwaypoint = 0;
@@ -3499,7 +3496,7 @@ namespace Game
             AddCreatureToGrid(guid, data);
 
             // We use spawn coords to spawn
-            if (!map.Instanceable() && !map.IsRemovalGrid(x, y))
+            if (!map.Instanceable() && !map.IsRemovalGrid(data.posX, data.posY))
             {
                 Creature creature = Creature.CreateCreatureFromDB(guid, map);
                 if (!creature)
@@ -4332,7 +4329,7 @@ namespace Game
                 cellguids.gameobjects.Remove(guid);
             }
         }
-        public ulong AddGOData(uint entry, uint mapId, float x, float y, float z, float o, uint spawntimedelay, float rotation0, float rotation1, float rotation2, float rotation3)
+        public ulong AddGOData(uint entry, uint mapId, Position pos, Quaternion rot, uint spawntimedelay)
         {
             GameObjectTemplate goinfo = GetGameObjectTemplate(entry);
             if (goinfo == null)
@@ -4346,14 +4343,8 @@ namespace Game
             GameObjectData data = new GameObjectData();
             data.id = entry;
             data.mapid = (ushort)mapId;
-            data.posX = x;
-            data.posY = y;
-            data.posZ = z;
-            data.orientation = o;
-            data.rotation.X = rotation0;
-            data.rotation.Y = rotation1;
-            data.rotation.Z = rotation2;
-            data.rotation.W = rotation3;
+            pos.GetPosition(out data.posX, out data.posY, out data.posZ, out data.orientation);
+            data.rotation = rot;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
             data.spawnDifficulties.Add(Difficulty.None);
@@ -4366,7 +4357,7 @@ namespace Game
 
             // Spawn if necessary (loaded grids only)
             // We use spawn coords to spawn
-            if (!map.Instanceable() && map.IsGridLoaded(x, y))
+            if (!map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
             {
                 GameObject go = GameObject.CreateGameObjectFromDB(guid, map);
                 if (!go)
@@ -4376,7 +4367,7 @@ namespace Game
                 }
             }
 
-            Log.outDebug(LogFilter.Maps, "AddGOData: dbguid:{0} entry:{1} map:{2} x:{3} y:{4} z:{5} o:{6}", guid, entry, mapId, x, y, z, o);
+            Log.outDebug(LogFilter.Maps, "AddGOData: dbguid:{0} entry:{1} map:{2} x:{3} y:{4} z:{5} o:{6}", guid, entry, mapId, data.posX, data.posY, data.posZ, data.orientation);
 
             return guid;
         }

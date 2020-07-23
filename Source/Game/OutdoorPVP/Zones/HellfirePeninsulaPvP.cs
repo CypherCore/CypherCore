@@ -166,13 +166,8 @@ namespace Game.PvP
         {
             m_TowerType = (uint)type;
 
-            var capturepoint = HPConst.CapturePoints[m_TowerType];
-            var towerflag = HPConst.TowerFlags[m_TowerType];
-
-            SetCapturePointData(capturepoint.entry, capturepoint.map, capturepoint.x, capturepoint.y, capturepoint.z, capturepoint.o, capturepoint.rot0,
-                capturepoint.rot1, capturepoint.rot2, capturepoint.rot3);
-
-            AddObject((uint)type, towerflag.entry, towerflag.map, towerflag.x, towerflag.y, towerflag.z, towerflag.o, towerflag.rot0, towerflag.rot1, towerflag.rot2, towerflag.rot3);
+            SetCapturePointData(HPConst.CapturePoints[m_TowerType].entry, HPConst.CapturePoints[m_TowerType].map, HPConst.CapturePoints[m_TowerType].pos, HPConst.CapturePoints[m_TowerType].rot);
+            AddObject(m_TowerType, HPConst.TowerFlags[m_TowerType].entry, HPConst.TowerFlags[m_TowerType].map, HPConst.TowerFlags[m_TowerType].pos, HPConst.TowerFlags[m_TowerType].rot);
         }
 
         public override void ChangeState()

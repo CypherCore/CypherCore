@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.GameMath;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
@@ -375,9 +376,9 @@ namespace Game.PvP
             m_CreatureTypes[guid] = type;
         }
 
-        public bool AddObject(uint type, uint entry, uint map, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3)
+        public bool AddObject(uint type, uint entry, uint map, Position pos, Quaternion rot)
         {
-            ulong guid = Global.ObjectMgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3);
+            ulong guid = Global.ObjectMgr.AddGOData(entry, map, pos, rot, 0);
             if (guid != 0)
             {
                 AddGO(type, guid);
@@ -387,9 +388,9 @@ namespace Game.PvP
             return false;
         }
 
-        public bool AddCreature(uint type, uint entry, uint team, uint map, float x, float y, float z, float o, uint spawntimedelay)
+        public bool AddCreature(uint type, uint entry, uint map, Position pos, uint team, uint spawntimedelay)
         {
-            ulong guid = Global.ObjectMgr.AddCreatureData(entry, team, map, x, y, z, o, spawntimedelay);
+            ulong guid = Global.ObjectMgr.AddCreatureData(entry, map, pos, spawntimedelay);
             if (guid != 0)
             {
                 AddCre(type, guid);
@@ -399,7 +400,7 @@ namespace Game.PvP
             return false;
         }
 
-        public bool SetCapturePointData(uint entry, uint map, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3)
+        public bool SetCapturePointData(uint entry, uint map, Position pos, Quaternion rot)
         {
             Log.outDebug(LogFilter.Outdoorpvp, "Creating capture point {0}", entry);
 
@@ -411,7 +412,7 @@ namespace Game.PvP
                 return false;
             }
 
-            m_capturePointSpawnId = Global.ObjectMgr.AddGOData(entry, map, x, y, z, o, 0, rotation0, rotation1, rotation2, rotation3);
+            m_capturePointSpawnId = Global.ObjectMgr.AddGOData(entry, map, pos, rot, 0);
             if (m_capturePointSpawnId == 0)
                 return false;
 
@@ -755,26 +756,14 @@ namespace Game.PvP
         {
             entry = _entry;
             map = _map;
-            x = _x;
-            y = _y;
-            z = _z;
-            o = _o;
-            rot0 = _rot0;
-            rot1 = _rot1;
-            rot2 = _rot2;
-            rot3 = _rot3;
+            pos = new Position(_x, _y, _z, _o);
+            rot = new Quaternion(_rot0, _rot1, _rot2, _rot3);
         }
 
         public uint entry;
         public uint map;
-        public float x;
-        public float y;
-        public float z;
-        public float o;
-        public float rot0;
-        public float rot1;
-        public float rot2;
-        public float rot3;
+        public Position pos;
+        public Quaternion rot;
     }
 
     class creature_type
@@ -783,17 +772,11 @@ namespace Game.PvP
         {
             entry = _entry;
             map = _map;
-            x = _x;
-            y = _y;
-            z = _z;
-            o = _o;
+            pos = new Position(_x, _y, _z, _o);
         }
 
         public uint entry;
         public uint map;
-        public float x;
-        public float y;
-        public float z;
-        public float o;
+        Position pos;
     }
 }
