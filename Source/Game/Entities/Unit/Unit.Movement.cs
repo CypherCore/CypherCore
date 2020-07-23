@@ -25,6 +25,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using Game.Spells;
+using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -569,8 +570,7 @@ namespace Game.Entities
             else if (turn)
                 UpdateOrientation(orientation);
 
-            // code block for underwater state update
-            UpdateUnderwaterState(GetMap(), x, y, z);
+            UpdatePositionData();
 
             return (relocated || turn);
         }
@@ -754,48 +754,34 @@ namespace Game.Entities
             return null;
         }
 
-        public virtual void UpdateUnderwaterState(Map m, float x, float y, float z)
+        public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
-            if (IsFlying() || (!IsPet() && !IsVehicle()))
+            base.ProcessPositionDataChanged(data);
+            ProcessTerrainStatusUpdate(data.LiquidStatus, data.LiquidInfo);
+        }
+
+        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
+        {
+            if (IsFlying() || !IsControlledByPlayer())
                 return;
 
-            LiquidData liquid_status;
-            ZLiquidStatus res = m.GetLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
-            if (res == 0)
+            // remove appropriate auras if we are swimming/not swimming respectively
+            if (status.HasAnyFlag(ZLiquidStatus.Swimming))
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotAbovewater);
+            else
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
+
+            // liquid aura handling
+            LiquidTypeRecord curLiquid = null;
+            if (status.HasAnyFlag(ZLiquidStatus.Swimming) && liquidData.HasValue)
+                curLiquid = CliDB.LiquidTypeStorage.LookupByKey(liquidData.Value.entry);
+            if (curLiquid != _lastLiquid)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
                     RemoveAurasDueToSpell(_lastLiquid.SpellID);
-
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
-                _lastLiquid = null;
-                return;
-            }
-            uint liqEntry = liquid_status.entry;
-            if (liqEntry != 0)
-            {
-                LiquidTypeRecord liquid = CliDB.LiquidTypeStorage.LookupByKey(liqEntry);
-                if (_lastLiquid != null && _lastLiquid.SpellID != 0 && _lastLiquid.Id != liqEntry)
-                    RemoveAurasDueToSpell(_lastLiquid.SpellID);
-
-                if (liquid != null && liquid.SpellID != 0)
-                {
-                    if (res.HasAnyFlag(ZLiquidStatus.UnderWater | ZLiquidStatus.InWater))
-                    {
-                        if (!HasAura(liquid.SpellID))
-                            CastSpell(this, liquid.SpellID, true);
-                    }
-                    else
-                        RemoveAurasDueToSpell(liquid.SpellID);
-                }
-
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotAbovewater);
-                _lastLiquid = liquid;
-            }
-            else if (_lastLiquid != null && _lastLiquid.SpellID != 0)
-            {
-                RemoveAurasDueToSpell(_lastLiquid.SpellID);
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
-                _lastLiquid = null;
+                if (curLiquid != null && curLiquid.SpellID != 0)
+                    CastSpell(this, curLiquid.SpellID, true);
+                _lastLiquid = curLiquid;
             }
         }
 

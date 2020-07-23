@@ -24,6 +24,7 @@ using Game.Maps;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -712,77 +713,52 @@ namespace Game.Entities
             SendPacket(raidInstanceMessage);
         }
 
-        public override void UpdateUnderwaterState(Map m, float x, float y, float z)
+        public override void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
         {
-            LiquidData liquid_status;
-            ZLiquidStatus res = m.GetLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
-            if (res == 0)
-            {
-                m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
-                if (_lastLiquid != null && _lastLiquid.SpellID != 0)
-                    RemoveAurasDueToSpell(_lastLiquid.SpellID);
-
-                _lastLiquid = null;
+            if (IsFlying())
                 return;
-            }
-            uint liqEntry = liquid_status.entry;
-            if (liqEntry != 0)
-            {
-                LiquidTypeRecord liquid = CliDB.LiquidTypeStorage.LookupByKey(liqEntry);
-                if (_lastLiquid != null && _lastLiquid.SpellID != 0 && _lastLiquid != liquid)
-                    RemoveAurasDueToSpell(_lastLiquid.SpellID);
 
-                if (liquid != null && liquid.SpellID != 0)
+            // process liquid auras using generic unit code
+            base.ProcessTerrainStatusUpdate(status, liquidData);
+
+            // player specific logic for mirror timers
+            if (status != 0 && liquidData.HasValue)
+            {
+                // Breath bar state (under water in any liquid type)
+                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapAllLiquidTypes))
                 {
-                    if (res.HasAnyFlag(ZLiquidStatus.UnderWater | ZLiquidStatus.InWater))
-                    {
-                        if (!HasAura(liquid.SpellID))
-                            CastSpell(this, liquid.SpellID, true);
-                    }
+                    if (status.HasAnyFlag(ZLiquidStatus.UnderWater))
+                        m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
                     else
-                        RemoveAurasDueToSpell(liquid.SpellID);
+                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InWater;
                 }
 
-                _lastLiquid = liquid;
-            }
-            else if (_lastLiquid != null && _lastLiquid.SpellID != 0)
-            {
-                RemoveAurasDueToSpell(_lastLiquid.SpellID);
-                _lastLiquid = null;
-            }
-
-
-            // All liquids type - check under water position
-            if (liquid_status.type_flags.HasAnyFlag<uint>(MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean | MapConst.MapLiquidTypeMagma | MapConst.MapLiquidTypeSlime))
-            {
-                if (res.HasAnyFlag(ZLiquidStatus.UnderWater))
-                    m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
+                // Fatigue bar state (if not on flight path or transport)
+                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeDarkWater) && !IsInFlight() && !GetTransport())
+                    m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
                 else
-                    m_MirrorTimerFlags &= ~PlayerUnderwaterState.InWater;
-            }
+                    m_MirrorTimerFlags &= ~PlayerUnderwaterState.InDarkWater;
 
-            // Allow travel in dark water on taxi or transport
-            if (liquid_status.type_flags.HasAnyFlag<uint>(MapConst.MapLiquidTypeDarkWater) && !IsInFlight() && GetTransport() == null)
-                m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
+                // Lava state (any contact)
+                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeMagma))
+                {
+                    if (status.HasAnyFlag(ZLiquidStatus.InContact))
+                        m_MirrorTimerFlags |= PlayerUnderwaterState.InLava;
+                    else
+                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InLava;
+                }
+
+                // Slime state (any contact)
+                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeSlime))
+                {
+                    if (status.HasAnyFlag(ZLiquidStatus.InContact))
+                        m_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;
+                    else
+                        m_MirrorTimerFlags &= ~PlayerUnderwaterState.InSlime;
+                }
+            }
             else
-                m_MirrorTimerFlags &= ~PlayerUnderwaterState.InDarkWater;
-
-            // in lava check, anywhere in lava level
-            if (liquid_status.type_flags.HasAnyFlag<uint>(MapConst.MapLiquidTypeMagma))
-            {
-                if (res.HasAnyFlag(ZLiquidStatus.UnderWater | ZLiquidStatus.InWater | ZLiquidStatus.WaterWalk))
-                    m_MirrorTimerFlags |= PlayerUnderwaterState.InLava;
-                else
-                    m_MirrorTimerFlags &= ~PlayerUnderwaterState.InLava;
-            }
-            // in slime check, anywhere in slime level
-            if (liquid_status.type_flags.HasAnyFlag<uint>(MapConst.MapLiquidTypeSlime))
-            {
-                if (res.HasAnyFlag(ZLiquidStatus.UnderWater | ZLiquidStatus.InWater | ZLiquidStatus.WaterWalk))
-                    m_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;
-                else
-                    m_MirrorTimerFlags &= ~PlayerUnderwaterState.InSlime;
-            }
+                m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
         }
     }
 }

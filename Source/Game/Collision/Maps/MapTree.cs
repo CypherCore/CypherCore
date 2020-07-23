@@ -30,6 +30,7 @@ namespace Game.Collision
             ground_Z = float.NegativeInfinity;
         }
 
+        public int rootId;
         public ModelInstance hitInstance;
         public GroupModel hitModel;
         public float ground_Z;

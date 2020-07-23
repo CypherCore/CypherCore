@@ -26,6 +26,7 @@ using Game.Networking.Packets;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
+using Game.DataStorage;
 
 namespace Game.Entities
 {
@@ -48,6 +49,8 @@ namespace Game.Entities
             m_updateFlag.Clear();
 
             m_objectData = new ObjectFieldData();
+
+            m_staticFloorZ = MapConst.VMAPInvalidHeightValue;
         }
 
         public virtual void Dispose()
@@ -91,6 +94,8 @@ namespace Game.Entities
 
             IsInWorld = true;
             ClearUpdateMask(true);
+
+            GetMap().GetZoneAndAreaId(_phaseShift, out m_zoneId, out m_areaId, GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         public virtual void RemoveFromWorld()
@@ -105,6 +110,25 @@ namespace Game.Entities
             ClearUpdateMask(true);
         }
 
+        public void UpdatePositionData()
+        {
+            PositionFullTerrainStatus data = new PositionFullTerrainStatus();
+            GetMap().GetFullTerrainStatusForPosition(_phaseShift, GetPositionX(), GetPositionY(), GetPositionZ(), data);
+            ProcessPositionDataChanged(data);
+        }
+
+        public virtual void ProcessPositionDataChanged(PositionFullTerrainStatus data)
+        {
+            m_zoneId = m_areaId = data.AreaId;
+
+            var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
+            if (area != null)
+                if (area.Id != 0)
+                    m_zoneId = area.Id;
+
+            m_staticFloorZ = data.FloorZ;
+        }
+        
         public virtual void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)
         {
             if (!target)
@@ -990,22 +1014,12 @@ namespace Game.Entities
             if (transport)
                 transport.RemovePassenger(this);
         }
+        
+        public uint GetZoneId()  { return m_zoneId; }
+        public uint GetAreaId()  { return m_areaId; }
 
-        public uint GetZoneId()
-        {
-            return GetMap().GetZoneId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
-        }
-
-        public uint GetAreaId()
-        {
-            return GetMap().GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
-        }
-
-        public void GetZoneAndAreaId(out uint zoneid, out uint areaid)
-        {
-            GetMap().GetZoneAndAreaId(GetPhaseShift(), out zoneid, out areaid, posX, posY, posZ);
-        }
-
+        public void GetZoneAndAreaId(out uint zoneid, out uint areaid) { zoneid = m_zoneId; areaid = m_areaId; }
+        
         public bool IsInWorldPvpZone()
         {
             switch (GetZoneId())
@@ -2306,6 +2320,13 @@ namespace Game.Entities
             pos.SetOrientation(GetOrientation());
         }
 
+        public float GetFloorZ()
+        {
+            if (!IsInWorld)
+                return m_staticFloorZ;
+            return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ()));
+        }
+        
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
 
         #region Fields
@@ -2320,6 +2341,10 @@ namespace Game.Entities
         public uint LastUsedScriptID;
 
         bool m_objectUpdated;
+
+        uint m_zoneId;
+        uint m_areaId;
+        float m_staticFloorZ;
 
         public MovementInfo m_movementInfo;
         string _name;

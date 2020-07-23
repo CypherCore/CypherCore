@@ -191,7 +191,6 @@ namespace Game.Entities
 
             UpdateSplineMovement(diff);
             GetMotionMaster().UpdateMotion(diff);
-            UpdateUnderwaterState(GetMap(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
         void _UpdateSpells(uint diff)
         {

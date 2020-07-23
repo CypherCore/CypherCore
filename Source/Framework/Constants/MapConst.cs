@@ -119,13 +119,17 @@ namespace Framework.Constants
         AllWorld = Player | Creature | Corpse | DynamicObject
     }
 
+    [Flags]
     public enum ZLiquidStatus
     {
         NoWater = 0x00,
         AboveWater = 0x01,
         WaterWalk = 0x02,
         InWater = 0x04,
-        UnderWater = 0x08
+        UnderWater = 0x08,
+
+        Swimming = InWater | UnderWater,
+        InContact = Swimming | WaterWalk
     }
 
     public enum EncounterFrameType

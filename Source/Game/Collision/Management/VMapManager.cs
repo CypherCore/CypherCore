@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Collision
 {
@@ -240,6 +241,41 @@ namespace Game.Collision
             return false;
         }
 
+        public AreaAndLiquidData GetAreaAndLiquidData(uint mapId, float x, float y, float z, uint reqLiquidType)
+        {
+            var data = new AreaAndLiquidData();
+
+            if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLiquidStatus))
+            {
+                data.floorZ = z;
+                int adtId, rootId, groupId;
+                uint flags;
+                if (GetAreaInfo(mapId, x, y, ref data.floorZ, out flags, out adtId, out rootId, out groupId))
+                    data.areaInfo.Set(new AreaAndLiquidData.AreaInfo(adtId, rootId, groupId, flags));
+                return data;
+            }
+            var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
+            if (instanceTree != null)
+            {
+                LocationInfo info = new LocationInfo();
+                Vector3 pos = ConvertPositionToInternalRep(x, y, z);
+                if (instanceTree.GetLocationInfo(pos, info))
+                {
+                    data.floorZ = info.ground_Z;
+                    uint liquidType = info.hitModel.GetLiquidType();
+                    float liquidLevel = 0;
+                    if (reqLiquidType == 0 || Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
+                        if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
+                            data.liquidInfo.Set(new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel));
+
+                    if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLiquidStatus))
+                        data.areaInfo.Set(new AreaAndLiquidData.AreaInfo(info.hitInstance.adtId, info.rootId, (int)info.hitModel.GetWmoID(), info.hitModel.GetMogpFlags()));
+                }
+            }
+
+            return data;
+        }
+
         public WorldModel AcquireModelInstance(string filename, uint flags = 0)
         {
             lock (LoadedModelFilesLock)
@@ -349,5 +385,39 @@ namespace Game.Collision
 
         WorldModel iModel;
         int iRefCount;
+    }
+
+    public class AreaAndLiquidData
+    {
+        public struct AreaInfo
+        {
+            public int AdtId;
+            public int RootId;
+            public int GroupId;
+            public uint MogpFlags;
+
+            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
+            {
+                AdtId = adtId;
+                RootId = rootId;
+                GroupId = groupId;
+                MogpFlags = flags;
+            }
+        }
+        public struct LiquidInfo
+        {
+            public uint LiquidType;
+            public float Level;
+
+            public LiquidInfo(uint type, float level)
+            {
+                LiquidType = type;
+                Level = level;
+            }
+        }
+
+        public float floorZ = MapConst.VMAPInvalidHeightValue;
+        public Optional<AreaInfo> areaInfo;
+        public Optional<LiquidInfo> liquidInfo;
     }
 }

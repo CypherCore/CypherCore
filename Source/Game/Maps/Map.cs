@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.Dynamic;
 using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.Collision;
@@ -32,7 +33,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace Game.Maps
 {
@@ -850,7 +850,7 @@ namespace Game.Maps
             SendRemoveTransports(player);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
-                player.DestroyForNearbyPlayers(); // previous player->UpdateObjectVisibility(true)
+                player.DestroyForNearbyPlayers(); // previous player.UpdateObjectVisibility(true)
 
             Cell cell = player.GetCurrentCell();
             RemoveFromGrid(player, cell);
@@ -869,7 +869,7 @@ namespace Game.Maps
                 RemoveFromActive(obj);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
-                obj.DestroyForNearbyPlayers(); // previous obj->UpdateObjectVisibility(true)
+                obj.DestroyForNearbyPlayers(); // previous obj.UpdateObjectVisibility(true)
 
             Cell cell = obj.GetCurrentCell();
             RemoveFromGrid(obj, cell);
@@ -950,6 +950,7 @@ namespace Game.Maps
                 AddToGrid(player, newcell);
             }
 
+            player.UpdatePositionData();
             player.UpdateObjectVisibility(false);
         }
 
@@ -981,6 +982,7 @@ namespace Game.Maps
                 if (creature.IsVehicle())
                     creature.GetVehicleKit().RelocatePassengers();
                 creature.UpdateObjectVisibility(false);
+                creature.UpdatePositionData();
                 RemoveCreatureFromMoveList(creature);
             }
 
@@ -1010,6 +1012,7 @@ namespace Game.Maps
             {
                 go.Relocate(x, y, z, orientation);
                 go.UpdateModelPosition();
+                go.UpdatePositionData();
                 go.UpdateObjectVisibility(false);
                 RemoveGameObjectFromMoveList(go);
             }
@@ -1040,6 +1043,7 @@ namespace Game.Maps
             else
             {
                 dynObj.Relocate(x, y, z, orientation);
+                dynObj.UpdatePositionData();
                 dynObj.UpdateObjectVisibility(false);
                 RemoveDynamicObjectFromMoveList(dynObj);
             }
@@ -1186,6 +1190,7 @@ namespace Game.Maps
                     creature.Relocate(creature._newPosition);
                     if (creature.IsVehicle())
                         creature.GetVehicleKit().RelocatePassengers();
+                    creature.UpdatePositionData();
                     creature.UpdateObjectVisibility(false);
                 }
                 else
@@ -1238,6 +1243,7 @@ namespace Game.Maps
                     // update pos
                     go.Relocate(go._newPosition);
                     go.UpdateModelPosition();
+                    go.UpdatePositionData();
                     go.UpdateObjectVisibility(false);
                 }
                 else
@@ -1284,6 +1290,7 @@ namespace Game.Maps
                 {
                     // update pos
                     dynObj.Relocate(dynObj._newPosition);
+                    dynObj.UpdatePositionData();
                     dynObj.UpdateObjectVisibility(false);
                 }
                 else
@@ -1548,6 +1555,7 @@ namespace Game.Maps
             {
                 c.Relocate(resp_x, resp_y, resp_z, resp_o);
                 c.GetMotionMaster().Initialize(); // prevent possible problems with default move generators
+                c.UpdatePositionData();
                 c.UpdateObjectVisibility(false);
                 return true;
             }
@@ -1574,6 +1582,7 @@ namespace Game.Maps
             if (GameObjectCellRelocation(go, resp_cell))
             {
                 go.Relocate(resp_x, resp_y, resp_z, resp_o);
+                go.UpdatePositionData();
                 go.UpdateObjectVisibility(false);
                 return true;
             }
@@ -1705,18 +1714,6 @@ namespace Game.Maps
             _corpseBones.Clear();
         }
 
-        private GridMap GetGridMap(float x, float y)
-        {
-            // half opt method
-            var gx = (uint)(MapConst.CenterGridId - x / MapConst.SizeofGrids); //grid x
-            var gy = (uint)(MapConst.CenterGridId - y / MapConst.SizeofGrids); //grid y
-
-            // ensure GridMap is loaded
-            EnsureGridCreated(new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy));
-
-            return GridMaps[gx][gy];
-        }
-
         GridMap GetGridMap(uint mapId, float x, float y)
         {
             // half opt method
@@ -1816,8 +1813,6 @@ namespace Game.Maps
 
         private bool IsOutdoorWMO(uint mogpFlags, int adtId, int rootId, int groupId, WMOAreaTableRecord wmoEntry, AreaTableRecord atEntry)
         {
-            bool outdoor = true;
-
             if (wmoEntry != null && atEntry != null)
             {
                 if (atEntry.Flags[0].HasAnyFlag(AreaFlags.Outside))
@@ -1826,7 +1821,7 @@ namespace Game.Maps
                     return false;
             }
 
-            outdoor = Convert.ToBoolean(mogpFlags & 0x8);
+            bool outdoor = Convert.ToBoolean(mogpFlags & 0x8);
 
             if (wmoEntry != null)
             {
@@ -1929,8 +1924,7 @@ namespace Game.Maps
 
         public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
         {
-            bool throwaway;
-            return GetAreaId(phaseShift, x, y, z, out throwaway);
+            return GetAreaId(phaseShift, x, y, z, out _);
         }
 
         public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z, out bool isOutdoors)
@@ -2090,6 +2084,108 @@ namespace Game.Maps
                 }
             }
             return result;
+        }
+
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, uint reqLiquidType = MapConst.MapAllLiquidTypes)
+        {
+            uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
+            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, reqLiquidType);
+            if (vmapData.areaInfo.HasValue)
+                data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.GroupId, vmapData.areaInfo.Value.MogpFlags));
+
+            GridMap gmap = GetGridMap(terrainMapId, x, y);
+            float mapHeight = gmap.GetHeight(x, y);
+
+            // area lookup
+            AreaTableRecord areaEntry = null;
+            if (vmapData.areaInfo.HasValue && (z + 2.0f <= mapHeight || mapHeight <= vmapData.floorZ))
+            {
+                WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.GroupId);
+                if (wmoEntry != null)
+                    areaEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
+            }
+
+            if (areaEntry != null)
+            {
+                data.FloorZ = vmapData.floorZ;
+                data.AreaId = areaEntry.Id;
+            }
+            else
+            {
+                data.FloorZ = mapHeight;
+                if (gmap != null)
+                    data.AreaId = gmap.GetArea(x, y);
+                else
+                    data.AreaId = 0;
+
+                if (data.AreaId == 0)
+                    data.AreaId = i_mapRecord.AreaTableID;
+
+                if (data.AreaId != 0)
+                    areaEntry = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
+            }
+
+            // liquid processing
+            data.LiquidStatus = ZLiquidStatus.NoWater;
+            if (vmapData.liquidInfo.HasValue && vmapData.liquidInfo.Value.Level > vmapData.floorZ && z + 2.0f > vmapData.floorZ)
+            {
+                uint liquidType = vmapData.liquidInfo.Value.LiquidType;
+                if (GetId() == 530 && liquidType == 2) // gotta love blizzard hacks
+                    liquidType = 15;
+
+                uint liquidFlagType = 0;
+                LiquidTypeRecord liquidData = CliDB.LiquidTypeStorage.LookupByKey(liquidType);
+                if (liquidData != null)
+                    liquidFlagType = liquidData.SoundBank;
+
+                if (liquidType != 0 && liquidType < 21 && areaEntry != null)
+                {
+                    uint overrideLiquid = areaEntry.LiquidTypeID[liquidFlagType];
+                    if (overrideLiquid == 0 && areaEntry.ParentAreaID != 0)
+                    {
+                        AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+                        if (zoneEntry != null)
+                            overrideLiquid = zoneEntry.LiquidTypeID[liquidFlagType];
+                    }
+
+                    LiquidTypeRecord overrideData = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+                    if (overrideData != null)
+                    {
+                        liquidType = overrideLiquid;
+                        liquidFlagType = overrideData.SoundBank;
+                    }
+                }
+
+                var liquidInfo = new LiquidData();
+                liquidInfo.level = vmapData.liquidInfo.Value.Level;
+                liquidInfo.depth_level = vmapData.floorZ;
+                liquidInfo.entry = liquidType;
+                liquidInfo.type_flags = 1u << (int)liquidFlagType;
+                data.LiquidInfo.Set(liquidInfo);
+
+                float delta = vmapData.liquidInfo.Value.Level - z;
+                if (delta > 2.0f)
+                    data.LiquidStatus = ZLiquidStatus.UnderWater;
+                else if (delta > 0.0f)
+                    data.LiquidStatus = ZLiquidStatus.InWater;
+                else if (delta > -0.1f)
+                    data.LiquidStatus = ZLiquidStatus.WaterWalk;
+                else
+                    data.LiquidStatus = ZLiquidStatus.AboveWater;
+            }
+            // look up liquid data from grid map
+            if (gmap != null && (data.LiquidStatus == ZLiquidStatus.AboveWater || data.LiquidStatus == ZLiquidStatus.NoWater))
+            {
+                LiquidData gridMapLiquid = new LiquidData();
+                ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid);
+                if (gridMapStatus != ZLiquidStatus.NoWater && (gridMapLiquid.level > vmapData.floorZ))
+                {
+                    if (GetId() == 530 && gridMapLiquid.entry == 2)
+                        gridMapLiquid.entry = 15;
+                    data.LiquidInfo.Set(gridMapLiquid);
+                    data.LiquidStatus = gridMapStatus;
+                }
+            }
         }
 
         public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
@@ -3207,6 +3303,11 @@ namespace Game.Maps
             return _dynamicTree.Contains(model);
         }
 
+        public float GetGameObjectFloor(PhaseShift phaseShift, float x, float y, float z, float maxSearchDist = MapConst.DefaultHeightSearch)
+        {
+            return _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift);
+        }
+        
         public virtual uint GetOwnerGuildId(Team team = Team.Other)
         {
             return 0;
@@ -4910,5 +5011,30 @@ namespace Game.Maps
         public float WeatherGrade;
         public uint OverrideLightId;
         public uint LightFadeInTime;
+    }
+
+    public struct PositionFullTerrainStatus
+    {
+        public struct AreaInfo
+        {
+            public int AdtId;
+            public int RootId;
+            public int GroupId;
+            public uint MogpFlags;
+
+            public AreaInfo(int adtId, int rootId, int groupId, uint flags)
+            {
+                AdtId = adtId;
+                RootId = rootId;
+                GroupId = groupId;
+                MogpFlags = flags;
+            }
+        }
+
+        public uint AreaId;
+        public float FloorZ;
+        public ZLiquidStatus LiquidStatus;
+        public Optional<AreaInfo> areaInfo;
+        public Optional<LiquidData> LiquidInfo;
     }
 }

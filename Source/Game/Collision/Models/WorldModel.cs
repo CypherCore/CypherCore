@@ -361,6 +361,7 @@ namespace Game.Collision
             groupTree.IntersectPoint(p, callback);
             if (callback.hit != null)
             {
+                info.rootId = (int)RootWMOID;
                 info.hitModel = callback.hit;
                 dist = callback.zDist;
                 return true;
