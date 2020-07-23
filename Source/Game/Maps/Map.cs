@@ -1754,7 +1754,15 @@ namespace Game.Maps
                 LiquidData liquid_status;
 
                 ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
-                return res != ZLiquidStatus.NoWater ? liquid_status.level : ground_z;
+                switch (res)
+                {
+                    case ZLiquidStatus.AboveWater:
+                        return Math.Max(liquid_status.level, ground_z);
+                    case ZLiquidStatus.NoWater:
+                        return ground_z;
+                    default:
+                        return liquid_status.level;
+                }
             }
 
             return MapConst.VMAPInvalidHeightValue;
@@ -2218,7 +2226,7 @@ namespace Game.Maps
 
         public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
-            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift));
+            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), GetGameObjectFloor(phaseShift, x, y, z, maxSearchDist));
         }
 
         public bool IsInWater(PhaseShift phaseShift, float x, float y, float pZ)
