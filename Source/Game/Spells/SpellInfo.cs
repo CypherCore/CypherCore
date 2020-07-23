@@ -1378,6 +1378,14 @@ namespace Game.Spells
                 case 50241: // Evasive Charges
                     _auraState = AuraStateType.Unk22;
                     break;
+                case 9991:  // Touch of Zanzil
+                case 35325: // Glowing Blood
+                case 35328: // Lambent Blood
+                case 35329: // Vibrant Blood
+                case 35331: // Black Blood
+                case 49163: // Perpetual Instability
+                    _auraState = AuraStateType.FaerieFire;
+                    break;
                 default:
                     break;
             }
