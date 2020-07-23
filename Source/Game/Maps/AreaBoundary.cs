@@ -26,7 +26,7 @@ namespace Game.Maps
             _isInvertedBoundary = isInverted;
         }
 
-        public bool IsWithinBoundary(Position pos) { return IsWithinBoundaryArea(pos) != _isInvertedBoundary; }
+        public bool IsWithinBoundary(Position pos) { return pos != null && (IsWithinBoundaryArea(pos) != _isInvertedBoundary); }
 
         public virtual bool IsWithinBoundaryArea(Position pos) { return false; }
 
@@ -86,9 +86,6 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
             return !(pos.GetPositionX() < _minX || pos.GetPositionX() > _maxX || pos.GetPositionY() < _minY || pos.GetPositionY() > _maxY);
         }
 
@@ -113,9 +110,6 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
             double offX = _center.GetDoublePositionX() - pos.GetPositionX();
             double offY = _center.GetDoublePositionY() - pos.GetPositionY();
             return offX * offX + offY * offY <= _radiusSq;
@@ -136,10 +130,8 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
-            double offX = _center.GetDoublePositionX() - pos.GetPositionX(), offY = _center.GetDoublePositionY() - pos.GetPositionY();
+            double offX = _center.GetDoublePositionX() - pos.GetPositionX();
+            double offY = _center.GetDoublePositionY() - pos.GetPositionY();
             return (offX * offX) * _scaleXSq + (offY * offY) <= _radiusYSq;
         }
 
@@ -166,9 +158,6 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
             // half-plane signs
             bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
             bool sign2 = ((-_c.GetDoublePositionX() + pos.GetPositionX()) * _bcy - (-_c.GetDoublePositionY() + pos.GetPositionY()) * _bcx) < 0;
@@ -206,9 +195,6 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
             // half-plane signs
             bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
             bool sign2 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _day - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _dax) < 0;
@@ -239,13 +225,27 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            if (pos == null)
-                return false;
-
-            return !(pos.GetPositionZ() < _minZ || pos.GetPositionZ() > _maxZ);
+            return (_minZ <= pos.GetPositionZ() && pos.GetPositionZ() <= _maxZ);
         }
 
         float _minZ;
         float _maxZ;
+    }
+
+    class BoundaryUnionBoundary : AreaBoundary
+    {
+        public BoundaryUnionBoundary(AreaBoundary b1, AreaBoundary b2, bool isInverted = false) : base(isInverted)
+        {
+            _b1 = b1;
+            _b2 = b2;
+        }
+
+        public override bool IsWithinBoundaryArea(Position pos)
+        {
+            return _b1.IsWithinBoundary(pos) || _b2.IsWithinBoundary(pos);
+        }
+
+        AreaBoundary _b1;
+        AreaBoundary _b2;
     }
 }
