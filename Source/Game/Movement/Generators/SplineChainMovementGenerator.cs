@@ -93,7 +93,9 @@ namespace Game.Movement
                     SendPathSpline(me, span.Slice(_nextFirstWP - 1));
                     Log.outDebug(LogFilter.Movement, "{0}: Resumed spline chain generator from resume state.", me.GetGUID().ToString());
                     ++_nextIndex;
-                    if (_msToNext == 0)
+                    if (_nextIndex >= _chainSize)
+                        _msToNext = 0;
+                    else if (_msToNext == 0)
                         _msToNext = 1;
                     _nextFirstWP = 0;
                 }
