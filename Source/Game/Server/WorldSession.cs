@@ -60,7 +60,7 @@ namespace Game
             _collectionMgr = new CollectionMgr(this);
 
             m_Address = sock.GetRemoteIpAddress().ToString();
-            ResetTimeOutTime();
+            ResetTimeOutTime(false);
             DB.Login.Execute("UPDATE account SET online = 1 WHERE id = {0};", GetAccountId());     // One-time query
         }
 
@@ -240,7 +240,8 @@ namespace Game
             UpdateTimeOutTime(diff);
 
             // Before we process anything:
-            // If necessary, kick the player from the character select screen
+            /// If necessary, kick the player because the client didn't send anything for too long
+            /// (or they've been idling in character select)
             if (IsConnectionIdle())
                 m_Socket[(int)ConnectionType.Realm].CloseSocket();
 
@@ -737,7 +738,7 @@ namespace Game
                 SendAuthWaitQue(0);
 
             SetInQueue(false);
-            ResetTimeOutTime();
+            ResetTimeOutTime(false);
 
             SendSetTimeZoneInformation();
             SendFeatureSystemStatusGlueScreen();
@@ -815,7 +816,13 @@ namespace Game
             else
                 m_timeOutTime -= diff;
         }
-        public void ResetTimeOutTime() { m_timeOutTime = WorldConfig.GetIntValue(WorldCfg.SocketTimeouttime); }
+        public void ResetTimeOutTime(bool onlyActive)
+        {
+            if (GetPlayer())
+                m_timeOutTime = WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+            else if (!onlyActive)
+                m_timeOutTime = WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+        }
         bool IsConnectionIdle() { return (m_timeOutTime <= 0 && !m_inQueue); }
 
         public uint GetRecruiterId() { return recruiterId; }

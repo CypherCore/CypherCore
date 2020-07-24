@@ -237,6 +237,10 @@ namespace Game.Networking
                         authContinuedSession.Read();
                         HandleAuthContinuedSession(authContinuedSession);
                         break;
+                    case ClientOpcodes.KeepAlive:
+                        if (_worldSession != null)
+                            _worldSession.ResetTimeOutTime(true);
+                        break;
                     case ClientOpcodes.LogDisconnect:
                         break;
                     case ClientOpcodes.EnableNagle:
@@ -264,9 +268,8 @@ namespace Game.Networking
                             break;
                         }
 
-                        // Our Idle timer will reset on any non PING opcodes.
-                        // Catches people idling on the login screen and any lingering ingame connections.
-                        _worldSession.ResetTimeOutTime();
+                        // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
+                        _worldSession.ResetTimeOutTime(false);
                         _worldSession.QueuePacket(packet);
                         break;
                 }

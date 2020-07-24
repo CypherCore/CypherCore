@@ -267,7 +267,7 @@ namespace Game
                 else
                 {
                     sess.SetInQueue(false);
-                    sess.ResetTimeOutTime();
+                    sess.ResetTimeOutTime(false);
                     m_QueuedPlayer.Remove(iter);
                     found = true;                                   // removing queued session
                     break;
