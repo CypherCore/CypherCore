@@ -41,79 +41,83 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PartyInvite)]
         void HandlePartyInvite(PartyInviteClient packet)
         {
-            Player player = Global.ObjAccessor.FindPlayerByName(packet.TargetName);
+            Player invitingPlayer = GetPlayer();
+            Player invitedPlayer = Global.ObjAccessor.FindPlayerByName(packet.TargetName);
 
             // no player
-            if (!player)
+            if (invitedPlayer == null)
             {
                 SendPartyResult(PartyOperation.Invite, packet.TargetName, PartyResult.BadPlayerNameS);
                 return;
             }
 
             // player trying to invite himself (most likely cheating)
-            if (player == GetPlayer())
+            if (invitedPlayer == invitingPlayer)
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.BadPlayerNameS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.BadPlayerNameS);
                 return;
             }
 
             // restrict invite to GMs
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowGmGroup) && !GetPlayer().IsGameMaster() && player.IsGameMaster())
+            if (!WorldConfig.GetBoolValue(WorldCfg.AllowGmGroup) && !invitingPlayer.IsGameMaster() && invitedPlayer.IsGameMaster())
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.BadPlayerNameS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.BadPlayerNameS);
                 return;
             }
 
             // can't group with
-            if (!GetPlayer().IsGameMaster() && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && GetPlayer().GetTeam() != player.GetTeam())
+            if (!invitingPlayer.IsGameMaster() && !WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && invitingPlayer.GetTeam() != invitedPlayer.GetTeam())
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.PlayerWrongFaction);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.PlayerWrongFaction);
                 return;
             }
-            if (GetPlayer().GetInstanceId() != 0 && player.GetInstanceId() != 0 && GetPlayer().GetInstanceId() != player.GetInstanceId() && GetPlayer().GetMapId() == player.GetMapId())
+            if (invitingPlayer.GetInstanceId() != 0 && invitedPlayer.GetInstanceId() != 0 && invitingPlayer.GetInstanceId() != invitedPlayer.GetInstanceId() && invitingPlayer.GetMapId() == invitedPlayer.GetMapId())
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.TargetNotInInstanceS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.TargetNotInInstanceS);
                 return;
             }
             // just ignore us
-            if (player.GetInstanceId() != 0 && player.GetDungeonDifficultyID() != GetPlayer().GetDungeonDifficultyID())
+            if (invitedPlayer.GetInstanceId() != 0 && invitedPlayer.GetDungeonDifficultyID() != invitingPlayer.GetDungeonDifficultyID())
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.IgnoringYouS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.IgnoringYouS);
                 return;
             }
 
-            if (player.GetSocial().HasIgnore(GetPlayer().GetGUID()))
+            if (invitedPlayer.GetSocial().HasIgnore(invitingPlayer.GetGUID()))
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.IgnoringYouS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.IgnoringYouS);
                 return;
             }
 
-            if (!player.GetSocial().HasFriend(GetPlayer().GetGUID()) && GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
+            if (!invitedPlayer.GetSocial().HasFriend(invitingPlayer.GetGUID()) && invitingPlayer.GetLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.InviteRestricted);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.InviteRestricted);
                 return;
             }
 
-            Group group = GetPlayer().GetGroup();
-            if (group && group.IsBGGroup())
-                group = GetPlayer().GetOriginalGroup();
+            Group group = invitingPlayer.GetGroup();
+            if (group != null && group.IsBGGroup())
+                group = invitingPlayer.GetOriginalGroup();
 
-            Group group2 = player.GetGroup();
-            if (group2 && group2.IsBGGroup())
-                group2 = player.GetOriginalGroup();
+            if (group == null)
+                group = invitingPlayer.GetGroupInvite();
+
+            Group group2 = invitedPlayer.GetGroup();
+            if (group2 != null && group2.IsBGGroup())
+                group2 = invitedPlayer.GetOriginalGroup();
 
             PartyInvite partyInvite;
             // player already in another group or invited
-            if (group2 || player.GetGroupInvite())
+            if (group2 || invitedPlayer.GetGroupInvite())
             {
-                SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.AlreadyInGroupS);
+                SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.AlreadyInGroupS);
 
                 if (group2)
                 {
                     // tell the player that they were invited but it failed as they were already in a group
                     partyInvite = new PartyInvite();
-                    partyInvite.Initialize(GetPlayer(), packet.ProposedRoles, false);
-                    player.SendPacket(partyInvite);
+                    partyInvite.Initialize(invitingPlayer, packet.ProposedRoles, false);
+                    invitedPlayer.SendPacket(partyInvite);
                 }
 
                 return;
@@ -122,9 +126,10 @@ namespace Game
             if (group)
             {
                 // not have permissions for invite
-                if (!group.IsLeader(GetPlayer().GetGUID()) && !group.IsAssistant(GetPlayer().GetGUID()))
+                if (!group.IsLeader(invitingPlayer.GetGUID()) && !group.IsAssistant(invitingPlayer.GetGUID()))
                 {
-                    SendPartyResult(PartyOperation.Invite, "", PartyResult.NotLeader);
+                    if (group.IsCreated())
+                        SendPartyResult(PartyOperation.Invite, "", PartyResult.NotLeader);
                     return;
                 }
                 // not have place
@@ -138,14 +143,14 @@ namespace Game
             // ok, but group not exist, start a new group
             // but don't create and save the group to the DB until
             // at least one person joins
-            if (!group)
+            if (group == null)
             {
                 group = new Group();
                 // new group: if can't add then delete
-                if (!group.AddLeaderInvite(GetPlayer()))
+                if (!group.AddLeaderInvite(invitingPlayer))
                     return;
 
-                if (!group.AddInvite(player))
+                if (!group.AddInvite(invitedPlayer))
                 {
                     group.RemoveAllInvites();
                     return;
@@ -154,15 +159,15 @@ namespace Game
             else
             {
                 // already existed group: if can't add then just leave
-                if (!group.AddInvite(player))
+                if (!group.AddInvite(invitedPlayer))
                     return;
             }
 
             partyInvite = new PartyInvite();
-            partyInvite.Initialize(GetPlayer(), packet.ProposedRoles, true);
-            player.SendPacket(partyInvite);
+            partyInvite.Initialize(invitingPlayer, packet.ProposedRoles, true);
+            invitedPlayer.SendPacket(partyInvite);
 
-            SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.Ok);
+            SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.Ok);
         }
 
         [WorldPacketHandler(ClientOpcodes.PartyInviteResponse)]
@@ -315,7 +320,8 @@ namespace Game
         void HandleLeaveGroup(LeaveGroup packet)
         {
             Group grp = GetPlayer().GetGroup();
-            if (!grp)
+            Group grpInvite = GetPlayer().GetGroupInvite();
+            if (grp == null && grpInvite == null)
                 return;
 
             if (GetPlayer().InBattleground())
@@ -328,9 +334,16 @@ namespace Game
             /********************/
 
             // everything's fine, do it
-            SendPartyResult(PartyOperation.Leave, GetPlayer().GetName(), PartyResult.Ok);
-
-            GetPlayer().RemoveFromGroup(RemoveMethod.Leave);
+            if (grp != null)
+            {
+                SendPartyResult(PartyOperation.Leave, GetPlayer().GetName(), PartyResult.Ok);
+                GetPlayer().RemoveFromGroup(RemoveMethod.Leave);
+            }
+            else if (grpInvite != null && grpInvite.GetLeaderGUID() == GetPlayer().GetGUID())
+            { // pending group creation being cancelled
+                SendPartyResult(PartyOperation.Leave, GetPlayer().GetName(), PartyResult.Ok);
+                grpInvite.Disband();
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.SetLootMethod)]
