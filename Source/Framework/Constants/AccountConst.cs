@@ -770,7 +770,7 @@ namespace Framework.Constants
         CommandGroupAssistant = 862,
         CommandGroupMaintank = 863,
         CommandGroupMainassist = 864,
-        CommandNpcShowloot = 865, // Reserved
+        CommandNpcShowloot = 865,
         CommandListSpawnpoints = 866, // Reserved
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,

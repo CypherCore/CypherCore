@@ -349,7 +349,15 @@ namespace Framework.Constants
         CommandWhisperon = 285,
         CommandWhisperoff = 286,
         CommandCreatguidnotfound = 287,
-        // Ticket Strings Need Rewrite // 288-296 Free
+        CommandNotDeadOrNoLoot = 288,
+        CommandNpcShowLootHeader = 289,
+        CommandNpcShowLootLabel = 290,
+        CommandNpcShowLootEntry = 291,
+        CommandNpcShowLootMoney = 292,
+        CommandNpcShowLootLabel2 = 293,
+        CommandNpcShowLootSublabel = 294,
+        CommandNpcShowLootEntry2 = 295,
+        // 296 free
 
         // End
         CommandSpawndist = 297,
