@@ -4085,10 +4085,13 @@ namespace Game.Spells
             if (!unitTarget)
                 return;
 
-            Creature creatureTarget = unitTarget.ToCreature();
-            if (creatureTarget)
-                if (creatureTarget.IsWorldBoss() || creatureTarget.IsDungeonBoss())
-                    return;
+            if (m_caster.GetTypeId() == TypeId.Player || m_caster.GetOwnerGUID().IsPlayer() || m_caster.IsHunterPet())
+            {
+                Creature creatureTarget = unitTarget.ToCreature();
+                if (creatureTarget != null)
+                    if (creatureTarget.IsWorldBoss() || creatureTarget.IsDungeonBoss())
+                        return;
+            }
 
             // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
             if (unitTarget.HasUnitState(UnitState.Root | UnitState.Stunned))
