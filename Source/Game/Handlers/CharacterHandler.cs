@@ -872,6 +872,77 @@ namespace Game
                 PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(pCurrChar.GetRace(), pCurrChar.GetClass());
                 foreach (var spellId in info.castSpells)
                     pCurrChar.CastSpell(pCurrChar, spellId, true);
+
+                // start with every map explored
+                if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
+                {
+                    for (ushort i = 0; i < PlayerConst.ExploredZonesSize; i++)
+                        pCurrChar.SetUpdateFieldValue(ref pCurrChar.m_values.ModifyValue(pCurrChar.m_activePlayerData).ModifyValue(pCurrChar.m_activePlayerData.ExploredZones, i), 0xFFFFFFFFFFFFFFFF);
+                }
+
+                //Reputations if "StartAllReputation" is enabled
+                if (WorldConfig.GetBoolValue(WorldCfg.StartAllRep))
+                {
+                    ReputationMgr repMgr = pCurrChar.GetReputationMgr();
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(942), 42999, false); // Cenarion Expedition
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(935), 42999, false); // The Sha'tar
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(936), 42999, false); // Shattrath City
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1011), 42999, false); // Lower City
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(970), 42999, false); // Sporeggar
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(967), 42999, false); // The Violet Eye
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(989), 42999, false); // Keepers of Time
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(932), 42999, false); // The Aldor
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(934), 42999, false); // The Scryers
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1038), 42999, false); // Ogri'la
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1077), 42999, false); // Shattered Sun Offensive
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1106), 42999, false); // Argent Crusade
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1104), 42999, false); // Frenzyheart Tribe
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1090), 42999, false); // Kirin Tor
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1098), 42999, false); // Knights of the Ebon Blade
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1156), 42999, false); // The Ashen Verdict
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1073), 42999, false); // The Kalu'ak
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1105), 42999, false); // The Oracles
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1119), 42999, false); // The Sons of Hodir
+                    repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1091), 42999, false); // The Wyrmrest Accord
+
+                    // Factions depending on team, like cities and some more stuff
+                    switch (pCurrChar.GetTeam())
+                    {
+                        case Team.Alliance:
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(72), 42999, false); // Stormwind
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(47), 42999, false); // Ironforge
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(69), 42999, false); // Darnassus
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(930), 42999, false); // Exodar
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(730), 42999, false); // Stormpike Guard
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(978), 42999, false); // Kurenai
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(54), 42999, false); // Gnomeregan Exiles
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(946), 42999, false); // Honor Hold
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1037), 42999, false); // Alliance Vanguard
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1068), 42999, false); // Explorers' League
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1126), 42999, false); // The Frostborn
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1094), 42999, false); // The Silver Covenant
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1050), 42999, false); // Valiance Expedition
+                            break;
+                        case Team.Horde:
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(76), 42999, false); // Orgrimmar
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(68), 42999, false); // Undercity
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(81), 42999, false); // Thunder Bluff
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(911), 42999, false); // Silvermoon City
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(729), 42999, false); // Frostwolf Clan
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(941), 42999, false); // The Mag'har
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(530), 42999, false); // Darkspear Trolls
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(947), 42999, false); // Thrallmar
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1052), 42999, false); // Horde Expedition
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1067), 42999, false); // The Hand of Vengeance
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1124), 42999, false); // The Sunreavers
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1064), 42999, false); // The Taunka
+                            repMgr.SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(1085), 42999, false); // Warsong Offensive
+                            break;
+                        default:
+                            break;
+                    }
+                    repMgr.SendState(null);
+                }
             }
 
             // show time before shutdown if shutdown planned.

@@ -272,56 +272,6 @@ namespace Game.Entities
             SetCreateCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
             SetCreateCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
-            // start with every map explored
-            if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
-            {
-                for (ushort i = 0; i < PlayerConst.ExploredZonesSize; i++)
-                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i), 0xFFFFFFFFFFFFFFFF);
-            }
-
-            //Reputations if "StartAllReputation" is enabled, -- TODO: Fix this in a better way
-            if (WorldConfig.GetBoolValue(WorldCfg.StartAllRep))
-            {
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(942), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(935), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(936), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(1011), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(970), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(967), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(989), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(932), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(934), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(1038), 42999);
-                GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(1077), 42999);
-
-                // Factions depending on team, like cities and some more stuff
-                switch (GetTeam())
-                {
-                    case Team.Alliance:
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(72), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(47), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(69), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(930), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(730), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(978), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(54), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(946), 42999);
-                        break;
-                    case Team.Horde:
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(76), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(68), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(81), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(911), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(729), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(941), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(530), 42999);
-                        GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(947), 42999);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
             // Played time
             m_Last_tick = Time.UnixTime;
             m_PlayedTimeTotal = 0;

@@ -183,14 +183,15 @@ namespace Game
             SetFactionStanding setFactionStanding = new SetFactionStanding();
             setFactionStanding.ReferAFriendBonus = 0.0f;
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
-            setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, faction.Standing));
+            if (faction != null)
+                setFactionStanding.Faction.Add(new FactionStandingData((int)faction.ReputationListID, faction.Standing));
 
             foreach (var state in _factions.Values)
             {
                 if (state.needSend)
                 {
                     state.needSend = false;
-                    if (state.ReputationListID != faction.ReputationListID)
+                    if (faction == null || state.ReputationListID != faction.ReputationListID)
                         setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, state.Standing));
                 }
             }
@@ -214,12 +215,6 @@ namespace Game
             }
 
             _player.SendPacket(initFactions);
-        }
-
-        void SendStates()
-        {
-            foreach (var faction in _factions)
-                SendState(faction.Value);
         }
 
         public void SendVisible(FactionState faction, bool visible = true)
