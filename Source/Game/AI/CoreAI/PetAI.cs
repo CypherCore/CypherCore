@@ -52,7 +52,6 @@ namespace Game.AI
         {
             if (!me.IsAlive())
             {
-                Log.outDebug(LogFilter.Server, "Creature stoped attacking cuz his dead [{0}]", me.GetGUID().ToString());
                 me.GetMotionMaster().Clear();
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop();

@@ -450,6 +450,15 @@ namespace Game.Entities
                 if (victim.IsTypeId(TypeId.Player))
                     victim.SetInCombatWith(this);
 
+                Unit owner = victim.GetOwner();
+                if (owner != null)
+                {
+                    AddThreat(owner, 0.0f);
+                    SetInCombatWith(owner);
+                    if (owner.GetTypeId() == TypeId.Player)
+                        owner.SetInCombatWith(this);
+                }
+
                 creature.SendAIReaction(AiReaction.Hostile);
                 creature.CallAssistance();
 
@@ -546,7 +555,7 @@ namespace Game.Entities
         {
             Unit victim = GetVictim();
             if (victim != null)
-                if (!IsControlledByPlayer() || IsInCombatWith(victim) || victim.IsInCombatWith(this))
+                if ((!IsPet() && GetPlayerMovingMe() == null) || IsInCombatWith(victim) || victim.IsInCombatWith(this))
                     return victim;
 
             if (!attackerList.Empty())
