@@ -34,7 +34,7 @@ namespace Game.BattleFields
             m_BattleId = BattlefieldIds.WG;
             m_ZoneId = WGConst.ZoneId;
             m_MapId = WGConst.MapId;
-            m_Map = Global.MapMgr.FindMap(m_MapId, 0);
+            m_Map = Global.MapMgr.CreateBaseMap(m_MapId);
 
             m_MaxPlayer = WorldConfig.GetUIntValue(WorldCfg.WintergraspPlrMax);
             m_IsEnabled = WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable);

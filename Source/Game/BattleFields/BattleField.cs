@@ -663,21 +663,13 @@ namespace Game.BattleFields
 
         public Creature SpawnCreature(uint entry, Position pos)
         {
-            //Get map object
-            Map map = Global.MapMgr.CreateBaseMap(m_MapId);
-            if (!map)
-            {
-                Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0} map not found", entry);
-                return null;
-            }
-
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: entry {0} does not exist.", entry);
                 return null;
             }
 
-            Creature creature = Creature.CreateCreature(entry, map, pos);
+            Creature creature = Creature.CreateCreature(entry, m_Map, pos);
             if (!creature)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
@@ -687,7 +679,7 @@ namespace Game.BattleFields
             creature.SetHomePosition(pos);
 
             // Set creature in world
-            map.AddToMap(creature);
+            m_Map.AddToMap(creature);
             creature.SetActive(true);
 
             return creature;
@@ -696,11 +688,6 @@ namespace Game.BattleFields
         // Method for spawning gameobject on map
         public GameObject SpawnGameObject(uint entry, Position pos, Quaternion rotation)
         {
-            // Get map object
-            Map map = Global.MapMgr.CreateBaseMap(m_MapId);
-            if (!map)
-                return null;
-
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield.SpawnGameObject: GameObject template {0} not found in database! Battlefield not created!", entry);
@@ -708,7 +695,7 @@ namespace Game.BattleFields
             }
 
             // Create gameobject
-            GameObject go = GameObject.CreateGameObject(entry, map, pos, rotation, 255, GameObjectState.Ready);
+            GameObject go = GameObject.CreateGameObject(entry, m_Map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
@@ -716,7 +703,7 @@ namespace Game.BattleFields
             }
 
             // Add to world
-            map.AddToMap(go);
+            m_Map.AddToMap(go);
             go.SetActive(true);
 
             return go;

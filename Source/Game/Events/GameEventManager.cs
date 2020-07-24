@@ -1170,9 +1170,9 @@ namespace Game
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
 
                     // Spawn if necessary (loaded grids only)
-                    Map map = Global.MapMgr.CreateBaseMap(data.mapid);
+                    Map map = Global.MapMgr.FindMap(data.mapid, 0);
                     // We use spawn coords to spawn
-                    if (!map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
                         Creature.CreateCreatureFromDB(guid, map);
                 }
             }
@@ -1193,9 +1193,9 @@ namespace Game
                     Global.ObjectMgr.AddGameObjectToGrid(guid, data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
-                    Map map = Global.MapMgr.CreateBaseMap(data.mapid);
+                    Map map = Global.MapMgr.FindMap(data.mapid, 0);
                     // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                    if (!map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
                     {
                         GameObject pGameobject = GameObject.CreateGameObjectFromDB(guid, map, false);
                         // @todo find out when it is add to map
