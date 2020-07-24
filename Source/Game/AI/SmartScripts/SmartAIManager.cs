@@ -459,7 +459,7 @@ namespace Game.AI
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid action type ({2}), skipped.", e.entryOrGuid, e.event_id, e.GetActionType());
                 return false;
             }
-            if (e.Event.event_phase_mask > (uint)PhaseBits.All)
+            if (e.Event.event_phase_mask > (uint)SmartEventPhaseBits.All)
             {
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid phase mask ({2}), skipped.", e.entryOrGuid, e.event_id, e.Event.event_phase_mask);
                 return false;
@@ -648,6 +648,27 @@ namespace Game.AI
                         {
                             if (!IsTextValid(e, e.Event.textOver.textGroupID))
                                 return false;
+                            break;
+                        }
+                    case SmartEvents.PhaseChange:
+                        {
+                            if (e.Event.eventPhaseChange.phasemask == 0)
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has no param set, event won't be executed!.");
+                                return false;
+                            }
+
+                            if (e.Event.eventPhaseChange.phasemask > (uint)SmartEventPhaseBits.All)
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid phasemask {e.Event.eventPhaseChange.phasemask}, skipped.");
+                                return false;
+                            }
+
+                            if (e.Event.event_phase_mask != 0 && (e.Event.event_phase_mask & e.Event.eventPhaseChange.phasemask) == 0)
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses event phasemask {e.Event.event_phase_mask} and incompatible event_param1 {e.Event.eventPhaseChange.phasemask}, skipped.");
+                                return false;
+                            }
                             break;
                         }
                     case SmartEvents.IsBehindTarget:
@@ -1644,7 +1665,7 @@ namespace Game.AI
             { SmartEvents.JustCreated,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GossipHello,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.FollowCompleted,          SmartScriptTypeMaskId.Creature },
-            { SmartEvents.Unused66,                 SmartScriptTypeMaskId.None     },
+            { SmartEvents.PhaseChange,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.IsBehindTarget,           SmartScriptTypeMaskId.Creature },
             { SmartEvents.GameEventStart,           SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GameEventEnd,             SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
@@ -1703,6 +1724,11 @@ namespace Game.AI
         public SmartEvents GetEventType() { return Event.type; }
         public SmartActions GetActionType() { return Action.type; }
         public SmartTargets GetTargetType() { return Target.type; }
+
+        public override string ToString()
+        {
+            return $"Entry {entryOrGuid} SourceType {GetScriptType()} Event {event_id} Action {GetActionType()}";
+        }
 
         public int entryOrGuid;
         public SmartScriptType source_type;
@@ -1815,6 +1841,9 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public Dummy dummy;
+
+        [FieldOffset(16)]
+        public EventPhaseChange eventPhaseChange;
 
         [FieldOffset(16)]
         public BehindTarget behindTarget;
@@ -2009,6 +2038,10 @@ namespace Game.AI
         {
             public uint spell;
             public uint effIndex;
+        }
+        public struct EventPhaseChange
+        {
+            public uint phasemask;
         }
         public struct BehindTarget
         {

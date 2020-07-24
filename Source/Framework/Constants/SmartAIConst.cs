@@ -69,7 +69,7 @@ namespace Framework.Constants
         Count = 12
     }
 
-    public enum PhaseBits
+    public enum SmartEventPhaseBits
     {
         PhaseAlwaysBit = 0,
         Phase1Bit = 1,
@@ -204,7 +204,7 @@ namespace Framework.Constants
         JustCreated = 63,      // None
         GossipHello = 64,      // noReportUse (for GOs)
         FollowCompleted = 65,      // None
-        Unused66 = 66,
+        PhaseChange = 66,
         IsBehindTarget = 67,      // Cooldownmin, Cooldownmax
         GameEventStart = 68,      // GameEvent.Entry
         GameEventEnd = 69,      // GameEvent.Entry

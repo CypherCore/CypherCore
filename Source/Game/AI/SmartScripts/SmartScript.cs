@@ -3187,6 +3187,14 @@ namespace Game.AI
                         ProcessAction(e, unit, var0, var1);
                         break;
                     }
+                case SmartEvents.PhaseChange:
+                    {
+                        if (!IsInPhase(e.Event.eventPhaseChange.phasemask))
+                            return;
+
+                        ProcessAction(e, GetLastInvoker());
+                        break;
+                    }
                 case SmartEvents.GameEventStart:
                 case SmartEvents.GameEventEnd:
                     {
@@ -3990,15 +3998,24 @@ namespace Game.AI
         void IncPhase(uint p)
         {
             // protect phase from overflowing
-            mEventPhase = Math.Min((uint)SmartPhase.Phase12, mEventPhase + p);
+            SetPhase(Math.Min((uint)SmartPhase.Phase12, mEventPhase + p));
         }
 
         void DecPhase(uint p)
         {
             if (p >= mEventPhase)
-                mEventPhase = 0;
+                SetPhase(0);
             else
-                mEventPhase -= p;
+                SetPhase(mEventPhase - p);
+        }
+        void SetPhase(uint p)
+        {
+            uint oldPhase = mEventPhase;
+
+            mEventPhase = p;
+
+            if (oldPhase != mEventPhase)
+                ProcessEventsFor(SmartEvents.PhaseChange);
         }
         bool IsInPhase(uint p)
         {
@@ -4007,7 +4024,6 @@ namespace Game.AI
 
             return ((1 << (int)(mEventPhase - 1)) & p) != 0;
         }
-        void SetPhase(uint p = 0) { mEventPhase = p; }
 
         void RemoveStoredEvent(uint id)
         {
