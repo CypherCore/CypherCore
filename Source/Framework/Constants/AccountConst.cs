@@ -214,7 +214,7 @@ namespace Framework.Constants
         CommandDebugGetitemstate = 306,
         CommandDebugGetitemvalue = 307, // DEPRECATED: DON'T REUSE
         CommandDebugGetvalue = 308, // DEPRECATED: DON'T REUSE
-        CommandDebugHostil = 309,
+        CommandDebugCombat = 309,
         CommandDebugItemexpire = 310,
         CommandDebugLootrecipient = 311,
         CommandDebugLos = 312,

@@ -435,8 +435,8 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("hostil", RBACPermissions.CommandDebugHostil)]
-        static bool HandleDebugHostileRefListCommand(StringArguments args, CommandHandler handler)
+        [Command("combat", RBACPermissions.CommandDebugCombat)]
+        static bool HandleDebugCombatListCommand(StringArguments args, CommandHandler handler)
         {
             Unit target = handler.GetSelectedUnit();
             if (!target)
