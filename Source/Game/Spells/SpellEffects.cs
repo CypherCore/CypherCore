@@ -3142,25 +3142,6 @@ namespace Game.Spells
                                     }
                                 }
                                 return;
-                            case 58983: // Big Blizzard Bear
-                                {
-                                    if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
-                                        return;
-
-                                    // Prevent stacking of mounts and client crashes upon dismounting
-                                    unitTarget.RemoveAurasByType(AuraType.Mounted);
-
-                                    // Triggered spell id dependent on riding skilll
-                                    ushort skillval = unitTarget.ToPlayer().GetSkillValue(SkillType.Riding);
-                                    if (skillval != 0)
-                                    {
-                                        if (skillval >= 150)
-                                            unitTarget.CastSpell(unitTarget, 58999, true);
-                                        else
-                                            unitTarget.CastSpell(unitTarget, 58997, true);
-                                    }
-                                    return;
-                                }
                             case 59317:                                 // Teleporting
                                 {
 
@@ -4022,7 +4003,7 @@ namespace Game.Spells
                     spellEffectExtraData.SpellVisualId = (uint)effectInfo.MiscValueB;
                 }
                 // Spell is not using explicit target - no generated path
-                if (m_preGeneratedPath.GetPathType() == PathType.Blank)
+                if (m_preGeneratedPath == null)
                 {
                     Position pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetCombatReach(), unitTarget.GetRelativeAngle(m_caster.GetPosition()));
                     if (MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) && m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
