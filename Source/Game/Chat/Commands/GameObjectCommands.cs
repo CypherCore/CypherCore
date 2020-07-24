@@ -51,9 +51,11 @@ namespace Game.Chat
                 return false;
             }
 
+            uint autoCloseTime = obj.GetGoInfo().GetAutoCloseTime() != 0 ? 10000u : 0u;
+
             // Activate
             obj.SetLootState(LootState.Ready);
-            obj.UseDoorOrButton(10000, false, handler.GetSession().GetPlayer());
+            obj.UseDoorOrButton(autoCloseTime, false, handler.GetSession().GetPlayer());
 
             handler.SendSysMessage("Object activated!");
             return true;
