@@ -57,12 +57,14 @@ namespace Game.Networking.Packets
             uint areasCount = _worldPacket.ReadBits<uint>(4);
 
             Request.Read(_worldPacket);
+            RequestID = _worldPacket.ReadUInt32();
 
             for (int i = 0; i < areasCount; ++i)
                 Areas.Add(_worldPacket.ReadInt32());
         }
 
         public WhoRequest Request = new WhoRequest();
+        public uint RequestID;
         public List<int> Areas= new List<int>();
     }
 
@@ -75,9 +77,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Response.Count, 6);
             _worldPacket.FlushBits();
 
+            _worldPacket.WriteUInt32(RequestID);
             Response.ForEach(p => p.Write(_worldPacket));
         }
 
+        public uint RequestID;
         public List<WhoEntry> Response = new List<WhoEntry>();
     }
 

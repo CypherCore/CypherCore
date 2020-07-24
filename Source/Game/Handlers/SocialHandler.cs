@@ -66,6 +66,8 @@ namespace Game
             uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
 
             WhoResponsePkt response = new WhoResponsePkt();
+            response.RequestID = whoRequest.RequestID;
+
             List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
             foreach (WhoListPlayerInfo target in whoList)
             {
