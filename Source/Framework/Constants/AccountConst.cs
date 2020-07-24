@@ -244,7 +244,7 @@ namespace Framework.Constants
         CommandDebugSpawnvehicle = 336,
         CommandDebugThreat = 337,
         CommandDebugUpdate = 338, // DEPRECATED: DON'T REUSE
-        CommandDebugUws = 339,
+        CommandDebugWorldState = 339,
         CommandWpgps = 340,
         CommandDeserter = 341,
         CommandDeserterBg = 342,

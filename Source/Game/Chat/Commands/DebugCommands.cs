@@ -835,7 +835,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("uws", RBACPermissions.CommandDebugUws)]
+        [Command("worldstate", RBACPermissions.CommandDebugWorldState)]
         static bool HandleDebugUpdateWorldStateCommand(StringArguments args, CommandHandler handler)
         {
             if (!uint.TryParse(args.NextString(), out uint variable) || variable == 0)
