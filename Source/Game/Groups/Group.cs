@@ -2387,6 +2387,11 @@ namespace Game.Groups
             return GetLeaderGUID() == guid;
         }
 
+        public bool IsAssistant(ObjectGuid guid)
+        {
+            return GetMemberFlags(guid).HasAnyFlag(GroupMemberFlags.Assistant);
+        }
+        
         public ObjectGuid GetMemberGUID(string name)
         {
             foreach (var member in m_memberSlots)
@@ -2395,12 +2400,13 @@ namespace Game.Groups
             return ObjectGuid.Empty;
         }
 
-        public bool IsAssistant(ObjectGuid guid)
+        public GroupMemberFlags GetMemberFlags(ObjectGuid guid)
         {
             var mslot = _getMemberSlot(guid);
             if (mslot == null)
-                return false;
-            return mslot.flags.HasAnyFlag(GroupMemberFlags.Assistant);
+                return 0;
+
+            return mslot.flags;
         }
 
         public bool SameSubGroup(ObjectGuid guid1, ObjectGuid guid2)

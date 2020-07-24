@@ -766,10 +766,10 @@ namespace Framework.Constants
         CommandGobjectSpawngroup = 858, // Reserved For DynamicSpawning
         CommandGobjectDespawngroup = 859, // Reserved For DynamicSpawning
         CommandListRespawns = 860, // Reserved For DynamicSpawning
-        CommandGroupSet = 861, // Reserved
-        CommandGroupAssistant = 862, // Reserved
-        CommandGroupMaintank = 863, // Reserved
-        CommandGroupMainassist = 864, // Reserved
+        CommandGroupSet = 861,
+        CommandGroupAssistant = 862,
+        CommandGroupMaintank = 863,
+        CommandGroupMainassist = 864,
         CommandNpcShowloot = 865, // Reserved
         CommandListSpawnpoints = 866, // Reserved
         CommandReloadQuestGreetingLocale = 867, // Reserved

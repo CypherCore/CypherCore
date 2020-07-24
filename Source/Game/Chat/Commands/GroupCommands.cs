@@ -54,7 +54,6 @@ namespace Game.Chat
             }
 
             Player gmPlayer = handler.GetSession().GetPlayer();
-            Group gmGroup = gmPlayer.GetGroup();
             Map gmMap = gmPlayer.GetMap();
             bool toInstance = gmMap.Instanceable();
             bool onlyLocalSummon = false;
@@ -133,9 +132,8 @@ namespace Game.Chat
             Player player;
             Group group;
             ObjectGuid guid;
-            string nameStr = args.NextString();
 
-            if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
+            if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
                 return false;
 
             if (!group)
@@ -347,6 +345,74 @@ namespace Game.Chat
 
             // And finish after every iterator is done.
             return true;
+        }
+
+        [CommandGroup("set", RBACPermissions.CommandGroupSet)]
+        class GroupSetCommands
+        {
+            [Command("assistant", RBACPermissions.CommandGroupAssistant)]
+            static bool HandleGroupSetAssistantCommand(StringArguments args, CommandHandler handler)
+            {
+                return GroupFlagCommand(args, handler, GroupMemberFlags.Assistant, "Assistant");
+            }
+
+            [Command("leader", RBACPermissions.CommandGroupLeader)]
+            static bool HandleGroupSetLeaderCommand(StringArguments args, CommandHandler handler)
+            {
+                return HandleGroupLeaderCommand(args, handler);
+            }
+
+            [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
+            static bool HandleGroupSetMainAssistCommand(StringArguments args, CommandHandler handler)
+            {
+                return GroupFlagCommand(args, handler, GroupMemberFlags.MainAssist, "Main Assist");
+            }
+
+            [Command("maintank", RBACPermissions.CommandGroupMaintank)]
+            static bool HandleGroupSetMainTankCommand(StringArguments args, CommandHandler handler)
+            {
+                return GroupFlagCommand(args, handler, GroupMemberFlags.MainTank, "Main Tank");
+            }
+
+            static bool GroupFlagCommand(StringArguments args, CommandHandler handler, GroupMemberFlags flag, string what)
+            {
+                Player player;
+                Group group;
+                ObjectGuid guid;
+
+                if (!handler.GetPlayerGroupAndGUIDByName(args.NextString(), out player, out group, out guid))
+                    return false;
+
+                if (!group)
+                {
+                    handler.SendSysMessage(CypherStrings.NotInGroup, player.GetName());
+                    return false;
+                }
+
+                if (!group.IsRaidGroup())
+                {
+                    handler.SendSysMessage(CypherStrings.NotInRaidGroup, player.GetName());
+                    return false;
+                }
+
+                if (flag == GroupMemberFlags.Assistant && group.IsLeader(guid))
+                {
+                    handler.SendSysMessage(CypherStrings.LeaderCannotBeAssistant, player.GetName());
+                    return false;
+                }
+
+                if (group.GetMemberFlags(guid).HasAnyFlag(flag))
+                {
+                    group.SetGroupMemberFlag(guid, false, flag);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "no longer", what);
+                }
+                else
+                {
+                    group.SetGroupMemberFlag(guid, true, flag);
+                    handler.SendSysMessage(CypherStrings.GroupRoleChanged, player.GetName(), "now", what);
+                }
+                return true;
+            }
         }
     }
 }

@@ -954,7 +954,10 @@ namespace Framework.Constants
         DisallowTicketsConfig = 1190,
         BanExists = 1191,
         ChangeAccountSuccess = 1192,
-        // Room For More Level 3              1193-1198 Not Used
+        NotInRaidGroup = 1193,
+        GroupRoleChanged = 1194,
+        LeaderCannotBeAssistant = 1195,
+        // Room for more level 3              1196-1198 not used
 
         // Debug Commands
         DebugAreatriggerLeft = 1999,
