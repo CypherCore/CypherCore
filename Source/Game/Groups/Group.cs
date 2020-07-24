@@ -2586,6 +2586,7 @@ namespace Game.Groups
         public List<MemberSlot> GetMemberSlots() { return m_memberSlots; }
         public GroupReference GetFirstMember() { return (GroupReference)m_memberMgr.GetFirst(); }
         public uint GetMembersCount() { return (uint)m_memberSlots.Count; }
+        public uint GetInviteeCount() { return (uint)m_invitees.Count; }
         public GroupFlags GetGroupFlags() { return m_groupFlags; }
 
         bool IsReadyCheckStarted() { return m_readyCheckStarted; }

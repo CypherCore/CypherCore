@@ -253,11 +253,14 @@ namespace Game.Entities
 
             group.RemoveInvite(this);
 
-            if (group.GetMembersCount() <= 1)                       // group has just 1 member => disband
+            if (group.IsCreated())
             {
-                if (group.IsCreated())
+                if (group.GetMembersCount() <= 1) // group has just 1 member => disband
                     group.Disband(true);
-                else
+            }
+            else
+            {
+                if (group.GetInviteeCount() <= 1)
                     group.RemoveAllInvites();
             }
         }
