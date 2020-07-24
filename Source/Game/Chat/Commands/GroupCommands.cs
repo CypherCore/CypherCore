@@ -57,15 +57,19 @@ namespace Game.Chat
             Group gmGroup = gmPlayer.GetGroup();
             Map gmMap = gmPlayer.GetMap();
             bool toInstance = gmMap.Instanceable();
+            bool onlyLocalSummon = false;
 
-            // we are in instance, and can summon only player in our group with us as lead
-            if (toInstance && (
-                !gmGroup || group.GetLeaderGUID() != gmPlayer.GetGUID() ||
-                gmGroup.GetLeaderGUID() != gmPlayer.GetGUID()))
-            // the last check is a bit excessive, but let it be, just in case
+            // make sure people end up on our instance of the map, disallow far summon if intended destination is different from actual destination
+            // note: we could probably relax this further by checking permanent saves and the like, but eh
+            // :close enough:
+            if (toInstance)
             {
-                handler.SendSysMessage(CypherStrings.CannotSummonToInst);
-                return false;
+                Player groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
+                if (!groupLeader || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
+                {
+                    handler.SendSysMessage(CypherStrings.PartialGroupSummon);
+                    onlyLocalSummon = true;
+                }
             }
 
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
@@ -77,25 +81,26 @@ namespace Game.Chat
 
                 // check online security
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
-                    return false;
+                    continue;
 
                 string plNameLink = handler.GetNameLink(player);
 
                 if (player.IsBeingTeleported())
                 {
                     handler.SendSysMessage(CypherStrings.IsTeleported, plNameLink);
-                    return false;
+                    continue;
                 }
 
                 if (toInstance)
                 {
                     Map playerMap = player.GetMap();
 
-                    if (playerMap.Instanceable() && playerMap.GetInstanceId() != gmMap.GetInstanceId())
+                    if ((onlyLocalSummon || (playerMap.Instanceable() && playerMap.GetId() == gmMap.GetId())) && // either no far summon allowed or we're in the same map as player (no map switch)
+                        ((playerMap.GetId() != gmMap.GetId()) || (playerMap.GetInstanceId() != gmMap.GetInstanceId()))) // so we need to be in the same map and instance of the map, otherwise skip
                     {
                         // cannot summon from instance to instance
-                        handler.SendSysMessage(CypherStrings.CannotSummonToInst, plNameLink);
-                        return false;
+                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, plNameLink);
+                        continue;
                     }
                 }
 

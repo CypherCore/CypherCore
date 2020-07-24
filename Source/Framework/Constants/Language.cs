@@ -249,7 +249,8 @@ namespace Framework.Constants
 
         //                                    185 not used
         TransportPosition = 186,
-        // Room For More Level 1              187-199 Not Used
+        PartialGroupSummon = 187,
+        // Room For More Level 1              188-199 not used
 
         // Level 2 Chat
         NoSelection = 200,

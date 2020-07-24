@@ -656,8 +656,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Map map = handler.GetSession().GetPlayer().GetMap();
-
+                Map map = _player.GetMap();
                 if (map.IsBattlegroundOrArena())
                 {
                     // only allow if gm mode is on
@@ -667,31 +666,34 @@ namespace Game.Chat
                         return false;
                     }
                     // if both players are in different bgs
-                    else if (target.GetBattlegroundId() != 0 && handler.GetSession().GetPlayer().GetBattlegroundId() != target.GetBattlegroundId())
+                    else if (target.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
                         target.LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
 
                     // all's well, set bg id
                     // when porting out from the bg, it will be reset to 0
-                    target.SetBattlegroundId(handler.GetSession().GetPlayer().GetBattlegroundId(), handler.GetSession().GetPlayer().GetBattlegroundTypeId());
+                    target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
                     // remember current position as entry point for return at bg end teleportation
                     if (!target.GetMap().IsBattlegroundOrArena())
                         target.SetBattlegroundEntryPoint();
                 }
-                else if (map.IsDungeon())
+                else if (map.Instanceable())
                 {
-                    Map destMap = target.GetMap();
+                    Group targetGroup = target.GetGroup();
+                    Map targetMap = target.GetMap();
+                    Player targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
 
-                    if (destMap.Instanceable() && destMap.GetInstanceId() != map.GetInstanceId())
-                        target.UnbindInstance(map.GetInstanceId(), target.GetDungeonDifficultyID(), true);
+                    // check if far teleport is allowed
+                    if (!targetGroupLeader || (targetGroupLeader.GetMapId() != map.GetId()) || (targetGroupLeader.GetInstanceId() != map.GetInstanceId()))
+                        if ((targetMap.GetId() != map.GetId()) || (targetMap.GetInstanceId() != map.GetInstanceId()))
+                        {
+                            handler.SendSysMessage(CypherStrings.CannotSummonToInst);
+                            return false;
+                        }
 
-                    // we are in an instance, and can only summon players in our group with us as leader
-                    if (handler.GetSession().GetPlayer().GetGroup() || !target.GetGroup() ||
-                        (target.GetGroup().GetLeaderGUID() != handler.GetSession().GetPlayer().GetGUID()) ||
-                        (handler.GetSession().GetPlayer().GetGroup().GetLeaderGUID() != handler.GetSession().GetPlayer().GetGUID()))
-                    // the last check is a bit excessive, but let it be, just in case
+                    // check if we're already in a different instance of the same map
+                    if ((targetMap.GetId() == map.GetId()) && (targetMap.GetInstanceId() != map.GetInstanceId()))
                     {
-                        handler.SendSysMessage(CypherStrings.CannotSummonToInst, nameLink);
-
+                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, nameLink);
                         return false;
                     }
                 }
@@ -712,9 +714,9 @@ namespace Game.Chat
 
                 // before GM
                 float x, y, z;
-                handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, target.GetCombatReach());
-                target.TeleportTo(handler.GetSession().GetPlayer().GetMapId(), x, y, z, target.GetOrientation());
-                PhasingHandler.InheritPhaseShift(target, handler.GetSession().GetPlayer());
+                _player.GetClosePoint(out x, out y, out z, target.GetCombatReach());
+                target.TeleportTo(_player.GetMapId(), x, y, z, target.GetOrientation());
+                PhasingHandler.InheritPhaseShift(target, _player);
                 target.UpdateObjectVisibility();
             }
             else
@@ -728,13 +730,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
 
                 // in point where GM stay
-                Player.SavePositionInDB(new WorldLocation(handler.GetSession().GetPlayer().GetMapId(),
-                    handler.GetSession().GetPlayer().GetPositionX(),
-                    handler.GetSession().GetPlayer().GetPositionY(),
-                    handler.GetSession().GetPlayer().GetPositionZ(),
-                    handler.GetSession().GetPlayer().GetOrientation()),
-                    handler.GetSession().GetPlayer().GetZoneId(),
-                    targetGuid);
+                Player.SavePositionInDB(new WorldLocation(_player.GetMapId(), _player.GetPositionX(), _player.GetPositionY(), _player.GetPositionZ(), _player.GetOrientation()), _player.GetZoneId(), targetGuid);
             }
 
             return true;
