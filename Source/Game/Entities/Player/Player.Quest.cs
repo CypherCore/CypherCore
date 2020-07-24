@@ -33,9 +33,11 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        public ObjectGuid GetDivider() { return m_divider; }
-        public void SetDivider(ObjectGuid guid) { m_divider = guid; }
-
+        public uint GetSharedQuestID() { return m_sharedQuestId; }
+        public ObjectGuid GetPlayerSharingQuest() { return m_playerSharingQuest; }
+        public void SetQuestSharingInfo(ObjectGuid guid, uint id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
+        public void ClearQuestSharingInfo() { m_playerSharingQuest = ObjectGuid.Empty; m_sharedQuestId = 0; }
+        
         uint GetInGameTime() { return m_ingametime; }
         public void SetInGameTime(uint time) { m_ingametime = time; }
 

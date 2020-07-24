@@ -91,30 +91,30 @@ namespace Game
             else
                 obj = Global.ObjAccessor.FindPlayer(packet.QuestGiverGUID);
 
-            var CLOSE_GOSSIP_CLEAR_DIVIDER = new System.Action(() =>
+            var CLOSE_GOSSIP_CLEAR_SHARING_INFO = new System.Action(() =>
             {
                 GetPlayer().PlayerTalkClass.SendCloseGossip();
-                GetPlayer().SetDivider(ObjectGuid.Empty);
+                GetPlayer().ClearQuestSharingInfo();
             });
 
             // no or incorrect quest giver
             if (obj == null)
             {
-                CLOSE_GOSSIP_CLEAR_DIVIDER();
+                CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                 return;
             }
 
             Player playerQuestObject = obj.ToPlayer();
             if (playerQuestObject)
             {
-                if ((_player.GetDivider().IsEmpty() && _player.GetDivider() != packet.QuestGiverGUID) || !playerQuestObject.CanShareQuest(packet.QuestID))
+                if ((_player.GetPlayerSharingQuest().IsEmpty() && _player.GetPlayerSharingQuest() != packet.QuestGiverGUID) || !playerQuestObject.CanShareQuest(packet.QuestID))
                 {
-                    CLOSE_GOSSIP_CLEAR_DIVIDER();
+                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
                 }
                 if (!_player.IsInSameRaidWith(playerQuestObject))
                 {
-                    CLOSE_GOSSIP_CLEAR_DIVIDER();
+                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
                 }
             }
@@ -122,7 +122,7 @@ namespace Game
             {
                 if (!obj.HasQuest(packet.QuestID))
                 {
-                    CLOSE_GOSSIP_CLEAR_DIVIDER();
+                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
                 }
             }
@@ -130,7 +130,7 @@ namespace Game
             // some kind of WPE protection
             if (!_player.CanInteractWithQuestGiver(obj))
             {
-                CLOSE_GOSSIP_CLEAR_DIVIDER();
+                CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                 return;
             }
 
@@ -140,17 +140,17 @@ namespace Game
                 // prevent cheating
                 if (!GetPlayer().CanTakeQuest(quest, true))
                 {
-                    CLOSE_GOSSIP_CLEAR_DIVIDER();
+                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
                 }
 
-                if (!_player.GetDivider().IsEmpty())
+                if (!_player.GetPlayerSharingQuest().IsEmpty())
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(_player.GetDivider());
+                    Player player = Global.ObjAccessor.FindPlayer(_player.GetPlayerSharingQuest());
                     if (player != null)
                     {
                         player.SendPushToPartyResponse(_player, QuestPushReason.Accepted);
-                        _player.SetDivider(ObjectGuid.Empty);
+                        _player.ClearQuestSharingInfo();
                     }
                 }
 
@@ -172,7 +172,7 @@ namespace Game
 
                                 if (player.CanTakeQuest(quest, true))
                                 {
-                                    player.SetDivider(_player.GetGUID());
+                                    player.SetQuestSharingInfo(_player.GetGUID(), quest.Id);
 
                                     //need confirmation that any gossip window will close
                                     player.PlayerTalkClass.SendCloseGossip();
@@ -189,7 +189,7 @@ namespace Game
                 }
             }
 
-            CLOSE_GOSSIP_CLEAR_DIVIDER();
+            CLOSE_GOSSIP_CLEAR_SHARING_INFO();
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverQueryQuest)]
@@ -456,7 +456,7 @@ namespace Game
                 if (!quest.HasFlag(QuestFlags.PartyAccept))
                     return;
 
-                Player originalPlayer = Global.ObjAccessor.FindPlayer(GetPlayer().GetDivider());
+                Player originalPlayer = Global.ObjAccessor.FindPlayer(GetPlayer().GetPlayerSharingQuest());
                 if (originalPlayer == null)
                     return;
 
@@ -478,7 +478,7 @@ namespace Game
                 }
             }
 
-            GetPlayer().SetDivider(ObjectGuid.Empty);
+            GetPlayer().ClearQuestSharingInfo();
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest)]
@@ -600,7 +600,7 @@ namespace Game
                     continue;
                 }
 
-                if (!receiver.GetDivider().IsEmpty())
+                if (!receiver.GetPlayerSharingQuest().IsEmpty())
                 {
                     sender.SendPushToPartyResponse(receiver, QuestPushReason.Busy);
                     continue;
@@ -615,7 +615,7 @@ namespace Game
                     receiver.PlayerTalkClass.SendQuestGiverRequestItems(quest, sender.GetGUID(), receiver.CanCompleteRepeatableQuest(quest), true);
                 else
                 {
-                    receiver.SetDivider(sender.GetGUID());
+                    receiver.SetQuestSharingInfo(sender.GetGUID(), quest.Id);
                     receiver.PlayerTalkClass.SendQuestGiverQuestDetails(quest, receiver.GetGUID(), true, false);
                 }
             }
@@ -624,16 +624,16 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestPushResult)]
         void HandleQuestPushResult(QuestPushResult packet)
         {
-            if (!GetPlayer().GetDivider().IsEmpty())
+            if (!GetPlayer().GetPlayerSharingQuest().IsEmpty())
             {
-                if (_player.GetDivider() == packet.SenderGUID)
+                if (_player.GetPlayerSharingQuest() == packet.SenderGUID)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(_player.GetDivider());
+                    Player player = Global.ObjAccessor.FindPlayer(_player.GetPlayerSharingQuest());
                     if (player)
                         player.SendPushToPartyResponse(_player, packet.Result);
                 }
 
-                _player.SetDivider(ObjectGuid.Empty);
+                _player.ClearQuestSharingInfo();
             }
         }
 

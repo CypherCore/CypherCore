@@ -429,7 +429,7 @@ namespace Game.Misc
             }
 
             packet.QuestGiverGUID = npcGUID;
-            packet.InformUnit = _session.GetPlayer().GetDivider();
+            packet.InformUnit = _session.GetPlayer().GetPlayerSharingQuest();
             packet.QuestID = quest.Id;
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;

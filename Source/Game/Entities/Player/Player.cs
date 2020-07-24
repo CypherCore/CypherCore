@@ -5806,6 +5806,15 @@ namespace Game.Entities
                 _garrison.SendRemoteInfo();
 
             UpdateItemLevelAreaBasedScaling();
+
+            if (!GetPlayerSharingQuest().IsEmpty())
+            {
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(GetSharedQuestID());
+                if (quest != null)
+                    PlayerTalkClass.SendQuestGiverQuestDetails(quest, GetGUID(), true, false);
+                else
+                    ClearQuestSharingInfo();
+            }
         }
 
         public void RemoveSocial()

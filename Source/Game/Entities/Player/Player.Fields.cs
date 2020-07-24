@@ -252,7 +252,8 @@ namespace Game.Entities
         uint m_PlayedTimeLevel;
 
         Dictionary<byte, ActionButton> m_actionButtons = new Dictionary<byte, ActionButton>();
-        ObjectGuid m_divider;
+        ObjectGuid m_playerSharingQuest;
+        uint m_sharedQuestId;
         uint m_ingametime;
 
         PlayerCommandStates _activeCheats;
