@@ -3059,7 +3059,7 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        bool IsRegeneratingHealth() { return m_regenHealth; }
+        public bool IsRegeneratingHealth() { return m_regenHealth; }
         public void SetRegeneratingHealth(bool regenHealth) { m_regenHealth = regenHealth; }
 
         public void SetHomePosition(float x, float y, float z, float o)
