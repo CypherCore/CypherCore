@@ -133,7 +133,7 @@ namespace Game.Entities
             SetWorldRotation(0.0f, 0.0f, 0.0f, 1.0f);
             SetParentRotation(Quaternion.WAxis);
 
-            m_model = CreateModel();
+            CreateModel();
             return true;
         }
 

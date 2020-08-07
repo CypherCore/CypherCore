@@ -266,9 +266,7 @@ namespace Game.Entities
 
             SetDisplayId(goInfo.displayId);
 
-            m_model = CreateModel();
-            if (m_model != null && m_model.IsMapObject())
-                AddFlag(GameObjectFlags.MapObject);
+            CreateModel();
 
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
             SetGoType(goInfo.type);
@@ -2410,14 +2408,12 @@ namespace Game.Entities
                 if (GetMap().ContainsGameObjectModel(m_model))
                     GetMap().RemoveGameObjectModel(m_model);
 
-            m_model = CreateModel();
+            RemoveFlag(GameObjectFlags.MapObject);
+            m_model = null;
+            CreateModel();
+
             if (m_model != null)
                 GetMap().InsertGameObjectModel(m_model);
-
-            if (m_model != null && m_model.IsMapObject())
-                AddFlag(GameObjectFlags.MapObject);
-            else
-                RemoveFlag(GameObjectFlags.MapObject);
         }
 
         Player GetLootRecipient()
@@ -2763,9 +2759,11 @@ namespace Game.Entities
             return IsInRange(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), dist2compare);
         }
 
-        public GameObjectModel CreateModel()
+        public void CreateModel()
         {
-            return GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
+            m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
+            if (m_model != null && m_model.IsMapObject())
+                AddFlag(GameObjectFlags.MapObject);
         }
 
         #region Fields
