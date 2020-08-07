@@ -2247,16 +2247,13 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetGoInfo().type != GameObjectTypes.SpellFocus)
-                return false;
-
-            if (go.GetGoInfo().SpellFocus.spellFocusType != i_focusId)
+            if (go.GetGoInfo().GetSpellFocusType() != i_focusId)
                 return false;
 
             if (!go.IsSpawned())
                 return false;
 
-            float dist = go.GetGoInfo().SpellFocus.radius / 2.0f;
+            float dist = go.GetGoInfo().GetSpellFocusRadius() / 2.0f;
 
             return go.IsWithinDistInMap(i_unit, dist);
         }

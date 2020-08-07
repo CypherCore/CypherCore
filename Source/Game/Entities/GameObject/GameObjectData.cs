@@ -517,6 +517,32 @@ namespace Game.Entities
             }
         }
 
+        public uint GetSpellFocusType()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.SpellFocus:
+                    return SpellFocus.spellFocusType;
+                case GameObjectTypes.UILink:
+                    return UILink.spellFocusType;
+                default:
+                    return 0;
+            }
+        }
+
+        public uint GetSpellFocusRadius()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.SpellFocus:
+                    return SpellFocus.radius;
+                case GameObjectTypes.UILink:
+                    return UILink.radius;
+                default:
+                    return 0;
+            }
+        }
+
         public void InitializeQueryData()
         {
             QueryData = new QueryGameObjectResponse();
