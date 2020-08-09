@@ -125,17 +125,16 @@ namespace Game.Misc
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
                 uint newOptionIndex = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
-                AddGossipMenuItemData(newOptionIndex, item.ActionMenuId, item.ActionPoiId, item.TrainerId);
+                AddGossipMenuItemData(newOptionIndex, item.ActionMenuId, item.ActionPoiId);
             }
         }
 
-        public void AddGossipMenuItemData(uint optionIndex, uint gossipActionMenuId, uint gossipActionPoi, uint trainerId)
+        public void AddGossipMenuItemData(uint optionIndex, uint gossipActionMenuId, uint gossipActionPoi)
         {
             GossipMenuItemData itemData = new GossipMenuItemData();
 
             itemData.GossipActionMenuId = gossipActionMenuId;
             itemData.GossipActionPoi = gossipActionPoi;
-            itemData.TrainerId = trainerId;
 
             _menuItemData[optionIndex] = itemData;
         }
@@ -731,7 +730,6 @@ namespace Game.Misc
     {
         public uint GossipActionMenuId;  // MenuId of the gossip triggered by this action
         public uint GossipActionPoi;
-        public uint TrainerId;
     }
 
     public struct NpcTextData
@@ -765,7 +763,6 @@ namespace Game.Misc
         public uint BoxMoney;
         public string BoxText;
         public uint BoxBroadcastTextId;
-        public uint TrainerId;
         public List<Condition> Conditions = new List<Condition>();
     }
 

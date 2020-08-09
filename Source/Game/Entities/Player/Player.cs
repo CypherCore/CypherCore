@@ -2411,7 +2411,7 @@ namespace Game.Entities
                     }
 
                     menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId);
                 }
             }
         }
@@ -2509,7 +2509,7 @@ namespace Game.Entities
                     GetSession().SendStablePet(guid);
                     break;
                 case GossipOption.Trainer:
-                    GetSession().SendTrainerList(source.ToCreature(), menuItemData.TrainerId);
+                    GetSession().SendTrainerList(source.ToCreature(), Global.ObjectMgr.GetCreatureTrainerForGossipOption(source.GetEntry(), menuId, optionIndex));
                     break;
                 case GossipOption.Learndualspec:
                     break;

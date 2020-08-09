@@ -642,12 +642,11 @@ namespace Game
             
             //                                          0         1              2             3             4                        5             6
             SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcFlag, " +
-                //   7                8              9            10           11          12                     13
-                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
+                //   7                8              9            10           11          12
+                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId " +
                 "FROM gossip_menu_option o " +
                 "LEFT JOIN gossip_menu_option_action oa ON o.MenuId = oa.MenuId AND o.OptionIndex = oa.OptionIndex " +
                 "LEFT JOIN gossip_menu_option_box ob ON o.MenuId = ob.MenuId AND o.OptionIndex = ob.OptionIndex " +
-                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuId = ot.MenuId AND o.OptionIndex = ot.OptionIndex " +
                 "ORDER BY o.MenuId, o.OptionIndex");
 
             if (result.IsEmpty())
@@ -673,7 +672,6 @@ namespace Game
                 gMenuItem.BoxMoney = result.Read<uint>(10);
                 gMenuItem.BoxText = result.Read<string>(11);
                 gMenuItem.BoxBroadcastTextId = result.Read<uint>(12);
-                gMenuItem.TrainerId = result.Read<uint>(13);
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
@@ -706,12 +704,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
-                }
-
-                if (gMenuItem.TrainerId != 0 && GetTrainer(gMenuItem.TrainerId) == null)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
-                    gMenuItem.TrainerId = 0;
                 }
 
                 gossipMenuItemsStorage.Add(gMenuItem.MenuId, gMenuItem);
@@ -3074,33 +3066,50 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
-        public void LoadCreatureDefaultTrainers()
+        public void LoadCreatureTrainers()
         {
             uint oldMSTime = Time.GetMSTime();
 
             _creatureDefaultTrainers.Clear();
 
-            SQLResult result = DB.World.Query("SELECT CreatureId, TrainerId FROM creature_default_trainer");
+            SQLResult result = DB.World.Query("SELECT CreatureId, TrainerId, MenuId, OptionIndex FROM creature_trainer");
             if (!result.IsEmpty())
             {
                 do
                 {
                     uint creatureId = result.Read<uint>(0);
                     uint trainerId = result.Read<uint>(1);
+                    uint gossipMenuId = result.Read<uint>(2);
+                    uint gossipOptionIndex = result.Read<uint>(3);
 
                     if (GetCreatureTemplate(creatureId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_default_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
                         continue;
                     }
 
                     if (GetTrainer(trainerId) == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_default_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId} MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}, ignoring");
                         continue;
                     }
 
-                    _creatureDefaultTrainers[creatureId] = trainerId;
+                    if (gossipMenuId != 0 || gossipOptionIndex != 0)
+                    {
+                        var gossipMenuItems = GetGossipMenuItemsMapBounds(gossipMenuId);
+                        var gossipOptionItr = gossipMenuItems.Find(entry =>
+                        {
+                            return entry.OptionIndex == gossipOptionIndex;
+                        });
+
+                        if (gossipOptionItr == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `creature_trainer` references non-existing gossip menu option (MenuId {gossipMenuId} OptionIndex {gossipOptionIndex}) for CreatureId {creatureId} and TrainerId {trainerId}, ignoring");
+                            continue;
+                        }
+                    }
+
+                    _creatureDefaultTrainers[(creatureId, gossipMenuId, gossipOptionIndex)] = trainerId;
                 } while (result.NextRow());
             }
 
@@ -3526,7 +3535,11 @@ namespace Game
         }
         public uint GetCreatureDefaultTrainer(uint creatureId)
         {
-            return _creatureDefaultTrainers.LookupByKey(creatureId);
+            return GetCreatureTrainerForGossipOption(creatureId, 0, 0);
+        }
+        public uint GetCreatureTrainerForGossipOption(uint creatureId, uint gossipMenuId, uint gossipOptionIndex)
+        {
+            return _creatureDefaultTrainers.LookupByKey((creatureId, gossipMenuId, gossipOptionIndex));
         }
         public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
         {
@@ -9820,7 +9833,7 @@ namespace Game
         Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new Dictionary<uint, CreatureBaseStats>();
         Dictionary<uint, VendorItemData> cacheVendorItemStorage = new Dictionary<uint, VendorItemData>();
         Dictionary<uint, Trainer> _trainers = new Dictionary<uint, Trainer>();
-        Dictionary<uint, uint> _creatureDefaultTrainers = new Dictionary<uint, uint>();
+        Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint>();
         List<uint>[] _difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
         List<uint>[] _hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
         Dictionary<uint, NpcText> _npcTextStorage = new Dictionary<uint, NpcText>();
