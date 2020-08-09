@@ -775,7 +775,6 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
-
     class PhaseShiftChange : ServerPacket
     {
         public PhaseShiftChange() : base(ServerOpcodes.PhaseShiftChange) { }
@@ -803,9 +802,6 @@ namespace Game.Networking.Packets
         public List<ushort> UiMapPhaseIDs = new List<ushort>();
         public List<ushort> VisibleMapIDs = new List<ushort>();
     }
-
-
-
 
     public class ZoneUnderAttack : ServerPacket
     {

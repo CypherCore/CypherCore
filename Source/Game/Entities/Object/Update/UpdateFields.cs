@@ -3154,7 +3154,7 @@ namespace Game.Entities
         public UpdateField<bool> BankAutoSortDisabled = new UpdateField<bool>(0, 2);
         public UpdateField<bool> SortBagsRightToLeft = new UpdateField<bool>(0, 3);
         public UpdateField<bool> InsertItemsLeftToRight = new UpdateField<bool>(0, 4);
-        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new UpdateFieldArray<DynamicUpdateField<Research>>(1, 22, 23);//-1-1
+        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new UpdateFieldArray<DynamicUpdateField<Research>>(1, 22, 23);
         public DynamicUpdateField<ulong> KnownTitles = new DynamicUpdateField<ulong>(0, 5);
         public DynamicUpdateField<ushort> ResearchSites = new DynamicUpdateField<ushort>(0, 6);
         public DynamicUpdateField<uint> ResearchSiteProgress = new DynamicUpdateField<uint>(0, 7);

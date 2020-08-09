@@ -28,13 +28,13 @@ namespace Game.BattleFields
     {
         public override bool SetupBattlefield()
         {
-            InitStalker(WGNpcs.Stalker, WGConst.WintergraspStalkerPos);
-
             m_TypeId = (uint)BattleFieldTypes.WinterGrasp;                              // See enum BattlefieldTypes
             m_BattleId = BattlefieldIds.WG;
             m_ZoneId = WGConst.ZoneId;
             m_MapId = WGConst.MapId;
             m_Map = Global.MapMgr.CreateBaseMap(m_MapId);
+
+            InitStalker(WGNpcs.Stalker, WGConst.WintergraspStalkerPos);
 
             m_MaxPlayer = WorldConfig.GetUIntValue(WorldCfg.WintergraspPlrMax);
             m_IsEnabled = WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable);
