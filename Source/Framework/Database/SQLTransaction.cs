@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;

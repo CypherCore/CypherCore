@@ -95,7 +95,8 @@ namespace Game.Entities
             IsInWorld = true;
             ClearUpdateMask(true);
 
-            GetMap().GetZoneAndAreaId(_phaseShift, out m_zoneId, out m_areaId, GetPositionX(), GetPositionY(), GetPositionZ());
+            if (GetMap() != null)
+                GetMap().GetZoneAndAreaId(_phaseShift, out m_zoneId, out m_areaId, GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         public virtual void RemoveFromWorld()

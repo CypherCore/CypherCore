@@ -5026,7 +5026,7 @@ namespace Game.Maps
         public uint LightFadeInTime;
     }
 
-    public struct PositionFullTerrainStatus
+    public class PositionFullTerrainStatus
     {
         public struct AreaInfo
         {

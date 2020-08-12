@@ -270,7 +270,7 @@ namespace Game.Spells
             return Convert.ToBoolean(_effectMask & (1 << (int)effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
-        bool IsSelfcasted() { return !_flags.HasAnyFlag(AuraFlags.NoCaster); }
+        bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
         public uint GetEffectsToApply() { return _effectsToApply; }
 
         public void SetRemoveMode(AuraRemoveMode mode) { _removeMode = mode; }

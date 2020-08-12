@@ -3237,7 +3237,6 @@ namespace Game.Entities
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
-                stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);
@@ -3387,6 +3386,7 @@ namespace Game.Entities
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
+                stmt.AddValue(index++, GetNumRespecs());
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);

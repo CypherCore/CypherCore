@@ -69,14 +69,19 @@ public class PacketLog
                 else
                     Buffer.BlockCopy(endPoint.Address.GetAddressBytes(), 0, SocketIPBytes, 0, 16);
 
-                if (!isClientPacket)
-                    data.Combine(new byte[2]);
+                int size = data.Length;
+                if (isClientPacket)
+                    size -= 2;
 
-                writer.Write(data.Length + 4);
+                writer.Write(size + 4);
                 writer.Write(SocketIPBytes);
-                writer.Write((ushort)endPoint.Port);
+                writer.Write(endPoint.Port);
                 writer.Write(opcode);
-                writer.Write(data);
+
+                if (isClientPacket)
+                    writer.Write(data, 2, size);
+                else
+                    writer.Write(data, 0, size);
             }
         }
     }

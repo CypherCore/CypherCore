@@ -16,7 +16,7 @@
  */
 
 using Framework.Configuration;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 

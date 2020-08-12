@@ -520,7 +520,7 @@ namespace Game.Spells
 
         public bool IsPositiveEffect(uint effIndex)
         {
-            return NegativeEffects.Get((int)effIndex);
+            return !NegativeEffects.Get((int)effIndex);
         }
 
         public bool IsChanneled()

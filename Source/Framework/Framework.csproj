@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.11.4" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="MySqlConnector" Version="0.62.0-beta4" />
+    <PackageReference Include="MySqlConnector" Version="1.0.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
 
