@@ -99,7 +99,9 @@ namespace Game.Chat.Commands
             byte index = (byte)(Global.BNetAccountMgr.GetMaxIndex(accountId) + 1);
             string accountName = accountId.ToString() + '#' + index;
 
-            switch (Global.AccountMgr.CreateAccount(accountName, "DUMMY", bnetAccountName, accountId, index))
+            // Generate random hex string for password, these accounts must not be logged on with GRUNT
+            byte[] randPassword = new byte[0].GenerateRandomKey(16);
+            switch (Global.AccountMgr.CreateAccount(accountName, randPassword.ToHexString(), bnetAccountName, accountId, index))
             {
                 case AccountOpResult.Ok:
                     handler.SendSysMessage(CypherStrings.AccountCreated, accountName);

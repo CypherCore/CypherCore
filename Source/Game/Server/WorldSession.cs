@@ -59,7 +59,7 @@ namespace Game
             _battlePetMgr = new BattlePetMgr(this);
             _collectionMgr = new CollectionMgr(this);
 
-            m_Address = sock.GetRemoteIpAddress().ToString();
+            m_Address = sock.GetRemoteIpAddress().Address.ToString();
             ResetTimeOutTime(false);
             DB.Login.Execute("UPDATE account SET online = 1 WHERE id = {0};", GetAccountId());     // One-time query
         }

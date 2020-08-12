@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Framework.Cryptography;
 
 namespace Game
 {
@@ -44,20 +45,23 @@ namespace Game
             if (GetId(username) != 0)
                 return AccountOpResult.NameAlreadyExist;                       // username does already exist
 
+            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(username, password);
+
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT);
             stmt.AddValue(0, username);
-            stmt.AddValue(1, CalculateShaPassHash(username, password));
+            stmt.AddValue(1, registrationData.Item1);
+            stmt.AddValue(2, registrationData.Item2);
             stmt.AddValue(2, email);
-            stmt.AddValue(3, email);
+            stmt.AddValue(4, email);
             if (bnetAccountId != 0 && bnetIndex != 0)
             {
-                stmt.AddValue(4, bnetAccountId);
-                stmt.AddValue(5, bnetIndex);
+                stmt.AddValue(5, bnetAccountId);
+                stmt.AddValue(6, bnetIndex);
             }
             else
             {
-                stmt.AddValue(4, null);
                 stmt.AddValue(5, null);
+                stmt.AddValue(6, null);
             }
             DB.Login.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
 
@@ -156,9 +160,22 @@ namespace Game
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_USERNAME);
             stmt.AddValue(0, newUsername);
-            stmt.AddValue(1, CalculateShaPassHash(newUsername, newPassword));
+            stmt.AddValue(1, accountId);
+            DB.Login.Execute(stmt);
+
+            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(newUsername, newPassword);
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
+            stmt.AddValue(0, registrationData.salt);
+            stmt.AddValue(1, registrationData.verifier);
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
+
+            {
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
+                stmt.AddValue(0, CalculateShaPassHash(newUsername, newPassword));
+                stmt.AddValue(1, accountId);
+                DB.Login.Execute(stmt);
+            }
 
             return AccountOpResult.Ok;
         }
@@ -173,16 +190,20 @@ namespace Game
             if (newPassword.Length > MaxAccountLength)
                 return AccountOpResult.PassTooLong;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_PASSWORD);
-            stmt.AddValue(0, CalculateShaPassHash(username, newPassword));
-            stmt.AddValue(1, accountId);
+            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(username, newPassword);
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
+            stmt.AddValue(0, registrationData.salt);
+            stmt.AddValue(1, registrationData.verifier);
+            stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
-            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_VS);
-            stmt.AddValue(0, "");
-            stmt.AddValue(1, "");
-            stmt.AddValue(2, username);
-            DB.Login.Execute(stmt);
+            {
+                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
+                stmt.AddValue(0, CalculateShaPassHash(username, newPassword));
+                stmt.AddValue(1, accountId);
+                DB.Login.Execute(stmt);
+            }
 
             return AccountOpResult.Ok;
         }
@@ -283,9 +304,16 @@ namespace Game
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_CHECK_PASSWORD);
             stmt.AddValue(0, accountId);
-            stmt.AddValue(1, CalculateShaPassHash(username, password));
             SQLResult result = DB.Login.Query(stmt);
-            return !result.IsEmpty();
+            if (!result.IsEmpty())
+            {
+                byte[] salt = result.Read<byte[]>(0);
+                byte[] verifier = result.Read<byte[]>(1);
+                if (SRP6.CheckLogin(username, password, salt, verifier))
+                    return true;
+            }
+
+            return false;
         }
 
         public bool CheckEmail(uint accountId, string newEmail)
@@ -311,6 +339,7 @@ namespace Game
             return result.IsEmpty() ? 0 : (uint)result.Read<ulong>(0);
         }
 
+        [Obsolete]
         string CalculateShaPassHash(string name, string password)
         {
             SHA1 sha = SHA1.Create();

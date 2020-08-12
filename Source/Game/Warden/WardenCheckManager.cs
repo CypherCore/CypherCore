@@ -64,17 +64,7 @@ namespace Game
                 wardenCheck.Action = (WardenActions)WorldConfig.GetIntValue(WorldCfg.WardenClientFailAction);
 
                 if (checkType == WardenCheckType.PageA || checkType == WardenCheckType.PageB || checkType == WardenCheckType.Driver)
-                {
                     wardenCheck.Data = new BigInteger(data.ToByteArray());
-                    int len = data.Length / 2;
-
-                    if (wardenCheck.Data.ToByteArray().Length < len)
-                    {
-                        byte[] temp = wardenCheck.Data.ToByteArray();
-                        Array.Reverse(temp);
-                        wardenCheck.Data = new BigInteger(temp);
-                    }
-                }
 
                 if (checkType == WardenCheckType.Memory || checkType == WardenCheckType.Module)
                     MemChecksIdPool.Add(id);
@@ -96,13 +86,6 @@ namespace Game
                 if (checkType == WardenCheckType.MPQ || checkType == WardenCheckType.Memory)
                 {
                     BigInteger Result = new BigInteger(checkResult.ToByteArray());
-                    int len = checkResult.Length / 2;
-                    if (Result.ToByteArray().Length < len)
-                    {
-                        byte[] temp = Result.ToByteArray();
-                        Array.Reverse(temp);
-                        Result = new BigInteger(temp);
-                    }
                     CheckResultStore[id] = Result;
                 }
 

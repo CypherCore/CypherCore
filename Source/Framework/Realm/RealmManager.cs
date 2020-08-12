@@ -295,7 +295,7 @@ public class RealmManager : Singleton<RealmManager>
             byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
-            stmt.AddValue(0, keyData.ToHexString());
+            stmt.AddValue(0, keyData);
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, locale);
             stmt.AddValue(3, os);
