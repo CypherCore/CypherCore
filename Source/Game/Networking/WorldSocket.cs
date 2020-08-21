@@ -22,21 +22,24 @@ using Framework.IO;
 using Framework.Networking;
 using Game.Networking.Packets;
 using System;
-using System.IO;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Game.Networking
 {
     public class WorldSocket : SocketBase
     {
-        static string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
-        static string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
+        static readonly string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
+        static readonly string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
 
-        static byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
-        static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
-        static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
-        static byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
+        static readonly byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
+        static readonly byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
+        static readonly byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
+        static readonly byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
+
+        static readonly int HeaderSize = 16;
+
+        SocketBuffer _headerBuffer;
+        SocketBuffer _packetBuffer;
 
         ConnectionType _connectType;
         ulong _key;
@@ -63,6 +66,9 @@ namespace Game.Networking
             _worldCrypt = new WorldCrypt();
 
             _encryptKey = new byte[16];
+
+            _headerBuffer = new SocketBuffer(HeaderSize);
+            _packetBuffer = new SocketBuffer(0);
         }
 
         public override void Dispose()
@@ -87,7 +93,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }
 
-        async void CheckIpCallback(SQLResult result)
+        void CheckIpCallback(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -109,15 +115,17 @@ namespace Game.Networking
                 }
             }
 
+            _packetBuffer.Resize(ClientConnectionInitialize.Length + 1);
+
+            AsyncReadWithCallback(InitializeHandler);
+
             ByteBuffer packet = new ByteBuffer();
             packet.WriteString(ServerConnectionInitialize);
             packet.WriteString("\n");
             AsyncWrite(packet.GetData());
-
-            await AsyncReadWithCallback(InitializeHandler);
         }
 
-        async Task InitializeHandler(SocketAsyncEventArgs args)
+        void InitializeHandler(SocketAsyncEventArgs args)
         {
             if (args.SocketError != SocketError.Success)
             {
@@ -127,160 +135,216 @@ namespace Game.Networking
 
             if (args.BytesTransferred > 0)
             {
-                ByteBuffer connBuffer = new ByteBuffer(args.Buffer);
-
-                string initializer = connBuffer.ReadString((uint)ClientConnectionInitialize.Length);
-                if (initializer != ClientConnectionInitialize)
+                if (_packetBuffer.GetRemainingSpace() > 0)
                 {
-                    CloseSocket();
+                    // need to receive the header
+                    int readHeaderSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
+                    _packetBuffer.Write(args.Buffer, 0, readHeaderSize);
+
+                    if (_packetBuffer.GetRemainingSpace() > 0)
+                    {
+                        // Couldn't receive the whole header this time.
+                        AsyncReadWithCallback(InitializeHandler);
+                        return;
+                    }
+
+                    ByteBuffer buffer = new ByteBuffer(_packetBuffer.GetData());
+                    string initializer = buffer.ReadString((uint)ClientConnectionInitialize.Length);
+                    if (initializer != ClientConnectionInitialize)
+                    {
+                        CloseSocket();
+                        return;
+                    }
+
+                    byte terminator = buffer.ReadUInt8();
+                    if (terminator != '\n')
+                    {
+                        CloseSocket();
+                        return;
+                    }
+
+                    // Initialize the zlib stream
+                    _compressionStream = new ZLib.z_stream();
+
+                    // Initialize the deflate algo...
+                    var z_res1 = ZLib.deflateInit2(_compressionStream, 1, 8, -15, 8, 0);
+                    if (z_res1 != 0)
+                    {
+                        CloseSocket();
+                        Log.outError(LogFilter.Network, "Can't initialize packet compression (zlib: deflateInit2_) Error code: {0}", z_res1);
+                        return;
+                    }
+
+                    _packetBuffer.Reset();
+                    HandleSendAuthSession();
+                    AsyncRead();
                     return;
                 }
-
-                // Initialize the zlib stream
-                _compressionStream = new ZLib.z_stream();
-
-                // Initialize the deflate algo...
-                var z_res1 = ZLib.deflateInit2(_compressionStream, 1, 8, -15, 8, 0);
-                if (z_res1 != 0)
-                {
-                    CloseSocket();
-                    Log.outError(LogFilter.Network, "Can't initialize packet compression (zlib: deflateInit2_) Error code: {0}", z_res1);
-                    return;
-                }
-
-                HandleSendAuthSession();
-                await AsyncRead();
-                return;
             }
 
-            await AsyncReadWithCallback(InitializeHandler);
+            AsyncReadWithCallback(InitializeHandler);
         }
 
-        public async override Task ReadHandler(byte[] receiveData, int bytesTransferred)
+        public override void ReadHandler(SocketAsyncEventArgs args)
         {
             if (!IsOpen())
                 return;
 
-            while (bytesTransferred > 5)
+            int currentReadIndex = 0;
+            while (currentReadIndex < args.BytesTransferred)
             {
-                var header = new PacketHeader();
-                header.Read(receiveData);
-
-                if (!header.IsValidSize())
+                if (_headerBuffer.GetRemainingSpace() > 0)
                 {
-                    Log.outError(LogFilter.Network, "WorldSocket.ReadHeader(): client {0} sent malformed packet (size: {1})", GetRemoteIpAddress().ToString(), header.Size);
-                    CloseSocket();
-                    return;
+                    // need to receive the header
+                    int readHeaderSize = Math.Min(args.BytesTransferred, _headerBuffer.GetRemainingSpace());
+                    _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
+                    currentReadIndex += readHeaderSize;
+
+                    if (_headerBuffer.GetRemainingSpace() > 0)
+                        break; // Couldn't receive the whole header this time.
+
+                    // We just received nice new header
+                    if (!ReadHeader())
+                    {
+                        CloseSocket();
+                        return;
+                    }
                 }
 
-                var data = new byte[header.Size];
-                Buffer.BlockCopy(receiveData, 16, data, 0, header.Size);
-
-                if (!_worldCrypt.Decrypt(ref data, header.Tag))
+                // We have full read header, now check the data payload
+                if (_packetBuffer.GetRemainingSpace() > 0)
                 {
-                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress()} failed to decrypt packet (size: {header.Size})");
-                    return;
+                    // need more data in the payload
+                    int readDataSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
+                    _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
+                    currentReadIndex += readDataSize;
+
+                    if (_packetBuffer.GetRemainingSpace() > 0)
+                        break; // Couldn't receive the whole data this time.
                 }
 
-                WorldPacket worldPacket = new WorldPacket(data);
-                if (worldPacket.GetOpcode() >= (int)ClientOpcodes.Max)
+                // just received fresh new payload
+                ReadDataHandlerResult result = ReadData();
+                _headerBuffer.Reset();
+                if (result != ReadDataHandlerResult.Ok)
                 {
-                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress()} sent wrong opcode (opcode: {worldPacket.GetOpcode()})");
+                    if (result != ReadDataHandlerResult.WaitingForQuery)
+                        CloseSocket();
+
                     return;
                 }
-
-                PacketLog.Write(data, worldPacket.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
-                if (!ProcessPacket(worldPacket))
-                {
-                    CloseSocket();
-                    return;
-                }
-
-                bytesTransferred -= header.Size + 16;
-                Buffer.BlockCopy(receiveData, header.Size + 16, receiveData, 0, bytesTransferred);
             }
 
-            await AsyncRead();
+            AsyncRead();
         }
 
-        bool ProcessPacket(WorldPacket packet)
+        bool ReadHeader()
         {
-            ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
+            PacketHeader header = new PacketHeader();
+            header.Read(_headerBuffer.GetData());
 
-            try
+            if (!header.IsValidSize())
             {
-                switch (opcode)
-                {
-                    case ClientOpcodes.Ping:
-                        Ping ping = new Ping(packet);
-                        ping.Read();
-                        return HandlePing(ping);
-                    case ClientOpcodes.AuthSession:
-                        if (_worldSession != null)
-                        {
-                            Log.outError(LogFilter.Network, "WorldSocket.ProcessPacket: received duplicate CMSG_AUTH_SESSION from {0}", _worldSession.GetPlayerInfo());
-                            return false;
-                        }
-
-                        AuthSession authSession = new AuthSession(packet);
-                        authSession.Read();
-                        HandleAuthSession(authSession);
-                        break;
-                    case ClientOpcodes.AuthContinuedSession:
-                        if (_worldSession != null)
-                        {
-                            Log.outError(LogFilter.Network, "WorldSocket.ProcessPacket: received duplicate CMSG_AUTH_CONTINUED_SESSION from {0}", _worldSession.GetPlayerInfo());
-                            return false;
-                        }
-
-                        AuthContinuedSession authContinuedSession = new AuthContinuedSession(packet);
-                        authContinuedSession.Read();
-                        HandleAuthContinuedSession(authContinuedSession);
-                        break;
-                    case ClientOpcodes.KeepAlive:
-                        if (_worldSession != null)
-                            _worldSession.ResetTimeOutTime(true);
-                        break;
-                    case ClientOpcodes.LogDisconnect:
-                        break;
-                    case ClientOpcodes.EnableNagle:
-                        Log.outDebug(LogFilter.Network, "Client {0} requested enabling nagle algorithm", GetRemoteIpAddress().ToString());
-                        SetNoDelay(false);
-                        break;
-                    case ClientOpcodes.ConnectToFailed:
-                        ConnectToFailed connectToFailed = new ConnectToFailed(packet);
-                        connectToFailed.Read();
-                        HandleConnectToFailed(connectToFailed);
-                        break;
-                    case ClientOpcodes.EnableEncryptionAck:
-                        HandleEnableEncryptionAck();
-                        break;
-                    default:
-                        if (_worldSession == null)
-                        {
-                            Log.outError(LogFilter.Network, "ProcessIncoming: Client not authed opcode = {0}", opcode);
-                            return false;
-                        }
-
-                        if (!PacketManager.ContainsHandler(opcode))
-                        {
-                            Log.outError(LogFilter.Network, "No defined handler for opcode {0} sent by {1}", opcode, _worldSession.GetPlayerInfo());
-                            break;
-                        }
-
-                        // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
-                        _worldSession.ResetTimeOutTime(false);
-                        _worldSession.QueuePacket(packet);
-                        break;
-                }
-            }
-            catch (IOException)
-            {
-                Log.outError(LogFilter.Network, "WorldSocket.ProcessPacket(): client {0} sent malformed {1}", GetRemoteIpAddress().ToString(), opcode);
+                Log.outError(LogFilter.Network, $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} sent malformed packet (size: {header.Size})");
                 return false;
             }
 
+            _packetBuffer.Resize(header.Size);
             return true;
+        }
+
+        ReadDataHandlerResult ReadData()
+        {
+            PacketHeader header = new PacketHeader();
+            header.Read(_headerBuffer.GetData());
+
+            if (!_worldCrypt.Decrypt(_packetBuffer.GetData(), header.Tag))
+            {
+                Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} failed to decrypt packet (size: {header.Size})");
+                return ReadDataHandlerResult.Error;
+            }
+
+            WorldPacket packet = new WorldPacket(_packetBuffer.GetData());
+            _packetBuffer.Reset();
+
+            if (packet.GetOpcode() >= (int)ClientOpcodes.Max)
+            {
+                Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} sent wrong opcode (opcode: {packet.GetOpcode()})");
+                return ReadDataHandlerResult.Error;
+            }
+
+            PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
+
+            ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
+            switch (opcode)
+            {
+                case ClientOpcodes.Ping:
+                    Ping ping = new Ping(packet);
+                    ping.Read();
+                    if (!HandlePing(ping))
+                        return ReadDataHandlerResult.Error;
+                    break;
+                case ClientOpcodes.AuthSession:
+                    if (_worldSession != null)
+                    {
+                        Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_SESSION from {_worldSession.GetPlayerInfo()}");
+                        return ReadDataHandlerResult.Error;
+                    }
+
+                    AuthSession authSession = new AuthSession(packet);
+                    authSession.Read();
+                    HandleAuthSession(authSession);
+                    return ReadDataHandlerResult.WaitingForQuery;
+                case ClientOpcodes.AuthContinuedSession:
+                    if (_worldSession != null)
+                    {
+                        Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): received duplicate CMSG_AUTH_CONTINUED_SESSION from {_worldSession.GetPlayerInfo()}");
+                        return ReadDataHandlerResult.Error;
+                    }
+
+                    AuthContinuedSession authContinuedSession = new AuthContinuedSession(packet);
+                    authContinuedSession.Read();
+                    HandleAuthContinuedSession(authContinuedSession);
+                    return ReadDataHandlerResult.WaitingForQuery;
+                case ClientOpcodes.KeepAlive:
+                    if (_worldSession != null)
+                        _worldSession.ResetTimeOutTime(true);
+                    break;
+                case ClientOpcodes.LogDisconnect:
+                    break;
+                case ClientOpcodes.EnableNagle:
+                    SetNoDelay(false);
+                    break;
+                case ClientOpcodes.ConnectToFailed:
+                    ConnectToFailed connectToFailed = new ConnectToFailed(packet);
+                    connectToFailed.Read();
+                    HandleConnectToFailed(connectToFailed);
+                    break;
+                case ClientOpcodes.EnableEncryptionAck:
+                    HandleEnableEncryptionAck();
+                    break;
+                default:
+                    if (_worldSession == null)
+                    {
+                        Log.outError(LogFilter.Network, $"ProcessIncoming: Client not authed opcode = {opcode}");
+                        return ReadDataHandlerResult.Error;
+                    }
+
+                    if (!PacketManager.ContainsHandler(opcode))
+                    {
+                        Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
+                        break;
+                    }
+
+                    // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
+                    _worldSession.ResetTimeOutTime(false);
+
+                    // Copy the packet to the heap before enqueuing
+                    _worldSession.QueuePacket(packet);
+                    break;
+            }
+
+            return ReadDataHandlerResult.Ok;
         }
 
         public void SendPacket(ServerPacket packet)
@@ -471,7 +535,7 @@ namespace Game.Networking
             // This also allows to check for possible "hack" attempts on account
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION);
-            stmt.AddValue(0, _sessionKey.ToHexString());
+            stmt.AddValue(0, _sessionKey);
             stmt.AddValue(1, account.game.Id);
             DB.Login.Execute(stmt);
 
@@ -571,6 +635,7 @@ namespace Game.Networking
             //_worldSession.InitWarden(_sessionKey);
 
             _queryProcessor.AddCallback(_worldSession.LoadPermissionsAsync().WithCallback(LoadSessionPermissionsCallback));
+            AsyncRead();
         }
 
         void LoadSessionPermissionsCallback(SQLResult result)
@@ -615,7 +680,7 @@ namespace Game.Networking
 
             uint accountId = key.AccountId;
             string login = result.Read<string>(0);
-            _sessionKey = result.Read<string>(1).ToByteArray();
+            _sessionKey = result.Read<byte[]>(1);
 
             HmacSha256 hmac = new HmacSha256(_sessionKey);
             hmac.Process(BitConverter.GetBytes(authSession.Key), 8);
@@ -639,6 +704,7 @@ namespace Game.Networking
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
             SendPacket(new EnableEncryption(_encryptKey, true));
+            AsyncRead();
         }
 
         void HandleConnectToFailed(ConnectToFailed connectToFailed)
@@ -754,7 +820,7 @@ namespace Game.Networking
             // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
             // WHERE a.username = ? ORDER BY aa.RealmID DESC LIMIT 1
             game.Id = fields.Read<uint>(0);
-            game.SessionKey = fields.Read<string>(1).ToByteArray();
+            game.SessionKey = fields.Read<byte[]>(1);
             battleNet.LastIP = fields.Read<string>(2);
             battleNet.IsLockedToIP = fields.Read<bool>(3);
             battleNet.LockCountry = fields.Read<string>(4);
@@ -800,5 +866,12 @@ namespace Game.Networking
             public AccountTypes Security;
             public bool IsBanned;
         }
+    }
+
+    enum ReadDataHandlerResult
+    {
+        Ok = 0,
+        Error = 1,
+        WaitingForQuery = 2
     }
 }

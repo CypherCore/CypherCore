@@ -45,7 +45,7 @@ namespace Framework.Cryptography
             return true;
         }
 
-        public bool Decrypt(ref byte[] data, byte[] tag)
+        public bool Decrypt(byte[] data, byte[] tag)
         {
             if (IsInitialized)
                 _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);

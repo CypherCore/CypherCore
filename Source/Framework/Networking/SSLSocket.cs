@@ -19,6 +19,7 @@ using System;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
@@ -66,10 +67,7 @@ namespace Framework.Networking
             try
             {
                 var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
-
-                byte[] data = new byte[result];
-                Buffer.BlockCopy(_receiveBuffer, 0, data, 0, result);
-                ReadHandler(data, result);
+                ReadHandler(_receiveBuffer, result);
             }
             catch (Exception ex)
             {
@@ -81,7 +79,7 @@ namespace Framework.Networking
         {
             try
             {
-                await _stream.AuthenticateAsServerAsync(certificate, false, System.Security.Authentication.SslProtocols.Tls, false);
+                await _stream.AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls, false);
             }
             catch(Exception ex)
             {

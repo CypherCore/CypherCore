@@ -92,7 +92,7 @@ namespace BNetServer.Networking
             if (!IsOpen())
                 return;
 
-            var stream = new CodedInputStream(data);
+            var stream = new CodedInputStream(data, 0, receivedLength);
             while (!stream.IsAtEnd)
             {
                 var header = new Header();

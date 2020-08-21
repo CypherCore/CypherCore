@@ -18,7 +18,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Framework.Networking
 {
@@ -34,18 +33,27 @@ namespace Framework.Networking
     {
         Socket _socket;
         IPEndPoint _remoteIPEndPoint;
-        byte[] _receiveBuffer;
+
+        SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
+        SocketAsyncEventArgs receiveSocketAsyncEventArgs;
+
+        public delegate void SocketReadCallback(SocketAsyncEventArgs args);
 
         protected SocketBase(Socket socket)
         {
             _socket = socket;
             _remoteIPEndPoint = (IPEndPoint)_socket.RemoteEndPoint;
-            _receiveBuffer = new byte[ushort.MaxValue];
+
+            receiveSocketAsyncEventArgsWithCallback = new SocketAsyncEventArgs();
+            receiveSocketAsyncEventArgsWithCallback.SetBuffer(new byte[0x4000], 0, 0x4000);
+
+            receiveSocketAsyncEventArgs = new SocketAsyncEventArgs();
+            receiveSocketAsyncEventArgs.SetBuffer(new byte[0x4000], 0, 0x4000);
+            receiveSocketAsyncEventArgs.Completed += (sender, args) => ProcessReadAsync(args);
         }
 
         public virtual void Dispose()
         {
-            _receiveBuffer = null;
             _socket.Dispose();
         }
 
@@ -61,54 +69,28 @@ namespace Framework.Networking
             return _remoteIPEndPoint;
         }
 
-        public async Task AsyncRead()
+        public void AsyncReadWithCallback(SocketReadCallback callback)
         {
             if (!IsOpen())
                 return;
 
-            try
-            {
-                using (var socketEventargs = new SocketAsyncEventArgs())
-                {
-                    socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
-                    socketEventargs.Completed += async (sender, args) => await ProcessReadAsync(args);
-                    socketEventargs.SocketFlags = SocketFlags.None;
-                    socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
-
-                    if (!_socket.ReceiveAsync(socketEventargs))
-                        await ProcessReadAsync(socketEventargs);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.outException(ex);
-            }
+            receiveSocketAsyncEventArgsWithCallback.Completed += (sender, args) => callback(args);
+            receiveSocketAsyncEventArgsWithCallback.SetBuffer(0, 0x4000);
+            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgsWithCallback))
+                callback(receiveSocketAsyncEventArgsWithCallback);
         }
 
-        public async Task AsyncReadWithCallback(SocketReadCallback callback)
+        public void AsyncRead()
         {
             if (!IsOpen())
                 return;
 
-            try
-            {
-                using (var socketEventargs = new SocketAsyncEventArgs())
-                {
-                    socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
-                    socketEventargs.Completed += (sender, args) => callback(args);
-                    socketEventargs.UserToken = _socket;
-                    socketEventargs.SocketFlags = SocketFlags.None;
-                    if (!_socket.ReceiveAsync(socketEventargs))
-                        await callback(socketEventargs);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.outException(ex);
-            }
+            receiveSocketAsyncEventArgs.SetBuffer(0, 0x4000);
+            if (!_socket.ReceiveAsync(receiveSocketAsyncEventArgs))
+                ProcessReadAsync(receiveSocketAsyncEventArgs);
         }
 
-        async Task ProcessReadAsync(SocketAsyncEventArgs args)
+        void ProcessReadAsync(SocketAsyncEventArgs args)
         {
             if (args.SocketError != SocketError.Success)
             {
@@ -122,19 +104,17 @@ namespace Framework.Networking
                 return;
             }
 
-            byte[] data = new byte[args.BytesTransferred];
-            Buffer.BlockCopy(_receiveBuffer, 0, data, 0, args.BytesTransferred);
-            await ReadHandler(data, args.BytesTransferred);
+            ReadHandler(args);
         }
 
-        public abstract Task ReadHandler(byte[] data, int bytesTransferred);
+        public abstract void ReadHandler(SocketAsyncEventArgs args);
 
-        public async void AsyncWrite(byte[] data)
+        public void AsyncWrite(byte[] data)
         {
             if (!IsOpen())
                 return;
 
-            await _socket.SendAsync(data, SocketFlags.None);
+            _socket.Send(data);
         }
 
         public void CloseSocket()
@@ -163,7 +143,5 @@ namespace Framework.Networking
         {
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
         }
-
-        public delegate Task SocketReadCallback(SocketAsyncEventArgs args);
     }
 }
