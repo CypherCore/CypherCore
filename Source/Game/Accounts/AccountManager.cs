@@ -45,13 +45,13 @@ namespace Game
             if (GetId(username) != 0)
                 return AccountOpResult.NameAlreadyExist;                       // username does already exist
 
-            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(username, password);
+            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, password);
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_ACCOUNT);
             stmt.AddValue(0, username);
-            stmt.AddValue(1, registrationData.Item1);
-            stmt.AddValue(2, registrationData.Item2);
-            stmt.AddValue(2, email);
+            stmt.AddValue(1, salt);
+            stmt.AddValue(2, verifier);
+            stmt.AddValue(3, email);
             stmt.AddValue(4, email);
             if (bnetAccountId != 0 && bnetIndex != 0)
             {
@@ -163,10 +163,10 @@ namespace Game
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
 
-            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(newUsername, newPassword);
+            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(newUsername, newPassword);
             stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
-            stmt.AddValue(0, registrationData.salt);
-            stmt.AddValue(1, registrationData.verifier);
+            stmt.AddValue(0, salt);
+            stmt.AddValue(1, verifier);
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
@@ -190,11 +190,11 @@ namespace Game
             if (newPassword.Length > MaxAccountLength)
                 return AccountOpResult.PassTooLong;
 
-            (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationData(username, newPassword);
+            (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, newPassword);
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
-            stmt.AddValue(0, registrationData.salt);
-            stmt.AddValue(1, registrationData.verifier);
+            stmt.AddValue(0, salt);
+            stmt.AddValue(1, verifier);
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 

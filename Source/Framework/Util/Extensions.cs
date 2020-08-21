@@ -36,9 +36,12 @@ namespace System
             return (lValue & lFlag) != 0;
         }
 
-        public static string ToHexString(this byte[] byteArray)
+        public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
-            return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
+            if (reverse)
+                return byteArray.Reverse().Aggregate("", (current, b) => current + b.ToString("X2"));
+            else
+                return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
         
         public static byte[] ToByteArray(this string str)

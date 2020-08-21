@@ -86,7 +86,7 @@ namespace BNetServer.Networking
                 uint loginTicketExpiry = result.Read<uint>(4);
                 bool isBanned = result.Read<ulong>(5) != 0;
 
-                if (CalculateShaPassHash(login, password) == pass_hash)
+                if (CalculateShaPassHash(login.ToUpper(), password.ToUpper()) == pass_hash)
                 {
                     if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
                     {
@@ -168,8 +168,8 @@ namespace BNetServer.Networking
         string CalculateShaPassHash(string name, string password)
         {
             SHA256 sha256 = SHA256.Create();
-            var i = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));
-            return sha256.ComputeHash(Encoding.UTF8.GetBytes(i.ToHexString() + ":" + password)).ToHexString();
+            var email = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(email.ToHexString() + ":" + password)).ToHexString(true);
         }
     }
 }

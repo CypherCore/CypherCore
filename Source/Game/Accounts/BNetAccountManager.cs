@@ -41,7 +41,7 @@ namespace Game
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BNET_ACCOUNT);
             stmt.AddValue(0, email);
-            stmt.AddValue(1, CalculateShaPassHash(email, password));
+            stmt.AddValue(1, CalculateShaPassHash(email.ToUpper(), password.ToUpper()));
             DB.Login.DirectExecute(stmt);
 
             uint newAccountId = GetId(email);
@@ -176,7 +176,7 @@ namespace Game
         {
             SHA256 sha256 = SHA256.Create();
             var i = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));
-            return sha256.ComputeHash(Encoding.UTF8.GetBytes(i.ToHexString() + ":" + password)).ToHexString();
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(i.ToHexString() + ":" + password)).ToHexString(true);
         }
     }
 }
