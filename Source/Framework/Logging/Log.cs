@@ -203,7 +203,7 @@ public class Log
                 }
             case AppenderType.File:
                 {
-                    string filename = "";
+                    string filename;
                     if (tokens.Length < 4)
                     {
                         if (name != "Server")
@@ -236,7 +236,6 @@ public class Log
         if (string.IsNullOrEmpty(appenderName))
             return;
 
-        LogLevel level = LogLevel.Disabled;
         string name = appenderName.Substring(7);
 
         string options = ConfigMgr.GetDefaultValue(appenderName, "");
@@ -254,7 +253,7 @@ public class Log
             return;
         }
 
-        level = (LogLevel)uint.Parse(tokens[0]);
+        LogLevel level = (LogLevel)uint.Parse(tokens[0]);
         if (level > LogLevel.Fatal)
         {
             Console.WriteLine("Log.CreateLoggerFromConfig: Wrong Log Level {0} for logger {1}", type, name);
@@ -348,8 +347,6 @@ public class Log
         foreach (var appender in appenders.Values)
             appender.setRealmId(id);
     }
-
-    static string GetLogsDir() { return m_logsDir; }
 
     static Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
     static Dictionary<LogFilter, Logger> loggers = new Dictionary<LogFilter, Logger>();

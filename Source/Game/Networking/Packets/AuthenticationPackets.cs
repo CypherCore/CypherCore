@@ -316,7 +316,6 @@ namespace Game.Networking.Packets
             public byte[] IPv4;
             public byte[] IPv6;
             public string NameSocket;
-
         }
 
         public enum AddressType

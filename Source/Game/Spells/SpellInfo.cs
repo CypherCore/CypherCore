@@ -3140,8 +3140,8 @@ namespace Game.Spells
                 if (effect == null || !effect.IsEffect())
                     continue;
 
-                targetMask |= effect.TargetA.GetExplicitTargetMask(srcSet, dstSet);
-                targetMask |= effect.TargetB.GetExplicitTargetMask(srcSet, dstSet);
+                targetMask |= effect.TargetA.GetExplicitTargetMask(ref srcSet, ref dstSet);
+                targetMask |= effect.TargetB.GetExplicitTargetMask(ref srcSet, ref dstSet);
 
                 // add explicit target flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid target provided
                 if (effect.GetImplicitTargetType() != SpellEffectImplicitTargetTypes.Explicit)
@@ -3723,8 +3723,7 @@ namespace Game.Spells
 
         public int CalcValue(Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
-            float throwAway;
-            return CalcValue(out throwAway, caster, bp, target, castItemId, itemLevel);
+            return CalcValue(out _, caster, bp, target, castItemId, itemLevel);
         }
 
         public int CalcValue(out float variance, Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
@@ -4474,7 +4473,7 @@ namespace Game.Spells
             return _target;
         }
 
-        public SpellCastTargetFlags GetExplicitTargetMask(bool srcSet, bool dstSet)
+        public SpellCastTargetFlags GetExplicitTargetMask(ref bool srcSet, ref bool dstSet)
         {
             SpellCastTargetFlags targetMask = 0;
             if (GetTarget() == Targets.DestTraj)
