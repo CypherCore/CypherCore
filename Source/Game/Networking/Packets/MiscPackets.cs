@@ -356,6 +356,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(DifficultyID);
             _worldPacket.WriteUInt8(IsTournamentRealm);
             _worldPacket.WriteBit(XRealmPvpAlert);
+            _worldPacket.WriteBit(BlockExitingLoadingScreen);
             _worldPacket.WriteBit(RestrictedAccountMaxLevel.HasValue);
             _worldPacket.WriteBit(RestrictedAccountMaxMoney.HasValue);
             _worldPacket.WriteBit(InstanceGroupSize.HasValue);
@@ -374,6 +375,8 @@ namespace Game.Networking.Packets
         public uint DifficultyID;
         public byte IsTournamentRealm;
         public bool XRealmPvpAlert;
+        public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
+                                                    // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
         public Optional<uint> RestrictedAccountMaxLevel;
         public Optional<uint> RestrictedAccountMaxMoney;
         public Optional<uint> InstanceGroupSize;
