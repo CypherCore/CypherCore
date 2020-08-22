@@ -139,54 +139,7 @@ namespace Game.AI
             if (mgr.GetThreatListSize() <= offset)
                 return null;
 
-            List<Unit> targetList = new List<Unit>();
-            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
-            {
-                foreach (HostileReference  refe in mgr.GetThreatList())
-                {
-                    if (!refe.IsOnline())
-                        continue;
-
-                    targetList.Add(refe.GetTarget());
-                }
-            }
-            else
-            {
-                Unit currentVictim = mgr.GetCurrentVictim();
-                if (currentVictim)
-                    targetList.Add(currentVictim);
-
-                foreach (HostileReference refe in mgr.GetThreatList())
-                {
-                    if (!refe.IsOnline())
-                        continue;
-
-                    Unit thisTarget = refe.GetTarget();
-                    if (thisTarget != currentVictim)
-                        targetList.Add(thisTarget);
-                }
-            }
-
-            // filter by predicate
-            targetList.RemoveAll(target => { return !selector.Check(target); });
-            // shortcut: the list certainly isn't gonna get any larger after this point
-            if (targetList.Count <= offset)
-                return null;
-
-            // right now, list is unsorted for DISTANCE types - re-sort by MAXDISTANCE
-            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
-                SortByDistance(targetList, targetType == SelectAggroTarget.MinDistance);
-
-            // then reverse the sorting for MIN sortings
-            if (targetType == SelectAggroTarget.MinThreat)
-                targetList.Reverse();
-
-            // now pop the first <offset> elements
-            while (offset != 0)
-            {
-                targetList.RemoveAt(0);
-                --offset;
-            }
+            List<Unit> targetList = SelectTargetList((uint)mgr.GetThreatListSize(), targetType, offset, selector);
 
             // maybe nothing fulfills the predicate
             if (targetList.Empty())
@@ -262,9 +215,6 @@ namespace Game.AI
                 }
             }
 
-            // filter by predicate
-            targetList.RemoveAll(target => { return !selector.Check(target); });
-
             // shortcut: the list isn't gonna get any larger
             if (targetList.Count <= offset)
             {
@@ -286,6 +236,9 @@ namespace Game.AI
                 targetList.RemoveAt(0);
                 --offset;
             }
+
+            // then finally filter by predicate
+            targetList.RemoveAll(target => { return !selector.Check(target); });
 
             if (targetList.Count <= num)
                 return targetList;
