@@ -1177,6 +1177,43 @@ namespace Game.Spells
             target.UpdateObjectVisibility();
         }
 
+        [AuraEffectHandler(AuraType.DetectAmore)]
+        void HandleDetectAmore(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (target.IsTypeId(TypeId.Player))
+                return;
+
+            if (apply)
+            {
+                Player playerTarget = target.ToPlayer();
+                if (playerTarget != null)
+                {
+                    playerTarget.AddAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
+                }
+            }
+            else
+            {
+                if (target.HasAuraType(AuraType.DetectAmore))
+                {
+                    var amoreAuras = target.GetAuraEffectsByType(AuraType.DetectAmore);
+                    foreach (var auraEffect in amoreAuras)
+                    {
+                        if (GetMiscValue() == auraEffect.GetMiscValue())
+                            return;
+                    }
+                }
+
+                Player playerTarget = target.ToPlayer();
+                if (playerTarget != null)
+                    playerTarget.RemoveAuraVision((PlayerFieldByte2Flags)(1 << (GetMiscValue() - 1)));
+            }
+        }
+
         [AuraEffectHandler(AuraType.SpiritOfRedemption)]
         void HandleSpiritOfRedemption(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
