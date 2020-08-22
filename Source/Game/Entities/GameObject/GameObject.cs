@@ -194,6 +194,8 @@ namespace Game.Entities
                 return false;
             }
 
+            UpdatePositionData();
+
             SetZoneScript();
             if (m_zoneScript != null)
             {

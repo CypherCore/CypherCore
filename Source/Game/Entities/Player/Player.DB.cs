@@ -2841,6 +2841,7 @@ namespace Game.Entities
             }
 
             SetMap(map);
+            UpdatePositionData();
 
             // now that map position is determined, check instance validity
             if (!CheckInstanceValidity(true) && !IsInstanceLoginGameMasterException())

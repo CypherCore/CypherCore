@@ -192,6 +192,7 @@ namespace Game.Entities
             }
 
             SetMap(Global.MapMgr.CreateMap(info.MapId, this));
+            UpdatePositionData();
 
             PowerType powertype = cEntry.DisplayPower;
 

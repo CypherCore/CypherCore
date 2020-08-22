@@ -774,6 +774,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "Creature.Create: given coordinates for creature (guidlow {0}, entry {1}) are not valid (X: {2}, Y: {3}, Z: {4}, O: {5})", guidlow, entry, x, y, z, ang);
                 return false;
             }
+            UpdatePositionData();
 
             // Allow players to see those units while dead, do it here (mayby altered by addon auras)
             if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.GhostVisible))
