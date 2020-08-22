@@ -92,33 +92,18 @@ namespace Scripts.World
 
         void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
-            if (onStartDuel)
+            // remove cooldowns on spells that have < 10 min CD, has no onHold and Aura
+            player.GetSpellHistory().ResetCooldowns(itr =>
             {
-                // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
-                player.GetSpellHistory().ResetCooldowns(pair =>
-                {
-                    DateTime now = GameTime.GetGameTimeSystemPoint();
-                    uint cooldownDuration = pair.Value.CooldownEnd > now ? (uint)(pair.Value.CooldownEnd - now).TotalMilliseconds : 0;
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
-                    return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds
-                           && spellInfo.CategoryRecoveryTime < 10 * Time.Minute * Time.InMilliseconds
-                           && !pair.Value.OnHold
-                           && cooldownDuration > 0
-                           && (spellInfo.RecoveryTime - cooldownDuration) > (Time.Minute / 2) * Time.InMilliseconds
-                           && (spellInfo.CategoryRecoveryTime - cooldownDuration) > (Time.Minute / 2) * Time.InMilliseconds;
-                }, true);
-            }
-            else
-            {
-                // remove cooldowns on spells that have < 10 min CD and has no onHold
-                player.GetSpellHistory().ResetCooldowns(pair =>
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
-                    return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds
-                           && spellInfo.CategoryRecoveryTime < 10 * Time.Minute * Time.InMilliseconds
-                           && !pair.Value.OnHold;
-                }, true);
-            }
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itr.Key, Difficulty.None);
+                uint remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
+                return remainingCooldown > 0
+                    && !itr.Value.OnHold
+                    && TimeSpan.FromMilliseconds(spellInfo.RecoveryTime) < TimeSpan.FromMinutes(10)
+                    && TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime) < TimeSpan.FromMinutes(10)
+                    && TimeSpan.FromMilliseconds(remainingCooldown) < TimeSpan.FromMinutes(10)
+                    && (onStartDuel ? !player.HasAura(spellInfo.Id) : true);
+            }, true);
 
             // pet cooldowns
             Pet pet = player.GetPet();
