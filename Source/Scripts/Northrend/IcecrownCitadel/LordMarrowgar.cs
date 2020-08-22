@@ -41,7 +41,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             public const int EmoteBoneStorm = 7;
         }
 
-        struct Spells
+        struct SpellIds
         {
             // Lord Marrowgar
             public const uint BoneSlice = 69055;
@@ -106,7 +106,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 if (!unit.IsTypeId(TypeId.Player))
                     return false;
 
-                if (unit.HasAura(Spells.Impaled))
+                if (unit.HasAura(SpellIds.Impaled))
                     return false;
 
                 // Check if it is one of the tanks soaking Bone Slice
@@ -136,7 +136,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 _Reset();
                 me.SetSpeedRate(UnitMoveType.Run, _baseSpeed);
-                me.RemoveAurasDueToSpell(Spells.BoneStorm);
+                me.RemoveAurasDueToSpell(SpellIds.BoneStorm);
                 me.RemoveAurasDueToSpell(InstanceSpells.Berserk);
 
                 _events.ScheduleEvent(Misc.EventEnableBoneSlice, 10000);
@@ -201,30 +201,30 @@ namespace Scripts.Northrend.IcecrownCitadel
                     switch (eventId)
                     {
                         case Misc.EventBoneSpikeGraveyard:
-                            if (IsHeroic() || !me.HasAura(Spells.BoneStorm))
-                                DoCast(me, Spells.BoneSpikeGraveyard);
+                            if (IsHeroic() || !me.HasAura(SpellIds.BoneStorm))
+                                DoCast(me, SpellIds.BoneSpikeGraveyard);
                             _events.ScheduleEvent(Misc.EventBoneSpikeGraveyard, RandomHelper.URand(15000, 20000), Misc.EventGroupSpecial);
                             break;
                         case Misc.EventColdflame:
                             _coldflameLastPos.Relocate(me);
                             _coldflameTarget.Clear();
-                            if (!me.HasAura(Spells.BoneStorm))
-                                DoCastAOE(Spells.ColdflameNormal);
+                            if (!me.HasAura(SpellIds.BoneStorm))
+                                DoCastAOE(SpellIds.ColdflameNormal);
                             else
-                                DoCast(me, Spells.ColdflameBoneStorm);
+                                DoCast(me, SpellIds.ColdflameBoneStorm);
                             _events.ScheduleEvent(Misc.EventColdflame, 5000, Misc.EventGroupSpecial);
                             break;
                         case Misc.EventWarnBoneStorm:
                             _boneSlice = false;
                             Talk(Texts.SayBoneStorm);
                             me.FinishSpell(CurrentSpellTypes.Melee, false);
-                            DoCast(me, Spells.BoneStorm);
+                            DoCast(me, SpellIds.BoneStorm);
                             _events.DelayEvents(3000, Misc.EventGroupSpecial);
                             _events.ScheduleEvent(Misc.EventBoneStormBegin, 3050);
                             _events.ScheduleEvent(Misc.EventWarnBoneStorm, RandomHelper.URand(90000, 95000));
                             break;
                         case Misc.EventBoneStormBegin:
-                            Aura pStorm = me.GetAura(Spells.BoneStorm);
+                            Aura pStorm = me.GetAura(SpellIds.BoneStorm);
                             if (pStorm != null)
                                 pStorm.SetDuration((int)_boneStormDuration);
                             me.SetSpeedRate(UnitMoveType.Run, _baseSpeed * 3.0f);
@@ -263,12 +263,12 @@ namespace Scripts.Northrend.IcecrownCitadel
                 });
 
                 // We should not melee attack when storming
-                if (me.HasAura(Spells.BoneStorm))
+                if (me.HasAura(SpellIds.BoneStorm))
                     return;
 
                 // 10 seconds since encounter start Bone Slice replaces melee attacks
                 if (_boneSlice && !me.GetCurrentSpell(CurrentSpellTypes.Melee))
-                    DoCastVictim(Spells.BoneSlice);
+                    DoCastVictim(SpellIds.BoneSlice);
 
                 DoMeleeAttackIfReady();
             }
@@ -355,7 +355,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 else
                     pos.Relocate(owner);
 
-                if (owner.HasAura(Spells.BoneStorm))
+                if (owner.HasAura(SpellIds.BoneStorm))
                 {
                     float ang = Position.NormalizeOrientation(pos.GetAngle(me));
                     me.SetOrientation(ang);
@@ -376,7 +376,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 }
 
                 me.NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), me.GetPositionZ(), me.GetOrientation());
-                DoCast(Spells.ColdflameSummon);
+                DoCast(SpellIds.ColdflameSummon);
                 _events.ScheduleEvent(Misc.EventColdflameTrigger, 500);
             }
 
@@ -388,7 +388,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 {
                     Position newPos = me.GetNearPosition(5.0f, 0.0f);
                     me.NearTeleportTo(newPos.GetPositionX(), newPos.GetPositionY(), me.GetPositionZ(), me.GetOrientation());
-                    DoCast(Spells.ColdflameSummon);
+                    DoCast(SpellIds.ColdflameSummon);
                     _events.ScheduleEvent(Misc.EventColdflameTrigger, 500);
                 }
             }
@@ -412,7 +412,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 {
                     Unit trapped = summ.GetSummoner();
                     if (trapped)
-                        trapped.RemoveAurasDueToSpell(Spells.Impaled);
+                        trapped.RemoveAurasDueToSpell(SpellIds.Impaled);
                 }
 
                 me.DespawnOrUnsummon();
@@ -421,13 +421,13 @@ namespace Scripts.Northrend.IcecrownCitadel
             public override void KilledUnit(Unit victim)
             {
                 me.DespawnOrUnsummon();
-                victim.RemoveAurasDueToSpell(Spells.Impaled);
+                victim.RemoveAurasDueToSpell(SpellIds.Impaled);
             }
 
             public override void IsSummonedBy(Unit summoner)
             {
-                DoCast(summoner, Spells.Impaled);
-                summoner.CastSpell(me, Spells.RideVehicle, true);
+                DoCast(summoner, SpellIds.Impaled);
+                summoner.CastSpell(me, SpellIds.RideVehicle, true);
                 _events.ScheduleEvent(Misc.EventFailBoned, 8000);
                 _hasTrappedUnit = true;
             }
@@ -471,7 +471,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 targets.Clear();
                 // select any unit but not the tank
-                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetCombatReach(), true, false, -(int)Spells.Impaled);
+                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetCombatReach(), true, false, -(int)SpellIds.Impaled);
                 if (!target)
                     target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true); // or the tank if its solo
                 if (!target)
@@ -516,7 +516,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         {
             bool CanBeAppliedOn(Unit target)
             {
-                if (target.HasAura(Spells.Impaled))
+                if (target.HasAura(SpellIds.Impaled))
                     return false;
 
                 SpellEffectInfo effect = GetSpellInfo().GetEffect(0);
@@ -573,6 +573,17 @@ namespace Scripts.Northrend.IcecrownCitadel
                     foreach (var target in targets)
                     {
                         target.CastSpell(target, Misc.BoneSpikeSummonId[i], true);
+                        if (!target.IsAlive()) // make sure we don't get any stuck spikes on dead targets
+                        {
+                            Aura aura = target.GetAura(SpellIds.Impaled);
+                            if (aura != null)
+                            {
+                                Creature spike = ObjectAccessor.GetCreature(target, aura.GetCasterGUID());
+                                if (spike != null)
+                                    spike.DespawnOrUnsummon();
+                                aura.Remove();
+                            }
+                        }
                         i++;
                     }
 

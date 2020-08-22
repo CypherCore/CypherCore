@@ -559,6 +559,13 @@ namespace Game.Entities
             Target.RemovePendingEventsForSeat(Seat.Key);
             Target.RemovePendingEventsForPassenger(Passenger);
 
+            // Passenger might've died in the meantime - abort if this is the case
+            if (!Passenger.IsAlive())
+            {
+                Abort(0);
+                return true;
+            }
+
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
             Seat.Value.Passenger.IsUnselectable = Passenger.HasUnitFlag(UnitFlags.NotSelectable);
