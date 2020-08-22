@@ -1118,6 +1118,23 @@ namespace Game.Networking.Packets
 
         public uint Result;
     }
+
+    class MissileCancel : ServerPacket
+    {
+        public MissileCancel() : base(ServerOpcodes.MissileCancel) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(OwnerGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteBit(Reverse);
+            _worldPacket.FlushBits();
+        }
+
+        public ObjectGuid OwnerGUID;
+        public bool Reverse;
+        public uint SpellID;
+    }
     
     //Structs
     public struct SpellLogPowerData

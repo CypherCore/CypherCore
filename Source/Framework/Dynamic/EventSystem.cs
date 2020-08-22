@@ -60,7 +60,7 @@ namespace Framework.Dynamic
                 AddEvent(Event, CalculateTime(1), false);
             }
         }
-    
+
 
         public void KillAllEvents(bool force)
         {
@@ -114,6 +114,8 @@ namespace Framework.Dynamic
         {
             return (m_time + t_offset);
         }
+
+        public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
 
         ulong m_time;
         SortedMultiMap<ulong, BasicEvent> m_events = new SortedMultiMap<ulong, BasicEvent>();

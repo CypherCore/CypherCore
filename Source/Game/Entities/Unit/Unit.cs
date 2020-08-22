@@ -1067,6 +1067,32 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisualKit, true);
         }
 
+        void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        {
+            bool hasMissile = false;
+            foreach (var pair in m_Events.GetEvents())
+            {
+                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+                if (spell != null)
+                {
+                    if (spell.GetSpellInfo().Id == spellId)
+                    {
+                        pair.Value.ScheduleAbort();
+                        hasMissile = true;
+                    }
+                }
+            }
+
+            if (hasMissile)
+            {
+                MissileCancel packet = new MissileCancel();
+                packet.OwnerGUID = GetGUID();
+                packet.SpellID = spellId;
+                packet.Reverse = reverseMissile;
+                SendMessageToSet(packet, false);
+            }
+        }
+
         public void UnsummonAllTotems()
         {
             for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)

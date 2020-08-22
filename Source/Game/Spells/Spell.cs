@@ -4418,6 +4418,15 @@ namespace Game.Spells
                 Global.SpellMgr.GetSpellEffectHandler(eff).Invoke(this, i);
         }
 
+        public static Spell ExtractSpellFromEvent(BasicEvent basicEvent)
+        {
+            SpellEvent spellEvent = (SpellEvent)basicEvent;
+            if (spellEvent != null)
+                return spellEvent.GetSpell();
+
+            return null;
+        }
+        
         public SpellCastResult CheckCast(bool strict)
         {
             uint param1 = 0, param2 = 0;
@@ -7998,16 +8007,20 @@ namespace Game.Spells
             m_Spell.GetCaster().m_Events.AddEvent(this, e_time + 1, false);
             return false;                                           // event not complete
         }
+
         public override void Abort(ulong e_time)
         {
             // oops, the spell we try to do is aborted
             if (m_Spell.GetState() != SpellState.Finished)
                 m_Spell.Cancel();
         }
+
         public override bool IsDeletable()
         {
             return m_Spell.IsDeletable();
         }
+
+        public Spell GetSpell() { return m_Spell; }
 
         Spell m_Spell;
     }
