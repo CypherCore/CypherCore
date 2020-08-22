@@ -46,6 +46,14 @@ namespace Game.Combat
             if (!Owner.CanHaveThreatList() || Owner.HasUnitState(UnitState.Evade))
                 return;
 
+            if (Owner.IsControlledByPlayer() || victim.IsControlledByPlayer())
+            {
+                if (Owner.IsFriendlyTo(victim) || victim.IsFriendlyTo(Owner))
+                    return;
+            }
+            else if (!Owner.IsHostileTo(victim) && !victim.IsHostileTo(Owner))
+                return;
+
             Owner.SetInCombatWith(victim);
             victim.SetInCombatWith(Owner);
             AddThreat(victim, amount, spell != null ? spell.GetSchoolMask() : victim.GetMeleeDamageSchoolMask(), spell);
