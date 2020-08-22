@@ -57,9 +57,9 @@ namespace Game
             }
         }
 
-        void SendAvailableHotfixes(int version)
+        void SendAvailableHotfixes()
         {
-            SendPacket(new AvailableHotfixes(version, Global.DB2Mgr.GetHotfixCount(), Global.DB2Mgr.GetHotfixData()));
+            SendPacket(new AvailableHotfixes(Global.WorldMgr.GetRealmId().GetAddress(), Global.DB2Mgr.GetHotfixCount(), Global.DB2Mgr.GetHotfixData()));
         }
 
         [WorldPacketHandler(ClientOpcodes.HotfixRequest, Status = SessionStatus.Authed)]

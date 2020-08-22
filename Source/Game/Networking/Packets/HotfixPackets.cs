@@ -78,23 +78,23 @@ namespace Game.Networking.Packets
 
     class AvailableHotfixes : ServerPacket
     {
-        public AvailableHotfixes(int hotfixCacheVersion, uint hotfixCount, List<HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
+        public AvailableHotfixes(uint virtualRealmAddress, uint hotfixCount, List<HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
-            HotfixCacheVersion = hotfixCacheVersion;
+            VirtualRealmAddress = virtualRealmAddress;
             HotfixCount = hotfixCount;
             Hotfixes = hotfixes;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(HotfixCacheVersion);
+            _worldPacket.WriteUInt32(VirtualRealmAddress);
             _worldPacket.WriteUInt32(HotfixCount);
 
             foreach (HotfixRecord hotfixRecord in Hotfixes)
                 hotfixRecord.Write(_worldPacket);
         }
 
-        public int HotfixCacheVersion;
+        public uint VirtualRealmAddress;
         public uint HotfixCount;
         public List<HotfixRecord> Hotfixes;
     }

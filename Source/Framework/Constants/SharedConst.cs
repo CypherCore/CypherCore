@@ -1172,7 +1172,6 @@ namespace Framework.Constants
         GuildResetHour,
         GuildSaveInterval,
         HonorAfterDuel,
-        HotfixCacheVersion,
         InstanceIgnoreLevel,
         InstanceIgnoreRaid,
         InstancemapLoadGrids,

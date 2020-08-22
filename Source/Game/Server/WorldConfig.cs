@@ -738,17 +738,6 @@ namespace Game
             }
             Log.outInfo(LogFilter.ServerLoading, "Client cache version set to: {0}", clientCacheId);
 
-            int hotfixCacheId = GetDefaultValue("HotfixCacheVersion", 0);
-            if (hotfixCacheId != 0)
-            {
-                // overwrite DB/old value
-                if (hotfixCacheId > 0)
-                    Values[WorldCfg.HotfixCacheVersion] = hotfixCacheId;
-                else
-                    Log.outError(LogFilter.ServerLoading, "HotfixCacheVersion can't be negative {0}, ignored.", hotfixCacheId);
-            }
-            Log.outInfo(LogFilter.ServerLoading, "Hotfix cache version set to: {0}", hotfixCacheId);
-
             Values[WorldCfg.GuildNewsLogCount] = GetDefaultValue("Guild.NewsLogRecordsCount", GuildConst.NewsLogMaxRecords);
             if ((int)Values[WorldCfg.GuildNewsLogCount] > GuildConst.NewsLogMaxRecords)
                 Values[WorldCfg.GuildNewsLogCount] = GuildConst.NewsLogMaxRecords;

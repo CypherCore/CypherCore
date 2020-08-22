@@ -2075,13 +2075,12 @@ namespace Game
         {
             var DBVersion = "Unknown world database.";
 
-            SQLResult result = DB.World.Query("SELECT db_version, cache_id, hotfix_cache_id FROM version LIMIT 1");
+            SQLResult result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
             if (!result.IsEmpty())
             {
                 DBVersion = result.Read<string>(0);
                 // will be overwrite by config values if different and non-0
                 WorldConfig.SetValue(WorldCfg.ClientCacheVersion, result.Read<uint>(1));
-                WorldConfig.SetValue(WorldCfg.HotfixCacheVersion, result.Read<uint>(2));
             }
 
             return DBVersion;
