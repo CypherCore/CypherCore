@@ -938,8 +938,8 @@ namespace Game.Entities
             //should work fine, cause far teleport will be executed in Update()
             SetCanDelayTeleport(true);
 
-            uint quest_id = quest.Id;
-            QuestStatus oldStatus = GetQuestStatus(quest_id);
+            uint questId = quest.Id;
+            QuestStatus oldStatus = GetQuestStatus(questId);
 
             foreach (QuestObjective obj in quest.Objectives)
             {
@@ -966,8 +966,27 @@ namespace Game.Entities
                 }
             }
 
-            RemoveTimedQuest(quest_id);
+            RemoveTimedQuest(questId);
 
+            if (quest.GetRewItemsCount() > 0)
+            {
+                for (uint i = 0; i < quest.GetRewItemsCount(); ++i)
+                {
+                    uint itemId = quest.RewardItemId[i];
+                    if (itemId != 0)
+                    {
+                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
+                        {
+                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId));
+                            SendNewItem(item, quest.RewardItemCount[i], true, false);
+                        }
+                        else if (quest.IsDFQuest())
+                            SendItemRetrievalMail(itemId, quest.RewardItemCount[i], ItemContext.QuestReward);
+                    }
+                }
+            }
+            
             ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(reward);
             if (rewardProto != null && quest.GetRewChoiceItemsCount() != 0)
             {
@@ -989,25 +1008,6 @@ namespace Game.Entities
             if (rewardProto != null && quest.PackageID != 0)
                 RewardQuestPackage(quest.PackageID, reward);
 
-            if (quest.GetRewItemsCount() > 0)
-            {
-                for (uint i = 0; i < quest.GetRewItemsCount(); ++i)
-                {
-                    uint itemId = quest.RewardItemId[i];
-                    if (itemId != 0)
-                    {
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
-                        {
-                            Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId));
-                            SendNewItem(item, quest.RewardItemCount[i], true, false);
-                        }
-                        else if (quest.IsDFQuest())
-                            SendItemRetrievalMail(itemId, quest.RewardItemCount[i], ItemContext.QuestReward);
-                    }
-                }
-            }
-
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 if (quest.RewardCurrencyId[i] != 0)
@@ -1018,9 +1018,7 @@ namespace Game.Entities
             if (skill != 0)
                 UpdateSkillPro(skill, 1000, quest.RewardSkillPoints);
 
-            RewardReputation(quest);
-
-            ushort log_slot = FindQuestSlot(quest_id);
+            ushort log_slot = FindQuestSlot(questId);
             if (log_slot < SharedConst.MaxQuestLogSize)
                 SetQuestSlot(log_slot, 0);
 
@@ -1071,25 +1069,27 @@ namespace Game.Entities
 
             if (quest.IsDaily() || quest.IsDFQuest())
             {
-                SetDailyQuestStatus(quest_id);
+                SetDailyQuestStatus(questId);
                 if (quest.IsDaily())
                 {
-                    UpdateCriteria(CriteriaTypes.CompleteDailyQuest, quest_id);
-                    UpdateCriteria(CriteriaTypes.CompleteDailyQuestDaily, quest_id);
+                    UpdateCriteria(CriteriaTypes.CompleteDailyQuest, questId);
+                    UpdateCriteria(CriteriaTypes.CompleteDailyQuestDaily, questId);
                 }
             }
             else if (quest.IsWeekly())
-                SetWeeklyQuestStatus(quest_id);
+                SetWeeklyQuestStatus(questId);
             else if (quest.IsMonthly())
-                SetMonthlyQuestStatus(quest_id);
+                SetMonthlyQuestStatus(questId);
             else if (quest.IsSeasonal())
-                SetSeasonalQuestStatus(quest_id);
+                SetSeasonalQuestStatus(questId);
 
-            RemoveActiveQuest(quest_id, false);
+            RemoveActiveQuest(questId, false);
             if (quest.CanIncreaseRewardedQuestCounters())
-                SetRewardedQuest(quest_id);
+                SetRewardedQuest(questId);
 
             SendQuestReward(quest, questGiver?.ToCreature(), XP, !announce);
+
+            RewardReputation(quest);
 
             // cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
             if (quest.RewardSpell > 0)
@@ -1134,7 +1134,7 @@ namespace Game.Entities
             // make full db save
             SaveToDB(false);
 
-            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
+            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
             if (questBit != 0)
                 SetQuestCompletedBit(questBit, true);
 
@@ -1144,13 +1144,13 @@ namespace Game.Entities
                 UpdatePvPState();
             }
 
-            SendQuestUpdate(quest_id);
+            SendQuestUpdate(questId);
             SendQuestGiverStatusMultiple();
 
             //lets remove flag for delayed teleports
             SetCanDelayTeleport(false);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
         }
 
