@@ -765,11 +765,11 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     {
                         Talk(RedRidingHood.SayWolfHood);
                         DoCast(target, RedRidingHood.SpellLittleRedRidingHood, true);
-                        TempThreat = DoGetThreat(target);
+                        TempThreat = GetThreat(target);
                         if (TempThreat != 0.0f)
-                            DoModifyThreatPercent(target, -100);
+                            ModifyThreatByPercent(target, -100);
                         HoodGUID = target.GetGUID();
-                        me.AddThreat(target, 1000000.0f);
+                        AddThreat(target, 1000000.0f);
                         ChaseTimer = 20000;
                         IsChasing = true;
                     }
@@ -781,9 +781,9 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     if (target)
                     {
                         HoodGUID.Clear();
-                        if (DoGetThreat(target) != 0f)
-                            DoModifyThreatPercent(target, -100);
-                        me.AddThreat(target, TempThreat);
+                        if (GetThreat(target) != 0f)
+                            ModifyThreatByPercent(target, -100);
+                        AddThreat(target, TempThreat);
                         TempThreat = 0;
                     }
 
@@ -1023,7 +1023,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                         Romulo.GetMotionMaster().Clear();
                         Romulo.SetDeathState(DeathState.JustDied);
                         Romulo.CombatStop(true);
-                        Romulo.DeleteThreatList();
+                        Romulo.GetThreatManager().ClearAllThreat();
                         Romulo.SetDynamicFlags(UnitDynFlags.Lootable);
                     }
 
@@ -1261,7 +1261,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                         Julianne.GetMotionMaster().Clear();
                         Julianne.SetDeathState(DeathState.JustDied);
                         Julianne.CombatStop(true);
-                        Julianne.DeleteThreatList();
+                        Julianne.GetThreatManager().ClearAllThreat();
                         Julianne.SetDynamicFlags(UnitDynFlags.Lootable);
                     }
                     return;
@@ -1290,7 +1290,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                 Creature Julianne = (ObjectAccessor.GetCreature(me, JulianneGUID));
                 if (Julianne && Julianne.GetVictim())
                 {
-                    me.AddThreat(Julianne.GetVictim(), 1.0f);
+                    AddThreat(Julianne.GetVictim(), 1.0f);
                     AttackStart(Julianne.GetVictim());
                 }
             }

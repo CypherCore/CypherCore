@@ -170,7 +170,7 @@ namespace Game.Entities
             member.SetFormation(null);
         }
 
-        public void MemberAttackStart(Creature member, Unit target)
+        public void MemberEngagingTarget(Creature member, Unit target)
         {
             GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
             if (groupAI == 0)
@@ -186,9 +186,6 @@ namespace Game.Entities
 
             foreach (var pair in m_members)
             {
-                if (m_leader) // avoid crash if leader was killed and reset.
-                    Log.outDebug(LogFilter.Unit, "GROUP ATTACK: group instance id {0} calls member instid {1}", m_leader.GetInstanceId(), member.GetInstanceId());
-
                 Creature other = pair.Key;
 
                 // Skip self
@@ -198,11 +195,8 @@ namespace Game.Entities
                 if (!other.IsAlive())
                     continue;
 
-                if (other.GetVictim())
-                    continue;
-
                 if (((other != m_leader && groupAI.HasAnyFlag(GroupAIFlags.MembersAssistLeader)) || (other == m_leader && groupAI.HasAnyFlag(GroupAIFlags.LeaderAssistsMember))) && other.IsValidAttackTarget(target))
-                    other.GetAI().AttackStart(target);
+                    other.EngageWithTarget(target);
             }
         }
 

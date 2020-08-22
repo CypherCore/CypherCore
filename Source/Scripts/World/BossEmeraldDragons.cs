@@ -146,7 +146,7 @@ namespace Scripts.World.BossEmeraldDragons
 
             _scheduler.Update(diff);
 
-            Unit target = SelectTarget(SelectAggroTarget.TopAggro, 0, -50.0f, true);
+            Unit target = SelectTarget(SelectAggroTarget.MaxThreat, 0, -50.0f, true);
             if (target)
                 DoCast(target, Spells.SummonPlayer);
 

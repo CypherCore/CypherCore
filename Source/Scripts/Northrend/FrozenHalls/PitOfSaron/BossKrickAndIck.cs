@@ -174,8 +174,8 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
 
         public void _ResetThreat(Unit target)
         {
-            DoModifyThreatPercent(target, -100);
-            me.AddThreat(target, _tempThreat);
+            ModifyThreatByPercent(target, -100);
+            AddThreat(target, _tempThreat);
         }
 
         public override void UpdateAI(uint diff)
@@ -617,8 +617,8 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
                         ick.GetAI().Talk(TextIds.SayIckChase1, target);
                         ick.AddAura(GetSpellInfo().Id, target);
                         ick.GetAI<boss_ick>().SetTempThreat(ick.GetThreatManager().GetThreat(target));
-                        ick.AddThreat(target, GetEffectValue());
-                        target.AddThreat(ick, GetEffectValue());
+                        ick.GetThreatManager().AddThreat(target, GetEffectValue(), GetSpellInfo(), true, true);
+                        target.GetThreatManager().AddThreat(ick, GetEffectValue(), GetSpellInfo(), true, true);
                     }
                 }
             }

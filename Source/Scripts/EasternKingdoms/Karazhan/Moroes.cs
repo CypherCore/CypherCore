@@ -278,16 +278,9 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
                 if (Blind_Timer <= diff)
                 {
-                    List<Unit> targets = SelectTargetList(5, SelectAggroTarget.Random, me.GetCombatReach() * 5, true);
-                    foreach (var i in targets)
-                    {
-
-                        if (!me.IsWithinMeleeRange(i))
-                        {
-                            DoCast(i, SpellIds.Blind);
-                            break;
-                        }
-                    }
+                    Unit target = SelectTarget(SelectAggroTarget.MinDistance, 0, 0.0f, true, false);
+                    if (target != null)
+                        DoCast(target, SpellIds.Blind);
                     Blind_Timer = 40000;
                 }
                 else

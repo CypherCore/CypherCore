@@ -209,10 +209,12 @@ namespace Game.Combat
         {
             GetTarget().AddHatedBy(this);
         }
+
         public override void TargetObjectDestroyLink()
         {
             GetTarget().RemoveHatedBy(this);
         }
+
         public override void SourceObjectDestroyLink()
         {
             SetOnlineOfflineState(false);

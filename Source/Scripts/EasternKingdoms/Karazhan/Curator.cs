@@ -102,7 +102,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
             switch (eventId)
             {
                 case EventIds.HatefulBolt:
-                    Unit target = SelectTarget(SelectAggroTarget.TopAggro, 1);
+                    Unit target = SelectTarget(SelectAggroTarget.MaxThreat, 1);
                     if (target != null)
                         DoCast(target, SpellIds.HatefulBolt);
                     _events.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));

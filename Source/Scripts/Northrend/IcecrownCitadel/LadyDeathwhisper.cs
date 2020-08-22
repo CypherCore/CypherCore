@@ -313,7 +313,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     Talk(TextIds.SayDominateMind);
                     for (byte i = 0; i < _dominateMindCount; i++)
                     {
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)SpellIds.DominateMind);
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, false, -(int)SpellIds.DominateMind);
                         if (target != null)
                             DoCast(target, SpellIds.DominateMind);
                     }
@@ -423,7 +423,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 Talk(TextIds.SayPhase2);
                 Talk(TextIds.EmotePhase2);
                 DoStartMovement(me.GetVictim());
-                DoResetThreat();
+                ResetThreatList();
 
                 damage -= (uint)me.GetPower(PowerType.Mana);
                 me.SetPower(PowerType.Mana, 0);

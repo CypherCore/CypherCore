@@ -1352,10 +1352,10 @@ namespace Scripts.Northrend.Ulduar
 
                 if (me.HasUnitState(UnitState.Root))
                 {
-                    Unit newTarget = SelectTarget(SelectAggroTarget.Nearest, 0, 30.0f, true);
+                    Unit newTarget = SelectTarget(SelectAggroTarget.MinDistance, 0, 30.0f, true);
                     if (newTarget)
                     {
-                        me.DeleteThreatList();
+                        me.GetThreatManager().ClearAllThreat();
                         AttackStart(newTarget);
                     }
                 }

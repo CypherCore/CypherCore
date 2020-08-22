@@ -155,7 +155,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         return;
                     case Jaraxxus.EventFelLightning:
                         {
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true, -Jaraxxus.SpellLordHittin);
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true, true, -Jaraxxus.SpellLordHittin);
                             if (target)
                                 DoCast(target, Jaraxxus.SpellFelLighting);
                             _events.ScheduleEvent(Jaraxxus.EventFelLightning, RandomHelper.URand(10 * Time.InMilliseconds, 15 * Time.InMilliseconds));
@@ -163,7 +163,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         }
                     case Jaraxxus.EventIncinerateFlesh:
                         {
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -Jaraxxus.SpellLordHittin);
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, true, -Jaraxxus.SpellLordHittin);
                             if (target)
                             {
                                 Talk(Jaraxxus.EmoteIncinerate, target);
@@ -179,7 +179,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         return;
                     case Jaraxxus.EventLegionFlame:
                         {
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -Jaraxxus.SpellLordHittin);
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, true, -Jaraxxus.SpellLordHittin);
                             if (target)
                             {
                                 Talk(Jaraxxus.EmoteLegionFlame, target);

@@ -646,7 +646,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                         Talk(Texts.SaySvalnaAggro);
                         break;
                     case EventTypes.ImpalingSpear:
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)InstanceSpells.ImpalingSpear);
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, true, -(int)InstanceSpells.ImpalingSpear);
                         if (target)
                         {
                             DoCast(me, InstanceSpells.AetherShield);

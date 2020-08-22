@@ -125,7 +125,7 @@ namespace Game.Entities
 
         public virtual void SetCanDualWield(bool value) { m_canDualWield = value; }
 
-        void SendClearThreatList()
+        public void SendClearThreatList()
         {
             ThreatClear packet = new ThreatClear();
             packet.UnitGUID = GetGUID();
@@ -156,13 +156,6 @@ namespace Game.Entities
                 }
                 SendMessageToSet(packet, false);
             }
-        }
-
-        public void DeleteThreatList()
-        {
-            if (CanHaveThreatList(true) && !threatManager.IsThreatListEmpty())
-                SendClearThreatList();
-            threatManager.ClearReferences();
         }
 
         public void TauntApply(Unit taunter)
@@ -325,12 +318,6 @@ namespace Game.Entities
         }
         public void RemoveHatedBy(HostileReference pHostileReference) { } //nothing to do yet
 
-        public void AddThreat(Unit victim, float fThreat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
-        {
-            // Only mobs can manage threat lists
-            if (CanHaveThreatList() && !HasUnitState(UnitState.Evade))
-                threatManager.AddThreat(victim, fThreat, schoolMask, threatSpell);
-        }
         public float ApplyTotalThreatModifier(float fThreat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal)
         {
             if (!HasAuraType(AuraType.ModThreat) || fThreat < 0)
@@ -359,6 +346,17 @@ namespace Game.Entities
         {
             return m_deathState;
         }
+
+        public bool IsEngaged()  { return IsInCombat();    }
+        public bool IsEngagedBy(Unit who) { return IsInCombatWith(who); }
+        public void EngageWithTarget(Unit who)
+        {
+            SetInCombatWith(who);
+            who.SetInCombatWith(this);
+            GetThreatManager().AddThreat(who, 0.0f);
+        }
+        public bool IsThreatened() { return CanHaveThreatList() && !GetThreatManager().IsThreatListEmpty(); }
+        public bool IsThreatenedBy(Unit who) { return who != null && CanHaveThreatList() && GetThreatManager().IsThreatenedBy(who); }
 
         public bool IsInCombat() { return HasUnitFlag(UnitFlags.InCombat); }
         public bool IsPetInCombat() { return HasUnitFlag(UnitFlags.PetInCombat); }
@@ -444,7 +442,7 @@ namespace Game.Entities
             if (creature != null && !IsPet())
             {
                 // should not let player enter combat by right clicking target - doesn't helps
-                AddThreat(victim, 0.0f);
+                GetThreatManager().AddThreat(victim, 0.0f);
                 SetInCombatWith(victim);
 
                 if (victim.IsTypeId(TypeId.Player))
@@ -453,7 +451,7 @@ namespace Game.Entities
                 Unit owner = victim.GetOwner();
                 if (owner != null)
                 {
-                    AddThreat(owner, 0.0f);
+                    GetThreatManager().AddThreat(owner, 0.0f);
                     SetInCombatWith(owner);
                     if (owner.GetTypeId() == TypeId.Player)
                         owner.SetInCombatWith(this);
@@ -553,6 +551,9 @@ namespace Game.Entities
         }
         public Unit GetAttackerForHelper()
         {
+            if (!IsEngaged())
+                return null;
+
             Unit victim = GetVictim();
             if (victim != null)
                 if ((!IsPet() && GetPlayerMovingMe() == null) || IsInCombatWith(victim) || victim.IsInCombatWith(this))
@@ -1143,7 +1144,7 @@ namespace Game.Entities
                     if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(AuraType.DamageShield)))
                         victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);
 
-                    victim.AddThreat(this, damage, damageSchoolMask, spellProto);
+                    victim.GetThreatManager().AddThreat(this, damage, spellProto);
                 }
                 else                                                // victim is a player
                 {
@@ -1338,11 +1339,12 @@ namespace Game.Entities
                 SetInCombatWith(target);
                 target.SetInCombatWith(this);
             }
-            Unit who = target.GetCharmerOrOwnerOrSelf();
-            if (who.IsTypeId(TypeId.Player))
-                SetContestedPvP(who.ToPlayer());
 
             Player me = GetCharmerOrOwnerPlayerOrPlayerItself();
+            Unit who = target.GetCharmerOrOwnerOrSelf();
+            if (me != null && who.IsTypeId(TypeId.Player))
+                me.SetContestedPvP(who.ToPlayer());
+
             if (me != null && who.IsPvP() && (!who.IsTypeId(TypeId.Player) || me.duel == null || me.duel.opponent != who))
             {
                 me.UpdatePvP(true);
@@ -1403,7 +1405,7 @@ namespace Game.Entities
                         creature.GetAI().EnterCombat(enemy);
 
                     if (creature.GetFormation() != null)
-                        creature.GetFormation().MemberAttackStart(creature, enemy);
+                        creature.GetFormation().MemberEngagingTarget(creature, enemy);
                 }
 
                 if (IsPet())
@@ -1595,7 +1597,7 @@ namespace Game.Entities
 
                 if (!creature.IsPet())
                 {
-                    creature.DeleteThreatList();
+                    creature.GetThreatManager().ClearAllThreat();
 
                     // must be after setDeathState which resets dynamic flags
                     if (!creature.loot.IsLooted())
@@ -1708,29 +1710,6 @@ namespace Game.Entities
         public void KillSelf(bool durabilityLoss = true) { Kill(this, durabilityLoss); }
 
         public virtual uint GetBlockPercent() { return 30; }
-
-        public void SetContestedPvP(Player attackedPlayer = null)
-        {
-            Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
-
-            if (player == null || (attackedPlayer != null && (attackedPlayer == player || (player.duel != null && player.duel.opponent == attackedPlayer))))
-                return;
-
-            player.SetContestedPvPTimer(30000);
-            if (!player.HasUnitState(UnitState.AttackPlayer))
-            {
-                player.AddUnitState(UnitState.AttackPlayer);
-                player.AddPlayerFlag(PlayerFlags.ContestedPVP);
-                // call MoveInLineOfSight for nearby contested guards
-                UpdateObjectVisibility();
-            }
-            if (!HasUnitState(UnitState.AttackPlayer))
-            {
-                AddUnitState(UnitState.AttackPlayer);
-                // call MoveInLineOfSight for nearby contested guards
-                UpdateObjectVisibility();
-            }
-        }
 
         void UpdateReactives(uint p_time)
         {

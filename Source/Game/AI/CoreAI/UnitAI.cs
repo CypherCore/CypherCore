@@ -57,9 +57,9 @@ namespace Game.AI
             return me.GetThreatManager();
         }
 
-        void SortByDistanceTo(Unit reference, List<Unit> targets)
+        void SortByDistance(List<Unit> targets, bool ascending)
         {
-            targets.Sort(new ObjectDistanceOrderPred(reference));
+            targets.Sort(new ObjectDistanceOrderPred(me, true));
         }
 
         public void DoMeleeAttackIfReady()
@@ -113,100 +113,187 @@ namespace Game.AI
             return false;
         }
 
-        public Unit SelectTarget(SelectAggroTarget targetType, uint position = 0, float dist = 0.0f, bool playerOnly = false, int aura = 0)
+        /// <summary>
+        /// Select the best target (in <targetType> order) from the threat list that fulfill the following:
+        /// - Not among the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM).
+        /// - Within at most <dist> yards (if dist > 0.0f)
+        /// - At least -<dist> yards away (if dist < 0.0f)
+        /// - Is a player (if playerOnly = true)
+        /// - Not the current tank (if withTank = false)
+        /// - Has aura with ID <aura> (if aura > 0)
+        /// - Does not have aura with ID -<aura> (if aura < 0)
+        /// </summary>
+        public Unit SelectTarget(SelectAggroTarget targetType, uint offset = 0, float dist = 0.0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
-            return SelectTarget(targetType, position, new DefaultTargetSelector(me, dist, playerOnly, aura));
+            return SelectTarget(targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
 
-        // Select the targets satifying the predicate.
-        public Unit SelectTarget(SelectAggroTarget targetType, uint position, ISelector selector)
+        /// <summary>
+        /// Select the best target (in <targetType> order) satisfying <predicate> from the threat list.
+        /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
+        /// </summary>
+        public Unit SelectTarget(SelectAggroTarget targetType, uint offset, ISelector selector)
         {
-            var threatlist = GetThreatManager().GetThreatList();
-            if (position >= threatlist.Count)
+            ThreatManager mgr = GetThreatManager();
+            // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
+            if (mgr.GetThreatListSize() <= offset)
                 return null;
 
             List<Unit> targetList = new List<Unit>();
-            Unit currentVictim = null;
-
-            var currentVictimReference = GetThreatManager().GetCurrentVictim();
-            if (currentVictimReference != null)
+            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
             {
-                currentVictim = currentVictimReference.GetTarget();
+                foreach (HostileReference  refe in mgr.GetThreatList())
+                {
+                    if (!refe.IsOnline())
+                        continue;
 
-                // Current victim always goes first
-                if (currentVictim && selector.Check(currentVictim))
+                    targetList.Add(refe.GetTarget());
+                }
+            }
+            else
+            {
+                Unit currentVictim = mgr.GetCurrentVictim();
+                if (currentVictim)
                     targetList.Add(currentVictim);
+
+                foreach (HostileReference refe in mgr.GetThreatList())
+                {
+                    if (!refe.IsOnline())
+                        continue;
+
+                    Unit thisTarget = refe.GetTarget();
+                    if (thisTarget != currentVictim)
+                        targetList.Add(thisTarget);
+                }
             }
 
-            foreach (var hostileRef in threatlist)
-            {
-                if (currentVictim != null && hostileRef.GetTarget() != currentVictim && selector.Check(hostileRef.GetTarget()))
-                    targetList.Add(hostileRef.GetTarget());
-                else if (currentVictim == null && selector.Check(hostileRef.GetTarget()))
-                    targetList.Add(hostileRef.GetTarget());
-            }
-
-            if (position >= targetList.Count)
+            // filter by predicate
+            targetList.RemoveAll(target => { return !selector.Check(target); });
+            // shortcut: the list certainly isn't gonna get any larger after this point
+            if (targetList.Count <= offset)
                 return null;
 
-            if (targetType == SelectAggroTarget.Nearest || targetType == SelectAggroTarget.Farthest)
-                SortByDistanceTo(me, targetList);
+            // right now, list is unsorted for DISTANCE types - re-sort by MAXDISTANCE
+            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
+                SortByDistance(targetList, targetType == SelectAggroTarget.MinDistance);
+
+            // then reverse the sorting for MIN sortings
+            if (targetType == SelectAggroTarget.MinThreat)
+                targetList.Reverse();
+
+            // now pop the first <offset> elements
+            while (offset != 0)
+            {
+                targetList.RemoveAt(0);
+                --offset;
+            }
+
+            // maybe nothing fulfills the predicate
+            if (targetList.Empty())
+                return null;
 
             switch (targetType)
             {
-                case SelectAggroTarget.Nearest:
-                case SelectAggroTarget.TopAggro:
-                    {
-                        return targetList.First();
-                    }
-                case SelectAggroTarget.Farthest:
-                case SelectAggroTarget.BottomAggro:
-                    {
-                        return targetList.Last();
-                    }
+                case SelectAggroTarget.MaxThreat:
+                case SelectAggroTarget.MinThreat:
+                case SelectAggroTarget.MaxDistance:
+                case SelectAggroTarget.MinDistance:
+                    return targetList[0];
                 case SelectAggroTarget.Random:
-                    {
                         return targetList.SelectRandom();
-                    }
                 default:
-                    break;
+                    return null;
             }
-
-            return null;
         }
 
-        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, float dist, bool playerOnly, int aura = 0)
+        /// <summary>
+        /// Select the best (up to) <num> targets (in <targetType> order) from the threat list that fulfill the following:
+        /// - Not among the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM).
+        /// - Within at most <dist> yards (if dist > 0.0f)
+        /// - At least -<dist> yards away (if dist < 0.0f)
+        /// - Is a player (if playerOnly = true)
+        /// - Not the current tank (if withTank = false)
+        /// - Has aura with ID <aura> (if aura > 0)
+        /// - Does not have aura with ID -<aura> (if aura < 0)
+        /// The resulting targets are stored in <targetList> (which is cleared first).
+        /// </summary>
+        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, float dist, bool playerOnly, bool withTank, int aura = 0)
         {
-            return SelectTargetList(new DefaultTargetSelector(me, dist, playerOnly, aura), num, targetType);
+            return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
 
-        // Select the targets satifying the predicate.
-        // predicate shall extend std.unary_function<Unit*, bool>
-        public List<Unit> SelectTargetList(ISelector selector, uint maxTargets, SelectAggroTarget targetType)
+        /// <summary>
+        /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
+        /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
+        /// </summary>
+        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, ISelector selector)
         {
             var targetList = new List<Unit>();
 
-            var threatlist = GetThreatManager().GetThreatList();
-            if (threatlist.Empty())
+            ThreatManager mgr = GetThreatManager();
+            // shortcut: we're gonna ignore the first <offset> elements, and there's at most <offset> elements, so we ignore them all - nothing to do here
+            if (mgr.GetThreatListSize() <= offset)
                 return targetList;
 
-            foreach (var hostileRef in threatlist)
-                if (selector.Check(hostileRef.GetTarget()))
-                    targetList.Add(hostileRef.GetTarget());
+            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
+            {
+                foreach (HostileReference refe in mgr.GetThreatList())
+                {
+                    if (!refe.IsOnline())
+                        continue;
 
-            if (targetList.Count < maxTargets)
+                    targetList.Add(refe.GetTarget());
+                }
+            }
+            else
+            {
+                Unit currentVictim = mgr.GetCurrentVictim();
+                if (currentVictim != null)
+                    targetList.Add(currentVictim);
+
+                foreach (HostileReference refe in mgr.GetThreatList())
+                {
+                    if (!refe.IsOnline())
+                        continue;
+
+                    Unit thisTarget = refe.GetTarget();
+                    if (thisTarget != currentVictim)
+                        targetList.Add(thisTarget);
+                }
+            }
+
+            // filter by predicate
+            targetList.RemoveAll(target => { return !selector.Check(target); });
+
+            // shortcut: the list isn't gonna get any larger
+            if (targetList.Count <= offset)
+            {
+                targetList.Clear();
                 return targetList;
+            }
 
-            if (targetType == SelectAggroTarget.Nearest || targetType == SelectAggroTarget.Farthest)
-                SortByDistanceTo(me, targetList);
+            // right now, list is unsorted for DISTANCE types - re-sort by MAXDISTANCE
+            if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
+                SortByDistance(targetList, targetType == SelectAggroTarget.MinDistance);
 
-            if (targetType == SelectAggroTarget.Farthest || targetType == SelectAggroTarget.BottomAggro)
+            // now the list is MAX sorted, reverse for MIN types
+            if (targetType == SelectAggroTarget.MinThreat)
                 targetList.Reverse();
 
+            // ignore the first <offset> elements
+            while (offset != 0)
+            {
+                targetList.RemoveAt(0);
+                --offset;
+            }
+
+            if (targetList.Count <= num)
+                return targetList;
+
             if (targetType == SelectAggroTarget.Random)
-                targetList = targetList.SelectRandom(maxTargets).ToList();
+                targetList = targetList.SelectRandom(num).ToList();
             else
-                targetList.Resize(maxTargets);
+                targetList.Resize(num);
 
             return targetList;
         }
@@ -247,7 +334,7 @@ namespace Game.AI
                             bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
                             float range = spellInfo.GetMaxRange(false);
 
-                            DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, -(int)spellId);
+                            DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, true, -(int)spellId);
                             if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
                             && targetSelector.Check(me.GetVictim()))
                                 target = me.GetVictim();
@@ -498,11 +585,11 @@ namespace Game.AI
     
     public enum SelectAggroTarget
     {
-        Random = 0,                               //Just selects a random target
-        TopAggro,                                 //Selects targes from top aggro to bottom
-        BottomAggro,                              //Selects targets from bottom aggro to top
-        Nearest,
-        Farthest
+        Random = 0,  // just pick a random target
+        MaxThreat,   // prefer targets higher in the threat list
+        MinThreat,   // prefer targets lower in the threat list
+        MaxDistance, // prefer targets further from us
+        MinDistance  // prefer targets closer to us
     }
 
     public interface ISelector
@@ -516,27 +603,32 @@ namespace Game.AI
         Unit me;
         float m_dist;
         bool m_playerOnly;
+        Unit except;
         int m_aura;
 
-        // unit: the reference unit
-        // dist: if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit
-        // playerOnly: self explaining
-        // aura: if 0: ignored, if > 0: the target shall have the aura, if < 0, the target shall NOT have the aura
-        public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, int aura)
+        /// <param name="unit">the reference unit</param>
+        /// <param name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
+        /// <param name="playerOnly">self explaining</param>
+        /// <param name="withMainTank">allow current tank to be selected</param>
+        /// <param name="aura">if 0: ignored, if > 0: the target shall have the aura, if < 0, the target shall NOT have the aura</param>
+        public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, bool withMainTank, int aura)
         {
             me = unit;
             m_dist = dist;
             m_playerOnly = playerOnly;
+            except = withMainTank ? me.GetThreatManager().GetCurrentVictim() : null;
             m_aura = aura;
         }
 
         public bool Check(Unit target)
         {
-
             if (me == null)
                 return false;
 
             if (target == null)
+                return false;
+
+            if (target == except)
                 return false;
 
             if (m_playerOnly && !target.IsTypeId(TypeId.Player))
@@ -665,9 +757,9 @@ namespace Game.AI
             if (_playerOnly && !target.IsTypeId(TypeId.Player))
                 return false;
 
-            HostileReference currentVictim = _source.GetThreatManager().GetCurrentVictim();
+            Unit currentVictim = _source.GetThreatManager().GetCurrentVictim();
             if (currentVictim != null)
-                return target.GetGUID() != currentVictim.GetUnitGuid();
+                return target != currentVictim;
 
             return target != _source.GetVictim();
         }

@@ -4239,7 +4239,7 @@ namespace Game.Spells
                         case 1515:                                      // Tame beast
                             // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                             if (caster != null && target.CanHaveThreatList())
-                                target.AddThreat(caster, 10.0f);
+                                target.GetThreatManager().AddThreat(caster, 10.0f);
                             break;
                         case 13139:                                     // net-o-matic
                             // root to self part of (root_target.charge.root_self sequence
@@ -5597,7 +5597,7 @@ namespace Game.Spells
                 HealInfo healInfo = new HealInfo(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
                 caster.HealBySpell(healInfo);
 
-                caster.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+                caster.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
                 caster.ProcSkillsAndAuras(caster, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.None, hitMask, null, null, healInfo);
             }
 
@@ -5707,7 +5707,7 @@ namespace Game.Spells
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
-            target.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+            target.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
             // %-based heal - does not proc auras
             if (GetAuraType() == AuraType.ObsModHealth)
@@ -5751,7 +5751,8 @@ namespace Game.Spells
             if (gainAmount != 0)
             {
                 gainedAmount = caster.ModifyPower(powerType, gainAmount);
-                target.AddThreat(caster, gainedAmount * 0.5f, GetSpellInfo().GetSchoolMask(), GetSpellInfo());
+                // energize is not modified by threat modifiers
+                target.GetThreatManager().AddThreat(caster, gainedAmount * 0.5f, GetSpellInfo(), true);
             }
 
             // Drain Mana
@@ -5801,7 +5802,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.GetHostileRefManager().ThreatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetThreatManager().ForwardThreatForAssistingMe(caster, gain * 0.5f, GetSpellInfo(), true);
 
             target.SendPeriodicAuraLog(pInfo);
         }
@@ -5829,7 +5830,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.GetHostileRefManager().ThreatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetThreatManager().ForwardThreatForAssistingMe(caster, gain * 0.5f, GetSpellInfo(), true);
 
             target.SendPeriodicAuraLog(pInfo);
         }

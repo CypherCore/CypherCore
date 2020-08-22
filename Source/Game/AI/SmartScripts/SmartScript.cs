@@ -334,16 +334,10 @@ namespace Game.AI
                         if (me == null)
                             break;
 
-                        var threatList = me.GetThreatManager().GetThreatList();
-                        foreach (var refe in threatList)
+                        foreach (var refe in me.GetThreatManager().GetThreatList())
                         {
-                            Unit target = Global.ObjAccessor.GetUnit(me, refe.GetUnitGuid());
-                            if (target != null)
-                            {
-                                me.GetThreatManager().ModifyThreatPercent(target, e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_THREAT_ALL_PCT: Creature guidLow {0} modify threat for unit {1}, value {2}",
-                                    me.GetGUID().ToString(), target.GetGUID().ToString(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
-                            }
+                            refe.AddThreatPercent(Math.Max(-100, (int)(e.Action.threatPCT.threatINC - e.Action.threatPCT.threatDEC)));
+                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_THREAT_ALL_PCT: Creature {me.GetGUID()} modify threat for {refe.GetTarget().GetGUID()}, value {e.Action.threatPCT.threatINC - e.Action.threatPCT.threatDEC}");
                         }
                         break;
                     }
@@ -356,9 +350,8 @@ namespace Game.AI
                         {
                             if (IsUnit(target))
                             {
-                                me.GetThreatManager().ModifyThreatPercent(target.ToUnit(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_THREAT_SINGLE_PCT: Creature guidLow {0} modify threat for unit {1}, value {2}",
-                                    me.GetGUID().ToString(), target.GetGUID().ToString(), e.Action.threatPCT.threatINC != 0 ? (int)e.Action.threatPCT.threatINC : -(int)e.Action.threatPCT.threatDEC);
+                                me.GetThreatManager().ModifyThreatByPercent(target.ToUnit(), Math.Max(-100, (int)(e.Action.threatPCT.threatINC - e.Action.threatPCT.threatDEC)));
+                                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_THREAT_SINGLE_PCT: Creature {me.GetGUID()} modify threat for {target.GetGUID()}, value {e.Action.threatPCT.threatINC - e.Action.threatPCT.threatDEC}");
                             }
                         }
                         break;
@@ -2094,7 +2087,7 @@ namespace Game.AI
                     {
                         foreach (var target in targets)
                             if (IsUnit(target))
-                                me.AddThreat(target.ToUnit(), (float)e.Action.threatPCT.threatINC - (float)e.Action.threatPCT.threatDEC);
+                                me.GetThreatManager().AddThreat(target.ToUnit(), (float)(e.Action.threatPCT.threatINC - (float)e.Action.threatPCT.threatDEC), null, true, true);
 
                         break;
                     }
@@ -2377,13 +2370,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.TopAggro, 1, new PowerUsersSelector(me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.MaxThreat, 1, new PowerUsersSelector(me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.TopAggro, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.MaxThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2394,13 +2387,13 @@ namespace Game.AI
                     {
                         if (e.Target.hostilRandom.powerType != 0)
                         {
-                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.BottomAggro, 1, new PowerUsersSelector(me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
+                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.MinThreat, 1, new PowerUsersSelector(me, (PowerType)(e.Target.hostilRandom.powerType - 1), (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0));
                             if (u != null)
                                 targets.Add(u);
                         }
                         else
                         {
-                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.BottomAggro, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
+                            Unit u = me.GetAI().SelectTarget(SelectAggroTarget.MinThreat, 1, (float)e.Target.hostilRandom.maxDist, e.Target.hostilRandom.playerOnly != 0);
                             if (u != null)
                                 targets.Add(u);
                         }
@@ -2443,7 +2436,7 @@ namespace Game.AI
                 case SmartTargets.Farthest:
                     if (me)
                     {
-                        Unit u = me.GetAI().SelectTarget(SelectAggroTarget.Farthest, 0, new FarthestTargetSelector(me, (float)e.Target.farthest.maxDist, e.Target.farthest.playerOnly != 0, e.Target.farthest.isInLos != 0));
+                        Unit u = me.GetAI().SelectTarget(SelectAggroTarget.MaxDistance, 0, new FarthestTargetSelector(me, (float)e.Target.farthest.maxDist, e.Target.farthest.playerOnly != 0, e.Target.farthest.isInLos != 0));
                         if (u != null)
                             targets.Add(u);
                     }
@@ -2674,16 +2667,12 @@ namespace Game.AI
                     }
                 case SmartTargets.ThreatList:
                     {
-                        if (me != null)
+                        if (me != null && me.CanHaveThreatList())
                         {
                             var threatList = me.GetThreatManager().GetThreatList();
-                            foreach (var refe in threatList)
-                            {
-                                Unit temp = Global.ObjAccessor.GetUnit(me, refe.GetUnitGuid());
-                                if (temp != null)
-                                    if (e.Target.hostilRandom.maxDist == 0 || me.IsWithinCombatRange(temp, (float)e.Target.hostilRandom.maxDist))
-                                        targets.Add(temp);
-                            }
+                            foreach (var refe in me.GetThreatManager().GetThreatList())
+                                if (e.Target.hostilRandom.maxDist == 0 || me.IsWithinCombatRange(refe.GetTarget(), e.Target.hostilRandom.maxDist))
+                                    targets.Add(refe.GetTarget());
                         }
                         break;
                     }
@@ -2790,18 +2779,18 @@ namespace Game.AI
                     ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
                     break;
                 case SmartEvents.UpdateOoc:
-                    if (me != null && me.IsInCombat())
+                    if (me != null && me.IsEngaged())
                         return;
                     ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
                     break;
                 case SmartEvents.UpdateIc:
-                    if (me == null || !me.IsInCombat())
+                    if (me == null || !me.IsEngaged())
                         return;
                     ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
                     break;
                 case SmartEvents.HealthPct:
                     {
-                        if (me == null || !me.IsInCombat() || me.GetMaxHealth() == 0)
+                        if (me == null || !me.IsEngaged() || me.GetMaxHealth() == 0)
                             return;
                         uint perc = (uint)me.GetHealthPct();
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
@@ -2811,7 +2800,7 @@ namespace Game.AI
                     }
                 case SmartEvents.TargetHealthPct:
                     {
-                        if (me == null || !me.IsInCombat() || me.GetVictim() == null || me.GetVictim().GetMaxHealth() == 0)
+                        if (me == null || !me.IsEngaged() || me.GetVictim() == null || me.GetVictim().GetMaxHealth() == 0)
                             return;
                         uint perc = (uint)me.GetVictim().GetHealthPct();
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
@@ -2821,7 +2810,7 @@ namespace Game.AI
                     }
                 case SmartEvents.ManaPct:
                     {
-                        if (me == null || !me.IsInCombat() || me.GetMaxPower(PowerType.Mana) == 0)
+                        if (me == null || !me.IsEngaged() || me.GetMaxPower(PowerType.Mana) == 0)
                             return;
                         uint perc = (uint)me.GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
@@ -2831,7 +2820,7 @@ namespace Game.AI
                     }
                 case SmartEvents.TargetManaPct:
                     {
-                        if (me == null || !me.IsInCombat() || me.GetVictim() == null || me.GetVictim().GetMaxPower(PowerType.Mana) == 0)
+                        if (me == null || !me.IsEngaged() || me.GetVictim() == null || me.GetVictim().GetMaxPower(PowerType.Mana) == 0)
                             return;
                         uint perc = (uint)me.GetVictim().GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
@@ -2841,7 +2830,7 @@ namespace Game.AI
                     }
                 case SmartEvents.Range:
                     {
-                        if (me == null || !me.IsInCombat() || me.GetVictim() == null)
+                        if (me == null || !me.IsEngaged() || me.GetVictim() == null)
                             return;
 
                         if (me.IsInRange(me.GetVictim(), e.Event.minMaxRepeat.min, e.Event.minMaxRepeat.max))
@@ -2852,7 +2841,7 @@ namespace Game.AI
                     }
                 case SmartEvents.VictimCasting:
                     {
-                        if (me == null || !me.IsInCombat())
+                        if (me == null || !me.IsEngaged())
                             return;
 
                         Unit victim = me.GetVictim();
@@ -2873,7 +2862,7 @@ namespace Game.AI
                     }
                 case SmartEvents.FriendlyHealth:
                     {
-                        if (me == null || !me.IsInCombat())
+                        if (me == null || !me.IsEngaged())
                             return;
 
                         Unit target = DoSelectLowestHpFriendly(e.Event.friendlyHealth.radius, e.Event.friendlyHealth.hpDeficit);
@@ -2889,7 +2878,7 @@ namespace Game.AI
                     }
                 case SmartEvents.FriendlyIsCc:
                     {
-                        if (me == null || !me.IsInCombat())
+                        if (me == null || !me.IsEngaged())
                             return;
 
                         List<Creature> creatures = new List<Creature>();
@@ -3016,7 +3005,7 @@ namespace Game.AI
                     }
                 case SmartEvents.OocLos:
                     {
-                        if (me == null || me.IsInCombat())
+                        if (me == null || me.IsEngaged())
                             return;
                         //can trigger if closer than fMaxAllowedRange
                         float range = e.Event.los.maxDist;
@@ -3036,7 +3025,7 @@ namespace Game.AI
                     }
                 case SmartEvents.IcLos:
                     {
-                        if (me == null || !me.IsInCombat())
+                        if (me == null || !me.IsEngaged())
                             return;
                         //can trigger if closer than fMaxAllowedRange
                         float range = e.Event.los.maxDist;
@@ -3226,7 +3215,7 @@ namespace Game.AI
                     }
                 case SmartEvents.FriendlyHealthPCT:
                     {
-                        if (me == null || !me.IsInCombat())
+                        if (me == null || !me.IsEngaged())
                             return;
 
                         List<WorldObject> targets;
@@ -3401,10 +3390,10 @@ namespace Game.AI
             if (e.Event.event_phase_mask != 0 && !IsInPhase(e.Event.event_phase_mask))
                 return;
 
-            if (e.GetEventType() == SmartEvents.UpdateIc && (me == null || !me.IsInCombat()))
+            if (e.GetEventType() == SmartEvents.UpdateIc && (me == null || !me.IsEngaged()))
                 return;
 
-            if (e.GetEventType() == SmartEvents.UpdateOoc && (me != null && me.IsInCombat()))//can be used with me=NULL (go script)
+            if (e.GetEventType() == SmartEvents.UpdateOoc && (me != null && me.IsEngaged()))//can be used with me=NULL (go script)
                 return;
 
             if (e.timer < diff)
@@ -3741,15 +3730,10 @@ namespace Game.AI
 
         public void OnMoveInLineOfSight(Unit who)
         {
-            ProcessEventsFor(SmartEvents.OocLos, who);
-
             if (me == null)
                 return;
 
-            if (me.GetVictim() != null)
-                return;
-
-            ProcessEventsFor(SmartEvents.IcLos, who);
+            ProcessEventsFor(me.IsEngaged() ? SmartEvents.IcLos : SmartEvents.OocLos, who);
         }
 
         Unit DoSelectLowestHpFriendly(float range, uint MinHPDiff)

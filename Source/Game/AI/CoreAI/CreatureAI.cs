@@ -102,16 +102,8 @@ namespace Game.AI
                 {
                     creature.SetInCombatWith(player);
                     player.SetInCombatWith(creature);
-                    creature.AddThreat(player, 0.0f);
+                    creature.GetThreatManager().AddThreat(player, 0.0f, null, true, true);
                 }
-
-                /* Causes certain things to never leave the threat list (Priest Lightwell, etc):
-                foreach (var unit in player.m_Controlled)
-                {
-                    me.SetInCombatWith(unit);
-                    unit.SetInCombatWith(me);
-                    me.AddThreat(unit, 0.0f);
-                }*/
             }
         }
 
@@ -119,6 +111,7 @@ namespace Game.AI
         {
             if (MoveInLineOfSight_locked)
                 return;
+
             MoveInLineOfSight_locked = true;
             MoveInLineOfSight(who);
             MoveInLineOfSight_locked = false;
@@ -126,11 +119,11 @@ namespace Game.AI
 
         public virtual void MoveInLineOfSight(Unit who)
         {
-            if (me.GetVictim() != null)
+            if (me.IsEngaged())
                 return;
 
             if (me.HasReactState(ReactStates.Aggressive) && me.CanStartAttack(who, false))
-                AttackStart(who);
+                me.EngageWithTarget(who);
         }
 
         void _OnOwnerCombatInteraction(Unit target)
@@ -139,12 +132,7 @@ namespace Game.AI
                 return;
 
             if (!me.HasReactState(ReactStates.Passive) && me.CanStartAttack(target, true))
-            {
-                if (me.IsInCombat())
-                    me.AddThreat(target, 0.0f);
-                else
-                    AttackStart(target);
-            }
+                me.EngageWithTarget(target);
         }
 
         // Distract creature, if player gets too close while stealthed/prowling
@@ -154,8 +142,8 @@ namespace Game.AI
             if (!who || !who.IsTypeId(TypeId.Player))
                 return;
 
-            // If this unit isn't an NPC, is already distracted, is in combat, is confused, stunned or fleeing, do nothing
-            if (!me.IsTypeId(TypeId.Unit) || me.IsInCombat() || me.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing | UnitState.Distracted))
+            // If this unit isn't an NPC, is already distracted, is fighting, is confused, stunned or fleeing, do nothing
+            if (!me.IsTypeId(TypeId.Unit) || me.IsEngaged() || me.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing | UnitState.Distracted))
                 return;
 
             // Only alert for hostiles!
@@ -214,7 +202,7 @@ namespace Game.AI
 
         public bool UpdateVictimWithGaze()
         {
-            if (!me.IsInCombat())
+            if (!me.IsEngaged())
                 return false;
 
             if (me.HasReactState(ReactStates.Passive))
@@ -237,7 +225,7 @@ namespace Game.AI
 
         public bool UpdateVictim()
         {
-            if (!me.IsInCombat())
+            if (!me.IsEngaged())
                 return false;
 
             if (!me.HasReactState(ReactStates.Passive))
@@ -266,7 +254,7 @@ namespace Game.AI
             me.RemoveAurasOnEvade();
 
             // sometimes bosses stuck in combat?
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.SetLootRecipient(null);
             me.ResetPlayerDamageReq();
@@ -410,7 +398,10 @@ namespace Game.AI
             me.DoImmediateBoundaryCheck();
         }
 
-        // Called for reaction at enter to combat if not in combat yet (enemy can be NULL)
+        /// <summary>
+        /// Called for reaction when initially engaged
+        /// </summary>
+        /// <param name="victim"></param>
         public virtual void EnterCombat(Unit victim) { }
 
         // Called when the creature is killed

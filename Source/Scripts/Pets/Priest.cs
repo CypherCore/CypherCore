@@ -42,7 +42,7 @@ namespace Scripts.Pets.Priest
             if (!me.IsAlive())
                 return;
 
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.ResetPlayerDamageReq();
         }

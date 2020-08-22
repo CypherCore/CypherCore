@@ -491,7 +491,7 @@ namespace Game.Entities
 
             m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map.RemoveAllObjectsInRemoveList
             CombatStop();
-            DeleteThreatList();
+            GetThreatManager().ClearAllThreat();
             GetHostileRefManager().DeleteReferences();
         }
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
@@ -1609,7 +1609,7 @@ namespace Game.Entities
             if (s != DeathState.Alive && s != DeathState.JustRespawned)
             {
                 CombatStop();
-                DeleteThreatList();
+                GetThreatManager().ClearAllThreat();
                 GetHostileRefManager().DeleteReferences();
 
                 if (IsNonMeleeSpellCast(false))

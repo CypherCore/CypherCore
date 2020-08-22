@@ -1243,7 +1243,7 @@ namespace Game.AI
                 }
             }
 
-            if (charmer.IsInCombat())
+            if (charmer.IsEngaged())
             {
                 Unit target = me.GetVictim();
                 if (!target || !charmer.IsValidAttackTarget(target) || target.HasBreakableByDamageCrowdControlAura())

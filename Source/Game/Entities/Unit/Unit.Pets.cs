@@ -313,7 +313,7 @@ namespace Game.Entities
 
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
-            DeleteThreatList();
+            GetThreatManager().ClearAllThreat();
 
             Player playerCharmer = charmer.ToPlayer();
 
@@ -456,7 +456,7 @@ namespace Game.Entities
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
             GetHostileRefManager().DeleteReferences();
-            DeleteThreatList();
+            GetThreatManager().ClearAllThreat();
 
             if (_oldFactionId != 0)
             {

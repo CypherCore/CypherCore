@@ -168,7 +168,7 @@ namespace Game.Maps
                 if (creature.IsInCombat() || !creature.GetThreatManager().IsThreatListsEmpty())
                 {
                     creature.CombatStop();
-                    creature.DeleteThreatList();
+                    creature.GetThreatManager().ClearAllThreat();
                     if (creature.IsAIEnabled)
                         creature.GetAI().EnterEvadeMode();
                 }

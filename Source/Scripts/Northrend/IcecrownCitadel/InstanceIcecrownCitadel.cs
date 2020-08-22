@@ -1509,7 +1509,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                             if (warden)
                             {
                                 terenas.GetAI().AttackStart(warden);
-                                warden.AddThreat(terenas, 300000.0f);
+                                warden.GetThreatManager().AddThreat(terenas, 300000.0f);
                             }
                         }
                         break;

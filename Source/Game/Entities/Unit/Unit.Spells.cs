@@ -1509,13 +1509,18 @@ namespace Game.Entities
 
         public void EnergizeBySpell(Unit victim, uint spellId, int damage, PowerType powerType)
         {
+            SpellInfo info = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+            if (info != null)
+                EnergizeBySpell(victim, info, damage, powerType);
+        }
+
+        void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
+        {
             int gain = victim.ModifyPower(powerType, damage);
             int overEnergize = damage - gain;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            victim.GetHostileRefManager().ThreatAssist(this, damage * 0.5f, spellInfo);
-
-            SendEnergizeSpellLog(victim, spellId, damage, overEnergize, powerType);
+            victim.GetThreatManager().ForwardThreatForAssistingMe(this, damage / 2, spellInfo, true);
+            SendEnergizeSpellLog(victim, spellInfo.Id, damage, overEnergize, powerType);
         }
 
         public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellSchoolMask type, bool apply)

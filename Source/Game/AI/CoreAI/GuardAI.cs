@@ -34,12 +34,9 @@ namespace Game.AI
 
         public override bool CanSeeAlways(WorldObject obj)
         {
-            if (!obj.IsTypeMask(TypeMask.Unit))
-                return false;
-
-            var threatList = me.GetThreatManager().GetThreatList();
-            foreach (var refe in threatList)
-                if (refe.GetUnitGuid() == obj.GetGUID())
+            Unit unit = obj.ToUnit();
+            if (unit != null)
+                if (unit.IsControlledByPlayer() && me.IsEngagedBy(unit))
                     return true;
 
             return false;
@@ -51,14 +48,14 @@ namespace Game.AI
             {
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop(true);
-                me.DeleteThreatList();
+                me.GetThreatManager().ClearAllThreat();
                 return;
             }
 
             Log.outDebug(LogFilter.Unit, "Guard entry: {0} enters evade mode.", me.GetEntry());
 
             me.RemoveAllAuras();
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
 
             // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead

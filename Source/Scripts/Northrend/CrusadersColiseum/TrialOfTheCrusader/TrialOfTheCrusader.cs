@@ -1174,8 +1174,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             {
                                 //1-shot Fizzlebang
                                 temp.CastSpell(me, 67888, false);
-                                me.SetInCombatWith(temp);
-                                temp.AddThreat(me, 1000.0f);
+                                AddThreat(me, 1000.0f, temp);
                                 temp.GetAI().AttackStart(me);
                             }
                             _instance.SetData(DataTypes.Event, 1160);

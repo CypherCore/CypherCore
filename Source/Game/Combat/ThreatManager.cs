@@ -36,6 +36,28 @@ namespace Game.Combat
 
         const int ThreatUpdateInternal = 1 * Time.InMilliseconds;
 
+        public void ForwardThreatForAssistingMe(Unit victim, float amount, SpellInfo spell, bool ignoreModifiers = false, bool ignoreRedirection = false)
+        {
+            GetOwner().GetHostileRefManager().ThreatAssist(victim, amount, spell);
+        }
+
+        public void AddThreat(Unit victim, float amount, SpellInfo spell, bool ignoreModifiers = false, bool ignoreRedirection = false)
+        {
+            if (!Owner.CanHaveThreatList() || Owner.HasUnitState(UnitState.Evade))
+                return;
+
+            Owner.SetInCombatWith(victim);
+            victim.SetInCombatWith(Owner);
+            AddThreat(victim, amount, spell != null ? spell.GetSchoolMask() : victim.GetMeleeDamageSchoolMask(), spell);
+        }
+
+        public void ClearAllThreat()
+        {
+            if (Owner.CanHaveThreatList(true) && !IsThreatListEmpty())
+                Owner.SendClearThreatList();
+            ClearReferences();
+        }
+        
         public void ClearReferences()
         {
             threatContainer.ClearReferences();
@@ -111,17 +133,17 @@ namespace Game.Combat
             }
         }
 
-        public void ModifyThreatPercent(Unit victim, int percent)
+        public void ModifyThreatByPercent(Unit victim, int percent)
         {
-            threatContainer.ModifyThreatPercent(victim, percent);
+            threatContainer.ModifyThreatByPercent(victim, percent);
         }
 
         public Unit GetHostilTarget()
         {
             threatContainer.Update();
-            HostileReference nextVictim = threatContainer.SelectNextVictim(GetOwner().ToCreature(), GetCurrentVictim());
+            HostileReference nextVictim = threatContainer.SelectNextVictim(GetOwner().ToCreature(), getCurrentVictim());
             SetCurrentVictim(nextVictim);
-            return GetCurrentVictim() != null ? GetCurrentVictim().GetTarget() : null;
+            return GetCurrentVictim() != null ? GetCurrentVictim() : null;
         }
 
         public float GetThreat(Unit victim, bool alsoSearchOfflineList = false)
@@ -138,10 +160,10 @@ namespace Game.Combat
         void TauntApply(Unit taunter)
         {
             HostileReference refe = threatContainer.GetReferenceByTarget(taunter);
-            if (GetCurrentVictim() != null && refe != null && (refe.GetThreat() < GetCurrentVictim().GetThreat()))
+            if (GetCurrentVictim() != null && refe != null && (refe.GetThreat() < getCurrentVictim().GetThreat()))
             {
                 if (refe.GetTempThreatModifier() == 0.0f) // Ok, temp threat is unused
-                    refe.SetTempThreat(GetCurrentVictim().GetThreat());
+                    refe.SetTempThreat(getCurrentVictim().GetThreat());
             }
         }
 
@@ -170,14 +192,14 @@ namespace Game.Combat
             switch (threatRefStatusChangeEvent.GetEventType())
             {
                 case UnitEventTypes.ThreatRefThreatChange:
-                    if ((GetCurrentVictim() == hostilRef && threatRefStatusChangeEvent.GetFValue() < 0.0f) ||
-                        (GetCurrentVictim() != hostilRef && threatRefStatusChangeEvent.GetFValue() > 0.0f))
+                    if ((getCurrentVictim() == hostilRef && threatRefStatusChangeEvent.GetFValue() < 0.0f) ||
+                        (getCurrentVictim() != hostilRef && threatRefStatusChangeEvent.GetFValue() > 0.0f))
                         SetDirty(true);                             // the order in the threat list might have changed
                     break;
                 case UnitEventTypes.ThreatRefOnlineStatus:
                     if (!hostilRef.IsOnline())
                     {
-                        if (hostilRef == GetCurrentVictim())
+                        if (hostilRef == getCurrentVictim())
                         {
                             SetCurrentVictim(null);
                             SetDirty(true);
@@ -188,14 +210,14 @@ namespace Game.Combat
                     }
                     else
                     {
-                        if (GetCurrentVictim() != null && hostilRef.GetThreat() > (1.1f * GetCurrentVictim().GetThreat()))
+                        if (GetCurrentVictim() != null && hostilRef.GetThreat() > (1.1f * getCurrentVictim().GetThreat()))
                             SetDirty(true);
                         threatContainer.AddReference(hostilRef);
                         threatOfflineContainer.Remove(hostilRef);
                     }
                     break;
                 case UnitEventTypes.ThreatRefRemoveFromList:
-                    if (hostilRef == GetCurrentVictim())
+                    if (hostilRef == getCurrentVictim())
                     {
                         SetCurrentVictim(null);
                         SetDirty(true);
@@ -208,7 +230,6 @@ namespace Game.Combat
                     break;
             }
         }
-
 
         public bool IsNeedUpdateToClient(uint time)
         {
@@ -245,11 +266,8 @@ namespace Game.Combat
             return threatContainer.Empty() && threatOfflineContainer.Empty();
         }
 
-        public HostileReference GetCurrentVictim()
-        {
-            return currentVictim;
-        }
-
+        public HostileReference getCurrentVictim() { return currentVictim; }
+        
         public Unit GetOwner()
         {
             return Owner;
@@ -264,8 +282,53 @@ namespace Game.Combat
         public List<HostileReference> GetOfflineThreatList() { return threatOfflineContainer.GetThreatList(); }
         public ThreatContainer GetOnlineContainer() { return threatContainer; }
 
-        // The hatingUnit is not used yet
-        public static float CalcThreat(Unit hatedUnit, Unit hatingUnit, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
+        public Unit SelectVictim() { return GetHostilTarget(); }
+        public Unit GetCurrentVictim() 
+        {
+            var refe = getCurrentVictim();
+            if (refe != null)
+                return refe.GetTarget();
+            else 
+                return null;
+        }
+        public bool IsThreatListEmpty(bool includeOffline = false) { return includeOffline ? IsThreatListsEmpty() : IsThreatListEmpty(); }
+        public bool IsThreatenedBy(Unit who, bool includeOffline = false) { return FindReference(who, includeOffline) != null; }
+        public int GetThreatListSize() { return threatContainer.threatList.Count; }
+        public Unit GetAnyTarget()
+        {
+            var list = GetThreatList();
+            if (!list.Empty())
+                return list[0].GetTarget();
+
+            return null;
+        }
+        public void ResetThreat(Unit who) 
+        {
+            var refe = FindReference(who, true);
+            if (refe != null)
+                refe.SetThreat(0.0f);
+
+        }
+        public void ResetAllThreat() { ResetAllAggro(); }
+
+        HostileReference FindReference(Unit who, bool includeOffline)
+        {
+            var refe = threatContainer.GetReferenceByTarget(who);
+            if (refe != null)
+                return refe;
+
+            if (includeOffline)
+            {
+                var offlineRefe = threatOfflineContainer.GetReferenceByTarget(who);
+                if (offlineRefe != null)
+                    return offlineRefe;
+            }
+
+            return null;
+        }
+
+    // The hatingUnit is not used yet
+    public static float CalcThreat(Unit hatedUnit, Unit hatingUnit, float threat, SpellSchoolMask schoolMask = SpellSchoolMask.Normal, SpellInfo threatSpell = null)
         {
             if (threatSpell != null)
             {
@@ -370,7 +433,7 @@ namespace Game.Combat
             return reff;
         }
 
-        public void ModifyThreatPercent(Unit victim, int percent)
+        public void ModifyThreatByPercent(Unit victim, int percent)
         {
             HostileReference refe = GetReferenceByTarget(victim);
             if (refe != null)

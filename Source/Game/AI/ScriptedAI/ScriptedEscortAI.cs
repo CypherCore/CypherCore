@@ -88,8 +88,7 @@ namespace Game.AI
                 }
                 else
                 {
-                    who.SetInCombatWith(me);
-                    me.AddThreat(who, 0.0f);
+                    me.EngageWithTarget(who);
                     return true;
                 }
             }
@@ -111,24 +110,7 @@ namespace Game.AI
                 {
                     float fAttackRadius = me.GetAttackDistance(who);
                     if (me.IsWithinDistInMap(who, fAttackRadius) && me.IsWithinLOSInMap(who))
-                    {
-                        if (!me.GetVictim())
-                        {
-                            // Clear distracted state on combat
-                            if (me.HasUnitState(UnitState.Distracted))
-                            {
-                                me.ClearUnitState(UnitState.Distracted);
-                                me.GetMotionMaster().Clear();
-                            }
-
-                            AttackStart(who);
-                        }
-                        else if (me.GetMap().IsDungeon())
-                        {
-                            who.SetInCombatWith(me);
-                            me.AddThreat(who, 0.0f);
-                        }
-                    }
+                        me.EngageWithTarget(who);
                 }
             }
         }
@@ -181,7 +163,7 @@ namespace Game.AI
         public override void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
         {
             me.RemoveAllAuras();
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.SetLootRecipient(null);
 

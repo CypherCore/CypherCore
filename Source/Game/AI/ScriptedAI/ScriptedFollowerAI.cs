@@ -49,9 +49,7 @@ namespace Game.AI
 
             if (me.Attack(who, true))
             {
-                me.AddThreat(who, 0.0f);
-                me.SetInCombatWith(who);
-                who.SetInCombatWith(me);
+                me.EngageWithTarget(who); // in case it doesn't have threat+combat yet
 
                 if (me.HasUnitState(UnitState.Follow))
                     me.ClearUnitState(UnitState.Follow);
@@ -84,18 +82,8 @@ namespace Game.AI
             //too far away and no free sight?
             if (me.IsWithinDistInMap(who, 100.0f) && me.IsWithinLOSInMap(who))
             {
-                //already fighting someone?
-                if (!me.GetVictim())
-                {
-                    AttackStart(who);
-                    return true;
-                }
-                else
-                {
-                    who.SetInCombatWith(me);
-                    me.AddThreat(who, 0.0f);
-                    return true;
-                }
+                me.EngageWithTarget(who);
+                return true;
             }
 
             return false;
@@ -128,10 +116,7 @@ namespace Game.AI
                             AttackStart(who);
                         }
                         else if (me.GetMap().IsDungeon())
-                        {
-                            who.SetInCombatWith(me);
-                            me.AddThreat(who, 0.0f);
-                        }
+                            me.EngageWithTarget(who);
                     }
                 }
             }
@@ -178,7 +163,7 @@ namespace Game.AI
         public override void EnterEvadeMode(EvadeReason why)
         {
             me.RemoveAllAuras();
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.SetLootRecipient(null);
 

@@ -22,6 +22,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Game.Maps;
 
 namespace Game.Entities
 {
@@ -485,15 +486,38 @@ namespace Game.Entities
             }
         }
 
+        public void SetContestedPvP(Player attackedPlayer = null)
+        {
+            if (attackedPlayer != null && (attackedPlayer == this || (duel != null && duel.opponent == attackedPlayer)))
+                return;
+
+            SetContestedPvPTimer(30000);
+            if (!HasUnitState(UnitState.AttackPlayer))
+            {
+                AddUnitState(UnitState.AttackPlayer);
+                AddPlayerFlag(PlayerFlags.ContestedPVP);
+                // call MoveInLineOfSight for nearby contested guards
+                AIRelocationNotifier notifier = new AIRelocationNotifier(this);
+                Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            }
+            foreach (Unit unit in m_Controlled)
+            {
+                if (!unit.HasUnitState(UnitState.AttackPlayer))
+                {
+                    unit.AddUnitState(UnitState.AttackPlayer);
+                    AIRelocationNotifier notifier = new AIRelocationNotifier(unit);
+                    Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+                }
+            }
+        }
+        
         public void UpdateContestedPvP(uint diff)
         {
             if (m_contestedPvPTimer == 0 || IsInCombat())
                 return;
 
             if (m_contestedPvPTimer <= diff)
-            {
                 ResetContestedPvP();
-            }
             else
                 m_contestedPvPTimer -= diff;
         }

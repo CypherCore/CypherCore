@@ -448,7 +448,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                         temp.SetReactState(ReactStates.Aggressive);
                         temp.SetInCombatWith(player);
                         player.SetInCombatWith(temp);
-                        temp.AddThreat(player, 0.0f);
+                        AddThreat(player, 0.0f, temp);
                     }
                 }
             }

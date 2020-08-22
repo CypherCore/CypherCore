@@ -1559,7 +1559,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void DamageTaken(Unit doneBy, ref uint damage)
         {
-            me.AddThreat(doneBy, damage);    // just to create threat reference
+            AddThreat(doneBy, damage);    // just to create threat reference
             _damageTimes[doneBy.GetGUID()] = Time.UnixTime;
             damage = 0;
         }

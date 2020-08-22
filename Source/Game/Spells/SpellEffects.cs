@@ -1942,7 +1942,7 @@ namespace Game.Spells
                 return;
 
             // Check for possible target
-            if (unitTarget == null || unitTarget.IsInCombat())
+            if (unitTarget == null || unitTarget.IsEngaged())
                 return;
 
             // target must be OK to do this
@@ -2701,7 +2701,7 @@ namespace Game.Spells
             if (!unitTarget.CanHaveThreatList())
                 return;
 
-            unitTarget.AddThreat(m_caster, damage);
+            unitTarget.GetThreatManager().AddThreat(m_caster, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.HealMaxHealth)]
@@ -4408,7 +4408,7 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            unitTarget.GetThreatManager().ModifyThreatPercent(m_caster, damage);
+            unitTarget.GetThreatManager().ModifyThreatByPercent(m_caster, damage);
         }
 
         [SpellEffectHandler(SpellEffectName.TransDoor)]

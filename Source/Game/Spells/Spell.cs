@@ -1938,7 +1938,7 @@ namespace Game.Spells
 
                 HealInfo healInfo = new HealInfo(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
                 caster.HealBySpell(healInfo, crit);
-                unitTarget.GetHostileRefManager().ThreatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
+                unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
                 m_healing = (int)healInfo.GetEffectiveHeal();
 
                 // Do triggers for unit
@@ -2007,8 +2007,7 @@ namespace Game.Spells
                 if (missInfo == SpellMissInfo.Resist && m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && unitTarget.IsTypeId(TypeId.Unit))
                 {
                     m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Talk);
-                    if (unitTarget.ToCreature().IsAIEnabled)
-                        unitTarget.ToCreature().GetAI().AttackStart(m_caster);
+                    unitTarget.ToCreature().EngageWithTarget(m_caster);
                 }
             }
 
@@ -2108,14 +2107,17 @@ namespace Game.Spells
                     // assisting case, healing and resurrection
                     if (unit.HasUnitState(UnitState.AttackPlayer))
                     {
-                        m_caster.SetContestedPvP();
-                        if (m_caster.IsTypeId(TypeId.Player))
-                            m_caster.ToPlayer().UpdatePvP(true);
+                        Player playerOwner = m_caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (playerOwner != null)
+                        {
+                            playerOwner.SetContestedPvP();
+                            playerOwner.UpdatePvP(true);
+                        }
                     }
                     if (unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
                         m_caster.SetInCombatState(unit.GetCombatTimer() > 0, unit);
-                        unit.GetHostileRefManager().ThreatAssist(m_caster, 0.0f);
+                        unit.GetThreatManager().ForwardThreatForAssistingMe(m_caster, 0.0f, null, true);
                     }
                 }
             }
@@ -4377,14 +4379,14 @@ namespace Game.Spells
 
                 // positive spells distribute threat among all units that are in combat with target, like healing
                 if (m_spellInfo.IsPositive())
-                    target.GetHostileRefManager().ThreatAssist(m_caster, threatToAdd, m_spellInfo);
+                    target.GetThreatManager().ForwardThreatForAssistingMe(m_caster, threatToAdd, m_spellInfo);
                 // for negative spells threat gets distributed among affected targets
                 else
                 {
                     if (!target.CanHaveThreatList())
                         continue;
 
-                    target.AddThreat(m_caster, threatToAdd, m_spellInfo.GetSchoolMask(), m_spellInfo);
+                    target.GetThreatManager().AddThreat(m_caster, threatToAdd, m_spellInfo, true);
                 }
             }
             Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, m_spellInfo.IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);

@@ -475,7 +475,7 @@ namespace Game.Entities
                     }
 
                     // periodic check to see if the creature has passed an evade boundary
-                    if (IsAIEnabled && !IsInEvadeMode() && IsInCombat())
+                    if (IsAIEnabled && !IsInEvadeMode() && IsEngaged())
                     {
                         if (diff >= m_boundaryCheckTime)
                         {
@@ -487,7 +487,7 @@ namespace Game.Entities
                     }
 
                     // if periodic combat pulse is enabled and we are both in combat and in a dungeon, do this now
-                    if (m_combatPulseDelay > 0 && IsInCombat() && GetMap().IsDungeon())
+                    if (m_combatPulseDelay > 0 && IsEngaged() && GetMap().IsDungeon())
                     {
                         if (diff > m_combatPulseTime)
                             m_combatPulseTime = 0;
@@ -503,12 +503,7 @@ namespace Game.Entities
                                     continue;
 
                                 if (player.IsAlive() && IsHostileTo(player))
-                                {
-                                    if (CanHaveThreatList())
-                                        AddThreat(player, 0.0f);
-                                    SetInCombatWith(player);
-                                    player.SetInCombatWith(this);
-                                }
+                                    EngageWithTarget(player);
                             }
                             m_combatPulseTime = m_combatPulseDelay * Time.InMilliseconds;
                         }
@@ -1484,7 +1479,7 @@ namespace Game.Entities
                 if (!_IsTargetAcceptable(who))
                     return false;
 
-                if (who.IsInCombat() && IsWithinDist(who, SharedConst.AttackDistance))
+                if (who.IsEngaged() && IsWithinDist(who, SharedConst.AttackDistance))
                 {
                     Unit victim = who.GetAttackerForHelper();
                     if (victim != null)
@@ -2022,7 +2017,7 @@ namespace Game.Entities
                 return false;
 
             // skip fighting creature
-            if (IsInCombat())
+            if (IsEngaged())
                 return false;
 
             // only free creature
@@ -2067,7 +2062,7 @@ namespace Game.Entities
             Unit targetVictim = target.GetAttackerForHelper();
 
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-            if (IsInCombatWith(target) || IsHostileTo(target))
+            if (IsEngagedBy(target) || IsHostileTo(target))
                 return true;
 
             // if the target's victim is friendly, and the target is neutral, the target is acceptable
@@ -2256,7 +2251,6 @@ namespace Game.Entities
             }
 
             var PlList = map.GetPlayers();
-
             if (PlList.Empty())
                 return;
 
@@ -2266,12 +2260,7 @@ namespace Game.Entities
                     continue;
 
                 if (player.IsAlive())
-                {
-                    SetInCombatWith(player);
-                    player.SetInCombatWith(this);
-                    AddThreat(player, 0.0f);
-                }
-
+                    EngageWithTarget(player);
             }
         }
 
@@ -3270,9 +3259,7 @@ namespace Game.Entities
                     if (assistant != null && assistant.CanAssistTo(m_owner, victim))
                     {
                         assistant.SetNoCallAssistance(true);
-                        assistant.CombatStart(victim);
-                        if (assistant.IsAIEnabled)
-                            assistant.GetAI().AttackStart(victim);
+                        assistant.EngageWithTarget(victim);
                     }
                 }
             }

@@ -587,7 +587,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (!me.IsAlive() || !me.IsInCombat())
                 return;
 
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.GetMotionMaster().MoveTargetedHome();
         }
@@ -733,10 +733,9 @@ namespace Scripts.Northrend.IcecrownCitadel
             foreach (var stalker in creatures)
             {
                 stalker.RemoveAllAuras();
-                stalker.DeleteThreatList();
+                stalker.GetThreatManager().ClearAllThreat();
                 stalker.CombatStop(true);
             }
-
 
             uint explosionSpell = isVictory ? GunshipSpells.ExplosionVictory : GunshipSpells.ExplosionWipe;
             creatures.Clear();
@@ -872,7 +871,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (!me.IsAlive())
                 return;
 
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.GetMotionMaster().MoveTargetedHome();
 
@@ -1132,7 +1131,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (!me.IsAlive())
                 return;
 
-            me.DeleteThreatList();
+            me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
             me.GetMotionMaster().MoveTargetedHome();
 
@@ -1442,7 +1441,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 {
                     players.Sort(new ObjectDistanceOrderPred(me));
                     foreach (var pl in players)
-                        me.AddThreat(pl, 1.0f);
+                        AddThreat(pl, 1.0f);
 
                     AttackStart(players.First());
                 }

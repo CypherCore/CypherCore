@@ -1738,9 +1738,7 @@ namespace Game.Entities
         public void AddToNotify(NotifyFlags f) { m_notifyflags |= f; }
         public bool IsNeedNotify(NotifyFlags f) { return Convert.ToBoolean(m_notifyflags & f); }
         NotifyFlags GetNotifyFlags() { return m_notifyflags; }
-        bool NotifyExecuted(NotifyFlags f) { return Convert.ToBoolean(m_executed_notifies & f); }
-        void SetNotified(NotifyFlags f) { m_executed_notifies |= f; }
-        public void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
+        public void ResetAllNotifies() { m_notifyflags = 0; }
 
         public bool IsActiveObject() { return m_isActive; }
         public bool IsPermanentWorldObject() { return m_isWorldObject; }
@@ -2363,7 +2361,6 @@ namespace Game.Entities
         public bool IsInWorld { get; set; }
 
         NotifyFlags m_notifyflags;
-        NotifyFlags m_executed_notifies;
 
         public FlaggedArray<StealthType> m_stealth = new FlaggedArray<StealthType>(2);
         public FlaggedArray<StealthType> m_stealthDetect = new FlaggedArray<StealthType>(2);

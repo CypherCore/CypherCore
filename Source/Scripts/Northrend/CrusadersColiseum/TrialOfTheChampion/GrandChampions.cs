@@ -175,8 +175,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                     {
                         if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
                         {
-                            DoResetThreat();
-                            me.AddThreat(player, 1.0f);
+                            ResetThreatList();
+                            me.GetThreatManager().AddThreat(player, 1.0f);
                             DoCast(player, TrialOfChampionSpells.CHARGE);
                             break;
                         }
@@ -324,7 +324,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                         temp.SetReactState(ReactStates.Aggressive);
                         temp.SetInCombatWith(player);
                         player.SetInCombatWith(temp);
-                        temp.AddThreat(player, 0.0f);
+                        temp.GetThreatManager().AddThreat(player, 0.0f);
                     }
                 }
             }
@@ -386,8 +386,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                     {
                         if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
                         {
-                            DoResetThreat();
-                            me.AddThreat(player, 5.0f);
+                            ResetThreatList();
+                            me.GetThreatManager().AddThreat(player, 5.0f);
                             DoCast(player, TrialOfChampionSpells.INTERCEPT);
                             break;
                         }
@@ -549,7 +549,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
                 ObjectGuid uiTargetGUID = ObjectGuid.Empty;
-                Unit target = SelectTarget(SelectAggroTarget.Farthest, 0, 30.0f);
+                Unit target = SelectTarget(SelectAggroTarget.MaxDistance, 0, 30.0f);
                 if (target)
                 {
                     uiTargetGUID = target.GetGUID();

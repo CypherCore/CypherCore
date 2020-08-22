@@ -73,7 +73,7 @@ namespace Scripts.Outlands
                 me.SetFaction(Aeranas.FactionFriendly);
                 me.AddNpcFlag(NPCFlags.QuestGiver);
                 me.RemoveAllAuras();
-                me.DeleteThreatList();
+                me.GetThreatManager().ClearAllThreat();
                 me.CombatStop(true);
                 Talk(Aeranas.SayFree);
                 return;

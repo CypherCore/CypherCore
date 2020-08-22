@@ -470,8 +470,8 @@ namespace Scripts.Northrend.IcecrownCitadel
             void SelectTarget(List<WorldObject> targets)
             {
                 targets.Clear();
-                // select any unit but not the tank (by owners threatlist)
-                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetCombatReach(), true, -(int)Spells.Impaled);
+                // select any unit but not the tank
+                Unit target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 1, -GetCaster().GetCombatReach(), true, false, -(int)Spells.Impaled);
                 if (!target)
                     target = GetCaster().GetAI().SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true); // or the tank if its solo
                 if (!target)
@@ -565,7 +565,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     CreatureAI marrowgarAI = marrowgar.GetAI();
                     byte boneSpikeCount = (byte)(Convert.ToBoolean((int)GetCaster().GetMap().GetDifficultyID() & 1) ? 3 : 1);
 
-                    List<Unit> targets = marrowgarAI.SelectTargetList(new BoneSpikeTargetSelector(marrowgarAI), boneSpikeCount, SelectAggroTarget.Random);
+                    List<Unit> targets = marrowgarAI.SelectTargetList(boneSpikeCount, SelectAggroTarget.Random, 1, new BoneSpikeTargetSelector(marrowgarAI));
                     if (targets.Empty())
                         return;
 
