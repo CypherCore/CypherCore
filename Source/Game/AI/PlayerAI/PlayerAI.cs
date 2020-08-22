@@ -682,16 +682,29 @@ namespace Game.AI
     {
         public SimpleCharmedPlayerAI(Player player) : base(player)
         {
-            _castCheckTimer = 500;
+            _castCheckTimer = 2500;
             _chaseCloser = false;
             _forceFacing = true;
+        }
+
+        public override bool CanAIAttack(Unit who)
+        {
+            if (!me.IsValidAttackTarget(who) || who.HasBreakableByDamageCrowdControlAura())
+                return false;
+
+            Unit charmer = me.GetCharmer();
+            if (charmer != null)
+                if (!charmer.IsValidAttackTarget(who))
+                    return false;
+
+            return base.CanAIAttack(who);
         }
 
         public override Unit SelectAttackTarget()
         {
             Unit charmer = me.GetCharmer();
             if (charmer)
-                return charmer.IsAIEnabled ? charmer.GetAI().SelectTarget(SelectAggroTarget.Random, 0, new UncontrolledTargetSelectPredicate()) : charmer.GetVictim();
+                return charmer.IsAIEnabled ? charmer.GetAI().SelectTarget(SelectAggroTarget.Random, 0, new ValidTargetSelectPredicate(this)) : charmer.GetVictim();
             return null;
         }
 
@@ -1246,11 +1259,23 @@ namespace Game.AI
             if (charmer.IsEngaged())
             {
                 Unit target = me.GetVictim();
-                if (!target || !charmer.IsValidAttackTarget(target) || target.HasBreakableByDamageCrowdControlAura())
+                if (!target || !CanAIAttack(target))
                 {
                     target = SelectAttackTarget();
-                    if (!target)
+                    if (!target || !CanAIAttack(target))
+                    {
+                        if (!_isFollowing)
+                        {
+                            _isFollowing = true;
+                            me.AttackStop();
+                            me.CastStop();
+                            me.StopMoving();
+                            me.GetMotionMaster().Clear();
+                            me.GetMotionMaster().MoveFollow(charmer, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+                        }
                         return;
+                    }
+                    _isFollowing = false;
 
                     if (IsRangedAttacker())
                     {
@@ -1304,8 +1329,9 @@ namespace Game.AI
 
                 DoAutoAttackIfReady();
             }
-            else
+            else if (!_isFollowing)
             {
+                _isFollowing = true;
                 me.AttackStop();
                 me.CastStop();
                 me.StopMoving();
@@ -1337,13 +1363,21 @@ namespace Game.AI
         uint _castCheckTimer;
         bool _chaseCloser;
         bool _forceFacing;
+        bool _isFollowing;
     }
 
-    struct UncontrolledTargetSelectPredicate : ISelector
+    struct ValidTargetSelectPredicate : ISelector
     {
+        UnitAI _ai;
+
+        public ValidTargetSelectPredicate(UnitAI ai)
+        {
+            _ai = ai;
+        }
+
         public bool Check(Unit target)
         {
-            return !target.HasBreakableByDamageCrowdControlAura();
+            return _ai.CanAIAttack(target);
         }
     }
 }
