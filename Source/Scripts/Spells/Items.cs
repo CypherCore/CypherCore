@@ -275,6 +275,7 @@ namespace Scripts.Spells.Items
         //Nitroboots
         public const uint NitroBoostsSuccess = 54861;
         public const uint NitroBoostsBackfire = 46014;
+        public const uint NitroBoostsParachute = 54649;
 
         //Teachlanguage
         public const uint LearnGnomishBinary = 50242;
@@ -2521,6 +2522,42 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script]
+    class spell_item_nitro_boosts_backfire : AuraScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.NitroBoostsParachute);
+        }
+
+        void HandleApply(AuraEffect effect, AuraEffectHandleModes mode)
+        {
+            lastZ = GetTarget().GetPositionZ();
+        }
+
+        void HandlePeriodicDummy(AuraEffect effect)
+        {
+            PreventDefaultAction();
+            float curZ = GetTarget().GetPositionZ();
+            if (curZ < lastZ)
+            {
+                if (RandomHelper.randChance(80)) // we don't have enough sniffs to verify this, guesstimate
+                    GetTarget().CastSpell(GetTarget(), SpellIds.NitroBoostsParachute, true, null, effect);
+                GetAura().Remove();
+            }
+            else
+                lastZ = curZ;
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleApply, 1, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicDummy, 1, AuraType.PeriodicTriggerSpell));
+        }
+
+        float lastZ = MapConst.InvalidHeight;
+    }
+    
     [Script]
     class spell_item_teach_language : SpellScript
     {
