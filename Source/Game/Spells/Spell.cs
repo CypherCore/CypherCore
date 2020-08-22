@@ -2838,6 +2838,13 @@ namespace Game.Spells
             // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
             SendSpellGo();
 
+            if (!m_spellInfo.IsChanneled())
+            {
+                Creature creatureCaster = m_caster.ToCreature();
+                if (creatureCaster != null)
+                    creatureCaster.ReleaseFocus(this);
+            }
+
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
             if ((m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled()) || m_spellInfo.HasAttribute(SpellAttr4.Unk4))
             {
