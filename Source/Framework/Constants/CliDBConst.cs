@@ -877,7 +877,7 @@ namespace Framework.Constants
         Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
         Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
         Unk2 = 0x04,                // Only Used For Areas On Map 571 (Development Before)
-        SlaveCapital = 0x08,                // City And City Subsones
+        SlaveCapital = 0x08,                // City And City Subzones
         Unk3 = 0x10,                // Can'T Find Common Meaning
         SlaveCapital2 = 0x20,                // Slave Capital City Flag?
         AllowDuels = 0x40,                // Allow To Duel Here

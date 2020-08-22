@@ -99,6 +99,17 @@ namespace Game.DataStorage
 
             return Flags[0].HasAnyFlag(AreaFlags.Sanctuary);
         }
+
+        public bool IsFlyable()
+        {
+            if (Flags[0].HasAnyFlag(AreaFlags.Outland))
+            {
+                if (!Flags[0].HasAnyFlag(AreaFlags.NoFlyZone))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public sealed class AreaTriggerRecord
