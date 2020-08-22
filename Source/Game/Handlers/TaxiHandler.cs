@@ -45,22 +45,24 @@ namespace Game
         public void SendTaxiStatus(ObjectGuid guid)
         {
             // cheating checks
-            Creature unit = ObjectAccessor.GetCreature(GetPlayer(), guid);
-            if (unit == null)
+            Player player = GetPlayer();
+            Creature unit = ObjectAccessor.GetCreature(player, guid);
+            if (!unit || unit.IsHostileTo(player) || !unit.HasNpcFlag(NPCFlags.FlightMaster))
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.SendTaxiStatus - {0} not found.", guid.ToString());
                 return;
             }
 
-            uint curloc = Global.ObjectMgr.GetNearestTaxiNode(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetMapId(), GetPlayer().GetTeam());
+            // find taxi node
+            uint nearest = Global.ObjectMgr.GetNearestTaxiNode(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetMapId(), player.GetTeam());
 
             TaxiNodeStatusPkt data = new TaxiNodeStatusPkt();
             data.Unit = guid;
 
-            if (curloc == 0)
+            if (nearest == 0)
                 data.Status = TaxiNodeStatus.None;
-            else if (unit.GetReactionTo(GetPlayer()) >= ReputationRank.Neutral)
-                data.Status = GetPlayer().m_taxi.IsTaximaskNodeKnown(curloc) ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
+            else if (unit.GetReactionTo(player) >= ReputationRank.Neutral)
+                data.Status = player.m_taxi.IsTaximaskNodeKnown(nearest) ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
             else
                 data.Status = TaxiNodeStatus.NotEligible;
 
