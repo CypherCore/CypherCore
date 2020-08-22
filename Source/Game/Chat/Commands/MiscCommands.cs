@@ -58,7 +58,7 @@ namespace Game.Chat
                 return false;
 
             handler.SendSysMessage(CypherStrings.AvailableCmd);
-            handler.SendSysMessage("{0}", list);
+            handler.SendSysMessage(list);
             return true;
         }
 

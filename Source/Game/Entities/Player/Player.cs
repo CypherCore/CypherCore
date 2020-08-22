@@ -6350,7 +6350,7 @@ namespace Game.Entities
         }
         public void SendSysMessage(string str, params object[] args)
         {
-            new CommandHandler(Session).SendSysMessage(str, args);
+            new CommandHandler(Session).SendSysMessage(string.Format(str, args));
         }
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
         {

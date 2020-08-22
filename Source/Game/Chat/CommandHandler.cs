@@ -26,6 +26,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Game.Chat
 {
@@ -36,38 +37,37 @@ namespace Game.Chat
             _session = session;
         }
 
-        public bool ParseCommand(string fullCmd)
+        public virtual bool ParseCommand(string text)
         {
-            if (string.IsNullOrEmpty(fullCmd))
+            if (string.IsNullOrEmpty(text))
                 return false;
 
-            string text = fullCmd;
             // chat case (.command or !command format)
-            if (_session != null)
-            {
-                if (text[0] != '!' && text[0] != '.')
-                    return false;
-            }
+            if (text[0] != '!' && text[0] != '.')
+                return false;
 
+            /// ignore single . and ! in line
             if (text.Length < 2)
                 return false;
 
             // ignore messages staring from many dots.
-            if ((text[0] == '.' && text[1] == '.') || (text[0] == '!' && text[1] == '!'))
+            if (text[1] == '!' || text[1] == '.')
                 return false;
 
-            // skip first . or ! (in console allowed use command with . and ! and without its)
-            if (text[0] == '!' || text[0] == '.')
-                text = text.Substring(1);
+            return _ParseCommands(text.Substring(1));
+        }
 
-            if (!ExecuteCommandInTable(CommandManager.GetCommands(), text, fullCmd))
-            {
-                if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
-                    return false;
+        public bool _ParseCommands(string text)
+        {
+            if (ExecuteCommandInTable(CommandManager.GetCommands(), text, text))
+                return true;
 
-                SendSysMessage(CypherStrings.NoCmd);
-            }
+            // Pretend commands don't exist for regular players
+            if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
+                return false;
 
+            // Send error message for GMs
+            SendSysMessage(CypherStrings.NoCmd);
             return true;
         }
 
@@ -748,18 +748,25 @@ namespace Game.Chat
             return string.Format(Global.ObjectMgr.GetCypherString(cypherString), args);
         }
 
+        public void SendSysMessage(string str, params object[] args)
+        {
+            SendSysMessage(string.Format(str, args));
+        }
         public void SendSysMessage(CypherStrings cypherString, params object[] args)
         {
-            SendSysMessage(Global.ObjectMgr.GetCypherString(cypherString), args);
+            SendSysMessage(string.Format(Global.ObjectMgr.GetCypherString(cypherString), args));
         }
-        public virtual void SendSysMessage(string str, params object[] args)
+
+        public virtual void SendSysMessage(string str, bool escapeCharacters = false)
         {
             _sentErrorMessage = true;
-            string msg = string.Format(str, args);
+
+            if (escapeCharacters)
+                str.Replace("|", "||");
 
             ChatPkt messageChat = new ChatPkt();
 
-            var lines = new StringArray(msg, "\n", "\r");
+            var lines = new StringArray(str, "\n", "\r");
             for (var i = 0; i < lines.Length; ++i)
             {
                 messageChat.Initialize(ChatMsg.System, Language.Universal, null, null, lines[i]);
@@ -834,6 +841,102 @@ namespace Game.Chat
         WorldSession _session;
     }
 
+    class AddonChannelCommandHandler : CommandHandler
+    {
+        public static string PREFIX = "TrinityCore";
+
+        string echo;
+        bool hadAck;
+        bool humanReadable;
+
+        public AddonChannelCommandHandler(WorldSession session) : base(session) { }
+
+        public override bool ParseCommand(string text)
+        {
+            if (text.IsEmpty())
+                return false;
+
+            if (text.Length < 5) // str[1] through str[4] is 4-character command counter
+                return false;
+
+            echo = text.Substring(1);
+
+            switch (text[0])
+            {
+                case 'p': // p Ping
+                    SendAck();
+                    return true;
+                case 'h': // h Issue human-readable command
+                case 'i': // i Issue command
+                    if (text.Length < 6)
+                        return false;
+                    humanReadable = (text[0] == 'h');
+                    if (_ParseCommands(text + 5)) // actual command starts at str[5]
+                    {
+                        if (!hadAck)
+                            SendAck();
+                        if (HasSentErrorMessage())
+                            SendFailed();
+                        else
+                            SendOK();
+                    }
+                    else
+                    {
+                        SendSysMessage(CypherStrings.NoCmd);
+                        SendFailed();
+                    }
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        void Send(string msg)
+        {
+            ChatPkt chat = new ChatPkt();
+            chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
+            GetSession().SendPacket(chat);
+        }
+
+        void SendAck() // a Command acknowledged, no body
+        {
+            Send($"a{echo:4}\0");
+            hadAck = true;
+        }
+
+        void SendOK() // o Command OK, no body
+        {
+            Send($"o{echo:4}\0");
+        }
+
+        void SendFailed() // f Command failed, no body
+        {
+            Send($"f{echo:4}\0");
+        }
+
+        public override void SendSysMessage(string str, bool escapeCharacters)
+        {
+            if (!hadAck)
+                SendAck();
+
+            StringBuilder msg = new StringBuilder("m");
+            msg.Append(echo, 0, 4);
+            string body = str;
+            if (escapeCharacters)
+                body.Replace("|", "||");
+
+            int pos, lastpos;
+            for (lastpos = 0, pos = body.IndexOf('\n', lastpos); pos != -1; lastpos = pos + 1, pos = body.IndexOf('\n', lastpos))
+            {
+                StringBuilder line = msg;
+                line.Append(body, lastpos, pos - lastpos);
+                Send(line.ToString());
+            }
+            msg.Append(body, lastpos, pos - lastpos);
+            Send(msg.ToString());
+        }
+    }
+
     public class ConsoleHandler : CommandHandler
     {
         public override bool IsAvailable(ChatCommand cmd)
@@ -846,12 +949,23 @@ namespace Game.Chat
             return true;
         }
 
-        public override void SendSysMessage(string str, params object[] args)
+        public override void SendSysMessage(string str, bool escapeCharacters)
         {
             _sentErrorMessage = true;
-            string msg = string.Format(str, args);
 
-            Log.outInfo(LogFilter.Server, msg);
+            Log.outInfo(LogFilter.Server, str);
+        }
+
+        public override bool ParseCommand(string str)
+        {
+            if (str.IsEmpty())
+                return false;
+
+            // Console allows using commands both with and without leading indicator
+            if (str[0] == '.' || str[0] == '!')
+                str = str.Substring(1);
+
+            return _ParseCommands(str);
         }
 
         public override string GetNameLink()

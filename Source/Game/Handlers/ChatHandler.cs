@@ -402,6 +402,9 @@ namespace Game
             if (!WorldConfig.GetBoolValue(WorldCfg.AddonChannel))
                 return;
 
+            if (prefix == AddonChannelCommandHandler.PREFIX && new AddonChannelCommandHandler(this).ParseCommand(text))
+                return;
+
             switch (type)
             {
                 case ChatMsg.Guild:
