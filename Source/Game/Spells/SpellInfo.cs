@@ -654,10 +654,9 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
             {
                 // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
-                if (auraSpellInfo == null ||
-                    (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
-                        auraSpellInfo.Mechanic != Mechanics.Invulnerability &&
-                        (auraSpellInfo.Mechanic != Mechanics.Banish || (IsRankOf(auraSpellInfo) && auraSpellInfo.Dispel != DispelType.None)))) // Banish shouldn't be immune to itself, but Cyclone should
+                if (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
+                    auraSpellInfo.Mechanic != Mechanics.Invulnerability &&
+                    (auraSpellInfo.Mechanic != Mechanics.Banish || (IsRankOf(auraSpellInfo) && auraSpellInfo.Dispel != DispelType.None))) // Banish shouldn't be immune to itself, but Cyclone should
                     return true;
             }
 
