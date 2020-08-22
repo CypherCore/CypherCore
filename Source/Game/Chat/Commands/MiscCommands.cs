@@ -678,17 +678,22 @@ namespace Game.Chat
                 }
                 else if (map.Instanceable())
                 {
-                    Group targetGroup = target.GetGroup();
                     Map targetMap = target.GetMap();
-                    Player targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
+
+                    Player targetGroupLeader = null;
+                    Group targetGroup = target.GetGroup();
+                    if (targetGroup != null)
+                        targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
 
                     // check if far teleport is allowed
-                    if (!targetGroupLeader || (targetGroupLeader.GetMapId() != map.GetId()) || (targetGroupLeader.GetInstanceId() != map.GetInstanceId()))
+                    if (targetGroupLeader == null || (targetGroupLeader.GetMapId() != map.GetId()) || (targetGroupLeader.GetInstanceId() != map.GetInstanceId()))
+                    {
                         if ((targetMap.GetId() != map.GetId()) || (targetMap.GetInstanceId() != map.GetInstanceId()))
                         {
                             handler.SendSysMessage(CypherStrings.CannotSummonToInst);
                             return false;
                         }
+                    }
 
                     // check if we're already in a different instance of the same map
                     if ((targetMap.GetId() == map.GetId()) && (targetMap.GetInstanceId() != map.GetInstanceId()))
