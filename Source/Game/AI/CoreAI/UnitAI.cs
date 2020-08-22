@@ -609,14 +609,14 @@ namespace Game.AI
         /// <param name="unit">the reference unit</param>
         /// <param name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
         /// <param name="playerOnly">self explaining</param>
-        /// <param name="withMainTank">allow current tank to be selected</param>
+        /// <param name="withTank">allow current tank to be selected</param>
         /// <param name="aura">if 0: ignored, if > 0: the target shall have the aura, if < 0, the target shall NOT have the aura</param>
-        public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, bool withMainTank, int aura)
+        public DefaultTargetSelector(Unit unit, float dist, bool playerOnly, bool withTank, int aura)
         {
             me = unit;
             m_dist = dist;
             m_playerOnly = playerOnly;
-            except = withMainTank ? me.GetThreatManager().GetCurrentVictim() : null;
+            except = !withTank ? me.GetThreatManager().GetCurrentVictim() : null;
             m_aura = aura;
         }
 
@@ -628,7 +628,7 @@ namespace Game.AI
             if (target == null)
                 return false;
 
-            if (target == except)
+            if (except != null && target == except)
                 return false;
 
             if (m_playerOnly && !target.IsTypeId(TypeId.Player))
