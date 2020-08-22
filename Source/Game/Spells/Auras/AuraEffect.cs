@@ -283,19 +283,21 @@ namespace Game.Spells
                 ApplySpellMod(aurApp.GetTarget(), apply);
 
             // call scripts helping/replacing effect handlers
-            bool prevented = false;
+            bool prevented;
             if (apply)
                 prevented = GetBase().CallScriptEffectApplyHandlers(this, aurApp, mode);
             else
                 prevented = GetBase().CallScriptEffectRemoveHandlers(this, aurApp, mode);
 
-            // check if script events have removed the aura or if default effect prevention was requested
-            if ((apply && aurApp.HasRemoveMode()) || prevented)
+            // check if script events have removed the aura already
+            if (apply && aurApp.HasRemoveMode())
                 return;
 
-            Global.SpellMgr.GetAuraEffectHandler(GetAuraType()).Invoke(this, aurApp, mode, apply);
+            // call default effect handler if it wasn't prevented
+            if (!prevented)
+                Global.SpellMgr.GetAuraEffectHandler(GetAuraType()).Invoke(this, aurApp, mode, apply);
 
-            // check if script events have removed the aura or if default effect prevention was requested
+            // check if the default handler reemoved the aura
             if (apply && aurApp.HasRemoveMode())
                 return;
 
