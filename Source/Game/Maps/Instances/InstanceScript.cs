@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Networking.Packets;
 using Game.Scenarios;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -32,6 +33,7 @@ namespace Game.Maps
         public InstanceScript(InstanceMap map)
         {
             instance = map;
+            _instanceSpawnGroups = Global.ObjectMgr.GetSpawnGroupsForInstance(map.GetId());
         }
 
         public void SaveToDB()
@@ -161,27 +163,6 @@ namespace Game.Maps
             }
         }
 
-        void UpdateMinionState(Creature minion, EncounterState state)
-        {
-            switch (state)
-            {
-                case EncounterState.NotStarted:
-                    if (!minion.IsAlive())
-                        minion.Respawn();
-                    else if (minion.IsInCombat())
-                        minion.GetAI().EnterEvadeMode();
-                    break;
-                case EncounterState.InProgress:
-                    if (!minion.IsAlive())
-                        minion.Respawn();
-                    else if (minion.GetVictim() == null)
-                        minion.GetAI().DoZoneInCombat();
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public virtual void UpdateDoorState(GameObject door)
         {
             var range = doors.LookupByKey(door.GetEntry());
@@ -211,6 +192,65 @@ namespace Game.Maps
             }
 
             door.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
+        }
+
+        void UpdateMinionState(Creature minion, EncounterState state)
+        {
+            switch (state)
+            {
+                case EncounterState.NotStarted:
+                    if (!minion.IsAlive())
+                        minion.Respawn();
+                    else if (minion.IsInCombat())
+                        minion.GetAI().EnterEvadeMode();
+                    break;
+                case EncounterState.InProgress:
+                    if (!minion.IsAlive())
+                        minion.Respawn();
+                    else if (minion.GetVictim() == null)
+                        minion.GetAI().DoZoneInCombat();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        enum states { Block, Spawn, ForceBlock };
+        void UpdateSpawnGroups()
+        {
+            if (_instanceSpawnGroups.Empty())
+                return;
+
+            Dictionary<uint, states> newStates = new Dictionary<uint, states>();
+            foreach (var info in _instanceSpawnGroups)
+            {
+                if (!newStates.ContainsKey(info.SpawnGroupId))
+                    newStates[info.SpawnGroupId] = 0;// makes sure there's a BLOCK value in the map
+
+                if (newStates[info.SpawnGroupId] == states.ForceBlock) // nothing will change this
+                    continue;
+
+                if (((1 << (int)GetBossState(info.BossStateId)) & info.BossStates) == 0)
+                    continue;
+
+                if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.BlockSpawn))
+                    newStates[info.SpawnGroupId] = states.ForceBlock;
+                else if (info.Flags.HasAnyFlag(InstanceSpawnGroupFlags.ActivateSpawn))
+                    newStates[info.SpawnGroupId] = states.Spawn;
+            }
+
+            foreach (var pair in newStates)
+            {
+                uint groupId = pair.Key;
+                bool doSpawn = pair.Value == states.Spawn;
+                if (Global.ObjectMgr.IsSpawnGroupActive(groupId) == doSpawn)
+                    continue; // nothing to do here
+                              // if we should spawn group, then spawn it...
+                if (doSpawn)
+                    Global.ObjectMgr.SpawnGroupSpawn(groupId, instance);
+                else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
+                    Global.ObjectMgr.SetSpawnGroupActive(groupId, false);
+            }
         }
 
         public BossInfo GetBossInfo(uint id)
@@ -291,7 +331,7 @@ namespace Game.Maps
                 if (bossInfo.state == EncounterState.ToBeDecided) // loading
                 {
                     bossInfo.state = state;
-                    //Log.outError(LogFilter.General "Inialize boss {0} state as {1}.", id, (uint32)state);
+                    Log.outDebug(LogFilter.Scripts, $"InstanceScript: Inialize boss {id} state as {state}.");
                     return false;
                 }
                 else
@@ -354,6 +394,7 @@ namespace Game.Maps
                         UpdateMinionState(minion, state);
                 }
 
+                UpdateSpawnGroups();
                 return true;
             }
             return false;
@@ -362,6 +403,14 @@ namespace Game.Maps
         public bool _SkipCheckRequiredBosses(Player player = null)
         {
             return player && player.GetSession().HasPermission(RBACPermissions.SkipCheckInstanceRequiredBosses);
+        }
+
+        public virtual void Create()
+        {
+            for (uint i = 0; i < bosses.Count; ++i)
+                SetBossState(i, EncounterState.NotStarted);
+
+            UpdateSpawnGroups();
         }
 
         public virtual void Load(string data)
@@ -411,6 +460,7 @@ namespace Game.Maps
                 if (buff < EncounterState.ToBeDecided)
                     SetBossState(pair.Key, buff);
             }
+            UpdateSpawnGroups();
         }
 
         public virtual string GetSaveData()
@@ -852,6 +902,7 @@ namespace Game.Maps
         Dictionary<uint, uint> _gameObjectInfo = new Dictionary<uint, uint>();
         Dictionary<uint, ObjectGuid> _objectGuids = new Dictionary<uint, ObjectGuid>();
         uint completedEncounters;
+        List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new List<InstanceSpawnGroupInfo>();
         uint _entranceId;
         uint _temporaryEntranceId;
         uint _combatResurrectionTimer;

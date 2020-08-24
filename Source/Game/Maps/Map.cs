@@ -5173,6 +5173,8 @@ namespace Game.Maps
                     }
                 }
             }
+            else
+                i_data.Create();
         }
 
         public bool Reset(InstanceResetMethod method)

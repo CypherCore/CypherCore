@@ -586,6 +586,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Group Templates...");
             Global.ObjectMgr.LoadSpawnGroupTemplates();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading instance spawn groups...");
+            Global.ObjectMgr.LoadInstanceSpawnGroups();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Data...");
             Global.ObjectMgr.LoadCreatures();
 

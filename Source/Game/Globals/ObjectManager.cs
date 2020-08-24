@@ -18,7 +18,9 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
+using Framework.Dynamic;
 using Framework.GameMath;
+using Framework.IO;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -31,8 +33,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Framework.Dynamic;
-using Framework.IO;
 
 namespace Game
 {
@@ -5375,6 +5375,61 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {numMembers} spawn group members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+        public void LoadInstanceSpawnGroups()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                         0              1            2           3             4
+            SQLResult result = DB.World.Query("SELECT instanceMapId, bossStateId, bossStates, spawnGroupId, flags FROM instance_spawn_groups");
+            if (result.IsEmpty())
+            {
+                Log.outError(LogFilter.ServerLoading, "Loaded 0 instance spawn groups. DB table `instance_spawn_groups` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                ushort instanceMapId = result.Read<ushort>(0);
+                uint spawnGroupId = result.Read<uint>(3);
+
+                var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
+                if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
+                {
+                    Log.outError(LogFilter.ServerLoading, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
+                    continue;
+                }
+
+                InstanceSpawnGroupInfo info = new InstanceSpawnGroupInfo();
+                info.SpawnGroupId = spawnGroupId;
+                info.BossStateId = result.Read<byte>(1);
+
+                byte ALL_STATES = (1 << (int)EncounterState.ToBeDecided) - 1;
+                byte states = result.Read<byte>(2);
+                if ((states & ~ALL_STATES) != 0)
+                {
+                    info.BossStates = (byte)(states & ALL_STATES);
+                    Log.outError(LogFilter.ServerLoading, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid boss state mask {states} - truncated to {info.BossStates}.");
+                }
+                else
+                    info.BossStates = states;
+
+                InstanceSpawnGroupFlags flags = (InstanceSpawnGroupFlags)result.Read<byte>(4);
+                if ((flags & ~InstanceSpawnGroupFlags.All) != 0)
+                {
+                    info.Flags = flags & InstanceSpawnGroupFlags.All;
+                    Log.outError(LogFilter.ServerLoading, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid flags {flags} - truncated to {info.Flags}.");
+                }
+                else
+                    info.Flags = flags;
+
+                _instanceSpawnGroupStorage.Add(instanceMapId, info);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} instance spawn groups in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         void OnDeleteSpawnData(SpawnData data)
         {
             var templateIt = _spawnGroupDataStorage.LookupByKey(data.spawnGroupData.groupId);
@@ -5394,24 +5449,24 @@ namespace Game
 
             Cypher.Assert(false, $"Spawn data ({data.type},{data.spawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
         }
-        public bool SpawnGroupSpawn(uint groupId, Map map, bool ignoreRespawn, bool force = false, List<WorldObject> spawnedObjects = null)
+        public bool SpawnGroupSpawn(uint groupId, Map map, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
         {
             var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
             if (spawnGroup == null || spawnGroup.flags.HasAnyFlag(SpawnGroupFlags.System))
             {
-                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId}. Blocked.");
+                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. Blocked.");
                 return false;
             }
 
             if (!map)
             {
-                Log.outError(LogFilter.Maps, $"Tried to despawn creature group {groupId}, but no map was supplied. Blocked.");
+                Log.outError(LogFilter.Maps, $"Tried to spawn creature group {groupId}, but no map was supplied. Blocked.");
                 return false;
             }
 
             if (spawnGroup.mapId != map.GetId())
             {
-                Log.outError(LogFilter.Maps, $"Tried to despawn creature group {groupId}, but supplied map is {map.GetId()}, creature group has map {spawnGroup.mapId}. Blocked.");
+                Log.outError(LogFilter.Maps, $"Tried to spawn creature group {groupId}, but supplied map is {map.GetId()}, creature group has map {spawnGroup.mapId}. Blocked.");
                 return false;
             }
 
@@ -5543,13 +5598,14 @@ namespace Game
             return _dungeonEncounterStorage.LookupByKey(MathFunctions.MakePair64(mapId, (uint)difficulty));
         }
         public bool IsTransportMap(uint mapId) { return _transportMaps.Contains((ushort)mapId); }
-        void SetSpawnGroupActive(uint groupId, bool state)
+        SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
+        public void SetSpawnGroupActive(uint groupId, bool state)
         { 
             var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
             if (spawnGroup != null)
                 spawnGroup.isActive = state;
         }
-        bool IsSpawnGroupActive(uint groupId)
+        public bool IsSpawnGroupActive(uint groupId)
         {
             var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
             return (spawnGroup != null) && spawnGroup.isActive;
@@ -5567,6 +5623,7 @@ namespace Game
 
             return null;
         }
+        public List<InstanceSpawnGroupInfo> GetSpawnGroupsForInstance(uint instanceId) { return _instanceSpawnGroupStorage.LookupByKey(instanceId); }
         
         //Player
         public void LoadPlayerInfo()
@@ -10098,6 +10155,7 @@ namespace Game
         List<ushort> _transportMaps = new List<ushort>();
         Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new Dictionary<uint, SpawnGroupTemplateData>();
         MultiMap<uint, SpawnData> _spawnGroupMapStorage = new MultiMap<uint, SpawnData>();
+        MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new MultiMap<ushort, InstanceSpawnGroupInfo>();
 
         //Spells /Skills / Phases
         Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new Dictionary<uint, PhaseInfoStruct>();
@@ -10512,6 +10570,14 @@ namespace Game
         public uint armor;
     }
 
+    public struct InstanceSpawnGroupInfo
+    {
+        public byte BossStateId;
+        public byte BossStates;
+        public uint SpawnGroupId;
+        public InstanceSpawnGroupFlags Flags;
+    }
+    
     public class SpellClickInfo
     {
         public uint spellId;

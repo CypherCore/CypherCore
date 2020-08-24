@@ -113,7 +113,7 @@ namespace Framework.Constants
         AreaTrigger = 0x20,
         Conversation = 0x40,
         All = 0x7F,
-        
+
         //GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger
         AllGrid = GameObject | Creature | DynamicObject | Corpse | AreaTrigger | Conversation,
 
@@ -230,5 +230,14 @@ namespace Framework.Constants
         EscortQuestNpc = 0x10,
 
         All = (System | CompatibilityMode | ManualSpawn | DynamicSpawnRate | EscortQuestNpc)
+    }
+
+    [Flags]
+    public enum InstanceSpawnGroupFlags
+    {
+        ActivateSpawn = 0x01,
+        BlockSpawn = 0x02,
+
+        All = (ActivateSpawn | BlockSpawn)
     }
 }
