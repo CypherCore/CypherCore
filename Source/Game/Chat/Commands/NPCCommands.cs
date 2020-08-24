@@ -879,6 +879,9 @@ namespace Game.Chat
                     if (!ulong.TryParse(cId, out ulong guidLow) || guidLow == 0)
                         return false;
 
+                    // force respawn to make sure we find something
+                    handler.GetSession().GetPlayer().GetMap().RemoveRespawnTime(SpawnObjectType.Creature, guidLow, true);
+                    // then try to find it
                     creature = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
                 }
                 else

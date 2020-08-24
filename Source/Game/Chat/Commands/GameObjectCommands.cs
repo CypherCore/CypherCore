@@ -72,6 +72,9 @@ namespace Game.Chat
             if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
+            Player player = handler.GetSession().GetPlayer();
+            // force respawn to make sure we find something
+            player.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guidLow, true);
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {
@@ -82,7 +85,7 @@ namespace Game.Chat
             ObjectGuid ownerGuid = obj.GetOwnerGUID();
             if (ownerGuid.IsEmpty())
             {
-                Unit owner = Global.ObjAccessor.GetUnit(handler.GetPlayer(), ownerGuid);
+                Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
                 if (!owner || !ownerGuid.IsPlayer())
                 {
                     handler.SendSysMessage(CypherStrings.CommandDelobjrefercreature, ownerGuid.ToString(), obj.GetGUID().ToString());
