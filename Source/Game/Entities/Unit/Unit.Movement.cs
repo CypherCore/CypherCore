@@ -779,7 +779,8 @@ namespace Game.Entities
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
                     RemoveAurasDueToSpell(_lastLiquid.SpellID);
-                if (curLiquid != null && curLiquid.SpellID != 0)
+                Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (curLiquid != null && curLiquid.SpellID != 0 && (!player || !player.IsGameMaster()))
                     CastSpell(this, curLiquid.SpellID, true);
                 _lastLiquid = curLiquid;
             }
