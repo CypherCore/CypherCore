@@ -123,45 +123,62 @@ namespace Game.Entities
             if (GetDeathState() != DeathState.Corpse)
                 return;
 
-            m_corpseRemoveTime = Time.UnixTime;
-            SetDeathState(DeathState.Dead);
-            RemoveAllAuras();
-            DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-            loot.Clear();
-            uint respawnDelay = m_respawnDelay;
-            if (IsAIEnabled)
-                GetAI().CorpseRemoved(respawnDelay);
-
-            if (destroyForNearbyPlayers)
-                DestroyForNearbyPlayers();
-
-            // Should get removed later, just keep "compatibility" with scripts
-            if (setSpawnTime)
-                m_respawnTime = Math.Max(Time.UnixTime + respawnDelay, m_respawnTime);
-
-            // if corpse was removed during falling, the falling will continue and override relocation to respawn position
-            if (IsFalling())
-                StopMoving();
-
-            float x, y, z, o;
-            GetRespawnPosition(out x, out y, out z, out o);
-
-            // We were spawned on transport, calculate real position
-            if (IsSpawnedOnTransport())
+            if (m_respawnCompatibilityMode)
             {
-                Position pos = m_movementInfo.transport.pos;
-                pos.posX = x;
-                pos.posY = y;
-                pos.posZ = z;
-                pos.SetOrientation(o);
+                m_corpseRemoveTime = Time.UnixTime;
+                SetDeathState(DeathState.Dead);
+                RemoveAllAuras();
+                //DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
+                loot.Clear();
+                uint respawnDelay = m_respawnDelay;
+                if (IsAIEnabled)
+                    GetAI().CorpseRemoved(respawnDelay);
 
-                ITransport transport = GetDirectTransport();
-                if (transport != null)
-                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                if (destroyForNearbyPlayers)
+                    DestroyForNearbyPlayers();
+
+                // Should get removed later, just keep "compatibility" with scripts
+                if (setSpawnTime)
+                    m_respawnTime = Math.Max(Time.UnixTime + respawnDelay, m_respawnTime);
+
+                // if corpse was removed during falling, the falling will continue and override relocation to respawn position
+                if (IsFalling())
+                    StopMoving();
+
+                float x, y, z, o;
+                GetRespawnPosition(out x, out y, out z, out o);
+
+                // We were spawned on transport, calculate real position
+                if (IsSpawnedOnTransport())
+                {
+                    Position pos = m_movementInfo.transport.pos;
+                    pos.posX = x;
+                    pos.posY = y;
+                    pos.posZ = z;
+                    pos.SetOrientation(o);
+
+                    ITransport transport = GetDirectTransport();
+                    if (transport != null)
+                        transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                }
+
+                SetHomePosition(x, y, z, o);
+                GetMap().CreatureRelocation(this, x, y, z, o);
             }
+            else
+            {
+                // In case this is called directly and normal respawn timer not set
+                // Since this timer will be longer than the already present time it
+                // will be ignored if the correct place added a respawn timer
+                if (setSpawnTime)
+                {
+                    uint respawnDelay = m_respawnDelay;
+                    m_respawnTime = Math.Max(Time.UnixTime + respawnDelay, m_respawnTime);
 
-            SetHomePosition(x, y, z, o);
-            GetMap().CreatureRelocation(this, x, y, z, o);
+                    SaveRespawnTime(0, false);
+                }
+                AddObjectToRemoveList();
+            }
         }
 
         public bool InitEntry(uint entry, CreatureData data = null)
@@ -375,7 +392,7 @@ namespace Game.Entities
             {
                 case DeathState.JustRespawned:
                 case DeathState.JustDied:
-                    Log.outError(LogFilter.Unit, "Creature ({0}) in wrong state: {2}", GetGUID().ToString(), m_deathState);
+                    Log.outError(LogFilter.Unit, "Creature ({0}) in wrong state: {1}", GetGUID().ToString(), m_deathState);
                     break;
                 case DeathState.Dead:
                     {
@@ -383,22 +400,25 @@ namespace Game.Entities
                         if (m_respawnTime <= now)
                         {
                             // First check if there are any scripts that object to us respawning
-                            if (!Global.ScriptMgr.CanSpawn(GetSpawnId(), GetEntry(), GetCreatureTemplate(), GetCreatureData(), GetMap()))
-                                break; // Will be rechecked on next Update call
+                            if (!Global.ScriptMgr.CanSpawn(GetSpawnId(), GetEntry(), GetCreatureData(), GetMap()))
+                            {
+                                m_respawnTime = now + RandomHelper.URand(4, 7);
+                                break; // Will be rechecked on next Update call after delay expires
+                            }
 
                             ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
-                            long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                            if (linkedRespawntime == 0)             // Can respawn
+                            long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                            if (linkedRespawnTime == 0)             // Can respawn
                                 Respawn();
                             else                                // the master is dead
                             {
                                 ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
                                 if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                    SetRespawnTime(Time.Day);
+                                    SetRespawnTime(Time.Week);
                                 else
                                 {
                                     // else copy time from master and add a little
-                                    long baseRespawnTime = Math.Max(linkedRespawntime, now);
+                                    long baseRespawnTime = Math.Max(linkedRespawnTime, now);
                                     long offset = RandomHelper.URand(5, Time.Minute);
 
                                     // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
@@ -731,7 +751,7 @@ namespace Game.Entities
                 lowGuid = map.GenerateLowGuid(HighGuid.Creature);
 
             Creature creature = new Creature();
-            if (!creature.Create(lowGuid, map, entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), null, vehId))
+            if (!creature.Create(lowGuid, map, entry, pos, null, vehId))
                 return null;
 
             return creature;
@@ -740,13 +760,13 @@ namespace Game.Entities
         public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
             Creature creature = new Creature();
-            if (!creature.LoadCreatureFromDB(spawnId, map, addToMap, allowDuplicate))
+            if (!creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
                 return null;
 
             return creature;
         }
 
-        public bool Create(ulong guidlow, Map map, uint entry, float x, float y, float z, float ang, CreatureData data, uint vehId)
+        public bool Create(ulong guidlow, Map map, uint entry, Position pos, CreatureData data = null, uint vehId = 0, bool dynamic = false)
         {
             SetMap(map);
 
@@ -755,6 +775,10 @@ namespace Game.Entities
                 PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
                 PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
             }
+
+            // Set if this creature can handle dynamic spawns
+            if (!dynamic)
+                SetRespawnCompatibilityMode();
 
             CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cinfo == null)
@@ -765,13 +789,13 @@ namespace Game.Entities
 
             //! Relocate before CreateFromProto, to initialize coords and allow
             //! returning correct zone id for selecting OutdoorPvP/Battlefield script
-            Relocate(x, y, z, ang);
+            Relocate(pos);
 
             // Check if the position is valid before calling CreateFromProto(), otherwise we might add Auras to Creatures at
             // invalid position, triggering a crash about Auras not removed in the destructor
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Unit, "Creature.Create: given coordinates for creature (guidlow {0}, entry {1}) are not valid (X: {2}, Y: {3}, Z: {4}, O: {5})", guidlow, entry, x, y, z, ang);
+                Log.outError(LogFilter.Unit, $"Creature.Create: given coordinates for creature (guidlow {guidlow}, entry {entry}) are not valid ({pos})");
                 return false;
             }
             UpdatePositionData();
@@ -810,10 +834,8 @@ namespace Game.Entities
             //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
             if (HasUnitMovementFlag(MovementFlag.Hover))
             {
-                z += m_unitData.HoverHeight;
-
                 //! Relocate again with updated Z coord
-                Relocate(x, y, z, ang);
+                posZ += m_unitData.HoverHeight;
             }
 
             LastUsedScriptID = GetScriptId();
@@ -922,6 +944,14 @@ namespace Game.Entities
                 && !IsPet()
                 && !IsTotem()
                 && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
+        }
+
+        public bool IsEscortNPC(bool onlyIfActive = true)
+        {
+            if (!IsAIEnabled)
+                return false;
+
+            return GetAI().IsEscortNPC(onlyIfActive);
         }
 
         public override bool IsMovementPreventedByCasting()
@@ -1068,16 +1098,20 @@ namespace Game.Entities
                     dynamicflags = 0;
             }
 
-            // data.guid = guid must not be updated at save
-            data.id = GetEntry();
-            data.mapid = (ushort)mapid;
+            if (data.spawnId == 0)
+                data.spawnId = m_spawnId;
+            Cypher.Assert(data.spawnId == m_spawnId);
+
+            data.Id = GetEntry();
             data.displayid = displayId;
-            data.equipmentId = GetCurrentEquipmentId();
-            data.posX = GetPositionX();
-            data.posY = GetPositionY();
-            data.posZ = GetPositionZMinusOffset();
-            data.orientation = GetOrientation();
-            data.spawntimesecs = m_respawnDelay;
+            data.equipmentId = (sbyte)GetCurrentEquipmentId();
+
+            if (GetTransport() == null)
+                data.spawnPoint.WorldRelocate(this);
+            else
+                data.spawnPoint.WorldRelocate(mapid, GetTransOffsetX(), GetTransOffsetY(), GetTransOffsetZ(), GetTransOffsetO());
+
+            data.spawntimesecs = (int)m_respawnDelay;
             // prevent add data integrity problems
             data.spawndist = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_respawnradius;
             data.currentwaypoint = 0;
@@ -1092,6 +1126,8 @@ namespace Game.Entities
             data.unit_flags2 = unitFlags2;
             data.unit_flags3 = unitFlags3;
             data.dynamicflags = (uint)dynamicflags;
+            if (data.spawnGroupData == null)
+                data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
             data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
             data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
@@ -1414,13 +1450,18 @@ namespace Game.Entities
                 return;
             }
 
-            GetMap().RemoveCreatureRespawnTime(m_spawnId);
+            GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId);
             Global.ObjectMgr.DeleteCreatureData(m_spawnId);
 
             SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
             stmt.AddValue(0, m_spawnId);
+            trans.Append(stmt);
+
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_SPAWNGROUP_MEMBER);
+            stmt.AddValue(0, (byte)SpawnObjectType.Creature);
+            stmt.AddValue(1, m_spawnId);
             trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
@@ -1549,14 +1590,31 @@ namespace Game.Entities
             if (s == DeathState.JustDied)
             {
                 m_corpseRemoveTime = Time.UnixTime + m_corpseDelay;
-                if (IsDungeonBoss() && m_respawnDelay == 0)
-                    m_respawnTime = long.MaxValue; // never respawn in this instance
+                uint respawnDelay = m_respawnDelay;
+                uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
+                if (scalingMode != 0)
+                    GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
+                // @todo remove the boss respawn time hack in a dynspawn follow-up once we have creature groups in instances
+                if (m_respawnCompatibilityMode)
+                {
+                    if (IsDungeonBoss() && m_respawnDelay == 0)
+                        m_respawnTime = long.MaxValue; // never respawn in this instance
+                    else
+                        m_respawnTime = Time.UnixTime + respawnDelay + m_corpseDelay;
+                }
                 else
-                    m_respawnTime = Time.UnixTime + m_respawnDelay + m_corpseDelay;
+                {
+                    if (IsDungeonBoss() && m_respawnDelay == 0)
+                        m_respawnTime = long.MaxValue; // never respawn in this instance
+                    else
+                        m_respawnTime = Time.UnixTime + respawnDelay;
+                }
 
                 // always save boss respawn time at death to prevent crash cheating
                 if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately) || IsWorldBoss())
                     SaveRespawnTime();
+                else if (!m_respawnCompatibilityMode)
+                    SaveRespawnTime(0, false);
 
                 ReleaseFocus(null, false);               // remove spellcast focus
                 DoNotReacquireTarget(); // cancel delayed re-target
@@ -1632,8 +1690,6 @@ namespace Game.Entities
 
         public void Respawn(bool force = false)
         {
-            DestroyForNearbyPlayers();
-
             if (force)
             {
                 if (IsAlive())
@@ -1642,49 +1698,60 @@ namespace Game.Entities
                     SetDeathState(DeathState.Corpse);
             }
 
-            RemoveCorpse(false, false);
-
-            if (GetDeathState() == DeathState.Dead)
+            if (m_respawnCompatibilityMode)
             {
-                if (m_spawnId != 0)
-                    GetMap().RemoveCreatureRespawnTime(m_spawnId);
+                DestroyForNearbyPlayers();
+                RemoveCorpse(false, false);
 
-                Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
-                m_respawnTime = 0;
-                ResetPickPocketRefillTimer();
-                loot.Clear();
+                if (GetDeathState() == DeathState.Dead)
+                {
+                    if (m_spawnId != 0)
+                        GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId);
 
-                if (m_originalEntry != GetEntry())
-                    UpdateEntry(m_originalEntry);
-                else
+                    Log.outDebug(LogFilter.Unit, "Respawning creature {0} ({1})", GetName(), GetGUID().ToString());
+                    m_respawnTime = 0;
+                    ResetPickPocketRefillTimer();
+                    loot.Clear();
+
+                    if (m_originalEntry != GetEntry())
+                        UpdateEntry(m_originalEntry);
+
                     SelectLevel();
 
-                SetDeathState(DeathState.JustRespawned);
+                    SetDeathState(DeathState.JustRespawned);
 
-                CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
-                if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
-                {
-                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                    CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
+                    if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
+                    {
+                        SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                        SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                    }
+
+                    GetMotionMaster().InitDefault();
+                    //Re-initialize reactstate that could be altered by movementgenerators
+                    InitializeReactState();
+
+                    //Call AI respawn virtual function//Call AI respawn virtual function
+                    if (IsAIEnabled)
+                    {
+                        //reset the AI to be sure no dirty or uninitialized values will be used till next tick
+                        GetAI().Reset();
+                        TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
+                    }
+
+                    uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<Creature>(GetSpawnId()) : 0;
+                    if (poolid != 0)
+                        Global.PoolMgr.UpdatePool<Creature>(poolid, GetSpawnId());
                 }
-
-                GetMotionMaster().InitDefault();
-                //Re-initialize reactstate that could be altered by movementgenerators
-                InitializeReactState();
-
-                //Call AI respawn virtual function
-                if (IsAIEnabled)
-                {
-                    GetAI().Reset();
-                    TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
-                }
-
-                uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<Creature>(GetSpawnId()) : 0;
-                if (poolid != 0)
-                    Global.PoolMgr.UpdatePool<Creature>(poolid, GetSpawnId());
+                UpdateObjectVisibility();
+            }
+            else
+            {
+                if (m_spawnId != 0)
+                    GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId, true);
             }
 
-            UpdateObjectVisibility();
+            Log.outDebug(LogFilter.Unit, $"Respawning creature {GetName()} ({GetGUID()})");
         }
 
         public void ForcedDespawn(uint timeMSToDespawn = 0, TimeSpan forceRespawnTimer = default)
@@ -1695,30 +1762,49 @@ namespace Game.Entities
                 return;
             }
 
-            uint corpseDelay = GetCorpseDelay();
-            uint respawnDelay = GetRespawnDelay();
-
-            // do it before killing creature
-            DestroyForNearbyPlayers();
-
-            bool overrideRespawnTime = false;
-            if (IsAlive())
+            if (m_respawnCompatibilityMode)
             {
-                if (forceRespawnTimer > TimeSpan.Zero)
+                uint corpseDelay = GetCorpseDelay();
+                uint respawnDelay = GetRespawnDelay();
+
+                // do it before killing creature
+                DestroyForNearbyPlayers();
+
+                bool overrideRespawnTime = false;
+                if (IsAlive())
                 {
-                    SetCorpseDelay(0);
-                    SetRespawnDelay((uint)forceRespawnTimer.TotalSeconds);
-                    overrideRespawnTime = false;
+                    if (forceRespawnTimer > TimeSpan.Zero)
+                    {
+                        SetCorpseDelay(0);
+                        SetRespawnDelay((uint)forceRespawnTimer.TotalSeconds);
+                        overrideRespawnTime = false;
+                    }
+
+                    SetDeathState(DeathState.JustDied);
                 }
 
-                SetDeathState(DeathState.JustDied);
+                // Skip corpse decay time
+                RemoveCorpse(overrideRespawnTime, false);
+
+                SetCorpseDelay(corpseDelay);
+                SetRespawnDelay(respawnDelay);
             }
+            else
+            {
+                if (forceRespawnTimer > TimeSpan.Zero)
+                    SaveRespawnTime((uint)forceRespawnTimer.TotalSeconds);
+                else
+                {
+                    uint respawnDelay = m_respawnDelay;
+                    uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
+                    if (scalingMode != 0)
+                        GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
+                    m_respawnTime = Time.UnixTime + respawnDelay;
+                    SaveRespawnTime();
+                }
 
-            // Skip corpse decay time
-            RemoveCorpse(overrideRespawnTime, false);
-
-            SetCorpseDelay(corpseDelay);
-            SetRespawnDelay(respawnDelay);
+                AddObjectToRemoveList();
+            }
         }
 
         public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
@@ -2074,12 +2160,19 @@ namespace Game.Entities
             return false;
         }
 
-        public override void SaveRespawnTime()
+        public override void SaveRespawnTime(uint forceDelay = 0, bool saveToDb = true)
         {
             if (IsSummon() || m_spawnId == 0 || (m_creatureData != null && !m_creatureData.dbData))
                 return;
 
-            GetMap().SaveCreatureRespawnTime(m_spawnId, m_respawnTime);
+            if (m_respawnCompatibilityMode)
+            {
+                GetMap().SaveRespawnTimeDB(SpawnObjectType.Creature, m_spawnId, m_respawnTime);
+                return;
+            }
+
+            uint thisRespawnTime = (uint)(forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime);
+            GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId(), m_creatureData.dbData && saveToDb);
         }
 
         public bool CanCreatureAttack(Unit victim, bool force = true)
@@ -2293,32 +2386,20 @@ namespace Game.Entities
         }
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori, out float dist)
         {
-            // for npcs on transport, this will return transport offset
-            if (m_spawnId != 0)
+            if (m_creatureData != null)
             {
-                CreatureData data = Global.ObjectMgr.GetCreatureData(GetSpawnId());
-                if (data != null)
-                {
-                    x = data.posX;
-                    y = data.posY;
-                    z = data.posZ;
-                    ori = data.orientation;
-                    dist = data.spawndist;
-
-                    return;
-                }
+                m_creatureData.spawnPoint.GetPosition(out x, out y, out z, out ori);
+                dist = m_creatureData.spawndist;
             }
-
-            // changed this from current position to home position, fixes world summons with infinite duration (wg npcs for example)
-            Position homePos = GetHomePosition();
-            x = homePos.GetPositionX();
-            y = homePos.GetPositionY();
-            z = homePos.GetPositionZ();
-            ori = homePos.GetOrientation();
-            dist = 0;
+            else
+            {
+                Position homePos = GetHomePosition();
+                homePos.GetPosition(out x, out y, out z, out ori);
+                dist = 0;
+            }
         }
 
-        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.mapid != GetMapId(); }
+        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
 
         public void AllLootRemovedFromCorpse()
         {
@@ -2934,12 +3015,7 @@ namespace Game.Entities
         public CreatureTemplate GetCreatureTemplate() { return m_creatureInfo; }
         public CreatureData GetCreatureData() { return m_creatureData; }
 
-        public override bool LoadFromDB(ulong spawnId, Map map)
-        {
-            return LoadCreatureFromDB(spawnId, map, false, false);
-        }
-
-        public bool LoadCreatureFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
+        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
             if (!allowDuplicate)
             {
@@ -2976,39 +3052,48 @@ namespace Game.Entities
             }
 
             m_spawnId = spawnId;
+            m_respawnCompatibilityMode = data.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.CompatibilityMode);
             m_creatureData = data;
             m_respawnradius = data.spawndist;
-            m_respawnDelay = data.spawntimesecs;
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data, 0))
+            m_respawnDelay = (uint)data.spawntimesecs;
+            // Is the creature script objecting to us spawning? If yes, delay by a little bit (then re-check in ::Update)
+            if (!m_respawnCompatibilityMode && m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, data.Id, data, map))
+            {
+                SaveRespawnTime(RandomHelper.URand(4, 7));
+                return false;
+            }
+
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.Id, data.spawnPoint, data, 0, !m_respawnCompatibilityMode))
                 return false;
 
             //We should set first home position, because then AI calls home movement
-            SetHomePosition(data.posX, data.posY, data.posZ, data.orientation);
+            SetHomePosition(data.spawnPoint);
 
             m_deathState = DeathState.Alive;
 
             m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
 
-            // Is the creature script objecting to us spawning? If yes, delay by one second (then re-check in ::Update)
-            if (m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, GetEntry(), GetCreatureTemplate(), GetCreatureData(), map))
-                m_respawnTime = Time.UnixTime + 1;
+            // Is the creature script objecting to us spawning? If yes, delay by a little bit (then re-check in ::Update)
+            if (m_respawnCompatibilityMode && m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, GetEntry(), GetCreatureData(), map))
+                m_respawnTime = Time.UnixTime + RandomHelper.URand(4, 7);
 
-            if (m_respawnTime != 0)                          // respawn on Update
+            if (m_respawnTime != 0)                          // respawn on UpdateLoadCreatureFromDB
             {
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
-                    float tz = map.GetHeight(GetPhaseShift(), data.posX, data.posY, data.posZ, true, MapConst.MaxFallDistance);
-                    if (data.posZ - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
-                        Relocate(data.posX, data.posY, tz);
+                    float tz = map.GetHeight(GetPhaseShift(), data.spawnPoint, true, MapConst.MaxFallDistance);
+                    if (data.spawnPoint.GetPositionZ() - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
+                        Relocate(data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY(), tz);
                 }
             }
 
             SetSpawnHealth();
 
+            // checked at creature_template loading
             DefaultMovementType = (MovementGeneratorType)data.movementType;
 
-            loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, data.mapid, data.id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+            loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, GetMapId(), data.Id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
 
             if (addToMap && !GetMap().AddToMap(this))
                 return false;
@@ -3101,6 +3186,10 @@ namespace Game.Entities
         {
             m_originalEntry = entry;
         }
+
+        // There's many places not ready for dynamic spawns. This allows them to live on for now.
+        void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
+        public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
         public Unit SelectVictim()
         {

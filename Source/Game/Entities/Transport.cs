@@ -318,14 +318,12 @@ namespace Game.Entities
         {
             Map map = GetMap();
 
-            Creature creature = Creature.CreateCreatureFromDB(guid, map, false);
+            Creature creature = Creature.CreateCreatureFromDB(guid, map, false, true);
             if (!creature)
                 return null;
 
-            float x = data.posX;
-            float y = data.posY;
-            float z = data.posZ;
-            float o = data.orientation;
+            float x, y, z, o;
+            data.spawnPoint.GetPosition(out x, out y, out z, out o);
 
             creature.SetTransport(this);
             creature.m_movementInfo.transport.guid = GetGUID();
@@ -365,10 +363,8 @@ namespace Game.Entities
             if (!go)
                 return null;
 
-            float x = data.posX;
-            float y = data.posY;
-            float z = data.posZ;
-            float o = data.orientation;
+            float x, y, z, o;
+            data.spawnPoint.GetPosition(out x, out y, out z, out o);
 
             go.SetTransport(this);
             go.m_movementInfo.transport.guid = GetGUID();
@@ -472,7 +468,7 @@ namespace Game.Entities
             pos.GetPosition(out x, out y, out z, out o);
             CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 
-            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o, null, vehId))
+            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, new Position(x, y, z, o), null, vehId))
                 return null;
 
             PhasingHandler.InheritPhaseShift(summon, summoner ? (WorldObject)summoner : this);
@@ -553,7 +549,7 @@ namespace Game.Entities
 
                 // GameObjects on transport
                 foreach (var go in cell.Value.gameobjects)
-                    CreateGOPassenger(go, Global.ObjectMgr.GetGOData(go));
+                    CreateGOPassenger(go, Global.ObjectMgr.GetGameObjectData(go));
             }
         }
 

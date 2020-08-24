@@ -202,28 +202,17 @@ namespace Game.Chat.Commands
             if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
-            float x, y, z, o;
-            uint mapId;
-
             // by DB guid
-            GameObjectData goData = Global.ObjectMgr.GetGOData(guidLow);
-            if (goData != null)
-            {
-                x = goData.posX;
-                y = goData.posY;
-                z = goData.posZ;
-                o = goData.orientation;
-                mapId = goData.mapid;
-            }
-            else
+            GameObjectData goData = Global.ObjectMgr.GetGameObjectData(guidLow);
+            if (goData == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
                 return false;
             }
 
-            if (!GridDefines.IsValidMapCoord(mapId, x, y, z, o) || Global.ObjectMgr.IsTransportMap(mapId))
+            if (!GridDefines.IsValidMapCoord(goData.spawnPoint) || Global.ObjectMgr.IsTransportMap(goData.spawnPoint.GetMapId()))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, goData.spawnPoint.GetPositionX(), goData.spawnPoint.GetPositionY(), goData.spawnPoint.GetMapId());
                 return false;
             }
 
@@ -237,7 +226,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(mapId, x, y, z, o);
+            player.TeleportTo(goData.spawnPoint);
             return true;
         }
 

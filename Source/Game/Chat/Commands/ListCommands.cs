@@ -18,7 +18,9 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Spells;
 using System.Collections.Generic;
 
@@ -128,11 +130,39 @@ namespace Game.Chat.Commands
                     float y = result.Read<float>(2);
                     float z = result.Read<float>(3);
                     ushort mapId = result.Read<ushort>(4);
+                    bool liveFound = false;
 
+                    // Get map (only support base map from console)
+                    Map thisMap;
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId);
+                        thisMap = handler.GetSession().GetPlayer().GetMap();
                     else
-                        handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId);
+                        thisMap = Global.MapMgr.FindBaseNonInstanceMap(mapId);
+
+                    // If map found, try to find active version of this creature
+                    if (thisMap)
+                    {
+                        var creBounds = thisMap.GetCreatureBySpawnIdStore().LookupByKey(guid);
+                        if (!creBounds.Empty())
+                        {
+                            foreach (var creature in creBounds)
+                            {
+                                if (handler.GetSession())
+                                    handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+                                else
+                                    handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, creature.GetGUID().ToString(), creature.IsAlive() ? "*" : " ");
+                            }
+                            liveFound = true;
+                        }
+                    }
+
+                    if (!liveFound)
+                    {
+                        if (handler.GetSession())
+                            handler.SendSysMessage(CypherStrings.CreatureListChat, guid, guid, cInfo.Name, x, y, z, mapId, "", "");
+                        else
+                            handler.SendSysMessage(CypherStrings.CreatureListConsole, guid, cInfo.Name, x, y, z, mapId, "", "");
+                    }
                 }
                 while (result.NextRow());
             }
@@ -495,17 +525,116 @@ namespace Game.Chat.Commands
                     float z = result.Read<float>(3);
                     ushort mapId = result.Read<ushort>(4);
                     uint entry = result.Read<uint>(5);
+                    bool liveFound = false;
 
+                    // Get map (only support base map from console)
+                    Map thisMap;
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId);
+                        thisMap = handler.GetSession().GetPlayer().GetMap();
                     else
-                        handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId);
+                        thisMap = Global.MapMgr.FindBaseNonInstanceMap(mapId);
+
+                    // If map found, try to find active version of this object
+                    if (thisMap)
+                    {
+                        var goBounds = thisMap.GetGameObjectBySpawnIdStore().LookupByKey(guid);
+                        if (!goBounds.Empty())
+                        {
+                            foreach (var go in goBounds)
+                            {
+                                if (handler.GetSession())
+                                    handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, go.GetGUID(), go.IsSpawned() ? "*" : " ");
+                                else
+                                    handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, go.GetGUID(), go.IsSpawned() ? "*" : " ");
+                            }
+                            liveFound = true;
+                        }
+                    }
+
+                    if (!liveFound)
+                    {
+                        if (handler.GetSession())
+                            handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gInfo.name, x, y, z, mapId, "", "");
+                        else
+                            handler.SendSysMessage(CypherStrings.GoListConsole, guid, gInfo.name, x, y, z, mapId, "", "");
+                    }
                 }
                 while (result.NextRow());
             }
 
             handler.SendSysMessage(CypherStrings.CommandListobjmessage, gameObjectId, objectCount);
 
+            return true;
+        }
+
+        [Command("respawns", RBACPermissions.CommandListRespawns)]
+        static bool HandleListRespawnsCommand(StringArguments args, CommandHandler handler)
+        {
+            // We need a player
+            Player player = handler.GetSession().GetPlayer();
+            if (player == null)
+                return false;
+
+            // And we need a map
+            Map map = player.GetMap();
+            if (map == null)
+                return false;
+
+            uint range = 0;
+            if (!args.Empty())
+                range = args.NextUInt32();
+
+            List<RespawnInfo> respawns = new List<RespawnInfo>();
+            Locale locale = handler.GetSession().GetSessionDbcLocale();
+            string stringOverdue = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsOverdue, locale);
+            string stringCreature = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsCreatures, locale);
+            string stringGameobject = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsGameobjects, locale);
+
+            uint zoneId = player.GetZoneId();
+            if (range != 0)
+                handler.SendSysMessage(CypherStrings.ListRespawnsRange, stringCreature, range);
+            else
+                handler.SendSysMessage(CypherStrings.ListRespawnsZone, stringCreature, GetZoneName(zoneId, handler.GetSessionDbcLocale()), zoneId);
+            handler.SendSysMessage(CypherStrings.ListRespawnsListheader);
+            map.GetRespawnInfo(respawns, SpawnObjectTypeMask.Creature, range != 0 ? 0 : zoneId);
+            foreach (RespawnInfo ri in respawns)
+            {
+                CreatureData data = Global.ObjectMgr.GetCreatureData(ri.spawnId);
+                if (data == null)
+                    continue;
+
+                if (range != 0 && !player.IsInDist(data.spawnPoint, range))
+                    continue;
+
+                uint gridY = ri.gridId / MapConst.MaxGrids;
+                uint gridX = ri.gridId % MapConst.MaxGrids;
+
+                string respawnTime = ri.respawnTime > Time.UnixTime ? Time.secsToTimeString((ulong)(ri.respawnTime - Time.UnixTime), true) : stringOverdue;
+                handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX},{gridY}] | {GetZoneName(ri.zoneId, handler.GetSessionDbcLocale())} ({ri.zoneId}) | {(data.spawnGroupData.isActive ? respawnTime : "inactive")}");
+            }
+
+            respawns.Clear();
+            if (range != 0)
+                handler.SendSysMessage(CypherStrings.ListRespawnsRange, stringGameobject, range);
+            else
+                handler.SendSysMessage(CypherStrings.ListRespawnsZone, stringGameobject, GetZoneName(zoneId, handler.GetSessionDbcLocale()), zoneId);
+            handler.SendSysMessage(CypherStrings.ListRespawnsListheader);
+            map.GetRespawnInfo(respawns, SpawnObjectTypeMask.GameObject, range != 0 ? 0 : zoneId);
+            foreach (RespawnInfo ri in respawns)
+            {
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(ri.spawnId);
+                if (data == null)
+                    continue;
+
+                if (range != 0 && !player.IsInDist(data.spawnPoint, range))
+                    continue;
+
+                uint gridY = ri.gridId / MapConst.MaxGrids;
+                uint gridX = ri.gridId % MapConst.MaxGrids;
+
+                string respawnTime = ri.respawnTime > Time.UnixTime ? Time.secsToTimeString((ulong)(ri.respawnTime - Time.UnixTime), true) : stringOverdue;
+                handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX},{gridY}] | {GetZoneName(ri.zoneId, handler.GetSessionDbcLocale())} ({ri.zoneId}) | {(data.spawnGroupData.isActive ? respawnTime : "inactive")}");
+            }
             return true;
         }
 
@@ -530,6 +659,12 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.DebugSceneObjectDetail, instanceByPackage.Value.ScenePackageId, instanceByPackage.Key);
 
             return true;
+        }
+
+        static string GetZoneName(uint zoneId, Locale locale)
+        {
+            AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+            return zoneEntry != null ? zoneEntry.AreaName[locale] : "<unknown zone>";
         }
     }
 }

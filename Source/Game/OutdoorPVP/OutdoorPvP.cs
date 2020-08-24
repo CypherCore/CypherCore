@@ -358,7 +358,7 @@ namespace Game.PvP
 
         void AddGO(uint type, ulong guid)
         {
-            GameObjectData data = Global.ObjectMgr.GetGOData(guid);
+            GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
             if (data == null)
                 return;
 
@@ -378,7 +378,7 @@ namespace Game.PvP
 
         public bool AddObject(uint type, uint entry, uint map, Position pos, Quaternion rot)
         {
-            ulong guid = Global.ObjectMgr.AddGOData(entry, map, pos, rot, 0);
+            ulong guid = Global.ObjectMgr.AddGameObjectData(entry, map, pos, rot, 0);
             if (guid != 0)
             {
                 AddGO(type, guid);
@@ -412,7 +412,7 @@ namespace Game.PvP
                 return false;
             }
 
-            m_capturePointSpawnId = Global.ObjectMgr.AddGOData(entry, map, pos, rot, 0);
+            m_capturePointSpawnId = Global.ObjectMgr.AddGameObjectData(entry, map, pos, rot, 0);
             if (m_capturePointSpawnId == 0)
                 return false;
 
@@ -472,7 +472,7 @@ namespace Game.PvP
                 gameobject.Delete();
             }
 
-            Global.ObjectMgr.DeleteGOData(spawnId);
+            Global.ObjectMgr.DeleteGameObjectData(spawnId);
             m_ObjectTypes.Remove(spawnId);
             m_Objects.Remove(type);
             return true;
@@ -480,7 +480,7 @@ namespace Game.PvP
 
         bool DelCapturePoint()
         {
-            Global.ObjectMgr.DeleteGOData(m_capturePointSpawnId);
+            Global.ObjectMgr.DeleteGameObjectData(m_capturePointSpawnId);
             m_capturePointSpawnId = 0;
 
             if (m_capturePoint)

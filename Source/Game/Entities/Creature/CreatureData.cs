@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
 using Game.Networking.Packets;
+using Game.Maps;
 
 namespace Game.Entities
 {
@@ -327,34 +328,22 @@ namespace Game.Entities
         public EquipmentItem[] Items = new EquipmentItem[SharedConst.MaxEquipmentItems];
     }
 
-    public class CreatureData
+    public class CreatureData : SpawnData
     {
-        public uint id;                                           // entry in creature_template
-        public ushort mapid;
         public uint displayid;
-        public int equipmentId;
-        public float posX;
-        public float posY;
-        public float posZ;
-        public float orientation;
-        public uint spawntimesecs;
+        public sbyte equipmentId;
         public float spawndist;
         public uint currentwaypoint;
         public uint curhealth;
         public uint curmana;
         public byte movementType;
-        public List<Difficulty> spawnDifficulties = new List<Difficulty>();
         public ulong npcflag;
-        public uint unit_flags;     // enum UnitFlags mask values
-        public uint unit_flags2;    // enum UnitFlags2 mask values
-        public uint unit_flags3;    // enum UnitFlags3 mask values
+        public uint unit_flags;                                  // enum UnitFlags mask values
+        public uint unit_flags2;                                 // enum UnitFlags2 mask values
+        public uint unit_flags3;                                 // enum UnitFlags3 mask values
         public uint dynamicflags;
-        public PhaseUseFlagsValues phaseUseFlags;
-        public uint phaseId;
-        public uint phaseGroup;
-        public int terrainSwapMap;
-        public uint ScriptId;
-        public bool dbData;
+
+        public CreatureData() : base(SpawnObjectType.Creature) { }
     }
 
     public class CreatureModelInfo

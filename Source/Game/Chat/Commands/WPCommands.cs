@@ -559,7 +559,7 @@ namespace Game.Chat.Commands
                 creature.Dispose();
 
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
@@ -779,7 +779,7 @@ namespace Game.Chat.Commands
                     creature.Dispose();
 
                     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                    creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                    creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
                     if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
@@ -844,7 +844,7 @@ namespace Game.Chat.Commands
                 creature.CleanupsBeforeDelete();
                 creature.Dispose();
 
-                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
@@ -899,7 +899,7 @@ namespace Game.Chat.Commands
                 creature.CleanupsBeforeDelete();
                 creature.Dispose();
 
-                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                creature = Creature.CreateCreatureFromDB(dbGuid, map, true, true);
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);

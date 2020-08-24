@@ -144,14 +144,14 @@ namespace Game
                         uint pool_id = result.Read<uint>(1);
                         float chance = result.Read<float>(2);
 
-                        GameObjectData data = Global.ObjectMgr.GetGOData(guid);
+                        GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
                         {
                             Log.outError(LogFilter.Sql, "`pool_gameobject` has a non existing gameobject spawn (GUID: {0}) defined for pool id ({1}), skipped.", guid, pool_id);
                             continue;
                         }
 
-                        GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(data.id);
+                        GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
                         if (goinfo.type != GameObjectTypes.Chest &&
                             goinfo.type != GameObjectTypes.FishingHole &&
                             goinfo.type != GameObjectTypes.GatheringNode &&
@@ -534,6 +534,21 @@ namespace Game
             return 0;
         }
 
+        // Selects proper template overload to call based on passed type
+        public uint IsPartOfAPool(SpawnObjectType type, ulong spawnId)
+        {
+            switch (type)
+            {
+                case SpawnObjectType.Creature:
+                    return IsPartOfAPool<Creature>(spawnId);
+                case SpawnObjectType.GameObject:
+                    return IsPartOfAPool<GameObject>(spawnId);
+                default:
+                    Cypher.Assert(false, $"Invalid spawn type {type} passed to PoolMgr.IsPartOfPool (with spawnId {spawnId})");
+                    return 0;
+            }
+        }
+        
         public enum QuestTypes
         {
             None = 0,
@@ -655,28 +670,40 @@ namespace Game
                         if (data != null)
                         {
                             Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
-                            Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                             if (map != null && !map.Instanceable())
                             {
                                 var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
                                 foreach (var creature in creatureBounds)
+                                {
+                                    // For dynamic spawns, save respawn time here
+                                    if (!creature.GetRespawnCompatibilityMode())
+                                        creature.SaveRespawnTime(0, false);
+
                                     creature.AddObjectToRemoveList();
+                                }
                             }
                         }
                         break;
                     }
                 case "GameObject":
                     {
-                        var data = Global.ObjectMgr.GetGOData(guid);
+                        var data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data != null)
                         {
                             Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
-                            Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                             if (map != null && !map.Instanceable())
                             {
                                 var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
                                 foreach (var go in gameobjectBounds)
+                                {
+                                    // For dynamic spawns, save respawn time here
+                                    if (!go.GetRespawnCompatibilityMode())
+                                        go.SaveRespawnTime(0, false);
+
                                     go.AddObjectToRemoveList();
+                                }
                             }
                         }
                         break;
@@ -863,24 +890,24 @@ namespace Game
                             Global.ObjectMgr.AddCreatureToGrid(obj.guid, data);
 
                             // Spawn if necessary (loaded grids only)
-                            Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                             // We use spawn coords to spawn
-                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                                 Creature.CreateCreatureFromDB(obj.guid, map);
                         }
                     }
                     break;
                 case "GameObject":
                     {
-                        GameObjectData data = Global.ObjectMgr.GetGOData(obj.guid);
+                        GameObjectData data = Global.ObjectMgr.GetGameObjectData(obj.guid);
                         if (data != null)
                         {
                             Global.ObjectMgr.AddGameObjectToGrid(obj.guid, data);
                             // Spawn if necessary (loaded grids only)
                             // this base map checked as non-instanced and then only existed
-                            Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                            Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                             // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                            if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                             {
                                 GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
                                 if (go)

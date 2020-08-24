@@ -345,6 +345,10 @@ namespace Game.Entities
         {
             if (_nextGuid >= ObjectGuid.GetMaxCounter(_highGuid) - 1)
                 HandleCounterOverflow();
+
+            if (_highGuid == HighGuid.Creature || _highGuid == HighGuid.Vehicle || _highGuid == HighGuid.GameObject || _highGuid == HighGuid.Transport)
+                CheckGuidTrigger(_nextGuid);
+
             return _nextGuid++;
         }
 
@@ -354,6 +358,14 @@ namespace Game.Entities
         {
             Log.outFatal(LogFilter.Server, "{0} guid overflow!! Can't continue, shutting down server. ", _highGuid);
             Global.WorldMgr.StopNow();
+        }
+
+        void CheckGuidTrigger(ulong guidlow)
+        {
+            if (!Global.WorldMgr.IsGuidAlert() && guidlow > WorldConfig.GetUInt64Value(WorldCfg.RespawnGuidAlertLevel))
+                Global.WorldMgr.TriggerGuidAlert();
+            else if (!Global.WorldMgr.IsGuidWarning() && guidlow > WorldConfig.GetUInt64Value(WorldCfg.RespawnGuidWarnLevel))
+                Global.WorldMgr.TriggerGuidWarning();
         }
     }
 }

@@ -1079,11 +1079,26 @@ namespace Framework.Constants
         DebugSceneObjectList = 5068,
         DebugSceneObjectDetail = 5069,
 
-        NpcinfoUnitFieldFlags2 = 5070,
-        NpcinfoUnitFieldFlags3 = 5071,
-        NpcinfoNpcFlags = 5072,
+        // Strings Added For DynamicSpawning
+        SpawninfoGroupId = 5070,
+        SpawninfoCompatibilityMode = 5071,
+        SpawninfoGuidinfo = 5072,
+        SpawninfoSpawnidLocation = 5073,
+        SpawninfoDistancefromplayer = 5074,
+        SpawngroupBadgroup = 5075,
+        SpawngroupSpawncount = 5076,
+        ListRespawnsRange = 5077,
+        ListRespawnsZone = 5078,
+        ListRespawnsListheader = 5079,
+        ListRespawnsOverdue = 5080,
+        ListRespawnsCreatures = 5081,
+        ListRespawnsGameobjects = 5082,
 
-        // Room For More Trinity Strings      5073-9999
+        NpcinfoUnitFieldFlags2 = 5084,
+        NpcinfoUnitFieldFlags3 = 5085,
+        NpcinfoNpcFlags = 5086,
+
+        // Room For More Trinity Strings      5087-6603
 
         // Level Requirement Notifications
         SayReq = 6604,

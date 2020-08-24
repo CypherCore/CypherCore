@@ -364,6 +364,12 @@ namespace Game.Entities
             Relocate(pos);
         }
 
+        public void WorldRelocate(uint mapId, Position pos)
+        {
+            _mapId = mapId;
+            Relocate(pos);
+        }
+        
         public void WorldRelocate(WorldLocation loc)
         {
             _mapId = loc._mapId;

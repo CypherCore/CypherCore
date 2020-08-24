@@ -1731,7 +1731,7 @@ namespace Game.Entities
 
         public virtual uint GetLevelForTarget(WorldObject target) { return 1; }
 
-        public virtual void SaveRespawnTime() { }
+        public virtual void SaveRespawnTime(uint forceDelay = 0, bool saveToDB = true) { }
 
         public ZoneScript GetZoneScript() { return m_zoneScript; }
 
@@ -1770,7 +1770,7 @@ namespace Game.Entities
         public virtual bool IsInvisibleDueToDespawn() { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }
 
-        public virtual bool LoadFromDB(ulong guid, Map map) { return true; }
+        public virtual bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate) { return true; }
 
         //Position
 

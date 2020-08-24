@@ -96,7 +96,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             CreatureData data = creature.GetCreatureData();
             if (data != null)
-                creature.UpdatePosition(data.posX, data.posY, data.posZ, data.orientation);
+                creature.UpdatePosition(data.spawnPoint);
             creature.DespawnOrUnsummon();
 
             creature.SetCorpseDelay(corpseDelay);
@@ -496,7 +496,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 Creature crusader = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CaptainArnath + i));
                 if (crusader)
                 {
-                    if (crusader.IsAlive() && crusader.GetEntry() == crusader.GetCreatureData().id)
+                    if (crusader.IsAlive() && crusader.GetEntry() == crusader.GetCreatureData().Id)
                     {
                         crusader.m_Events.AddEvent(new CaptainSurviveTalk(crusader), crusader.m_Events.CalculateTime(delay));
                         delay += 6000;

@@ -1328,7 +1328,7 @@ namespace Game
                                     CreatureData creatureData = Global.ObjectMgr.GetCreatureData(cond.ConditionValue3);
                                     if (creatureData != null)
                                     {
-                                        if (cond.ConditionValue2 != 0 && creatureData.id != cond.ConditionValue2)
+                                        if (cond.ConditionValue2 != 0 && creatureData.Id != cond.ConditionValue2)
                                         {
                                             Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match creature entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
                                             return false;
@@ -1349,10 +1349,10 @@ namespace Game
                                 }
                                 if (cond.ConditionValue3 != 0)
                                 {
-                                    GameObjectData goData = Global.ObjectMgr.GetGOData(cond.ConditionValue3);
+                                    GameObjectData goData = Global.ObjectMgr.GetGameObjectData(cond.ConditionValue3);
                                     if (goData != null)
                                     {
-                                        if (cond.ConditionValue2 != 0 && goData.id != cond.ConditionValue2)
+                                        if (cond.ConditionValue2 != 0 && goData.Id != cond.ConditionValue2)
                                         {
                                             Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match gameobject entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
                                             return false;

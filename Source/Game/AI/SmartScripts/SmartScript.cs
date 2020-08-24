@@ -2051,6 +2051,91 @@ namespace Game.AI
                                 target.ToCreature().SetCorpseDelay(e.Action.corpseDelay.timer);
                         break;
                     }
+                case SmartActions.SpawnSpawngroup:
+                    {
+                        if (e.Action.groupSpawn.minDelay == 0 && e.Action.groupSpawn.maxDelay == 0)
+                        {
+                            bool ignoreRespawn = ((e.Action.groupSpawn.spawnflags & (uint)SmartAiSpawnFlags.IgnoreRespawn) != 0);
+                            bool force = ((e.Action.groupSpawn.spawnflags & (uint)SmartAiSpawnFlags.ForceSpawn) != 0);
+
+                            // Instant spawn
+                            Global.ObjectMgr.SpawnGroupSpawn(e.Action.groupSpawn.groupId, GetBaseObject().GetMap(), ignoreRespawn, force);
+                        }
+                        else
+                        {
+                            // Delayed spawn (use values from parameter to schedule event to call us back
+                            SmartEvent ne = new SmartEvent();
+                            ne.type = SmartEvents.Update;
+                            ne.event_chance = 100;
+
+                            ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
+                            ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
+                            ne.minMaxRepeat.repeatMin = 0;
+                            ne.minMaxRepeat.repeatMax = 0;
+
+                            ne.event_flags = 0;
+                            ne.event_flags |= SmartEventFlags.NotRepeatable;
+
+                            SmartAction ac = new SmartAction();
+                            ac.type = SmartActions.SpawnSpawngroup;
+                            ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
+                            ac.groupSpawn.minDelay = 0;
+                            ac.groupSpawn.maxDelay = 0;
+                            ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
+                            ac.timeEvent.id = e.Action.timeEvent.id;
+
+                            SmartScriptHolder ev = new SmartScriptHolder();
+                            ev.Event = ne;
+                            ev.event_id = e.event_id;
+                            ev.Target = e.Target;
+                            ev.Action = ac;
+                            InitTimer(ev);
+                            mStoredEvents.Add(ev);
+                        }
+                        break;
+                    }
+                case SmartActions.DespawnSpawngroup:
+                    {
+                        if (e.Action.groupSpawn.minDelay == 0 && e.Action.groupSpawn.maxDelay == 0)
+                        {
+                            bool deleteRespawnTimes = ((e.Action.groupSpawn.spawnflags & (uint)SmartAiSpawnFlags.NosaveRespawn) != 0);
+
+                            // Instant spawn
+                            Global.ObjectMgr.SpawnGroupDespawn(e.Action.groupSpawn.groupId, GetBaseObject().GetMap(), deleteRespawnTimes);
+                        }
+                        else
+                        {
+                            // Delayed spawn (use values from parameter to schedule event to call us back
+                            SmartEvent ne = new SmartEvent();
+                            ne.type = SmartEvents.Update;
+                            ne.event_chance = 100;
+
+                            ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
+                            ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
+                            ne.minMaxRepeat.repeatMin = 0;
+                            ne.minMaxRepeat.repeatMax = 0;
+
+                            ne.event_flags = 0;
+                            ne.event_flags |= SmartEventFlags.NotRepeatable;
+
+                            SmartAction ac = new SmartAction();
+                            ac.type = SmartActions.DespawnSpawngroup;
+                            ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
+                            ac.groupSpawn.minDelay = 0;
+                            ac.groupSpawn.maxDelay = 0;
+                            ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
+                            ac.timeEvent.id = e.Action.timeEvent.id;
+
+                            SmartScriptHolder ev = new SmartScriptHolder();
+                            ev.Event = ne;
+                            ev.event_id = e.event_id;
+                            ev.Target = e.Target;
+                            ev.Action = ac;
+                            InitTimer(ev);
+                            mStoredEvents.Add(ev);
+                        }
+                        break;
+                    }
                 case SmartActions.DisableEvade:
                     {
                         if (!IsSmart())

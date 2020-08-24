@@ -682,13 +682,36 @@ namespace Game.Scripting
         }
 
         //CreatureScript
-        public bool CanSpawn(ulong spawnId, uint entry, CreatureTemplate actTemplate, CreatureData cData, Map map)
+        public bool CanSpawn(ulong spawnId, uint entry, CreatureData cData, Map map)
         {
-            Cypher.Assert(actTemplate != null);
+            Cypher.Assert(map != null);
 
             CreatureTemplate baseTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
-            if (baseTemplate == null)
-                baseTemplate = actTemplate;
+            Cypher.Assert(baseTemplate != null);
+
+            // find out which template we'd be using
+            CreatureTemplate actTemplate = null;
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
+            while (actTemplate == null && difficultyEntry != null)
+            {
+                int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
+                if (idx == -1)
+                    break;
+
+                if (baseTemplate.DifficultyEntry[idx] != 0)
+                {
+                    actTemplate = Global.ObjectMgr.GetCreatureTemplate(baseTemplate.DifficultyEntry[idx]);
+                    break;
+                }
+
+                if (difficultyEntry.FallbackDifficultyID == 0)
+                    break;
+
+                difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
+            }
+
+            if (actTemplate == null)
+                actTemplate = baseTemplate;
 
             uint scriptId = baseTemplate.ScriptID;
             if (cData != null && cData.ScriptId != 0)

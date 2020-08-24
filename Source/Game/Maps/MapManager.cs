@@ -430,6 +430,16 @@ namespace Game.Entities
             m.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, x, y, z);
         }
 
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, uint mapid, Position pos)
+        {
+            GetZoneAndAreaId(phaseShift, out zoneid, out areaid, mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        }
+
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, WorldLocation loc)
+        {
+            GetZoneAndAreaId(phaseShift, out zoneid, out areaid, loc.GetMapId(), loc);
+        }
+        
         public void DoForAllMaps(Action<Map> worker)
         {
             lock (_mapsLock)

@@ -831,7 +831,7 @@ namespace Game.Garrisons
             T BuildingSpawnHelper<T>(GameObject building, ulong spawnId, Map map) where T : WorldObject, new()
             {
                 T spawn = new T();
-                if (!spawn.LoadFromDB(spawnId, map))
+                if (!spawn.LoadFromDB(spawnId, map, false, false))
                     return null;
 
                 float x = spawn.GetPositionX();

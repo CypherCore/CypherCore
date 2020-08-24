@@ -129,39 +129,39 @@ namespace Game.AI
                                     continue;
                                 }
 
-                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.id);
+                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.Id);
                                 if (creatureInfo == null)
                                 {
-                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.Id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
 
                                 if (creatureInfo.AIName != "SmartAI")
                                 {
-                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.id}) guid ({-temp.entryOrGuid}) is not using SmartAI, skipped loading.");
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.Id}) guid ({-temp.entryOrGuid}) is not using SmartAI, skipped loading.");
                                     continue;
                                 }
                                 break;
                             }
                         case SmartScriptType.GameObject:
                             {
-                                GameObjectData gameObject = Global.ObjectMgr.GetGOData((ulong)-temp.entryOrGuid);
+                                GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.entryOrGuid);
                                 if (gameObject == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
 
-                                GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.id);
+                                GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.Id);
                                 if (gameObjectInfo == null)
                                 {
-                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
 
                                 if (gameObjectInfo.AIName != "SmartGameObjectAI")
                                 {
-                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.id}) guid ({-temp.entryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.entryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
                                     continue;
                                 }
                                 break;
@@ -758,7 +758,7 @@ namespace Game.AI
                             return false;
                         }
 
-                        if (e.Event.distance.guid != 0 && Global.ObjectMgr.GetGOData(e.Event.distance.guid) == null)
+                        if (e.Event.distance.guid != 0 && Global.ObjectMgr.GetGameObjectData(e.Event.distance.guid) == null)
                         {
                             Log.outError(LogFilter.Sql, "SmartAIMgr: Event SMART_EVENT_DISTANCE_GAMEOBJECT using invalid gameobject guid {0}, skipped.", e.Event.distance.guid);
                             return false;
@@ -1376,6 +1376,8 @@ namespace Game.AI
                 case SmartActions.TriggerRandomTimedEvent:
                 case SmartActions.SetCounter:
                 case SmartActions.RemoveAllGameobjects:
+                case SmartActions.SpawnSpawngroup:
+                case SmartActions.DespawnSpawngroup:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);
@@ -1423,7 +1425,7 @@ namespace Game.AI
                                 return false;
                             }
                             else
-                                entry = data.id;
+                                entry = data.Id;
                         }
                         else
                             entry = (uint)e.entryOrGuid;
@@ -2369,6 +2371,9 @@ namespace Game.AI
         public DisableEvade disableEvade;
 
         [FieldOffset(4)]
+        public GroupSpawn groupSpawn;
+
+        [FieldOffset(4)]
         public AuraType auraType;
 
         [FieldOffset(4)]
@@ -2853,6 +2858,13 @@ namespace Game.AI
         public struct DisableEvade
         {
             public uint disable;
+        }
+        public struct GroupSpawn
+        {
+            public uint groupId;
+            public uint minDelay;
+            public uint maxDelay;
+            public uint spawnflags;
         }
         public struct AuraType
         {

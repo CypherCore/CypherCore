@@ -71,6 +71,7 @@ namespace Game.Entities
         //Formation var
         CreatureGroup m_formation;
         bool TriggerJustRespawned;
+        bool m_respawnCompatibilityMode;
 
         public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
 

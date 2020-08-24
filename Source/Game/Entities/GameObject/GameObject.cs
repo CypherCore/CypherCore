@@ -166,7 +166,7 @@ namespace Game.Entities
                 return null;
 
             GameObject go = new GameObject();
-            if (!go.Create(entry, map, pos, rotation, animProgress, goState, artKit))
+            if (!go.Create(entry, map, pos, rotation, animProgress, goState, artKit, false, 0))
                 return null;
 
             return go;
@@ -175,13 +175,13 @@ namespace Game.Entities
         public static GameObject CreateGameObjectFromDB(ulong spawnId, Map map, bool addToMap = true)
         {
             GameObject go = new GameObject();
-            if (!go.LoadGameObjectFromDB(spawnId, map, addToMap))
+            if (!go.LoadFromDB(spawnId, map, addToMap))
                 return null;
 
             return go;
         }
 
-        bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit)
+        bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
         {
             Cypher.Assert(map);
             SetMap(map);
@@ -193,6 +193,10 @@ namespace Game.Entities
                 Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
                 return false;
             }
+
+            // Set if this object can handle dynamic spawns
+            if (!dynamic)
+                SetRespawnCompatibilityMode();
 
             UpdatePositionData();
 
@@ -373,6 +377,9 @@ namespace Game.Entities
             if (map.Is25ManRaid())
                 loot.maxDuplicates = 3;
 
+            if (spawnid != 0)
+                m_spawnId = spawnid;
+
             uint linkedEntry = GetGoInfo().GetLinkedGameObjectEntry();
             if (linkedEntry != 0)
             {
@@ -507,80 +514,87 @@ namespace Game.Entities
                     goto case LootState.Ready;
                 case LootState.Ready:
                     {
-                        if (m_respawnTime > 0)                          // timer on
+                        if (m_respawnCompatibilityMode)
                         {
-                            long now = Time.UnixTime;
-                            if (m_respawnTime <= now)            // timer expired
+                            if (m_respawnTime > 0)                          // timer on
                             {
-                                ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
-                                long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                                if (linkedRespawntime != 0)             // Can't respawn, the master is dead
+                                long now = Time.UnixTime;
+                                if (m_respawnTime <= now)            // timer expired
                                 {
-                                    ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
-                                    if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                        SetRespawnTime(Time.Day);
-                                    else
-                                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
-                                    SaveRespawnTime(); // also save to DB immediately
-                                    return;
-                                }
+                                    ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
+                                    long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                                    if (linkedRespawntime != 0)             // Can't respawn, the master is dead
+                                    {
+                                        ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
+                                        if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
+                                            SetRespawnTime(Time.Week);
+                                        else
+                                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
+                                        SaveRespawnTime(); // also save to DB immediately
+                                        return;
+                                    }
 
-                                m_respawnTime = 0;
-                                m_SkillupList.Clear();
-                                m_usetimes = 0;
+                                    m_respawnTime = 0;
+                                    m_SkillupList.Clear();
+                                    m_usetimes = 0;
 
-                                // If nearby linked trap exists, respawn it
-                                GameObject linkedTrap = GetLinkedTrap();
-                                if (linkedTrap)
-                                    linkedTrap.SetLootState(LootState.Ready);
+                                    // If nearby linked trap exists, respawn it
+                                    GameObject linkedTrap = GetLinkedTrap();
+                                    if (linkedTrap)
+                                        linkedTrap.SetLootState(LootState.Ready);
 
-                                switch (GetGoType())
-                                {
-                                    case GameObjectTypes.FishingNode:   //  can't fish now
-                                        {
-                                            Unit caster = GetOwner();
-                                            if (caster != null && caster.IsTypeId(TypeId.Player))
+                                    switch (GetGoType())
+                                    {
+                                        case GameObjectTypes.FishingNode:   //  can't fish now
                                             {
-                                                caster.ToPlayer().RemoveGameObject(this, false);
-                                                caster.ToPlayer().SendPacket(new FishEscaped());
+                                                Unit caster = GetOwner();
+                                                if (caster != null && caster.IsTypeId(TypeId.Player))
+                                                {
+                                                    caster.ToPlayer().RemoveGameObject(this, false);
+                                                    caster.ToPlayer().SendPacket(new FishEscaped());
+                                                }
+                                                // can be delete
+                                                m_lootState = LootState.JustDeactivated;
+                                                return;
                                             }
-                                            // can be delete
-                                            m_lootState = LootState.JustDeactivated;
-                                            return;
-                                        }
-                                    case GameObjectTypes.Door:
-                                    case GameObjectTypes.Button:
-                                        //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for Battlegrounds)
-                                        if (GetGoState() != GameObjectState.Ready)
-                                            ResetDoorOrButton();
-                                        break;
-                                    case GameObjectTypes.FishingHole:
-                                        // Initialize a new max fish count on respawn
-                                        m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
-                                        break;
-                                    default:
-                                        break;
+                                        case GameObjectTypes.Door:
+                                        case GameObjectTypes.Button:
+                                            //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for Battlegrounds)
+                                            if (GetGoState() != GameObjectState.Ready)
+                                                ResetDoorOrButton();
+                                            break;
+                                        case GameObjectTypes.FishingHole:
+                                            // Initialize a new max fish count on respawn
+                                            m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                    if (!m_spawnedByDefault)        // despawn timer
+                                    {
+                                        // can be despawned or destroyed
+                                        SetLootState(LootState.JustDeactivated);
+                                        return;
+                                    }
+
+                                    // Call AI Reset (required for example in SmartAI to clear one time events)
+                                    if (GetAI() != null)
+                                        GetAI().Reset();
+
+                                    // respawn timer
+                                    uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
+                                    if (poolid != 0)
+                                        Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
+                                    else
+                                        GetMap().AddToMap(this);
                                 }
-
-                                if (!m_spawnedByDefault)        // despawn timer
-                                {
-                                    // can be despawned or destroyed
-                                    SetLootState(LootState.JustDeactivated);
-                                    return;
-                                }
-
-                                // Call AI Reset (required for example in SmartAI to clear one time events)
-                                if (GetAI() != null)
-                                    GetAI().Reset();
-
-                                // respawn timer
-                                uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
-                                if (poolid != 0)
-                                    Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
-                                else
-                                    GetMap().AddToMap(this);
                             }
                         }
+
+                        // Set respawn timer
+                        if (!m_respawnCompatibilityMode && m_respawnTime > 0)
+                            SaveRespawnTime(0, false);
 
                         if (IsSpawned())
                         {
@@ -785,6 +799,7 @@ namespace Game.Entities
                         if (m_respawnDelayTime == 0)
                             return;
 
+                        // ToDo: Decide if we should properly despawn these. Maybe they expect to be able to manually respawn from script?
                         if (!m_spawnedByDefault)
                         {
                             m_respawnTime = 0;
@@ -792,11 +807,28 @@ namespace Game.Entities
                             return;
                         }
 
-                        m_respawnTime = Time.UnixTime + m_respawnDelayTime;
+                        uint respawnDelay = m_respawnDelayTime;
+                        uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
+                        if (scalingMode != 0)
+                            GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
+                        m_respawnTime = Time.UnixTime + respawnDelay;
 
                         // if option not set then object will be saved at grid unload
+                        // Otherwise just save respawn time to map object memory
                         if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
                             SaveRespawnTime();
+
+                        if (!m_respawnCompatibilityMode)
+                        {
+                            // Respawn time was just saved if set to save to DB
+                            // If not, we save only to map memory
+                            if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
+                                SaveRespawnTime(0, false);
+
+                            // Then despawn
+                            AddObjectToRemoveList();
+                            return;
+                        }
 
                         DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
                         break;
@@ -890,7 +922,7 @@ namespace Game.Entities
         {
             // this should only be used when the gameobject has already been loaded
             // preferably after adding to map, because mapid may not be valid otherwise
-            GameObjectData data = Global.ObjectMgr.GetGOData(m_spawnId);
+            GameObjectData data = Global.ObjectMgr.GetGameObjectData(m_spawnId);
             if (data == null)
             {
                 Log.outError(LogFilter.Maps, "GameObject.SaveToDB failed, cannot get gameobject data!");
@@ -911,22 +943,22 @@ namespace Game.Entities
                 m_spawnId = Global.ObjectMgr.GenerateGameObjectSpawnId();
 
             // update in loaded data (changing data only in this place)
-            GameObjectData data = new GameObjectData();
+            GameObjectData data = Global.ObjectMgr.NewOrExistGameObjectData(m_spawnId);
 
-            // guid = guid must not be updated at save
-            data.id = GetEntry();
-            data.mapid = (ushort)mapid;
-            data.posX = GetPositionX();
-            data.posY = GetPositionY();
-            data.posZ = GetPositionZ();
-            data.orientation = GetOrientation();
+            if (data.spawnId == 0)
+                data.spawnId = m_spawnId;
+            Cypher.Assert(data.spawnId == m_spawnId);
+
+            data.Id = GetEntry();
+            data.spawnPoint.WorldRelocate(this);
             data.rotation = m_worldRotation;
             data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();
-            data.go_state = GetGoState();
+            data.goState = GetGoState();
             data.spawnDifficulties = spawnDifficulties;
             data.artKit = (byte)GetGoArtKit();
-            Global.ObjectMgr.NewGOData(m_spawnId, data);
+            if (data.spawnGroupData == null)
+                data.spawnGroupData = Global.ObjectMgr.GetDefaultSpawnGroup();
 
             data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
             data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
@@ -958,24 +990,24 @@ namespace Game.Entities
             DB.World.Execute(stmt);
         }
 
-        bool LoadGameObjectFromDB(ulong spawnId, Map map, bool addToMap)
+        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool unused = true)
         {
-            GameObjectData data = Global.ObjectMgr.GetGOData(spawnId);
+            GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
             if (data == null)
             {
                 Log.outError(LogFilter.Maps, "Gameobject (SpawnId: {0}) not found in table `gameobject`, can't load. ", spawnId);
                 return false;
             }
 
-            uint entry = data.id;
-            Position pos = new Position(data.posX, data.posY, data.posZ, data.orientation);
+            uint entry = data.Id;
 
             uint animprogress = data.animprogress;
-            GameObjectState go_state = data.go_state;
+            GameObjectState go_state = data.goState;
             uint artKit = data.artKit;
 
             m_spawnId = spawnId;
-            if (!Create(entry, map, pos, data.rotation, animprogress, go_state, artKit))
+            m_respawnCompatibilityMode = ((data.spawnGroupData.flags & SpawnGroupFlags.CompatibilityMode) != 0);
+            if (!Create(entry, map, data.spawnPoint, data.rotation, animprogress, go_state, artKit, !m_respawnCompatibilityMode, spawnId))
                 return false;
 
             PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
@@ -1000,7 +1032,7 @@ namespace Game.Entities
                     if (m_respawnTime != 0 && m_respawnTime <= Time.UnixTime)
                     {
                         m_respawnTime = 0;
-                        GetMap().RemoveGORespawnTime(m_spawnId);
+                        GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
                     }
                 }
             }
@@ -1021,20 +1053,20 @@ namespace Game.Entities
 
         public void DeleteFromDB()
         {
-            GetMap().RemoveGORespawnTime(m_spawnId);
-            Global.ObjectMgr.DeleteGOData(m_spawnId);
+            GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
+            Global.ObjectMgr.DeleteGameObjectData(m_spawnId);
+
+            SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
-
             stmt.AddValue(0, m_spawnId);
-
-            DB.World.Execute(stmt);
+            trans.Append(stmt);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_EVENT_GAMEOBJECT);
-
             stmt.AddValue(0, m_spawnId);
+            trans.Append(stmt);
 
-            DB.World.Execute(stmt);
+            DB.World.CommitTransaction(trans);
         }
 
         public override bool HasQuest(uint quest_id)
@@ -1097,10 +1129,19 @@ namespace Game.Entities
             return Global.ObjAccessor.GetUnit(this, GetOwnerGUID());
         }
 
-        public override void SaveRespawnTime()
+        public override void SaveRespawnTime(uint forceDelay = 0, bool savetodb = true)
         {
-            if (m_goData != null && m_goData.dbData && m_respawnTime > Time.UnixTime && m_spawnedByDefault)
-                GetMap().SaveGORespawnTime(m_spawnId, m_respawnTime);
+            if (m_goData != null && m_respawnTime > Time.UnixTime && m_spawnedByDefault)
+            {
+                if (m_respawnCompatibilityMode)
+                {
+                    GetMap().SaveRespawnTimeDB(SpawnObjectType.GameObject, m_spawnId, m_respawnTime);
+                    return;
+                }
+
+                uint thisRespawnTime = (uint)(forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime);
+                GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData ? savetodb : false);
+            }
         }
 
         public override bool IsNeverVisibleFor(WorldObject seer)
@@ -1160,7 +1201,7 @@ namespace Game.Entities
             if (m_spawnedByDefault && m_respawnTime > 0)
             {
                 m_respawnTime = Time.UnixTime;
-                GetMap().RemoveGORespawnTime(m_spawnId);
+                GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId, true);
             }
         }
 
@@ -1262,7 +1303,7 @@ namespace Game.Entities
         public void SetGoArtKit(byte kit)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ArtKit), kit);
-            GameObjectData data = Global.ObjectMgr.GetGOData(m_spawnId);
+            GameObjectData data = Global.ObjectMgr.GetGameObjectData(m_spawnId);
             if (data != null)
                 data.artKit = kit;
         }
@@ -1273,10 +1314,10 @@ namespace Game.Entities
             if (go != null)
             {
                 go.SetGoArtKit(artkit);
-                data = go.GetGoData();
+                data = go.GetGameObjectData();
             }
             else if (lowguid != 0)
-                data = Global.ObjectMgr.GetGOData(lowguid);
+                data = Global.ObjectMgr.GetGameObjectData(lowguid);
 
             if (data != null)
                 data.artKit = artkit;
@@ -2075,7 +2116,7 @@ namespace Game.Entities
 
         public uint GetScriptId()
         {
-            GameObjectData gameObjectData = GetGoData();
+            GameObjectData gameObjectData = GetGameObjectData();
             if (gameObjectData != null)
             {
                 uint scriptId = gameObjectData.ScriptId;
@@ -2548,23 +2589,10 @@ namespace Game.Entities
 
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
         {
-            if (m_spawnId != 0)
-            {
-                GameObjectData data = Global.ObjectMgr.GetGOData(GetSpawnId());
-                if (data != null)
-                {
-                    x = posX;
-                    y = posY;
-                    z = posZ;
-                    ori = data.orientation;
-                    return;
-                }
-            }
-
-            x = GetPositionX();
-            y = GetPositionY();
-            z = GetPositionZ();
-            ori = GetOrientation();
+            if (m_goData != null)
+                m_goData.spawnPoint.GetPosition(out x, out y, out z, out ori);
+            else
+                GetPosition(out x, out y, out z, out ori);
         }
 
         public float GetInteractionDistance()
@@ -2624,17 +2652,12 @@ namespace Game.Entities
 
         public GameObjectTemplate GetGoInfo() { return m_goInfo; }
         public GameObjectTemplateAddon GetTemplateAddon() { return m_goTemplateAddon; }
-        public GameObjectData GetGoData() { return m_goData; }
+        public GameObjectData GetGameObjectData() { return m_goData; }
         public GameObjectValue GetGoValue() { return m_goValue; }
 
         public ulong GetSpawnId() { return m_spawnId; }
 
         public long GetPackedWorldRotation() { return m_packedRotation; }
-
-        public override bool LoadFromDB(ulong spawnId, Map map)
-        {
-            return LoadGameObjectFromDB(spawnId, map, false);
-        }
 
         public void SetOwnerGUID(ObjectGuid owner)
         {
@@ -2768,6 +2791,10 @@ namespace Game.Entities
                 AddFlag(GameObjectFlags.MapObject);
         }
 
+        // There's many places not ready for dynamic spawns. This allows them to live on for now.
+        void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
+        public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
+
         #region Fields
         protected GameObjectFieldData m_gameObjectData;
         protected GameObjectValue m_goValue;
@@ -2799,6 +2826,7 @@ namespace Game.Entities
         public Position StationaryPosition { get; set; }
 
         GameObjectAI m_AI;
+        bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
 

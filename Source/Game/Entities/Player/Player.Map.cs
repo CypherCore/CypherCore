@@ -160,6 +160,8 @@ namespace Game.Entities
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
             }
 
+            GetMap().UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
+
             // group update
             if (GetGroup())
             {

@@ -495,7 +495,7 @@ namespace Game.AI
             _events.Reset();
             summons.DespawnAll();
             _scheduler.CancelAll();
-            if (instance != null)
+            if (instance != null && instance.GetBossState(_bossId) != EncounterState.Done)
                 instance.SetBossState(_bossId, EncounterState.NotStarted);
         }
 
@@ -576,12 +576,14 @@ namespace Game.AI
             DoMeleeAttackIfReady();
         }
 
-        public void _DespawnAtEvade(uint delayToRespawn = 30, Creature who = null)
+        public void _DespawnAtEvade(uint delayToRespawn = 30, Creature who = null) { _DespawnAtEvade(TimeSpan.FromSeconds(delayToRespawn), who); }
+
+        public void _DespawnAtEvade(TimeSpan delayToRespawn, Creature who = null)
         {
-            if (delayToRespawn < 2)
+            if (delayToRespawn < TimeSpan.FromSeconds(2))
             {
                 Log.outError(LogFilter.Scripts, "_DespawnAtEvade called with delay of {0} seconds, defaulting to 2.", delayToRespawn);
-                delayToRespawn = 2;
+                delayToRespawn = TimeSpan.FromSeconds(2);
             }
 
             if (!who)
@@ -595,7 +597,7 @@ namespace Game.AI
                 return;
             }
 
-            who.DespawnOrUnsummon(0, TimeSpan.FromSeconds(delayToRespawn));
+            who.DespawnOrUnsummon(0, delayToRespawn);
 
             if (instance != null && who == me)
                 instance.SetBossState(_bossId, EncounterState.Fail);

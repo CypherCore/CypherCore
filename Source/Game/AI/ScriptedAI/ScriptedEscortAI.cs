@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
+using Game.Maps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -234,13 +235,17 @@ namespace Game.AI
                                 return;
                             }
 
-                            if (m_bCanInstantRespawn)
+                            if (m_bCanInstantRespawn && !WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc))
                             {
                                 me.SetDeathState(DeathState.JustDied);
                                 me.Respawn();
                             }
                             else
+                            {
+                                if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc))
+                                    me.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, me.GetSpawnId(), true);
                                 me.DespawnOrUnsummon();
+                            }
 
                             return;
                         }
@@ -274,11 +279,18 @@ namespace Game.AI
                     {
                         Log.outDebug(LogFilter.Scripts, "EscortAI failed because player/group was to far away or not found");
 
-                        if (m_bCanInstantRespawn)
+                        bool isEscort = false;
+                        CreatureData cdata = me.GetCreatureData();
+                        if (cdata != null)
+                            isEscort = (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && cdata.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc));
+
+                        if (m_bCanInstantRespawn && !isEscort)
                         {
                             me.SetDeathState(DeathState.JustDied);
                             me.Respawn();
                         }
+                        else if (m_bCanInstantRespawn && isEscort)
+                            me.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, me.GetSpawnId(), true);
                         else
                             me.DespawnOrUnsummon();
 
@@ -391,6 +403,25 @@ namespace Game.AI
         /// todo get rid of this many variables passed in function.
         public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
         {
+            // Queue respawn from the point it starts
+            Map map = me.GetMap();
+            if (map != null)
+            {
+                CreatureData cdata = me.GetCreatureData();
+                if (cdata != null)
+                {
+                    SpawnGroupTemplateData groupdata = cdata.spawnGroupData;
+                    if (groupdata != null)
+                    {
+                        if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && groupdata.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc) && map.GetCreatureRespawnTime(me.GetSpawnId()) == 0)
+                        {
+                            me.SetRespawnTime(me.GetRespawnDelay());
+                            me.SaveRespawnTime();
+                        }
+                    }
+                }
+            }
+
             if (me.GetVictim())
             {
                 Log.outError(LogFilter.Server, "TSCR ERROR: EscortAI (script: {0}, creature entry: {1}) attempts to Start while in combat", me.GetScriptName(), me.GetEntry());
@@ -536,6 +567,17 @@ namespace Game.AI
             return false;
         }
 
+        public override bool IsEscortNPC(bool onlyIfActive)
+        {
+            if (!onlyIfActive)
+                return true;
+
+            if (!GetEventStarterGUID().IsEmpty())
+                return true;
+
+            return false;
+        }
+        
         public virtual void WaypointReached(uint pointId) { }
         public virtual void WaypointStart(uint pointId) { }
 

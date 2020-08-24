@@ -22,7 +22,7 @@ namespace Game.Maps
 {
     public class ZoneScript
     {
-        public virtual uint GetCreatureEntry(ulong guidlow, CreatureData data) { return data.id; }
+        public virtual uint GetCreatureEntry(ulong guidlow, CreatureData data) { return data.Id; }
         public virtual uint GetGameObjectEntry(ulong spawnId, uint entry) { return entry; }
 
         public virtual void OnCreatureCreate(Creature creature) { }

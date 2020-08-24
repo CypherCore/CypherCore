@@ -412,7 +412,7 @@ namespace Game
                         int internal_event_id = mGameEvent.Length + event_id - 1;
 
 
-                        GameObjectData data = Global.ObjectMgr.GetGOData(guid);
+                        GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
                         {
                             Log.outError(LogFilter.Sql, "`game_event_gameobject` contains gameobject (GUID: {0}) not found in `gameobject` table.", guid);
@@ -773,7 +773,7 @@ namespace Game
                         uint entry = 0;
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data != null)
-                            entry = data.id;
+                            entry = data.Id;
 
                         VendorItem vItem = new VendorItem();
                         vItem.item = result.Read<uint>(2);
@@ -1103,7 +1103,7 @@ namespace Game
                 // get the creature data from the low guid to get the entry, to be able to find out the whole guid
                 CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                 if (data != null)
-                    creaturesByMap.Add(data.mapid, guid);
+                    creaturesByMap.Add(data.spawnPoint.GetMapId(), guid);
             }
 
             foreach (var key in creaturesByMap.Keys)
@@ -1170,9 +1170,9 @@ namespace Game
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
 
                     // Spawn if necessary (loaded grids only)
-                    Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                    Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                     // We use spawn coords to spawn
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                         Creature.CreateCreatureFromDB(guid, map);
                 }
             }
@@ -1187,15 +1187,15 @@ namespace Game
             foreach (var guid in mGameEventGameobjectGuids[internal_event_id])
             {
                 // Add to correct cell
-                GameObjectData data = Global.ObjectMgr.GetGOData(guid);
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                 if (data != null)
                 {
                     Global.ObjectMgr.AddGameObjectToGrid(guid, data);
                     // Spawn if necessary (loaded grids only)
                     // this base map checked as non-instanced and then only existed
-                    Map map = Global.MapMgr.FindMap(data.mapid, 0);
+                    Map map = Global.MapMgr.FindMap(data.spawnPoint.GetMapId(), 0);
                     // We use current coords to unspawn, not spawn coords since creature can have changed grid
-                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
+                    if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                     {
                         GameObject pGameobject = GameObject.CreateGameObjectFromDB(guid, map, false);
                         // @todo find out when it is add to map
@@ -1243,7 +1243,7 @@ namespace Game
                 {
                     Global.ObjectMgr.RemoveCreatureFromGrid(guid, data);
 
-                    Global.MapMgr.DoForAllMapsWithMapId(data.mapid, map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
                     {
                         var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(guid);
                         foreach (var creature in creatureBounds)
@@ -1265,12 +1265,12 @@ namespace Game
                 if (event_id > 0 && HasGameObjectActiveEventExcept(guid, (ushort)event_id))
                     continue;
                 // Remove the gameobject from grid
-                GameObjectData data = Global.ObjectMgr.GetGOData(guid);
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                 if (data != null)
                 {
                     Global.ObjectMgr.RemoveGameObjectFromGrid(guid, data);
 
-                    Global.MapMgr.DoForAllMapsWithMapId(data.mapid, map =>
+                    Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
                     {
                         var gameobjectBounds = map.GetGameObjectBySpawnIdStore().LookupByKey(guid);
                         foreach (var go in gameobjectBounds)
@@ -1300,7 +1300,7 @@ namespace Game
                     continue;
 
                 // Update if spawned
-                Global.MapMgr.DoForAllMapsWithMapId(data.mapid, map =>
+                Global.MapMgr.DoForAllMapsWithMapId(data.spawnPoint.GetMapId(), map =>
                 {
                     var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(tuple.Item1);
                     foreach (var creature in creatureBounds)
@@ -1337,12 +1337,12 @@ namespace Game
                     tuple.Item2.modelid_prev = data2.displayid;
                     tuple.Item2.equipement_id_prev = (byte)data2.equipmentId;
                     data2.displayid = tuple.Item2.modelid;
-                    data2.equipmentId = tuple.Item2.equipment_id;
+                    data2.equipmentId = (sbyte)tuple.Item2.equipment_id;
                 }
                 else
                 {
                     data2.displayid = tuple.Item2.modelid_prev;
-                    data2.equipmentId = tuple.Item2.equipement_id_prev;
+                    data2.equipmentId = (sbyte)tuple.Item2.equipement_id_prev;
                 }
             }
         }

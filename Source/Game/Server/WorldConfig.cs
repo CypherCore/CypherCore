@@ -776,6 +776,49 @@ namespace Game
                 Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.NoGrayAggroAbove];
             }
 
+            // Respawn Settings
+            Values[WorldCfg.RespawnMinCheckIntervalMs] = GetDefaultValue("Respawn.MinCheckIntervalMS", 5000);
+            Values[WorldCfg.RespawnDynamicMode] = GetDefaultValue("Respawn.DynamicMode", 0);
+            if ((int)Values[WorldCfg.RespawnDynamicMode] > 1)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Invalid value for Respawn.DynamicMode ({Values[WorldCfg.RespawnDynamicMode]}). Set to 0.");
+                Values[WorldCfg.RespawnDynamicMode] = 0;
+            }
+            Values[WorldCfg.RespawnDynamicEscortNpc] = GetDefaultValue("Respawn.DynamicEscortNPC", true);
+            Values[WorldCfg.RespawnGuidWarnLevel] = GetDefaultValue("Respawn.GuidWarnLevel", 12000000);
+            if ((int)Values[WorldCfg.RespawnGuidWarnLevel] > 16777215)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidWarnLevel]}) cannot be greater than maximum GUID (16777215). Set to 12000000.");
+                Values[WorldCfg.RespawnGuidWarnLevel] = 12000000;
+            }
+            Values[WorldCfg.RespawnGuidAlertLevel] = GetDefaultValue("Respawn.GuidAlertLevel", 16000000);
+            if ((int)Values[WorldCfg.RespawnGuidAlertLevel] > 16777215)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Respawn.GuidWarnLevel ({Values[WorldCfg.RespawnGuidAlertLevel]}) cannot be greater than maximum GUID (16777215). Set to 16000000.");
+                Values[WorldCfg.RespawnGuidAlertLevel] = 16000000;
+            }
+            Values[WorldCfg.RespawnRestartQuietTime] = GetDefaultValue("Respawn.RestartQuietTime", 3);
+            if ((int)Values[WorldCfg.RespawnRestartQuietTime] > 23)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Respawn.RestartQuietTime ({Values[WorldCfg.RespawnRestartQuietTime]}) must be an hour, between 0 and 23. Set to 3.");
+                Values[WorldCfg.RespawnRestartQuietTime] = 3;
+            }
+            Values[WorldCfg.RespawnDynamicRateCreature] = GetDefaultValue("Respawn.DynamicRateCreature", 10.0f);
+            if ((float)Values[WorldCfg.RespawnDynamicRateCreature] < 0.0f)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Respawn.DynamicRateCreature ({Values[WorldCfg.RespawnDynamicRateCreature]}) must be positive. Set to 10.");
+                Values[WorldCfg.RespawnDynamicRateCreature] = 10.0f;
+            }
+            Values[WorldCfg.RespawnDynamicMinimumCreature] = GetDefaultValue("Respawn.DynamicMinimumCreature", 10);
+            Values[WorldCfg.RespawnDynamicRateGameobject] = GetDefaultValue("Respawn.DynamicRateGameObject", 10.0f);
+            if ((float)Values[WorldCfg.RespawnDynamicRateGameobject] < 0.0f)
+            {
+                Log.outError(LogFilter.ServerLoading, $"Respawn.DynamicRateGameObject ({Values[WorldCfg.RespawnDynamicRateGameobject]}) must be positive. Set to 10.");
+                Values[WorldCfg.RespawnDynamicRateGameobject] = 10.0f;
+            }
+            Values[WorldCfg.RespawnDynamicMinimumGameObject] = GetDefaultValue("Respawn.DynamicMinimumGameObject", 10);
+            Values[WorldCfg.RespawnGuidWarningFrequency] = GetDefaultValue("Respawn.WarningFrequency", 1800);
+
             Values[WorldCfg.EnableMmaps] = GetDefaultValue("mmap.EnablePathFinding", false);
             Values[WorldCfg.VmapIndoorCheck] = GetDefaultValue("vmap.EnableIndoorCheck", false);
 

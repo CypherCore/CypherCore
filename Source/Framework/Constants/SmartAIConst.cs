@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+
+using System;
 
 namespace Framework.Constants
 {
@@ -114,6 +116,15 @@ namespace Framework.Constants
         End = 3
     }
 
+    [Flags]
+    public enum SmartAiSpawnFlags
+    {
+        None = 0x00,
+        IgnoreRespawn = 0x01,
+        ForceSpawn = 0x02,
+        NosaveRespawn = 0x04,
+    }
+
     public enum SmartAITemplate
     {
         Basic = 0, //nothing is preset
@@ -125,6 +136,7 @@ namespace Framework.Constants
         End = 6
     }
 
+    [Flags]
     public enum SmartCastFlags
     {
         InterruptPrevious = 0x01,                     //Interrupt any spell casting
@@ -361,6 +373,8 @@ namespace Framework.Constants
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId
+        SpawnSpawngroup = 131,    // Group ID, min secs, max secs, spawnflags
+        DespawnSpawngroup = 132,    // Group ID, min secs, max secs, spawnflags
         // 131 - 134 : 3.3.5 reserved
         PlayCinematic = 135,    // reserved for future uses
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction

@@ -201,7 +201,7 @@ namespace Game.Chat
                     if (gameObjectInfo == null)
                         continue;
 
-                    handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gameObjectInfo.name, x, y, z, mapId);
+                    handler.SendSysMessage(CypherStrings.GoListChat, guid, entry, guid, gameObjectInfo.name, x, y, z, mapId, "", "");
 
                     ++count;
                 } while (result.NextRow());
@@ -412,10 +412,10 @@ namespace Game.Chat
                 if (!ulong.TryParse(cValue, out ulong guidLow))
                     return false;
 
-                GameObjectData data = Global.ObjectMgr.GetGOData(guidLow);
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guidLow);
                 if (data == null)
                     return false;
-                entry = data.id;
+                entry = data.Id;
             }
             else
             {
@@ -427,15 +427,45 @@ namespace Game.Chat
             if (gameObjectInfo == null)
                 return false;
 
+            GameObject thisGO = null;
+            if (handler.GetSession().GetPlayer())
+                thisGO = handler.GetSession().GetPlayer().FindNearestGameObject(entry, 30);
+            else if (handler.GetSelectedObject() != null && handler.GetSelectedObject().IsTypeId(TypeId.GameObject))
+                thisGO = handler.GetSelectedObject().ToGameObject();
+
             GameObjectTypes type = gameObjectInfo.type;
             uint displayId = gameObjectInfo.displayId;
             string name = gameObjectInfo.name;
             uint lootId = gameObjectInfo.GetLootId();
 
+            // If we have a real object, send some info about it
+            if (thisGO != null)
+            {
+                handler.SendSysMessage(CypherStrings.SpawninfoGuidinfo, thisGO.GetGUID().ToString());
+                handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, thisGO.GetSpawnId(), thisGO.GetPositionX(), thisGO.GetPositionY(), thisGO.GetPositionZ());
+                Player player = handler.GetSession().GetPlayer();
+                if (player != null)
+                {
+                    Position playerPos = player.GetPosition();
+                    float dist = thisGO.GetExactDist(playerPos);
+                    handler.SendSysMessage(CypherStrings.SpawninfoDistancefromplayer, dist);
+                }
+            }
             handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
             handler.SendSysMessage(CypherStrings.GoinfoType, type);
             handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
             handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
+            WorldObject obj = handler.GetSelectedObject();
+            if (obj != null)
+            {
+                if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
+                {
+                    SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
+                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, groupData.isActive);
+                }
+                if (obj.IsGameObject())
+                    handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, obj.ToGameObject().GetRespawnCompatibilityMode());
+            }
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
 
@@ -508,7 +538,7 @@ namespace Game.Chat
                     return false;
 
                 // TODO: is it really necessary to add both the real and DB table guid here ?
-                Global.ObjectMgr.AddGameObjectToGrid(spawnId, Global.ObjectMgr.GetGOData(spawnId));
+                Global.ObjectMgr.AddGameObjectToGrid(spawnId, Global.ObjectMgr.GetGameObjectData(spawnId));
                 handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
                 return true;
             }

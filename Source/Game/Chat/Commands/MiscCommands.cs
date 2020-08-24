@@ -34,221 +34,8 @@ namespace Game.Chat
 {
     class MiscCommands
     {
-        [CommandNonGroup("commands", RBACPermissions.CommandCommands, true)]
-        static bool Commands(StringArguments args, CommandHandler handler)
-        {
-            string list = "";
-            foreach (var command in CommandManager.GetCommands())
-            {
-                if (handler.IsAvailable(command))
-                {
-                    if (handler.GetSession() != null)
-                        list += "\n    ";
-                    else
-                        list += "\n\r    ";
-
-                    list += command.Name;
-
-                    if (!command.ChildCommands.Empty())
-                        list += " ...";
-                }
-            }
-
-            if (list.IsEmpty())
-                return false;
-
-            handler.SendSysMessage(CypherStrings.AvailableCmd);
-            handler.SendSysMessage(list);
-            return true;
-        }
-
-        [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
-        static bool Help(StringArguments args, CommandHandler handler)
-        {
-            string cmd = args.NextString("");
-            if (cmd.IsEmpty())
-            {
-                handler.ShowHelpForCommand(CommandManager.GetCommands(), "help");
-                handler.ShowHelpForCommand(CommandManager.GetCommands(), "");
-            }
-            else
-            {
-                if (!handler.ShowHelpForCommand(CommandManager.GetCommands(), cmd))
-                    handler.SendSysMessage(CypherStrings.NoHelpCmd);
-            }
-
-            return true;
-        }
-
-        [CommandNonGroup("revive", RBACPermissions.CommandRevive, true)]
-        static bool Revive(StringArguments args, CommandHandler handler)
-        {
-            Player target;
-            ObjectGuid targetGuid;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid))
-                return false;
-
-            if (target != null)
-            {
-                target.ResurrectPlayer(0.5f);
-                target.SpawnCorpseBones();
-                target.SaveToDB();
-            }
-            else
-                Player.OfflineResurrect(targetGuid, null);
-
-            return true;
-        }
-
-        [CommandNonGroup("die", RBACPermissions.CommandDie)]
-        static bool Die(StringArguments args, CommandHandler handler)
-        {
-            Unit target = handler.GetSelectedUnit();
-
-            if (!target && handler.GetPlayer().GetTarget().IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            Player player = target.ToPlayer();
-            if (player)
-                if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
-                    return false;
-
-            if (target.IsAlive())
-                handler.GetSession().GetPlayer().Kill(target);
-
-            return true;
-        }
-
-        [CommandNonGroup("gps", RBACPermissions.CommandGps)]
-        static bool HandleGPSCommand(StringArguments args, CommandHandler handler)
-        {
-            WorldObject obj;
-            if (!args.Empty())
-            {
-                HighGuid guidHigh = 0;
-                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
-                if (guidLow == 0)
-                    return false;
-                switch (guidHigh)
-                {
-                    case HighGuid.Player:
-                        {
-                            obj = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, guidLow));
-                            if (!obj)
-                            {
-                                handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                            }
-                            break;
-                        }
-                    case HighGuid.Creature:
-                        {
-                            obj = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
-                            if (!obj)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
-                            }
-                            break;
-                        }
-                    case HighGuid.GameObject:
-                        {
-                            obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                            if (!obj)
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
-                            }
-                            break;
-                        }
-                    default:
-                        return false;
-                }
-                if (!obj)
-                    return false;
-            }
-            else
-            {
-                obj = handler.GetSelectedUnit();
-
-                if (!obj)
-                {
-                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                    return false;
-                }
-            }
-
-            CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-            Cell cell = new Cell(cellCoord);
-
-            uint zoneId, areaId;
-            obj.GetZoneAndAreaId(out zoneId, out areaId);
-            uint mapId = obj.GetMapId();
-
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-            AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
-
-            float zoneX = obj.GetPositionX();
-            float zoneY = obj.GetPositionY();
-
-            Global.DB2Mgr.Map2ZoneCoordinates((int)zoneId, ref zoneX, ref zoneY);
-
-            Map map = obj.GetMap();
-            float groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
-            float floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
-
-            GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
-
-            // 63? WHY?
-            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
-            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
-
-            bool haveMap = Map.ExistMap(mapId, gridX, gridY);
-            bool haveVMap = Map.ExistVMap(mapId, gridX, gridY);
-            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
-
-            if (haveVMap)
-            {
-                if (map.IsOutdoors(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ()))
-                    handler.SendSysMessage(CypherStrings.GpsPositionOutdoors);
-                else
-                    handler.SendSysMessage(CypherStrings.GpsPositionIndoors);
-            }
-            else
-                handler.SendSysMessage(CypherStrings.GpsNoVmap);
-
-            string unknown = handler.GetCypherString(CypherStrings.Unknown);
-
-            handler.SendSysMessage(CypherStrings.MapPosition,
-                mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
-                zoneId, (zoneEntry != null ? zoneEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
-                areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
-                obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
-
-            Transport transport = obj.GetTransport();
-            if (transport)
-            {
-                handler.SendSysMessage(CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
-                    transport.GetEntry(), transport.GetName());
-            }
-
-            handler.SendSysMessage(CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), cell.GetCellY(), obj.GetInstanceId(),
-                zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
-
-            LiquidData liquidStatus;
-            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
-
-            if (liquidStatus != null)
-                handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
-
-            PhasingHandler.PrintToChat(handler, obj.GetPhaseShift());
-
-            return true;
-        }
-
         [CommandNonGroup("additem", RBACPermissions.CommandAdditem)]
-        static bool AddItem(StringArguments args, CommandHandler handler)
+        static bool HandleAddItemCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -372,7 +159,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("additemset", RBACPermissions.CommandAdditemset)]
-        static bool AddItemset(StringArguments args, CommandHandler handler)
+        static bool HandleAddItemSetCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -446,41 +233,9 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("dev", RBACPermissions.CommandDev)]
-        static bool HandleDevCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-            {
-                if (handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer))
-                    handler.GetSession().SendNotification(CypherStrings.DevOn);
-                else
-                    handler.GetSession().SendNotification(CypherStrings.DevOff);
-                return true;
-            }
-
-            string argstr = args.NextString();
-
-            if (argstr == "on")
-            {
-                handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer);
-                handler.GetSession().SendNotification(CypherStrings.DevOn);
-                return true;
-            }
-
-            if (argstr == "off")
-            {
-                handler.GetSession().GetPlayer().RemovePlayerFlag(PlayerFlags.Developer);
-                handler.GetSession().SendNotification(CypherStrings.DevOff);
-                return true;
-            }
-
-            handler.SendSysMessage(CypherStrings.UseBol);
-            return false;
-        }
-
         // Teleport to Player
         [CommandNonGroup("appear", RBACPermissions.CommandAppear)]
-        static bool Appear(StringArguments args, CommandHandler handler)
+        static bool HandleAppearCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -624,125 +379,282 @@ namespace Game.Chat
             return true;
         }
 
-        // Summon Player
-        [CommandNonGroup("summon", RBACPermissions.CommandSummon)]
-        static bool Summon(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("bank", RBACPermissions.CommandBank)]
+        static bool HandleBankCommand(StringArguments args, CommandHandler handler)
         {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID());
+            return true;
+        }
+
+        [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
+        static bool HandleBindSightCommand(StringArguments args, CommandHandler handler)
+        {
+            Unit unit = handler.GetSelectedUnit();
+            if (!unit)
                 return false;
 
-            Player _player = handler.GetSession().GetPlayer();
-            if (target == _player || targetGuid == _player.GetGUID())
-            {
-                handler.SendSysMessage(CypherStrings.CantTeleportSelf);
+            handler.GetSession().GetPlayer().CastSpell(unit, 6277, true);
+            return true;
+        }
 
+        [CommandNonGroup("combatstop", RBACPermissions.CommandCombatstop, true)]
+        static bool HandleCombatStopCommand(StringArguments args, CommandHandler handler)
+        {
+            Player target = null;
+
+            if (!args.Empty())
+            {
+                target = Global.ObjAccessor.FindPlayerByName(args.NextString());
+                if (!target)
+                {
+                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                    return false;
+                }
+            }
+
+            if (!target)
+            {
+                if (!handler.ExtractPlayerTarget(args, out target))
+                    return false;
+            }
+
+            // check online security
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
+
+            target.CombatStop();
+            target.GetHostileRefManager().DeleteReferences();
+            return true;
+        }
+
+        [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
+        static bool HandleComeToMeCommand(StringArguments args, CommandHandler handler)
+        {
+            Creature caster = handler.GetSelectedCreature();
+            if (!caster)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
 
-            if (target)
+            Player player = handler.GetSession().GetPlayer();
+            caster.GetMotionMaster().MovePoint(0, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+
+            return true;
+        }
+
+        [CommandNonGroup("commands", RBACPermissions.CommandCommands, true)]
+        static bool HandleCommandsCommand(StringArguments args, CommandHandler handler)
+        {
+            string list = "";
+            foreach (var command in CommandManager.GetCommands())
             {
-                string nameLink = handler.PlayerLink(targetName);
-                // check online security
-                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                    return false;
-
-                if (target.IsBeingTeleported())
+                if (handler.IsAvailable(command))
                 {
-                    handler.SendSysMessage(CypherStrings.IsTeleported, nameLink);
+                    if (handler.GetSession() != null)
+                        list += "\n    ";
+                    else
+                        list += "\n\r    ";
 
+                    list += command.Name;
+
+                    if (!command.ChildCommands.Empty())
+                        list += " ...";
+                }
+            }
+
+            if (list.IsEmpty())
+                return false;
+
+            handler.SendSysMessage(CypherStrings.AvailableCmd);
+            handler.SendSysMessage(list);
+            return true;
+        }
+
+        [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
+        static bool HandleDamageCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            string str = args.NextString();
+
+            if (str == "go")
+            {
+                ulong guidLow = args.NextUInt64();
+                if (guidLow == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
                 }
 
-                Map map = _player.GetMap();
-                if (map.IsBattlegroundOrArena())
+                int damage = args.NextInt32();
+                if (damage == 0)
                 {
-                    // only allow if gm mode is on
-                    if (!_player.IsGameMaster())
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+                }
+                Player player = handler.GetSession().GetPlayer();
+                if (player)
+                {
+                    GameObject go = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+                    if (!go)
                     {
-                        handler.SendSysMessage(CypherStrings.CannotGoToBgGm, nameLink);
+                        handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                         return false;
                     }
-                    // if both players are in different bgs
-                    else if (target.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
-                        target.LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
 
-                    // all's well, set bg id
-                    // when porting out from the bg, it will be reset to 0
-                    target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
-                    // remember current position as entry point for return at bg end teleportation
-                    if (!target.GetMap().IsBattlegroundOrArena())
-                        target.SetBattlegroundEntryPoint();
-                }
-                else if (map.Instanceable())
-                {
-                    Map targetMap = target.GetMap();
-
-                    Player targetGroupLeader = null;
-                    Group targetGroup = target.GetGroup();
-                    if (targetGroup != null)
-                        targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
-
-                    // check if far teleport is allowed
-                    if (targetGroupLeader == null || (targetGroupLeader.GetMapId() != map.GetId()) || (targetGroupLeader.GetInstanceId() != map.GetInstanceId()))
+                    if (!go.IsDestructibleBuilding())
                     {
-                        if ((targetMap.GetId() != map.GetId()) || (targetMap.GetInstanceId() != map.GetInstanceId()))
-                        {
-                            handler.SendSysMessage(CypherStrings.CannotSummonToInst);
-                            return false;
-                        }
-                    }
-
-                    // check if we're already in a different instance of the same map
-                    if ((targetMap.GetId() == map.GetId()) && (targetMap.GetInstanceId() != map.GetInstanceId()))
-                    {
-                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, nameLink);
+                        handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
                         return false;
                     }
+
+                    go.ModifyHealth(-damage, player);
+                    handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), guidLow, -damage, go.GetGoValue().Building.Health);
                 }
 
-                handler.SendSysMessage(CypherStrings.Summoning, nameLink, "");
-                if (handler.NeedReportToTarget(target))
-                    target.SendSysMessage(CypherStrings.SummonedBy, handler.PlayerLink(_player.GetName()));
+                return true;
+            }
 
-                // stop flight if need
-                if (target.IsInFlight())
-                {
-                    target.GetMotionMaster().MovementExpired();
-                    target.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+            Unit target = handler.GetSelectedUnit();
+            if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                return false;
+            }
+            Player player_ = target.ToPlayer();
+            if (player_)
+                if (handler.HasLowerSecurity(player_, ObjectGuid.Empty, false))
+                    return false;
+
+            if (!target.IsAlive())
+                return true;
+
+            if (!int.TryParse(str, out int damage_int))
+                return false;
+
+            if (damage_int <= 0)
+                return true;
+
+            uint damage_ = (uint)damage_int;
+
+            string schoolStr = args.NextString();
+
+            Player attacker = handler.GetSession().GetPlayer();
+
+            // flat melee damage without resistence/etc reduction
+            if (string.IsNullOrEmpty(schoolStr))
+            {
+                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                if (target != attacker)
+                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
+                return true;
+            }
+
+            if (!int.TryParse(schoolStr, out int school) || school >= (int)SpellSchools.Max)
+                return false;
+
+            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
+
+            if (attacker.IsDamageReducedByArmor(schoolmask))
+                damage_ = attacker.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
+
+            string spellStr = args.NextString();
+
+            // melee damage by specific school
+            if (string.IsNullOrEmpty(spellStr))
+            {
+                DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                attacker.CalcAbsorbResist(dmgInfo);
+
+                if (dmgInfo.GetDamage() == 0)
+                    return true;
+
+                damage_ = dmgInfo.GetDamage();
+
+                uint absorb = dmgInfo.GetAbsorb();
+                uint resist = dmgInfo.GetResist();
+                attacker.DealDamageMods(target, ref damage_, ref absorb);
+                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
+                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
+                return true;
+            }
+
+            // non-melee damage
+            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+            uint spellid = handler.ExtractSpellIdFromLink(args);
+            if (spellid == 0)
+                return false;
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return false;
+
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
+            damageInfo.damage = damage_;
+            attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            target.DealSpellDamage(damageInfo, true);
+            target.SendSpellNonMeleeDamageLog(damageInfo);
+            return true;
+        }
+
+        [CommandNonGroup("dev", RBACPermissions.CommandDev)]
+        static bool HandleDevCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+            {
+                if (handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer))
+                    handler.GetSession().SendNotification(CypherStrings.DevOn);
                 else
-                    target.SaveRecallPosition();
-
-                // before GM
-                float x, y, z;
-                _player.GetClosePoint(out x, out y, out z, target.GetCombatReach());
-                target.TeleportTo(_player.GetMapId(), x, y, z, target.GetOrientation());
-                PhasingHandler.InheritPhaseShift(target, _player);
-                target.UpdateObjectVisibility();
+                    handler.GetSession().SendNotification(CypherStrings.DevOff);
+                return true;
             }
-            else
+
+            string argstr = args.NextString();
+
+            if (argstr == "on")
             {
-                // check offline security
-                if (handler.HasLowerSecurity(null, targetGuid))
+                handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer);
+                handler.GetSession().SendNotification(CypherStrings.DevOn);
+                return true;
+            }
+
+            if (argstr == "off")
+            {
+                handler.GetSession().GetPlayer().RemovePlayerFlag(PlayerFlags.Developer);
+                handler.GetSession().SendNotification(CypherStrings.DevOff);
+                return true;
+            }
+
+            handler.SendSysMessage(CypherStrings.UseBol);
+            return false;
+        }
+
+        [CommandNonGroup("die", RBACPermissions.CommandDie)]
+        static bool HandleDieCommand(StringArguments args, CommandHandler handler)
+        {
+            Unit target = handler.GetSelectedUnit();
+
+            if (!target && handler.GetPlayer().GetTarget().IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                return false;
+            }
+
+            Player player = target.ToPlayer();
+            if (player)
+                if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
                     return false;
 
-                string nameLink = handler.PlayerLink(targetName);
-
-                handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
-
-                // in point where GM stay
-                Player.SavePositionInDB(new WorldLocation(_player.GetMapId(), _player.GetPositionX(), _player.GetPositionY(), _player.GetPositionZ(), _player.GetOrientation()), _player.GetZoneId(), targetGuid);
-            }
+            if (target.IsAlive())
+                handler.GetSession().GetPlayer().Kill(target);
 
             return true;
         }
 
         [CommandNonGroup("dismount", RBACPermissions.CommandDismount)]
-        static bool Dismount(StringArguments args, CommandHandler handler)
+        static bool HandleDismountCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -761,48 +673,6 @@ namespace Game.Chat
 
             player.Dismount();
             player.RemoveAurasByType(AuraType.Mounted);
-            return true;
-        }
-
-        [CommandNonGroup("guid", RBACPermissions.CommandGuid)]
-        static bool Guid(StringArguments args, CommandHandler handler)
-        {
-            ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
-
-            if (guid.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.NoSelection);
-                return false;
-            }
-
-            handler.SendSysMessage(CypherStrings.ObjectGuid, guid.ToString(), guid.GetHigh());
-            return true;
-        }
-
-        // move item to other slot
-        [CommandNonGroup("itemmove", RBACPermissions.CommandItemmove)]
-        static bool ItemMove(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            byte srcSlot = args.NextByte();
-            byte dstSlot = args.NextByte();
-
-            if (srcSlot == dstSlot)
-                return true;
-
-            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, srcSlot, true))
-                return false;
-
-            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, dstSlot, false))
-                return false;
-
-            ushort src = (ushort)((InventorySlots.Bag0 << 8) | srcSlot);
-            ushort dst = (ushort)((InventorySlots.Bag0 << 8) | dstSlot);
-
-            handler.GetSession().GetPlayer().SwapItem(src, dst);
-
             return true;
         }
 
@@ -867,73 +737,326 @@ namespace Game.Chat
             return true;
         }
 
-        // Teleport player to last position
-        [CommandNonGroup("recall", RBACPermissions.CommandRecall)]
-        static bool Recall(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("freeze", RBACPermissions.CommandFreeze)]
+        static bool HandleFreezeCommand(StringArguments args, CommandHandler handler)
         {
-            Player target;
-            if (!handler.ExtractPlayerTarget(args, out target))
-                return false;
+            Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
+            int freezeDuration = 0; // Freeze Duration (in seconds)
+            bool canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
+            bool getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
 
-            // check online security
-            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
-                return false;
-
-            if (target.IsBeingTeleported())
+            if (args.Empty())
             {
-                handler.SendSysMessage(CypherStrings.IsTeleported, handler.GetNameLink(target));
+                // Might have a selected player. We'll check it later
+                // Get the duration from world cfg
+                getDurationFromConfig = true;
+            }
+            else
+            {
+                // Get the args that we might have (up to 2)
+                string arg1 = args.NextString();
+                string arg2 = args.NextString();
 
-                return false;
+                // Analyze them to see if we got either a playerName or duration or both
+                if (!arg1.IsEmpty())
+                {
+                    if (arg1.IsNumber())
+                    {
+                        // case 2: .freeze duration
+                        // We have a selected player. We'll check him later
+                        if (!int.TryParse(arg1, out freezeDuration))
+                            return false;
+                        canApplyFreeze = true;
+                    }
+                    else
+                    {
+                        // case 3 or 4: .freeze player duration | .freeze player
+                        // find the player
+                        string name = arg1;
+                        ObjectManager.NormalizePlayerName(ref name);
+                        player = Global.ObjAccessor.FindPlayerByName(name);
+                        // Check if we have duration set
+                        if (!arg2.IsEmpty() && arg2.IsNumber())
+                        {
+                            if (!int.TryParse(arg2, out freezeDuration))
+                                return false;
+                            canApplyFreeze = true;
+                        }
+                        else
+                            getDurationFromConfig = true;
+                    }
+                }
             }
 
-            // stop flight if need
-            if (target.IsInFlight())
+            // Check if duration needs to be retrieved from config
+            if (getDurationFromConfig)
             {
-                target.GetMotionMaster().MovementExpired();
-                target.CleanupAfterTaxiFlight();
+                freezeDuration = WorldConfig.GetIntValue(WorldCfg.GmFreezeDuration);
+                canApplyFreeze = true;
             }
 
-            target.Recall();
-            return true;
+            // Player and duration retrieval is over
+            if (canApplyFreeze)
+            {
+                if (!player) // can be null if some previous selection failed
+                {
+                    handler.SendSysMessage(CypherStrings.CommandFreezeWrong);
+                    return true;
+                }
+                else if (player == handler.GetSession().GetPlayer())
+                {
+                    // Can't freeze himself
+                    handler.SendSysMessage(CypherStrings.CommandFreezeError);
+                    return true;
+                }
+                else // Apply the effect
+                {
+                    // Add the freeze aura and set the proper duration
+                    // Player combat status and flags are now handled
+                    // in Freeze Spell AuraScript (OnApply)
+                    Aura freeze = player.AddAura(9454, player);
+                    if (freeze != null)
+                    {
+                        if (freezeDuration != 0)
+                            freeze.SetDuration(freezeDuration * Time.InMilliseconds);
+                        handler.SendSysMessage(CypherStrings.CommandFreeze, player.GetName());
+                        // save player
+                        player.SaveToDB();
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
-        [CommandNonGroup("save", RBACPermissions.CommandSave)]
-        static bool Save(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("gps", RBACPermissions.CommandGps)]
+        static bool HandleGPSCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-
-            // save GM account without delay and output message
-            if (handler.GetSession().HasPermission(RBACPermissions.CommandsSaveWithoutDelay))
+            WorldObject obj;
+            if (!args.Empty())
             {
-                Player target = handler.GetSelectedPlayer();
-                if (target)
-                    target.SaveToDB();
+                HighGuid guidHigh = 0;
+                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
+                if (guidLow == 0)
+                    return false;
+                switch (guidHigh)
+                {
+                    case HighGuid.Player:
+                        {
+                            obj = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, guidLow));
+                            if (!obj)
+                            {
+                                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                            }
+                            break;
+                        }
+                    case HighGuid.Creature:
+                        {
+                            obj = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
+                            if (!obj)
+                            {
+                                handler.SendSysMessage(CypherStrings.CommandNocreaturefound);
+                            }
+                            break;
+                        }
+                    case HighGuid.GameObject:
+                        {
+                            obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+                            if (!obj)
+                            {
+                                handler.SendSysMessage(CypherStrings.CommandNogameobjectfound);
+                            }
+                            break;
+                        }
+                    default:
+                        return false;
+                }
+                if (!obj)
+                    return false;
+            }
+            else
+            {
+                obj = handler.GetSelectedUnit();
+
+                if (!obj)
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                    return false;
+                }
+            }
+
+            CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
+            Cell cell = new Cell(cellCoord);
+
+            uint zoneId, areaId;
+            obj.GetZoneAndAreaId(out zoneId, out areaId);
+            uint mapId = obj.GetMapId();
+
+            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
+            AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
+
+            float zoneX = obj.GetPositionX();
+            float zoneY = obj.GetPositionY();
+
+            Global.DB2Mgr.Map2ZoneCoordinates((int)zoneId, ref zoneX, ref zoneY);
+
+            Map map = obj.GetMap();
+            float groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
+            float floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
+
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+
+            // 63? WHY?
+            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
+            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
+
+            bool haveMap = Map.ExistMap(mapId, gridX, gridY);
+            bool haveVMap = Map.ExistVMap(mapId, gridX, gridY);
+            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
+
+            if (haveVMap)
+            {
+                if (map.IsOutdoors(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ()))
+                    handler.SendSysMessage(CypherStrings.GpsPositionOutdoors);
                 else
-                    player.SaveToDB();
-                handler.SendSysMessage(CypherStrings.PlayerSaved);
-                return true;
+                    handler.SendSysMessage(CypherStrings.GpsPositionIndoors);
+            }
+            else
+                handler.SendSysMessage(CypherStrings.GpsNoVmap);
+
+            string unknown = handler.GetCypherString(CypherStrings.Unknown);
+
+            handler.SendSysMessage(CypherStrings.MapPosition,
+                mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
+                zoneId, (zoneEntry != null ? zoneEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
+                areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
+                obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
+
+            Transport transport = obj.GetTransport();
+            if (transport)
+            {
+                handler.SendSysMessage(CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
+                    transport.GetEntry(), transport.GetName());
             }
 
-            // save if the player has last been saved over 20 seconds ago
-            uint saveInterval = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
-            if (saveInterval == 0 || (saveInterval > 20 * Time.InMilliseconds && player.GetSaveTimer() <= saveInterval - 20 * Time.InMilliseconds))
-                player.SaveToDB();
+            handler.SendSysMessage(CypherStrings.GridPosition, cell.GetGridX(), cell.GetGridY(), cell.GetCellX(), cell.GetCellY(), obj.GetInstanceId(),
+                zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
+
+            LiquidData liquidStatus;
+            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
+
+            if (liquidStatus != null)
+                handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
+
+            PhasingHandler.PrintToChat(handler, obj.GetPhaseShift());
 
             return true;
         }
 
-        // Save all players in the world
-        [CommandNonGroup("saveall", RBACPermissions.CommandSaveall, true)]
-        static bool SaveAll(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("guid", RBACPermissions.CommandGuid)]
+        static bool HandleGUIDCommand(StringArguments args, CommandHandler handler)
         {
-            Global.ObjAccessor.SaveAllPlayers();
-            handler.SendSysMessage(CypherStrings.PlayersSaved);
+            ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
+
+            if (guid.IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.NoSelection);
+                return false;
+            }
+
+            handler.SendSysMessage(CypherStrings.ObjectGuid, guid.ToString(), guid.GetHigh());
+            return true;
+        }
+
+        [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
+        static bool HandleHelpCommand(StringArguments args, CommandHandler handler)
+        {
+            string cmd = args.NextString("");
+            if (cmd.IsEmpty())
+            {
+                handler.ShowHelpForCommand(CommandManager.GetCommands(), "help");
+                handler.ShowHelpForCommand(CommandManager.GetCommands(), "");
+            }
+            else
+            {
+                if (!handler.ShowHelpForCommand(CommandManager.GetCommands(), cmd))
+                    handler.SendSysMessage(CypherStrings.NoHelpCmd);
+            }
+
+            return true;
+        }
+
+        [CommandNonGroup("hidearea", RBACPermissions.CommandHidearea)]
+        static bool HandleHideAreaCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            Player playerTarget = handler.GetSelectedPlayer();
+            if (!playerTarget)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
+
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            if (area == null)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            if (area.AreaBit < 0)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            uint offset = (uint)area.AreaBit / 64;
+            if (offset >= PlayerConst.ExploredZonesSize)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            uint val = (1u << (area.AreaBit % 64));
+            playerTarget.RemoveExploredZones(offset, val);
+
+            handler.SendSysMessage(CypherStrings.UnexploreArea);
+            return true;
+        }
+
+        // move item to other slot
+        [CommandNonGroup("itemmove", RBACPermissions.CommandItemmove)]
+        static bool HandleItemMoveCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            byte srcSlot = args.NextByte();
+            byte dstSlot = args.NextByte();
+
+            if (srcSlot == dstSlot)
+                return true;
+
+            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, srcSlot, true))
+                return false;
+
+            if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, dstSlot, false))
+                return false;
+
+            ushort src = (ushort)((InventorySlots.Bag0 << 8) | srcSlot);
+            ushort dst = (ushort)((InventorySlots.Bag0 << 8) | dstSlot);
+
+            handler.GetSession().GetPlayer().SwapItem(src, dst);
+
             return true;
         }
 
         // kick player
         [CommandNonGroup("kick", RBACPermissions.CommandKick, true)]
-        static bool Kick(StringArguments args, CommandHandler handler)
+        static bool HandleKickPlayerCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             string playerName;
@@ -965,90 +1088,8 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("unstuck", RBACPermissions.CommandUnstuck, true)]
-        static bool HandleUnstuckCommand(StringArguments args, CommandHandler handler)
-        {
-            uint SPELL_UNSTUCK_ID = 7355;
-            uint SPELL_UNSTUCK_VISUAL = 2683;
-
-            // No args required for players
-            if (handler.GetSession() != null && handler.GetSession().HasPermission(RBACPermissions.CommandsUseUnstuckWithArgs))
-            {
-                // 7355: "Stuck"
-                var player1 = handler.GetSession().GetPlayer();
-                if (player1)
-                    player1.CastSpell(player1, SPELL_UNSTUCK_ID, false);
-                return true;
-            }
-
-            if (args.Empty())
-                return false;
-
-            string location_str = "inn";
-            string loc = args.NextString();
-            if (string.IsNullOrEmpty(loc))
-                location_str = loc;
-
-            Player player;
-            ObjectGuid targetGUID;
-            if (!handler.ExtractPlayerTarget(args, out player, out targetGUID))
-                return false;
-
-            if (!player)
-            {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
-                stmt.AddValue(0, targetGUID.GetCounter());
-                SQLResult result = DB.Characters.Query(stmt);
-                if (!result.IsEmpty())
-                {
-                    Player.SavePositionInDB(new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);
-                    return true;
-                }
-
-                return false;
-            }
-
-            if (player.IsInFlight() || player.IsInCombat())
-            {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID, Difficulty.None);
-                if (spellInfo == null)
-                    return false;
-
-                Player caster = handler.GetSession().GetPlayer();
-                if (caster)
-                {
-                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, SPELL_UNSTUCK_VISUAL, castId, SpellCastResult.CantDoThatRightNow);
-                }
-
-                return false;
-            }
-
-            if (location_str == "inn")
-            {
-                var home = player.GetHomebind();
-                player.TeleportTo(home.GetMapId(), home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), player.GetOrientation());
-                return true;
-            }
-
-            if (location_str == "graveyard")
-            {
-                player.RepopAtGraveyard();
-                return true;
-            }
-
-            if (location_str == "startzone")
-            {
-                player.TeleportTo(player.GetStartPosition());
-                return true;
-            }
-
-            //Not a supported argument
-            return false;
-        }
-
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool LinkGrave(StringArguments args, CommandHandler handler)
+        static bool HandleLinkGraveCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -1094,8 +1135,285 @@ namespace Game.Chat
             return true;
         }
 
+        [CommandNonGroup("listfreeze", RBACPermissions.CommandListfreeze)]
+        static bool HandleListFreezeCommand(StringArguments args, CommandHandler handler)
+        {
+            // Get names from DB
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
+            SQLResult result = DB.Characters.Query(stmt);
+            if (result.IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.CommandNoFrozenPlayers);
+                return true;
+            }
+
+            // Header of the names
+            handler.SendSysMessage(CypherStrings.CommandListFreeze);
+
+            // Output of the results
+            do
+            {
+                string player = result.Read<string>(0);
+                int remaintime = result.Read<int>(1);
+                // Save the frozen player to update remaining time in case of future .listfreeze uses
+                // before the frozen state expires
+                Player frozen = Global.ObjAccessor.FindPlayerByName(player);
+                if (frozen)
+                    frozen.SaveToDB();
+                // Notify the freeze duration
+                if (remaintime == -1) // Permanent duration
+                    handler.SendSysMessage(CypherStrings.CommandPermaFrozenPlayer, player);
+                else
+                    // show time left (seconds)
+                    handler.SendSysMessage(CypherStrings.CommandTempFrozenPlayer, player, remaintime / Time.InMilliseconds);
+            }
+            while (result.NextRow());
+
+            return true;
+        }
+
+        [CommandNonGroup("mailbox", RBACPermissions.CommandMailbox)]
+        static bool HandleMailBoxCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+
+            handler.GetSession().SendShowMailBox(player.GetGUID());
+            return true;
+        }
+
+        [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
+        static bool HandleMovegensCommand(StringArguments args, CommandHandler handler)
+        {
+            Unit unit = handler.GetSelectedUnit();
+            if (!unit)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+
+                return false;
+            }
+
+            handler.SendSysMessage(CypherStrings.MovegensList, (unit.IsTypeId(TypeId.Player) ? "Player" : "Creature"), unit.GetGUID().ToString());
+
+            MotionMaster motionMaster = unit.GetMotionMaster();
+            float x, y, z;
+            motionMaster.GetDestination(out x, out y, out z);
+
+            for (byte i = 0; i < (int)MovementSlot.Max; ++i)
+            {
+                IMovementGenerator movementGenerator = motionMaster.GetMotionSlot(i);
+                if (movementGenerator == null)
+                {
+                    handler.SendSysMessage("Empty");
+                    continue;
+                }
+
+                switch (movementGenerator.GetMovementGeneratorType())
+                {
+                    case MovementGeneratorType.Idle:
+                        handler.SendSysMessage(CypherStrings.MovegensIdle);
+                        break;
+                    case MovementGeneratorType.Random:
+                        handler.SendSysMessage(CypherStrings.MovegensRandom);
+                        break;
+                    case MovementGeneratorType.Waypoint:
+                        handler.SendSysMessage(CypherStrings.MovegensWaypoint);
+                        break;
+                    case MovementGeneratorType.Confused:
+                        handler.SendSysMessage(CypherStrings.MovegensConfused);
+                        break;
+                    case MovementGeneratorType.Chase:
+                        {
+                            Unit target;
+                            if (unit.IsTypeId(TypeId.Player))
+                                target = ((ChaseMovementGenerator<Player>)movementGenerator).GetTarget();
+                            else
+                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).GetTarget();
+
+                            if (!target)
+                                handler.SendSysMessage(CypherStrings.MovegensChaseNull);
+                            else if (target.IsTypeId(TypeId.Player))
+                                handler.SendSysMessage(CypherStrings.MovegensChasePlayer, target.GetName(), target.GetGUID().ToString());
+                            else
+                                handler.SendSysMessage(CypherStrings.MovegensChaseCreature, target.GetName(), target.GetGUID().ToString());
+                            break;
+                        }
+                    case MovementGeneratorType.Follow:
+                        {
+                            Unit target;
+                            if (unit.IsTypeId(TypeId.Player))
+                                target = ((FollowMovementGenerator<Player>)movementGenerator).GetTarget();
+                            else
+                                target = ((FollowMovementGenerator<Creature>)movementGenerator).GetTarget();
+
+                            if (!target)
+                                handler.SendSysMessage(CypherStrings.MovegensFollowNull);
+                            else if (target.IsTypeId(TypeId.Player))
+                                handler.SendSysMessage(CypherStrings.MovegensFollowPlayer, target.GetName(), target.GetGUID().ToString());
+                            else
+                                handler.SendSysMessage(CypherStrings.MovegensFollowCreature, target.GetName(), target.GetGUID().ToString());
+                            break;
+                        }
+                    case MovementGeneratorType.Home:
+                        {
+                            if (unit.IsTypeId(TypeId.Unit))
+                                handler.SendSysMessage(CypherStrings.MovegensHomeCreature, x, y, z);
+                            else
+                                handler.SendSysMessage(CypherStrings.MovegensHomePlayer);
+                            break;
+                        }
+                    case MovementGeneratorType.Flight:
+                        handler.SendSysMessage(CypherStrings.MovegensFlight);
+                        break;
+                    case MovementGeneratorType.Point:
+                        {
+                            handler.SendSysMessage(CypherStrings.MovegensPoint, x, y, z);
+                            break;
+                        }
+                    case MovementGeneratorType.Fleeing:
+                        handler.SendSysMessage(CypherStrings.MovegensFear);
+                        break;
+                    case MovementGeneratorType.Distract:
+                        handler.SendSysMessage(CypherStrings.MovegensDistract);
+                        break;
+                    case MovementGeneratorType.Effect:
+                        handler.SendSysMessage(CypherStrings.MovegensEffect);
+                        break;
+                    default:
+                        handler.SendSysMessage(CypherStrings.MovegensUnknown, movementGenerator.GetMovementGeneratorType());
+                        break;
+                }
+            }
+            return true;
+        }
+
+        // mute player for some times
+        [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
+        static bool HandleMuteCommand(StringArguments args, CommandHandler handler)
+        {
+            string nameStr;
+            string delayStr;
+            handler.ExtractOptFirstArg(args, out nameStr, out delayStr);
+            if (string.IsNullOrEmpty(delayStr))
+                return false;
+
+            string muteReason = args.NextString();
+            string muteReasonStr = "No reason";
+            if (muteReason != null)
+                muteReasonStr = muteReason;
+
+            Player target;
+            ObjectGuid targetGuid;
+            string targetName;
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
+                return false;
+
+            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+
+            // find only player from same account if any
+            if (!target)
+            {
+                WorldSession session = Global.WorldMgr.FindSession(accountId);
+                if (session != null)
+                    target = session.GetPlayer();
+            }
+
+            if (!uint.TryParse(delayStr, out uint notSpeakTime))
+                return false;
+
+            // must have strong lesser security level
+            if (handler.HasLowerSecurity(target, targetGuid, true))
+                return false;
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            string muteBy;
+            if (handler.GetSession() != null)
+                muteBy = handler.GetSession().GetPlayerName();
+            else
+                muteBy = "Console";
+
+            if (target)
+            {
+                // Target is online, mute will be in effect right away.
+                long muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
+                target.GetSession().m_muteTime = muteTime;
+                stmt.AddValue(0, muteTime);
+                string nameLink = handler.PlayerLink(targetName);
+
+                if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
+                {
+                    Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, (handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server"), nameLink, notSpeakTime, muteReasonStr);
+                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
+                }
+                else
+                {
+                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
+                }
+            }
+            else
+            {
+                // Target is offline, mute will be in effect starting from the next login.
+                int muteTime = -(int)(notSpeakTime * Time.Minute);
+                stmt.AddValue(0, muteTime);
+            }
+
+            stmt.AddValue(1, muteReasonStr);
+            stmt.AddValue(2, muteBy);
+            stmt.AddValue(3, accountId);
+            DB.Login.Execute(stmt);
+            string nameLink_ = handler.PlayerLink(targetName);
+
+            if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld) && !target)
+                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, handler.GetSession().GetPlayerName(), nameLink_, notSpeakTime, muteReasonStr);
+            else
+                handler.SendSysMessage(target ? CypherStrings.YouDisableChat : CypherStrings.CommandDisableChatDelayed, nameLink_, notSpeakTime, muteReasonStr);
+            return true;
+        }
+
+        // mutehistory command
+        [CommandNonGroup("mutehistory", RBACPermissions.CommandMutehistory, true)]
+        static bool HandleMuteInfoCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            string accountName = args.NextString("");
+            if (accountName.IsEmpty())
+                return false;
+
+            uint accountId = Global.AccountMgr.GetId(accountName);
+            if (accountId == 0)
+            {
+                handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                return false;
+            }
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
+            stmt.AddValue(0, accountId);
+
+            SQLResult result = DB.Login.Query(stmt);
+            if (result.IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.CommandMutehistoryEmpty, accountName);
+                return true;
+            }
+
+            handler.SendSysMessage(CypherStrings.CommandMutehistory, accountName);
+            do
+            {
+                // we have to manually set the string for mutedate
+                long sqlTime = result.Read<uint>(0);
+
+                // set it to string
+                string buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
+
+                handler.SendSysMessage(CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), result.Read<string>(2), result.Read<string>(3));
+            } while (result.NextRow());
+
+            return true;
+        }
+
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
-        static bool NearGrave(StringArguments args, CommandHandler handler)
+        static bool HandleNearGraveCommand(StringArguments args, CommandHandler handler)
         {
             string px2 = args.NextString();
             Team team;
@@ -1151,129 +1469,6 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.CommandZonenografaction, zone_id, team_name);
             }
 
-            return true;
-        }
-
-        [CommandNonGroup("showarea", RBACPermissions.CommandShowarea)]
-        static bool ShowArea(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
-            if (area == null)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            if (area.AreaBit < 0)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            uint offset = (uint)area.AreaBit / 64;
-            if (offset >= PlayerConst.ExploredZonesSize)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            ulong val = 1ul << (area.AreaBit % 64);
-            playerTarget.AddExploredZones(offset, val);
-
-            handler.SendSysMessage(CypherStrings.ExploreArea);
-            return true;
-        }
-
-        [CommandNonGroup("hidearea", RBACPermissions.CommandHidearea)]
-        static bool HideArea(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Player playerTarget = handler.GetSelectedPlayer();
-            if (!playerTarget)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-                return false;
-            }
-
-            AreaTableRecord  area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
-            if (area == null)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            if (area.AreaBit < 0)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            uint offset = (uint)area.AreaBit / 64;
-            if (offset >= PlayerConst.ExploredZonesSize)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            uint val = (1u << (area.AreaBit % 64));
-            playerTarget.RemoveExploredZones(offset, val);
-
-            handler.SendSysMessage(CypherStrings.UnexploreArea);
-            return true;
-        }
-
-        [CommandNonGroup("bank", RBACPermissions.CommandBank)]
-        static bool Bank(StringArguments args, CommandHandler handler)
-        {
-            handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID());
-            return true;
-        }
-
-        [CommandNonGroup("wchange", RBACPermissions.CommandWchange)]
-        static bool WChange(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            // Weather is OFF
-            if (!WorldConfig.GetBoolValue(WorldCfg.Weather))
-            {
-                handler.SendSysMessage(CypherStrings.WeatherDisabled);
-                return false;
-            }
-
-            // *Change the weather of a cell            
-            //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-            if (!uint.TryParse(args.NextString(), out uint type))
-                return false; 
-            
-            //0 to 1, sending -1 is instand good weather
-            if (!float.TryParse(args.NextString(), out float grade))
-                return false;                       
-
-            Player player = handler.GetSession().GetPlayer();
-            uint zoneid = player.GetZoneId();
-
-            Weather weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
-            if (weather == null)
-            {
-                handler.SendSysMessage(CypherStrings.NoWeather);
-                return false;
-            }
-
-            weather.SetWeather((WeatherType)type, grade);
             return true;
         }
 
@@ -1625,491 +1820,97 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("respawn", RBACPermissions.CommandRespawn)]
-        static bool Respawn(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-
-            // accept only explicitly selected target (not implicitly self targeting case)
-            Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
-            if (target)
-            {
-                if (target.IsPet())
-                {
-                    handler.SendSysMessage(CypherStrings.SelectCreature);
-                    return false;
-                }
-
-                if (target.IsDead())
-                    target.Respawn();
-                return true;
-            }
-
-            var worker = new WorldObjectWorker(player, new RespawnDo());
-            Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
-
-            return true;
-        }
-
-        // mute player for some times
-        [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool Mute(StringArguments args, CommandHandler handler)
-        {
-            string nameStr;
-            string delayStr;
-            handler.ExtractOptFirstArg(args, out nameStr, out delayStr);
-            if (string.IsNullOrEmpty(delayStr))
-                return false;
-
-            string muteReason = args.NextString();
-            string muteReasonStr = "No reason";
-            if (muteReason != null)
-                muteReasonStr = muteReason;
-
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
-                return false;
-
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
-
-            // find only player from same account if any
-            if (!target)
-            {
-                WorldSession session = Global.WorldMgr.FindSession(accountId);
-                if (session != null)
-                    target = session.GetPlayer();
-            }
-
-            if (!uint.TryParse(delayStr, out uint notSpeakTime))
-                return false;
-
-            // must have strong lesser security level
-            if (handler.HasLowerSecurity(target, targetGuid, true))
-                return false;
-
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
-            string muteBy;
-            if (handler.GetSession() != null)
-                muteBy = handler.GetSession().GetPlayerName();
-            else
-                muteBy = "Console";
-
-            if (target)
-            {
-                // Target is online, mute will be in effect right away.
-                long muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
-                target.GetSession().m_muteTime = muteTime;
-                stmt.AddValue(0, muteTime);
-                string nameLink = handler.PlayerLink(targetName);
-
-                if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
-                {
-                    Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, (handler.GetSession() != null ? handler.GetSession().GetPlayerName() : "Server"), nameLink, notSpeakTime, muteReasonStr);
-                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
-                }
-                else
-                {
-                    target.SendSysMessage(CypherStrings.YourChatDisabled, notSpeakTime, muteBy, muteReasonStr);
-                }
-            }
-            else
-            {
-                // Target is offline, mute will be in effect starting from the next login.
-                int muteTime = -(int)(notSpeakTime * Time.Minute);
-                stmt.AddValue(0, muteTime);
-            }
-
-            stmt.AddValue(1, muteReasonStr);
-            stmt.AddValue(2, muteBy);
-            stmt.AddValue(3, accountId);
-            DB.Login.Execute(stmt);
-            string nameLink_ = handler.PlayerLink(targetName);
-
-            if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld) && !target)
-                Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, handler.GetSession().GetPlayerName(), nameLink_, notSpeakTime, muteReasonStr);
-            else
-                handler.SendSysMessage(target ? CypherStrings.YouDisableChat : CypherStrings.CommandDisableChatDelayed, nameLink_, notSpeakTime, muteReasonStr);
-            return true;
-        }
-
-        // unmute player
-        [CommandNonGroup("unmute", RBACPermissions.CommandUnmute, true)]
-        static bool UnMute(StringArguments args, CommandHandler handler)
-        {
-            Player target;
-            ObjectGuid targetGuid;
-            string targetName;
-            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
-                return false;
-
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
-
-            // find only player from same account if any
-            if (!target)
-            {
-                WorldSession session = Global.WorldMgr.FindSession(accountId);
-                if (session != null)
-                    target = session.GetPlayer();
-            }
-
-            // must have strong lesser security level
-            if (handler.HasLowerSecurity(target, targetGuid, true))
-                return false;
-
-            if (target)
-            {
-                if (target.GetSession().CanSpeak())
-                {
-                    handler.SendSysMessage(CypherStrings.ChatAlreadyEnabled);
-                    return false;
-                }
-
-                target.GetSession().m_muteTime = 0;
-            }
-
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
-            stmt.AddValue(0, 0);
-            stmt.AddValue(1, "");
-            stmt.AddValue(2, "");
-            stmt.AddValue(3, accountId);
-            DB.Login.Execute(stmt);
-
-            if (target)
-                target.SendSysMessage(CypherStrings.YourChatEnabled);
-
-            string nameLink = handler.PlayerLink(targetName);
-
-            handler.SendSysMessage(CypherStrings.YouEnableChat, nameLink);
-
-            return true;
-        }
-
-        // mutehistory command
-        [CommandNonGroup("mutehistory", RBACPermissions.CommandMutehistory, true)]
-        static bool HandleMuteInfoCommand(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
+        static bool HandlePlayAllCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
 
-            string accountName = args.NextString("");
-            if (accountName.IsEmpty())
-                return false;
+            uint soundId = args.NextUInt32();
 
-            uint accountId = Global.AccountMgr.GetId(accountName);
-            if (accountId == 0)
+            if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
-                handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
                 return false;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
-            stmt.AddValue(0, accountId);
+            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId));
 
-            SQLResult result = DB.Login.Query(stmt);
-            if (result.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.CommandMutehistoryEmpty, accountName);
-                return true;
-            }
-
-            handler.SendSysMessage(CypherStrings.CommandMutehistory, accountName);
-            do
-            {
-                // we have to manually set the string for mutedate
-                long sqlTime = result.Read<uint>(0);
-
-                // set it to string
-                string buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
-
-                handler.SendSysMessage(CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), result.Read<string>(2), result.Read<string>(3));
-            } while (result.NextRow());
-
+            handler.SendSysMessage(CypherStrings.CommandPlayedToAll, soundId);
             return true;
         }
 
-        [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
-        static bool MoveGens(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
+        static bool HandlePossessCommand(StringArguments args, CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
-            }
 
-            handler.SendSysMessage(CypherStrings.MovegensList, (unit.IsTypeId(TypeId.Player) ? "Player" : "Creature"), unit.GetGUID().ToString());
-
-            MotionMaster motionMaster = unit.GetMotionMaster();
-            float x, y, z;
-            motionMaster.GetDestination(out x, out y, out z);
-
-            for (byte i = 0; i < (int)MovementSlot.Max; ++i)
-            {
-                IMovementGenerator movementGenerator = motionMaster.GetMotionSlot(i);
-                if (movementGenerator == null)
-                {
-                    handler.SendSysMessage("Empty");
-                    continue;
-                }
-
-                switch (movementGenerator.GetMovementGeneratorType())
-                {
-                    case MovementGeneratorType.Idle:
-                        handler.SendSysMessage(CypherStrings.MovegensIdle);
-                        break;
-                    case MovementGeneratorType.Random:
-                        handler.SendSysMessage(CypherStrings.MovegensRandom);
-                        break;
-                    case MovementGeneratorType.Waypoint:
-                        handler.SendSysMessage(CypherStrings.MovegensWaypoint);
-                        break;
-                    case MovementGeneratorType.Confused:
-                        handler.SendSysMessage(CypherStrings.MovegensConfused);
-                        break;
-                    case MovementGeneratorType.Chase:
-                        {
-                            Unit target;
-                            if (unit.IsTypeId(TypeId.Player))
-                                target = ((ChaseMovementGenerator<Player>)movementGenerator).GetTarget();
-                            else
-                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).GetTarget();
-
-                            if (!target)
-                                handler.SendSysMessage(CypherStrings.MovegensChaseNull);
-                            else if (target.IsTypeId(TypeId.Player))
-                                handler.SendSysMessage(CypherStrings.MovegensChasePlayer, target.GetName(), target.GetGUID().ToString());
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensChaseCreature, target.GetName(), target.GetGUID().ToString());
-                            break;
-                        }
-                    case MovementGeneratorType.Follow:
-                        {
-                            Unit target;
-                            if (unit.IsTypeId(TypeId.Player))
-                                target = ((FollowMovementGenerator<Player>)movementGenerator).GetTarget();
-                            else
-                                target = ((FollowMovementGenerator<Creature>)movementGenerator).GetTarget();
-
-                            if (!target)
-                                handler.SendSysMessage(CypherStrings.MovegensFollowNull);
-                            else if (target.IsTypeId(TypeId.Player))
-                                handler.SendSysMessage(CypherStrings.MovegensFollowPlayer, target.GetName(), target.GetGUID().ToString());
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensFollowCreature, target.GetName(), target.GetGUID().ToString());
-                            break;
-                        }
-                    case MovementGeneratorType.Home:
-                        {
-                            if (unit.IsTypeId(TypeId.Unit))
-                                handler.SendSysMessage(CypherStrings.MovegensHomeCreature, x, y, z);
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensHomePlayer);
-                            break;
-                        }
-                    case MovementGeneratorType.Flight:
-                        handler.SendSysMessage(CypherStrings.MovegensFlight);
-                        break;
-                    case MovementGeneratorType.Point:
-                        {
-                            handler.SendSysMessage(CypherStrings.MovegensPoint, x, y, z);
-                            break;
-                        }
-                    case MovementGeneratorType.Fleeing:
-                        handler.SendSysMessage(CypherStrings.MovegensFear);
-                        break;
-                    case MovementGeneratorType.Distract:
-                        handler.SendSysMessage(CypherStrings.MovegensDistract);
-                        break;
-                    case MovementGeneratorType.Effect:
-                        handler.SendSysMessage(CypherStrings.MovegensEffect);
-                        break;
-                    default:
-                        handler.SendSysMessage(CypherStrings.MovegensUnknown, movementGenerator.GetMovementGeneratorType());
-                        break;
-                }
-            }
+            handler.GetSession().GetPlayer().CastSpell(unit, 530, true);
             return true;
         }
 
-        [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
-        static bool HandleComeToMeCommand(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("pvpstats", RBACPermissions.CommandPvpstats, true)]
+        static bool HandlePvPstatsCommand(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.GetSelectedCreature();
-            if (!caster)
+            if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
-                handler.SendSysMessage(CypherStrings.SelectCreature);
-                return false;
-            }
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
+                SQLResult result = DB.Characters.Query(stmt);
 
-            Player player = handler.GetSession().GetPlayer();
-            caster.GetMotionMaster().MovePoint(0, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-
-            return true;
-        }
-
-        [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool Damage(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            string str = args.NextString();
-
-            if (str == "go")
-            {
-                ulong guidLow = args.NextUInt64();
-                if (guidLow == 0)
+                if (!result.IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
+                    uint horde_victories = result.Read<uint>(1);
 
-                int damage = args.NextInt32();
-                if (damage == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-                Player player = handler.GetSession().GetPlayer();
-                if (player)
-                {
-                    GameObject go = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
-                    if (!go)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
+                    if (!(result.NextRow()))
                         return false;
-                    }
 
-                    if (!go.IsDestructibleBuilding())
-                    {
-                        handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
-                        return false;
-                    }
+                    uint alliance_victories = result.Read<uint>(1);
 
-                    go.ModifyHealth(-damage, player);
-                    handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), guidLow, -damage, go.GetGoValue().Building.Health);
+                    handler.SendSysMessage(CypherStrings.Pvpstats, alliance_victories, horde_victories);
                 }
-
-                return true;
-            }
-
-            Unit target = handler.GetSelectedUnit();
-            if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-            Player player_ = target.ToPlayer();
-            if (player_)
-                if (handler.HasLowerSecurity(player_, ObjectGuid.Empty, false))
+                else
                     return false;
-
-            if (!target.IsAlive())
-                return true;
-
-            if (!int.TryParse(str, out int damage_int))
-                return false;
-            
-            if (damage_int <= 0)
-                return true;
-
-            uint damage_ = (uint)damage_int;
-
-            string schoolStr = args.NextString();
-
-            Player attacker = handler.GetSession().GetPlayer();
-
-            // flat melee damage without resistence/etc reduction
-            if (string.IsNullOrEmpty(schoolStr))
-            {
-                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
-                if (target != attacker)
-                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
-                return true;
             }
+            else
+                handler.SendSysMessage(CypherStrings.PvpstatsDisabled);
 
-            if (!int.TryParse(schoolStr, out int school) || school >= (int)SpellSchools.Max)
-                return false;
-
-            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
-
-            if (attacker.IsDamageReducedByArmor(schoolmask))
-                damage_ = attacker.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
-
-            string spellStr = args.NextString();
-
-            // melee damage by specific school
-            if (string.IsNullOrEmpty(spellStr))
-            {
-                DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
-                attacker.CalcAbsorbResist(dmgInfo);
-
-                if (dmgInfo.GetDamage() == 0)
-                    return true;
-
-                damage_ = dmgInfo.GetDamage();
-
-                uint absorb = dmgInfo.GetAbsorb();
-                uint resist = dmgInfo.GetResist();
-                attacker.DealDamageMods(target, ref damage_, ref absorb);
-                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
-                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
-                return true;
-            }
-
-            // non-melee damage
-            // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellid = handler.ExtractSpellIdFromLink(args);
-            if (spellid == 0)
-                return false;
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return false;
-
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
-            damageInfo.damage = damage_;
-            attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
-            target.DealSpellDamage(damageInfo, true);
-            target.SendSpellNonMeleeDamageLog(damageInfo);
             return true;
         }
 
-        [CommandNonGroup("combatstop", RBACPermissions.CommandCombatstop, true)]
-        static bool CombatStop(StringArguments args, CommandHandler handler)
+        // Teleport player to last position
+        [CommandNonGroup("recall", RBACPermissions.CommandRecall)]
+        static bool HandleRecallCommand(StringArguments args, CommandHandler handler)
         {
-            Player target = null;
-
-            if (!args.Empty())
-            {
-                target = Global.ObjAccessor.FindPlayerByName(args.NextString());
-                if (!target)
-                {
-                    handler.SendSysMessage(CypherStrings.PlayerNotFound);
-                    return false;
-                }
-            }
-
-            if (!target)
-            {
-                if (!handler.ExtractPlayerTarget(args, out target))
-                    return false;
-            }
+            Player target;
+            if (!handler.ExtractPlayerTarget(args, out target))
+                return false;
 
             // check online security
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            target.CombatStop();
-            target.GetHostileRefManager().DeleteReferences();
+            if (target.IsBeingTeleported())
+            {
+                handler.SendSysMessage(CypherStrings.IsTeleported, handler.GetNameLink(target));
+
+                return false;
+            }
+
+            // stop flight if need
+            if (target.IsInFlight())
+            {
+                target.GetMotionMaster().MovementExpired();
+                target.CleanupAfterTaxiFlight();
+            }
+
+            target.Recall();
             return true;
         }
 
         [CommandNonGroup("repairitems", RBACPermissions.CommandRepairitems, true)]
-        static bool RepairItems(StringArguments args, CommandHandler handler)
+        static bool HandleRepairitemsCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -2129,96 +1930,265 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("freeze", RBACPermissions.CommandFreeze)]
-        static bool HandleFreezeCommand(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("respawn", RBACPermissions.CommandRespawn)]
+        static bool HandleRespawnCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
-            int freezeDuration = 0; // Freeze Duration (in seconds)
-            bool canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
-            bool getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
+            Player player = handler.GetSession().GetPlayer();
 
-            if (args.Empty())
+            // accept only explicitly selected target (not implicitly self targeting case)
+            Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
+            if (target)
             {
-                // Might have a selected player. We'll check it later
-                // Get the duration from world cfg
-                getDurationFromConfig = true;
+                if (target.IsPet())
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCreature);
+                    return false;
+                }
+
+                if (target.IsDead())
+                    target.Respawn();
+                return true;
+            }
+
+            // First handle any creatures that still have a corpse around
+            var worker = new WorldObjectWorker(player, new RespawnDo());
+            Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
+
+            // Now handle any that had despawned, but had respawn time logged.
+            List<RespawnInfo> data = new List<RespawnInfo>();
+            player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All, 0);
+            if (!data.Empty())
+            {
+                uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
+                foreach (RespawnInfo info in data)
+                    if (info.gridId == gridId)
+                        player.GetMap().RemoveRespawnTime(info, true);
+            }
+
+            return true;
+        }
+
+        [CommandNonGroup("revive", RBACPermissions.CommandRevive, true)]
+        static bool HandleReviveCommand(StringArguments args, CommandHandler handler)
+        {
+            Player target;
+            ObjectGuid targetGuid;
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid))
+                return false;
+
+            if (target != null)
+            {
+                target.ResurrectPlayer(0.5f);
+                target.SpawnCorpseBones();
+                target.SaveToDB();
+            }
+            else
+                Player.OfflineResurrect(targetGuid, null);
+
+            return true;
+        }
+
+        // Save all players in the world
+        [CommandNonGroup("saveall", RBACPermissions.CommandSaveall, true)]
+        static bool HandleSaveAllCommand(StringArguments args, CommandHandler handler)
+        {
+            Global.ObjAccessor.SaveAllPlayers();
+            handler.SendSysMessage(CypherStrings.PlayersSaved);
+            return true;
+        }
+
+        [CommandNonGroup("save", RBACPermissions.CommandSave)]
+        static bool HandleSaveCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+
+            // save GM account without delay and output message
+            if (handler.GetSession().HasPermission(RBACPermissions.CommandsSaveWithoutDelay))
+            {
+                Player target = handler.GetSelectedPlayer();
+                if (target)
+                    target.SaveToDB();
+                else
+                    player.SaveToDB();
+                handler.SendSysMessage(CypherStrings.PlayerSaved);
+                return true;
+            }
+
+            // save if the player has last been saved over 20 seconds ago
+            uint saveInterval = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            if (saveInterval == 0 || (saveInterval > 20 * Time.InMilliseconds && player.GetSaveTimer() <= saveInterval - 20 * Time.InMilliseconds))
+                player.SaveToDB();
+
+            return true;
+        }
+
+        [CommandNonGroup("showarea", RBACPermissions.CommandShowarea)]
+        static bool HandleShowAreaCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            Player playerTarget = handler.GetSelectedPlayer();
+            if (!playerTarget)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
+
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            if (area == null)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            if (area.AreaBit < 0)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            uint offset = (uint)area.AreaBit / 64;
+            if (offset >= PlayerConst.ExploredZonesSize)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            ulong val = 1ul << (area.AreaBit % 64);
+            playerTarget.AddExploredZones(offset, val);
+
+            handler.SendSysMessage(CypherStrings.ExploreArea);
+            return true;
+        }
+
+        // Summon Player
+        [CommandNonGroup("summon", RBACPermissions.CommandSummon)]
+        static bool HandleSummonCommand(StringArguments args, CommandHandler handler)
+        {
+            Player target;
+            ObjectGuid targetGuid;
+            string targetName;
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+                return false;
+
+            Player _player = handler.GetSession().GetPlayer();
+            if (target == _player || targetGuid == _player.GetGUID())
+            {
+                handler.SendSysMessage(CypherStrings.CantTeleportSelf);
+
+                return false;
+            }
+
+            if (target)
+            {
+                string nameLink = handler.PlayerLink(targetName);
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
+
+                if (target.IsBeingTeleported())
+                {
+                    handler.SendSysMessage(CypherStrings.IsTeleported, nameLink);
+
+                    return false;
+                }
+
+                Map map = _player.GetMap();
+                if (map.IsBattlegroundOrArena())
+                {
+                    // only allow if gm mode is on
+                    if (!_player.IsGameMaster())
+                    {
+                        handler.SendSysMessage(CypherStrings.CannotGoToBgGm, nameLink);
+                        return false;
+                    }
+                    // if both players are in different bgs
+                    else if (target.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
+                        target.LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
+
+                    // all's well, set bg id
+                    // when porting out from the bg, it will be reset to 0
+                    target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
+                    // remember current position as entry point for return at bg end teleportation
+                    if (!target.GetMap().IsBattlegroundOrArena())
+                        target.SetBattlegroundEntryPoint();
+                }
+                else if (map.Instanceable())
+                {
+                    Map targetMap = target.GetMap();
+
+                    Player targetGroupLeader = null;
+                    Group targetGroup = target.GetGroup();
+                    if (targetGroup != null)
+                        targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
+
+                    // check if far teleport is allowed
+                    if (targetGroupLeader == null || (targetGroupLeader.GetMapId() != map.GetId()) || (targetGroupLeader.GetInstanceId() != map.GetInstanceId()))
+                    {
+                        if ((targetMap.GetId() != map.GetId()) || (targetMap.GetInstanceId() != map.GetInstanceId()))
+                        {
+                            handler.SendSysMessage(CypherStrings.CannotSummonToInst);
+                            return false;
+                        }
+                    }
+
+                    // check if we're already in a different instance of the same map
+                    if ((targetMap.GetId() == map.GetId()) && (targetMap.GetInstanceId() != map.GetInstanceId()))
+                    {
+                        handler.SendSysMessage(CypherStrings.CannotSummonInstInst, nameLink);
+                        return false;
+                    }
+                }
+
+                handler.SendSysMessage(CypherStrings.Summoning, nameLink, "");
+                if (handler.NeedReportToTarget(target))
+                    target.SendSysMessage(CypherStrings.SummonedBy, handler.PlayerLink(_player.GetName()));
+
+                // stop flight if need
+                if (target.IsInFlight())
+                {
+                    target.GetMotionMaster().MovementExpired();
+                    target.CleanupAfterTaxiFlight();
+                }
+                // save only in non-flight case
+                else
+                    target.SaveRecallPosition();
+
+                // before GM
+                float x, y, z;
+                _player.GetClosePoint(out x, out y, out z, target.GetCombatReach());
+                target.TeleportTo(_player.GetMapId(), x, y, z, target.GetOrientation());
+                PhasingHandler.InheritPhaseShift(target, _player);
+                target.UpdateObjectVisibility();
             }
             else
             {
-                // Get the args that we might have (up to 2)
-                string arg1 = args.NextString();
-                string arg2 = args.NextString();
+                // check offline security
+                if (handler.HasLowerSecurity(null, targetGuid))
+                    return false;
 
-                // Analyze them to see if we got either a playerName or duration or both
-                if (!arg1.IsEmpty())
-                {
-                    if (arg1.IsNumber())
-                    {
-                        // case 2: .freeze duration
-                        // We have a selected player. We'll check him later
-                        if (!int.TryParse(arg1, out freezeDuration))
-                            return false;
-                        canApplyFreeze = true;
-                    }
-                    else
-                    {
-                        // case 3 or 4: .freeze player duration | .freeze player
-                        // find the player
-                        string name = arg1;
-                        ObjectManager.NormalizePlayerName(ref name);
-                        player = Global.ObjAccessor.FindPlayerByName(name);
-                        // Check if we have duration set
-                        if (!arg2.IsEmpty() && arg2.IsNumber())
-                        {
-                            if (!int.TryParse(arg2, out freezeDuration))
-                                return false;
-                            canApplyFreeze = true;
-                        }
-                        else
-                            getDurationFromConfig = true;
-                    }
-                }
+                string nameLink = handler.PlayerLink(targetName);
+
+                handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
+
+                // in point where GM stay
+                Player.SavePositionInDB(new WorldLocation(_player.GetMapId(), _player.GetPositionX(), _player.GetPositionY(), _player.GetPositionZ(), _player.GetOrientation()), _player.GetZoneId(), targetGuid);
             }
 
-            // Check if duration needs to be retrieved from config
-            if (getDurationFromConfig)
-            {
-                freezeDuration = WorldConfig.GetIntValue(WorldCfg.GmFreezeDuration);
-                canApplyFreeze = true;
-            }
+            return true;
+        }
 
-            // Player and duration retrieval is over
-            if (canApplyFreeze)
-            {
-                if (!player) // can be null if some previous selection failed
-                {
-                    handler.SendSysMessage(CypherStrings.CommandFreezeWrong);
-                    return true;
-                }
-                else if (player == handler.GetSession().GetPlayer())
-                {
-                    // Can't freeze himself
-                    handler.SendSysMessage(CypherStrings.CommandFreezeError);
-                    return true;
-                }
-                else // Apply the effect
-                {
-                    // Add the freeze aura and set the proper duration
-                    // Player combat status and flags are now handled
-                    // in Freeze Spell AuraScript (OnApply)
-                    Aura freeze = player.AddAura(9454, player);
-                    if (freeze != null)
-                    {
-                        if (freezeDuration != 0)
-                            freeze.SetDuration(freezeDuration * Time.InMilliseconds);
-                        handler.SendSysMessage(CypherStrings.CommandFreeze, player.GetName());
-                        // save player
-                        player.SaveToDB();
-                        return true;
-                    }
-                }
-            }
-            return false;
+        [CommandNonGroup("unbindsight", RBACPermissions.CommandUnbindsight)]
+        static bool HandleUnbindSightCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+
+            if (player.IsPossessing())
+                return false;
+
+            player.StopCastingBindSight();
+            return true;
         }
 
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
@@ -2280,76 +2250,60 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("listfreeze", RBACPermissions.CommandListfreeze)]
-        static bool ListFreeze(StringArguments args, CommandHandler handler)
+        // unmute player
+        [CommandNonGroup("unmute", RBACPermissions.CommandUnmute, true)]
+        static bool HandleUnmuteCommand(StringArguments args, CommandHandler handler)
         {
-            // Get names from DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.CommandNoFrozenPlayers);
-                return true;
-            }
-
-            // Header of the names
-            handler.SendSysMessage(CypherStrings.CommandListFreeze);
-
-            // Output of the results
-            do
-            {
-                string player = result.Read<string>(0);
-                int remaintime = result.Read<int>(1);
-                // Save the frozen player to update remaining time in case of future .listfreeze uses
-                // before the frozen state expires
-                Player frozen = Global.ObjAccessor.FindPlayerByName(player);
-                if (frozen)
-                    frozen.SaveToDB();
-                // Notify the freeze duration
-                if (remaintime == -1) // Permanent duration
-                    handler.SendSysMessage(CypherStrings.CommandPermaFrozenPlayer, player);
-                else
-                    // show time left (seconds)
-                    handler.SendSysMessage(CypherStrings.CommandTempFrozenPlayer, player, remaintime / Time.InMilliseconds);
-            }
-            while (result.NextRow());
-
-            return true;
-        }
-
-        [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
-        static bool PlayAll(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
+            Player target;
+            ObjectGuid targetGuid;
+            string targetName;
+            if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint soundId = args.NextUInt32();
+            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
-            if (!CliDB.SoundKitStorage.ContainsKey(soundId))
+            // find only player from same account if any
+            if (!target)
             {
-                handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
-                return false;
+                WorldSession session = Global.WorldMgr.FindSession(accountId);
+                if (session != null)
+                    target = session.GetPlayer();
             }
 
-            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId));
-
-            handler.SendSysMessage(CypherStrings.CommandPlayedToAll, soundId);
-            return true;
-        }
-
-        [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
-        static bool Possess(StringArguments args, CommandHandler handler)
-        {
-            Unit unit = handler.GetSelectedUnit();
-            if (!unit)
+            // must have strong lesser security level
+            if (handler.HasLowerSecurity(target, targetGuid, true))
                 return false;
 
-            handler.GetSession().GetPlayer().CastSpell(unit, 530, true);
+            if (target)
+            {
+                if (target.GetSession().CanSpeak())
+                {
+                    handler.SendSysMessage(CypherStrings.ChatAlreadyEnabled);
+                    return false;
+                }
+
+                target.GetSession().m_muteTime = 0;
+            }
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            stmt.AddValue(0, 0);
+            stmt.AddValue(1, "");
+            stmt.AddValue(2, "");
+            stmt.AddValue(3, accountId);
+            DB.Login.Execute(stmt);
+
+            if (target)
+                target.SendSysMessage(CypherStrings.YourChatEnabled);
+
+            string nameLink = handler.PlayerLink(targetName);
+
+            handler.SendSysMessage(CypherStrings.YouEnableChat, nameLink);
+
             return true;
         }
 
         [CommandNonGroup("unpossess", RBACPermissions.CommandUnpossess)]
-        static bool UnPossess(StringArguments args, CommandHandler handler)
+        static bool HandleUnPossessCommand(StringArguments args, CommandHandler handler)
         {
             Unit unit = handler.GetSelectedUnit();
             if (!unit)
@@ -2360,63 +2314,121 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
-        static bool BindSight(StringArguments args, CommandHandler handler)
+        [CommandNonGroup("unstuck", RBACPermissions.CommandUnstuck, true)]
+        static bool HandleUnstuckCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.GetSelectedUnit();
-            if (!unit)
-                return false;
+            uint SPELL_UNSTUCK_ID = 7355;
+            uint SPELL_UNSTUCK_VISUAL = 2683;
 
-            handler.GetSession().GetPlayer().CastSpell(unit, 6277, true);
-            return true;
-        }
-
-        [CommandNonGroup("unbindsight", RBACPermissions.CommandUnbindsight)]
-        static bool UnbindSight(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-
-            if (player.IsPossessing())
-                return false;
-
-            player.StopCastingBindSight();
-            return true;
-        }
-
-        [CommandNonGroup("mailbox", RBACPermissions.CommandMailbox)]
-        static bool MailBox(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-
-            handler.GetSession().SendShowMailBox(player.GetGUID());
-            return true;
-        }
-
-        [CommandNonGroup("pvpstats", RBACPermissions.CommandPvpstats, true)]
-        static bool HandlePvPstatsCommand(StringArguments args, CommandHandler handler)
-        {
-            if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
+            // No args required for players
+            if (handler.GetSession() != null && handler.GetSession().HasPermission(RBACPermissions.CommandsUseUnstuckWithArgs))
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
-                SQLResult result = DB.Characters.Query(stmt);
+                // 7355: "Stuck"
+                var player1 = handler.GetSession().GetPlayer();
+                if (player1)
+                    player1.CastSpell(player1, SPELL_UNSTUCK_ID, false);
+                return true;
+            }
 
+            if (args.Empty())
+                return false;
+
+            string location_str = "inn";
+            string loc = args.NextString();
+            if (string.IsNullOrEmpty(loc))
+                location_str = loc;
+
+            Player player;
+            ObjectGuid targetGUID;
+            if (!handler.ExtractPlayerTarget(args, out player, out targetGUID))
+                return false;
+
+            if (!player)
+            {
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                stmt.AddValue(0, targetGUID.GetCounter());
+                SQLResult result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
-                    uint horde_victories = result.Read<uint>(1);
-
-                    if (!(result.NextRow()))
-                        return false;
-
-                    uint alliance_victories = result.Read<uint>(1);
-
-                    handler.SendSysMessage(CypherStrings.Pvpstats, alliance_victories, horde_victories);
+                    Player.SavePositionInDB(new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);
+                    return true;
                 }
-                else
-                    return false;
-            }
-            else
-                handler.SendSysMessage(CypherStrings.PvpstatsDisabled);
 
+                return false;
+            }
+
+            if (player.IsInFlight() || player.IsInCombat())
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID, Difficulty.None);
+                if (spellInfo == null)
+                    return false;
+
+                Player caster = handler.GetSession().GetPlayer();
+                if (caster)
+                {
+                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
+                    Spell.SendCastResult(caster, spellInfo, SPELL_UNSTUCK_VISUAL, castId, SpellCastResult.CantDoThatRightNow);
+                }
+
+                return false;
+            }
+
+            if (location_str == "inn")
+            {
+                var home = player.GetHomebind();
+                player.TeleportTo(home.GetMapId(), home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), player.GetOrientation());
+                return true;
+            }
+
+            if (location_str == "graveyard")
+            {
+                player.RepopAtGraveyard();
+                return true;
+            }
+
+            if (location_str == "startzone")
+            {
+                player.TeleportTo(player.GetStartPosition());
+                return true;
+            }
+
+            //Not a supported argument
+            return false;
+        }
+
+        [CommandNonGroup("wchange", RBACPermissions.CommandWchange)]
+        static bool HandleChangeWeather(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            // Weather is OFF
+            if (!WorldConfig.GetBoolValue(WorldCfg.Weather))
+            {
+                handler.SendSysMessage(CypherStrings.WeatherDisabled);
+                return false;
+            }
+
+            // *Change the weather of a cell            
+            //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+            if (!uint.TryParse(args.NextString(), out uint type))
+                return false; 
+            
+            //0 to 1, sending -1 is instand good weather
+            if (!float.TryParse(args.NextString(), out float grade))
+                return false;                       
+
+            Player player = handler.GetSession().GetPlayer();
+            uint zoneid = player.GetZoneId();
+
+            Weather weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
+            if (weather == null)
+            {
+                handler.SendSysMessage(CypherStrings.NoWeather);
+                return false;
+            }
+
+            weather.SetWeather((WeatherType)type, grade);
             return true;
         }
     }

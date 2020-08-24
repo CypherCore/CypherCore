@@ -474,6 +474,15 @@ namespace Game.AI
         // Object destruction is handled by Unit::RemoveCharmedBy
         public virtual PlayerAI GetAIForCharmedPlayer(Player who) { return null; }
 
+
+        /// <summary>
+        /// Should return true if the NPC is target of an escort quest
+        /// If onlyIfActive is set, should return true only if the escort quest is currently active
+        /// </summary>
+        /// <param name="onlyIfActive"></param>
+        /// <returns></returns>
+        public virtual bool IsEscortNPC(bool onlyIfActive)  { return false;    }
+        
         List<AreaBoundary> GetBoundary() { return _boundary; }
 
         bool MoveInLineOfSight_locked;

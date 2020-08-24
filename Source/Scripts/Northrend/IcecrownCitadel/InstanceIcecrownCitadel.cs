@@ -346,7 +346,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             // Weekly quest spawn prevention
             public override uint GetCreatureEntry(ulong guidLow, CreatureData data)
             {
-                uint entry = data.id;
+                uint entry = data.Id;
                 switch (entry)
                 {
                     case CreatureIds.InfiltratorMinchar:
@@ -384,13 +384,13 @@ namespace Scripts.Northrend.IcecrownCitadel
                     case CreatureIds.ZafodBoombox:
                         GameObjectTemplate go = Global.ObjectMgr.GetGameObjectTemplate(GameObjectIds.TheSkybreaker_A);
                         if (go != null)
-                            if ((TeamInInstance == Team.Alliance && data.mapid == go.MoTransport.SpawnMap) ||
-                                (TeamInInstance == Team.Horde && data.mapid != go.MoTransport.SpawnMap))
+                            if ((TeamInInstance == Team.Alliance && data.spawnPoint.GetMapId() == go.MoTransport.SpawnMap) ||
+                                (TeamInInstance == Team.Horde && data.spawnPoint.GetMapId() != go.MoTransport.SpawnMap))
                                 return entry;
                         return 0;
                     case CreatureIds.IGBMuradinBrozebeard:
-                        if ((TeamInInstance == Team.Alliance && data.posX > 10.0f) ||
-                            (TeamInInstance == Team.Horde && data.posX < 10.0f))
+                        if ((TeamInInstance == Team.Alliance && data.spawnPoint.GetPositionX() > 10.0f) ||
+                            (TeamInInstance == Team.Horde && data.spawnPoint.GetPositionX() < 10.0f))
                             return entry;
                         return 0;
                     default:
