@@ -383,7 +383,7 @@ namespace Game.Entities
             {
                 triggerJustAppeared = false;
                 GetAI().JustAppeared();
-                if (VehicleKit != null)
+                if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();
             }
 
@@ -1480,8 +1480,8 @@ namespace Game.Entities
             DB.World.CommitTransaction(trans);
 
             // then delete any active instances of the creature
-            var range = GetMap().GetCreatureBySpawnIdStore().LookupByKey(m_spawnId);
-            foreach (var creature in range)
+            var spawnMap = GetMap().GetCreatureBySpawnIdStore().LookupByKey(m_spawnId);
+            foreach (var creature in spawnMap)
                 creature.AddObjectToRemoveList();
         }
 
