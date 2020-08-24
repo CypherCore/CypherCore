@@ -227,7 +227,6 @@ namespace Game.Movement
 
             // inform formation
             creature.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0) ? true : false);
-
             return true;
         }
 
@@ -244,7 +243,6 @@ namespace Game.Movement
                 creature.StopMoving();
                 return true;
             }
-
 
             if (!_nextMoveTime.Passed())
             {

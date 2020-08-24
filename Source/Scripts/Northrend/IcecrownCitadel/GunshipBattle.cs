@@ -554,7 +554,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             Index = 0xFFFFFFFF;
 
             BurningPitchId = Instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipSpells.BurningPitchA : GunshipSpells.BurningPitchH;
-            me.SetRegeneratingHealth(false);
+            me.SetRegenerateHealth(false);
         }
 
         public override void SetData(uint type, uint data)
@@ -680,7 +680,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             _summonedFirstMage = false;
             _died = false;
 
-            me.SetRegeneratingHealth(false);
+            me.SetRegenerateHealth(false);
         }
 
         public override void DamageTaken(Unit source, ref uint damage)
@@ -844,7 +844,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             _controller.ResetSlots(Team.Horde);
             _controller.SetTransport(creature.GetTransport());
-            me.SetRegeneratingHealth(false);
+            me.SetRegenerateHealth(false);
             me.m_CombatDistance = 70.0f;
         }
 
@@ -1104,7 +1104,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             _controller.ResetSlots(Team.Alliance);
             _controller.SetTransport(creature.GetTransport());
-            me.SetRegeneratingHealth(false);
+            me.SetRegenerateHealth(false);
             me.m_CombatDistance = 70.0f;
         }
 

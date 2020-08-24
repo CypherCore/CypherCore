@@ -47,11 +47,7 @@ namespace Game.AI
                 owner.SetWalk(true);
                 owner.LoadCreaturesAddon();
                 owner.GetAI().JustReachedHome();
-                if (owner.IsRegeneratingHealth())
-                {
-                    owner.SetFullHealth();
-                    owner.SetPower(PowerType.Mana, owner.GetMaxPower(PowerType.Mana));
-                }
+                owner.SetSpawnHealth();
             }
         }
 

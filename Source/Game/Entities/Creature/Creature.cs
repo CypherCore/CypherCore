@@ -42,7 +42,7 @@ namespace Game.Entities
             m_boundaryCheckTime = 2500;
             reactState = ReactStates.Aggressive;
             DefaultMovementType = MovementGeneratorType.Idle;
-            m_regenHealth = true;
+            _regenerateHealth = true;
             m_meleeDamageSchoolMask = SpellSchoolMask.Normal;
             triggerJustAppeared = true;
 
@@ -329,7 +329,7 @@ namespace Game.Entities
 
             CreatureTemplate cInfo = GetCreatureTemplate();
 
-            m_regenHealth = cInfo.RegenHealth;
+            _regenerateHealth = cInfo.RegenHealth;
 
             // creatures always have melee weapon ready if any unless specified otherwise
             if (GetCreatureAddon() == null)
@@ -671,7 +671,7 @@ namespace Game.Entities
 
         void RegenerateHealth()
         {
-            if (!IsRegeneratingHealth())
+            if (!CanRegenerateHealth())
                 return;
 
             ulong curValue = GetHealth();
@@ -1436,12 +1436,11 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            if (m_creatureData == null)
+            if (_regenerateHealthLock)
                 return;
 
             ulong curhealth;
-
-            if (!m_regenHealth)
+            if (m_creatureData != null && !_regenerateHealth)
             {
                 curhealth = m_creatureData.curhealth;
                 if (curhealth != 0)
@@ -3178,8 +3177,8 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        public bool IsRegeneratingHealth() { return m_regenHealth; }
-        public void SetRegeneratingHealth(bool regenHealth) { m_regenHealth = regenHealth; }
+        public bool CanRegenerateHealth() { return !_regenerateHealthLock && _regenerateHealth; }
+        public void SetRegenerateHealth(bool value) { _regenerateHealthLock = !value; }
 
         public void SetHomePosition(float x, float y, float z, float o)
         {

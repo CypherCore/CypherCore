@@ -1896,7 +1896,7 @@ namespace Game.AI
                     {
                         foreach (var target in targets)
                             if (IsCreature(target))
-                                target.ToCreature().SetRegeneratingHealth(e.Action.setHealthRegen.regenHealth != 0 ? true : false);
+                                target.ToCreature().SetRegenerateHealth(e.Action.setHealthRegen.regenHealth != 0 ? true : false);
                         break;
                     }
                 case SmartActions.SetRoot:

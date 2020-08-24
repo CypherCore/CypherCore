@@ -36,6 +36,10 @@ namespace Game.Entities
         long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new MultiMap<byte, byte>();
 
+        // Regenerate health
+        bool _regenerateHealth; // Set on creation
+        bool _regenerateHealthLock; // Dynamically set
+
         public ulong m_PlayerDamageReq;
         public float m_SightDistance;
         public float m_CombatDistance;
@@ -49,7 +53,6 @@ namespace Game.Entities
 
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
-        bool m_regenHealth;
         bool m_cannotReachTarget;
         uint m_cannotReachTimer;
         bool m_AI_locked;
