@@ -3315,11 +3315,10 @@ namespace Game.Entities
 
             // last case when creature must not go to evade mode:
             // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
-            // for example at owner command to pet attack some far away creature
             // Note: creature does not have targeted movement generator but has attacker in this case
             foreach (var unit in attackerList)
             {
-                if (!CanCreatureAttack(unit) && !unit.IsTypeId(TypeId.Player)
+                if (CanCreatureAttack(unit) && !unit.IsTypeId(TypeId.Player)
                     && !unit.ToCreature().HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
                     return null;
             }
