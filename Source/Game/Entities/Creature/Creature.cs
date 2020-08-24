@@ -213,7 +213,12 @@ namespace Game.Entities
 
                     SaveRespawnTime(0, false);
                 }
-                AddObjectToRemoveList();
+
+                TempSummon summon = ToTempSummon();
+                if (summon != null)
+                    summon.UnSummon();
+                else
+                    AddObjectToRemoveList();
             }
         }
 
@@ -416,10 +421,11 @@ namespace Game.Entities
         {
             if (IsAIEnabled && triggerJustAppeared && m_deathState == DeathState.Alive)
             {
-                triggerJustAppeared = false;
-                GetAI().JustAppeared();
                 if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();
+
+                triggerJustAppeared = false;
+                GetAI().JustAppeared();
             }
 
             UpdateMovementFlags();

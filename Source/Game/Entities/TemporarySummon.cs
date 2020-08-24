@@ -52,9 +52,11 @@ namespace Game.Entities
                 UnSummon();
                 return;
             }
+
             switch (m_type)
             {
                 case TempSummonType.ManualDespawn:
+                case TempSummonType.DeadDespawn:
                     break;
                 case TempSummonType.TimedDespawn:
                     {
@@ -102,7 +104,7 @@ namespace Game.Entities
                 case TempSummonType.CorpseDespawn:
                     {
                         // if m_deathState is DEAD, CORPSE was skipped
-                        if (m_deathState == DeathState.Corpse || m_deathState == DeathState.Dead)
+                        if (m_deathState == DeathState.Corpse)
                         {
                             UnSummon();
                             return;
@@ -110,19 +112,9 @@ namespace Game.Entities
 
                         break;
                     }
-                case TempSummonType.DeadDespawn:
-                    {
-                        if (m_deathState == DeathState.Dead)
-                        {
-                            UnSummon();
-                            return;
-                        }
-                        break;
-                    }
                 case TempSummonType.TimedOrCorpseDespawn:
                     {
-                        // if m_deathState is DEAD, CORPSE was skipped
-                        if (m_deathState == DeathState.Corpse || m_deathState == DeathState.Dead)
+                        if (m_deathState == DeathState.Corpse)
                         {
                             UnSummon();
                             return;
@@ -144,13 +136,6 @@ namespace Game.Entities
                     }
                 case TempSummonType.TimedOrDeadDespawn:
                     {
-                        // if m_deathState is DEAD, CORPSE was skipped
-                        if (m_deathState == DeathState.Dead)
-                        {
-                            UnSummon();
-                            return;
-                        }
-
                         if (!IsInCombat() && IsAlive())
                         {
                             if (m_timer <= diff)

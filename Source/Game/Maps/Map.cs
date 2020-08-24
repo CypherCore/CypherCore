@@ -3901,7 +3901,7 @@ namespace Game.Maps
                 }
             }
 
-            TempSummon summon = null;
+            TempSummon summon;
             switch (mask)
             {
                 case UnitTypeMask.Summon:
@@ -3923,7 +3923,7 @@ namespace Game.Maps
                     return null;
             }
 
-            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId))
+            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos, null, vehId, true))
                 return null;
 
             // Set the summon to the summoner's phase
