@@ -159,6 +159,28 @@ namespace Game.Entities
             init.Stop();
         }
 
+        public virtual void PauseMovement(uint timer = 0, MovementSlot slot = 0)
+        {
+            if (slot >= MovementSlot.Max)
+                return;
+
+            IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
+            if (movementGenerator != null)
+                movementGenerator.Pause(timer);
+
+            StopMoving();
+        }
+
+        public void ResumeMovement(uint timer = 0, MovementSlot slot = 0)
+        {
+            if (slot >= MovementSlot.Max)
+                return;
+
+            IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
+            if (movementGenerator != null)
+                movementGenerator.Resume(timer);
+        }
+
         public void SetInFront(WorldObject target)
         {
             if (!HasUnitState(UnitState.CannotTurn))

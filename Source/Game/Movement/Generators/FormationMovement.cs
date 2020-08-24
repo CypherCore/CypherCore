@@ -22,7 +22,7 @@ namespace Game.Movement
 {
     public class FormationMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        public FormationMovementGenerator(uint id, Position destination, uint moveType, bool run, bool orientation)
+        public FormationMovementGenerator(uint id, Position destination, WaypointMoveType moveType, bool run, bool orientation)
         {
             _movementId = id;
             _destination = destination;
@@ -51,16 +51,16 @@ namespace Game.Movement
 
             switch (_moveType)
             {
-                case 2: // WAYPOINT_MOVE_TYPE_LAND
+                case WaypointMoveType.Land:
                     init.SetAnimation(AnimType.ToGround);
                     break;
-                case 3: // WAYPOINT_MOVE_TYPE_TAKEOFF
+                case WaypointMoveType.Takeoff:
                     init.SetAnimation(AnimType.ToFly);
                     break;
-                case 1: // WAYPOINT_MOVE_TYPE_RUN
+                case WaypointMoveType.Run:
                     init.SetWalk(false);
                     break;
-                case 0: // WAYPOINT_MOVE_TYPE_WALK
+                case WaypointMoveType.Walk:
                     init.SetWalk(true);
                     break;
             }
@@ -103,16 +103,16 @@ namespace Game.Movement
 
                 switch (_moveType)
                 {
-                    case 2: // WAYPOINT_MOVE_TYPE_LAND
+                    case WaypointMoveType.Land:
                         init.SetAnimation(AnimType.ToGround);
                         break;
-                    case 3: // WAYPOINT_MOVE_TYPE_TAKEOFF
+                    case WaypointMoveType.Takeoff:
                         init.SetAnimation(AnimType.ToFly);
                         break;
-                    case 1: // WAYPOINT_MOVE_TYPE_RUN
+                    case WaypointMoveType.Run:
                         init.SetWalk(false);
                         break;
-                    case 0: // WAYPOINT_MOVE_TYPE_WALK
+                    case WaypointMoveType.Walk:
                         init.SetWalk(true);
                         break;
                 }
@@ -151,7 +151,7 @@ namespace Game.Movement
 
         uint _movementId;
         Position _destination;
-        uint _moveType;
+        WaypointMoveType _moveType;
         bool _run;
         bool _orientation;
         bool _recalculateSpeed;

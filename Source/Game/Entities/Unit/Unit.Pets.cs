@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.AI;
+using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;
@@ -351,8 +352,15 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Unit))
             {
+                IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                if (movementGenerator != null)
+                    movementGenerator.Pause(0);
+
+                GetMotionMaster().Clear(MovementSlot.Active);
+
+                StopMoving();
+
                 ToCreature().GetAI().OnCharmed(true);
-                GetMotionMaster().MoveIdle();
             }
             else
             {
@@ -466,6 +474,7 @@ namespace Game.Entities
             else
                 RestoreFaction();
 
+            ///@todo Handle SLOT_IDLE motion resume
             GetMotionMaster().InitDefault();
 
             Creature creature = ToCreature();

@@ -197,22 +197,22 @@ namespace Game.Scripting
             LoadScriptWaypoints();
             LoadScriptSplineChains();
         }
+
         void LoadScriptWaypoints()
         {
             uint oldMSTime = Time.GetMSTime();
 
             // Drop Existing Waypoint list
+            _waypointStore.Clear();
 
-            m_mPointMoveMap.Clear();
-
-            ulong uiCreatureCount = 0;
+            ulong entryCount = 0;
 
             // Load Waypoints
             SQLResult result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
             if (!result.IsEmpty())
-                uiCreatureCount = result.Read<uint>(0);
+                entryCount = result.Read<uint>(0);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Script Waypoints for {0} creature(s)...", uiCreatureCount);
+            Log.outInfo(LogFilter.ServerLoading, $"Loading Script Waypoints for {entryCount} creature(s)...");
 
             //                                0       1         2           3           4           5
             result = DB.World.Query("SELECT entry, pointid, location_x, location_y, location_z, waittime FROM script_waypoint ORDER BY pointid");
@@ -227,28 +227,30 @@ namespace Game.Scripting
 
             do
             {
-                ScriptPointMove temp = new ScriptPointMove();
+                uint entry = result.Read<uint>(0);
+                uint id = result.Read<uint>(1);
+                float x = result.Read<float>(2);
+                float y = result.Read<float>(3);
+                float z = result.Read<float>(4);
+                uint waitTime = result.Read<uint>(5);
 
-                temp.uiCreatureEntry = result.Read<uint>(0);
-                uint uiEntry = temp.uiCreatureEntry;
-                temp.uiPointId = result.Read<uint>(1);
-                temp.fX = result.Read<float>(2);
-                temp.fY = result.Read<float>(3);
-                temp.fZ = result.Read<float>(4);
-                temp.uiWaitTime = result.Read<uint>(5);
-
-                CreatureTemplate pCInfo = Global.ObjectMgr.GetCreatureTemplate(temp.uiCreatureEntry);
-
-                if (pCInfo == null)
+                CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
+                if (info == null)
                 {
-                    Log.outError(LogFilter.Sql, "TSCR: DB table script_waypoint has waypoint for non-existant creature entry {0}", temp.uiCreatureEntry);
+                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for non-existant creature entry {entry}");
                     continue;
                 }
 
-                if (pCInfo.ScriptID == 0)
-                    Log.outError(LogFilter.Sql, "TSCR: DB table script_waypoint has waypoint for creature entry {0}, but creature does not have ScriptName defined and then useless.", temp.uiCreatureEntry);
+                if (info.ScriptID == 0)
+                    Log.outError(LogFilter.Sql, $"SystemMgr: DB table script_waypoint has waypoint for creature entry {entry}, but creature does not have ScriptName defined and then useless.");
 
-                m_mPointMoveMap.Add(uiEntry, temp);
+                if (!_waypointStore.ContainsKey(entry))
+                    _waypointStore[entry] = new WaypointPath();
+
+                WaypointPath path = _waypointStore[entry];
+                path.id = entry;
+                path.nodes.Add(new WaypointNode(id, x, y, z, 0.0f, waitTime));
+
                 ++count;
             }
             while (result.NextRow());
@@ -256,6 +258,7 @@ namespace Game.Scripting
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Script Waypoint nodes in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
 
         }
+
         void LoadScriptSplineChains()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -332,15 +335,22 @@ namespace Game.Scripting
                 Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for {0} chains, consisting of {1} splines with {2} waypoints in {3} ms", chainCount, splineCount, wpCount, Time.GetMSTimeDiffToNow(oldMSTime));
             }
         }
+
         public void FillSpellSummary()
         {
             UnitAI.FillAISpellInfo();
         }
 
+        public WaypointPath GetPath(uint creatureEntry)
+        {
+            return _waypointStore.LookupByKey(creatureEntry);
+        }
+        
         public List<SplineChainLink> GetSplineChain(Creature who, ushort chainId)
         {
             return GetSplineChain(who.GetEntry(), chainId);
         }
+
         List<SplineChainLink> GetSplineChain(uint entry, ushort chainId)
         {
             return m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
@@ -1242,11 +1252,6 @@ namespace Game.Scripting
             GetScriptRegistry<T>().AddScript(script);
         }
 
-        public List<ScriptPointMove> GetPointMoveList(uint creatureEntry)
-        {
-            return m_mPointMoveMap.LookupByKey(creatureEntry);
-        }
-
         ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
         {
             if (ScriptStorage.ContainsKey(typeof(T)))
@@ -1259,7 +1264,7 @@ namespace Game.Scripting
         public Dictionary<uint, SpellSummary> spellSummaryStorage = new Dictionary<uint, SpellSummary>();
         Hashtable ScriptStorage = new Hashtable();
 
-        MultiMap<uint, ScriptPointMove> m_mPointMoveMap = new MultiMap<uint, ScriptPointMove>();
+        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
         
         // creature entry + chain ID
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
@@ -1346,16 +1351,6 @@ namespace Game.Scripting
         // Counter used for code-only scripts.
         uint _scriptIdCounter;
         Dictionary<uint, TValue> ScriptMap = new Dictionary<uint, TValue>();
-    }
-
-    public class ScriptPointMove
-    {
-        public uint uiCreatureEntry;
-        public uint uiPointId;
-        public float fX;
-        public float fY;
-        public float fZ;
-        public uint uiWaitTime;
     }
 
     public class SpellSummary

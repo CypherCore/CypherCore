@@ -105,6 +105,21 @@ namespace Game.Entities
             ForcedDespawn(0);
         }
 
+        public override void PauseMovement(uint timer = 0, MovementSlot slot = 0)
+        {
+            base.PauseMovement(timer, slot);
+
+            SetHomePosition(GetPosition());
+        }
+
+        public bool IsReturningHome()
+        {
+            if (GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Home)
+                return true;
+
+            return false;
+        }
+        
         public void SearchFormation()
         {
             if (IsSummon())
@@ -119,6 +134,33 @@ namespace Game.Entities
                 FormationMgr.AddCreatureToGroup(frmdata.leaderGUID, this);
         }
 
+        public bool IsFormationLeader()
+        {
+            if (m_formation == null)
+                return false;
+
+            return m_formation.IsLeader(this);
+        }
+
+        public void SignalFormationMovement(Position destination, uint id = 0, WaypointMoveType moveType = 0, bool orientation = false)
+        {
+            if (m_formation == null)
+                return;
+
+            if (!m_formation.IsLeader(this))
+                return;
+
+            m_formation.LeaderMoveTo(destination, id, moveType, orientation);
+        }
+
+        public bool IsFormationLeaderMoveAllowed()
+        {
+            if (m_formation == null)
+                return false;
+
+            return m_formation.CanLeaderStartMoving();
+        }
+        
         public void RemoveCorpse(bool setSpawnTime = true, bool destroyForNearbyPlayers = true)
         {
             if (GetDeathState() != DeathState.Corpse)

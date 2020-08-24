@@ -340,8 +340,8 @@ namespace Game
                     if (!seamlessTeleport)
                     {
                         // short preparations to continue flight
-                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
-                        flight.Initialize(GetPlayer());
+                        IMovementGenerator movementGenerator = GetPlayer().GetMotionMaster().Top();
+                        movementGenerator.Initialize(GetPlayer());
                     }
                     return;
                 }

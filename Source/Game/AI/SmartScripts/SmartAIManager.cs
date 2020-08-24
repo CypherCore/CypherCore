@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Game.AI
@@ -296,11 +297,12 @@ namespace Game.AI
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SmartAI scripts in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadWaypointFromDB()
         {
             uint oldMSTime = Time.GetMSTime();
 
-            waypoint_map.Clear();
+            _waypointStore.Clear();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
             SQLResult result = DB.World.Query(stmt);
@@ -314,8 +316,8 @@ namespace Game.AI
 
             uint count = 0;
             uint total = 0;
-            uint last_entry = 0;
-            uint last_id = 1;
+            uint lastEntry = 0;
+            uint lastId = 1;
 
             do
             {
@@ -325,25 +327,30 @@ namespace Game.AI
                 float y = result.Read<float>(3);
                 float z = result.Read<float>(4);
 
-                if (last_entry != entry)
+                if (lastEntry != entry)
                 {
-                    last_id = 1;
-                    count++;
+                    lastId = 1;
+                    ++count;
                 }
 
-                if (last_id != id)
-                    Log.outError(LogFilter.Sql, "SmartWaypointMgr.LoadFromDB: Path entry {0}, unexpected point id {1}, expected {2}.", entry, id, last_id);
+                if (lastId != id)
+                    Log.outError(LogFilter.Sql, $"SmartWaypointMgr.LoadFromDB: Path entry {entry}, unexpected point id {id}, expected {lastId}.");
 
-                last_id++;
+                ++lastId;
 
-                waypoint_map.Add(entry, new WayPoint(id, x, y, z));
+                if (!_waypointStore.ContainsKey(entry))
+                    _waypointStore[entry] = new WaypointPath();
 
-                last_entry = entry;
-                total++;
+                WaypointPath path = _waypointStore[entry];
+                path.id = entry;
+                path.nodes.Add(new WaypointNode(id, x, y, z));
+
+                lastEntry = entry;
+                ++total;
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SmartAI waypoint paths (total {1} waypoints) in {2} ms", count, total, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         bool IsTargetValid(SmartScriptHolder e)
@@ -1110,17 +1117,19 @@ namespace Game.AI
                     break;
                 case SmartActions.WpStart:
                     {
-                        List<WayPoint> path = Global.SmartAIMgr.GetPath(e.Action.wpStart.pathID);
-                        if (path.Empty())
+                        WaypointPath path = GetPath(e.Action.wpStart.pathID);
+                        if (path == null || path.nodes.Empty())
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Creature {0} Event {1} Action {2} uses non-existent WaypointPath id {3}, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.Action.wpStart.pathID);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
                             return false;
                         }
+
                         if (e.Action.wpStart.quest != 0 && !IsQuestValid(e, e.Action.wpStart.quest))
                             return false;
+
                         if (e.Action.wpStart.reactState > (uint)ReactStates.Aggressive)
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Creature {0} Event {1} Action {2} uses invalid React State {3}, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.Action.wpStart.reactState);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid React State {e.Action.wpStart.reactState}, skipped.");
                             return false;
                         }
                         break;
@@ -1558,9 +1567,9 @@ namespace Game.AI
             return temp;
         }
 
-        public List<WayPoint> GetPath(uint id)
+        public WaypointPath GetPath(uint id)
         {
-            return waypoint_map.LookupByKey(id);
+            return _waypointStore.LookupByKey(id);
         }
 
         public SmartScriptHolder FindLinkedSourceEvent(List<SmartScriptHolder> list, uint eventId)
@@ -1582,7 +1591,7 @@ namespace Game.AI
         }
 
         MultiMap<int, SmartScriptHolder>[] mEventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
-        MultiMap<uint, WayPoint> waypoint_map = new MultiMap<uint, WayPoint>();
+        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
 
         Dictionary<SmartScriptType, uint> SmartAITypeMask = new Dictionary<SmartScriptType, uint>
         {
@@ -1686,22 +1695,6 @@ namespace Game.AI
             { SmartEvents.SpellEffectHit,           SmartScriptTypeMaskId.Spell },
             { SmartEvents.SpellEffectHitTarget,     SmartScriptTypeMaskId.Spell }
         };
-    }
-
-    public class WayPoint
-    {
-        public WayPoint(uint id, float x, float y, float z)
-        {
-            Id = id;
-            X = x;
-            Y = y;
-            Z = z;
-        }
-
-        public uint Id;
-        public float X;
-        public float Y;
-        public float Z;
     }
 
     public class SmartScriptHolder

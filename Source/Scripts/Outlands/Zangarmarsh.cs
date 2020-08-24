@@ -289,13 +289,13 @@ namespace Scripts.Outlands
     {
         public npc_kayra_longmane() : base("npc_kayra_longmane") { }
 
-        class npc_kayra_longmaneAI : NpcEscortAI
+        class npc_kayra_longmaneAI : EscortAI
         {
             public npc_kayra_longmaneAI(Creature creature) : base(creature) { }
 
             public override void Reset() { }
 
-            public override void WaypointReached(uint waypointId)
+            public override void WaypointReached(uint waypointId, uint pathId)
             {
                 Player player = GetPlayerForEscort();
                 if (!player)

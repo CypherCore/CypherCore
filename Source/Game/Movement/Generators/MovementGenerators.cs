@@ -34,7 +34,11 @@ namespace Game.Movement
         public abstract MovementGeneratorType GetMovementGeneratorType();
 
         public virtual void UnitSpeedChanged() { }
-        
+
+        public virtual void Pause(uint timer = 0) { }
+
+        public virtual void Resume(uint overrideTimer = 0) { }
+
         // used by Evade code for select point to evade with expected restart default movement
         public virtual bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {

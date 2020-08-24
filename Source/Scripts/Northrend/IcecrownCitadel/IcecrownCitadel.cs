@@ -666,7 +666,7 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class npc_crok_scourgebane : NpcEscortAI
+    class npc_crok_scourgebane : EscortAI
     {
         public npc_crok_scourgebane(Creature creature) : base(creature)
         {
@@ -748,7 +748,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             switch (waypointId)
             {
@@ -780,7 +780,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
         }
 
-        public override void WaypointStart(uint waypointId)
+        public override void WaypointStarted(uint waypointId, uint pathId)
         {
             _currentWPid = waypointId;
             switch (waypointId)

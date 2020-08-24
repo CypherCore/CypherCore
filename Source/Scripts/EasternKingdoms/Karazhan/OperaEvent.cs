@@ -1379,7 +1379,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     {
         public npc_barnes() : base("npc_barnes") { }
 
-        class npc_barnesAI : NpcEscortAI
+        class npc_barnesAI : EscortAI
         {
             public npc_barnesAI(Creature creature) : base(creature)
             {
@@ -1418,7 +1418,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             public override void EnterCombat(Unit who) { }
 
-            public override void WaypointReached(uint waypointId)
+            public override void WaypointReached(uint waypointId, uint pathId)
             {
                 switch (waypointId)
                 {

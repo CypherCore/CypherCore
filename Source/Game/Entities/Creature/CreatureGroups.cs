@@ -216,7 +216,7 @@ namespace Game.Entities
             m_Formed = !dismiss;
         }
 
-        public void LeaderMoveTo(Position destination, uint id = 0, uint moveType = 0, bool orientation = false)
+        public void LeaderMoveTo(Position destination, uint id = 0, WaypointMoveType moveType = 0, bool orientation = false)
         {
             //! To do: This should probably get its own movement generator or use WaypointMovementGenerator.
             //! If the leader's path is known, member's path can be plotted as well using formation offsets.
@@ -258,11 +258,26 @@ namespace Game.Entities
             }
         }
 
+        public bool CanLeaderStartMoving()
+        {
+            foreach (var itr in m_members)
+            {
+                if (itr.Key != m_leader && itr.Key.IsAlive())
+                {
+                    if (itr.Key.IsEngaged() || itr.Key.IsReturningHome())
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
         public Creature GetLeader() { return m_leader; }
         public uint GetId() { return m_groupID; }
         public bool IsEmpty() { return m_members.Empty(); }
         public bool IsFormed() { return m_Formed; }
-
+        public bool IsLeader(Creature creature) { return m_leader == creature; }
+        
         Creature m_leader;
         Dictionary<Creature, FormationInfo> m_members = new Dictionary<Creature, FormationInfo>();
 

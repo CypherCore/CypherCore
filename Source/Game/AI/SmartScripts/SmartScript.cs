@@ -1988,7 +1988,8 @@ namespace Game.AI
                                 waypoints.Add(id);
 
                         float distanceToClosest = float.MaxValue;
-                        WayPoint closestWp = null;
+                        uint closestPathId = 0;
+                        uint closestWaypointId = 0;
 
                         foreach (var target in targets)
                         {
@@ -1997,26 +1998,26 @@ namespace Game.AI
                             {
                                 if (IsSmart(creature))
                                 {
-                                    foreach (uint wpId in waypoints)
+                                    foreach (uint pathId in waypoints)
                                     {
-                                        var path = Global.SmartAIMgr.GetPath(wpId);
-                                        if (path == null || path.Empty())
+                                        WaypointPath path = Global.SmartAIMgr.GetPath(pathId);
+                                        if (path == null || path.nodes.Empty())
                                             continue;
 
-                                        WayPoint wp = path[0];
-                                        if (wp != null)
+                                        foreach (var waypoint in path.nodes)
                                         {
-                                            float distToThisPath = creature.GetDistance(wp.X, wp.Y, wp.Z);
+                                            float distToThisPath = creature.GetDistance(waypoint.x, waypoint.y, waypoint.z);
                                             if (distToThisPath < distanceToClosest)
                                             {
                                                 distanceToClosest = distToThisPath;
-                                                closestWp = wp;
+                                                closestPathId = pathId;
+                                                closestWaypointId = waypoint.id;
                                             }
                                         }
                                     }
 
-                                    if (closestWp != null)
-                                        ((SmartAI)creature.GetAI()).StartPath(false, closestWp.Id, true);
+                                    if (closestPathId != 0)
+                                        ((SmartAI)creature.GetAI()).StartPath(false, closestPathId, true, null, closestWaypointId);
                                 }
                             }
                         }

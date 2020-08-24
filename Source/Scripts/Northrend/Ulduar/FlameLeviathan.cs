@@ -867,7 +867,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
     }
 
     [Script]
-    class npc_mimirons_inferno : NpcEscortAI
+    class npc_mimirons_inferno : EscortAI
     {
         public npc_mimirons_inferno(Creature creature)
             : base(creature)
@@ -877,10 +877,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             me.SetReactState(ReactStates.Passive);
         }
 
-        public override void WaypointReached(uint waypointId)
-        {
-
-        }
+        public override void WaypointReached(uint waypointId, uint pathId) { }
 
         public override void Reset()
         {

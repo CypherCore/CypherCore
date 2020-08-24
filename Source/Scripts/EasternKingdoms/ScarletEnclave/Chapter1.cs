@@ -947,7 +947,7 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    class npc_scarlet_miner : NpcEscortAI
+    class npc_scarlet_miner : EscortAI
     {
         public npc_scarlet_miner(Creature creature) : base(creature)
         {
@@ -1012,7 +1012,7 @@ namespace Scripts.EasternKingdoms
             SetDespawnAtFar(false);
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             switch (waypointId)
             {

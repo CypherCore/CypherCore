@@ -1163,7 +1163,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_garments_of_quests : NpcEscortAI
+    class npc_garments_of_quests : EscortAI
     {
         public npc_garments_of_quests(Creature creature) : base(creature)
         {
@@ -1254,7 +1254,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
 
         }

@@ -102,7 +102,7 @@ namespace Game.Movement
                 DirectClean(reset);
         }
 
-        void Clear(MovementSlot slot)
+        public void Clear(MovementSlot slot)
         {
             if (Empty() || slot >= MovementSlot.Max)
                 return;
@@ -593,12 +593,17 @@ namespace Game.Movement
             StartMovement(new DistractMovementGenerator(timer), MovementSlot.Controlled);
         }
 
-        public void MovePath(uint path_id, bool repeatable)
+        public void MovePath(uint pathId, bool repeatable)
         {
-            if (path_id == 0)
+            if (pathId == 0)
                 return;
 
-            StartMovement(new WaypointMovementGenerator(path_id, repeatable), MovementSlot.Idle);
+            StartMovement(new WaypointMovementGenerator(pathId, repeatable), MovementSlot.Idle);
+        }
+
+        public void MovePath(WaypointPath path, bool repeatable)
+        {
+            StartMovement(new WaypointMovementGenerator(path, repeatable), MovementSlot.Idle);
         }
 
         void MoveRotate(uint time, RotateDirection direction)
@@ -609,7 +614,7 @@ namespace Game.Movement
             StartMovement(new RotateMovementGenerator(time, direction), MovementSlot.Active);
         }
 
-        public void MoveFormation(uint id, Position destination, uint moveType, bool forceRun = false, bool forceOrientation = false)
+        public void MoveFormation(uint id, Position destination, WaypointMoveType moveType, bool forceRun = false, bool forceOrientation = false)
         {
             if (_owner.GetTypeId() == TypeId.Unit)
                 StartMovement(new FormationMovementGenerator(id, destination, moveType, forceRun, forceOrientation), MovementSlot.Active);

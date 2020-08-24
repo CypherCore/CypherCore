@@ -117,8 +117,7 @@ namespace Game.Movement
             _timer.Reset(traveltime + resetTimer);
 
             // Call for creature group update
-            if (owner.GetFormation() != null && owner.GetFormation().GetLeader() == owner)
-                owner.GetFormation().LeaderMoveTo(position);
+            owner.SignalFormationMovement(position);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()

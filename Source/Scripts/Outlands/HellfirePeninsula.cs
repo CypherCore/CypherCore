@@ -115,7 +115,7 @@ namespace Scripts.Outlands
     }
 
     [Script]
-    class npc_ancestral_wolf : NpcEscortAI
+    class npc_ancestral_wolf : EscortAI
     {
         public npc_ancestral_wolf(Creature creature) : base(creature)
         {
@@ -146,7 +146,7 @@ namespace Scripts.Outlands
             base.MoveInLineOfSight(who);
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             switch (waypointId)
             {
@@ -167,7 +167,7 @@ namespace Scripts.Outlands
     }
 
     [Script]
-    class npc_wounded_blood_elf : NpcEscortAI
+    class npc_wounded_blood_elf : EscortAI
     {
         public npc_wounded_blood_elf(Creature creature) : base(creature) { }
 
@@ -193,7 +193,7 @@ namespace Scripts.Outlands
             }
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             Player player = GetPlayerForEscort();
             if (!player)

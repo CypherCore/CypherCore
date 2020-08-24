@@ -68,8 +68,7 @@ namespace Game.Movement
             // Call for creature group update
             Creature creature = owner.ToCreature();
             if (creature != null)
-            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
-                creature.GetFormation().LeaderMoveTo(_destination, _movementId);
+                creature.SignalFormationMovement(_destination, _movementId);
         }
 
         public override void DoReset(T owner)
@@ -109,8 +108,7 @@ namespace Game.Movement
                 // Call for creature group update
                 Creature creature = owner.ToCreature();
                 if (creature != null)
-                    if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
-                        creature.GetFormation().LeaderMoveTo(_destination, _movementId);
+                    creature.SignalFormationMovement(_destination, _movementId);
             }
 
             return !owner.MoveSpline.Finalized();

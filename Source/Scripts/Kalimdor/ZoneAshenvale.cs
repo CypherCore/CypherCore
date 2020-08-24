@@ -111,7 +111,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
 
 
     [Script]
-    class npc_ruul_snowhoof : NpcEscortAI
+    class npc_ruul_snowhoof : EscortAI
     {
         public npc_ruul_snowhoof(Creature creature) : base(creature) { }
 
@@ -138,7 +138,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             }
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             Player player = GetPlayerForEscort();
             if (!player)
@@ -170,7 +170,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
     }
 
     [Script]
-    public class npc_muglash : NpcEscortAI
+    public class npc_muglash : EscortAI
     {
         public npc_muglash(Creature creature) : base(creature)
         {
@@ -228,7 +228,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             }
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             Player player = GetPlayerForEscort();
             if (player)

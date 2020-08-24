@@ -72,7 +72,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
     }
 
     [Script]
-    class generic_vehicleAI_toc5 : NpcEscortAI
+    class generic_vehicleAI_toc5 : EscortAI
     {
         public generic_vehicleAI_toc5(Creature creature) : base(creature)
         {
@@ -124,7 +124,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                 Start(false, true);
         }
 
-        public override void WaypointReached(uint waypointId)
+        public override void WaypointReached(uint waypointId, uint pathId)
         {
             switch (waypointId)
             {

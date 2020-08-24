@@ -143,9 +143,8 @@ namespace Game
 
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Talk);
 
-            // and if he has pure gossip or is banker and moves or is tabard designer?
-            //if (unit->IsArmorer() || unit->IsCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider() || unit->IsGuard())
-            unit.StopMoving();
+            // Stop the npc if moving
+            unit.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
 
             // If spiritguide, no need for gossip menu, just put player into resurrect queue
             if (unit.IsSpiritGuide())
@@ -464,8 +463,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // Stop the npc if moving
-            if (vendor.HasUnitState(UnitState.Moving))
-                vendor.StopMoving();
+            vendor.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
 
             VendorItemData vendorItems = vendor.GetVendorItems();
             int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;

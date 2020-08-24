@@ -130,8 +130,7 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            while (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
-                GetPlayer().GetMotionMaster().MovementExpired(false);
+            GetPlayer().GetMotionMaster().Clear(MovementSlot.Controlled);
 
             if (mountDisplayId != 0)
                 GetPlayer().Mount(mountDisplayId);

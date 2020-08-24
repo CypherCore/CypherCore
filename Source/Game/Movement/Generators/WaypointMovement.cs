@@ -28,21 +28,45 @@ namespace Game.Movement
 {
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        const int FLIGHT_TRAVEL_UPDATE = 100;
-        const int TIMEDIFF_NEXT_WP = 250;
-
-        public WaypointMovementGenerator(uint pathid = 0, bool _repeating = true)
+        public WaypointMovementGenerator(uint pathId = 0, bool repeating = true)
         {
-            nextMoveTime = new TimeTrackerSmall(0);
-            isArrivalDone = false;
-            pathId = pathid;
-            repeating = _repeating;
+            _nextMoveTime = new TimeTrackerSmall(0);
+            _pathId = pathId;
+            _repeating = repeating;
+            _loadedFromDB = true;
         }
 
-        public override void DoReset(Creature creature)
+        public WaypointMovementGenerator(WaypointPath path, bool repeating = true)
         {
-            creature.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
-            StartMoveNow(creature);
+            _nextMoveTime = new TimeTrackerSmall(0);
+            _repeating = repeating;            
+            _path = path;
+        }
+
+        void LoadPath(Creature creature)
+        {
+            if (_loadedFromDB)
+            {
+                if (_pathId == 0)
+                    _pathId = creature.GetWaypointPath();
+
+                _path = Global.WaypointMgr.GetPath(_pathId);
+            }
+
+            if (_path == null)
+            {
+                // No path id found for entry
+                Log.outError(LogFilter.Sql, $"WaypointMovementGenerator.LoadPath: creature {creature.GetName()} ({creature.GetGUID()} DB GUID: {creature.GetSpawnId()}) doesn't have waypoint path id: {_pathId}");
+                return;
+            }
+
+            _nextMoveTime.Reset(1000);
+        }
+
+        public override void DoInitialize(Creature creature)
+        {
+            _done = false;
+            LoadPath(creature);
         }
 
         public override void DoFinalize(Creature creature)
@@ -51,110 +75,75 @@ namespace Game.Movement
             creature.SetWalk(false);
         }
 
-        public override void DoInitialize(Creature creature)
+        public override void DoReset(Creature creature)
         {
-            LoadPath(creature);
-            creature.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
+            if (!_done && CanMove(creature))
+                StartMoveNow(creature);
+            else if (_done)
+            {
+                // mimic IdleMovementGenerator
+                if (!creature.IsStopped())
+                    creature.StopMoving();
+            }
         }
 
-        public override bool DoUpdate(Creature creature, uint time_diff)
+        void OnArrived(Creature creature)
         {
-            // Waypoint movement can be switched on/off
-            // This is quite handy for escort quests and other stuff
-            if (creature.HasUnitState(UnitState.NotMove))
+            if (_path == null || _path.nodes.Empty())
+                return;
+
+            WaypointNode waypoint = _path.nodes.ElementAt((int)_currentNode);
+            if (waypoint.delay != 0)
             {
                 creature.ClearUnitState(UnitState.RoamingMove);
-                return true;
+                _nextMoveTime.Reset((int)waypoint.delay);
             }
 
-            // prevent a crash at empty waypoint path.
-            if (path == null || path.Empty())
-                return false;
-
-            if (Stopped())
+            if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
             {
-                if (CanMove((int)time_diff))
-                    return StartMove(creature);
-            }
-            else
-            {
-                // Set home position at place on waypoint movement.
-                if (creature.GetTransGUID().IsEmpty())
-                    creature.SetHomePosition(creature.GetPosition());
-
-                if (creature.IsStopped())
-                    Stop(WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer));
-                else if (creature.MoveSpline.Finalized())
-                {
-                    OnArrived(creature);
-                    return StartMove(creature);
-                }
+                Log.outDebug(LogFilter.MapsScript, $"Creature movement start script {waypoint.eventId} at point {_currentNode} for {creature.GetGUID()}.");
+                creature.ClearUnitState(UnitState.RoamingMove);
+                creature.GetMap().ScriptsStart(ScriptsType.Waypoint, waypoint.eventId, creature, null);
             }
 
-            return true;
-        }
-
-        void MovementInform(Creature creature)
-        {
+            // inform AI
             if (creature.IsAIEnabled)
-                creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, currentNode);
-        }
+            {
+                creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
 
-        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
-        {
-            x = y = z = 0;
-            // prevent a crash at empty waypoint path.
-            if (path == null || path.Empty())
-                return false;
+                Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+                creature.GetAI().WaypointReached(_path.nodes[_currentNode].id, _path.id);
+            }
 
-            var node = path.LookupByIndex((int)currentNode);
-            x = node.x;
-            y = node.y;
-            z = node.z;
-            return true;
-        }
-
-        void Stop(int time)
-        {
-            nextMoveTime.Reset(time);
-        }
-
-        bool Stopped()
-        {
-            return !nextMoveTime.Passed();
-        }
-
-        bool CanMove(int diff)
-        {
-            nextMoveTime.Update(diff);
-            return nextMoveTime.Passed();
-        }
-
-        void StartMoveNow(Creature creature)
-        {
-            nextMoveTime.Reset(0);
-            StartMove(creature);
+            creature.UpdateWaypointID((uint)_currentNode);
         }
 
         bool StartMove(Creature creature)
         {
-            if (path == null || path.Empty())
-                return false;
-
-            if (Stopped())
+            if (!creature || !creature.IsAlive())
                 return true;
+
+            if (_done || _path == null || _path.nodes.Empty())
+                return true;
+
+            // if the owner is the leader of its formation, check members status
+            if (creature.IsFormationLeader() && !creature.IsFormationLeaderMoveAllowed())
+            {
+                _nextMoveTime.Reset(1000);
+                return true;
+            }
 
             bool transportPath = creature.GetTransport() != null;
 
-            if (isArrivalDone)
+            if (_isArrivalDone)
             {
-                if ((currentNode == path.Count - 1) && !repeating) // If that's our last waypoint
+                if ((_currentNode == _path.nodes.Count - 1) && !_repeating) // If that's our last waypoint
                 {
-                    WaypointData waypoint = path.LookupByIndex((int)currentNode);
+                    WaypointNode lastWaypoint = _path.nodes.ElementAt(_currentNode);
 
-                    float x = waypoint.x;
-                    float y = waypoint.y;
-                    float z = waypoint.z;
+                    float x = lastWaypoint.x;
+                    float y = lastWaypoint.y;
+                    float z = lastWaypoint.z;
                     float o = creature.GetOrientation();
 
                     if (!transportPath)
@@ -173,21 +162,28 @@ namespace Game.Movement
                             transportPath = false;
                         // else if (vehicle) - this should never happen, vehicle offsets are const
                     }
-
-                    creature.GetMotionMaster().Initialize();
-                    return false;
+                    _done = true;
+                    return true;
                 }
 
-                currentNode = (uint)((currentNode + 1) % path.Count);
+                _currentNode = (_currentNode + 1) % _path.nodes.Count;
+
+                // inform AI
+                if (creature.IsAIEnabled)
+                {
+                    Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
+                    creature.GetAI().WaypointStarted(_path.nodes[(int)_currentNode].id, _path.id);
+                }
             }
 
-            var node = path.LookupByIndex((int)currentNode);
+            WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
+            Position formationDest = new Position(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
 
-            isArrivalDone = false;
+            _isArrivalDone = false;
+            _recalculateSpeed = false;
 
             creature.AddUnitState(UnitState.RoamingMove);
 
-            Position formationDest = new Position(node.x, node.y, node.z, (node.orientation != 0 && node.delay != 0) ? node.orientation : 0.0f);
             MoveSplineInit init = new MoveSplineInit(creature);
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
@@ -205,13 +201,13 @@ namespace Game.Movement
 
             //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
             //! but formationDest contains global coordinates
-            init.MoveTo(node.x, node.y, node.z);
+            init.MoveTo(waypoint.x, waypoint.y, waypoint.z);
 
             //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
-            if (node.orientation != 0 && node.delay != 0)
-                init.SetFacing(node.orientation);
+            if (waypoint.orientation != 0 && waypoint.delay != 0)
+                init.SetFacing(waypoint.orientation);
 
-            switch (node.moveType)
+            switch (waypoint.moveType)
             {
                 case WaypointMoveType.Land:
                     init.SetAnimation(AnimType.ToGround);
@@ -229,82 +225,146 @@ namespace Game.Movement
 
             init.Launch();
 
-            //Call for creature group update
-            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
-                creature.GetFormation().LeaderMoveTo(formationDest, node.id, (uint)node.moveType, (node.orientation != 0 && node.delay != 0) ? true : false);
+            // inform formation
+            creature.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0) ? true : false);
 
             return true;
         }
 
-        void LoadPath(Creature creature)
+        public override bool DoUpdate(Creature creature, uint diff)
         {
-            if (pathId == 0)
-                pathId = creature.GetWaypointPath();
+            if (!creature || !creature.IsAlive())
+                return true;
 
-            path = Global.WaypointMgr.GetPath(pathId);
+            if (_done || _path == null || _path.nodes.Empty())
+                return true;
 
-            if (path == null)
+            if (_stalled || creature.HasUnitState(UnitState.NotMove) || creature.IsMovementPreventedByCasting())
             {
-                // No movement found for entry
-                Log.outError(LogFilter.ScriptsAi, "WaypointMovementGenerator.LoadPath: creature {0} (Entry: {1} GUID: {2}) doesn't have waypoint path id: {3}", creature.GetName(), creature.GetEntry(), creature.GetGUID().ToString(), pathId);
-                return;
+                creature.StopMoving();
+                return true;
             }
 
-            StartMoveNow(creature);
-        }
 
-        void OnArrived(Creature creature)
-        {
-            if (path == null || path.Empty())
-                return;
-
-            if (isArrivalDone)
-                return;
-
-            isArrivalDone = true;
-
-            var current = path.LookupByIndex((int)currentNode);
-
-            if (current.eventId != 0 && RandomHelper.URand(0, 99) < current.eventChance)
+            if (!_nextMoveTime.Passed())
             {
-                Log.outDebug(LogFilter.Unit, "Creature movement start script {0} at point {1} for {2}.", current.eventId, currentNode, creature.GetGUID());
-                creature.ClearUnitState(UnitState.RoamingMove);
-                creature.GetMap().ScriptsStart(ScriptsType.Waypoint, current.eventId, creature, null);
+                _nextMoveTime.Update((int)diff);
+                if (_nextMoveTime.Passed())
+                    return StartMoveNow(creature);
+            }
+            else
+            {
+                // Set home position at place on waypoint movement.
+                if (creature.GetTransGUID().IsEmpty())
+                    creature.SetHomePosition(creature.GetPosition());
+
+                if (creature.MoveSpline.Finalized())
+                {
+                    OnArrived(creature);
+                    _isArrivalDone = true;
+
+                    if (_nextMoveTime.Passed())
+                        return StartMove(creature);
+                }
+                else if (_recalculateSpeed)
+                {
+                    if (_nextMoveTime.Passed())
+                        StartMove(creature);
+                }
             }
 
-            // Inform script
-            MovementInform(creature);
-            creature.UpdateWaypointID(currentNode);
-
-            if (current.delay != 0)
-            {
-                creature.ClearUnitState(UnitState.RoamingMove);
-                Stop((int)current.delay);
-            }
+            return true;
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType()
+        void MovementInform(Creature creature)
         {
-            return MovementGeneratorType.Waypoint;
+            if (creature.IsAIEnabled)
+                creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
         }
 
-        public uint GetCurrentNode() { return currentNode; }
+        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        {
+            x = y = z = 0;
+            // prevent a crash at empty waypoint path.
+            // prevent a crash at empty waypoint path.
+            if (_path == null || _path.nodes.Empty())
+                return false;
 
-        TimeTrackerSmall nextMoveTime;
+            WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
 
-        bool isArrivalDone;
-        uint pathId;
-        bool repeating;
-        List<WaypointData> path;
-        uint currentNode;
+            x = waypoint.x;
+            y = waypoint.y;
+            z = waypoint.z;
+            return true;
+        }
+
+        public override void Pause(uint timer = 0)
+        {
+            _stalled = timer != 0 ? false : true;
+            _nextMoveTime.Reset(timer != 0 ? (int)timer : 1);
+        }
+
+        public override void Resume(uint overrideTimer = 0)
+        {
+            _stalled = false;
+            if (overrideTimer != 0)
+                _nextMoveTime.Reset((int)overrideTimer);
+        }
+
+        bool CanMove(Creature creature)
+        {
+            return _nextMoveTime.Passed() && !creature.HasUnitState(UnitState.NotMove) && !creature.IsMovementPreventedByCasting();
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Waypoint; }
+
+        public override void UnitSpeedChanged() { _recalculateSpeed = true; }
+
+        bool StartMoveNow(Creature creature)
+        {
+            _nextMoveTime.Reset(0);
+            return StartMove(creature);
+        }
+
+        TimeTrackerSmall _nextMoveTime;
+        bool _recalculateSpeed;
+        bool _isArrivalDone;
+        uint _pathId;
+        bool _repeating;
+        bool _loadedFromDB;
+        bool _stalled;
+        bool _done;
+
+        WaypointPath _path;
+        int _currentNode;
     }
 
     public class FlightPathMovementGenerator : MovementGeneratorMedium<Player>
     {
+        uint GetPathAtMapEnd()
+        {
+            if (_currentNode >= _path.Count)
+                return (uint)_path.Count;
+
+            uint curMapId = _path[_currentNode].ContinentID;
+            for (int i = _currentNode; i < _path.Count; ++i)
+            {
+                if (_path[i].ContinentID != curMapId)
+                    return (uint)i;
+            }
+
+            return (uint)_path.Count;
+        }
+
+        bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
+        {
+            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
+        }
+        
         public void LoadPath(Player player, uint startNode = 0)
         {
-            i_path.Clear();
-            i_currentNode = (int)startNode;
+            _path.Clear();
+            _currentNode = (int)startNode;
             _pointsForPathSwitch.Clear();
             var taxi = player.m_taxi.GetPath();
             float discount = player.GetReputationPriceDiscount(player.m_taxi.GetFlightMasterFactionTemplate());
@@ -324,24 +384,24 @@ namespace Game.Movement
                     bool passedPreviousSegmentProximityCheck = false;
                     for (uint i = 0; i < nodes.Length; ++i)
                     {
-                        if (passedPreviousSegmentProximityCheck || src == 0 || i_path.Empty() || IsNodeIncludedInShortenedPath(i_path.Last(), nodes[i]))
+                        if (passedPreviousSegmentProximityCheck || src == 0 || _path.Empty() || IsNodeIncludedInShortenedPath(_path.Last(), nodes[i]))
                         {
                             if ((src == 0 || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
                                 (dst == taxi.Count - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.Length - 1)))
                             {
                                 passedPreviousSegmentProximityCheck = true;
-                                i_path.Add(nodes[i]);
+                                _path.Add(nodes[i]);
                             }
                         }
                         else
                         {
-                            i_path.RemoveAt(i_path.Count - 1);
+                            _path.RemoveAt(_path.Count - 1);
                             _pointsForPathSwitch[_pointsForPathSwitch.Count - 1].PathIndex -= 1;
                         }
                     }
                 }
 
-                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(i_path.Count - 1), (long)Math.Ceiling(cost * discount)));
+                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(_path.Count - 1), (long)Math.Ceiling(cost * discount)));
             }
         }
 
@@ -384,7 +444,7 @@ namespace Game.Movement
             init.args.path = new Vector3[end];
             for (int i = (int)GetCurrentNode(); i != end; ++i)
             {
-                Vector3 vertice = new Vector3(i_path[i].Loc.X, i_path[i].Loc.Y, i_path[i].Loc.Z);
+                Vector3 vertice = new Vector3(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
                 init.args.path[i] = vertice;
             }
             init.SetFirstPointId((int)GetCurrentNode());
@@ -399,13 +459,13 @@ namespace Game.Movement
         public override bool DoUpdate(Player player, uint time_diff)
         {
             uint pointId = (uint)player.MoveSpline.CurrentPathIdx();
-            if (pointId > i_currentNode)
+            if (pointId > _currentNode)
             {
                 bool departureEvent = true;
                 do
                 {
-                    DoEventIfAny(player, i_path[i_currentNode], departureEvent);
-                    while (!_pointsForPathSwitch.Empty() && _pointsForPathSwitch[0].PathIndex <= i_currentNode)
+                    DoEventIfAny(player, _path[_currentNode], departureEvent);
+                    while (!_pointsForPathSwitch.Empty() && _pointsForPathSwitch[0].PathIndex <= _currentNode)
                     {
                         _pointsForPathSwitch.RemoveAt(0);
                         player.m_taxi.NextTaxiDestination();
@@ -416,31 +476,31 @@ namespace Game.Movement
                         }
                     }
 
-                    if (pointId == i_currentNode)
+                    if (pointId == _currentNode)
                         break;
 
-                    if (i_currentNode == _preloadTargetNode)
+                    if (_currentNode == _preloadTargetNode)
                         PreloadEndGrid();
-                    i_currentNode += (departureEvent ? 1 : 0);
+                    _currentNode += (departureEvent ? 1 : 0);
                     departureEvent = !departureEvent;
                 }
                 while (true);
             }
 
-            return i_currentNode < (i_path.Count - 1);
+            return _currentNode < (_path.Count - 1);
         }
 
         public void SetCurrentNodeAfterTeleport()
         {
-            if (i_path.Empty() || i_currentNode >= i_path.Count)
+            if (_path.Empty() || _currentNode >= _path.Count)
                 return;
 
-            uint map0 = i_path[i_currentNode].ContinentID;
-            for (int i = i_currentNode + 1; i < i_path.Count; ++i)
+            uint map0 = _path[_currentNode].ContinentID;
+            for (int i = _currentNode + 1; i < _path.Count; ++i)
             {
-                if (i_path[i].ContinentID != map0)
+                if (_path[i].ContinentID != map0)
                 {
-                    i_currentNode = i;
+                    _currentNode = i;
                     return;
                 }
             }
@@ -459,7 +519,7 @@ namespace Game.Movement
 
         bool GetResetPos(Player player, out float x, out float y, out float z)
         {
-            TaxiPathNodeRecord node = i_path[i_currentNode];
+            TaxiPathNodeRecord node = _path[_currentNode];
             x = node.Loc.X;
             y = node.Loc.Y;
             z = node.Loc.Z;
@@ -468,11 +528,11 @@ namespace Game.Movement
 
         void InitEndGridInfo()
         {
-            int nodeCount = i_path.Count;        //! Number of nodes in path.
-            _endMapId = i_path[nodeCount - 1].ContinentID; //! MapId of last node
+            int nodeCount = _path.Count;        //! Number of nodes in path.
+            _endMapId = _path[nodeCount - 1].ContinentID; //! MapId of last node
             _preloadTargetNode = (uint)nodeCount - 3;
-            _endGridX = i_path[nodeCount - 1].Loc.X;
-            _endGridY = i_path[nodeCount - 1].Loc.Y;
+            _endGridX = _path[nodeCount - 1].Loc.X;
+            _endGridY = _path[nodeCount - 1].Loc.Y;
         }
 
         void PreloadEndGrid()
@@ -483,51 +543,30 @@ namespace Game.Movement
             // Load the grid
             if (endMap != null)
             {
-                Log.outInfo(LogFilter.Server, "Preloading grid ({0}, {1}) for map {2} at node index {3}/{4}", _endGridX, _endGridY, _endMapId, _preloadTargetNode, i_path.Count - 1);
+                Log.outInfo(LogFilter.Server, "Preloading grid ({0}, {1}) for map {2} at node index {3}/{4}", _endGridX, _endGridY, _endMapId, _preloadTargetNode, _path.Count - 1);
                 endMap.LoadGrid(_endGridX, _endGridY);
             }
             else
                 Log.outInfo(LogFilter.Server, "Unable to determine map to preload flightmaster grid");
         }
 
-        uint GetPathAtMapEnd()
-        {
-            if (i_currentNode >= i_path.Count)
-                return (uint)i_path.Count;
-
-            uint curMapId = i_path[i_currentNode].ContinentID;
-            for (int i = i_currentNode; i < i_path.Count; ++i)
-            {
-                if (i_path[i].ContinentID != curMapId)
-                    return (uint)i;
-            }
-
-            return (uint)i_path.Count;
-        }
-
-        bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
-        {
-            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
-        }
-
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Flight; }
 
-        public List<TaxiPathNodeRecord> GetPath() { return i_path; }
+        public List<TaxiPathNodeRecord> GetPath() { return _path; }
 
-        bool HasArrived() { return (i_currentNode >= i_path.Count); }
+        bool HasArrived() { return (_currentNode >= _path.Count); }
 
-        public void SkipCurrentNode() { ++i_currentNode; }
+        public void SkipCurrentNode() { ++_currentNode; }
 
-        public uint GetCurrentNode() { return (uint)i_currentNode; }
-
+        public uint GetCurrentNode() { return (uint)_currentNode; }
 
         float _endGridX;                //! X coord of last node location
         float _endGridY;                //! Y coord of last node location
         uint _endMapId;               //! map Id of last node location
         uint _preloadTargetNode;      //! node index where preloading starts
 
-        int i_currentNode;
-        List<TaxiPathNodeRecord> i_path = new List<TaxiPathNodeRecord>();
+        List<TaxiPathNodeRecord> _path = new List<TaxiPathNodeRecord>();
+        int _currentNode;
         List<TaxiNodeChangeInfo> _pointsForPathSwitch = new List<TaxiNodeChangeInfo>();    //! node indexes and costs where TaxiPath changes
 
         class TaxiNodeChangeInfo

@@ -71,8 +71,9 @@ namespace Game
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
             // Stop the npc if moving
-            creature.StopMoving();
+            creature.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
 
             _player.PlayerTalkClass.ClearMenus();
             if (creature.GetAI().GossipHello(_player))
