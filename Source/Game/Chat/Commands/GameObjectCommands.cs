@@ -101,6 +101,100 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]
+        static bool HandleGameObjectDespawnGroup(StringArguments args, CommandHandler handler)
+        {
+            return NPCCommands.HandleNpcDespawnGroup(args, handler);
+        }
+
+        [Command("info", RBACPermissions.CommandGobjectInfo)]
+        static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            string param1 = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
+            if (param1.IsEmpty())
+                return false;
+
+            uint entry;
+            if (param1.Equals("guid"))
+            {
+                string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
+                if (cValue.IsEmpty())
+                    return false;
+
+                if (!ulong.TryParse(cValue, out ulong guidLow))
+                    return false;
+
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guidLow);
+                if (data == null)
+                    return false;
+                entry = data.Id;
+            }
+            else
+            {
+                if (!uint.TryParse(param1, out entry))
+                    return false;
+            }
+
+            GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            if (gameObjectInfo == null)
+                return false;
+
+            GameObject thisGO = null;
+            if (handler.GetSession().GetPlayer())
+                thisGO = handler.GetSession().GetPlayer().FindNearestGameObject(entry, 30);
+            else if (handler.GetSelectedObject() != null && handler.GetSelectedObject().IsTypeId(TypeId.GameObject))
+                thisGO = handler.GetSelectedObject().ToGameObject();
+
+            GameObjectTypes type = gameObjectInfo.type;
+            uint displayId = gameObjectInfo.displayId;
+            string name = gameObjectInfo.name;
+            uint lootId = gameObjectInfo.GetLootId();
+
+            // If we have a real object, send some info about it
+            if (thisGO != null)
+            {
+                handler.SendSysMessage(CypherStrings.SpawninfoGuidinfo, thisGO.GetGUID().ToString());
+                handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, thisGO.GetSpawnId(), thisGO.GetPositionX(), thisGO.GetPositionY(), thisGO.GetPositionZ());
+                Player player = handler.GetSession().GetPlayer();
+                if (player != null)
+                {
+                    Position playerPos = player.GetPosition();
+                    float dist = thisGO.GetExactDist(playerPos);
+                    handler.SendSysMessage(CypherStrings.SpawninfoDistancefromplayer, dist);
+                }
+            }
+            handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
+            handler.SendSysMessage(CypherStrings.GoinfoType, type);
+            handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
+            handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
+            WorldObject obj = handler.GetSelectedObject();
+            if (obj != null)
+            {
+                if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
+                {
+                    SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
+                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, groupData.isActive);
+                }
+                if (obj.IsGameObject())
+                    handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, obj.ToGameObject().GetRespawnCompatibilityMode());
+            }
+            handler.SendSysMessage(CypherStrings.GoinfoName, name);
+            handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
+
+            GameObjectTemplateAddon addon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
+            if (addon != null)
+                handler.SendSysMessage(CypherStrings.GoinfoAddon, addon.faction, addon.flags);
+
+            GameObjectDisplayInfoRecord modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
+            if (modelInfo != null)
+                handler.SendSysMessage(CypherStrings.GoinfoModel, modelInfo.GeoBoxMax.X, modelInfo.GeoBoxMax.Y, modelInfo.GeoBoxMax.Z, modelInfo.GeoBoxMin.X, modelInfo.GeoBoxMin.Y, modelInfo.GeoBoxMin.Z);
+
+            return true;
+        }
+
         [Command("move", RBACPermissions.CommandGobjectMove)]
         static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
         {
@@ -209,6 +303,12 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.CommandNearobjmessage, distance, count);
             return true;
+        }
+
+        [Command("spawngroup", RBACPermissions.CommandGobjectSpawngroup)]
+        static bool HandleGameObjectSpawnGroup(StringArguments args, CommandHandler handler)
+        {
+            return NPCCommands.HandleNpcSpawnGroup(args, handler);
         }
 
         [Command("target", RBACPermissions.CommandGobjectTarget)]
@@ -392,93 +492,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("info", RBACPermissions.CommandGobjectInfo)]
-        static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
 
-            string param1 = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
-            if (param1.IsEmpty())
-                return false;
-
-            uint entry;
-            if (param1.Equals("guid"))
-            {
-                string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
-                if (cValue.IsEmpty())
-                    return false;
-
-                if (!ulong.TryParse(cValue, out ulong guidLow))
-                    return false;
-
-                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guidLow);
-                if (data == null)
-                    return false;
-                entry = data.Id;
-            }
-            else
-            {
-                if (!uint.TryParse(param1, out entry))
-                    return false;
-            }
-
-            GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
-            if (gameObjectInfo == null)
-                return false;
-
-            GameObject thisGO = null;
-            if (handler.GetSession().GetPlayer())
-                thisGO = handler.GetSession().GetPlayer().FindNearestGameObject(entry, 30);
-            else if (handler.GetSelectedObject() != null && handler.GetSelectedObject().IsTypeId(TypeId.GameObject))
-                thisGO = handler.GetSelectedObject().ToGameObject();
-
-            GameObjectTypes type = gameObjectInfo.type;
-            uint displayId = gameObjectInfo.displayId;
-            string name = gameObjectInfo.name;
-            uint lootId = gameObjectInfo.GetLootId();
-
-            // If we have a real object, send some info about it
-            if (thisGO != null)
-            {
-                handler.SendSysMessage(CypherStrings.SpawninfoGuidinfo, thisGO.GetGUID().ToString());
-                handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, thisGO.GetSpawnId(), thisGO.GetPositionX(), thisGO.GetPositionY(), thisGO.GetPositionZ());
-                Player player = handler.GetSession().GetPlayer();
-                if (player != null)
-                {
-                    Position playerPos = player.GetPosition();
-                    float dist = thisGO.GetExactDist(playerPos);
-                    handler.SendSysMessage(CypherStrings.SpawninfoDistancefromplayer, dist);
-                }
-            }
-            handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
-            handler.SendSysMessage(CypherStrings.GoinfoType, type);
-            handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
-            handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
-            WorldObject obj = handler.GetSelectedObject();
-            if (obj != null)
-            {
-                if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
-                {
-                    SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
-                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, groupData.isActive);
-                }
-                if (obj.IsGameObject())
-                    handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, obj.ToGameObject().GetRespawnCompatibilityMode());
-            }
-            handler.SendSysMessage(CypherStrings.GoinfoName, name);
-            handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
-
-            GameObjectTemplateAddon addon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
-            if (addon != null)
-                handler.SendSysMessage(CypherStrings.GoinfoAddon, addon.faction, addon.flags);
-
-            GameObjectDisplayInfoRecord modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
-            if (modelInfo != null)
-                handler.SendSysMessage(CypherStrings.GoinfoModel, modelInfo.GeoBoxMax.X, modelInfo.GeoBoxMax.Y, modelInfo.GeoBoxMax.Z, modelInfo.GeoBoxMin.X, modelInfo.GeoBoxMin.Y, modelInfo.GeoBoxMin.Z);
-
-            return true;
-        }
 
         [CommandGroup("add", RBACPermissions.CommandGobjectAdd)]
         class AddCommands

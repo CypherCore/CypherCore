@@ -20,7 +20,7 @@ using System;
 
 namespace Game.Chat
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class CommandAttribute : Attribute
     {
         public CommandAttribute(string command, RBACPermissions rbac, bool allowConsole = false)

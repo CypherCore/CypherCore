@@ -34,7 +34,7 @@ namespace Game.Chat
     class NPCCommands
     {
         [Command("despawngroup", RBACPermissions.CommandNpcDespawngroup)]
-        static bool HandleNpcDespawnGroup(StringArguments args, CommandHandler handler)
+        public static bool HandleNpcDespawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -419,7 +419,7 @@ namespace Game.Chat
         }
 
         [Command("spawngroup", RBACPermissions.CommandNpcSpawngroup)]
-        static bool HandleNpcSpawnGroup(StringArguments args, CommandHandler handler)
+        public static bool HandleNpcSpawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

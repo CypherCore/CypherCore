@@ -396,7 +396,7 @@ namespace Game.Chat
         class SetCommands
         {
             [Command("password", RBACPermissions.CommandAccountSetPassword, true)]
-            static bool HandleSetPasswordCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAccountSetPasswordCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -450,7 +450,7 @@ namespace Game.Chat
             }
 
             [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
-            static bool HandleSetAddonCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAccountSetAddonCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -511,8 +511,9 @@ namespace Game.Chat
                 return true;
             }
 
+            [Command("gmlevel", RBACPermissions.CommandAccountSetSecLevel, true)]
             [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleSetSecLevelCommand(StringArguments args, CommandHandler handler)
+            static bool HandleAccountSetSecLevelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -610,7 +611,7 @@ namespace Game.Chat
             class SetSecCommands
             {
                 [Command("email", RBACPermissions.CommandAccountSetSecEmail, true)]
-                static bool HandleSetEmailCommand(StringArguments args, CommandHandler handler)
+                static bool HandleAccountSetEmailCommand(StringArguments args, CommandHandler handler)
                 {
                     if (args.Empty())
                         return false;
@@ -666,7 +667,7 @@ namespace Game.Chat
                 }
 
                 [Command("regmail", RBACPermissions.CommandAccountSetSecRegmail, true)]
-                static bool HandleSetRegEmailCommand(StringArguments args, CommandHandler handler)
+                static bool HandleAccountSetRegEmailCommand(StringArguments args, CommandHandler handler)
                 {
                     if (args.Empty())
                         return false;

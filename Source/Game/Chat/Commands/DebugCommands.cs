@@ -846,17 +846,6 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
-        static bool HandleWPGPSCommand(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-
-            Log.outInfo(LogFilter.SqlDev, "(@PATH, XX, {0}, {1}, {2}, 0, 0, 0, 100, 0),", player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-
-            handler.SendSysMessage("Waypoint SQL written to SQL Developer log");
-            return true;
-        }
-
         [Command("worldstate", RBACPermissions.CommandDebug)]
         static bool HandleDebugWorldStateCommand(StringArguments args, CommandHandler handler)
         {
@@ -890,6 +879,17 @@ namespace Game.Chat
             return true;
         }
 
+        [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
+        static bool HandleWPGPSCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+
+            Log.outInfo(LogFilter.SqlDev, "(@PATH, XX, {0}, {1}, {2}, 0, 0, 0, 100, 0),", player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+
+            handler.SendSysMessage("Waypoint SQL written to SQL Developer log");
+            return true;
+        }
+
         [Command("wsexpression", RBACPermissions.CommandDebug)]
         static bool HandleDebugWSExpressionCommand(StringArguments args, CommandHandler handler)
         {
@@ -920,6 +920,135 @@ namespace Game.Chat
                 handler.SendSysMessage($"Expression {expressionId} not meet");
 
             return true;
+        }
+
+        [CommandGroup("play", RBACPermissions.CommandDebugPlay)]
+        class PlayCommands
+        {
+            [Command("cinematic", RBACPermissions.CommandDebugPlayCinematic)]
+            static bool HandleDebugPlayCinematicCommand(StringArguments args, CommandHandler handler)
+            {
+                // USAGE: .debug play cinematic #cinematicid
+                // #cinematicid - ID decimal number from CinemaicSequences.dbc (1st column)
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+                }
+
+                uint cinematicId = args.NextUInt32();
+
+                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
+                if (cineSeq == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CinematicNotExist, cinematicId);
+                    return false;
+                }
+
+                // Dump camera locations
+                var list = M2Storage.GetFlyByCameras(cineSeq.Camera[0]);
+                if (list != null)
+                {
+                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", cinematicId, cineSeq.Camera[0]);
+                    uint count = 1;
+                    foreach (FlyByCamera cam in list)
+                    {
+                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.timeStamp, cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W, cam.locations.W * (180 / Math.PI));
+                        count++;
+                    }
+                    handler.SendSysMessage("{0} waypoints dumped", list.Count);
+                }
+
+                handler.GetSession().GetPlayer().SendCinematicStart(cinematicId);
+                return true;
+            }
+
+            [Command("movie", RBACPermissions.CommandDebugPlayMovie)]
+            static bool HandleDebugPlayMovieCommand(StringArguments args, CommandHandler handler)
+            {
+                // USAGE: .debug play movie #movieid
+                // #movieid - ID decimal number from Movie.dbc (1st column)
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+                }
+
+                uint movieId = args.NextUInt32();
+
+                if (!CliDB.MovieStorage.ContainsKey(movieId))
+                {
+                    handler.SendSysMessage(CypherStrings.MovieNotExist, movieId);
+                    return false;
+                }
+
+                handler.GetSession().GetPlayer().SendMovieStart(movieId);
+                return true;
+            }
+
+            [Command("music", RBACPermissions.CommandDebugPlayMusic)]
+            static bool HandleDebugPlayMusicCommand(StringArguments args, CommandHandler handler)
+            {
+                // USAGE: .debug play music #musicId
+                // #musicId - ID decimal number from SoundEntries.dbc (1st column)
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+                    return false;
+                }
+
+                uint musicId = args.NextUInt32();
+                if (!CliDB.SoundKitStorage.ContainsKey(musicId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, musicId);
+                    return false;
+                }
+
+                Player player = handler.GetSession().GetPlayer();
+
+                player.PlayDirectMusic(musicId, player);
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, musicId);
+                return true;
+            }
+
+            [Command("sound", RBACPermissions.CommandDebugPlaySound)]
+            static bool HandleDebugPlaySoundCommand(StringArguments args, CommandHandler handler)
+            {
+                // USAGE: .debug playsound #soundid
+                // #soundid - ID decimal number from SoundEntries.dbc (1st column)
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.BadValue);
+
+                    return false;
+                }
+
+                uint soundId = args.NextUInt32();
+
+                if (!CliDB.SoundKitStorage.ContainsKey(soundId))
+                {
+                    handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
+                    return false;
+                }
+
+                Player player = handler.GetSession().GetPlayer();
+
+                Unit unit = handler.GetSelectedUnit();
+                if (!unit)
+                {
+                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                    return false;
+                }
+
+                if (!player.GetTarget().IsEmpty())
+                    unit.PlayDistanceSound(soundId, player);
+                else
+                    unit.PlayDirectSound(soundId, player);
+
+                handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
+                return true;
+            }
         }
 
         [CommandGroup("send", RBACPermissions.CommandDebugSend)]
@@ -1075,135 +1204,6 @@ namespace Game.Chat
                 castFailed.FailedArg2 = failArg2;
                 handler.GetSession().SendPacket(castFailed);
 
-                return true;
-            }
-        }
-
-        [CommandGroup("play", RBACPermissions.CommandDebugPlay)]
-        class PlayCommands
-        {
-            [Command("cinematic", RBACPermissions.CommandDebugPlayCinematic)]
-            static bool HandleDebugPlayCinematicCommand(StringArguments args, CommandHandler handler)
-            {
-                // USAGE: .debug play cinematic #cinematicid
-                // #cinematicid - ID decimal number from CinemaicSequences.dbc (1st column)
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-
-                uint cinematicId = args.NextUInt32();
-
-                CinematicSequencesRecord cineSeq = CliDB.CinematicSequencesStorage.LookupByKey(cinematicId);
-                if (cineSeq == null)
-                {
-                    handler.SendSysMessage(CypherStrings.CinematicNotExist, cinematicId);
-                    return false;
-                }
-
-                // Dump camera locations
-                var list = M2Storage.GetFlyByCameras(cineSeq.Camera[0]);
-                if (list != null)
-                {
-                    handler.SendSysMessage("Waypoints for sequence {0}, camera {1}", cinematicId, cineSeq.Camera[0]);
-                    uint count = 1;
-                    foreach (FlyByCamera cam in list)
-                    {
-                        handler.SendSysMessage("{0} - {1}ms [{2}, {3}, {4}] Facing {5} ({6} degrees)", count, cam.timeStamp, cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W, cam.locations.W * (180 / Math.PI));
-                        count++;
-                    }
-                    handler.SendSysMessage("{0} waypoints dumped", list.Count);
-                }
-
-                handler.GetSession().GetPlayer().SendCinematicStart(cinematicId);
-                return true;
-            }
-
-            [Command("movie", RBACPermissions.CommandDebugPlayMovie)]
-            static bool HandleDebugPlayMovieCommand(StringArguments args, CommandHandler handler)
-            {
-                // USAGE: .debug play movie #movieid
-                // #movieid - ID decimal number from Movie.dbc (1st column)
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-
-                uint movieId = args.NextUInt32();
-
-                if (!CliDB.MovieStorage.ContainsKey(movieId))
-                {
-                    handler.SendSysMessage(CypherStrings.MovieNotExist, movieId);
-                    return false;
-                }
-
-                handler.GetSession().GetPlayer().SendMovieStart(movieId);
-                return true;
-            }
-
-            [Command("music", RBACPermissions.CommandDebugPlayMusic)]
-            static bool HandleDebugPlayMusicCommand(StringArguments args, CommandHandler handler)
-            {
-                // USAGE: .debug play music #musicId
-                // #musicId - ID decimal number from SoundEntries.dbc (1st column)
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
-
-                uint musicId = args.NextUInt32();
-                if (!CliDB.SoundKitStorage.ContainsKey(musicId))
-                {
-                    handler.SendSysMessage(CypherStrings.SoundNotExist, musicId);
-                    return false;
-                }
-
-                Player player = handler.GetSession().GetPlayer();
-
-                player.PlayDirectMusic(musicId, player);
-
-                handler.SendSysMessage(CypherStrings.YouHearSound, musicId);
-                return true;
-            }
-
-            [Command("sound", RBACPermissions.CommandDebugPlaySound)]
-            static bool HandleDebugPlaySoundCommand(StringArguments args, CommandHandler handler)
-            {
-                // USAGE: .debug playsound #soundid
-                // #soundid - ID decimal number from SoundEntries.dbc (1st column)
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-
-                    return false;
-                }
-
-                uint soundId = args.NextUInt32();
-
-                if (!CliDB.SoundKitStorage.ContainsKey(soundId))
-                {
-                    handler.SendSysMessage(CypherStrings.SoundNotExist, soundId);
-                    return false;
-                }
-
-                Player player = handler.GetSession().GetPlayer();
-
-                Unit unit = handler.GetSelectedUnit();
-                if (!unit)
-                {
-                    handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                    return false;
-                }
-
-                if (!player.GetTarget().IsEmpty())
-                    unit.PlayDistanceSound(soundId, player);
-                else
-                    unit.PlayDirectSound(soundId, player);
-
-                handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
                 return true;
             }
         }
