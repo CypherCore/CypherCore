@@ -157,11 +157,14 @@ namespace Game.Movement
 
         public void PropagateSpeedChange()
         {
-            for (int i = 0; i <= _top; ++i)
-            {
-                if (_slot[i] != null)
-                    _slot[i].UnitSpeedChanged();
-            }
+            if (Empty())
+                return;
+
+            IMovementGenerator movement = Top();
+            if (movement == null)
+                return;
+
+            movement.UnitSpeedChanged();
         }
 
         public bool GetDestination(out float x, out float y, out float z)
