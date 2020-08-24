@@ -74,6 +74,7 @@ namespace Game
 
             // Stop the npc if moving
             creature.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            creature.SetHomePosition(creature.GetPosition());
 
             _player.PlayerTalkClass.ClearMenus();
             if (creature.GetAI().GossipHello(_player))

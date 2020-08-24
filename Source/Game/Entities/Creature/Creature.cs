@@ -105,13 +105,6 @@ namespace Game.Entities
             ForcedDespawn(0);
         }
 
-        public override void PauseMovement(uint timer = 0, MovementSlot slot = 0)
-        {
-            base.PauseMovement(timer, slot);
-
-            SetHomePosition(GetPosition());
-        }
-
         public bool IsReturningHome()
         {
             if (GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Home)

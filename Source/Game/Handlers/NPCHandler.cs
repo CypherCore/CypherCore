@@ -145,6 +145,7 @@ namespace Game
 
             // Stop the npc if moving
             unit.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            unit.SetHomePosition(unit.GetPosition());
 
             // If spiritguide, no need for gossip menu, just put player into resurrect queue
             if (unit.IsSpiritGuide())
@@ -464,6 +465,7 @@ namespace Game
 
             // Stop the npc if moving
             vendor.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
+            vendor.SetHomePosition(vendor.GetPosition());
 
             VendorItemData vendorItems = vendor.GetVendorItems();
             int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;

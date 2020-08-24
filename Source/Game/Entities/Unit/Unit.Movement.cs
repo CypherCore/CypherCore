@@ -159,7 +159,7 @@ namespace Game.Entities
             init.Stop();
         }
 
-        public virtual void PauseMovement(uint timer = 0, MovementSlot slot = 0)
+        public void PauseMovement(uint timer = 0, MovementSlot slot = 0)
         {
             if (slot >= MovementSlot.Max)
                 return;
