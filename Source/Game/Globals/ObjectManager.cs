@@ -3538,6 +3538,7 @@ namespace Game
         {
             return _creatureTemplateStorage;
         }
+        public Dictionary<ulong, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
         public CreatureData GetCreatureData(ulong guid)
         {
             return creatureDataStorage.LookupByKey(guid);
@@ -4381,6 +4382,7 @@ namespace Game
             return _gameObjectQuestItemStorage.LookupByKey(id);
         }
         MultiMap<uint, uint> GetGameObjectQuestItemMap() { return _gameObjectQuestItemStorage; }
+        public Dictionary<ulong, GameObjectData> GetAllGameObjectData() { return gameObjectDataStorage; }
         public GameObjectData GetGameObjectData(ulong guid)
         {
             return gameObjectDataStorage.LookupByKey(guid);

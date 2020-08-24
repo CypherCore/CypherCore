@@ -570,15 +570,8 @@ namespace Game.Chat.Commands
         [Command("respawns", RBACPermissions.CommandListRespawns)]
         static bool HandleListRespawnsCommand(StringArguments args, CommandHandler handler)
         {
-            // We need a player
             Player player = handler.GetSession().GetPlayer();
-            if (player == null)
-                return false;
-
-            // And we need a map
             Map map = player.GetMap();
-            if (map == null)
-                return false;
 
             uint range = 0;
             if (!args.Empty())
@@ -658,6 +651,44 @@ namespace Game.Chat.Commands
             foreach (var instanceByPackage in instanceByPackageMap)
                 handler.SendSysMessage(CypherStrings.DebugSceneObjectDetail, instanceByPackage.Value.ScenePackageId, instanceByPackage.Key);
 
+            return true;
+        }
+
+        [Command("spawnpoints", RBACPermissions.CommandListSpawnpoints)]
+        static bool HandleListSpawnPointsCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+            Map map = player.GetMap();
+            uint mapId = map.GetId();
+            bool showAll = map.IsBattlegroundOrArena() || map.IsDungeon();
+            handler.SendSysMessage("Listing all spawn points in map %u (%s)%s:", mapId, map.GetMapName(), showAll ? "" : " within 5000yd");
+
+            foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
+            {
+                SpawnData data = pair.Value;
+                if (data.spawnPoint.GetMapId() != mapId)
+                    continue;
+
+                CreatureTemplate cTemp = Global.ObjectMgr.GetCreatureTemplate(data.Id);
+                if (cTemp == null)
+                    continue;
+
+                if (showAll || data.spawnPoint.IsInDist2d(player, 5000.0f))
+                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.spawnId} | Entry: {data.Id} ({cTemp.Name}) | X: {data.spawnPoint.GetPositionX():3} | Y: {data.spawnPoint.GetPositionY():3} | Z: {data.spawnPoint.GetPositionZ():3}");
+            }
+            foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())
+            {
+                SpawnData data = pair.Value;
+                if (data.spawnPoint.GetMapId() != mapId)
+                    continue;
+
+                GameObjectTemplate goTemp = Global.ObjectMgr.GetGameObjectTemplate(data.Id);
+                if (goTemp == null)
+                    continue;
+
+                if (showAll || data.spawnPoint.IsInDist2d(player, 5000.0f))
+                    handler.SendSysMessage($"Type: {data.type} | SpawnId: {data.spawnId} | Entry: {data.Id} ({goTemp.name}) | X: {data.spawnPoint.GetPositionX():3} | Y: {data.spawnPoint.GetPositionY():3} | Z: {data.spawnPoint.GetPositionZ():3}");
+            }
             return true;
         }
 
