@@ -1477,6 +1477,11 @@ namespace Game.Entities
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);
+
+            // then delete any active instances of the creature
+            var range = GetMap().GetCreatureBySpawnIdStore().LookupByKey(m_spawnId);
+            foreach (var creature in range)
+                creature.AddObjectToRemoveList();
         }
 
         public override bool IsInvisibleDueToDespawn()
