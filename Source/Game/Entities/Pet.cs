@@ -1235,7 +1235,7 @@ namespace Game.Entities
             }
 
             // if remove last rank or non-ranked then update action bar at server and client if need
-            if (GetCharmInfo().RemoveSpellFromActionBar(spellId) && !learnPrev && clearActionBar)
+            if (clearActionBar && !learnPrev && GetCharmInfo().RemoveSpellFromActionBar(spellId))
             {
                 if (!m_loading)
                 {
