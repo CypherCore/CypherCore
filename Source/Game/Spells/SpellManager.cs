@@ -60,7 +60,7 @@ namespace Game.Entities
 
                         if (AuraEffectHandlers.ContainsKey(auraEffect.AuraType))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.AuraType].ToString(), methodInfo.Name, auraEffect.AuraType);
+                            Log.outError(LogFilter.ServerLoading, "Tried to override AuraEffectHandler of {0} with {1} (AuraType {2}).", AuraEffectHandlers[auraEffect.AuraType].GetMethodInfo().Name, methodInfo.Name, auraEffect.AuraType);
                             continue;
                         }
 
@@ -3055,6 +3055,13 @@ namespace Game.Entities
                     case 70860: // Frozen Throne Teleport
                     case 70861: // Sindragosa's Lair Teleport
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                        break;
+                    // Coldflame (Lord Marrowgar)
+                    case 69146:
+                    case 70823:
+                    case 70824:
+                    case 70825:
+                        spellInfo.AttributesEx4 &= ~SpellAttr4.IgnoreResistances;
                         break;
                     case 71169: // Shadow's Fate
                         spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
