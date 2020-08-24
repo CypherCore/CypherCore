@@ -551,7 +551,7 @@ namespace Game.AI
             return false;
         }
 
-        public override void JustRespawned()
+        public override void JustAppeared()
         {
             mDespawnTime = 0;
             mRespawnTime = 0;

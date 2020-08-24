@@ -44,6 +44,7 @@ namespace Game.Entities
             DefaultMovementType = MovementGeneratorType.Idle;
             m_regenHealth = true;
             m_meleeDamageSchoolMask = SpellSchoolMask.Normal;
+            triggerJustAppeared = true;
 
             RegenTimer = SharedConst.CreatureRegenInterval;
 
@@ -378,10 +379,10 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            if (IsAIEnabled && TriggerJustRespawned)
+            if (IsAIEnabled && triggerJustAppeared && m_deathState == DeathState.Alive)
             {
-                TriggerJustRespawned = false;
-                GetAI().JustRespawned();
+                triggerJustAppeared = false;
+                GetAI().JustAppeared();
                 if (VehicleKit != null)
                     VehicleKit.Reset();
             }
@@ -1736,13 +1737,10 @@ namespace Game.Entities
                     //Re-initialize reactstate that could be altered by movementgenerators
                     InitializeReactState();
 
-                    //Call AI respawn virtual function//Call AI respawn virtual function
-                    if (IsAIEnabled)
-                    {
-                        //reset the AI to be sure no dirty or uninitialized values will be used till next tick
+                    if (IsAIEnabled) // reset the AI to be sure no dirty or uninitialized values will be used till next tick
                         GetAI().Reset();
-                        TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
-                    }
+
+                    triggerJustAppeared = true;
 
                     uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<Creature>(GetSpawnId()) : 0;
                     if (poolid != 0)

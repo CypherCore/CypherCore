@@ -437,8 +437,8 @@ namespace Game.AI
         
         public virtual bool IsEscorted() { return false; }
 
-        // Called when creature is spawned or respawned
-        public virtual void JustRespawned() { }
+        // Called when creature appears in the world (spawn, respawn, grid load etc...)
+        public virtual void JustAppeared() { }
 
         public virtual void MovementInform(MovementGeneratorType type, uint id) { }
 

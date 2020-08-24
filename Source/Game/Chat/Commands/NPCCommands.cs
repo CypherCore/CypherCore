@@ -222,8 +222,8 @@ namespace Game.Chat
             }
 
 
-                // Attempting creature load from DB data
-                CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
+            // Attempting creature load from DB data
+            CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
             if (data == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandCreatguidnotfound, lowguid);

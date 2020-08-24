@@ -16,16 +16,16 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Movement;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.Spells;
-using Framework.Dynamic;
 
 namespace Game.Entities
 {

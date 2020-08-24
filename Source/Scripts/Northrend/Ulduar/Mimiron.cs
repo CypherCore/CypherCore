@@ -486,7 +486,7 @@ namespace Scripts.Northrend.Ulduar
                 _events.ScheduleEvent(Events.Outtro1, 7000);
             }
 
-            public override void JustRespawned()
+            public override void JustAppeared()
             {
                 //SetupEncounter();
             }
@@ -922,7 +922,7 @@ namespace Scripts.Northrend.Ulduar
                 }
             }
 
-            public override void JustRespawned()
+            public override void JustAppeared()
             {
                 SetupEncounter();
             }

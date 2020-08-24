@@ -131,9 +131,9 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
             SummonAdds();
         }
 
-        public override void JustRespawned()
+        public override void JustAppeared()
         {
-            base.JustRespawned();
+            base.JustAppeared();
             SummonAdds();
         }
 

@@ -373,9 +373,9 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
                 Initialize();
         }
 
-        public override void JustRespawned()
+        public override void JustAppeared()
         {
-            base.JustRespawned();
+            base.JustAppeared();
             Initialize();
         }
 

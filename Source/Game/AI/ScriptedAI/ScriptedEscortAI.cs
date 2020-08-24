@@ -140,7 +140,7 @@ namespace Game.AI
             }
         }
 
-        public override void JustRespawned()
+        public override void JustAppeared()
         {
             m_uiEscortState = EscortState.None;
 

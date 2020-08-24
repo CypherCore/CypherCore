@@ -661,7 +661,7 @@ namespace Game.Chat.Commands
             Map map = player.GetMap();
             uint mapId = map.GetId();
             bool showAll = map.IsBattlegroundOrArena() || map.IsDungeon();
-            handler.SendSysMessage("Listing all spawn points in map %u (%s)%s:", mapId, map.GetMapName(), showAll ? "" : " within 5000yd");
+            handler.SendSysMessage($"Listing all spawn points in map {mapId} ({map.GetMapName()}){(showAll ? "" : " within 5000yd")}:");
 
             foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
             {

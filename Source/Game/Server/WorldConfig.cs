@@ -784,7 +784,7 @@ namespace Game
                 Log.outError(LogFilter.ServerLoading, $"Invalid value for Respawn.DynamicMode ({Values[WorldCfg.RespawnDynamicMode]}). Set to 0.");
                 Values[WorldCfg.RespawnDynamicMode] = 0;
             }
-            Values[WorldCfg.RespawnDynamicEscortNpc] = GetDefaultValue("Respawn.DynamicEscortNPC", true);
+            Values[WorldCfg.RespawnDynamicEscortNpc] = GetDefaultValue("Respawn.DynamicEscortNPC", false);
             Values[WorldCfg.RespawnGuidWarnLevel] = GetDefaultValue("Respawn.GuidWarnLevel", 12000000);
             if ((int)Values[WorldCfg.RespawnGuidWarnLevel] > 16777215)
             {

@@ -70,7 +70,7 @@ namespace Game.Entities
 
         //Formation var
         CreatureGroup m_formation;
-        bool TriggerJustRespawned;
+        bool triggerJustAppeared;
         bool m_respawnCompatibilityMode;
 
         public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
