@@ -102,21 +102,15 @@ namespace Game.Movement
                 DirectClean(reset);
         }
 
-        void ClearExpireList()
+        void Clear(MovementSlot slot)
         {
-            for (int i = 0; i < _expireList.Count; ++i)
-                DirectDelete(_expireList[i]);
+            if (Empty() || slot >= MovementSlot.Max)
+                return;
 
-            _expireList.Clear();
-
-            if (Empty())
-                Initialize();
-            else if (NeedInitTop())
-                InitTop();
-            else if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Reset))
-                Top().Reset(_owner);
-
-            _cleanFlag &= ~MMCleanFlag.Reset;
+            if (_cleanFlag.HasAnyFlag(MMCleanFlag.Update))
+                DelayedClean(slot);
+            else
+                DirectClean(slot);
         }
 
         public void MovementExpired(bool reset = true)
@@ -147,6 +141,12 @@ namespace Game.Movement
                 return MovementGeneratorType.Max;
             else
                 return _slot[(int)slot].GetMovementGeneratorType();
+        }
+
+        public IMovementGenerator GetMotionSlot(MovementSlot slot)
+        {
+            Cypher.Assert((int)slot >= 0);
+            return _slot[(int)slot];
         }
 
         public IMovementGenerator GetMotionSlot(int slot)
@@ -681,6 +681,24 @@ namespace Game.Movement
                 Top().Reset(_owner);
         }
 
+        void DirectClean(MovementSlot slot)
+        {
+            IMovementGenerator motion = GetMotionSlot(slot);
+            if (motion != null)
+            {
+                _slot[(int)slot] = null;
+                DirectDelete(motion);
+            }
+
+            while (!Empty() && Top() == null)
+                --_top;
+
+            if (Empty())
+                Initialize();
+            else if (NeedInitTop())
+                InitTop();
+        }
+
         void DelayedClean()
         {
             while (Size() > 1)
@@ -690,6 +708,19 @@ namespace Game.Movement
                 if (curr != null)
                     DelayedDelete(curr);
             }
+        }
+
+        void DelayedClean(MovementSlot slot)
+        {
+            IMovementGenerator motion = GetMotionSlot(slot);
+            if (motion != null)
+            {
+                _slot[(int)slot] = null;
+                DelayedDelete(motion);
+            }
+
+            while (!Empty() && Top() == null)
+                --_top;
         }
 
         void DirectExpire(bool reset)
@@ -738,6 +769,23 @@ namespace Game.Movement
                 return;
 
             _expireList.Add(curr);
+        }
+
+        void ClearExpireList()
+        {
+            for (int i = 0; i < _expireList.Count; ++i)
+                DirectDelete(_expireList[i]);
+
+            _expireList.Clear();
+
+            if (Empty())
+                Initialize();
+            else if (NeedInitTop())
+                InitTop();
+            else if (_cleanFlag.HasAnyFlag(MMCleanFlag.Reset))
+                Top().Reset(_owner);
+
+            _cleanFlag &= ~MMCleanFlag.Reset;
         }
 
         public bool Empty() { return (_top < 0); }
