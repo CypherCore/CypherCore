@@ -150,18 +150,6 @@ namespace Game.Entities
         {
             GetMap().UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
 
-            if (m_zoneUpdateId != newZone)
-            {
-                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-                Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
-                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-                Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
-                SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
-                Guild guild = GetGuild();
-                if (guild)
-                    guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
-            }
-
             // group update
             if (GetGroup())
             {
@@ -171,9 +159,6 @@ namespace Game.Entities
                 if (pet)
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
             }
-
-            m_zoneUpdateId = newZone;
-            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
 
             // zone changed, so area changed as well, update it
             UpdateArea(newArea);
@@ -234,6 +219,20 @@ namespace Game.Entities
             UpdateLocalChannels(newZone);
 
             UpdateZoneDependentAuras(newZone);
+
+            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
+            if (m_zoneUpdateId != newZone)
+            { 
+                m_zoneUpdateId = newZone;
+                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
+                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
+                SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
+                Guild guild = GetGuild();
+                if (guild)
+                    guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
+            }
         }
 
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
