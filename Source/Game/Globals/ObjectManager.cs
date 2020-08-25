@@ -5280,7 +5280,6 @@ namespace Game
                         Log.outError(LogFilter.ServerLoading, $"System spawn group {groupId} ({group.name}) has invalid manual spawn flag. Ignored.");
                     }
                     group.flags = flags;
-                    group.isActive = !group.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
 
                     _spawnGroupDataStorage[groupId] = group;
                 } while (result.NextRow());
@@ -5294,7 +5293,6 @@ namespace Game
                 data.name = "Default Group";
                 data.mapId = 0;
                 data.flags = SpawnGroupFlags.System;
-                data.isActive = true;
                 _spawnGroupDataStorage[0] = data;
             }
 
@@ -5307,7 +5305,6 @@ namespace Game
                 data.name = "Legacy Group";
                 data.mapId = 0;
                 data.flags = SpawnGroupFlags.System | SpawnGroupFlags.CompatibilityMode;
-                data.isActive = true;
                 _spawnGroupDataStorage[1] = data;
             }
 
@@ -5449,137 +5446,6 @@ namespace Game
 
             Cypher.Assert(false, $"Spawn data ({data.type},{data.spawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
         }
-        public bool SpawnGroupSpawn(uint groupId, Map map, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
-        {
-            var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
-            if (spawnGroup == null || spawnGroup.flags.HasAnyFlag(SpawnGroupFlags.System))
-            {
-                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. Blocked.");
-                return false;
-            }
-
-            if (!map)
-            {
-                Log.outError(LogFilter.Maps, $"Tried to spawn creature group {groupId}, but no map was supplied. Blocked.");
-                return false;
-            }
-
-            if (spawnGroup.mapId != map.GetId())
-            {
-                Log.outError(LogFilter.Maps, $"Tried to spawn creature group {groupId}, but supplied map is {map.GetId()}, creature group has map {spawnGroup.mapId}. Blocked.");
-                return false;
-            }
-
-            foreach (var data in _spawnGroupMapStorage.LookupByKey(groupId))
-            {
-                Cypher.Assert(spawnGroup.mapId == data.spawnPoint.GetMapId());
-                // Check if there's already an instance spawned
-                if (!force)
-                {
-                    WorldObject obj = map.GetWorldObjectBySpawnId(data.type, data.spawnId);
-                    if (obj != null)
-                        if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
-                            continue;
-                }
-
-                long respawnTime = map.GetRespawnTime(data.type, data.spawnId);
-                if (respawnTime != 0 && respawnTime > Time.UnixTime)
-                {
-                    if (!force && !ignoreRespawn)
-                        continue;
-
-                    // we need to remove the respawn time, otherwise we'd end up double spawning
-                    map.RemoveRespawnTime(data.type, data.spawnId, false);
-                }
-
-                // don't spawn if the grid isn't loaded (will be handled in grid loader)
-                if (!map.IsGridLoaded(data.spawnPoint))
-                    continue;
-
-                // Everything OK, now do the actual (re)spawn
-                switch (data.type)
-                {
-                    case SpawnObjectType.Creature:
-                        {
-                            Creature creature = new Creature();
-                            if (!creature.LoadFromDB(data.spawnId, map, true, force))
-                                creature.Dispose();
-                            else if (spawnedObjects != null)
-                                spawnedObjects.Add(creature);
-                            break;
-                        }
-                    case SpawnObjectType.GameObject:
-                        {
-                            GameObject gameobject = new GameObject();
-                            if (!gameobject.LoadFromDB(data.spawnId, map, true))
-                                gameobject.Dispose();
-                            else if (spawnedObjects != null)
-                                spawnedObjects.Add(gameobject);
-                            break;
-                        }
-                    default:
-                        Cypher.Assert(false, $"Invalid spawn type {data.type} with spawnId {data.spawnId}");
-                        return false;
-                }
-            }
-            spawnGroup.isActive = true; // start processing respawns for the group
-            return true;
-        }
-        public bool SpawnGroupDespawn(uint groupId, Map map, bool deleteRespawnTimes)
-        {
-            var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
-            if (spawnGroup == null || spawnGroup.flags.HasAnyFlag(SpawnGroupFlags.System))
-            {
-                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId}. Blocked.");
-                return false;
-            }
-
-            if (!map)
-            {
-                Log.outError(LogFilter.Maps, $"Tried to despawn creature group {groupId}, but no map was supplied. Blocked.");
-                return false;
-            }
-
-            if (spawnGroup.mapId != map.GetId())
-            {
-                Log.outError(LogFilter.Maps, $"Tried to despawn creature group {groupId}, but supplied map is {map.GetId()}, creature group has map {spawnGroup.mapId}. Blocked.");
-                return false;
-            }
-
-            List<WorldObject> toUnload = new List<WorldObject>(); // unload after iterating, otherwise iterator invalidation
-            foreach (var data in _spawnGroupMapStorage.LookupByKey(groupId))
-            {
-                if (deleteRespawnTimes)
-                    map.RemoveRespawnTime(data.type, data.spawnId);
-                switch (data.type)
-                {
-                    case SpawnObjectType.Creature:
-                        {
-                            var bounds = map.GetCreatureBySpawnIdStore().LookupByKey(data.spawnId);
-                            foreach (var creature in bounds)
-                                toUnload.Add(creature);
-                            break;
-                        }
-                    case SpawnObjectType.GameObject:
-                        {
-                            var bounds = map.GetGameObjectBySpawnIdStore().LookupByKey(data.spawnId);
-                            foreach (var go in bounds)
-                                toUnload.Add(go);
-                            break;
-                        }
-                    default:
-                        Cypher.Assert(false, $"Invalid spawn type {data.type} in spawn data with spawnId {data.spawnId}.");
-                        return false;
-                }
-            }
-
-            // now do the actual despawning
-            foreach (WorldObject obj in toUnload)
-                obj.AddObjectToRemoveList();
-
-            spawnGroup.isActive = false; // stop processing respawns for the group, too
-            return true;
-        }
 
         public InstanceTemplate GetInstanceTemplate(uint mapID)
         {
@@ -5598,20 +5464,10 @@ namespace Game
             return _dungeonEncounterStorage.LookupByKey(MathFunctions.MakePair64(mapId, (uint)difficulty));
         }
         public bool IsTransportMap(uint mapId) { return _transportMaps.Contains((ushort)mapId); }
-        SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
-        public void SetSpawnGroupActive(uint groupId, bool state)
-        { 
-            var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
-            if (spawnGroup != null)
-                spawnGroup.isActive = state;
-        }
-        public bool IsSpawnGroupActive(uint groupId)
-        {
-            var spawnGroup = _spawnGroupDataStorage.LookupByKey(groupId);
-            return (spawnGroup != null) && spawnGroup.isActive;
-        }
+        public SpawnGroupTemplateData GetSpawnGroupData(uint groupId) { return _spawnGroupDataStorage.LookupByKey(groupId); }
         public SpawnGroupTemplateData GetDefaultSpawnGroup() { return _spawnGroupDataStorage.ElementAt(0).Value; }
-        SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
+        public SpawnGroupTemplateData GetLegacySpawnGroup() { return _spawnGroupDataStorage.ElementAt(1).Value; }
+        public List<SpawnData> GetSpawnDataForGroup(uint groupId) { return _spawnGroupMapStorage.LookupByKey(groupId); }
         public SpawnData GetSpawnData(SpawnObjectType type, ulong guid)
         {
             if (type == SpawnObjectType.Creature)

@@ -2060,7 +2060,7 @@ namespace Game.AI
                             bool force = ((e.Action.groupSpawn.spawnflags & (uint)SmartAiSpawnFlags.ForceSpawn) != 0);
 
                             // Instant spawn
-                            Global.ObjectMgr.SpawnGroupSpawn(e.Action.groupSpawn.groupId, GetBaseObject().GetMap(), ignoreRespawn, force);
+                            GetBaseObject().GetMap().SpawnGroupSpawn(e.Action.groupSpawn.groupId, ignoreRespawn, force);
                         }
                         else
                         {
@@ -2102,7 +2102,7 @@ namespace Game.AI
                             bool deleteRespawnTimes = ((e.Action.groupSpawn.spawnflags & (uint)SmartAiSpawnFlags.NosaveRespawn) != 0);
 
                             // Instant spawn
-                            Global.ObjectMgr.SpawnGroupDespawn(e.Action.groupSpawn.groupId, GetBaseObject().GetMap(), deleteRespawnTimes);
+                            GetBaseObject().GetMap().SpawnGroupSpawn(e.Action.groupSpawn.groupId, deleteRespawnTimes);
                         }
                         else
                         {

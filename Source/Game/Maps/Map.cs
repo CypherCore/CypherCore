@@ -2788,6 +2788,153 @@ namespace Game.Maps
             respawnDelay = (uint)Math.Max(Math.Ceiling(respawnDelay * adjustFactor), timeMinimum);
         }
 
+        SpawnGroupTemplateData GetSpawnGroupData(uint groupId)
+        {
+            SpawnGroupTemplateData data = Global.ObjectMgr.GetSpawnGroupData(groupId);
+            if (data != null && data.mapId == GetId())
+                return data;
+
+            return null;
+        }
+
+        public bool SpawnGroupSpawn(uint groupId, bool ignoreRespawn = false, bool force = false, List<WorldObject> spawnedObjects = null)
+        {
+            var groupData = GetSpawnGroupData(groupId);
+            if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to spawn non-existing (or system) spawn group {groupId}. on map {GetId()} Blocked.");
+                return false;
+            }
+
+            foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
+            {
+                Cypher.Assert(groupData.mapId == data.spawnPoint.GetMapId());
+                // Check if there's already an instance spawned
+                if (!force)
+                {
+                    WorldObject obj = GetWorldObjectBySpawnId(data.type, data.spawnId);
+                    if (obj != null)
+                        if ((data.type != SpawnObjectType.Creature) || obj.ToCreature().IsAlive())
+                            continue;
+                }
+
+                long respawnTime = GetRespawnTime(data.type, data.spawnId);
+                if (respawnTime != 0 && respawnTime > Time.UnixTime)
+                {
+                    if (!force && !ignoreRespawn)
+                        continue;
+
+                    // we need to remove the respawn time, otherwise we'd end up double spawning
+                    RemoveRespawnTime(data.type, data.spawnId, false);
+                }
+
+                // don't spawn if the grid isn't loaded (will be handled in grid loader)
+                if (!IsGridLoaded(data.spawnPoint))
+                    continue;
+
+                // Everything OK, now do the actual (re)spawn
+                switch (data.type)
+                {
+                    case SpawnObjectType.Creature:
+                        {
+                            Creature creature = new Creature();
+                            if (!creature.LoadFromDB(data.spawnId, this, true, force))
+                                creature.Dispose();
+                            else if (spawnedObjects != null)
+                                spawnedObjects.Add(creature);
+                            break;
+                        }
+                    case SpawnObjectType.GameObject:
+                        {
+                            GameObject gameobject = new GameObject();
+                            if (!gameobject.LoadFromDB(data.spawnId, this, true))
+                                gameobject.Dispose();
+                            else if (spawnedObjects != null)
+                                spawnedObjects.Add(gameobject);
+                            break;
+                        }
+                    default:
+                        Cypher.Assert(false, $"Invalid spawn type {data.type} with spawnId {data.spawnId}");
+                        return false;
+                }
+            }
+            SetSpawnGroupActive(groupId, true); // start processing respawns for the group
+            return true;
+        }
+
+        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes)
+        {
+            SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
+            if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to despawn non-existing (or system) spawn group {groupId} on map {GetId()}. Blocked.");
+                return false;
+            }
+
+            List<WorldObject> toUnload = new List<WorldObject>(); // unload after iterating, otherwise iterator invalidation
+            foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
+            {
+                if (deleteRespawnTimes)
+                    RemoveRespawnTime(data.type, data.spawnId);
+                switch (data.type)
+                {
+                    case SpawnObjectType.Creature:
+                        {
+                            var bounds = GetCreatureBySpawnIdStore().LookupByKey(data.spawnId);
+                            foreach (var creature in bounds)
+                                toUnload.Add(creature);
+                            break;
+                        }
+                    case SpawnObjectType.GameObject:
+                        {
+                            var bounds = GetGameObjectBySpawnIdStore().LookupByKey(data.spawnId);
+                            foreach (var go in bounds)
+                                toUnload.Add(go);
+                            break;
+                        }
+                    default:
+                        Cypher.Assert(false, $"Invalid spawn type {data.type} in spawn data with spawnId {data.spawnId}.");
+                        return false;
+                }
+            }
+
+            // now do the actual despawning
+            foreach (WorldObject obj in toUnload)
+                obj.AddObjectToRemoveList();
+
+            SetSpawnGroupActive(groupId, false); // stop processing respawns for the group, too
+            return true;
+        }
+
+        public void SetSpawnGroupActive(uint groupId, bool state)
+        {
+            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
+            if (data == null || data.flags.HasAnyFlag(SpawnGroupFlags.System))
+            {
+                Log.outError(LogFilter.Maps, $"Tried to set non-existing (or system) spawn group {groupId} to {(state ? "active" : "inactive")} on map {GetId()}. Blocked.");
+                return;
+            }
+            if (state != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn)) // toggled
+                _toggledSpawnGroupIds.Add(groupId);
+            else
+                _toggledSpawnGroupIds.Remove(groupId);
+        }
+
+        public bool IsSpawnGroupActive(uint groupId)
+        {
+            SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
+            if (data == null)
+            {
+                Log.outWarn(LogFilter.Maps, $"Tried to query state of non-existing spawn group {groupId} on map {GetId()}.");
+                return false;
+            }
+
+            if (data.flags.HasAnyFlag(SpawnGroupFlags.System))
+                return true;
+
+            return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
+        }
+
         public virtual void DelayedUpdate(uint diff)
         {
             for (var i = 0; i < _transports.Count; ++i)
@@ -4863,6 +5010,7 @@ namespace Game.Maps
         SortedSet<RespawnInfo> _respawnTimes = new SortedSet<RespawnInfo>(new CompareRespawnInfo());
         Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new Dictionary<ulong, RespawnInfo>();
         Dictionary<ulong, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new Dictionary<ulong, RespawnInfo>();
+        List<uint> _toggledSpawnGroupIds = new List<uint>();
         uint _respawnCheckTimer;
         Dictionary<uint, uint> _zonePlayerCountMap = new Dictionary<uint, uint>();
 

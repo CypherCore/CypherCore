@@ -243,13 +243,13 @@ namespace Game.Maps
             {
                 uint groupId = pair.Key;
                 bool doSpawn = pair.Value == states.Spawn;
-                if (Global.ObjectMgr.IsSpawnGroupActive(groupId) == doSpawn)
+                if (instance.IsSpawnGroupActive(groupId) == doSpawn)
                     continue; // nothing to do here
                               // if we should spawn group, then spawn it...
                 if (doSpawn)
-                    Global.ObjectMgr.SpawnGroupSpawn(groupId, instance);
+                    instance.SpawnGroupSpawn(groupId, instance);
                 else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
-                    Global.ObjectMgr.SetSpawnGroupActive(groupId, false);
+                    instance.SetSpawnGroupActive(groupId, false);
             }
         }
 
@@ -331,13 +331,19 @@ namespace Game.Maps
                 if (bossInfo.state == EncounterState.ToBeDecided) // loading
                 {
                     bossInfo.state = state;
-                    Log.outDebug(LogFilter.Scripts, $"InstanceScript: Inialize boss {id} state as {state}.");
+                    Log.outDebug(LogFilter.Scripts, $"InstanceScript: Initialize boss {id} state as {state} (map {instance.GetId()}, {instance.GetInstanceId()}).");
                     return false;
                 }
                 else
                 {
                     if (bossInfo.state == state)
                         return false;
+
+                    if (bossInfo.state == EncounterState.Done)
+                    {
+                        Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance state from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
+                        return false;
+                    }
 
                     if (state == EncounterState.Done)
                     {

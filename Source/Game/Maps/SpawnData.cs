@@ -27,7 +27,6 @@ namespace Game.Maps
         public string name;
         public uint mapId;
         public SpawnGroupFlags flags;
-        public bool isActive;
     }
 
     public class SpawnData

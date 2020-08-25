@@ -179,7 +179,7 @@ namespace Game.Chat
                 if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
                 {
                     SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
-                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, groupData.isActive);
+                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, obj.GetMap().IsSpawnGroupActive(groupData.groupId));
                 }
                 if (obj.IsGameObject())
                     handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, obj.ToGameObject().GetRespawnCompatibilityMode());

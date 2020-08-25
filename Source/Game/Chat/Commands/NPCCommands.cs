@@ -59,7 +59,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
 
-            if (!Global.ObjectMgr.SpawnGroupDespawn(groupId, player.GetMap(), deleteRespawnTimes))
+            if (!player.GetMap().SpawnGroupDespawn(groupId, deleteRespawnTimes))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
                 return false;
@@ -142,8 +142,7 @@ namespace Game.Chat
             if (target.GetCreatureData() != null && target.GetCreatureData().spawnGroupData.groupId != 0)
             {
                 SpawnGroupTemplateData groupData = target.GetCreatureData().spawnGroupData;
-                if (groupData != null)
-                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, groupData.isActive);
+                handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, target.GetMap().IsSpawnGroupActive(groupData.groupId));
             }
             handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, target.GetRespawnCompatibilityMode());
             handler.SendSysMessage(CypherStrings.NpcinfoLevel, target.GetLevel());
@@ -448,7 +447,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
 
             List<WorldObject> creatureList = new List<WorldObject>();
-            if (!Global.ObjectMgr.SpawnGroupSpawn(groupId, player.GetMap(), ignoreRespawn, force, creatureList))
+            if (!player.GetMap().SpawnGroupSpawn(groupId, ignoreRespawn, force, creatureList))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
                 return false;
