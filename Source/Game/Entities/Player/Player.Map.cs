@@ -148,7 +148,18 @@ namespace Game.Entities
 
         public void UpdateZone(uint newZone, uint newArea)
         {
-            GetMap().UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
+            uint oldZone = m_zoneUpdateId;
+            m_zoneUpdateId = newZone;
+            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
+
+            GetMap().UpdatePlayerZoneStats(oldZone, newZone);
+
+            // call leave script hooks immedately (before updating flags)
+            if (oldZone != newZone)
+            {
+                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+            }
 
             // group update
             if (GetGroup())
@@ -171,8 +182,6 @@ namespace Game.Entities
                 GetMap().GetOrGenerateZoneDefaultWeather(newZone);
 
             GetMap().SendZoneDynamicInfo(newZone, this);
-
-            Global.ScriptMgr.OnPlayerUpdateZone(this, newZone, newArea);
 
             // in PvP, any not controlled zone (except zone.team == 6, default case)
             // in PvE, only opposition team capital
@@ -220,13 +229,11 @@ namespace Game.Entities
 
             UpdateZoneDependentAuras(newZone);
 
-            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
-            if (m_zoneUpdateId != newZone)
+            // call enter script hooks after everyting else has processed
+            Global.ScriptMgr.OnPlayerUpdateZone(this, newZone, newArea);
+            if (oldZone != newZone)
             { 
-                m_zoneUpdateId = newZone;
-                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
-                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
                 SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
                 Guild guild = GetGuild();
