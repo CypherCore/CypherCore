@@ -966,7 +966,6 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Unk46)]
         [AuraEffectHandler(AuraType.Unk48)]
         [AuraEffectHandler(AuraType.PetDamageMulti)]
-        [AuraEffectHandler(AuraType.DetectAmore)]
         [AuraEffectHandler(AuraType.ModCriticalThreat)]
         [AuraEffectHandler(AuraType.ModCooldown)]
         [AuraEffectHandler(AuraType.Unk214)]

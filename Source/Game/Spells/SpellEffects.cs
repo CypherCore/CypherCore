@@ -4043,9 +4043,12 @@ namespace Game.Spells
             if (effectHandleMode == SpellEffectHandleMode.Launch)
             {
                 Position pos = destTarget.GetPosition();
-                float angle = m_caster.GetRelativeAngle(pos.posX, pos.posY);
-                float dist = m_caster.GetDistance(pos);
-                pos = m_caster.GetFirstCollisionPosition(dist, angle);
+                if (!m_caster.IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
+                {
+                    float angle = m_caster.GetRelativeAngle(pos.posX, pos.posY);
+                    float dist = m_caster.GetDistance(pos);
+                    pos = m_caster.GetFirstCollisionPosition(dist, angle);
+                }
 
                 m_caster.GetMotionMaster().MoveCharge(pos.posX, pos.posY, pos.posZ);
             }
