@@ -107,7 +107,36 @@ namespace Game.Chat
         [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]
         static bool HandleGameObjectDespawnGroup(StringArguments args, CommandHandler handler)
         {
-            return NPCCommands.HandleNpcDespawnGroup(args, handler);
+            if (args.Empty())
+                return false;
+
+            bool deleteRespawnTimes = false;
+            uint groupId = 0;
+
+            // Decode arguments
+            string arg = args.NextString();
+            while (!arg.IsEmpty())
+            {
+                string thisArg = arg.ToLower();
+                if (thisArg == "removerespawntime")
+                    deleteRespawnTimes = true;
+                else if (thisArg.IsEmpty() || !thisArg.IsNumber())
+                    return false;
+                else
+                    groupId = uint.Parse(thisArg);
+
+                arg = args.NextString();
+            }
+
+            Player player = handler.GetSession().GetPlayer();
+
+            if (!player.GetMap().SpawnGroupDespawn(groupId, deleteRespawnTimes))
+            {
+                handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
+                return false;
+            }
+
+            return true;
         }
 
         [Command("info", RBACPermissions.CommandGobjectInfo)]
@@ -311,7 +340,44 @@ namespace Game.Chat
         [Command("spawngroup", RBACPermissions.CommandGobjectSpawngroup)]
         static bool HandleGameObjectSpawnGroup(StringArguments args, CommandHandler handler)
         {
-            return NPCCommands.HandleNpcSpawnGroup(args, handler);
+            if (args.Empty())
+                return false;
+
+            bool ignoreRespawn = false;
+            bool force = false;
+            uint groupId = 0;
+
+            // Decode arguments
+            string arg = args.NextString();
+            while (!arg.IsEmpty())
+            {
+                string thisArg = arg.ToLower();
+                if (thisArg == "ignorerespawn")
+                    ignoreRespawn = true;
+                else if (thisArg == "force")
+                    force = true;
+                else if (thisArg.IsEmpty() || !thisArg.IsNumber())
+                    return false;
+                else
+                    groupId = uint.Parse(thisArg);
+
+                arg = args.NextString();
+            }
+
+            Player player = handler.GetSession().GetPlayer();
+
+            List<WorldObject> creatureList = new List<WorldObject>();
+            if (!player.GetMap().SpawnGroupSpawn(groupId, ignoreRespawn, force, creatureList))
+            {
+                handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
+                return false;
+            }
+
+            handler.SendSysMessage(CypherStrings.SpawngroupSpawncount, creatureList.Count);
+            foreach (WorldObject obj in creatureList)
+                handler.SendSysMessage($"{obj.GetName()} ({obj.GetGUID()})");
+
+            return true;
         }
 
         [Command("target", RBACPermissions.CommandGobjectTarget)]
@@ -494,8 +560,6 @@ namespace Game.Chat
 
             return true;
         }
-
-
 
         [CommandGroup("add", RBACPermissions.CommandGobjectAdd)]
         class AddCommands

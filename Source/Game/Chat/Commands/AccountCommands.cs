@@ -395,60 +395,6 @@ namespace Game.Chat
         [CommandGroup("set", RBACPermissions.CommandAccountSet, true)]
         class SetCommands
         {
-            [Command("password", RBACPermissions.CommandAccountSetPassword, true)]
-            static bool HandleAccountSetPasswordCommand(StringArguments args, CommandHandler handler)
-            {
-                if (args.Empty())
-                {
-                    handler.SendSysMessage(CypherStrings.CmdSyntax);
-                    return false;
-                }
-
-                // Get the command line arguments
-                string accountName = args.NextString();
-                string password = args.NextString();
-                string passwordConfirmation = args.NextString();
-
-                if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordConfirmation))
-                    return false;
-
-                uint targetAccountId = Global.AccountMgr.GetId(accountName);
-                if (targetAccountId == 0)
-                {
-                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-                    return false;
-                }
-
-                // can set password only for target with less security
-                // This also restricts setting handler's own password
-                if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
-                    return false;
-
-                if (!password.Equals(passwordConfirmation))
-                {
-                    handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
-                    return false;
-                }
-
-                AccountOpResult result = Global.AccountMgr.ChangePassword(targetAccountId, password);
-                switch (result)
-                {
-                    case AccountOpResult.Ok:
-                        handler.SendSysMessage(CypherStrings.CommandPassword);
-                        break;
-                    case AccountOpResult.NameNotExist:
-                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
-                        return false;
-                    case AccountOpResult.PassTooLong:
-                        handler.SendSysMessage(CypherStrings.PasswordTooLong);
-                        return false;
-                    default:
-                        handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
-                        return false;
-                }
-                return true;
-            }
-
             [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
             static bool HandleAccountSetAddonCommand(StringArguments args, CommandHandler handler)
             {
@@ -512,6 +458,65 @@ namespace Game.Chat
             }
 
             [Command("gmlevel", RBACPermissions.CommandAccountSetSecLevel, true)]
+            static bool HandleAccountSetGmLevelCommand(StringArguments args, CommandHandler handler)
+            {
+                return HandleAccountSetSecLevelCommand(args, handler);
+            }
+
+            [Command("password", RBACPermissions.CommandAccountSetPassword, true)]
+            static bool HandleAccountSetPasswordCommand(StringArguments args, CommandHandler handler)
+            {
+                if (args.Empty())
+                {
+                    handler.SendSysMessage(CypherStrings.CmdSyntax);
+                    return false;
+                }
+
+                // Get the command line arguments
+                string accountName = args.NextString();
+                string password = args.NextString();
+                string passwordConfirmation = args.NextString();
+
+                if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordConfirmation))
+                    return false;
+
+                uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                if (targetAccountId == 0)
+                {
+                    handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                    return false;
+                }
+
+                // can set password only for target with less security
+                // This also restricts setting handler's own password
+                if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
+                    return false;
+
+                if (!password.Equals(passwordConfirmation))
+                {
+                    handler.SendSysMessage(CypherStrings.NewPasswordsNotMatch);
+                    return false;
+                }
+
+                AccountOpResult result = Global.AccountMgr.ChangePassword(targetAccountId, password);
+                switch (result)
+                {
+                    case AccountOpResult.Ok:
+                        handler.SendSysMessage(CypherStrings.CommandPassword);
+                        break;
+                    case AccountOpResult.NameNotExist:
+                        handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                        return false;
+                    case AccountOpResult.PassTooLong:
+                        handler.SendSysMessage(CypherStrings.PasswordTooLong);
+                        return false;
+                    default:
+                        handler.SendSysMessage(CypherStrings.CommandNotchangepassword);
+                        return false;
+                }
+                return true;
+            }
+
             [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
             static bool HandleAccountSetSecLevelCommand(StringArguments args, CommandHandler handler)
             {
