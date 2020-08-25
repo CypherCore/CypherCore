@@ -5172,6 +5172,9 @@ namespace Game.Entities
                         if (HasUnitState(UnitState.Stunned))
                             return InventoryResult.GenericStunned;
 
+                        if (IsCharmed())
+                            return InventoryResult.CantDoThatRightNow; // @todo is this the correct error?
+
                         // do not allow equipping gear except weapons, offhands, projectiles, relics in
                         // - combat
                         // - in-progress arenas
@@ -5404,6 +5407,9 @@ namespace Game.Entities
             // item used
             if (pItem.m_lootGenerated)
                 return InventoryResult.LootGone;
+
+            if (IsCharmed())
+                return InventoryResult.CantDoThatRightNow; // @todo is this the correct error?
 
             // do not allow unequipping gear except weapons, offhands, projectiles, relics in
             // - combat
