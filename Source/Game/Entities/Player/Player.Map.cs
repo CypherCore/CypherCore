@@ -148,6 +148,8 @@ namespace Game.Entities
 
         public void UpdateZone(uint newZone, uint newArea)
         {
+            GetMap().UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
+
             if (m_zoneUpdateId != newZone)
             {
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
@@ -159,8 +161,6 @@ namespace Game.Entities
                 if (guild)
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
             }
-
-            GetMap().UpdatePlayerZoneStats(m_zoneUpdateId, newZone);
 
             // group update
             if (GetGroup())
