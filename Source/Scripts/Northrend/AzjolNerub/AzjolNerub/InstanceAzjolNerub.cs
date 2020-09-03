@@ -35,6 +35,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
         public const uint WatcherSilthik = 5;
         public const uint AnubarakWall = 6;
         public const uint AnubarakWall2 = 7;
+        public const uint GatewatcherGreet = 8;
     }
 
     struct ANCreatureIds
@@ -103,6 +104,8 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
 
         class instance_azjol_nerub_InstanceScript : InstanceScript
         {
+            uint _gateWatcherGreet;
+
             public instance_azjol_nerub_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders(ANInstanceMisc.DataHeader);
@@ -134,7 +137,30 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
 
                 return true;
             }
-    }
+
+            public override uint GetData(uint dataId)
+            {
+                switch (dataId)
+                {
+                    case ANDataTypes.GatewatcherGreet:
+                        return _gateWatcherGreet;
+                    default:
+                        return 0;
+                }
+            }
+
+            public override void SetData(uint dataId, uint value)
+            {
+                switch (dataId)
+                {
+                    case ANDataTypes.GatewatcherGreet:
+                        _gateWatcherGreet = value;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
         public override InstanceScript GetInstanceScript(InstanceMap map)
         {

@@ -366,6 +366,39 @@ namespace Game.Scripting
         public virtual bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered) { return false; }
     }
 
+    public class OnlyOnceAreaTriggerScript : AreaTriggerScript
+    {
+        public OnlyOnceAreaTriggerScript(string name) : base(name) { }
+
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered)
+        {
+            uint triggerId = trigger.Id;
+            InstanceScript instance = player.GetInstanceScript();
+            if (instance != null)
+            {
+                if (instance.IsAreaTriggerDone(triggerId))
+                    return true;
+                else
+                    instance.MarkAreaTriggerDone(triggerId);
+            }
+            return _OnTrigger(player, trigger, entered);
+        }
+
+        void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
+        {
+            script.ResetAreaTriggerDone(triggerId);
+        }
+
+        void ResetAreaTriggerDone(Player player, AreaTriggerRecord trigger)
+        {
+            InstanceScript instance = player.GetInstanceScript();
+            if (instance != null)
+                ResetAreaTriggerDone(instance, trigger.Id);
+        }
+
+        public virtual bool _OnTrigger(Player player, AreaTriggerRecord trigger, bool entered) { return false; }
+    }
+    
     public class BattlegroundScript : ScriptObject
     {
         public BattlegroundScript(string name) : base(name)

@@ -186,9 +186,9 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
             switch (action)
             {
                 case -ANInstanceMisc.ActionGatewatcherGreet:
-                    if (!_hadGreet && me.IsAlive() && !me.IsInCombat() && !_petsInCombat)
+                    if (instance.GetData(ANDataTypes.GatewatcherGreet) == 0 && me.IsAlive() && !me.IsInCombat() && !_petsInCombat)
                     {
-                        _hadGreet = true;
+                        instance.SetData(ANDataTypes.GatewatcherGreet, 1);
                         Talk(TextIds.SayPrefight);
                     }
                     break;
@@ -277,7 +277,6 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
                 Talk(TextIds.SaySendGroup);
         }
 
-        bool _hadGreet;
         bool _hadFrenzy;
         bool _petsInCombat;
         byte _watchersActive;

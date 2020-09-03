@@ -872,11 +872,16 @@ namespace Game.Maps
         public uint GetCompletedEncounterMask() { return completedEncounters; }
 
         // Sets a temporary entrance that does not get saved to db
-        void SetTemporaryEntranceLocation(uint worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
+        public void SetTemporaryEntranceLocation(uint worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
 
         // Get's the current entrance id
         public uint GetEntranceLocation() { return _temporaryEntranceId != 0 ? _temporaryEntranceId : _entranceId; }
 
+        // Only used by areatriggers that inherit from OnlyOnceAreaTriggerScript
+        public void MarkAreaTriggerDone(uint id) { _activatedAreaTriggers.Add(id); }
+        public void ResetAreaTriggerDone(uint id) { _activatedAreaTriggers.Remove(id); }
+        public bool IsAreaTriggerDone(uint id) { return _activatedAreaTriggers.Contains(id); }
+        
         public virtual void FillInitialWorldStates(InitWorldStates data) { }
 
         public int GetEncounterCount() { return bosses.Count; }
@@ -909,6 +914,7 @@ namespace Game.Maps
         Dictionary<uint, ObjectGuid> _objectGuids = new Dictionary<uint, ObjectGuid>();
         uint completedEncounters;
         List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new List<InstanceSpawnGroupInfo>();
+        List<uint> _activatedAreaTriggers = new List<uint>();
         uint _entranceId;
         uint _temporaryEntranceId;
         uint _combatResurrectionTimer;
