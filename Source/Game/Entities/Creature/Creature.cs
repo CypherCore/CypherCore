@@ -2478,6 +2478,7 @@ namespace Game.Entities
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
             float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
+            
             return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
         }
 

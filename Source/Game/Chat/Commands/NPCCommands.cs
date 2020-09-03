@@ -150,17 +150,17 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoHealth, target.GetCreateHealth(), target.GetMaxHealth(), target.GetHealth());
             handler.SendSysMessage(CypherStrings.NpcinfoInhabitType, cInfo.InhabitType);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, target.m_unitData.Flags);
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, (uint)target.m_unitData.Flags);
             foreach (UnitFlags value in Enum.GetValues(typeof(UnitFlags)))
                 if (target.HasUnitFlag(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, target.m_unitData.Flags2);
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, (uint)target.m_unitData.Flags2);
             foreach (UnitFlags2 value in Enum.GetValues(typeof(UnitFlags2)))
                 if (target.HasUnitFlag2(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags2)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, target.m_unitData.Flags3);
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, (uint)target.m_unitData.Flags3);
             foreach (UnitFlags3 value in Enum.GetValues(typeof(UnitFlags3)))
                 if (target.HasUnitFlag3(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags3)value, value);
@@ -185,7 +185,7 @@ namespace Game.Chat
                     handler.SendSysMessage("{0} (0x{1:X})", (CreatureFlagsExtra)value, value);
 
             handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, npcflags);
-            foreach (ulong value in Enum.GetValues(typeof(NPCFlags)))
+            foreach (uint value in Enum.GetValues(typeof(NPCFlags)))
                 if (npcflags.HasAnyFlag(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (NPCFlags)value, value);
 

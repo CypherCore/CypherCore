@@ -678,6 +678,10 @@ namespace Game.Maps
                 Cypher.Assert(_zonePlayerCountMap[oldZone] != 0, $"A player left zone {oldZone} (went to {newZone}) - but there were no players in the zone!");
                 --_zonePlayerCountMap[oldZone];
             }
+
+            if (!_zonePlayerCountMap.ContainsKey(newZone))
+                _zonePlayerCountMap[newZone] = 0;
+
             ++_zonePlayerCountMap[newZone];
         }
 
@@ -2172,8 +2176,10 @@ namespace Game.Maps
             if (vmapData.areaInfo.HasValue)
                 data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.GroupId, vmapData.areaInfo.Value.MogpFlags));
 
+            float mapHeight = MapConst.InvalidHeight;
             GridMap gmap = GetGridMap(terrainMapId, x, y);
-            float mapHeight = gmap.GetHeight(x, y);
+            if (gmap != null)
+                mapHeight = gmap.GetHeight(x, y);
 
             // area lookup
             AreaTableRecord areaEntry = null;
@@ -2661,8 +2667,8 @@ namespace Game.Maps
             Cypher.Assert(info != null);
 
             // spawnid store
-            GetRespawnMapForType(info.type).Remove(info.spawnId);
-            Cypher.Assert(GetRespawnMapForType(info.type).Count == 1, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
+            bool removed = GetRespawnMapForType(info.type).Remove(info.spawnId);
+            Cypher.Assert(removed, $"Respawn stores inconsistent for map {GetId()}, spawnid {info.spawnId} (type {info.type})");
 
             //respawn heap
             _respawnTimes.Remove(info);
@@ -5646,6 +5652,8 @@ namespace Game.Maps
     {
         public int Compare(RespawnInfo a, RespawnInfo b)
         {
+            if (a == b)
+                return 0;
             if (a.respawnTime != b.respawnTime)
                 return a.respawnTime.CompareTo(b.respawnTime);
             if (a.spawnId != b.spawnId)

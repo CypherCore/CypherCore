@@ -455,7 +455,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, difficulty.FallbackDifficultyID));
+                    procEntry = mSpellProcMap.LookupByKey((spellInfo.Id, (Difficulty)difficulty.FallbackDifficultyID));
                     if (procEntry != null)
                         return procEntry;
 

@@ -92,7 +92,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            Position position = _reference;
+            Position position = new Position(_reference);
             float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
             float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
             owner.MovePositionToFirstCollision(ref position, distance, angle);

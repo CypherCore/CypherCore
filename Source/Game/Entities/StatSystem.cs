@@ -488,8 +488,8 @@ namespace Game.Entities
             if (val == 0)
                 val = 1;
 
-            ulong health = GetHealth();
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxHealth), val);
+            ulong health = GetHealth();
 
             // group update
             if (IsTypeId(TypeId.Player))

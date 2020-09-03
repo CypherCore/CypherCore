@@ -43,6 +43,14 @@ namespace Game.Entities
             posZ = vector.Z;
         }
 
+        public Position(Position position)
+        {
+            posX = position.posX;
+            posY = position.posY;
+            posZ = position.posZ;
+            Orientation = position.Orientation;
+        }
+
         public float GetPositionX()
         {
             return posX;

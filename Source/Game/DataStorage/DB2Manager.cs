@@ -1118,56 +1118,56 @@ namespace Game.DataStorage
             {
                 case ExpectedStatType.CreatureHealth:
                     value = expectedStatRecord.CreatureHealth;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureHealthMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.CreatureHealthMod;
                     break;
                 case ExpectedStatType.PlayerHealth:
                     value = expectedStatRecord.PlayerHealth;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerHealthMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.PlayerHealthMod;
                     break;
                 case ExpectedStatType.CreatureAutoAttackDps:
                     value = expectedStatRecord.CreatureAutoAttackDps;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureAutoAttackDPSMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.CreatureAutoAttackDPSMod;
                     break;
                 case ExpectedStatType.CreatureArmor:
                     value = expectedStatRecord.CreatureArmor;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureArmorMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.CreatureArmorMod;
                     break;
                 case ExpectedStatType.PlayerMana:
                     value = expectedStatRecord.PlayerMana;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerManaMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.PlayerManaMod;
                     break;
                 case ExpectedStatType.PlayerPrimaryStat:
                     value = expectedStatRecord.PlayerPrimaryStat;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerPrimaryStatMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.PlayerPrimaryStatMod;
                     break;
                 case ExpectedStatType.PlayerSecondaryStat:
                     value = expectedStatRecord.PlayerSecondaryStat;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerSecondaryStatMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.PlayerSecondaryStatMod;
                     break;
                 case ExpectedStatType.ArmorConstant:
                     value = expectedStatRecord.ArmorConstant;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.ArmorConstantMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.ArmorConstantMod;
@@ -1176,7 +1176,7 @@ namespace Game.DataStorage
                     break;
                 case ExpectedStatType.CreatureSpellDamage:
                     value = expectedStatRecord.CreatureSpellDamage;
-                    if (contentTuningMods != null)
+                    if (!contentTuningMods.Empty())
                         value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureSpellDamageMod : 1.0f);
                     if (classMod != null)
                         value *= classMod.CreatureSpellDamageMod;
