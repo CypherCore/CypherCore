@@ -1557,6 +1557,9 @@ namespace Game
                     InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, itemPosCount, uItem, false);
                     if (inventoryResult == InventoryResult.Ok)
                     {
+                        if (_player.CanEquipItem(ItemConst.NullSlot, out dstPos, uItem, false) != InventoryResult.Ok)
+                            continue;
+
                         GetPlayer().RemoveItem(InventorySlots.Bag0, i, true);
                         GetPlayer().StoreItem(itemPosCount, uItem, true);
                     }
@@ -1567,6 +1570,9 @@ namespace Game
                 }
 
                 if (item.GetPos() == dstPos)
+                    continue;
+
+                if (_player.CanUnequipItem(dstPos, true) != InventoryResult.Ok)
                     continue;
 
                 GetPlayer().SwapItem(item.GetPos(), dstPos);
