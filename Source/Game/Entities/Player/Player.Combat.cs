@@ -251,8 +251,9 @@ namespace Game.Entities
             else if (slot == EquipmentSlot.OffHand)
                 attType = WeaponAttackType.OffAttack;
 
+            uint itemLevel = item.GetItemLevel(this);
             float minDamage, maxDamage;
-            item.GetDamage(this, out minDamage, out maxDamage);
+            proto.GetDamage(itemLevel, out minDamage, out maxDamage);
 
             if (minDamage > 0)
             {
@@ -269,6 +270,22 @@ namespace Game.Entities
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
             if (proto.GetDelay() != 0 && !(shapeshift != null && shapeshift.CombatRoundTime != 0))
                 SetBaseAttackTime(attType, apply ? proto.GetDelay() : SharedConst.BaseAttackTime);
+
+            int weaponBasedAttackPower = apply ? (int)(proto.GetDPS(itemLevel) * 6.0f) : 0;
+            switch (attType)
+            {
+                case WeaponAttackType.BaseAttack:
+                    SetMainHandWeaponAttackPower(weaponBasedAttackPower);
+                    break;
+                case WeaponAttackType.OffAttack:
+                    SetOffHandWeaponAttackPower(weaponBasedAttackPower);
+                    break;
+                case WeaponAttackType.RangedAttack:
+                    SetRangedWeaponAttackPower(weaponBasedAttackPower);
+                    break;
+                default:
+                    break;
+            }
 
             if (CanModifyStats() && (damage != 0 || proto.GetDelay() != 0))
                 UpdateDamagePhysical(attType);

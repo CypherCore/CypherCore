@@ -2253,18 +2253,30 @@ namespace Game.Entities
                     return weapon.GetTemplate().GetDelay() / 1000.0f;
             }
         }
-        public float GetTotalAttackPowerValue(WeaponAttackType attType)
+        public float GetTotalAttackPowerValue(WeaponAttackType attType, bool includeWeapon = true)
         {
             if (attType == WeaponAttackType.RangedAttack)
             {
-                int ap = m_unitData.RangedAttackPower;
+                float ap = m_unitData.RangedAttackPower + m_unitData.RangedAttackPowerModPos + m_unitData.RangedAttackPowerModNeg;
+                if (includeWeapon)
+                    ap += Math.Max(m_unitData.MainHandWeaponAttackPower, m_unitData.RangedWeaponAttackPower);
                 if (ap < 0)
                     return 0.0f;
                 return ap * (1.0f + m_unitData.RangedAttackPowerMultiplier);
             }
             else
             {
-                int ap = m_unitData.AttackPower;
+                float ap = m_unitData.AttackPower + m_unitData.AttackPowerModPos + m_unitData.AttackPowerModNeg;
+                if (includeWeapon)
+                {
+                    if (attType == WeaponAttackType.BaseAttack)
+                        ap += Math.Max(m_unitData.MainHandWeaponAttackPower, m_unitData.RangedWeaponAttackPower);
+                    else
+                    {
+                        ap += m_unitData.OffHandWeaponAttackPower;
+                        ap /= 2;
+                    }
+                }
                 if (ap < 0)
                     return 0.0f;
                 return ap * (1.0f + m_unitData.AttackPowerMultiplier);

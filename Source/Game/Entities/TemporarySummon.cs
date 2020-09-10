@@ -929,7 +929,7 @@ namespace Game.Entities
 
             float att_speed = GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000.0f;
 
-            float base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * att_speed + bonusDamage;
+            float base_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType, false) / 3.5f * att_speed + bonusDamage;
             float base_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             float total_value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float total_pct = GetPctModifierValue(unitMod, UnitModifierPctType.Total);

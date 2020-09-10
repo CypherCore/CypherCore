@@ -2514,8 +2514,6 @@ namespace Game.Entities
         }
         public uint GetAppearanceModId() { return m_itemData.ItemAppearanceModID; }
         public void SetAppearanceModId(uint appearanceModId) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)appearanceModId); }
-        public uint GetArmor(Player owner) { return GetTemplate().GetArmor(GetItemLevel(owner)); }
-        public void GetDamage(Player owner, out float minDamage, out float maxDamage) { GetTemplate().GetDamage(GetItemLevel(owner), out minDamage, out maxDamage); }
         public float GetRepairCostMultiplier() { return _bonusData.RepairCostMultiplier; }
         public uint GetScalingStatDistribution() { return _bonusData.ScalingStatDistribution; }
 

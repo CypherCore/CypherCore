@@ -709,6 +709,9 @@ namespace Game.Entities
         public void SetRangedAttackPowerModPos(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModPos), attackPowerMod); }
         public void SetRangedAttackPowerModNeg(int attackPowerMod) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerModNeg), attackPowerMod); }
         public void SetRangedAttackPowerMultiplier(float attackPowerMult) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackPowerMultiplier), attackPowerMult); }
+        public void SetMainHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MainHandWeaponAttackPower), attackPower); }
+        public void SetOffHandWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.OffHandWeaponAttackPower), attackPower); }
+        public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
         float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, uint spellId)
@@ -1076,7 +1079,7 @@ namespace Game.Entities
 
             float attackPowerMod = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
-            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType) / 3.5f * attackPowerMod;
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetTotalAttackPowerValue(attType, false) / 3.5f * attackPowerMod;
             float basePct = GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             float totalPct = addTotalPct ? GetPctModifierValue(unitMod, UnitModifierPctType.Total) : 1.0f;
@@ -2040,7 +2043,7 @@ namespace Game.Entities
                 weaponMaxDamage = 0.0f;
             }
 
-            float attackPower = GetTotalAttackPowerValue(attType);
+            float attackPower = GetTotalAttackPowerValue(attType, false);
             float attackSpeedMulti = Math.Max(GetAPMultiplier(attType, normalized), 0.25f);
 
             float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + (attackPower / 3.5f) * variance;

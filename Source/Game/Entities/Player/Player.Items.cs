@@ -4230,21 +4230,12 @@ namespace Game.Entities
                 }
             }
 
-            uint armor = item.GetArmor(this);
+            uint armor = proto.GetArmor(itemLevel);
             if (armor != 0)
                 HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)armor, apply);
 
-            WeaponAttackType attType = WeaponAttackType.BaseAttack;
-            if (slot == EquipmentSlot.MainHand && (proto.GetInventoryType() == InventoryType.Ranged || proto.GetInventoryType() == InventoryType.RangedRight))
-            {
-                attType = WeaponAttackType.RangedAttack;
-            }
-            else if (slot == EquipmentSlot.OffHand)
-            {
-                attType = WeaponAttackType.OffAttack;
-            }
-
-            if (CanUseAttackType(attType))
+            WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
+            if (attType != WeaponAttackType.Max && CanUseAttackType(attType))
                 _ApplyWeaponDamage(slot, item, apply);
         }
 

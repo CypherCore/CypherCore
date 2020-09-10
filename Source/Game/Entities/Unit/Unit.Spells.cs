@@ -128,8 +128,14 @@ namespace Game.Entities
                     ApCoeffMod /= 100.0f;
                 }
 
-                WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
-                float APbonus = victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
+                WeaponAttackType attType = WeaponAttackType.BaseAttack;
+                if ((spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee))
+                    attType = WeaponAttackType.RangedAttack;
+
+                if (spellProto.HasAttribute(SpellAttr3.ReqOffhand) && !spellProto.HasAttribute(SpellAttr3.MainHand))
+                    attType = WeaponAttackType.OffAttack;
+
+                float APbonus = (float)(victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += (int)(stack * ApCoeffMod * APbonus);
             }

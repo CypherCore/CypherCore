@@ -158,16 +158,11 @@ namespace Game.Entities
             return (uint)(shield.Quality[(int)quality] + 0.5f);
         }
 
-        public void GetDamage(uint itemLevel, out float minDamage, out float maxDamage)
+        public float GetDPS(uint itemLevel)
         {
-            minDamage = maxDamage = 0.0f;
             ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
             if (GetClass() != ItemClass.Weapon || quality > ItemQuality.Artifact)
-                return;
-
-            // get the right store here
-            if (GetInventoryType() > InventoryType.RangedRight)
-                return;
+                return 0.0f;
 
             float dps = 0.0f;
             switch (GetInventoryType())
@@ -198,7 +193,7 @@ namespace Game.Entities
                                 dps = CliDB.ItemDamageTwoHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
                             break;
                         default:
-                            return;
+                            break;
                     }
                     break;
                 case InventoryType.Weapon:
@@ -210,12 +205,22 @@ namespace Game.Entities
                         dps = CliDB.ItemDamageOneHandStorage.LookupByKey(itemLevel).Quality[(int)quality];
                     break;
                 default:
-                    return;
+                    break;
             }
 
-            float avgDamage = dps * GetDelay() * 0.001f;
-            minDamage = (GetDmgVariance() * -0.5f + 1.0f) * avgDamage;
-            maxDamage = (float)Math.Floor(avgDamage * (GetDmgVariance() * 0.5f + 1.0f) + 0.5f);
+            return dps;
+        }
+
+        public void GetDamage(uint itemLevel, out float minDamage, out float maxDamage)
+        {
+            minDamage = maxDamage = 0.0f;
+            float dps = GetDPS(itemLevel);
+            if (dps > 0.0f)
+            {
+                float avgDamage = dps * GetDelay() * 0.001f;
+                minDamage = (GetDmgVariance() * -0.5f + 1.0f) * avgDamage;
+                maxDamage = (float)Math.Floor(avgDamage * (GetDmgVariance() * 0.5f + 1.0f) + 0.5f);
+            }
         }
 
         public bool IsUsableByLootSpecialization(Player player, bool alwaysAllowBoundToAccount)
