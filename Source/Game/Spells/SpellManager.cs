@@ -3058,9 +3058,6 @@ namespace Game.Entities
                         break;
                     // Coldflame (Lord Marrowgar)
                     case 69146:
-                    case 70823:
-                    case 70824:
-                    case 70825:
                         spellInfo.AttributesEx4 &= ~SpellAttr4.IgnoreResistances;
                         break;
                     case 71169: // Shadow's Fate

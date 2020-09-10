@@ -379,24 +379,6 @@ namespace Game.Spells
                                 m_caster.CastSpell(unitTarget, spell.Id, true);
                             return;
                         }
-                    // Cloak of Shadows
-                    case 35729:
-                        {
-                            uint dispelMask = SpellInfo.GetDispelMask(DispelType.ALL);
-                            foreach (var iter in unitTarget.GetAppliedAuras())
-                            {
-                                // remove all harmful spells on you...
-                                SpellInfo spell = iter.Value.GetBase().GetSpellInfo();
-                                if ((spell.DmgClass == SpellDmgClass.Magic // only affect magic spells
-                                    || (Convert.ToBoolean(spell.GetDispelMask() & dispelMask))
-                                    // ignore positive and passive auras
-                                    && !iter.Value.IsPositive() && !iter.Value.GetBase().IsPassive()))
-                                {
-                                    m_caster.RemoveAura(iter);
-                                }
-                            }
-                            return;
-                        }
                 }
             }
 
