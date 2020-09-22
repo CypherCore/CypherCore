@@ -3265,6 +3265,9 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
+            if (unitTarget.IsTypeId(TypeId.Player))
+                unitTarget.ToPlayer().SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
+
             unitTarget.GetHostileRefManager().UpdateVisibility();
 
             var attackers = unitTarget.GetAttackers();
