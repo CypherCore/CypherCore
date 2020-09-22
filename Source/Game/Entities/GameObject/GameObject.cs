@@ -2042,6 +2042,8 @@ namespace Game.Entities
             // remove immunity flags, to allow spell to target anything
             trigger.RemoveUnitFlag(UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
 
+            PhasingHandler.InheritPhaseShift(trigger, this);
+
             Unit owner = GetOwner();
             if (owner)
             {
