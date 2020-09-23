@@ -618,9 +618,9 @@ namespace Game.Networking.Packets
         public ObjectGuid[] GemItem = new ObjectGuid[ItemConst.MaxGemSockets];
     }
 
-    class SocketGemsResult : ServerPacket
+    class SocketGemsSuccess : ServerPacket
     {
-        public SocketGemsResult() : base(ServerOpcodes.SocketGems, ConnectionType.Instance) { }
+        public SocketGemsSuccess() : base(ServerOpcodes.SocketGemsSuccess, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -651,9 +651,9 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class SortBagsResult : ServerPacket
+    class BagCleanupFinished : ServerPacket
     {
-        public SortBagsResult() : base(ServerOpcodes.SortBagsResult, ConnectionType.Instance) { }
+        public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
@@ -670,9 +670,9 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGuid { get; set; }
     }
 
-    class CharacterInventoryOverflowWarning : ServerPacket
+    class InventoryFullOverflow : ServerPacket
     {
-        public CharacterInventoryOverflowWarning() : base(ServerOpcodes.CharacterInventoryOverflowWarning) { }
+        public InventoryFullOverflow() : base(ServerOpcodes.InventoryFullOverflow) { }
 
         public override void Write() { }
     }

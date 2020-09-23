@@ -62,7 +62,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AzeriteEssenceActivateEssence)]
         void HandleAzeriteEssenceActivateEssence(AzeriteEssenceActivateEssence azeriteEssenceActivateEssence)
         {
-            AzeriteEssenceSelectionResult activateEssenceResult = new AzeriteEssenceSelectionResult();
+            ActivateEssenceFailed activateEssenceResult = new ActivateEssenceFailed();
             activateEssenceResult.AzeriteEssenceID = azeriteEssenceActivateEssence.AzeriteEssenceID;
 
             Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment);

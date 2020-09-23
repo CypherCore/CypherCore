@@ -727,7 +727,7 @@ namespace Game.Maps
 
         void SendBossKillCredit(uint encounterId)
         {
-            BossKillCredit bossKillCreditMessage = new BossKillCredit();
+            BossKill bossKillCreditMessage = new BossKill();
             bossKillCreditMessage.DungeonEncounterID = encounterId;
 
             instance.SendToPlayers(bossKillCreditMessage);

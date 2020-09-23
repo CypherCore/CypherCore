@@ -213,41 +213,41 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    AreaTriggerCircularMovementInfo circularMovementInfo = new AreaTriggerCircularMovementInfo();
+                    AreaTriggerOrbitInfo orbitInfo = new AreaTriggerOrbitInfo();
 
-                    circularMovementInfo.StartDelay = circularMovementInfos.Read<uint>(1);
-                    circularMovementInfo.Radius = circularMovementInfos.Read<float>(2);
-                    if (!float.IsInfinity(circularMovementInfo.Radius))
+                    orbitInfo.StartDelay = circularMovementInfos.Read<uint>(1);
+                    orbitInfo.Radius = circularMovementInfos.Read<float>(2);
+                    if (!float.IsInfinity(orbitInfo.Radius))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid Radius ({circularMovementInfo.Radius}), set to 0!");
-                        circularMovementInfo.Radius = 0.0f;
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid Radius ({orbitInfo.Radius}), set to 0!");
+                        orbitInfo.Radius = 0.0f;
                     }
 
-                    circularMovementInfo.BlendFromRadius = circularMovementInfos.Read<float>(3);
-                    if (!float.IsInfinity(circularMovementInfo.BlendFromRadius))
+                    orbitInfo.BlendFromRadius = circularMovementInfos.Read<float>(3);
+                    if (!float.IsInfinity(orbitInfo.BlendFromRadius))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid BlendFromRadius ({circularMovementInfo.BlendFromRadius}), set to 0!");
-                        circularMovementInfo.BlendFromRadius = 0.0f;
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid BlendFromRadius ({orbitInfo.BlendFromRadius}), set to 0!");
+                        orbitInfo.BlendFromRadius = 0.0f;
                     }
 
-                    circularMovementInfo.InitialAngle = circularMovementInfos.Read<float>(4);
-                    if (!float.IsInfinity(circularMovementInfo.InitialAngle))
+                    orbitInfo.InitialAngle = circularMovementInfos.Read<float>(4);
+                    if (!float.IsInfinity(orbitInfo.InitialAngle))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid InitialAngle ({circularMovementInfo.InitialAngle}), set to 0!");
-                        circularMovementInfo.InitialAngle = 0.0f;
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid InitialAngle ({orbitInfo.InitialAngle}), set to 0!");
+                        orbitInfo.InitialAngle = 0.0f;
                     }
 
-                    circularMovementInfo.ZOffset = circularMovementInfos.Read<float>(5);
-                    if (!float.IsInfinity(circularMovementInfo.ZOffset))
+                    orbitInfo.ZOffset = circularMovementInfos.Read<float>(5);
+                    if (!float.IsInfinity(orbitInfo.ZOffset))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid ZOffset ({circularMovementInfo.ZOffset}), set to 0!");
-                        circularMovementInfo.ZOffset = 0.0f;
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid ZOffset ({orbitInfo.ZOffset}), set to 0!");
+                        orbitInfo.ZOffset = 0.0f;
                     }
 
-                    circularMovementInfo.CounterClockwise = circularMovementInfos.Read<bool>(6);
-                    circularMovementInfo.CanLoop = circularMovementInfos.Read<bool>(7);
+                    orbitInfo.CounterClockwise = circularMovementInfos.Read<bool>(6);
+                    orbitInfo.CanLoop = circularMovementInfos.Read<bool>(7);
 
-                    atSpellMisc.CircularMovementInfo = circularMovementInfo;
+                    atSpellMisc.OrbitInfo = orbitInfo;
                 }
                 while (circularMovementInfos.NextRow());
             }

@@ -294,16 +294,16 @@ namespace Game.Networking.Packets
         public uint MovieID;
     }
 
-    public class UITimeRequest : ClientPacket
+    public class ServerTimeOffsetRequest : ClientPacket
     {
-        public UITimeRequest(WorldPacket packet) : base(packet) { }
+        public ServerTimeOffsetRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    public class UITime : ServerPacket
+    public class ServerTimeOffset : ServerPacket
     {
-        public UITime() : base(ServerOpcodes.UiTime) { }
+        public ServerTimeOffset() : base(ServerOpcodes.ServerTimeOffset) { }
 
         public override void Write()
         {

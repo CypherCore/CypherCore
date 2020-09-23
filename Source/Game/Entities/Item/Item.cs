@@ -1116,7 +1116,7 @@ namespace Game.Entities
 
         public void SendUpdateSockets()
         {
-            SocketGemsResult socketGems = new SocketGemsResult();
+            SocketGemsSuccess socketGems = new SocketGemsSuccess();
             socketGems.Item = GetGUID();
 
             GetOwner().SendPacket(socketGems);

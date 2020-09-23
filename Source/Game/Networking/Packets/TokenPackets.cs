@@ -20,9 +20,9 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class UpdateListedAuctionableTokens : ClientPacket
+    class CommerceTokenGetLog : ClientPacket
     {
-        public UpdateListedAuctionableTokens(WorldPacket packet) : base(packet) { }
+        public CommerceTokenGetLog(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -32,9 +32,9 @@ namespace Game.Networking.Packets
         public uint UnkInt;
     }
 
-    class UpdateListedAuctionableTokensResponse : ServerPacket
+    class CommerceTokenGetLogResponse : ServerPacket
     {
-        public UpdateListedAuctionableTokensResponse() : base(ServerOpcodes.WowTokenUpdateAuctionableListResponse, ConnectionType.Instance) { }
+        public CommerceTokenGetLogResponse() : base(ServerOpcodes.CommerceTokenGetLogResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -66,9 +66,9 @@ namespace Game.Networking.Packets
         }
     }
 
-    class RequestWowTokenMarketPrice : ClientPacket
+    class CommerceTokenGetMarketPrice : ClientPacket
     {
-        public RequestWowTokenMarketPrice(WorldPacket packet) : base(packet) { }
+        public CommerceTokenGetMarketPrice(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -78,9 +78,9 @@ namespace Game.Networking.Packets
         public uint UnkInt;
     }
 
-    class WowTokenMarketPriceResponse : ServerPacket
+    class CommerceTokenGetMarketPriceResponse : ServerPacket
     {
-        public WowTokenMarketPriceResponse() : base(ServerOpcodes.WowTokenMarketPriceResponse) { }
+        public CommerceTokenGetMarketPriceResponse() : base(ServerOpcodes.CommerceTokenGetMarketPriceResponse) { }
 
         public override void Write()
         {

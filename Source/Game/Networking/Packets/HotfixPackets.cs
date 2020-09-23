@@ -122,9 +122,9 @@ namespace Game.Networking.Packets
         public List<HotfixRecord> Hotfixes = new List<HotfixRecord>();
     }
 
-    class HotfixResponse : ServerPacket
+    class HotfixConnect : ServerPacket
     {
-        public HotfixResponse() : base(ServerOpcodes.HotfixResponse) { }
+        public HotfixConnect() : base(ServerOpcodes.HotfixConnect) { }
 
         public override void Write()
         {

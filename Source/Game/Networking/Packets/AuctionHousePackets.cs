@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListBidderItems : ClientPacket
+    class AuctionListBiddedItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
@@ -127,7 +127,7 @@ namespace Game.Networking.Packets
         public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
         public Optional<AddOnInfo> TaintedBy;
 
-        public AuctionListBidderItems(WorldPacket packet) : base(packet) { }
+        public AuctionListBiddedItems(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -237,14 +237,14 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListOwnerItems : ClientPacket
+    class AuctionListOwnedItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
         public Optional<AddOnInfo> TaintedBy;
         public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
 
-        public AuctionListOwnerItems(WorldPacket packet) : base(packet) { }
+        public AuctionListOwnedItems(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -396,14 +396,14 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionStartCommoditiesPurchase : ClientPacket
+    class AuctionGetCommodityQuote : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public int ItemID;
         public uint Quantity;
         public Optional<AddOnInfo> TaintedBy;
 
-        public AuctionStartCommoditiesPurchase(WorldPacket packet) : base(packet) { }
+        public AuctionGetCommodityQuote(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -460,7 +460,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionCommodityQuote : ServerPacket
+    class AuctionGetCommodityQuoteResult : ServerPacket
     {
         public Optional<ulong> TotalPrice;
         public Optional<uint> Quantity;
@@ -468,7 +468,7 @@ namespace Game.Networking.Packets
         public int Unknown830;
         public uint DesiredDelay;
 
-        public AuctionCommodityQuote() : base(ServerOpcodes.AuctionCommodityQuote) { }
+        public AuctionGetCommodityQuoteResult() : base(ServerOpcodes.AuctionGetCommodityQuoteResult) { }
 
         public override void Write()
         {
@@ -504,13 +504,13 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class AuctionListBidderItemsResult : ServerPacket
+    public class AuctionListBiddedItemsResult : ServerPacket
     {   
         public List<AuctionItem> Items = new List<AuctionItem>();
         public uint DesiredDelay;
         public bool HasMoreResults;
 
-        public AuctionListBidderItemsResult() : base(ServerOpcodes.AuctionListBidderItemsResult) { }
+        public AuctionListBiddedItemsResult() : base(ServerOpcodes.AuctionListBiddedItemsResult) { }
 
         public override void Write()
         {
@@ -550,12 +550,12 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionFavoriteItems : ServerPacket
+    class AuctionFavoriteList : ServerPacket
     {    
         public uint DesiredDelay;
         public List<AuctionFavoriteInfo> Items = new List<AuctionFavoriteInfo>();
 
-        public AuctionFavoriteItems() : base(ServerOpcodes.AuctionFavoriteItems) { }
+        public AuctionFavoriteList() : base(ServerOpcodes.AuctionFavoriteList) { }
 
         public override void Write()
         {
@@ -597,14 +597,14 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class AuctionListOwnerItemsResult : ServerPacket
+    public class AuctionListOwnedItemsResult : ServerPacket
     {   
         public List<AuctionItem> Items = new List<AuctionItem>();
         public List<AuctionItem> SoldItems = new List<AuctionItem>();
         public uint DesiredDelay;
         public bool HasMoreResults;
 
-        public AuctionListOwnerItemsResult() : base(ServerOpcodes.AuctionListOwnerItemsResult) { }
+        public AuctionListOwnedItemsResult() : base(ServerOpcodes.AuctionListOwnedItemsResult) { }
 
         public override void Write()
         {

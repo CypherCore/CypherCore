@@ -24,9 +24,9 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    public class PVPSeason : ServerPacket
+    public class SeasonInfo : ServerPacket
     {
-        public PVPSeason() : base(ServerOpcodes.PvpSeason) { }
+        public SeasonInfo() : base(ServerOpcodes.SeasonInfo) { }
 
         public override void Write()
         {
@@ -80,16 +80,16 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    public class PVPLogDataMessage : ServerPacket
+    public class PVPMatchStatisticsMessage : ServerPacket
     {
-        public PVPLogDataMessage() : base(ServerOpcodes.PvpLogData, ConnectionType.Instance) { }
+        public PVPMatchStatisticsMessage() : base(ServerOpcodes.PvpMatchStatistics, ConnectionType.Instance) { }
 
         public override void Write()
         {
             Data.Write(_worldPacket);
         }
 
-        public PVPLogData Data;
+        public PVPMatchStatistics Data;
     }
 
     public class BattlefieldStatusNone : ServerPacket
@@ -442,9 +442,9 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class RatedBattlefieldInfo : ServerPacket
+    class RatedPvpInfo : ServerPacket
     {
-        public RatedBattlefieldInfo() : base(ServerOpcodes.RatedBattlefieldInfo) { }
+        public RatedPvpInfo() : base(ServerOpcodes.RatedPvpInfo) { }
 
         public override void Write()
         {
@@ -455,9 +455,9 @@ namespace Game.Networking.Packets
         BracketInfo[] Bracket = new BracketInfo[6];
     }
     
-    class PVPMatchInit : ServerPacket
+    class PVPMatchInitialize : ServerPacket
     {
-        public PVPMatchInit() : base(ServerOpcodes.PvpMatchInit, ConnectionType.Instance) { }
+        public PVPMatchInitialize() : base(ServerOpcodes.PvpMatchInitialize, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -489,9 +489,9 @@ namespace Game.Networking.Packets
         public bool AffectsRating;
     }
 
-    class PVPMatchEnd : ServerPacket
+    class PVPMatchComplete : ServerPacket
     {
-        public PVPMatchEnd() : base(ServerOpcodes.PvpMatchEnd, ConnectionType.Instance) { }
+        public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -506,7 +506,7 @@ namespace Game.Networking.Packets
 
         public byte Winner;
         public int Duration;
-        public Optional<PVPLogData> LogData;
+        public Optional<PVPMatchStatistics> LogData;
     }
 
     //Structs
@@ -547,7 +547,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class PVPLogData
+    public class PVPMatchStatistics
     {
         public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();
         public Optional<RatingData> Ratings;

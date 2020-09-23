@@ -138,7 +138,7 @@ namespace Game.Entities
         }
     }
 
-    public struct AreaTriggerCircularMovementInfo
+    public struct AreaTriggerOrbitInfo
     {
         public void Write(WorldPacket data)
         {
@@ -265,7 +265,7 @@ namespace Game.Entities
 
         public AreaTriggerScaleInfo OverrideScale = new AreaTriggerScaleInfo();
         public AreaTriggerScaleInfo ExtraScale = new AreaTriggerScaleInfo();
-        public AreaTriggerCircularMovementInfo CircularMovementInfo;
+        public AreaTriggerOrbitInfo OrbitInfo;
 
         public AreaTriggerTemplate Template;
         public List<Vector3> SplinePoints = new List<Vector3>();

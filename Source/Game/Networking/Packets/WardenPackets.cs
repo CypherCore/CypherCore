@@ -54,9 +54,9 @@ namespace Game.Networking.Packets
         public ByteBuffer Data;
     }
 
-    class WardenDataServer : ServerPacket
+    class Warden3DataServer : ServerPacket
     {
-        public WardenDataServer() : base(ServerOpcodes.WardenData) { }
+        public Warden3DataServer() : base(ServerOpcodes.Warden3Data) { }
 
         public override void Write()
         {

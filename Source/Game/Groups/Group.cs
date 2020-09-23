@@ -1466,7 +1466,7 @@ namespace Game.Groups
             if (!player || !player.IsInWorld)
                 return;
 
-            PartyMemberState packet = new PartyMemberState();
+            PartyMemberFullState packet = new PartyMemberFullState();
             packet.Initialize(player);
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())

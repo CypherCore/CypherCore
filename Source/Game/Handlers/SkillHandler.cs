@@ -29,24 +29,24 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnTalents)]
         void HandleLearnTalents(LearnTalents packet)
         {
-            LearnTalentsFailed learnTalentsFailed = new LearnTalentsFailed();
+            LearnTalentFailed learnTalentFailed = new LearnTalentFailed();
             bool anythingLearned = false;
             foreach (uint talentId in packet.Talents)
             {
-                TalentLearnResult result = _player.LearnTalent(talentId, ref learnTalentsFailed.SpellID);
+                TalentLearnResult result = _player.LearnTalent(talentId, ref learnTalentFailed.SpellID);
                 if (result != 0)
                 {
-                    if (learnTalentsFailed.Reason == 0)
-                        learnTalentsFailed.Reason = (uint)result;
+                    if (learnTalentFailed.Reason == 0)
+                        learnTalentFailed.Reason = (uint)result;
 
-                    learnTalentsFailed.Talents.Add((ushort)talentId);
+                    learnTalentFailed.Talents.Add((ushort)talentId);
                 }
                 else
                     anythingLearned = true;
             }
 
-            if (learnTalentsFailed.Reason != 0)
-                SendPacket(learnTalentsFailed);
+            if (learnTalentFailed.Reason != 0)
+                SendPacket(learnTalentFailed);
 
             if (anythingLearned)
                 GetPlayer().SendTalentsInfoData();
@@ -55,24 +55,24 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
-            LearnPvpTalentsFailed learnPvpTalentsFailed = new LearnPvpTalentsFailed();
+            LearnPvpTalentFailed learnPvpTalentFailed = new LearnPvpTalentFailed();
             bool anythingLearned = false;
             foreach (var pvpTalent in packet.Talents)
             {
-                TalentLearnResult result = _player.LearnPvpTalent(pvpTalent.PvPTalentID, pvpTalent.Slot, ref learnPvpTalentsFailed.SpellID);
+                TalentLearnResult result = _player.LearnPvpTalent(pvpTalent.PvPTalentID, pvpTalent.Slot, ref learnPvpTalentFailed.SpellID);
                 if (result != 0)
                 {
-                    if (learnPvpTalentsFailed.Reason == 0)
-                        learnPvpTalentsFailed.Reason = (uint)result;
+                    if (learnPvpTalentFailed.Reason == 0)
+                        learnPvpTalentFailed.Reason = (uint)result;
 
-                    learnPvpTalentsFailed.Talents.Add(pvpTalent);
+                    learnPvpTalentFailed.Talents.Add(pvpTalent);
                 }
                 else
                     anythingLearned = true;
             }
 
-            if (learnPvpTalentsFailed.Reason != 0)
-                SendPacket(learnPvpTalentsFailed);
+            if (learnPvpTalentFailed.Reason != 0)
+                SendPacket(learnPvpTalentFailed);
 
             if (anythingLearned)
                 _player.SendTalentsInfoData();

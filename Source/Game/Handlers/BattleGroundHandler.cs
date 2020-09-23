@@ -221,9 +221,9 @@ namespace Game
             if (bg.IsArena())
                 return;
 
-            PVPLogDataMessage pvpLogData = new PVPLogDataMessage();
-            bg.BuildPvPLogDataPacket(out pvpLogData.Data);
-            SendPacket(pvpLogData);
+            PVPMatchStatisticsMessage pvpMatchStatistics = new PVPMatchStatisticsMessage();
+            bg.BuildPvPLogDataPacket(out pvpMatchStatistics.Data);
+            SendPacket(pvpMatchStatistics);
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlefieldList)]
@@ -581,8 +581,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestRatedBattlefieldInfo)]
         void HandleRequestRatedBattlefieldInfo(RequestRatedBattlefieldInfo packet)
         {
-            RatedBattlefieldInfo ratedBattlefieldInfo = new RatedBattlefieldInfo();
-            SendPacket(ratedBattlefieldInfo);
+            RatedPvpInfo ratedPvpInfo = new RatedPvpInfo();
+            SendPacket(ratedPvpInfo);
         }
 
         [WorldPacketHandler(ClientOpcodes.GetPvpOptionsEnabled, Processing = PacketProcessing.Inplace)]

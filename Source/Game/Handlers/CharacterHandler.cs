@@ -692,13 +692,13 @@ namespace Game
 
             // Send PVPSeason
             {
-                PVPSeason season = new PVPSeason();
-                season.PreviousSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
+                SeasonInfo seasonInfo = new SeasonInfo();
+                seasonInfo.PreviousSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
-                    season.CurrentSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
+                    seasonInfo.CurrentSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
 
-                SendPacket(season);
+                SendPacket(seasonInfo);
             }
 
             SQLResult resultGuild = holder.GetResult(PlayerLoginQueryLoad.Guild);
@@ -792,7 +792,7 @@ namespace Game
             stmt.AddValue(0, pCurrChar.GetGUID().GetCounter());
             GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt)).WithCallback(favoriteAuctionResult =>
             {
-                AuctionFavoriteItems favoriteItems = new AuctionFavoriteItems();
+                AuctionFavoriteList favoriteItems = new AuctionFavoriteList();
                 if (!favoriteAuctionResult.IsEmpty())
                 {
                     do
@@ -2432,12 +2432,12 @@ namespace Game
         {
             if (result == ResponseCodes.Success)
             {
-                CharCustomizeResponse response = new CharCustomizeResponse(customizeInfo);
+                CharCustomizeSuccess response = new CharCustomizeSuccess(customizeInfo);
                 SendPacket(response);
             }
             else
             {
-                CharCustomizeFailed failed = new CharCustomizeFailed();
+                CharCustomizeFailure failed = new CharCustomizeFailure();
                 failed.Result = (byte)result;
                 failed.CharGUID = customizeInfo.CharGUID;
                 SendPacket(failed);

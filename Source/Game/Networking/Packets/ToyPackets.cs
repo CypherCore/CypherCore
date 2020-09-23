@@ -46,9 +46,9 @@ namespace Game.Networking.Packets
         public SpellCastRequest Cast = new SpellCastRequest();
     }
 
-    class AccountToysUpdate : ServerPacket
+    class AccountToyUpdate : ServerPacket
     {
-        public AccountToysUpdate() : base(ServerOpcodes.AccountToysUpdate, ConnectionType.Instance) { }
+        public AccountToyUpdate() : base(ServerOpcodes.AccountToyUpdate, ConnectionType.Instance) { }
 
         public override void Write()
         {

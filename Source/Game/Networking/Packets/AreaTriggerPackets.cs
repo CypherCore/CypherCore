@@ -71,18 +71,18 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TriggerGUID);
 
             _worldPacket.WriteBit(AreaTriggerSpline.HasValue);
-            _worldPacket.WriteBit(AreaTriggerCircularMovement.HasValue);
+            _worldPacket.WriteBit(AreaTriggerOrbit.HasValue);
             _worldPacket.FlushBits();
 
             if (AreaTriggerSpline.HasValue)
                 AreaTriggerSpline.Value.Write(_worldPacket);
 
-            if (AreaTriggerCircularMovement.HasValue)
-                AreaTriggerCircularMovement.Value.Write(_worldPacket);
+            if (AreaTriggerOrbit.HasValue)
+                AreaTriggerOrbit.Value.Write(_worldPacket);
         }
 
         public Optional<AreaTriggerSplineInfo> AreaTriggerSpline;
-        public Optional<AreaTriggerCircularMovementInfo> AreaTriggerCircularMovement;
+        public Optional<AreaTriggerOrbitInfo> AreaTriggerOrbit;
         public ObjectGuid TriggerGUID;
     }
 

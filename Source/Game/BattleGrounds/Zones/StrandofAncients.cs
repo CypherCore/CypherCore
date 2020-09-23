@@ -1172,12 +1172,12 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)SAObjectives.DemolishersDestroyed, DemolishersDestroyed));
-            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)SAObjectives.GatesDestroyed, GatesDestroyed));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)SAObjectives.DemolishersDestroyed, DemolishersDestroyed));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)SAObjectives.GatesDestroyed, GatesDestroyed));
         }
 
         public override uint GetAttr1() { return DemolishersDestroyed; }

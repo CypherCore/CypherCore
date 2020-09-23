@@ -648,7 +648,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestWorldQuestUpdate)]
         void HandleRequestWorldQuestUpdate(RequestWorldQuestUpdate packet)
         {
-            WorldQuestUpdate response = new WorldQuestUpdate();
+            WorldQuestUpdateResponse response = new WorldQuestUpdateResponse();
 
             // @todo: 7.x Has to be implemented
             //response.WorldQuestUpdates.push_back(WorldPackets::Quest::WorldQuestUpdateInfo(lastUpdate, questID, timer, variableID, value));

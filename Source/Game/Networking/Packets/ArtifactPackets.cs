@@ -81,9 +81,9 @@ namespace Game.Networking.Packets
         public ObjectGuid NpcGUID;
     }
 
-    class ArtifactForgeOpened : ServerPacket
+    class OpenArtifactForge : ServerPacket
     {
-        public ArtifactForgeOpened() : base(ServerOpcodes.ArtifactForgeOpened) { }
+        public OpenArtifactForge() : base(ServerOpcodes.OpenArtifactForge) { }
 
         public override void Write()
         {
@@ -95,9 +95,9 @@ namespace Game.Networking.Packets
         public ObjectGuid ForgeGUID;
     }
 
-    class ArtifactRespecConfirm : ServerPacket
+    class ArtifactRespecPrompt : ServerPacket
     {
-        public ArtifactRespecConfirm() : base(ServerOpcodes.ArtifactRespecConfirm) { }
+        public ArtifactRespecPrompt() : base(ServerOpcodes.ArtifactRespecPrompt) { }
 
         public override void Write()
         {

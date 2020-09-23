@@ -23,26 +23,26 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.UpdateWowTokenAuctionableList)]
-        void HandleUpdateListedAuctionableTokens(UpdateListedAuctionableTokens updateListedAuctionableTokens)
+        [WorldPacketHandler(ClientOpcodes.CommerceTokenGetLog)]
+        void HandleCommerceTokenGetLog(CommerceTokenGetLog commerceTokenGetLog)
         {
-            UpdateListedAuctionableTokensResponse response = new UpdateListedAuctionableTokensResponse();
+            CommerceTokenGetLogResponse response = new CommerceTokenGetLogResponse();
 
             // @todo: fix 6.x implementation
-            response.UnkInt = updateListedAuctionableTokens.UnkInt;
+            response.UnkInt = commerceTokenGetLog.UnkInt;
             response.Result = TokenResult.Success;
 
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestWowTokenMarketPrice)]
-        void HandleRequestWowTokenMarketPrice(RequestWowTokenMarketPrice requestWowTokenMarketPrice)
+        [WorldPacketHandler(ClientOpcodes.CommerceTokenGetMarketPrice)]
+        void HandleCommerceTokenGetMarketPrice(CommerceTokenGetMarketPrice commerceTokenGetMarketPrice)
         {
-            WowTokenMarketPriceResponse response = new WowTokenMarketPriceResponse();
+            CommerceTokenGetMarketPriceResponse response = new CommerceTokenGetMarketPriceResponse();
 
             // @todo: 6.x fix implementation
             response.CurrentMarketPrice = 300000000;
-            response.UnkInt = requestWowTokenMarketPrice.UnkInt;
+            response.UnkInt = commerceTokenGetMarketPrice.UnkInt;
             response.Result = TokenResult.Success;
             //packet.ReadUInt32("UnkInt32");
 

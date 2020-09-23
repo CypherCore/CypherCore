@@ -691,12 +691,12 @@ namespace Game.BattleGrounds
             //we must set it this way, because end time is sent in packet!
             SetRemainingTime(BattlegroundConst.AutocloseBattleground);
 
-            PVPMatchEnd pvpMatchEnd = new PVPMatchEnd();
-            pvpMatchEnd.Winner = (byte)GetWinner();
-            pvpMatchEnd.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
-            pvpMatchEnd.LogData.HasValue = true;
-            BuildPvPLogDataPacket(out pvpMatchEnd.LogData.Value);
-            pvpMatchEnd.Write();
+            PVPMatchComplete pvpMatchComplete = new PVPMatchComplete();
+            pvpMatchComplete.Winner = (byte)GetWinner();
+            pvpMatchComplete.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
+            pvpMatchComplete.LogData.HasValue = true;
+            BuildPvPLogDataPacket(out pvpMatchComplete.LogData.Value);
+            pvpMatchComplete.Write();
 
             foreach (var pair in m_Players)
             {
@@ -793,7 +793,7 @@ namespace Game.BattleGrounds
 
                 BlockMovement(player);
 
-                player.SendPacket(pvpMatchEnd);
+                player.SendPacket(pvpMatchComplete);
 
                 player.UpdateCriteria(CriteriaTypes.CompleteBattleground, player.GetMapId());
             }
@@ -993,20 +993,20 @@ namespace Game.BattleGrounds
             playerJoined.Guid = player.GetGUID();
             SendPacketToTeam(team, playerJoined, player);
 
-            PVPMatchInit pvpMatchState = new PVPMatchInit();
-            pvpMatchState.MapID = GetMapId();
+            PVPMatchInitialize pvpMatchInitialize = new PVPMatchInitialize();
+            pvpMatchInitialize.MapID = GetMapId();
             switch (GetStatus())
             {
                 case BattlegroundStatus.None:
                 case BattlegroundStatus.WaitQueue:
-                    pvpMatchState.State = PVPMatchInit.MatchState.Inactive;
+                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.Inactive;
                     break;
                 case BattlegroundStatus.WaitJoin:
                 case BattlegroundStatus.InProgress:
-                    pvpMatchState.State = PVPMatchInit.MatchState.InProgress;
+                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.InProgress;
                     break;
                 case BattlegroundStatus.WaitLeave:
-                    pvpMatchState.State = PVPMatchInit.MatchState.Complete;
+                    pvpMatchInitialize.State = PVPMatchInitialize.MatchState.Complete;
                     break;
                 default:
                     break;
@@ -1014,15 +1014,15 @@ namespace Game.BattleGrounds
 
             if (GetElapsedTime() >= (int)BattlegroundStartTimeIntervals.Delay2m)
             {
-                pvpMatchState.Duration = (int)(GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds;
-                pvpMatchState.StartTime = GameTime.GetGameTime() - pvpMatchState.Duration;
+                pvpMatchInitialize.Duration = (int)(GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds;
+                pvpMatchInitialize.StartTime = GameTime.GetGameTime() - pvpMatchInitialize.Duration;
             }
-            pvpMatchState.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
-            pvpMatchState.BattlemasterListID = (uint)GetTypeID();
-            pvpMatchState.Registered = false;
-            pvpMatchState.AffectsRating = IsRated();
+            pvpMatchInitialize.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
+            pvpMatchInitialize.BattlemasterListID = (uint)GetTypeID();
+            pvpMatchInitialize.Registered = false;
+            pvpMatchInitialize.AffectsRating = IsRated();
 
-            player.SendPacket(pvpMatchState);
+            player.SendPacket(pvpMatchInitialize);
 
             player.RemoveAurasByType(AuraType.Mounted);
 
@@ -1238,13 +1238,13 @@ namespace Game.BattleGrounds
             return GetPlayersSize() < GetMaxPlayers();
         }
 
-        public virtual void BuildPvPLogDataPacket(out PVPLogData pvpLogData)
+        public virtual void BuildPvPLogDataPacket(out PVPMatchStatistics pvpLogData)
         {
-            pvpLogData = new PVPLogData();
+            pvpLogData = new PVPMatchStatistics();
 
             foreach (var score in PlayerScores)
             {
-                PVPLogData.PVPMatchPlayerStatistics playerData;
+                PVPMatchStatistics.PVPMatchPlayerStatistics playerData;
 
                 score.Value.BuildPvPLogPlayerDataPacket(out playerData);
 
@@ -1704,9 +1704,9 @@ namespace Game.BattleGrounds
 
             BlockMovement(player);
 
-            PVPLogDataMessage pvpLogData = new PVPLogDataMessage();
-            BuildPvPLogDataPacket(out pvpLogData.Data);
-            player.SendPacket(pvpLogData);
+            PVPMatchStatisticsMessage pvpMatchStatistics = new PVPMatchStatisticsMessage();
+            BuildPvPLogDataPacket(out pvpMatchStatistics.Data);
+            player.SendPacket(pvpMatchStatistics);
         }
 
         public uint GetAlivePlayersCountByTeam(Team Team)

@@ -94,9 +94,9 @@ namespace Game.Networking.Packets
         public uint ScenarioID;
     }
 
-    class ScenarioBoot : ServerPacket
+    class ScenarioVacate : ServerPacket
     {
-        public ScenarioBoot() : base(ServerOpcodes.ScenarioBoot, ConnectionType.Instance) { }
+        public ScenarioVacate() : base(ServerOpcodes.ScenarioVacate, ConnectionType.Instance) { }
 
         public override void Write()
         {

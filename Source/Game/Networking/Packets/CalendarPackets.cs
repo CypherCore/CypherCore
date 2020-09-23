@@ -124,9 +124,9 @@ namespace Game.Networking.Packets
         public long Date;
     }
 
-    class SCalendarEventInvite : ServerPacket
+    class CalendarInviteAdded : ServerPacket
     {
-        public SCalendarEventInvite() : base(ServerOpcodes.CalendarEventInvite) { }
+        public CalendarInviteAdded() : base(ServerOpcodes.CalendarInviteAdded) { }
 
         public override void Write()
         {
@@ -221,9 +221,9 @@ namespace Game.Networking.Packets
         public List<CalendarEventInviteInfo> Invites = new List<CalendarEventInviteInfo>();
     }
 
-    class CalendarEventInviteAlert : ServerPacket
+    class CalendarInviteAlert : ServerPacket
     {
-        public CalendarEventInviteAlert() : base(ServerOpcodes.CalendarEventInviteAlert) { }
+        public CalendarInviteAlert() : base(ServerOpcodes.CalendarInviteAlert) { }
 
         public override void Write()
         {
@@ -301,9 +301,9 @@ namespace Game.Networking.Packets
         public CalendarInviteStatus Status;
     }
 
-    class CalendarEventInviteStatus : ServerPacket
+    class CalendarInviteStatusPacket : ServerPacket
     {
-        public CalendarEventInviteStatus() : base(ServerOpcodes.CalendarEventInviteStatus) { }
+        public CalendarInviteStatusPacket() : base(ServerOpcodes.CalendarInviteStatus) { }
 
         public override void Write()
         {
@@ -327,9 +327,9 @@ namespace Game.Networking.Packets
         public ObjectGuid InviteGuid;
     }
 
-    class CalendarEventInviteRemoved : ServerPacket
+    class CalendarInviteRemoved : ServerPacket
     {
-        public CalendarEventInviteRemoved() : base(ServerOpcodes.CalendarEventInviteRemoved) { }
+        public CalendarInviteRemoved() : base(ServerOpcodes.CalendarInviteRemoved) { }
 
         public override void Write()
         {
@@ -347,9 +347,9 @@ namespace Game.Networking.Packets
         public bool ClearPending;
     }
 
-    class CalendarEventInviteModeratorStatus : ServerPacket
+    class CalendarInviteModeratorStatus : ServerPacket
     {
-        public CalendarEventInviteModeratorStatus() : base(ServerOpcodes.CalendarEventInviteModeratorStatus) { }
+        public CalendarInviteModeratorStatus() : base(ServerOpcodes.CalendarInviteModeratorStatus) { }
 
         public override void Write()
         {
@@ -367,9 +367,9 @@ namespace Game.Networking.Packets
         public bool ClearPending;
     }
 
-    class CalendarEventInviteRemovedAlert : ServerPacket
+    class CalendarInviteRemovedAlert : ServerPacket
     {
-        public CalendarEventInviteRemovedAlert() : base(ServerOpcodes.CalendarEventInviteRemovedAlert) { }
+        public CalendarInviteRemovedAlert() : base(ServerOpcodes.CalendarInviteRemovedAlert) { }
 
         public override void Write()
         {
@@ -639,9 +639,9 @@ namespace Game.Networking.Packets
         public int NewTimeRemaining;
     }
 
-    class CalendarEventInitialInvites : ServerPacket
+    class CalendarCommunityInvite : ServerPacket
     {
-        public CalendarEventInitialInvites() : base(ServerOpcodes.CalendarEventInitialInvites) { }
+        public CalendarCommunityInvite() : base(ServerOpcodes.CalendarCommunityInvite) { }
 
         public override void Write()
         {
@@ -656,9 +656,9 @@ namespace Game.Networking.Packets
         public List<CalendarEventInitialInviteInfo> Invites = new List<CalendarEventInitialInviteInfo>();
     }
 
-    class CalendarEventInviteStatusAlert : ServerPacket
+    class CalendarInviteStatusAlert : ServerPacket
     {
-        public CalendarEventInviteStatusAlert() : base(ServerOpcodes.CalendarEventInviteStatusAlert) { }
+        public CalendarInviteStatusAlert() : base(ServerOpcodes.CalendarInviteStatusAlert) { }
 
         public override void Write()
         {
@@ -674,9 +674,9 @@ namespace Game.Networking.Packets
         public byte Status;
     }
 
-    class CalendarEventInviteNotesAlert : ServerPacket
+    class CalendarInviteNotesAlert : ServerPacket
     {
-        public CalendarEventInviteNotesAlert(ulong eventID, string notes) : base(ServerOpcodes.CalendarEventInviteNotesAlert)
+        public CalendarInviteNotesAlert(ulong eventID, string notes) : base(ServerOpcodes.CalendarInviteNotesAlert)
         {
             EventID = eventID;
             Notes = notes;
@@ -695,9 +695,9 @@ namespace Game.Networking.Packets
         public string Notes;
     }
 
-    class CalendarEventInviteNotes : ServerPacket
+    class CalendarInviteNotes : ServerPacket
     {
-        public CalendarEventInviteNotes() : base(ServerOpcodes.CalendarEventInviteNotes) { }
+        public CalendarInviteNotes() : base(ServerOpcodes.CalendarInviteNotes) { }
 
         public override void Write()
         {

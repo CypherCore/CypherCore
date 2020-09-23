@@ -331,7 +331,7 @@ namespace Game.Scenarios
 
         void SendBootPlayer(Player player)
         {
-            ScenarioBoot scenarioBoot = new ScenarioBoot();
+            ScenarioVacate scenarioBoot = new ScenarioVacate();
             scenarioBoot.ScenarioID = (int)_data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }

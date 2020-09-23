@@ -57,9 +57,9 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
+        public virtual void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
         {
-            playerData = new PVPLogData.PVPMatchPlayerStatistics();
+            playerData = new PVPMatchStatistics.PVPMatchPlayerStatistics();
             playerData.PlayerGUID = PlayerGuid;
             playerData.Kills = KillingBlows;
             playerData.Faction = (byte)TeamId;

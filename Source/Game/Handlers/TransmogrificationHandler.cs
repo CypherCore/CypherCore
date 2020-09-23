@@ -294,7 +294,7 @@ namespace Game
 
         public void SendOpenTransmogrifier(ObjectGuid guid)
         {
-            SendPacket(new OpenTransmogrifier(guid));
+            SendPacket(new TransmogrifyNPC(guid));
         }
     }
 }

@@ -45,9 +45,9 @@ namespace Game.Networking.Packets
         public bool CurrentSpecOnly;
     }
 
-    class TransmogCollectionUpdate : ServerPacket
+    class AccountTransmogUpdate : ServerPacket
     {
-        public TransmogCollectionUpdate() : base(ServerOpcodes.TransmogCollectionUpdate) { }
+        public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate) { }
 
         public override void Write()
         {
@@ -69,9 +69,9 @@ namespace Game.Networking.Packets
         public List<uint> NewAppearances = new List<uint>();
     }
 
-    class OpenTransmogrifier : ServerPacket
+    class TransmogrifyNPC : ServerPacket
     {
-        public OpenTransmogrifier(ObjectGuid guid) : base(ServerOpcodes.OpenTransmogrifier, ConnectionType.Instance)
+        public TransmogrifyNPC(ObjectGuid guid) : base(ServerOpcodes.TransmogrifyNpc, ConnectionType.Instance)
         {
             Guid = guid;
         }

@@ -67,14 +67,14 @@ namespace Game
         {
             var hotfixes = Global.DB2Mgr.GetHotfixData();
 
-            HotfixResponse hotfixQueryResponse = new HotfixResponse();
+            HotfixConnect hotfixQueryResponse = new HotfixConnect();
             foreach (HotfixRecord hotfixRecord in hotfixQuery.Hotfixes)
             {
                 if (hotfixes.Contains(hotfixRecord))
                 {
                     var storage = Global.DB2Mgr.GetStorage(hotfixRecord.TableHash);
 
-                    HotfixResponse.HotfixData hotfixData = new HotfixResponse.HotfixData();
+                    HotfixConnect.HotfixData hotfixData = new HotfixConnect.HotfixData();
                     hotfixData.Record = hotfixRecord;
                     if (storage != null && storage.HasRecord((uint)hotfixRecord.RecordID))
                     {

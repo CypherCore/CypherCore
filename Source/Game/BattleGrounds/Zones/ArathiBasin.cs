@@ -833,12 +833,12 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)ABObjectives.AssaultBase, BasesAssaulted));
-            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)ABObjectives.DefendBase, BasesDefended));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)ABObjectives.AssaultBase, BasesAssaulted));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)ABObjectives.DefendBase, BasesDefended));
         }
 
         public override uint GetAttr1() { return BasesAssaulted; }

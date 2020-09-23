@@ -31,13 +31,13 @@ namespace Game
             Global.ServiceMgr.Dispatch(this, request.Method.GetServiceHash(), request.Method.Token, request.Method.GetMethodId(), new CodedInputStream(request.Data));
         }
 
-        [WorldPacketHandler(ClientOpcodes.BattlenetRequestRealmListTicket, Status = SessionStatus.Authed)]
-        void HandleBattlenetRequestRealmListTicket(RequestRealmListTicket requestRealmListTicket)
+        [WorldPacketHandler(ClientOpcodes.ChangeRealmTicket, Status = SessionStatus.Authed)]
+        void HandleBattlenetChangeRealmTicket(ChangeRealmTicket changeRealmTicket)
         {
-            SetRealmListSecret(requestRealmListTicket.Secret);
+            SetRealmListSecret(changeRealmTicket.Secret);
 
-            RealmListTicket realmListTicket = new RealmListTicket();
-            realmListTicket.Token = requestRealmListTicket.Token;
+            ChangeRealmTicketResponse realmListTicket = new ChangeRealmTicketResponse();
+            realmListTicket.Token = changeRealmTicket.Token;
             realmListTicket.Allow = true;
             realmListTicket.Ticket = new Framework.IO.ByteBuffer();
             realmListTicket.Ticket.WriteCString("WorldserverRealmListTicket");

@@ -466,7 +466,7 @@ namespace Game.Entities
                 bool hasAreaTriggerPolygon = areaTriggerTemplate.IsPolygon();
                 bool hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
-                bool hasCircularMovement = areaTrigger.HasCircularMovement();
+                bool hasOrbit = areaTrigger.HasOrbit();
 
                 data.WriteBit(hasAbsoluteOrientation);
                 data.WriteBit(hasDynamicShape);
@@ -488,7 +488,7 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerPolygon);
                 data.WriteBit(hasAreaTriggerCylinder);
                 data.WriteBit(hasAreaTriggerSpline);
-                data.WriteBit(hasCircularMovement);
+                data.WriteBit(hasOrbit);
 
                 if (hasUnk3)
                     data.WriteBit(0);
@@ -571,7 +571,7 @@ namespace Game.Entities
                     data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffsetTarget);
                 }
 
-                if (hasCircularMovement)
+                if (hasOrbit)
                    areaTrigger.GetCircularMovementInfo().Value.Write(data);
             }
 

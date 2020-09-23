@@ -399,7 +399,7 @@ namespace Game
 
             uint level = player ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
-            SCalendarEventInvite packet = new SCalendarEventInvite();
+            CalendarInviteAdded packet = new CalendarInviteAdded();
             packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
             packet.InviteGuid = invitee;
             packet.InviteID = calendarEvent != null ? invite.InviteId : 0;
@@ -441,7 +441,7 @@ namespace Game
 
         public void SendCalendarEventStatus(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarEventInviteStatus packet = new CalendarEventInviteStatus();
+            CalendarInviteStatusPacket packet = new CalendarInviteStatusPacket();
             packet.ClearPending = true; // FIXME
             packet.Date = calendarEvent.Date;
             packet.EventID = calendarEvent.EventId;
@@ -465,7 +465,7 @@ namespace Game
 
         void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
         {
-            CalendarEventInviteRemoved packet = new CalendarEventInviteRemoved();
+            CalendarInviteRemoved packet = new CalendarInviteRemoved();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
             packet.Flags = flags;
@@ -476,7 +476,7 @@ namespace Game
 
         public void SendCalendarEventModeratorStatusAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarEventInviteModeratorStatus packet = new CalendarEventInviteModeratorStatus();
+            CalendarInviteModeratorStatus packet = new CalendarInviteModeratorStatus();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
             packet.InviteGuid = invite.InviteeGuid;
@@ -487,7 +487,7 @@ namespace Game
 
         void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarEventInviteAlert packet = new CalendarEventInviteAlert();
+            CalendarInviteAlert packet = new CalendarInviteAlert();
             packet.Date = calendarEvent.Date;
             packet.EventID = calendarEvent.EventId;
             packet.EventName = calendarEvent.Title;
@@ -569,7 +569,7 @@ namespace Game
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             {
-                CalendarEventInviteRemovedAlert packet = new CalendarEventInviteRemovedAlert();
+                CalendarInviteRemovedAlert packet = new CalendarInviteRemovedAlert();
                 packet.Date = calendarEvent.Date;
                 packet.EventID = calendarEvent.EventId;
                 packet.Flags = calendarEvent.Flags;

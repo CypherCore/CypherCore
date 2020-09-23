@@ -320,8 +320,8 @@ namespace Game.Networking
                     connectToFailed.Read();
                     HandleConnectToFailed(connectToFailed);
                     break;
-                case ClientOpcodes.EnableEncryptionAck:
-                    HandleEnableEncryptionAck();
+                case ClientOpcodes.EnterEncryptedModeAck:
+                    HandleEnterEncryptedModeAck();
                     break;
                 default:
                     if (_worldSession == null)
@@ -643,7 +643,7 @@ namespace Game.Networking
             // RBAC must be loaded before adding session to check for skip queue permission
             _worldSession.GetRBACData().LoadFromDBCallback(result);
 
-            SendPacket(new EnableEncryption(_encryptKey, true));
+            SendPacket(new EnterEncryptedMode(_encryptKey, true));
         }
 
         void HandleAuthContinuedSession(AuthContinuedSession authSession)
@@ -703,7 +703,7 @@ namespace Game.Networking
             // only first 16 bytes of the hmac are used
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
-            SendPacket(new EnableEncryption(_encryptKey, true));
+            SendPacket(new EnterEncryptedMode(_encryptKey, true));
             AsyncRead();
         }
 
@@ -746,7 +746,7 @@ namespace Game.Networking
 
         }
 
-        void HandleEnableEncryptionAck()
+        void HandleEnterEncryptedModeAck()
         {
             _worldCrypt.Initialize(_encryptKey);
             if (_connectType == ConnectionType.Realm)

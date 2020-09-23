@@ -20,7 +20,6 @@ using Framework.Database;
 using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Mails;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
@@ -165,17 +164,17 @@ namespace Game
             SendAuctionHello(hello.Guid, unit);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionListBidderItems)]
-        void HandleAuctionListBidderItems(AuctionListBidderItems listBidderItems)
+        [WorldPacketHandler(ClientOpcodes.AuctionListBiddedItems)]
+        void HandleAuctionListBiddedItems(AuctionListBiddedItems listBiddedItems)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listBidderItems.TaintedBy.HasValue);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listBiddedItems.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(listBidderItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(listBiddedItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListBidderItems - {listBidderItems.Auctioneer} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListBidderItems - {listBiddedItems.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -185,10 +184,10 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            AuctionListBidderItemsResult result = new AuctionListBidderItemsResult();
+            AuctionListBiddedItemsResult result = new AuctionListBiddedItemsResult();
 
             Player player = GetPlayer();
-            auctionHouse.BuildListBidderItems(result, player, listBidderItems.Offset, listBidderItems.Sorts, listBidderItems.Sorts.Count);
+            auctionHouse.BuildListBiddedItems(result, player, listBiddedItems.Offset, listBiddedItems.Sorts, listBiddedItems.Sorts.Count);
             result.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
             SendPacket(result);
         }
@@ -288,17 +287,17 @@ namespace Game
             SendPacket(listItemsResult);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionListOwnerItems)]
-        void HandleAuctionListOwnerItems(AuctionListOwnerItems listOwnerItems)
+        [WorldPacketHandler(ClientOpcodes.AuctionListOwnedItems)]
+        void HandleAuctionListOwnedItems(AuctionListOwnedItems listOwnedItems)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listOwnerItems.TaintedBy.HasValue);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, listOwnedItems.TaintedBy.HasValue);
             if (throttle.Throttled)
                 return;
 
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(listOwnerItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(listOwnedItems.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListOwnerItems - {listOwnerItems.Auctioneer} not found or you can't interact with him.");
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleAuctionListOwnerItems - {listOwnedItems.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -308,9 +307,9 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            AuctionListOwnerItemsResult result = new AuctionListOwnerItemsResult();
+            AuctionListOwnedItemsResult result = new AuctionListOwnedItemsResult();
 
-            auctionHouse.BuildListOwnerItems(result, _player, listOwnerItems.Offset, listOwnerItems.Sorts, listOwnerItems.Sorts.Count);
+            auctionHouse.BuildListOwnedItems(result, _player, listOwnedItems.Offset, listOwnedItems.Sorts, listOwnedItems.Sorts.Count);
             result.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
             SendPacket(result);
         }
@@ -925,17 +924,17 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionStartCommoditiesPurchase)]
-        void HandleAuctionStartCommoditiesPurchase(AuctionStartCommoditiesPurchase startCommoditiesPurchase)
+        [WorldPacketHandler(ClientOpcodes.AuctionGetCommodityQuote)]
+        void HandleAuctionGetCommodityQuote(AuctionGetCommodityQuote getCommodityQuote)
         {
-            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, startCommoditiesPurchase.TaintedBy.HasValue, AuctionCommand.PlaceBid);
+            AuctionThrottleResult throttle = Global.AuctionHouseMgr.CheckThrottle(_player, getCommodityQuote.TaintedBy.HasValue, AuctionCommand.PlaceBid);
             if (throttle.Throttled)
                 return;
 
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(startCommoditiesPurchase.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(getCommodityQuote.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (!creature)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAuctionStartCommoditiesPurchase - {startCommoditiesPurchase.Auctioneer.ToString()} not found or you can't interact with him.");
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionStartCommoditiesPurchase - {getCommodityQuote.Auctioneer} not found or you can't interact with him.");
                 return;
             }
 
@@ -945,19 +944,19 @@ namespace Game
 
             AuctionHouseObject auctionHouse = Global.AuctionHouseMgr.GetAuctionsMap(creature.GetFaction());
 
-            AuctionCommodityQuote auctionCommodityQuote = new AuctionCommodityQuote();
+            AuctionGetCommodityQuoteResult commodityQuoteResult = new AuctionGetCommodityQuoteResult();
 
-            CommodityQuote quote = auctionHouse.CreateCommodityQuote(_player, (uint)startCommoditiesPurchase.ItemID, startCommoditiesPurchase.Quantity);
+            CommodityQuote quote = auctionHouse.CreateCommodityQuote(_player, (uint)getCommodityQuote.ItemID, getCommodityQuote.Quantity);
             if (quote != null)
             {
-                auctionCommodityQuote.TotalPrice.Set(quote.TotalPrice);
-                auctionCommodityQuote.Quantity.Set(quote.Quantity);
-                auctionCommodityQuote.QuoteDuration.Set((int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds);
+                commodityQuoteResult.TotalPrice.Set(quote.TotalPrice);
+                commodityQuoteResult.Quantity.Set(quote.Quantity);
+                commodityQuoteResult.QuoteDuration.Set((int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds);
             }
 
-            auctionCommodityQuote.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
+            commodityQuoteResult.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
 
-            SendPacket(auctionCommodityQuote);
+            SendPacket(commodityQuoteResult);
         }
 
         public void SendAuctionHello(ObjectGuid guid, Creature unit)

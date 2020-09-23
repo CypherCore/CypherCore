@@ -109,7 +109,7 @@ namespace Game
             Request.Function3_set = 1;
             Request.CheckSumm3 = BuildChecksum(BitConverter.GetBytes(Request.Unk5), 8);
 
-            WardenDataServer packet = new WardenDataServer();
+            Warden3DataServer packet = new Warden3DataServer();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -123,7 +123,7 @@ namespace Game
             Request.Command = WardenOpcodes.Smsg_HashRequest;
             Request.Seed = _seed;
 
-            WardenDataServer packet = new WardenDataServer();
+            Warden3DataServer packet = new Warden3DataServer();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -282,7 +282,7 @@ namespace Game
             }
             buffer.WriteUInt8(xorByte);
 
-            WardenDataServer packet = new WardenDataServer();
+            Warden3DataServer packet = new Warden3DataServer();
             packet.Data = EncryptData(buffer.GetData());
             _session.SendPacket(packet);
 

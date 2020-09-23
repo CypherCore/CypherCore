@@ -222,9 +222,9 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
     }
 
-    class PartyMemberState : ServerPacket
+    class PartyMemberFullState : ServerPacket
     {
-        public PartyMemberState() : base(ServerOpcodes.PartyMemberState) { }
+        public PartyMemberFullState() : base(ServerOpcodes.PartyMemberFullState) { }
 
         public override void Write()
         {

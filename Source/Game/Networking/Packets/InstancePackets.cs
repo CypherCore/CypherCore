@@ -257,9 +257,9 @@ namespace Game.Networking.Packets
         public uint CombatResChargeRecovery;
     }
 
-    class BossKillCredit : ServerPacket
+    class BossKill : ServerPacket
     {
-        public BossKillCredit() : base(ServerOpcodes.BossKillCredit, ConnectionType.Instance) { }
+        public BossKill() : base(ServerOpcodes.BossKill, ConnectionType.Instance) { }
 
         public override void Write()
         {

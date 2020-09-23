@@ -95,7 +95,7 @@ namespace Game.Arenas
             CheckWinConditions();
         }
 
-        public override void BuildPvPLogDataPacket(out PVPLogData pvpLogData)
+        public override void BuildPvPLogDataPacket(out PVPMatchStatistics pvpLogData)
         {
             base.BuildPvPLogDataPacket(out pvpLogData);
 

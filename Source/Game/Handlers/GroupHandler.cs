@@ -586,7 +586,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyMemberStats)]
         void HandleRequestPartyMemberStats(RequestPartyMemberStats packet)
         {
-            PartyMemberState partyMemberStats = new PartyMemberState();
+            PartyMemberFullState partyMemberStats = new PartyMemberFullState();
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
             if (!player)

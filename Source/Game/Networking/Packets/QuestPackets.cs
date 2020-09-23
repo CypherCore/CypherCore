@@ -811,9 +811,9 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class WorldQuestUpdate : ServerPacket
+    class WorldQuestUpdateResponse : ServerPacket
     {
-        public WorldQuestUpdate() : base(ServerOpcodes.WorldQuestUpdate, ConnectionType.Instance) { }
+        public WorldQuestUpdateResponse() : base(ServerOpcodes.WorldQuestUpdateResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {

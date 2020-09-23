@@ -293,7 +293,7 @@ namespace Game.Entities
                 SetState(ItemUpdateState.Changed, owner);
             }
 
-            AzeriteXpGain xpGain = new AzeriteXpGain();
+            PlayerAzeriteItemGains xpGain = new PlayerAzeriteItemGains();
             xpGain.ItemGUID = GetGUID();
             xpGain.XP = xp;
             owner.SendPacket(xpGain);

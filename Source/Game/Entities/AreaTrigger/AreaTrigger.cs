@@ -157,13 +157,13 @@ namespace Game.Entities
 
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasCircularMovement))
             {
-                AreaTriggerCircularMovementInfo cmi = GetMiscTemplate().CircularMovementInfo;
+                AreaTriggerOrbitInfo cmi = GetMiscTemplate().OrbitInfo;
                 if (target && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
                     cmi.PathTarget.Set(target.GetGUID());
                 else
                     cmi.Center.Set(new Vector3(pos.posX, pos.posY, pos.posZ));
 
-                InitCircularMovement(cmi, timeToTarget);
+                InitOrbit(cmi, timeToTarget);
             }
             else if (GetMiscTemplate().HasSplines())
             {
@@ -186,8 +186,8 @@ namespace Game.Entities
             AI_Initialize();
 
             // Relocate areatriggers with circular movement again
-            if (HasCircularMovement())
-                Relocate(CalculateCircularMovementPosition());
+            if (HasOrbit())
+                Relocate(CalculateOrbitPosition());
 
             if (!GetMap().AddToMap(this))
             {         // Returning false will cause the object to be deleted - remove from transport
@@ -208,10 +208,10 @@ namespace Game.Entities
             base.Update(diff);
             _timeSinceCreated += diff;
 
-            // "If" order matter here, Circular Movement > Attached > Splines
-            if (HasCircularMovement())
+            // "If" order matter here, Orbit > Attached > Splines
+            if (HasOrbit())
             {
-                UpdateCircularMovementPosition(diff);
+                UpdateOrbitPosition(diff);
             }
             else if(GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
             {
@@ -657,7 +657,7 @@ namespace Game.Entities
             _reachedDestination = false;
         }
 
-        void InitCircularMovement(AreaTriggerCircularMovementInfo cmi, uint timeToTarget)
+        void InitOrbit(AreaTriggerOrbitInfo cmi, uint timeToTarget)
         {
             // Circular movement requires either a center position or an attached unit
             Cypher.Assert(cmi.Center.HasValue || cmi.PathTarget.HasValue);
@@ -666,51 +666,51 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
             m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
 
-            _circularMovementInfo.Set(cmi);
+            _orbitInfo.Set(cmi);
 
-            _circularMovementInfo.Value.TimeToTarget = timeToTarget;
-            _circularMovementInfo.Value.ElapsedTimeForMovement = 0;
+            _orbitInfo.Value.TimeToTarget = timeToTarget;
+            _orbitInfo.Value.ElapsedTimeForMovement = 0;
 
             if (IsInWorld)
             {
                 AreaTriggerRePath reshape = new AreaTriggerRePath();
                 reshape.TriggerGUID = GetGUID();
-                reshape.AreaTriggerCircularMovement = _circularMovementInfo;
+                reshape.AreaTriggerOrbit = _orbitInfo;
 
                 SendMessageToSet(reshape, true);
             }
         }
 
-        public bool HasCircularMovement()
+        public bool HasOrbit()
         {
-            return _circularMovementInfo.HasValue;
+            return _orbitInfo.HasValue;
         }
 
-        Position GetCircularMovementCenterPosition()
+        Position GetOrbitCenterPosition()
         {
-            if (!_circularMovementInfo.HasValue)
+            if (!_orbitInfo.HasValue)
                 return null;
 
-            if (_circularMovementInfo.Value.PathTarget.HasValue)
+            if (_orbitInfo.Value.PathTarget.HasValue)
             {
-                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _circularMovementInfo.Value.PathTarget.Value);
+                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.Value.PathTarget.Value);
                 if (center)
                     return center;
             }
 
-            if (_circularMovementInfo.Value.Center.HasValue)
-                return new Position(_circularMovementInfo.Value.Center.Value);
+            if (_orbitInfo.Value.Center.HasValue)
+                return new Position(_orbitInfo.Value.Center.Value);
 
             return null;
         }
 
-        Position CalculateCircularMovementPosition()
+        Position CalculateOrbitPosition()
         {
-            Position centerPos = GetCircularMovementCenterPosition();
+            Position centerPos = GetOrbitCenterPosition();
             if (centerPos == null)
                 return GetPosition();
 
-            AreaTriggerCircularMovementInfo cmi = _circularMovementInfo.Value;
+            AreaTriggerOrbitInfo cmi = _orbitInfo.Value;
 
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
             float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
@@ -741,14 +741,14 @@ namespace Game.Entities
             return new Position(x, y, z, angle);
         }
 
-        void UpdateCircularMovementPosition(uint diff)
+        void UpdateOrbitPosition(uint diff)
         {
-            if (_circularMovementInfo.Value.StartDelay > GetElapsedTimeForMovement())
+            if (_orbitInfo.Value.StartDelay > GetElapsedTimeForMovement())
                 return;
 
-            _circularMovementInfo.Value.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _circularMovementInfo.Value.StartDelay);
+            _orbitInfo.Value.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _orbitInfo.Value.StartDelay);
 
-            Position pos = CalculateCircularMovementPosition();
+            Position pos = CalculateOrbitPosition();
 
             GetMap().AreaTriggerRelocation(this, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
 
@@ -939,7 +939,7 @@ namespace Game.Entities
         public Spline GetSpline() { return _spline; }
         public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
-        public Optional<AreaTriggerCircularMovementInfo> GetCircularMovementInfo() { return _circularMovementInfo; }
+        public Optional<AreaTriggerOrbitInfo> GetCircularMovementInfo() { return _orbitInfo; }
 
         AreaTriggerFieldData m_areaTriggerData;
 
@@ -962,7 +962,7 @@ namespace Game.Entities
         int _lastSplineIndex;
         uint _movementTime;
 
-        Optional<AreaTriggerCircularMovementInfo> _circularMovementInfo;
+        Optional<AreaTriggerOrbitInfo> _orbitInfo;
 
         AreaTriggerMiscTemplate _areaTriggerMiscTemplate;
         List<ObjectGuid> _insideUnits = new List<ObjectGuid>();

@@ -756,7 +756,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            SetSessionState bnetConnected = new SetSessionState();
+            ConnectionStatus bnetConnected = new ConnectionStatus();
             bnetConnected.State = 1;
             SendPacket(bnetConnected);
 

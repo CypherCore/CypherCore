@@ -53,9 +53,9 @@ namespace Game.Networking.Packets
         public ByteBuffer Data = new ByteBuffer();
     }
 
-    class SetSessionState : ServerPacket
+    class ConnectionStatus : ServerPacket
     {
-        public SetSessionState() : base(ServerOpcodes.BattlenetSetSessionState) { }
+        public ConnectionStatus() : base(ServerOpcodes.BattleNetConnectionStatus) { }
 
         public override void Write()
         {
@@ -68,9 +68,9 @@ namespace Game.Networking.Packets
         public bool SuppressNotification;
     }
 
-    class RealmListTicket : ServerPacket
+    class ChangeRealmTicketResponse : ServerPacket
     {
-        public RealmListTicket() : base(ServerOpcodes.BattlenetRealmListTicket) { }
+        public ChangeRealmTicketResponse() : base(ServerOpcodes.ChangeRealmTicketResponse) { }
 
         public override void Write()
         {
@@ -101,9 +101,9 @@ namespace Game.Networking.Packets
         public byte[] Data;
     }
 
-    class RequestRealmListTicket : ClientPacket
+    class ChangeRealmTicket : ClientPacket
     {
-        public RequestRealmListTicket(WorldPacket packet) : base(packet) { }
+        public ChangeRealmTicket(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {

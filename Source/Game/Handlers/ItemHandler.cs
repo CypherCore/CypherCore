@@ -1072,7 +1072,7 @@ namespace Game
         {
             // TODO: Implement sorting
             // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new SortBagsResult());
+            SendPacket(new BagCleanupFinished());
         }
 
         [WorldPacketHandler(ClientOpcodes.SortBankBags)]
@@ -1080,7 +1080,7 @@ namespace Game
         {
             // TODO: Implement sorting
             // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new SortBagsResult());
+            SendPacket(new BagCleanupFinished());
         }
 
         [WorldPacketHandler(ClientOpcodes.SortReagentBankBags)]
@@ -1088,7 +1088,7 @@ namespace Game
         {
             // TODO: Implement sorting
             // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new SortBagsResult());
+            SendPacket(new BagCleanupFinished());
         }
 
         [WorldPacketHandler(ClientOpcodes.RemoveNewItem)]

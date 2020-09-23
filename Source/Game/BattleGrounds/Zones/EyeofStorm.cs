@@ -1033,11 +1033,11 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPMatchStatistics.PVPMatchPlayerStatistics playerData)
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 
-            playerData.Stats.Add(new PVPLogData.PVPMatchPlayerPVPStat((int)EotSMisc.ObjectiveCaptureFlag, FlagCaptures));
+            playerData.Stats.Add(new PVPMatchStatistics.PVPMatchPlayerPVPStat((int)EotSMisc.ObjectiveCaptureFlag, FlagCaptures));
         }
 
         public override uint GetAttr1() { return FlagCaptures; }

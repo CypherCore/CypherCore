@@ -136,9 +136,9 @@ namespace Game.Networking.Packets
         public bool PlayAsDespawn;
     }
 
-    class GameObjectUIAction : ServerPacket
+    class GameObjectUILink : ServerPacket
     {
-        public GameObjectUIAction() : base(ServerOpcodes.GameObjectUiAction, ConnectionType.Instance) { }
+        public GameObjectUILink() : base(ServerOpcodes.GameObjectUILink, ConnectionType.Instance) { }
 
         public override void Write()
         {

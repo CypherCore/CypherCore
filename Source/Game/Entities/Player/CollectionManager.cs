@@ -809,23 +809,23 @@ namespace Game.Entities
 
             _favoriteAppearances[itemModifiedAppearanceId] = apperanceState;
 
-            TransmogCollectionUpdate transmogCollectionUpdate = new TransmogCollectionUpdate();
-            transmogCollectionUpdate.IsFullUpdate = false;
-            transmogCollectionUpdate.IsSetFavorite = apply;
-            transmogCollectionUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
+            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            accountTransmogUpdate.IsFullUpdate = false;
+            accountTransmogUpdate.IsSetFavorite = apply;
+            accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
 
-            _owner.SendPacket(transmogCollectionUpdate);
+            _owner.SendPacket(accountTransmogUpdate);
         }
 
         public void SendFavoriteAppearances()
         {
-            TransmogCollectionUpdate transmogCollectionUpdate = new TransmogCollectionUpdate();
-            transmogCollectionUpdate.IsFullUpdate = true;
+            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            accountTransmogUpdate.IsFullUpdate = true;
             foreach (var pair in _favoriteAppearances)
                 if (pair.Value != FavoriteAppearanceState.Removed)
-                    transmogCollectionUpdate.FavoriteAppearances.Add(pair.Key);
+                    accountTransmogUpdate.FavoriteAppearances.Add(pair.Key);
 
-            _owner.SendPacket(transmogCollectionUpdate);
+            _owner.SendPacket(accountTransmogUpdate);
         }
 
         public void AddTransmogSet(uint transmogSetId)

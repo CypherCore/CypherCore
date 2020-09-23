@@ -60,7 +60,7 @@ namespace Game
                 sizeLeft -= burstSize;
                 pos += (int)burstSize;
 
-                WardenDataServer packet = new WardenDataServer();
+                Warden3DataServer packet = new Warden3DataServer();
                 packet.Data = EncryptData(transfer.Write());
                 _session.SendPacket(packet);
             }
@@ -78,7 +78,7 @@ namespace Game
             request.ModuleKey = _module.Key;
             request.Size = _module.CompressedSize;
 
-            WardenDataServer packet = new WardenDataServer();
+            Warden3DataServer packet = new Warden3DataServer();
             packet.Data = EncryptData(request.Write());
             _session.SendPacket(packet);
         }

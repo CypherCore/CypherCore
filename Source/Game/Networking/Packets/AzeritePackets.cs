@@ -21,9 +21,9 @@ using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
-    class AzeriteXpGain : ServerPacket
+    class PlayerAzeriteItemGains : ServerPacket
     {
-        public AzeriteXpGain() : base(ServerOpcodes.AzeriteXpGain) { }
+        public PlayerAzeriteItemGains() : base(ServerOpcodes.PlayerAzeriteItemGains) { }
 
         public override void Write()
         {
@@ -35,9 +35,9 @@ namespace Game.Networking.Packets
         public ulong XP;
     }
 
-    class AzeriteEssenceForgeOpened : ServerPacket
+    class OpenHeartForge : ServerPacket
     {
-        public AzeriteEssenceForgeOpened() : base(ServerOpcodes.AzeriteEssenceForgeOpened) { }
+        public OpenHeartForge() : base(ServerOpcodes.OpenHeartForge) { }
 
         public override void Write()
         {
@@ -47,9 +47,9 @@ namespace Game.Networking.Packets
         public ObjectGuid ForgeGUID;
     }
 
-    class AzeriteEssenceForgeClose : ServerPacket
+    class CloseHeartForge : ServerPacket
     {
-        public AzeriteEssenceForgeClose() : base(ServerOpcodes.AzeriteEssenceForgeClose) { }
+        public CloseHeartForge() : base(ServerOpcodes.CloseHeartForge) { }
 
         public override void Write() { }
     }
@@ -80,9 +80,9 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class AzeriteEssenceSelectionResult : ServerPacket
+    class ActivateEssenceFailed : ServerPacket
     {
-        public AzeriteEssenceSelectionResult() : base(ServerOpcodes.AzeriteEssenceSelectionResult) { }
+        public ActivateEssenceFailed() : base(ServerOpcodes.ActivateEssenceFailed) { }
 
         public override void Write()
         {
@@ -130,9 +130,9 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class AzeriteEmpoweredItemEquippedStatusChanged : ServerPacket
+    class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
     {
-        public AzeriteEmpoweredItemEquippedStatusChanged() : base(ServerOpcodes.AzeriteEmpoweredItemEquippedStatusChanged) { }
+        public PlayerAzeriteItemEquippedStatusChanged() : base(ServerOpcodes.PlayerAzeriteItemEquippedStatusChanged) { }
 
         public override void Write()
         {
@@ -143,9 +143,9 @@ namespace Game.Networking.Packets
         public bool IsHeartEquipped;
     }
 
-    class AzeriteEmpoweredItemRespecOpen : ServerPacket
+    class AzeriteRespecNPC : ServerPacket
     {
-        public AzeriteEmpoweredItemRespecOpen(ObjectGuid npcGuid) : base(ServerOpcodes.AzeriteEmpoweredItemRespecOpen)
+        public AzeriteRespecNPC(ObjectGuid npcGuid) : base(ServerOpcodes.AzeriteRespecNpc)
         {
             NpcGUID = npcGuid;
         }

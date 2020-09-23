@@ -21,9 +21,9 @@ using System;
 
 namespace Game.Networking.Packets
 {
-    public class ReferAFriendFailure : ServerPacket
+    public class RecruitAFriendFailure : ServerPacket
     {
-        public ReferAFriendFailure() : base(ServerOpcodes.ReferAFriendFailure) { }
+        public RecruitAFriendFailure() : base(ServerOpcodes.RecruitAFriendFailure) { }
 
         public override void Write()
         {

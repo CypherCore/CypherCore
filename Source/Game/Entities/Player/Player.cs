@@ -5651,10 +5651,10 @@ namespace Game.Entities
             SendPacket(mountUpdate);
 
             // SMSG_ACCOUNT_TOYS_UPDATE
-            AccountToysUpdate toysUpdate = new AccountToysUpdate();
-            toysUpdate.IsFullUpdate = true;
-            toysUpdate.Toys = GetSession().GetCollectionMgr().GetAccountToys();
-            SendPacket(toysUpdate);
+            AccountToyUpdate toyUpdate = new AccountToyUpdate();
+            toyUpdate.IsFullUpdate = true;
+            toyUpdate.Toys = GetSession().GetCollectionMgr().GetAccountToys();
+            SendPacket(toyUpdate);
 
             // SMSG_ACCOUNT_HEIRLOOM_UPDATE
             AccountHeirloomUpdate heirloomUpdate = new AccountHeirloomUpdate();

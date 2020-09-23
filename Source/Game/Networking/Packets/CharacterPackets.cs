@@ -969,9 +969,9 @@ namespace Game.Networking.Packets
         public uint FactionIndex;
     }
 
-    class CharCustomizeResponse : ServerPacket
+    class CharCustomizeSuccess : ServerPacket
     {
-        public CharCustomizeResponse(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomize)
+        public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
         {
             CharGUID = customizeInfo.CharGUID;
             SexID = (byte)customizeInfo.SexID;
@@ -1010,9 +1010,9 @@ namespace Game.Networking.Packets
         public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
     }
 
-    class CharCustomizeFailed : ServerPacket
+    class CharCustomizeFailure : ServerPacket
     {
-        public CharCustomizeFailed() : base(ServerOpcodes.CharCustomizeFailed) { }
+        public CharCustomizeFailure() : base(ServerOpcodes.CharCustomizeFailure) { }
 
         public override void Write()
         {

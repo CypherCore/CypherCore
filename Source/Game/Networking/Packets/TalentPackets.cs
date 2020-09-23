@@ -106,9 +106,9 @@ namespace Game.Networking.Packets
         public SpecResetType RespecType;
     }
 
-    class LearnTalentsFailed : ServerPacket
+    class LearnTalentFailed : ServerPacket
     {
-        public LearnTalentsFailed() : base(ServerOpcodes.LearnTalentsFailed) { }
+        public LearnTalentFailed() : base(ServerOpcodes.LearnTalentFailed) { }
 
         public override void Write()
         {
@@ -157,9 +157,9 @@ namespace Game.Networking.Packets
         public Array<PvPTalent> Talents = new Array<PvPTalent>(4);
     }
 
-    class LearnPvpTalentsFailed : ServerPacket
+    class LearnPvpTalentFailed : ServerPacket
     {
-        public LearnPvpTalentsFailed() : base(ServerOpcodes.LearnPvpTalentsFailed) { }
+        public LearnPvpTalentFailed() : base(ServerOpcodes.LearnPvpTalentFailed) { }
 
         public override void Write()
         {

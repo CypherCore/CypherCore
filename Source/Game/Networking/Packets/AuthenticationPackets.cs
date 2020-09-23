@@ -365,14 +365,14 @@ namespace Game.Networking.Packets
         byte Con;
     }
 
-    class EnableEncryption : ServerPacket
+    class EnterEncryptedMode : ServerPacket
     {
         byte[] EncryptionKey;
         bool Enabled;
 
         static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
 
-        public EnableEncryption(byte[] encryptionKey, bool enabled) : base(ServerOpcodes.EnableEncryption)
+        public EnterEncryptedMode(byte[] encryptionKey, bool enabled) : base(ServerOpcodes.EnterEncryptedMode)
         {
             EncryptionKey = encryptionKey;
             Enabled = enabled;

@@ -1942,10 +1942,10 @@ namespace Game.Entities
                                         return;
                                     }
 
-                                    ArtifactForgeOpened artifactForgeOpened = new ArtifactForgeOpened();
-                                    artifactForgeOpened.ArtifactGUID = item.GetGUID();
-                                    artifactForgeOpened.ForgeGUID = GetGUID();
-                                    player.SendPacket(artifactForgeOpened);
+                                    OpenArtifactForge openArtifactForge = new OpenArtifactForge();
+                                    openArtifactForge.ArtifactGUID = item.GetGUID();
+                                    openArtifactForge.ForgeGUID = GetGUID();
+                                    player.SendPacket(openArtifactForge);
                                     break;
                                 }
                             case 2: // Heart Forge
@@ -1954,9 +1954,9 @@ namespace Game.Entities
                                     if (!item)
                                         return;
 
-                                    AzeriteEssenceForgeOpened azeriteEssenceForgeOpened = new AzeriteEssenceForgeOpened();
-                                    azeriteEssenceForgeOpened.ForgeGUID = GetGUID();
-                                    player.SendPacket(azeriteEssenceForgeOpened);
+                                    OpenHeartForge openHeartForge = new OpenHeartForge();
+                                    openHeartForge.ForgeGUID = GetGUID();
+                                    player.SendPacket(openHeartForge);
                                     break;
                                 }
                             default:
@@ -1970,10 +1970,10 @@ namespace Game.Entities
                         if (!player)
                             return;
 
-                        GameObjectUIAction gameObjectUIAction = new GameObjectUIAction();
-                        gameObjectUIAction.ObjectGUID = GetGUID();
-                        gameObjectUIAction.UILink = (int)GetGoInfo().UILink.UILinkType;
-                        player.SendPacket(gameObjectUIAction);
+                        GameObjectUILink gameObjectUILink = new GameObjectUILink();
+                        gameObjectUILink.ObjectGUID = GetGUID();
+                        gameObjectUILink.UILink = (int)GetGoInfo().UILink.UILinkType;
+                        player.SendPacket(gameObjectUILink);
                         return;
                     }
                 default:

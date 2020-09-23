@@ -24,10 +24,10 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.UiTimeRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
-        void HandleUITimeRequest(UITimeRequest packet)
+        [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
+        void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
-            UITime response = new UITime();
+            ServerTimeOffset response = new ServerTimeOffset();
             response.Time = (uint)Time.UnixTime;
             SendPacket(response);
         }

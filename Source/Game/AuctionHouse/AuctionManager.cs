@@ -988,7 +988,7 @@ namespace Game
             listBucketsResult.HasMoreResults = false;
         }
 
-        public void BuildListBidderItems(AuctionListBidderItemsResult listBidderItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListBiddedItems(AuctionListBiddedItemsResult listBidderItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
             // always full list
             List<AuctionPosting> auctions = new List<AuctionPosting>();
@@ -1068,7 +1068,7 @@ namespace Game
             listItemsResult.HasMoreResults = builder.HasMoreResults();
         }
 
-        public void BuildListOwnerItems(AuctionListOwnerItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
             // always full list
             List<AuctionPosting> auctions = new List<AuctionPosting>();

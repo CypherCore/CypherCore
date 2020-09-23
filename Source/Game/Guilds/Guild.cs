@@ -1489,7 +1489,7 @@ namespace Game.Guilds
 
         public void MassInviteToEvent(WorldSession session, uint minLevel, uint maxLevel, uint minRank)
         {
-            CalendarEventInitialInvites packet = new CalendarEventInitialInvites();
+            CalendarCommunityInvite packet = new CalendarCommunityInvite();
 
             foreach (var member in m_members.Values)
             {

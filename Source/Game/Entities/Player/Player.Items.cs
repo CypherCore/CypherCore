@@ -6202,7 +6202,7 @@ namespace Game.Entities
 
                     DB.Characters.CommitTransaction(trans);
 
-                    SendPacket(new CharacterInventoryOverflowWarning());
+                    SendPacket(new InventoryFullOverflow());
                 }
             }
 
