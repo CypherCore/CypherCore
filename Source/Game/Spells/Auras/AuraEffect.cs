@@ -888,7 +888,7 @@ namespace Game.Spells
         public bool HasAmount() { return m_amount != 0; }
         public void SetAmount(int _amount) { m_amount = _amount; m_canBeRecalculated = false; }
 
-        int GetPeriodicTimer() { return m_periodicTimer; }
+        public int GetPeriodicTimer() { return m_periodicTimer; }
         public void SetPeriodicTimer(int periodicTimer) { m_periodicTimer = periodicTimer; }
 
         void RecalculateAmount()
@@ -3502,17 +3502,17 @@ namespace Game.Spells
             {
                 float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseEnergyPercent, aurEff =>
                     {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-                    return false;
-                });
+                        if (aurEff.GetMiscValue() == (int)powerType)
+                            return true;
+                        return false;
+                    });
 
                 amount *= target.GetTotalAuraMultiplier(AuraType.ModMaxPowerPct, aurEff =>
                     {
-                    if (aurEff.GetMiscValue() == (int)powerType)
-                        return true;
-                    return false;
-                });
+                        if (aurEff.GetMiscValue() == (int)powerType)
+                            return true;
+                        return false;
+                    });
 
                 target.SetStatPctModifier(unitMod, UnitModifierPctType.Total, amount);
             }
@@ -6197,6 +6197,27 @@ namespace Game.Spells
                     }
                 }
             }
+        }
+
+        [AuraEffectHandler(AuraType.ModOverrideZonePvpType)]
+        void HandleModOverrideZonePVPType(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            if (apply)
+                target.SetOverrideZonePVPType((ZonePVPTypeOverride)GetMiscValue());
+            else if (target.HasAuraType(AuraType.ModOverrideZonePvpType))
+                target.SetOverrideZonePVPType((ZonePVPTypeOverride)target.GetAuraEffectsByType(AuraType.ModOverrideZonePvpType).Last().GetMiscValue());
+            else
+                target.SetOverrideZonePVPType(ZonePVPTypeOverride.None);
+
+            target.UpdateHostileAreaState(CliDB.AreaTableStorage.LookupByKey(target.GetZoneId()));
+            target.UpdatePvPState();
         }
         #endregion
     }

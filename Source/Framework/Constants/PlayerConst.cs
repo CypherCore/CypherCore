@@ -757,4 +757,13 @@ namespace Framework.Constants
         Default = InEquipment | InInventory,
         Everywhere = InEquipment | InInventory | InBank | InReagentBank
     }
+
+    public enum ZonePVPTypeOverride
+    {
+        None = 0,
+        Friendly = 1,
+        Hostile = 2,
+        Contested = 3,
+        Combat = 4
+    }
 }

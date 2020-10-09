@@ -222,15 +222,17 @@ namespace Game.Entities
             }
         }
 
-        void UpdateHostileAreaState(AreaTableRecord area)
+        public void UpdateHostileAreaState(AreaTableRecord area)
         {
+            ZonePVPTypeOverride overrideZonePvpType = GetOverrideZonePVPType();
+
             pvpInfo.IsInHostileArea = false;
 
             if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
                 pvpInfo.IsInHostileArea = false;
             else if (area.Flags[0].HasAnyFlag(AreaFlags.Arena))
                 pvpInfo.IsInHostileArea = true;
-            else
+            else if (overrideZonePvpType == ZonePVPTypeOverride.None)
             {
                 if (area != null)
                 {
@@ -253,11 +255,30 @@ namespace Game.Entities
                     }
                 }
             }
+            else
+            {
+                switch (overrideZonePvpType)
+                {
+                    case ZonePVPTypeOverride.Friendly:
+                        pvpInfo.IsInHostileArea = false;
+                        break;
+                    case ZonePVPTypeOverride.Hostile:
+                    case ZonePVPTypeOverride.Contested:
+                    case ZonePVPTypeOverride.Combat:
+                        pvpInfo.IsInHostileArea = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             // Treat players having a quest flagging for PvP as always in hostile area
             pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
         }
 
+        public ZonePVPTypeOverride GetOverrideZonePVPType() { return (ZonePVPTypeOverride)(uint)m_activePlayerData.OverrideZonePVPType; }
+        public void SetOverrideZonePVPType(ZonePVPTypeOverride type) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideZonePVPType), (uint)type); }  
+        
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
         {
             // some instances only have one difficulty
