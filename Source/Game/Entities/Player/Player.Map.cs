@@ -183,27 +183,7 @@ namespace Game.Entities
 
             GetMap().SendZoneDynamicInfo(newZone, this);
 
-            // in PvP, any not controlled zone (except zone.team == 6, default case)
-            // in PvE, only opposition team capital
-            switch ((ArenaTeams)zone.FactionGroupMask)
-            {
-                case ArenaTeams.Ally:
-                    pvpInfo.IsInHostileArea = GetTeam() != Team.Alliance && (Global.WorldMgr.IsPvPRealm() || zone.Flags[0].HasAnyFlag(AreaFlags.Capital));
-                    break;
-                case ArenaTeams.Horde:
-                    pvpInfo.IsInHostileArea = GetTeam() != Team.Horde && (Global.WorldMgr.IsPvPRealm() || zone.Flags[0].HasAnyFlag(AreaFlags.Capital));
-                    break;
-                case ArenaTeams.None:
-                    // overwrite for Battlegrounds, maybe batter some zone flags but current known not 100% fit to this
-                    pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm() || InBattleground() || zone.Flags[0].HasAnyFlag(AreaFlags.Wintergrasp);
-                    break;
-                default:                                            // 6 in fact
-                    pvpInfo.IsInHostileArea = false;
-                    break;
-            }
-
-            // Treat players having a quest flagging for PvP as always in hostile area
-            pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
+            UpdateHostileAreaState(zone);
 
             if (zone.Flags[0].HasAnyFlag(AreaFlags.Capital))                     // Is in a capital city
             {
@@ -240,6 +220,42 @@ namespace Game.Entities
                 if (guild)
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
             }
+        }
+
+        void UpdateHostileAreaState(AreaTableRecord area)
+        {
+            pvpInfo.IsInHostileArea = false;
+
+            if (area.IsSanctuary()) // sanctuary and arena cannot be overriden
+                pvpInfo.IsInHostileArea = false;
+            else if (area.Flags[0].HasAnyFlag(AreaFlags.Arena))
+                pvpInfo.IsInHostileArea = true;
+            else
+            {
+                if (area != null)
+                {
+                    if (InBattleground() || area.Flags[0].HasAnyFlag(AreaFlags.Combat) || (area.PvpCombatWorldStateID != -1 && Global.WorldMgr.GetWorldState((WorldStates)area.PvpCombatWorldStateID) != 0))
+                        pvpInfo.IsInHostileArea = true;
+                    else if (Global.WorldMgr.IsPvPRealm() || area.Flags[0].HasAnyFlag(AreaFlags.Unk3))
+                    {
+                        if (area.Flags[0].HasAnyFlag(AreaFlags.ContestedArea))
+                            pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
+                        else
+                        {
+                            FactionTemplateRecord factionTemplate = GetFactionTemplateEntry();
+                            if (factionTemplate == null || factionTemplate.FriendGroup.HasAnyFlag(area.FactionGroupMask))
+                                pvpInfo.IsInHostileArea = false;
+                            else if (factionTemplate.EnemyGroup.HasAnyFlag(area.FactionGroupMask))
+                                pvpInfo.IsInHostileArea = true;
+                            else
+                                pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
+                        }
+                    }
+                }
+            }
+
+            // Treat players having a quest flagging for PvP as always in hostile area
+            pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
         }
 
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)

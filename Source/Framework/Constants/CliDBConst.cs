@@ -898,12 +898,17 @@ namespace Framework.Constants
         Town = 0x200000,                // Small Towns With Inn
         RestZoneHorde = 0x400000,                // Warsong Hold, Acherus: The Ebon Hold, New Agamand Inn, Vengeance Landing Inn, Sunreaver Pavilion (Something To Do With Team?)
         RestZoneAlliance = 0x800000,                // Valgarde, Acherus: The Ebon Hold, Westguard Inn, Silver Covenant Pavilion (Something To Do With Team?)
-        Wintergrasp = 0x1000000,                // Wintergrasp And It'S Subzones
+        Combat = 0x1000000,                // "combat" area (Script_GetZonePVPInfo), used
         Inside = 0x2000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
         Outside = 0x4000000,                // Used For Determinating Spell Related Inside/Outside Questions In Map.Isoutdoors
         CanHearthAndResurrect = 0x8000000,                // Can Hearth And Resurrect From Area
         NoFlyZone = 0x20000000,                // Marks Zones Where You Cannot Fly
         Unk9 = 0x40000000,
+    }
+
+    public enum AreaFlags2
+    {
+        DontShowSanctuary = 0x00000200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
     }
 
     public enum ArtifactCategory
