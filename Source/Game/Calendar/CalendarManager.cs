@@ -476,7 +476,7 @@ namespace Game
 
         public void SendCalendarEventModeratorStatusAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarInviteModeratorStatus packet = new CalendarInviteModeratorStatus();
+            CalendarModeratorStatus packet = new CalendarModeratorStatus();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
             packet.InviteGuid = invite.InviteeGuid;

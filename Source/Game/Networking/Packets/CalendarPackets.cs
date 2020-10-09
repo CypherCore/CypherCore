@@ -347,9 +347,9 @@ namespace Game.Networking.Packets
         public bool ClearPending;
     }
 
-    class CalendarInviteModeratorStatus : ServerPacket
+    class CalendarModeratorStatus : ServerPacket
     {
-        public CalendarInviteModeratorStatus() : base(ServerOpcodes.CalendarInviteModeratorStatus) { }
+        public CalendarModeratorStatus() : base(ServerOpcodes.CalendarModeratorStatus) { }
 
         public override void Write()
         {
