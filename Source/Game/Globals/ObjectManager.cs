@@ -6671,8 +6671,7 @@ namespace Game
             {
                 do
                 {
-                    uint questId = result.Read<uint>(1);
-
+                    uint questId = result.Read<uint>(0);
                     var quest = _questTemplates.LookupByKey(questId);
                     if (quest != null)
                         quest.LoadQuestObjective(result.GetFields());
