@@ -293,7 +293,7 @@ namespace Game.Maps
                     visitor.Visit(_container.corpses);
                     visitor.Visit(_container.areaTriggers);
                     visitor.Visit(_container.conversations);
-                    visitor.Visit(_container.worldObjects);
+                    visitor.Visit(_container.worldObjects.ToArray());
                     break;
                 case GridMapTypeMask.AllWorld:
                     visitor.Visit(_objects.players);

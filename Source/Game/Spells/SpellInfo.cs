@@ -3611,7 +3611,6 @@ namespace Game.Spells
 
         Dictionary<uint, SpellEffectInfo> _effects = new Dictionary<uint, SpellEffectInfo>();
         List<SpellXSpellVisualRecord> _visuals = new List<SpellXSpellVisualRecord>();
-        bool _hasPowerDifficultyData;
         SpellSpecificType _spellSpecific;
         AuraStateType _auraState;
 

@@ -73,8 +73,6 @@ namespace Game.Maps
         public void Visit(IList<Corpse> corpses) { _notifier.Visit(corpses); }
         public void Visit(IList<Player> players) { _notifier.Visit(players); }
 
-        public void Visit(Dictionary<ObjectGuid, WorldObject> dict) { Visit(dict.Values.ToList()); }
-
         Notifier _notifier;
         internal GridMapTypeMask _mask;
     }
@@ -563,11 +561,10 @@ namespace Game.Maps
 
         public override void Visit(IList<WorldObject> objs)
         {
-            for (var i = 0; i < objs.Count; ++i)
+            foreach (var obj in objs)
             {
-                var obj = objs[i];
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
-                    continue;
+                    return;
 
                 if (obj.IsInWorld)
                     obj.Update(i_timeDiff);
@@ -645,42 +642,85 @@ namespace Game.Maps
             i_do = _do;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+                return;
+
             foreach (var obj in objs)
             {
-                switch (obj.GetTypeId())
-                {
-                    case TypeId.GameObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                            return;
-                        break;
-                    case TypeId.Player:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                            return;
-                        break;
-                    case TypeId.Unit:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                            return;
-                        break;
-                    case TypeId.Corpse:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                            return;
-                        break;
-                    case TypeId.DynamicObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                            return;
-                        break;
-                    case TypeId.AreaTrigger:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                            return;
-                        break;
-                    case TypeId.Conversation:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                            return;
-                        break;
-                }
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
 
+        public override void Visit(IList<Player> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
+
+        public override void Visit(IList<Corpse> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
+
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (obj.IsInPhase(_searcher))
+                    i_do.Invoke(obj);
+            }
+        }
+
+        public override void Visit(IList<Conversation> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            foreach (var obj in objs)
+            {
                 if (obj.IsInPhase(_searcher))
                     i_do.Invoke(obj);
             }
@@ -918,46 +958,17 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+                return;
+
             // already found
             if (i_object)
                 return;
 
             foreach (var obj in objs)
             {
-                switch (obj.GetTypeId())
-                {
-                    case TypeId.Player:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                            continue;
-                        break;
-                    case TypeId.GameObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                            continue;
-                        break;
-                    case TypeId.Corpse:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                            continue;
-                        break;
-                    case TypeId.Unit:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                            continue;
-                        break;
-                    case TypeId.DynamicObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                            continue;
-                        break;
-                    case TypeId.AreaTrigger:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                            continue;
-                        break;
-                    case TypeId.Conversation:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                            continue;
-                        break;
-                }
-
                 if (!obj.IsInPhase(_searcher))
                     continue;
 
@@ -966,7 +977,138 @@ namespace Game.Maps
                     i_object = obj;
                     return;
                 }
+            }
+        }
 
+        public override void Visit(IList<Player> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
+            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
+            }
+        }
+
+        public override void Visit(IList<Corpse> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
+            }
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
+            }
+        }
+
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
+            }
+        }
+
+        public override void Visit(IList<Conversation> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    i_object = obj;
+                    return;
+                }
             }
         }
 
@@ -986,42 +1128,103 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+                return;
+
             foreach (var obj in objs)
             {
-                switch (obj.GetTypeId())
-                {
-                    case TypeId.Player:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                            continue;
-                        break;
-                    case TypeId.GameObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                            continue;
-                        break;
-                    case TypeId.Corpse:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                            continue;
-                        break;
-                    case TypeId.Unit:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                            continue;
-                        break;
-                    case TypeId.DynamicObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                            continue;
-                        break;
-                    case TypeId.AreaTrigger:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                            continue;
-                        break;
-                    case TypeId.Conversation:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                            continue;
-                        break;
-                }
+                if (!obj.IsInPhase(_searcher))
+                    continue;
 
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<Player> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<Corpse> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+                return;
+
+            foreach (var obj in objs)
+            {
+                if (!obj.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                    i_object = obj;
+            }
+        }
+
+        public override void Visit(IList<Conversation> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            foreach (var obj in objs)
+            {
                 if (!obj.IsInPhase(_searcher))
                     continue;
 
@@ -1047,45 +1250,74 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IList<Player> objs)
         {
-            foreach (var obj in objs)
-            {
-                switch (obj.GetTypeId())
-                {
-                    case TypeId.Player:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                            continue;
-                        break;
-                    case TypeId.GameObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                            continue;
-                        break;
-                    case TypeId.Corpse:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                            continue;
-                        break;
-                    case TypeId.Unit:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                            continue;
-                        break;
-                    case TypeId.DynamicObject:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                            continue;
-                        break;
-                    case TypeId.AreaTrigger:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                            continue;
-                        break;
-                    case TypeId.Conversation:
-                        if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                            continue;
-                        break;
-                }
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+                return;
 
+            foreach (var obj in objs)
                 if (i_check.Invoke(obj))
                     i_objects.Add(obj);
-            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
+        }
+
+        public override void Visit(IList<Corpse> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
+        }
+
+        public override void Visit(IList<GameObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
+        }
+
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
+        }
+
+        public override void Visit(IList<Conversation> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            foreach (var obj in objs)
+                if (i_check.Invoke(obj))
+                    i_objects.Add(obj);
         }
 
         GridMapTypeMask i_mapTypeMask;
@@ -2099,7 +2331,7 @@ namespace Game.Maps
         float m_fRange;
     }
 
-    class AllCreaturesOfEntryInRange : ICheck<Creature>
+    public class AllCreaturesOfEntryInRange : ICheck<Creature>
     {
         public AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange)
         {
@@ -2181,7 +2413,7 @@ namespace Game.Maps
         float m_fRange;
     }
 
-    class ObjectTypeIdCheck : ICheck<WorldObject>
+    public class ObjectTypeIdCheck : ICheck<WorldObject>
     {
         public ObjectTypeIdCheck(TypeId typeId, bool equals)
         {
@@ -2218,7 +2450,7 @@ namespace Game.Maps
         ObjectGuid _GUID;
     }
 
-    class HeightDifferenceCheck : ICheck<WorldObject>
+    public class HeightDifferenceCheck : ICheck<WorldObject>
     {
         public HeightDifferenceCheck(WorldObject go, float diff, bool reverse)
         {

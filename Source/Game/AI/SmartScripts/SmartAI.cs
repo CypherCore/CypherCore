@@ -117,6 +117,7 @@ namespace Game.AI
                 return false;
             }
 
+            _path = new WaypointPath();
             _path.id = path.id;
             _path.nodes = path.nodes;
             foreach (WaypointNode waypoint in _path.nodes)

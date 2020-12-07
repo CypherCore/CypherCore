@@ -3558,7 +3558,7 @@ namespace Game.Maps
             return info.DefaultWeather;
         }
 
-        void SetZoneWeather(uint zoneId, WeatherState weatherId, float weatherGrade)
+        public void SetZoneWeather(uint zoneId, WeatherState weatherId, float weatherGrade)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
@@ -3580,7 +3580,7 @@ namespace Game.Maps
             }
         }
 
-        void SetZoneOverrideLight(uint zoneId, uint lightId, uint fadeInTime)
+        public void SetZoneOverrideLight(uint zoneId, uint lightId, uint fadeInTime)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
                 _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();

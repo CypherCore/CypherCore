@@ -385,6 +385,8 @@ namespace Game.Combat
             return iUnitGuid;
         }
 
+        public Unit GetVictim() { return GetTarget(); }
+
         public new HostileReference Next() { return (HostileReference)base.Next(); }
 
         float iThreat;

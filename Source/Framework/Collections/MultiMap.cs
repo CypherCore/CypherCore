@@ -137,7 +137,7 @@ namespace System.Collections.Generic
         {
             if (!_interalStorage.ContainsKey(key))
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
             value = _interalStorage[key].Last();
@@ -381,7 +381,7 @@ namespace System.Collections.Generic
         {
             if (!_interalStorage.ContainsKey(key))
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
             value = _interalStorage[key].Last();

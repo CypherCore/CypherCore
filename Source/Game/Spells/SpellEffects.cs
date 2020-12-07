@@ -1720,7 +1720,7 @@ namespace Game.Spells
                                         pos = destTarget;
                                     else
                                         // randomize position for multiple summons
-                                        m_caster.GetRandomPoint(destTarget, radius, out pos);
+                                        pos = m_caster.GetRandomPoint(destTarget, radius);
 
                                     summon = m_originalCaster.SummonCreature(entry, pos, summonType, (uint)duration, 0, personalSpawn);
                                     if (summon == null)
@@ -4972,7 +4972,7 @@ namespace Game.Spells
                     pos = destTarget;
                 else
                     // randomize position for multiple summons
-                    m_caster.GetRandomPoint(destTarget, radius, out pos);
+                    pos = m_caster.GetRandomPoint(destTarget, radius);
 
                 TempSummon summon = map.SummonCreature(entry, pos, properties, (uint)duration, caster, m_spellInfo.Id);
                 if (summon == null)

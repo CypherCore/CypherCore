@@ -196,7 +196,7 @@ namespace Game.Movement
             if (_arrivalSpellId != 0)
                 owner.CastSpell(Global.ObjAccessor.GetUnit(owner, _arrivalSpellTargetGuid), _arrivalSpellId, true); 
             
-            if (owner.ToCreature().GetAI() != null)
+            if (owner.ToCreature() && owner.ToCreature().GetAI() != null)
                 owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Effect, _pointId);
         }
 

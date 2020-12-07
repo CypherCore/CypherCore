@@ -41,7 +41,7 @@ namespace System.Collections.Generic
         /// <returns>The value, or the default value of the element type.</returns>
         public static T LookupByIndex<T>(this IList<T> list, int index)
         {
-            return index >= list.Count ? default(T) : list[index];
+            return index >= list.Count ? default : list[index];
         }
 
         /// <summary>
@@ -57,17 +57,17 @@ namespace System.Collections.Generic
         {
             TValue val;
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
-            return dict.TryGetValue(newkey, out val) ? val : default(TValue);
+            return dict.TryGetValue(newkey, out val) ? val : default;
         }
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             TValue val;
-            return dict.TryGetValue(key, out val) ? val : default(TValue);
+            return dict.TryGetValue(key, out val) ? val : default;
         }
         public static KeyValuePair<TKey, TValue> Find<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
             if (!dict.ContainsKey(key))
-                return default(KeyValuePair<TKey, TValue>);
+                return default;
 
             return new KeyValuePair<TKey, TValue>(key, dict[key]);
         }
@@ -106,7 +106,7 @@ namespace System.Collections.Generic
             else
             {
                 for (var i = list.Count; i < size; ++i)
-                    list.Add(default(T));
+                    list.Add(default);
             }
         }
 
@@ -161,7 +161,7 @@ namespace System.Collections.Generic
 
             }
 
-            return default(T);
+            return default;
         }
 
         public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, Func<TSource, TSource, bool> comparer)

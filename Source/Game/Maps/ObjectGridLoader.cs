@@ -271,7 +271,7 @@ namespace Game.Maps
         {
             foreach (var obj in objs)
             {
-                if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
+                if (obj.IsTypeId(TypeId.Corpse))
                     continue;
 
                 // if option set then object already saved at this moment

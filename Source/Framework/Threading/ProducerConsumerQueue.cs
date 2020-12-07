@@ -48,7 +48,7 @@ namespace Framework.Threading
 
         public bool Pop(out T value)
         {
-            value = default(T);
+            value = default;
             lock (_queueLock)
             {
                 if (_queue.Count == 0 || _shutdown)
@@ -61,7 +61,7 @@ namespace Framework.Threading
 
         public void WaitAndPop(out T value)
         {
-            value = default(T);
+            value = default;
             lock (_queueLock)
             {
                 while (_queue.Count == 0 && !_shutdown)

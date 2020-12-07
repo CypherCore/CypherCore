@@ -1113,7 +1113,7 @@ namespace Game.Entities
         }
 
         public UnitAI GetAI() { return i_AI; }
-        void SetAI(UnitAI newAI) { i_AI = newAI; }
+        public void SetAI(UnitAI newAI) { i_AI = newAI; }
 
         public bool IsPossessing()
         {
@@ -2351,7 +2351,7 @@ namespace Game.Entities
             else
                 return ToCreature().GetCreatureTemplate().CreatureType;
         }
-        Player GetAffectingPlayer()
+        public Player GetAffectingPlayer()
         {
             if (GetCharmerOrOwnerGUID().IsEmpty())
                 return IsTypeId(TypeId.Player) ? ToPlayer() : null;

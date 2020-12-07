@@ -39,7 +39,7 @@ namespace Game.Entities
         {
             return m_movementInfo.HasMovementFlag(MovementFlag.Walking);
         }
-        bool IsHovering() { return m_movementInfo.HasMovementFlag(MovementFlag.Hover); }
+        public bool IsHovering() { return m_movementInfo.HasMovementFlag(MovementFlag.Hover); }
         public bool IsStopped() { return !HasUnitState(UnitState.Moving); }
         public bool IsMoving() { return m_movementInfo.HasMovementFlag(MovementFlag.MaskMoving); }
         public bool IsTurning() { return m_movementInfo.HasMovementFlag(MovementFlag.MaskTurning); }

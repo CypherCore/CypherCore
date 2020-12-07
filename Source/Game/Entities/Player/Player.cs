@@ -7692,14 +7692,17 @@ namespace Game.Entities
         }
 
         //Helpers
-        public void ADD_GOSSIP_ITEM(GossipOptionIcon icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
+        public void AddGossipItem(GossipOptionIcon icon, string message, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, "", 0); }
         public void ADD_GOSSIP_ITEM_DB(uint menuId, uint menuItemId, uint sender, uint action) { PlayerTalkClass.GetGossipMenu().AddMenuItem(menuId, menuItemId, sender, action); }
         public void ADD_GOSSIP_ITEM_EXTENDED(GossipOptionIcon icon, string message, uint sender, uint action, string boxmessage, uint boxmoney, bool coded) { PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, message, sender, action, boxmessage, boxmoney, coded); }
 
         // This fuction Sends the current menu to show to client, a - NPCTEXTID(uint32), b - npc guid(uint64)
-        public void SEND_GOSSIP_MENU(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }
+        public void SendGossipMenu(uint titleId, ObjectGuid objGUID) { PlayerTalkClass.SendGossipMenu(titleId, objGUID); }
 
         // Closes the Menu
-        public void CLOSE_GOSSIP_MENU() { PlayerTalkClass.SendCloseGossip(); }
+        public void CloseGossipMenu() { PlayerTalkClass.SendCloseGossip(); }
+
+        //Clears the Menu
+        public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }
     }
 }

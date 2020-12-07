@@ -42,7 +42,7 @@ namespace Framework.Database
             var value = _reader[column];
 
             if (value == DBNull.Value)
-                return default(T);
+                return default;
 
             if (value.GetType() != typeof(T))
                 return (T)Convert.ChangeType(value, typeof(T));//todo remove me when all fields are the right type  this is super slow
@@ -105,7 +105,7 @@ namespace Framework.Database
             var value = _currentRow[column];
 
             if (value == DBNull.Value)
-                return default(T);
+                return default;
 
             if (value.GetType() != typeof(T))
                 return (T)Convert.ChangeType(value, typeof(T));//todo remove me when all fields are the right type  this is super slow

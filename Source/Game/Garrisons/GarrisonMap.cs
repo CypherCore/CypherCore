@@ -107,7 +107,7 @@ namespace Game.Garrisons
             Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
         }
 
-        public override void Visit(IList<WorldObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
             if (!plots.Empty())
@@ -130,6 +130,8 @@ namespace Game.Garrisons
                 }
             }
         }
+
+        public override void Visit(IList<Creature> objs) { }
 
         Cell i_cell;
         Grid i_grid;

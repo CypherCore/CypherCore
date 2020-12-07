@@ -64,145 +64,145 @@ namespace Framework.IO
         public char NextChar(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(char);
+                return default;
 
             char value;
             if (char.TryParse(Current, out value))
                 return value;
 
-            return default(char);
+            return default;
         }
 
         public byte NextByte(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(byte);
+                return default;
 
             byte value;
             if (byte.TryParse(Current, out value))
                 return value;
 
-            return default(byte);
+            return default;
         }
 
         public sbyte NextSByte(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(sbyte);
+                return default;
 
             sbyte value;
             if (sbyte.TryParse(Current, out value))
                 return value;
 
-            return default(sbyte);
+            return default;
         }
 
         public ushort NextUInt16(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(ushort);
+                return default;
 
             ushort value;
             if (ushort.TryParse(Current, out value))
                 return value;
 
-            return default(ushort);
+            return default;
         }
 
         public short NextInt16(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(short);
+                return default;
 
             short value;
             if (short.TryParse(Current, out value))
                 return value;
 
-            return default(short);
+            return default;
         }
 
         public uint NextUInt32(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(uint);
+                return default;
 
             uint value;
             if (uint.TryParse(Current, out value))
                 return value;
 
-            return default(uint);
+            return default;
         }
 
         public int NextInt32(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(int);
+                return default;
 
             int value;
             if (int.TryParse(Current, out value))
                 return value;
 
-            return default(int);
+            return default;
         }
 
         public ulong NextUInt64(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(ulong);
+                return default;
 
             ulong value;
             if (ulong.TryParse(Current, out value))
                 return value;
 
-            return default(ulong);
+            return default;
         }
 
         public long NextInt64(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(long);
+                return default;
 
             long value;
             if (long.TryParse(Current, out value))
                 return value;
 
-            return default(long);
+            return default;
         }
 
         public float NextSingle(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(float);
+                return default;
 
             float value;
             if (float.TryParse(Current, out value))
                 return value;
 
-            return default(float);
+            return default;
         }
 
         public double NextDouble(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(double);
+                return default;
 
             double value;
             if (double.TryParse(Current, out value))
                 return value;
 
-            return default(double);
+            return default;
         }
 
         public decimal NextDecimal(string delimiters = " ")
         {
             if (!MoveNext(delimiters))
-                return default(decimal);
+                return default;
 
             decimal value;
             if (decimal.TryParse(Current, out value))
                 return value;
 
-            return default(decimal);
+            return default;
         }
 
         public void AlignToNextChar()

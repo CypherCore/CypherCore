@@ -270,7 +270,7 @@ namespace Game.Movement
                 StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath), MovementSlot.Active);
         }
 
-        void MoveCloserAndStop(uint id, Unit target, float distance)
+        public void MoveCloserAndStop(uint id, Unit target, float distance)
         {
             float distanceToTravel = _owner.GetExactDist2d(target) - distance;
             if (distanceToTravel > 0.0f)
@@ -303,7 +303,7 @@ namespace Game.Movement
             StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
         }
 
-        void MoveTakeoff(uint id, Position pos)
+        public void MoveTakeoff(uint id, Position pos)
         {
             float x, y, z;
             pos.GetPosition(out x, out y, out z);
@@ -421,7 +421,7 @@ namespace Game.Movement
             StartMovement(new EffectMovementGenerator(id, arrivalSpellId, arrivalSpellTargetGuid), MovementSlot.Controlled);
         }
 
-        void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
+        public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
             float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
             Position pos = new Position(x, y, z, 0.0f);
@@ -480,7 +480,7 @@ namespace Game.Movement
             //MovePoint(EVENT_CHARGE_PREPATH, pos, false);
         }
 
-        void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
+        public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
         {
             Creature owner = _owner.ToCreature();
             if (!owner)
@@ -606,7 +606,7 @@ namespace Game.Movement
             StartMovement(new WaypointMovementGenerator(path, repeatable), MovementSlot.Idle);
         }
 
-        void MoveRotate(uint time, RotateDirection direction)
+        public void MoveRotate(uint time, RotateDirection direction)
         {
             if (time == 0)
                 return;

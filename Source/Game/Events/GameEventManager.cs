@@ -24,6 +24,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using Framework.Collections;
+using System.Linq;
 
 namespace Game
 {
@@ -1559,7 +1560,7 @@ namespace Game
             {
                 GameEventAIHookWorker worker = new GameEventAIHookWorker(event_id, activate);
                 var visitor = new Visitor(worker, GridMapTypeMask.None);
-                visitor.Visit(map.GetObjectsStore());
+                visitor.Visit(map.GetObjectsStore().Values.ToList());
             });
         }
 

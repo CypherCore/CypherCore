@@ -1366,7 +1366,7 @@ namespace Game.AI
         bool _isFollowing;
     }
 
-    struct ValidTargetSelectPredicate : ISelector
+    struct ValidTargetSelectPredicate : ICheck<Unit>
     {
         UnitAI _ai;
 
@@ -1375,7 +1375,7 @@ namespace Game.AI
             _ai = ai;
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             return _ai.CanAIAttack(target);
         }

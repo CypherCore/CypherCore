@@ -216,7 +216,7 @@ namespace System
         {
             T value;
             if (!Enum.TryParse(str, out value))
-                return default(T);
+                return default;
 
             return value;
         }

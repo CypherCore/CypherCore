@@ -132,7 +132,7 @@ namespace Game.AI
         /// Select the best target (in <targetType> order) satisfying <predicate> from the threat list.
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public Unit SelectTarget(SelectAggroTarget targetType, uint offset, ISelector selector)
+        public Unit SelectTarget(SelectAggroTarget targetType, uint offset, ICheck<Unit> selector)
         {
             ThreatManager mgr = GetThreatManager();
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
@@ -170,7 +170,7 @@ namespace Game.AI
         /// - Does not have aura with ID -<aura> (if aura < 0)
         /// The resulting targets are stored in <targetList> (which is cleared first).
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, float dist, bool playerOnly, bool withTank, int aura = 0)
+        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset = 0, float dist = 0f, bool playerOnly = false, bool withTank = true, int aura = 0)
         {
             return SelectTargetList(num, targetType, offset, new DefaultTargetSelector(me, dist, playerOnly, withTank, aura));
         }
@@ -179,7 +179,7 @@ namespace Game.AI
         /// Select the best (up to) <num> targets (in <targetType> order) satisfying <predicate> from the threat list and stores them in <targetList> (which is cleared first).
         /// If <offset> is nonzero, the first <offset> entries in <targetType> order (or MAXTHREAT order, if <targetType> is RANDOM) are skipped.
         /// </summary>
-        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, ISelector selector)
+        public List<Unit> SelectTargetList(uint num, SelectAggroTarget targetType, uint offset, ICheck<Unit> selector)
         {
             var targetList = new List<Unit>();
 
@@ -238,7 +238,7 @@ namespace Game.AI
             }
 
             // then finally filter by predicate
-            targetList.RemoveAll(target => { return !selector.Check(target); });
+            targetList.RemoveAll(unit => !selector.Invoke(unit));
 
             if (targetList.Count <= num)
                 return targetList;
@@ -289,7 +289,7 @@ namespace Game.AI
 
                             DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, true, -(int)spellId);
                             if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
-                            && targetSelector.Check(me.GetVictim()))
+                            && targetSelector.Invoke(me.GetVictim()))
                                 target = me.GetVictim();
                             else
                                 target = SelectTarget(SelectAggroTarget.Random, 0, targetSelector);
@@ -549,13 +549,8 @@ namespace Game.AI
         MinDistance  // prefer targets closer to us
     }
 
-    public interface ISelector
-    {
-        bool Check(Unit target);
-    }
-
     // default predicate function to select target based on distance, player and/or aura criteria
-    public class DefaultTargetSelector : ISelector
+    public class DefaultTargetSelector : ICheck<Unit>
     {
         Unit me;
         float m_dist;
@@ -577,7 +572,7 @@ namespace Game.AI
             m_aura = aura;
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             if (me == null)
                 return false;
@@ -611,13 +606,13 @@ namespace Game.AI
                 }
             }
 
-            return true;
+            return false;
         }
     }
 
     // Target selector for spell casts checking range, auras and attributes
     // todo Add more checks from Spell.CheckCast
-    public class SpellTargetSelector : ISelector
+    public class SpellTargetSelector : ICheck<Unit>
     {
         public SpellTargetSelector(Unit caster, uint spellId)
         {
@@ -627,7 +622,7 @@ namespace Game.AI
             Cypher.Assert(_spellInfo != null);
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             if (target == null)
                 return false;
@@ -698,7 +693,7 @@ namespace Game.AI
     // Very simple target selector, will just skip main target
     // NOTE: When passing to UnitAI.SelectTarget remember to use 0 as position for random selection
     //       because tank will not be in the temporary list
-    public class NonTankTargetSelector : ISelector
+    public class NonTankTargetSelector : ICheck<Unit>
     {
         public NonTankTargetSelector(Unit source, bool playerOnly = true)
         {
@@ -706,7 +701,7 @@ namespace Game.AI
             _playerOnly = playerOnly;
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             if (target == null)
                 return false;
@@ -726,7 +721,7 @@ namespace Game.AI
     }
 
     // Simple selector for units using mana
-    class PowerUsersSelector : ISelector
+    class PowerUsersSelector : ICheck<Unit>
     {
         public PowerUsersSelector(Unit unit, PowerType power, float dist, bool playerOnly)
         {
@@ -736,7 +731,7 @@ namespace Game.AI
             _playerOnly = playerOnly;
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             if (_me == null || target == null)
                 return false;
@@ -762,7 +757,7 @@ namespace Game.AI
         bool _playerOnly;
     }
 
-    class FarthestTargetSelector : ISelector
+    class FarthestTargetSelector : ICheck<Unit>
     {
         public FarthestTargetSelector(Unit unit, float dist, bool playerOnly, bool inLos)
         {
@@ -772,7 +767,7 @@ namespace Game.AI
             _inLos = inLos;
         }
 
-        public bool Check(Unit target)
+        public bool Invoke(Unit target)
         {
             if (_me == null || target == null)
                 return false;

@@ -1676,7 +1676,7 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.ModScale)]
         [AuraEffectHandler(AuraType.ModScale2)]
-        void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        public void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;

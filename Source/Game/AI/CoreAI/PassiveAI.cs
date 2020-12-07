@@ -88,7 +88,7 @@ namespace Game.AI
 
     public class NullCreatureAI : CreatureAI
     {
-        public NullCreatureAI(Creature c) : base(c)
+        public NullCreatureAI(Creature creature) : base(creature)
         {
             me.SetReactState(ReactStates.Passive);
         }

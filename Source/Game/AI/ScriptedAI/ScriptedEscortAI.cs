@@ -35,6 +35,8 @@ namespace Game.AI
             _activeAttacker = true;
             _despawnAtEnd = true;
             _despawnAtFar = true;
+
+            _path = new WaypointPath();
         }
 
         public Player GetPlayerForEscort()

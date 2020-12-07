@@ -492,6 +492,7 @@ namespace Game.AI
 
         protected EventMap _events = new EventMap();
         protected TaskScheduler _scheduler = new TaskScheduler();
+        protected InstanceScript _instance;
     }
 
     public struct AISpellInfoType

@@ -509,7 +509,7 @@ namespace Game.Entities
         public Unit GetDispeller() { return _dispellerUnit; }
         uint GetDispellerSpellId() { return _dispellerSpell; }
         public byte GetRemovedCharges() { return _chargesRemoved; }
-        void SetRemovedCharges(byte amount)
+        public void SetRemovedCharges(byte amount)
         {
             _chargesRemoved = amount;
         }

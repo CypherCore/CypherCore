@@ -35,7 +35,7 @@ namespace Game.AI
             _difficulty = me.GetMap().GetDifficultyID();
         }
 
-        void AttackStartNoMove(Unit target)
+        public void AttackStartNoMove(Unit target)
         {
             if (target == null)
                 return;
@@ -150,7 +150,7 @@ namespace Game.AI
         /// </summary>
         /// <param name="victim"></param>
         /// <param name="who"></param>
-        void ResetThreat(Unit victim, Unit who)
+        public void ResetThreat(Unit victim, Unit who)
         {
             if (!victim)
                 return;
@@ -189,7 +189,7 @@ namespace Game.AI
 
             return who.GetThreatManager().GetThreat(victim);
         }
-        
+
         //Spawns a creature relative to me
         public Creature DoSpawnCreature(uint entry, float offsetX, float offsetY, float offsetZ, float angle, TempSummonType type, uint despawntime)
         {
@@ -261,7 +261,7 @@ namespace Game.AI
             return apSpell[RandomHelper.IRand(0, (int)(spellCount - 1))];
         }
 
-        void DoTeleportTo(float x, float y, float z, uint time = 0)
+        public void DoTeleportTo(float x, float y, float z, uint time = 0)
         {
             me.Relocate(x, y, z);
             float speed = me.GetDistance(x, y, z) / (time * 0.001f);
@@ -274,7 +274,7 @@ namespace Game.AI
         }
 
         //Teleports a player without dropping threat (only teleports to same map)
-        void DoTeleportPlayer(Unit unit, float x, float y, float z, float o)
+        public void DoTeleportPlayer(Unit unit, float x, float y, float z, float o)
         {
             if (unit == null)
                 return;
@@ -527,7 +527,7 @@ namespace Game.AI
             ScheduleTasks();
         }
 
-        void TeleportCheaters()
+        public void TeleportCheaters()
         {
             float x, y, z;
             me.GetPosition(out x, out y, out z);
@@ -748,6 +748,11 @@ namespace Game.AI
 
         public void Despawn(Creature summon) { Remove(summon.GetGUID()); }
 
+        public void DespawnIf(ICheck<ObjectGuid> predicate)
+        {
+            this.RemoveAll(predicate);
+        }
+
         public void DespawnIf(Predicate<ObjectGuid> predicate)
         {
             RemoveAll(predicate);
@@ -760,6 +765,14 @@ namespace Game.AI
                 if (!ObjectAccessor.GetCreature(me, id))
                     Remove(id);
             }
+        }
+
+        public void DoAction(int info, ICheck<ObjectGuid> predicate, ushort max = 0)
+        {
+            // We need to use a copy of SummonList here, otherwise original SummonList would be modified
+            List<ObjectGuid> listCopy = new List<ObjectGuid>(this);
+            listCopy.RandomResize(predicate.Invoke, max);
+            DoActionImpl(info, listCopy);
         }
 
         public void DoAction(int info, Predicate<ObjectGuid> predicate, ushort max = 0)
@@ -793,5 +806,17 @@ namespace Game.AI
         }
 
         Creature me;
+    }
+
+    public class EntryCheckPredicate : ICheck<ObjectGuid>
+    {
+        public EntryCheckPredicate(uint entry)
+        {
+            _entry = entry;
+        }
+
+        public bool Invoke(ObjectGuid guid) { return guid.GetEntry() == _entry; }
+
+        uint _entry;
     }
 }

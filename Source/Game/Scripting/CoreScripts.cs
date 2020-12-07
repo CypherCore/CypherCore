@@ -540,7 +540,7 @@ namespace Game.Scripting
             Global.ScriptMgr.AddScript(this);
         }
 
-        public override bool IsDatabaseBound() { return true; }
+        public override bool IsDatabaseBound() { return false; }
 
         // Called when an additional criteria is checked.
         public virtual bool OnCheck(Player source, Unit target) { return false; }

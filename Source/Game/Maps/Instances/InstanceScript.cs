@@ -725,7 +725,7 @@ namespace Game.Maps
             instance.SendToPlayers(new InstanceEncounterEnd());
         }
 
-        void SendBossKillCredit(uint encounterId)
+        public void SendBossKillCredit(uint encounterId)
         {
             BossKill bossKillCreditMessage = new BossKill();
             bossKillCreditMessage.DungeonEncounterID = encounterId;

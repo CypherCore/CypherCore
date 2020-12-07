@@ -1504,6 +1504,11 @@ namespace Game.Entities
             return summon;
         }
 
+        public void SummonCreatureGroup(byte group)
+        {
+            SummonCreatureGroup(group, out _);
+        }
+
         public void SummonCreatureGroup(byte group, out List<TempSummon> list)
         {
             Cypher.Assert((IsTypeId(TypeId.GameObject) || IsTypeId(TypeId.Unit)), "Only GOs and creatures can summon npc groups!");
@@ -2028,12 +2033,11 @@ namespace Game.Entities
             UpdateGroundPositionZ(rand_x, rand_y, ref rand_z);            // update to LOS height if available
         }
 
-        public void GetRandomPoint(Position srcPos, float distance, out Position pos)
+        public Position GetRandomPoint(Position srcPos, float distance)
         {
-            pos = new Position();
             float x, y, z;
             GetRandomPoint(srcPos, distance, out x, out y, out z);
-            pos.Relocate(x, y, z, GetOrientation());
+            return new Position(x, y, z, GetOrientation());
         }
 
         public void UpdateGroundPositionZ(float x, float y, ref float z)

@@ -168,6 +168,7 @@ namespace Game.Scripting
                             case "GuildScript":
                             case "GroupScript":
                             case "AreaTriggerEntityScript":
+                            case "OnlyOnceAreaTriggerScript":
                             case "SceneScript":
                                 if (!attribute.Name.IsEmpty())
                                     name = attribute.Name;

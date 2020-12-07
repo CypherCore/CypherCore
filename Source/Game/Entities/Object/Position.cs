@@ -285,7 +285,7 @@ namespace Game.Entities
             float verticalDelta = GetPositionZ() - center.GetPositionZ();
             return IsInDist2d(center, radius) && Math.Abs(verticalDelta) <= height;
         }
-        
+
         public bool HasInArc(float arc, Position obj, float border = 2.0f)
         {
             // always have self in arc

@@ -474,8 +474,8 @@ namespace Game.Entities
                                         uint visualStateAfter = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
                                         if (visualStateBefore != visualStateAfter)
                                         {
-                                            m_gameObjectData.ModifyValue(m_gameObjectData.Level);
-                                            m_gameObjectData.ModifyValue(m_gameObjectData.State);
+                                            m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level);
+                                            m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State);
                                             ForceUpdateFieldChange();
                                         }
                                     }

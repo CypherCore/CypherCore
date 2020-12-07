@@ -317,7 +317,7 @@ namespace Framework.Dynamic
         /// Cancel events belonging to specified group.
         /// </summary>
         /// <param name="group">Group to cancel.</param>
-        void CancelEventGroup(uint group)
+        public void CancelEventGroup(uint group)
         {
             if (group == 0 || group > 8 || Empty())
                 return;
@@ -334,7 +334,7 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="eventId">Wanted event id.</param>
         /// <returns>Time of found event.</returns>
-        uint GetNextEventTime(uint eventId)
+        public uint GetNextEventTime(uint eventId)
         {
             if (Empty())
                 return 0;

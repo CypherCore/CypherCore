@@ -89,7 +89,7 @@ namespace Framework.Collections
             Exchange(1, Size--);
             Sink(1);
             _qp[min] = -1;
-            _keys[_pq[Size + 1]] = default(T);
+            _keys[_pq[Size + 1]] = default;
             _pq[Size + 1] = -1;
             return min;
         }
@@ -143,7 +143,7 @@ namespace Framework.Collections
             Exchange(i, Size--);
             Swim(i);
             Sink(i);
-            _keys[index] = default(T);
+            _keys[index] = default;
             _qp[index] = -1;
         }
         private bool Greater(int i, int j)
