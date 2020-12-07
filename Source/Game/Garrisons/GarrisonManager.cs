@@ -414,11 +414,11 @@ namespace Game.Garrisons
 
                 FinalizeGarrisonPlotGOInfo info = new FinalizeGarrisonPlotGOInfo();
                 info.factionInfo[GarrisonFactionIndex.Horde].GameObjectId = hordeGameObjectId;
-                info.factionInfo[GarrisonFactionIndex.Horde].Pos.Relocate(result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                info.factionInfo[GarrisonFactionIndex.Horde].Pos = new Position(result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                 info.factionInfo[GarrisonFactionIndex.Horde].AnimKitId = hordeAnimKitId;
 
                 info.factionInfo[GarrisonFactionIndex.Alliance].GameObjectId = allianceGameObjectId;
-                info.factionInfo[GarrisonFactionIndex.Alliance].Pos.Relocate(result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
+                info.factionInfo[GarrisonFactionIndex.Alliance].Pos = new Position(result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
                 info.factionInfo[GarrisonFactionIndex.Alliance].AnimKitId = allianceAnimKitId;
 
                 _finalizePlotGOInfo[garrPlotInstanceId] = info;
