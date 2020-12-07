@@ -89,7 +89,7 @@ namespace Scripts.Spells.Warlock
             Unit target = GetHitUnit();
             if (target)
             {
-                // Casting Banish on a banished target will remove applied aura
+                // Casting Banish on a banished target will Remove applied aura
                 Aura banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
                 if (banishAura != null)
                     banishAura.Remove();
@@ -119,7 +119,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            //OnEffectHitTarget.Add(new EffectHandler(spell_warl_conflagrate_SpellScript::HandleHit, 0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            //OnEffectHitTarget.Add(new EffectHandler(spell_warl_conflagrate_SpellScript::HandleHit, 0, SpellIds._EFFECT_SCHOOL_DAMAGE);
         }
     }
 
@@ -128,15 +128,15 @@ namespace Scripts.Spells.Warlock
     {
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            AuraEffect effect1 = GetEffect(1);
-            if (effect1 == null || !GetTargetApplication().HasEffect(1))
+            AuraEffect auraEffect = GetEffect(1);
+            if (auraEffect == null || !GetTargetApplication().HasEffect(1))
             {
                 PreventDefaultAction();
                 return;
             }
 
             // You take ${$s2/3}% reduced damage
-            float damageReductionPct = (float)effect1.GetAmount() / 3;
+            float damageReductionPct = (float)auraEffect.GetAmount() / 3;
             // plus a random amount of up to ${$s2/3}% additional reduced damage
             damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 
@@ -210,7 +210,7 @@ namespace Scripts.Spells.Warlock
     {
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            // If effect is removed by expire remove the summoned demonic circle too.
+            // If effect is Removed by expire Remove the summoned demonic circle too.
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Reapply))
                 GetTarget().RemoveGameObject(GetId(), true);
 
@@ -224,7 +224,7 @@ namespace Scripts.Spells.Warlock
             {
                 // Here we check if player is in demonic circle teleport range, if so add
                 // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
-                // If not in range remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
+                // If not in range Remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
 
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
 
@@ -646,7 +646,7 @@ namespace Scripts.Spells.Warlock
             {
                 if (caster.GetOwner() && caster.GetOwner().HasAura(SpellIds.GlyphOfSuccubus))
                 {
-                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(SpellIds.PriestShadowWordDeath)); // SW:D shall not be removed.
+                    target.RemoveAurasByType(AuraType.PeriodicDamage, ObjectGuid.Empty, target.GetAura(SpellIds.PriestShadowWordDeath)); // SW:D shall not be Removed.
                     target.RemoveAurasByType(AuraType.PeriodicDamagePercent);
                     target.RemoveAurasByType(AuraType.PeriodicLeech);
                 }
@@ -828,8 +828,6 @@ namespace Scripts.Spells.Warlock
         public List<uint> GetDotList() { return _dotList; }
         public Unit GetOriginalSwapSource() { return _swapCaster; }
         public void SetOriginalSwapSource(Unit victim) { _swapCaster = victim; }
-
-
         List<uint> _dotList = new List<uint>();
         Unit _swapCaster;
     }

@@ -138,8 +138,8 @@ namespace Scripts.Spells.Mage
 
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            AuraEffect effect1 = GetEffect(1);
-            if (effect1 == null || !GetTargetApplication().HasEffect(1) ||
+            AuraEffect effectInfo = GetEffect(1);
+            if (effectInfo == null || !GetTargetApplication().HasEffect(1) ||
                 dmgInfo.GetDamage() < GetTarget().GetHealth() ||
                 dmgInfo.GetDamage() > GetTarget().GetMaxHealth() * 2 ||
                 GetTarget().HasAura(SpellIds.Cauterized))
@@ -148,7 +148,7 @@ namespace Scripts.Spells.Mage
                 return;
             }
 
-            GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(effect1.GetAmount()));
+            GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(effectInfo.GetAmount()));
             GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(2).TriggerSpell, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, TriggerCastFlags.FullMask);
@@ -303,7 +303,7 @@ namespace Scripts.Spells.Mage
         }
     }
 
-             // 37447 - Improved Mana Gems
+    // 37447 - Improved Mana Gems
     [Script] // 61062 - Improved Mana Gems
     class spell_mage_imp_mana_gems : AuraScript
     {
@@ -501,7 +501,7 @@ namespace Scripts.Spells.Mage
 
         ObjectGuid _ringOfFrostGUID;
     }
-    
+
     [Script] // 82691 - Ring of Frost (freeze efect)
     class spell_mage_ring_of_frost_freeze : SpellScript
     {
@@ -552,7 +552,7 @@ namespace Scripts.Spells.Mage
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 80353 - Time Warp
     class spell_mage_time_warp : SpellScript
     {

@@ -483,8 +483,6 @@ namespace Scripts.Spells.Warrior
             OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Any));
         }
     }
-
-
     [Script] // 97462 - Rallying Cry
     class spell_warr_rallying_cry : SpellScript
     {
@@ -574,7 +572,7 @@ namespace Scripts.Spells.Warrior
         {
             PreventHitDefaultEffect(effIndex);
 
-            // remove shields, will still display immune to damage part
+            // Remove shields, will still display immune to damage part
             Unit target = GetHitUnit();
             if (target)
                 target.RemoveAurasWithMechanic(1 << (int)Mechanics.ImmuneShield, AuraRemoveMode.EnemySpell);

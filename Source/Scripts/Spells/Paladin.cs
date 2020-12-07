@@ -162,7 +162,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Forbearance) //, SPELL_PALADIN_IMMUNE_SHIELD_MARKER) // uncomment when we have serverside only spells
+            return ValidateSpellInfo(SpellIds.Forbearance) //, SpellIds._PALADIN_IMMUNE_SHIELD_MARKER) // uncomment when we have serverside only spells
                 && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
@@ -218,7 +218,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, SpellIds.Forbearance) //, SPELL_PALADIN_IMMUNE_SHIELD_MARKER // uncomment when we have serverside only spells
+            return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, SpellIds.Forbearance) //, SpellIds._PALADIN_IMMUNE_SHIELD_MARKER // uncomment when we have serverside only spells
                     && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 

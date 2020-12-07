@@ -61,6 +61,7 @@ namespace Scripts.World
         {
             if (me.GetEntry() == CreatureIds.CenarionHoldIndantry)
                 Talk(GuardsConst.SaySilAggro, who);
+
             SpellInfo spell = me.ReachWithSpellAttack(who);
             if (spell != null)
                 DoCast(who, spell.Id);

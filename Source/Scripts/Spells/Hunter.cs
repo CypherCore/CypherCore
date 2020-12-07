@@ -300,7 +300,7 @@ namespace Scripts.Spells.Hunter
         {
             if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Default || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Interrupt)
                 return;
-            
+
             if (!GetTarget().HasAura(SpellIds.MisdirectionProc))
                 GetTarget().ResetRedirectThreat();
         }
@@ -524,7 +524,7 @@ namespace Scripts.Spells.Hunter
         void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-            // break Auto Shot and autohit
+            // break auto Shot and varhit
             caster.InterruptSpell(CurrentSpellTypes.AutoRepeat);
             caster.AttackStop();
             caster.SendAttackSwingCancelAttack();

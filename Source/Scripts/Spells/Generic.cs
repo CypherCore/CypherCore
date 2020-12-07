@@ -140,8 +140,8 @@ namespace Scripts.Spells.Generic
         public const uint Damage45k = 64591;
 
         public const uint ChargingEffect8k5 = 63661;
-        public const uint ChargingEffect20k1 = 68284;
-        public const uint ChargingEffect20k2 = 68501;
+        public const uint Charging20k1 = 68284;
+        public const uint Charging20k2 = 68501;
         public const uint ChargingEffect45k1 = 62563;
         public const uint ChargingEffect45k2 = 66481;
 
@@ -269,7 +269,7 @@ namespace Scripts.Spells.Generic
         public const uint MarkOfKazrogalHellfire = 189512;
         public const uint MarkOfKazrogalDamageHellfire = 189515;
 
-        // Auraprocremovespells
+        // AuraprocRemovespells
         public const uint FaceRage = 99947;
         public const uint ImpatientMind = 187213;
     }
@@ -1184,7 +1184,7 @@ namespace Scripts.Spells.Generic
             if (spell.GetEffect(2).ApplyAuraName == AuraType.ModDamagePercentTaken)
                 OnEffectRemove.Add(new EffectApplyHandler(RemoveDummyFromDriver, 2, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.Real));
 
-            // Defend spells cast by players (add/remove visuals)
+            // Defend spells cast by players (add/Remove visuals)
             if (spell.GetEffect(1).ApplyAuraName == AuraType.Dummy)
             {
                 AfterEffectApply.Add(new EffectApplyHandler(RefreshVisualShields, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
@@ -1550,7 +1550,7 @@ namespace Scripts.Spells.Generic
                         switch (GetSpellInfo().Id)
                         {
                             case SpellIds.TriggerTrialChampion:
-                                spellId = SpellIds.ChargingEffect20k1;
+                                spellId = SpellIds.Charging20k1;
                                 break;
                             case SpellIds.TriggerFactionMounts:
                                 spellId = SpellIds.ChargingEffect8k5;
@@ -1608,8 +1608,8 @@ namespace Scripts.Spells.Generic
                 case SpellIds.ChargingEffect8k5:
                     spellId = SpellIds.Damage8k5;
                     break;
-                case SpellIds.ChargingEffect20k1:
-                case SpellIds.ChargingEffect20k2:
+                case SpellIds.Charging20k1:
+                case SpellIds.Charging20k2:
                     spellId = SpellIds.Damage20k;
                     break;
                 case SpellIds.ChargingEffect45k1:
@@ -1662,7 +1662,7 @@ namespace Scripts.Spells.Generic
 
                 // triggered spells are 28703 to 28707
                 // Note: some sources say, that there was the possibility of
-                //       receiving a debuff. However, this seems to be removed by a patch.
+                //       receiving a debuff. However, this seems to be Removed by a patch.
 
                 // don't overwrite an existing aura
                 for (byte i = 0; i < 5; ++i)
@@ -1759,155 +1759,6 @@ namespace Scripts.Spells.Generic
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script]
-    class spell_gen_on_tournament_mount : AuraScript
-    {
-        uint _pennantSpellId;
-
-        public override bool Load()
-        {
-            _pennantSpellId = 0;
-            return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void HandleApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                Unit vehicle = caster.GetVehicleBase();
-                if (vehicle)
-                {
-                    _pennantSpellId = GetPennatSpellId(caster.ToPlayer(), vehicle);
-                    caster.CastSpell(caster, _pennantSpellId, true);
-                }
-            }
-        }
-
-        void HandleRemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-                caster.RemoveAurasDueToSpell(_pennantSpellId);
-        }
-
-        uint GetPennatSpellId(Player player, Unit mount)
-        {
-            switch (mount.GetEntry())
-            {
-                case CreatureIds.ArgentSteedAspirant:
-                case CreatureIds.StormwindSteed:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionStormwind))
-                            return SpellIds.StormwindChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfStormwind) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfStormwind))
-                            return SpellIds.StormwindValiant;
-                        else
-                            return SpellIds.StormwindAspirant;
-                    }
-                case CreatureIds.GnomereganMechanostrider:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionGnomeregan))
-                            return SpellIds.GnomereganChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfGnomeregan) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfGnomeregan))
-                            return SpellIds.GnomereganValiant;
-                        else
-                            return SpellIds.GnomereganAspirant;
-                    }
-                case CreatureIds.DarkSpearRaptor:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionSenJin))
-                            return SpellIds.SenjinChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfSenJin) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfSenJin))
-                            return SpellIds.SenjinValiant;
-                        else
-                            return SpellIds.SenjinAspirant;
-                    }
-                case CreatureIds.ArgentHawkstriderAspirant:
-                case CreatureIds.SilvermoonHawkstrider:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionSilvermoon))
-                            return SpellIds.SilvermoonChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfSilvermoon) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfSilvermoon))
-                            return SpellIds.SilvermoonValiant;
-                        else
-                            return SpellIds.SilvermoonAspirant;
-                    }
-                case CreatureIds.DarnassianNightsaber:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionDarnassus))
-                            return SpellIds.DarnassusChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfDarnassus) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfDarnassus))
-                            return SpellIds.DarnassusValiant;
-                        else
-                            return SpellIds.DarnassusAspirant;
-                    }
-                case CreatureIds.ExodarElekk:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionTheExodar))
-                            return SpellIds.ExodarChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfTheExodar) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfTheExodar))
-                            return SpellIds.ExodarValiant;
-                        else
-                            return SpellIds.ExodarAspirant;
-                    }
-                case CreatureIds.IronforgeRam:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionIronforge))
-                            return SpellIds.IronforgeChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfIronforge) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfIronforge))
-                            return SpellIds.IronforgeValiant;
-                        else
-                            return SpellIds.IronforgeAspirant;
-                    }
-                case CreatureIds.ForsakenWarhorse:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionUndercity))
-                            return SpellIds.UndercityChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfUndercity) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfUndercity))
-                            return SpellIds.UndercityValiant;
-                        else
-                            return SpellIds.UndercityAspirant;
-                    }
-                case CreatureIds.OrgrimmarWolf:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionOrgrimmar))
-                            return SpellIds.OrgrimmarChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfOrgrimmar) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfOrgrimmar))
-                            return SpellIds.OrgrimmarValiant;
-                        else
-                            return SpellIds.OrgrimmarAspirant;
-                    }
-                case CreatureIds.ThunderBluffKodo:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionThunderBluff))
-                            return SpellIds.ThunderbluffChampion;
-                        else if (player.GetQuestRewardStatus(QuestIds.ValiantOfThunderBluff) || player.GetQuestRewardStatus(QuestIds.A_ValiantOfThunderBluff))
-                            return SpellIds.ThunderbluffValiant;
-                        else
-                            return SpellIds.ThunderbluffAspirant;
-                    }
-                case CreatureIds.ArgentWarhorse:
-                    {
-                        if (player.HasAchieved(AchievementIds.ChampionAlliance) || player.HasAchieved(AchievementIds.ChampionHorde))
-                            return player.GetClass() == Class.Deathknight ? SpellIds.EbonbladeChampion : SpellIds.ArgentcrusadeChampion;
-                        else if (player.HasAchieved(AchievementIds.ArgentValor))
-                            return player.GetClass() == Class.Deathknight ? SpellIds.EbonbladeValiant : SpellIds.ArgentcrusadeValiant;
-                        else
-                            return player.GetClass() == Class.Deathknight ? SpellIds.EbonbladeAspirant : SpellIds.ArgentcrusadeAspirant;
-                    }
-                default:
-                    return 0;
-            }
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleApplyEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemoveEffect, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
         }
     }
 
@@ -2875,7 +2726,7 @@ namespace Scripts.Spells.Generic
                     player.InterruptNonMeleeSpells(true);
                 player.AddUnitFlag(UnitFlags.NonAttackable);
 
-                // if player class = hunter || warlock remove pet if alive
+                // if player class = hunter || warlock Remove pet if alive
                 if ((player.GetClass() == Class.Hunter) || (player.GetClass() == Class.Warlock))
                 {
                     Pet pet = player.GetPet();

@@ -473,7 +473,7 @@ namespace Scripts.Spells.Priest
                 return;
 
             int healAmount = (int)target.CountPctFromMaxHealth((int)healPct);
-            // remove the aura now, we don't want 40% healing bonus
+            // Remove the aura now, we don't want 40% healing bonus
             Remove(AuraRemoveMode.EnemySpell);
             target.CastCustomSpell(target, SpellIds.GuardianSpiritHeal, healAmount, 0, 0, true);
             absorbAmount = dmgInfo.GetDamage();

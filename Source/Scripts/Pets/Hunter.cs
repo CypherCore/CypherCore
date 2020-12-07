@@ -22,96 +22,106 @@ using Game.Scripting;
 
 namespace Scripts.Pets
 {
-    [Script]
-    class npc_pet_hunter_snake_trap : ScriptedAI
+    namespace Hunter
     {
-        public npc_pet_hunter_snake_trap(Creature creature) : base(creature) { }
-
-        public override void EnterCombat(Unit who) { }
-
-        public override void Reset()
+        struct SpellIds
         {
-            _spellTimer = 0;
+            public const uint CripplingPoison = 30981;   // Viper
+            public const uint DeadlyPoisonPassive = 34657;   // Venomous Snake
+            public const uint MindNumbingPoison = 25810;    // Viper
 
-            CreatureTemplate Info = me.GetCreatureTemplate();
-
-            _isViper = Info.Entry == NpcViper ? true : false;
-
-            me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
-            // Add delta to make them not all hit the same time
-            uint delta = (RandomHelper.Rand32() % 7) * 100;
-            me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
-            //me.SetStatFloatValue(UnitFields.RangedAttackPower, (float)Info.AttackPower);
-
-            // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-            if (!me.GetVictim() && me.IsSummon())
-            {
-                Unit owner = me.ToTempSummon().GetSummoner();
-                if (owner)
-                    if (owner.GetAttackerForHelper())
-                        AttackStart(owner.GetAttackerForHelper());
-            }
-
-            if (!_isViper)
-                DoCast(me, SpellDeadlyPoisonPassive, true);
         }
 
-        // Redefined for random target selection:
-        public override void MoveInLineOfSight(Unit who)
+        struct CreatureIds
         {
-            if (!me.GetVictim() && me.CanCreatureAttack(who))
-            {
-                if (me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
-                    return;
+            public const int Viper = 19921;
+        }
 
-                float attackRadius = me.GetAttackDistance(who);
-                if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
+        [Script]
+        class npc_pet_hunter_snake_trap : ScriptedAI
+        {
+            public npc_pet_hunter_snake_trap(Creature creature) : base(creature) { }
+
+            public override void EnterCombat(Unit who) { }
+
+            public override void Reset()
+            {
+                _spellTimer = 0;
+
+                CreatureTemplate Info = me.GetCreatureTemplate();
+
+                _isViper = Info.Entry == CreatureIds.Viper ? true : false;
+
+                me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
+                // Add delta to make them not all hit the same time
+                uint delta = (RandomHelper.Rand32() % 7) * 100;
+                me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
+                //me.SetStatFloatValue(UnitFields.RangedAttackPower, (float)Info.AttackPower);
+
+                // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
+                if (!me.GetVictim() && me.IsSummon())
                 {
-                    if ((RandomHelper.Rand32() % 5) == 0)
+                    Unit owner = me.ToTempSummon().GetSummoner();
+                    if (owner)
+                        if (owner.GetAttackerForHelper())
+                            AttackStart(owner.GetAttackerForHelper());
+                }
+
+                if (!_isViper)
+                    DoCast(me, SpellIds.DeadlyPoisonPassive, true);
+            }
+
+            // Redefined for random target selection:
+            public override void MoveInLineOfSight(Unit who)
+            {
+                if (!me.GetVictim() && me.CanCreatureAttack(who))
+                {
+                    if (me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
+                        return;
+
+                    float attackRadius = me.GetAttackDistance(who);
+                    if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
                     {
-                        me.SetAttackTimer(WeaponAttackType.BaseAttack, (RandomHelper.Rand32() % 10) * 100);
-                        _spellTimer = (RandomHelper.Rand32() % 10) * 100;
-                        AttackStart(who);
+                        if ((RandomHelper.Rand32() % 5) == 0)
+                        {
+                            me.SetAttackTimer(WeaponAttackType.BaseAttack, (RandomHelper.Rand32() % 10) * 100);
+                            _spellTimer = (RandomHelper.Rand32() % 10) * 100;
+                            AttackStart(who);
+                        }
                     }
                 }
             }
-        }
 
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim() || !me.GetVictim())
-                return;
-
-            if (me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
+            public override void UpdateAI(uint diff)
             {
-                me.InterruptNonMeleeSpells(false);
-                return;
-            }
+                if (!UpdateVictim() || !me.GetVictim())
+                    return;
 
-            //Viper
-            if (_isViper)
-            {
-                if (_spellTimer <= diff)
+                if (me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
                 {
-                    if (RandomHelper.IRand(0, 2) == 0) //33% chance to cast
-                        DoCastVictim(RandomHelper.RAND(SpellMindNumbingPoison, SpellCripplingPoison));
-
-                    _spellTimer = 3000;
+                    me.InterruptNonMeleeSpells(false);
+                    return;
                 }
-                else
-                    _spellTimer -= diff;
+
+                //Viper
+                if (_isViper)
+                {
+                    if (_spellTimer <= diff)
+                    {
+                        if (RandomHelper.IRand(0, 2) == 0) //33% chance to cast
+                            DoCastVictim(RandomHelper.RAND(SpellIds.MindNumbingPoison, SpellIds.CripplingPoison));
+
+                        _spellTimer = 3000;
+                    }
+                    else
+                        _spellTimer -= diff;
+                }
+
+                DoMeleeAttackIfReady();
             }
 
-            DoMeleeAttackIfReady();
+            bool _isViper;
+            uint _spellTimer;
         }
-
-        bool _isViper;
-        uint _spellTimer;
-
-        const uint SpellCripplingPoison = 30981;   // Viper
-        const uint SpellDeadlyPoisonPassive = 34657;   // Venomous Snake
-        const uint SpellMindNumbingPoison = 25810;    // Viper
-
-        const int NpcViper = 19921;
     }
 }

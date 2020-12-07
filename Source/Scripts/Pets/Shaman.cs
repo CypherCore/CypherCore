@@ -19,95 +19,89 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using System;
 
 namespace Scripts.Pets
 {
-    [Script]
-    class npc_pet_shaman_earth_elemental : ScriptedAI
+    namespace Shaman
     {
-        public npc_pet_shaman_earth_elemental(Creature creature) : base(creature) { }
-
-        public override void Reset()
+        struct SpellIds
         {
-            _events.Reset();
-            _events.ScheduleEvent(EventAngeredEarth, 0);
-            me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
+            //npc_pet_shaman_earth_elemental
+            public const uint AngeredEarth = 36213;
+
+            //npc_pet_shaman_fire_elemental
+            public const uint FireBlast = 57984;
+            public const uint FireNova = 12470;
+            public const uint FireShield = 13376;
         }
 
-        public override void UpdateAI(uint diff)
+        [Script]
+        class npc_pet_shaman_earth_elemental : ScriptedAI
         {
-            if (!UpdateVictim())
-                return;
+            public npc_pet_shaman_earth_elemental(Creature creature) : base(creature) { }
 
-            _events.Update(diff);
-
-            if (_events.ExecuteEvent() == EventAngeredEarth)
+            public override void Reset()
             {
-                DoCastVictim(SpellAngeredEarth);
-                _events.ScheduleEvent(EventAngeredEarth, RandomHelper.URand(5000, 20000));
+                _scheduler.CancelAll();
+                _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+                {
+                    DoCastVictim(SpellIds.AngeredEarth);
+                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                });
+                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
             }
 
-            DoMeleeAttackIfReady();
-        }
-
-        const int EventAngeredEarth = 1;
-        const uint SpellAngeredEarth = 36213;
-    }
-
-    [Script]
-    public class npc_pet_shaman_fire_elemental : ScriptedAI
-    {
-        public npc_pet_shaman_fire_elemental(Creature creature) : base(creature) { }
-
-        public override void Reset()
-        {
-            _events.Reset();
-            _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
-            _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
-            _events.ScheduleEvent(EventFireShield, 0);
-            me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            if (me.HasUnitState(UnitState.Casting))
-                return;
-
-            _events.Update(diff);
-
-            _events.ExecuteEvents(eventId =>
+            public override void UpdateAI(uint diff)
             {
-                switch (eventId)
-                {
-                    case EventFireNova:
-                        DoCastVictim(SpellFireNova);
-                        _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
-                        break;
-                    case EventFireShield:
-                        DoCastVictim(SpellFireShield);
-                        _events.ScheduleEvent(EventFireShield, 2000);
-                        break;
-                    case EventFireBlast:
-                        DoCastVictim(SpellFireBlast);
-                        _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
-                        break;
-                    default:
-                        break;
-                }
-            });
+                if (!UpdateVictim())
+                    return;
 
-            DoMeleeAttackIfReady();
+                _scheduler.Update(diff);
+
+                DoMeleeAttackIfReady();
+            }
         }
 
-        const int EventFireNova = 1;
-        const int EventFireShield = 2;
-        const int EventFireBlast = 3;
+        [Script]
+        public class npc_pet_shaman_fire_elemental : ScriptedAI
+        {
+            public npc_pet_shaman_fire_elemental(Creature creature) : base(creature) { }
 
-        const uint SpellFireBlast = 57984;
-        const uint SpellFireNova = 12470;
-        const uint SpellFireShield = 13376;
+            public override void Reset()
+            {
+                _scheduler.CancelAll();
+                _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+                {
+                    DoCastVictim(SpellIds.FireNova);
+                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                });
+                _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), task =>
+                {
+                    DoCastVictim(SpellIds.FireShield);
+                    task.Repeat(TimeSpan.FromSeconds(2));
+                });
+                _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
+                {
+                    DoCastVictim(SpellIds.FireBlast);
+                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+                });
+                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
+            }
+
+            public override void UpdateAI(uint diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                _scheduler.Update(diff);
+
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
+
+                DoMeleeAttackIfReady();
+            }
+        }
     }
 }
+

@@ -742,7 +742,7 @@ namespace Scripts.Spells.Druid
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            // No need to check remove mode, it's safe for auras to remove each other in AfterRemove hook.
+            // No need to check Remove mode, it's safe for auras to Remove each other in AfterRemove hook.
             GetTarget().RemoveAura(SpellIds.FormStag);
             GetTarget().RemoveAura(SpellIds.FormAquatic);
             GetTarget().RemoveAura(SpellIds.FormFlight);
@@ -782,7 +782,7 @@ namespace Scripts.Spells.Druid
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            // If it stays 0, it removes Travel Form dummy in AfterRemove.
+            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
             triggeredSpellId = 0;
 
             // We should only handle aura interrupts.
@@ -798,7 +798,7 @@ namespace Scripts.Spells.Druid
             else if (CheckLocationForForm(SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
                 triggeredSpellId = SpellIds.FormStag;
 
-            // If chosen form is current aura, just don't remove it.
+            // If chosen form is current aura, just don't Remove it.
             if (triggeredSpellId == m_scriptSpellId)
                 PreventDefaultAction();
         }
@@ -809,7 +809,7 @@ namespace Scripts.Spells.Druid
 
             if (triggeredSpellId != 0) // Apply new form
                 player.AddAura(triggeredSpellId, player);
-            else // If not set, simply remove Travel Form dummy
+            else // If not set, simply Remove Travel Form dummy
                 player.RemoveAura(SpellIds.TravelForm);
         }
 
@@ -1004,8 +1004,8 @@ namespace Scripts.Spells.Druid
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellEffectInfo effect2 = spellInfo.GetEffect(2);
-            if (effect2 == null || effect2.IsEffect() || effect2.CalcValue() <= 0)
+            SpellEffectInfo effectInfo = spellInfo.GetEffect(2);
+            if (effectInfo == null || effectInfo.IsEffect() || effectInfo.CalcValue() <= 0)
                 return false;
             return true;
         }

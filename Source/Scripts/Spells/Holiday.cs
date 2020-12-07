@@ -159,9 +159,6 @@ namespace Scripts.Spells.Holiday
     {
         public const uint RibbonPole = 181605;
     }
-
-
-
     [Script] // 45102 Romantic Picnic
     class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
@@ -178,7 +175,7 @@ namespace Scripts.Spells.Holiday
             Unit target = GetTarget();
             Unit caster = GetCaster();
 
-            // If our player is no longer sit, remove all auras
+            // If our player is no longer sit, Remove all auras
             if (target.GetStandState() != UnitStandStateType.Sit)
             {
                 target.RemoveAura(SpellIds.RomanticPicnicAchiev);
@@ -756,7 +753,7 @@ namespace Scripts.Spells.Holiday
         {
             Unit target = GetTarget();
 
-            // check if aura needs to be removed
+            // check if aura needs to be Removed
             if (!target.FindNearestGameObject(GameobjectIds.RibbonPole, 8.0f) || !target.HasUnitState(UnitState.Casting))
             {
                 target.InterruptNonMeleeSpells(false);

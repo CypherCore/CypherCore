@@ -20,43 +20,46 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 
-namespace Scripts.Pets.Priest
+namespace Scripts.Pets
 {
-    struct SpellIds
+    namespace Priest
     {
-        public const uint GlyphOfShadowFiend = 58228;
-        public const uint ShadowFiendDeath = 57989;
-        public const uint LightWellCharges = 59907;
-    }
-
-    [Script]
-    class npc_pet_pri_lightwell : PassiveAI
-    {
-        public npc_pet_pri_lightwell(Creature creature) : base(creature)
+        struct SpellIds
         {
-            DoCast(creature, SpellIds.LightWellCharges, false);
+            public const uint GlyphOfShadowFiend = 58228;
+            public const uint ShadowFiendDeath = 57989;
+            public const uint LightWellCharges = 59907;
         }
 
-        public override void EnterEvadeMode(EvadeReason why)
+        [Script]
+        class npc_pet_pri_lightwell : PassiveAI
         {
-            if (!me.IsAlive())
-                return;
+            public npc_pet_pri_lightwell(Creature creature) : base(creature)
+            {
+                DoCast(creature, SpellIds.LightWellCharges, false);
+            }
 
-            me.GetThreatManager().ClearAllThreat();
-            me.CombatStop(true);
-            me.ResetPlayerDamageReq();
+            public override void EnterEvadeMode(EvadeReason why)
+            {
+                if (!me.IsAlive())
+                    return;
+
+                me.GetThreatManager().ClearAllThreat();
+                me.CombatStop(true);
+                me.ResetPlayerDamageReq();
+            }
         }
-    }
 
-    [Script]
-    class npc_pet_pri_shadowfiend : PetAI
-    {
-        public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
-
-        public override void IsSummonedBy(Unit summoner)
+        [Script]
+        class npc_pet_pri_shadowfiend : PetAI
         {
-            if (summoner.HasAura(SpellIds.GlyphOfShadowFiend))
-                DoCastAOE(SpellIds.ShadowFiendDeath);
+            public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
+
+            public override void IsSummonedBy(Unit summoner)
+            {
+                if (summoner.HasAura(SpellIds.GlyphOfShadowFiend))
+                    DoCastAOE(SpellIds.ShadowFiendDeath);
+            }
         }
     }
 }

@@ -368,7 +368,7 @@ namespace Scripts.Spells.Items
         public const uint UnstablePowerAuraStack = 24659;
         public const uint RestlessStrengthAuraStack = 24662;
 
-        // Auraprocremovespells        
+        // AuraprocRemovespells        
         public const uint TalismanOfAscendance = 28200;
         public const uint JomGabbar = 29602;
         public const uint BattleTrance = 45040;
@@ -655,27 +655,27 @@ namespace Scripts.Spells.Items
                     //CLASS_NONE
                     new uint[] { },
                     //CLASS_WARRIOR
-                    new uint[] { SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
                     //CLASS_PALADIN
-                    new uint[]{ SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_HUNTER
-                    new uint[]{ SpellIds.Delusional, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Delusional, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_ROGUE
-                    new uint[]{ SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
                     //CLASS_PRIEST
-                    new uint[]{ SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_DEATH_KNIGHT
-                    new uint[]{ SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
+                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
                     //CLASS_SHAMAN
-                    new uint[] { SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_MAGE
-                    new uint[]{ SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_WARLOCK
-                    new uint[]{ SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
+                    new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_UNK
                     new uint[]{ },
                     //CLASS_DRUID
-                    new uint[]{ SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia }
+                    new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia }
                 };
 
             PreventDefaultAction();
@@ -820,19 +820,19 @@ namespace Scripts.Spells.Items
                     //CLASS_NONE
                     new uint[] { },
                     //CLASS_WARRIOR
-                    new uint[] { _strengthSpellId, _criticalSpellId, _hasteSpellId },
+                    new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
                     //CLASS_PALADIN
                     new uint[] { _strengthSpellId, _criticalSpellId, _hasteSpellId },
                     //CLASS_HUNTER
-                    new uint[] { _agilitySpellId, _criticalSpellId, _apSpellId },
+                    new uint[] {_agilitySpellId, _criticalSpellId, _apSpellId },
                     //CLASS_ROGUE
-                    new uint[] { _agilitySpellId, _hasteSpellId, _apSpellId },
+                    new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
                     //CLASS_PRIEST
                     new uint[] { },
                     //CLASS_DEATH_KNIGHT
-                    new uint[] { _strengthSpellId, _criticalSpellId, _hasteSpellId },
+                    new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
                     //CLASS_SHAMAN
-                    new uint[] { _agilitySpellId, _hasteSpellId, _apSpellId },
+                    new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
                     //CLASS_MAGE
                     new uint[] { },
                     //CLASS_WARLOCK
@@ -840,7 +840,7 @@ namespace Scripts.Spells.Items
                     //CLASS_UNK
                     new uint[] { },
                     //CLASS_DRUID
-                    new uint[] { _strengthSpellId, _agilitySpellId, _hasteSpellId }
+                    new uint[] {_strengthSpellId, _agilitySpellId, _hasteSpellId }
                 };
 
             PreventDefaultAction();
@@ -1984,7 +1984,7 @@ namespace Scripts.Spells.Items
             Player target = GetHitPlayer();
             if (target)
             {
-                uint[] items = { ItemIds.HeartCandy1, ItemIds.HeartCandy2, ItemIds.HeartCandy3, ItemIds.HeartCandy4, ItemIds.HeartCandy5, ItemIds.HeartCandy6, ItemIds.HeartCandy7, ItemIds.HeartCandy8 };
+                uint[] items = new uint[] { ItemIds.HeartCandy1, ItemIds.HeartCandy2, ItemIds.HeartCandy3, ItemIds.HeartCandy4, ItemIds.HeartCandy5, ItemIds.HeartCandy6, ItemIds.HeartCandy7, ItemIds.HeartCandy8 };
                 target.AddItem(items[RandomHelper.IRand(0, 7)], 1);
             }
         }
@@ -2112,7 +2112,7 @@ namespace Scripts.Spells.Items
             uint sound_id = RandomHelper.RAND(SoundIds.Ashbringer1, SoundIds.Ashbringer2, SoundIds.Ashbringer3, SoundIds.Ashbringer4, SoundIds.Ashbringer5, SoundIds.Ashbringer6,
                             SoundIds.Ashbringer7, SoundIds.Ashbringer8, SoundIds.Ashbringer9, SoundIds.Ashbringer10, SoundIds.Ashbringer11, SoundIds.Ashbringer12);
 
-            // Ashbringers effect (spellID 28441) retriggers every 5 seconds, with a chance of making it say one of the above 12 sounds
+            // Ashbringers effect (SpellIds.ID 28441) retriggers every 5 seconds, with a chance of making it say one of the above 12 sounds
             if (RandomHelper.URand(0, 60) < 1)
                 player.PlayDirectSound(sound_id, player);
         }
@@ -2557,7 +2557,7 @@ namespace Scripts.Spells.Items
 
         float lastZ = MapConst.InvalidHeight;
     }
-    
+
     [Script]
     class spell_item_teach_language : SpellScript
     {
@@ -2972,7 +2972,7 @@ namespace Scripts.Spells.Items
             if (dummy == null || dummy.GetStackAmount() < aurEff.GetAmount())
                 return;
 
-            // if right amount, remove the aura and cast real trigger
+            // if right amount, Remove the aura and cast real trigger
             caster.RemoveAurasDueToSpell(_stackSpell);
             Unit target = eventInfo.GetActionTarget();
             if (target)
@@ -3392,7 +3392,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]// 45051 - Mad Alchemist's Potion (34440)
-    class mad_alchemists_potion_SpellScript : SpellScript
+    class spell_item_mad_alchemists_potion : SpellScript
     {
         void SecondaryEffect()
         {
@@ -3461,7 +3461,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script]// 53750 - Crazy Alchemist's Potion (40077)
-    class crazy_alchemists_potion_SpellScript : SpellScript
+    class spell_item_crazy_alchemists_potion : SpellScript
     {
         void SecondaryEffect()
         {

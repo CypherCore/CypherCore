@@ -92,7 +92,7 @@ namespace Scripts.World
 
         void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
-            // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
+            // Remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
             player.GetSpellHistory().ResetCooldowns(itr =>
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itr.Key, Difficulty.None);

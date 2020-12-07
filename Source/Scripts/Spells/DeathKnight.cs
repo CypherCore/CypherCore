@@ -300,7 +300,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script]
-    class spell_dk_death_and_decay_AuraScript: AuraScript
+    class spell_dk_death_and_decay_AuraScript : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
         {
@@ -429,7 +429,7 @@ namespace Scripts.Spells.DeathKnight
         void HandleHeal(uint effIndex)
         {
             Unit caster = GetCaster();
-            //TODO: heal = std::min(10% health, 20% of all damage taken in last 5 seconds)
+            //TODO: heal = Math.Min(10% health, 20% of all damage taken in last 5 seconds)
             int heal = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetSpellInfo().GetEffect(4).CalcValue());
             caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
 

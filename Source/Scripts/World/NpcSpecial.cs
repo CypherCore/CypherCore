@@ -125,11 +125,11 @@ namespace Scripts.World.NpcSpecial
         //Argent squire/gruntling
         public static Tuple<uint, uint>[] bannerSpells =
         {
-            Tuple.Create(Spells.DarnassusPennant, Spells.SenjinPennant),
-            Tuple.Create(Spells.ExodarPennant, Spells.UndercityPennant),
-            Tuple.Create(Spells.GnomereganPennant, Spells.OrgrimmarPennant),
-            Tuple.Create(Spells.IronforgePennant, Spells.SilvermoonPennant),
-            Tuple.Create(Spells.StormwindPennant, Spells.ThunderbluffPennant)
+            Tuple.Create(SpellIds.DarnassusPennant, SpellIds.SenjinPennant),
+            Tuple.Create(SpellIds.ExodarPennant, SpellIds.UndercityPennant),
+            Tuple.Create(SpellIds.GnomereganPennant, SpellIds.OrgrimmarPennant),
+            Tuple.Create(SpellIds.IronforgePennant, SpellIds.SilvermoonPennant),
+            Tuple.Create(SpellIds.StormwindPennant, SpellIds.ThunderbluffPennant)
         };
     }
 
@@ -227,7 +227,7 @@ namespace Scripts.World.NpcSpecial
         public const uint RibbonPole = 181605;
     }
 
-    struct Spells
+    struct SpellIds
     {
         public const uint GuardsMark = 38067;
 
@@ -341,7 +341,7 @@ namespace Scripts.World.NpcSpecial
         public const uint Darkness = 5650;
     }
 
-    struct Texts
+    struct TextIds
     {
         //Lunaclawspirit
         public const uint TextIdDefault = 4714;
@@ -511,7 +511,7 @@ namespace Scripts.World.NpcSpecial
                             if (!who.IsWithinDistInMap(me, NpcSpecialConst.RangeGuardsMark))
                                 return;
 
-                            Aura markAura = who.GetAura(Spells.GuardsMark);
+                            Aura markAura = who.GetAura(SpellIds.GuardsMark);
                             if (markAura != null)
                             {
                                 // the target wasn't able to move out of our range within 25 seconds
@@ -535,7 +535,7 @@ namespace Scripts.World.NpcSpecial
                                 if (!lastSpawnedGuard)
                                     return;
 
-                                lastSpawnedGuard.CastSpell(who, Spells.GuardsMark, true);
+                                lastSpawnedGuard.CastSpell(who, SpellIds.GuardsMark, true);
                             }
                             break;
                         }
@@ -562,90 +562,80 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_chicken_cluck : CreatureScript
+    class npc_chicken_cluck : ScriptedAI
     {
-        public npc_chicken_cluck() : base("npc_chicken_cluck") { }
-
-        class npc_chicken_cluckAI : ScriptedAI
+        public npc_chicken_cluck(Creature creature) : base(creature)
         {
-            public npc_chicken_cluckAI(Creature creature) : base(creature)
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            ResetFlagTimer = 120000;
+        }
+
+        uint ResetFlagTimer;
+
+        public override void Reset()
+        {
+            Initialize();
+            me.SetFaction(NpcSpecialConst.FactionChicken);
+            me.RemoveNpcFlag(NPCFlags.QuestGiver);
+        }
+
+        public override void EnterCombat(Unit who) { }
+
+        public override void UpdateAI(uint diff)
+        {
+            // Reset flags after a certain time has passed so that the next player has to start the 'event' again
+            if (me.HasNpcFlag(NPCFlags.QuestGiver))
             {
-                Initialize();
-            }
-
-            void Initialize()
-            {
-                ResetFlagTimer = 120000;
-            }
-
-            uint ResetFlagTimer;
-
-            public override void Reset()
-            {
-                Initialize();
-                me.SetFaction(NpcSpecialConst.FactionChicken);
-                me.RemoveNpcFlag(NPCFlags.QuestGiver);
-            }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void UpdateAI(uint diff)
-            {
-                // Reset flags after a certain time has passed so that the next player has to start the 'event' again
-                if (me.HasNpcFlag(NPCFlags.QuestGiver))
+                if (ResetFlagTimer <= diff)
                 {
-                    if (ResetFlagTimer <= diff)
+                    EnterEvadeMode();
+                    return;
+                }
+                else
+                    ResetFlagTimer -= diff;
+            }
+
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+        }
+
+        public override void ReceiveEmote(Player player, TextEmotes emote)
+        {
+            switch (emote)
+            {
+                case TextEmotes.Chicken:
+                    if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.None && RandomHelper.Rand32() % 30 == 1)
                     {
-                        EnterEvadeMode();
-                        return;
+                        me.AddNpcFlag(NPCFlags.QuestGiver);
+                        me.SetFaction(NpcSpecialConst.FactionFriendly);
+                        Talk(player.GetTeam() == Team.Horde ? TextIds.EmoteHelloH : TextIds.EmoteHelloA);
                     }
-                    else
-                        ResetFlagTimer -= diff;
-                }
-
-                if (UpdateVictim())
-                    DoMeleeAttackIfReady();
-            }
-
-            public override void ReceiveEmote(Player player, TextEmotes emote)
-            {
-                switch (emote)
-                {
-                    case TextEmotes.Chicken:
-                        if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.None && RandomHelper.Rand32() % 30 == 1)
-                        {
-                            me.AddNpcFlag(NPCFlags.QuestGiver);
-                            me.SetFaction(NpcSpecialConst.FactionFriendly);
-                            Talk(player.GetTeam() == Team.Horde ? Texts.EmoteHelloH : Texts.EmoteHelloA);
-                        }
-                        break;
-                    case TextEmotes.Cheer:
-                        if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.Complete)
-                        {
-                            me.AddNpcFlag(NPCFlags.QuestGiver);
-                            me.SetFaction(NpcSpecialConst.FactionFriendly);
-                            Talk(Texts.EmoteCluck);
-                        }
-                        break;
-                }
-            }
-
-            public override void QuestAccept(Player player, Quest quest)
-            {
-                if (quest.Id == QuestConst.Cluck)
-                    Reset();
-            }
-
-            public override void QuestReward(Player player, Quest quest, uint opt)
-            {
-                if (quest.Id == QuestConst.Cluck)
-                    Reset();
+                    break;
+                case TextEmotes.Cheer:
+                    if (player.GetQuestStatus(QuestConst.Cluck) == QuestStatus.Complete)
+                    {
+                        me.AddNpcFlag(NPCFlags.QuestGiver);
+                        me.SetFaction(NpcSpecialConst.FactionFriendly);
+                        Talk(TextIds.EmoteCluck);
+                    }
+                    break;
             }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void QuestAccept(Player player, Quest quest)
         {
-            return new npc_chicken_cluckAI(creature);
+            if (quest.Id == QuestConst.Cluck)
+                Reset();
+        }
+
+        public override void QuestReward(Player player, Quest quest, uint opt)
+        {
+            if (quest.Id == QuestConst.Cluck)
+                Reset();
         }
     }
 
@@ -669,8 +659,8 @@ namespace Scripts.World.NpcSpecial
         public override void Reset()
         {
             Initialize();
-            DoCast(me, Spells.Brazier, true);
-            DoCast(me, Spells.FieryAura, false);
+            DoCast(me, SpellIds.Brazier, true);
+            DoCast(me, SpellIds.FieryAura, false);
             float x, y, z;
             me.GetPosition(out x, out y, out z);
             me.Relocate(x, y, z + 0.94f);
@@ -717,8 +707,8 @@ namespace Scripts.World.NpcSpecial
                         me.HandleEmoteCommand(Emote.OneshotLaugh);
                         break;
                     case TextEmotes.Dance:
-                        if (!player.HasAura(Spells.Seduction))
-                            DoCast(player, Spells.Seduction, true);
+                        if (!player.HasAura(SpellIds.Seduction))
+                            DoCast(player, SpellIds.Seduction, true);
                         break;
                 }
             }
@@ -754,7 +744,7 @@ namespace Scripts.World.NpcSpecial
             {
                 Unit target = Global.ObjAccessor.GetUnit(me, DoSearchForTargets(_lastTargetGUID));
                 if (target)
-                    target.CastSpell(target, Spells.TargetIndicator, true);
+                    target.CastSpell(target, SpellIds.TargetIndicator, true);
 
                 _targetTimer = 3000;
             }
@@ -796,7 +786,7 @@ namespace Scripts.World.NpcSpecial
 
                 GameObject go = me.FindNearestGameObject(GameobjectIds.RibbonPole, 10.0f);
                 if (go)
-                    me.CastSpell(go, Spells.RedFireRing, true);
+                    me.CastSpell(go, SpellIds.RedFireRing, true);
 
                 task.Schedule(TimeSpan.FromSeconds(5), task1 =>
                 {
@@ -808,7 +798,7 @@ namespace Scripts.World.NpcSpecial
 
                     go = me.FindNearestGameObject(GameobjectIds.RibbonPole, 10.0f);
                     if (go)
-                        me.CastSpell(go, Spells.BlueFireRing, true);
+                        me.CastSpell(go, SpellIds.BlueFireRing, true);
 
                     task.Repeat(TimeSpan.FromSeconds(5));
                 });
@@ -829,7 +819,7 @@ namespace Scripts.World.NpcSpecial
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
             List<Player> players = new List<Player>();
-            var check = new UnitAuraCheck<Player>(true, Spells.RibbonDanceCosmetic);
+            var check = new UnitAuraCheck<Player>(true, SpellIds.RibbonDanceCosmetic);
             var searcher = new PlayerListSearcher(me, players, check);
             Cell.VisitWorldObjects(me, searcher, 10.0f);
 
@@ -848,76 +838,108 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_doctor : CreatureScript
+    class npc_doctor : ScriptedAI
     {
-        public npc_doctor() : base("npc_doctor") { }
-
-        public class npc_doctorAI : ScriptedAI
+        public npc_doctor(Creature creature) : base(creature)
         {
-            public npc_doctorAI(Creature creature) : base(creature)
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            PlayerGUID.Clear();
+
+            SummonPatientTimer = 10000;
+            SummonPatientCount = 0;
+            PatientDiedCount = 0;
+            PatientSavedCount = 0;
+
+            Patients.Clear();
+            Coordinates.Clear();
+
+            Event = false;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
+        }
+
+        public void BeginEvent(Player player)
+        {
+            PlayerGUID = player.GetGUID();
+
+            SummonPatientTimer = 10000;
+            SummonPatientCount = 0;
+            PatientDiedCount = 0;
+            PatientSavedCount = 0;
+
+            switch (me.GetEntry())
             {
-                Initialize();
+                case CreatureIds.DoctorAlliance:
+                    foreach (var coord in NpcSpecialConst.DoctorAllianceCoords)
+                        Coordinates.Add(coord);
+                    break;
+                case CreatureIds.DoctorHorde:
+                    foreach (var coord in NpcSpecialConst.DoctorHordeCoords)
+                        Coordinates.Add(coord);
+                    break;
             }
 
-            void Initialize()
+            Event = true;
+            me.AddUnitFlag(UnitFlags.NotSelectable);
+        }
+
+        public void PatientDied(Position point)
+        {
+            Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
+            if (player && ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete)))
             {
-                PlayerGUID.Clear();
+                ++PatientDiedCount;
 
-                SummonPatientTimer = 10000;
-                SummonPatientCount = 0;
-                PatientDiedCount = 0;
-                PatientSavedCount = 0;
-
-                Patients.Clear();
-                Coordinates.Clear();
-
-                Event = false;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-                me.RemoveUnitFlag(UnitFlags.NotSelectable);
-            }
-
-            public void BeginEvent(Player player)
-            {
-                PlayerGUID = player.GetGUID();
-
-                SummonPatientTimer = 10000;
-                SummonPatientCount = 0;
-                PatientDiedCount = 0;
-                PatientSavedCount = 0;
-
-                switch (me.GetEntry())
+                if (PatientDiedCount > 5 && Event)
                 {
-                    case CreatureIds.DoctorAlliance:
-                        foreach (var coord in NpcSpecialConst.DoctorAllianceCoords)
-                            Coordinates.Add(coord);
-                        break;
-                    case CreatureIds.DoctorHorde:
-                        foreach (var coord in NpcSpecialConst.DoctorHordeCoords)
-                            Coordinates.Add(coord);
-                        break;
+                    if (player.GetQuestStatus(6624) == QuestStatus.Incomplete)
+                        player.FailQuest(6624);
+                    else if (player.GetQuestStatus(6622) == QuestStatus.Incomplete)
+                        player.FailQuest(6622);
+
+                    Reset();
+                    return;
                 }
 
-                Event = true;
-                me.AddUnitFlag(UnitFlags.NotSelectable);
+                Coordinates.Add(point);
             }
+            else
+                // If no player or player abandon quest in progress
+                Reset();
+        }
 
-            public void PatientDied(Position point)
+        public void PatientSaved(Creature soldier, Player player, Position point)
+        {
+            if (player && PlayerGUID == player.GetGUID())
             {
-                Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
-                if (player && ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete)))
+                if ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete))
                 {
-                    ++PatientDiedCount;
+                    ++PatientSavedCount;
 
-                    if (PatientDiedCount > 5 && Event)
+                    if (PatientSavedCount == 15)
                     {
+                        if (!Patients.Empty())
+                        {
+                            foreach (var guid in Patients)
+                            {
+                                Creature patient = ObjectAccessor.GetCreature(me, guid);
+                                if (patient)
+                                    patient.SetDeathState(DeathState.JustDied);
+                            }
+                        }
+
                         if (player.GetQuestStatus(6624) == QuestStatus.Incomplete)
-                            player.FailQuest(6624);
+                            player.AreaExploredOrEventHappens(6624);
                         else if (player.GetQuestStatus(6622) == QuestStatus.Incomplete)
-                            player.FailQuest(6622);
+                            player.AreaExploredOrEventHappens(6622);
 
                         Reset();
                         return;
@@ -925,122 +947,80 @@ namespace Scripts.World.NpcSpecial
 
                     Coordinates.Add(point);
                 }
-                else
-                    // If no player or player abandon quest in progress
-                    Reset();
             }
-
-            public void PatientSaved(Creature soldier, Player player, Position point)
-            {
-                if (player && PlayerGUID == player.GetGUID())
-                {
-                    if ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete))
-                    {
-                        ++PatientSavedCount;
-
-                        if (PatientSavedCount == 15)
-                        {
-                            if (!Patients.Empty())
-                            {
-                                foreach (var guid in Patients)
-                                {
-                                    Creature patient = ObjectAccessor.GetCreature(me, guid);
-                                    if (patient)
-                                        patient.SetDeathState(DeathState.JustDied);
-                                }
-                            }
-
-                            if (player.GetQuestStatus(6624) == QuestStatus.Incomplete)
-                                player.AreaExploredOrEventHappens(6624);
-                            else if (player.GetQuestStatus(6622) == QuestStatus.Incomplete)
-                                player.AreaExploredOrEventHappens(6622);
-
-                            Reset();
-                            return;
-                        }
-
-                        Coordinates.Add(point);
-                    }
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (Event && SummonPatientCount >= 20)
-                {
-                    Reset();
-                    return;
-                }
-
-                if (Event)
-                {
-                    if (SummonPatientTimer <= diff)
-                    {
-                        if (Coordinates.Empty())
-                            return;
-
-                        uint patientEntry;
-                        switch (me.GetEntry())
-                        {
-                            case CreatureIds.DoctorAlliance:
-                                patientEntry = NpcSpecialConst.AllianceSoldierId[RandomHelper.Rand32() % 3];
-                                break;
-                            case CreatureIds.DoctorHorde:
-                                patientEntry = NpcSpecialConst.HordeSoldierId[RandomHelper.Rand32() % 3];
-                                break;
-                            default:
-                                Log.outError(LogFilter.Scripts, "Invalid entry for Triage doctor. Please check your database");
-                                return;
-                        }
-
-                        var index = RandomHelper.IRand(0, Coordinates.Count - 1);
-
-                        Creature Patient = me.SummonCreature(patientEntry, Coordinates[index], TempSummonType.TimedDespawnOOC, 5000);
-                        if (Patient)
-                        {
-                            //303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
-                            Patient.AddUnitFlag(UnitFlags.PvpAttackable);
-
-                            Patients.Add(Patient.GetGUID());
-                            ((npc_injured_patient)Patient.GetAI()).DoctorGUID = me.GetGUID();
-                            ((npc_injured_patient)Patient.GetAI()).Coord = Coordinates[index];
-
-                            Coordinates.RemoveAt(index);
-                        }
-
-                        SummonPatientTimer = 10000;
-                        ++SummonPatientCount;
-                    }
-                    else
-                        SummonPatientTimer -= diff;
-                }
-            }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void QuestAccept(Player player, Quest quest)
-            {
-                if ((quest.Id == 6624) || (quest.Id == 6622))
-                    BeginEvent(player);
-            }
-
-            ObjectGuid PlayerGUID;
-
-            uint SummonPatientTimer;
-            uint SummonPatientCount;
-            uint PatientDiedCount;
-            uint PatientSavedCount;
-
-            bool Event;
-
-            List<ObjectGuid> Patients = new List<ObjectGuid>();
-            List<Position> Coordinates = new List<Position>();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return new npc_doctorAI(creature);
+            if (Event && SummonPatientCount >= 20)
+            {
+                Reset();
+                return;
+            }
+
+            if (Event)
+            {
+                if (SummonPatientTimer <= diff)
+                {
+                    if (Coordinates.Empty())
+                        return;
+
+                    uint patientEntry;
+                    switch (me.GetEntry())
+                    {
+                        case CreatureIds.DoctorAlliance:
+                            patientEntry = NpcSpecialConst.AllianceSoldierId[RandomHelper.Rand32() % 3];
+                            break;
+                        case CreatureIds.DoctorHorde:
+                            patientEntry = NpcSpecialConst.HordeSoldierId[RandomHelper.Rand32() % 3];
+                            break;
+                        default:
+                            Log.outError(LogFilter.Scripts, "Invalid entry for Triage doctor. Please check your database");
+                            return;
+                    }
+
+                    var index = RandomHelper.IRand(0, Coordinates.Count - 1);
+
+                    Creature Patient = me.SummonCreature(patientEntry, Coordinates[index], TempSummonType.TimedDespawnOOC, 5000);
+                    if (Patient)
+                    {
+                        //303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
+                        Patient.AddUnitFlag(UnitFlags.PvpAttackable);
+
+                        Patients.Add(Patient.GetGUID());
+                        ((npc_injured_patient)Patient.GetAI()).DoctorGUID = me.GetGUID();
+                        ((npc_injured_patient)Patient.GetAI()).Coord = Coordinates[index];
+
+                        Coordinates.RemoveAt(index);
+                    }
+
+                    SummonPatientTimer = 10000;
+                    ++SummonPatientCount;
+                }
+                else
+                    SummonPatientTimer -= diff;
+            }
         }
+
+        public override void EnterCombat(Unit who) { }
+
+        public override void QuestAccept(Player player, Quest quest)
+        {
+            if ((quest.Id == 6624) || (quest.Id == 6622))
+                BeginEvent(player);
+        }
+
+        ObjectGuid PlayerGUID;
+
+        uint SummonPatientTimer;
+        uint SummonPatientCount;
+        uint PatientDiedCount;
+        uint PatientSavedCount;
+
+        bool Event;
+
+        List<ObjectGuid> Patients = new List<ObjectGuid>();
+        List<Position> Coordinates = new List<Position>();
     }
 
     [Script]
@@ -1106,7 +1086,7 @@ namespace Scripts.World.NpcSpecial
                 {
                     Creature doctor = ObjectAccessor.GetCreature(me, DoctorGUID);
                     if (doctor)
-                        ((npc_doctor.npc_doctorAI)doctor.GetAI()).PatientSaved(me, player, Coord);
+                        ((npc_doctor)doctor.GetAI()).PatientSaved(me, player, Coord);
                 }
             }
 
@@ -1119,7 +1099,7 @@ namespace Scripts.World.NpcSpecial
             //stand up
             me.SetStandState(UnitStandStateType.Stand);
 
-            Talk(Texts.SayDoc);
+            Talk(TextIds.SayDoc);
 
             uint mobId = me.GetEntry();
             me.SetWalk(false);
@@ -1156,7 +1136,7 @@ namespace Scripts.World.NpcSpecial
                 {
                     Creature doctor = ObjectAccessor.GetCreature((me), DoctorGUID);
                     if (doctor)
-                        ((npc_doctor.npc_doctorAI)doctor.GetAI()).PatientDied(Coord);
+                        ((npc_doctor)doctor.GetAI()).PatientDied(Coord);
                 }
             }
         }
@@ -1218,7 +1198,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void SpellHit(Unit caster, SpellInfo spell)
         {
-            if (spell.Id == Spells.LesserHealR2 || spell.Id == Spells.FortitudeR1)
+            if (spell.Id == SpellIds.LesserHealR2 || spell.Id == SpellIds.FortitudeR1)
             {
                 //not while in combat
                 if (me.IsInCombat())
@@ -1233,16 +1213,16 @@ namespace Scripts.World.NpcSpecial
                 {
                     if (quest != 0 && player.GetQuestStatus(quest) == QuestStatus.Incomplete)
                     {
-                        if (IsHealed && !CanRun && spell.Id == Spells.FortitudeR1)
+                        if (IsHealed && !CanRun && spell.Id == SpellIds.FortitudeR1)
                         {
-                            Talk(Texts.SayThanks, caster);
+                            Talk(TextIds.SayThanks, caster);
                             CanRun = true;
                         }
-                        else if (!IsHealed && spell.Id == Spells.LesserHealR2)
+                        else if (!IsHealed && spell.Id == SpellIds.LesserHealR2)
                         {
                             CasterGUID = caster.GetGUID();
                             me.SetStandState(UnitStandStateType.Stand);
-                            Talk(Texts.SayHealed, caster);
+                            Talk(TextIds.SayHealed, caster);
                             IsHealed = true;
                         }
                     }
@@ -1256,7 +1236,6 @@ namespace Scripts.World.NpcSpecial
 
         public override void WaypointReached(uint waypointId, uint pathId)
         {
-
         }
 
         public override void UpdateAI(uint diff)
@@ -1275,7 +1254,7 @@ namespace Scripts.World.NpcSpecial
                             case CreatureIds.Dolf:
                             case CreatureIds.Korja:
                             case CreatureIds.DgKel:
-                                Talk(Texts.SayGoodbye, unit);
+                                Talk(TextIds.SayGoodbye, unit);
                                 break;
                         }
 
@@ -1315,143 +1294,132 @@ namespace Scripts.World.NpcSpecial
 
             if (me.IsAttackReady())
             {
-                DoCastVictim(Spells.Deathtouch, true);
+                DoCastVictim(SpellIds.Deathtouch, true);
                 me.ResetAttackTimer();
             }
         }
     }
 
     [Script]
-    class npc_sayge : CreatureScript
+    class npc_sayge : ScriptedAI
     {
-        public npc_sayge() : base("npc_sayge") { }
+        public npc_sayge(Creature creature) : base(creature) { }
 
-        class npc_saygeAI : ScriptedAI
+        public override bool GossipHello(Player player)
         {
-            public npc_saygeAI(Creature creature) : base(creature) { }
+            if (me.IsQuestGiver())
+                player.PrepareQuestMenu(me.GetGUID());
 
-            public override bool GossipHello(Player player)
+            if (player.GetSpellHistory().HasCooldown(SpellIds.Strength) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Agility) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Stamina) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Spirit) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Intellect) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Armor) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Damage) ||
+                player.GetSpellHistory().HasCooldown(SpellIds.Resistance))
+                player.SendGossipMenu(GossipMenus.CantGiveYouYour, me.GetGUID());
+            else
             {
-                if (me.IsQuestGiver())
-                    player.PrepareQuestMenu(me.GetGUID());
-
-                if (player.GetSpellHistory().HasCooldown(Spells.Strength) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Agility) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Stamina) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Spirit) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Intellect) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Armor) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Damage) ||
-                    player.GetSpellHistory().HasCooldown(Spells.Resistance))
-                    player.SEND_GOSSIP_MENU(GossipMenus.CantGiveYouYour, me.GetGUID());
-                else
-                {
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.IAmReadyToDiscover, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SEND_GOSSIP_MENU(GossipMenus.IHaveLongKnown, me.GetGUID());
-                }
-
-                return true;
+                player.ADD_GOSSIP_ITEM_DB(GossipMenus.IAmReadyToDiscover, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.SendGossipMenu(GossipMenus.IHaveLongKnown, me.GetGUID());
             }
 
-            void SendAction(Player player, uint action)
-            {
-                switch (action)
-                {
-                    case eTradeskill.GossipActionInfoDef + 1:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-                        player.SEND_GOSSIP_MENU(GossipMenus.YouHaveBeenTasked, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 2:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 1, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                        player.SEND_GOSSIP_MENU(GossipMenus.SwornExecutioner, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 3:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
-                        player.SEND_GOSSIP_MENU(GossipMenus.DiplomaticMission, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 4:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 6, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 7, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 8, eTradeskill.GossipActionInfoDef);
-                        player.SEND_GOSSIP_MENU(GossipMenus.YourBrotherSeeks, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 5:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
-                        player.SEND_GOSSIP_MENU(GossipMenus.ATerribleBeast, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef:
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge6, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
-                        player.SEND_GOSSIP_MENU(GossipMenus.YourFortuneIsCast, me.GetGUID());
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 6:
-                        DoCast(player, Spells.Fortune, false);
-                        player.SEND_GOSSIP_MENU(GossipMenus.HereIsYourFortune, me.GetGUID());
-                        break;
-                }
-            }
+            return true;
+        }
 
-            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        void SendAction(Player player, uint action)
+        {
+            switch (action)
             {
-                uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-                player.PlayerTalkClass.ClearMenus();
-                uint spellId = 0;
-                switch (sender)
-                {
-                    case eTradeskill.GossipSenderMain:
-                        SendAction(player, action);
-                        break;
-                    case eTradeskill.GossipSenderMain + 1:
-                        spellId = Spells.Damage;
-                        break;
-                    case eTradeskill.GossipSenderMain + 2:
-                        spellId = Spells.Resistance;
-                        break;
-                    case eTradeskill.GossipSenderMain + 3:
-                        spellId = Spells.Armor;
-                        break;
-                    case eTradeskill.GossipSenderMain + 4:
-                        spellId = Spells.Spirit;
-                        break;
-                    case eTradeskill.GossipSenderMain + 5:
-                        spellId = Spells.Intellect;
-                        break;
-                    case eTradeskill.GossipSenderMain + 6:
-                        spellId = Spells.Stamina;
-                        break;
-                    case eTradeskill.GossipSenderMain + 7:
-                        spellId = Spells.Strength;
-                        break;
-                    case eTradeskill.GossipSenderMain + 8:
-                        spellId = Spells.Agility;
-                        break;
-                }
-
-                if (spellId != 0)
-                {
-                    DoCast(player, spellId, false);
-                    player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
-                    SendAction(player, action);
-                }
-                return true;
+                case eTradeskill.GossipActionInfoDef + 1:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge, GossipMenus.OptionIdAnswer4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+                    player.SendGossipMenu(GossipMenus.YouHaveBeenTasked, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef + 2:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 1, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge2, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
+                    player.SendGossipMenu(GossipMenus.SwornExecutioner, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef + 3:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge3, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 2, eTradeskill.GossipActionInfoDef);
+                    player.SendGossipMenu(GossipMenus.DiplomaticMission, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef + 4:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 6, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 7, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge4, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 8, eTradeskill.GossipActionInfoDef);
+                    player.SendGossipMenu(GossipMenus.YourBrotherSeeks, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef + 5:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain + 5, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer2, eTradeskill.GossipSenderMain + 4, eTradeskill.GossipActionInfoDef);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge5, GossipMenus.OptionIdAnswer3, eTradeskill.GossipSenderMain + 3, eTradeskill.GossipActionInfoDef);
+                    player.SendGossipMenu(GossipMenus.ATerribleBeast, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef:
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.OptionSayge6, GossipMenus.OptionIdAnswer1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+                    player.SendGossipMenu(GossipMenus.YourFortuneIsCast, me.GetGUID());
+                    break;
+                case eTradeskill.GossipActionInfoDef + 6:
+                    DoCast(player, SpellIds.Fortune, false);
+                    player.SendGossipMenu(GossipMenus.HereIsYourFortune, me.GetGUID());
+                    break;
             }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            return new npc_saygeAI(creature);
+            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            player.PlayerTalkClass.ClearMenus();
+            uint spellId = 0;
+            switch (sender)
+            {
+                case eTradeskill.GossipSenderMain:
+                    SendAction(player, action);
+                    break;
+                case eTradeskill.GossipSenderMain + 1:
+                    spellId = SpellIds.Damage;
+                    break;
+                case eTradeskill.GossipSenderMain + 2:
+                    spellId = SpellIds.Resistance;
+                    break;
+                case eTradeskill.GossipSenderMain + 3:
+                    spellId = SpellIds.Armor;
+                    break;
+                case eTradeskill.GossipSenderMain + 4:
+                    spellId = SpellIds.Spirit;
+                    break;
+                case eTradeskill.GossipSenderMain + 5:
+                    spellId = SpellIds.Intellect;
+                    break;
+                case eTradeskill.GossipSenderMain + 6:
+                    spellId = SpellIds.Stamina;
+                    break;
+                case eTradeskill.GossipSenderMain + 7:
+                    spellId = SpellIds.Strength;
+                    break;
+                case eTradeskill.GossipSenderMain + 8:
+                    spellId = SpellIds.Agility;
+                    break;
+            }
+
+            if (spellId != 0)
+            {
+                DoCast(player, spellId, false);
+                player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
+                SendAction(player, action);
+            }
+            return true;
         }
     }
-
 
     [Script]
     class npc_steam_tonk : ScriptedAI
@@ -1505,7 +1473,7 @@ namespace Scripts.World.NpcSpecial
         {
             if (ExplosionTimer <= diff)
             {
-                DoCast(me, Spells.TonkMineDetonate, true);
+                DoCast(me, SpellIds.TonkMineDetonate, true);
                 me.SetDeathState(DeathState.Dead); // unsummon it
             }
             else
@@ -1524,7 +1492,7 @@ namespace Scripts.World.NpcSpecial
                 return;
 
             if (emote == TextEmotes.Dance)
-                me.CastSpell(player, Spells.BrewfestToast, false);
+                me.CastSpell(player, SpellIds.BrewfestToast, false);
         }
     }
 
@@ -1541,12 +1509,30 @@ namespace Scripts.World.NpcSpecial
             // TODO: solve this in a different way! setting them as stunned prevents dummies from parrying
             me.SetControlled(true, UnitState.Stunned);//disable rotate
 
-            _events.Reset();
+            _scheduler.CancelAll();
             _damageTimes.Clear();
             if (me.GetEntry() != AdvancedTargetDummy && me.GetEntry() != TargetDummy)
-                _events.ScheduleEvent(EventCheckCombat, 1000);
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                {
+                    long now = Time.UnixTime;
+                    foreach (var pair in _damageTimes.ToList())
+                    {
+                        // If unit has not dealt damage to training dummy for 5 seconds, Remove him from combat
+                        if (pair.Value < now - 5)
+                        {
+                            Unit unit = Global.ObjAccessor.GetUnit(me, pair.Key);
+                            if (unit)
+                                unit.GetHostileRefManager().DeleteReference(me);
+
+                            _damageTimes.Remove(pair.Key);
+                        }
+                    }
+                    task.Repeat();
+                });
+            }
             else
-                _events.ScheduleEvent(EventDespawn, 15000);
+                _scheduler.Schedule(TimeSpan.FromSeconds(15), task => me.DespawnOrUnsummon());
         }
 
         public override void EnterEvadeMode(EvadeReason why)
@@ -1572,181 +1558,133 @@ namespace Scripts.World.NpcSpecial
             if (!me.HasUnitState(UnitState.Stunned))
                 me.SetControlled(true, UnitState.Stunned);//disable rotate
 
-            _events.Update(diff);
-
-            _events.ExecuteEvents(eventId =>
-            {
-                switch (eventId)
-                {
-                    case EventCheckCombat:
-                        long now = Time.UnixTime;
-                        foreach (var pair in _damageTimes.ToList())
-                        {
-                            // If unit has not dealt damage to training dummy for 5 seconds, remove him from combat
-                            if (pair.Value < now - 5)
-                            {
-                                Unit unit = Global.ObjAccessor.GetUnit(me, pair.Key);
-                                if (unit)
-                                    unit.GetHostileRefManager().DeleteReference(me);
-
-                                _damageTimes.Remove(pair.Key);
-                            }
-                        }
-                        _events.ScheduleEvent(EventCheckCombat, 1000);
-                        break;
-                    case EventDespawn:
-                        me.DespawnOrUnsummon();
-                        break;
-                }
-            });
+            _scheduler.Update(diff);
         }
 
         public override void MoveInLineOfSight(Unit who) { }
 
         Dictionary<ObjectGuid, long> _damageTimes = new Dictionary<ObjectGuid, long>();
 
-        const int EventCheckCombat = 1;
-        const int EventDespawn = 2;
         const uint AdvancedTargetDummy = 2674;
         const uint TargetDummy = 2673;
     }
 
     [Script]
-    class npc_wormhole : CreatureScript
+    class npc_wormhole : PassiveAI
     {
-        public npc_wormhole() : base("npc_wormhole") { }
-
-        class npc_wormholeAI : PassiveAI
+        public npc_wormhole(Creature creature) : base(creature)
         {
-            public npc_wormholeAI(Creature creature) : base(creature)
-            {
-                Initialize();
-            }
-
-            void Initialize()
-            {
-                _showUnderground = RandomHelper.URand(0, 100) == 0; // Guessed value, it is really rare though
-            }
-
-            public override void InitializeAI()
-            {
-                Initialize();
-            }
-
-            public override bool GossipHello(Player player)
-            {
-                if (me.IsSummon())
-                {
-                    if (player == me.ToTempSummon().GetSummoner())
-                    {
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
-                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
-
-                        if (_showUnderground)
-                            player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
-
-                        player.SEND_GOSSIP_MENU(Texts.Wormhole, me.GetGUID());
-                    }
-                }
-
-                return true;
-            }
-
-            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
-            {
-                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-                player.PlayerTalkClass.ClearMenus();
-
-                switch (action)
-                {
-                    case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.BoreanTundra, false);
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.HowlingFjord, false);
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.SholazarBasin, false);
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 4: // Icecrown
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.Icecrown, false);
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.StormPeaks, false);
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 6: // Underground
-                        player.CLOSE_GOSSIP_MENU();
-                        DoCast(player, Spells.Underground, false);
-                        break;
-                }
-
-                return true;
-            }
-
-            bool _showUnderground;
+            Initialize();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return new npc_wormholeAI(creature);
+            _showUnderground = RandomHelper.URand(0, 100) == 0; // Guessed value, it is really rare though
         }
+
+        public override void InitializeAI()
+        {
+            Initialize();
+        }
+
+        public override bool GossipHello(Player player)
+        {
+            if (me.IsSummon())
+            {
+                if (player == me.ToTempSummon().GetSummoner())
+                {
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole2, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole3, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 3);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole4, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 4);
+                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 5);
+
+                    if (_showUnderground)
+                        player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdWormhole, GossipMenus.OptionIdWormhole6, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 6);
+
+                    player.SendGossipMenu(TextIds.Wormhole, me.GetGUID());
+                }
+            }
+
+            return true;
+        }
+
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+        {
+            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            player.PlayerTalkClass.ClearMenus();
+
+            switch (action)
+            {
+                case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.BoreanTundra, false);
+                    break;
+                case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.HowlingFjord, false);
+                    break;
+                case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.SholazarBasin, false);
+                    break;
+                case eTradeskill.GossipActionInfoDef + 4: // Icecrown
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.Icecrown, false);
+                    break;
+                case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.StormPeaks, false);
+                    break;
+                case eTradeskill.GossipActionInfoDef + 6: // Underground
+                    player.CloseGossipMenu();
+                    DoCast(player, SpellIds.Underground, false);
+                    break;
+            }
+
+            return true;
+        }
+
+        bool _showUnderground;
     }
 
     [Script]
-    class npc_experience : CreatureScript
+    class npc_experience : ScriptedAI
     {
-        public npc_experience() : base("npc_experience") { }
+        public npc_experience(Creature creature) : base(creature) { }
 
-        class npc_experienceAI : ScriptedAI
+        public override bool GossipHello(Player player)
         {
-            public npc_experienceAI(Creature creature) : base(creature) { }
-
-            public override bool GossipHello(Player player)
+            if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
             {
-                if (player.HasPlayerFlag(PlayerFlags.NoXPGain)) // not gaining XP
-                {
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-                    player.SEND_GOSSIP_MENU(Texts.XpOnOff, me.GetGUID());
-                }
-                else // currently gaining XP
-                {
-                    player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
-                    player.SEND_GOSSIP_MENU(Texts.XpOnOff, me.GetGUID());
-                }
-                return true;
+                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
             }
-
-            public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
+            else // currently gaining XP
             {
-                uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
-                player.PlayerTalkClass.ClearMenus();
-
-                switch (action)
-                {
-                    case eTradeskill.GossipActionInfoDef + 1:// XP ON selected
-                        player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
-                        break;
-                    case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
-                        player.AddPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
-                        break;
-                }
-
-                player.PlayerTalkClass.SendCloseGossip();
-                return true;
+                player.ADD_GOSSIP_ITEM_DB(GossipMenus.MenuIdXpOnOff, GossipMenus.OptionIdXpOff, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                player.SendGossipMenu(TextIds.XpOnOff, me.GetGUID());
             }
+            return true;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            return new npc_experienceAI(creature);
+            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            player.PlayerTalkClass.ClearMenus();
+
+            switch (action)
+            {
+                case eTradeskill.GossipActionInfoDef + 1:// XP ON selected
+                    player.RemovePlayerFlag(PlayerFlags.NoXPGain); // turn on XP gain
+                    break;
+                case eTradeskill.GossipActionInfoDef + 2:// XP OFF selected
+                    player.AddPlayerFlag(PlayerFlags.NoXPGain); // turn off XP gain
+                    break;
+            }
+
+            player.PlayerTalkClass.SendCloseGossip();
+            return true;
         }
     }
 
@@ -1832,29 +1770,29 @@ namespace Scripts.World.NpcSpecial
             switch (entry)
             {
                 case CreatureIds.FireworkBlue:
-                    return Spells.RocketBlue;
+                    return SpellIds.RocketBlue;
                 case CreatureIds.FireworkGreen:
-                    return Spells.RocketGreen;
+                    return SpellIds.RocketGreen;
                 case CreatureIds.FireworkPurple:
-                    return Spells.RocketPurple;
+                    return SpellIds.RocketPurple;
                 case CreatureIds.FireworkRed:
-                    return Spells.RocketRed;
+                    return SpellIds.RocketRed;
                 case CreatureIds.FireworkYellow:
-                    return Spells.RocketYellow;
+                    return SpellIds.RocketYellow;
                 case CreatureIds.FireworkWhite:
-                    return Spells.RocketWhite;
+                    return SpellIds.RocketWhite;
                 case CreatureIds.FireworkBigBlue:
-                    return Spells.RocketBigBlue;
+                    return SpellIds.RocketBigBlue;
                 case CreatureIds.FireworkBigGreen:
-                    return Spells.RocketBigGreen;
+                    return SpellIds.RocketBigGreen;
                 case CreatureIds.FireworkBigPurple:
-                    return Spells.RocketBigPurple;
+                    return SpellIds.RocketBigPurple;
                 case CreatureIds.FireworkBigRed:
-                    return Spells.RocketBigRed;
+                    return SpellIds.RocketBigRed;
                 case CreatureIds.FireworkBigYellow:
-                    return Spells.RocketBigYellow;
+                    return SpellIds.RocketBigYellow;
                 case CreatureIds.FireworkBigWhite:
-                    return Spells.RocketBigWhite;
+                    return SpellIds.RocketBigWhite;
                 default:
                     return 0;
             }
@@ -1949,7 +1887,7 @@ namespace Scripts.World.NpcSpecial
                     }
                 }
                 if (me.GetEntry() == CreatureIds.ClusterElune)
-                    DoCast(Spells.LunarFortune);
+                    DoCast(SpellIds.LunarFortune);
 
                 float displacement = 0.7f;
                 for (byte i = 0; i < 4; i++)
@@ -1999,7 +1937,7 @@ namespace Scripts.World.NpcSpecial
             inLove = true;
             Unit owner = me.GetOwner();
             if (owner)
-                owner.CastSpell(owner, Spells.SpringFling, true);
+                owner.CastSpell(owner, SpellIds.SpringFling, true);
         }
 
         public override void UpdateAI(uint diff)
@@ -2010,14 +1948,14 @@ namespace Scripts.World.NpcSpecial
                 {
                     Unit rabbit = Global.ObjAccessor.GetUnit(me, rabbitGUID);
                     if (rabbit)
-                        DoCast(rabbit, Spells.SpringRabbitJump);
+                        DoCast(rabbit, SpellIds.SpringRabbitJump);
                     jumpTimer = RandomHelper.URand(5000, 10000);
                 }
                 else jumpTimer -= diff;
 
                 if (bunnyTimer <= diff)
                 {
-                    DoCast(Spells.SummonBabyBunny);
+                    DoCast(SpellIds.SummonBabyBunny);
                     bunnyTimer = RandomHelper.URand(20000, 40000);
                 }
                 else bunnyTimer -= diff;
@@ -2029,14 +1967,14 @@ namespace Scripts.World.NpcSpecial
                     Creature rabbit = me.FindNearestCreature(CreatureIds.SpringRabbit, 10.0f);
                     if (rabbit)
                     {
-                        if (rabbit == me || rabbit.HasAura(Spells.SpringRabbitInLove))
+                        if (rabbit == me || rabbit.HasAura(SpellIds.SpringRabbitInLove))
                             return;
 
-                        me.AddAura(Spells.SpringRabbitInLove, me);
+                        me.AddAura(SpellIds.SpringRabbitInLove, me);
                         DoAction(1);
-                        rabbit.AddAura(Spells.SpringRabbitInLove, rabbit);
+                        rabbit.AddAura(SpellIds.SpringRabbitInLove, rabbit);
                         rabbit.GetAI().DoAction(1);
-                        rabbit.CastSpell(rabbit, Spells.SpringRabbitJump, true);
+                        rabbit.CastSpell(rabbit, SpellIds.SpringRabbitJump, true);
                         rabbitGUID = rabbit.GetGUID();
                     }
                     searchTimer = RandomHelper.URand(5000, 10000);
@@ -2166,7 +2104,7 @@ namespace Scripts.World.NpcSpecial
                             GameObject target = VerifyTarget();
                             if (target)
                             {
-                                me.CastSpell(target, Spells.WreckTrain, false);
+                                me.CastSpell(target, SpellIds.WreckTrain, false);
                                 target.GetAI().DoAction(TrainWrecker.ActionWrecked);
                                 _timer = 2 * Time.InMilliseconds;
                                 _nextAction = TrainWrecker.EventDoDance;
@@ -2214,21 +2152,21 @@ namespace Scripts.World.NpcSpecial
             ScheduleTasks();
         }
 
-        void ScheduleTasks()
+        public void ScheduleTasks()
         {
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
-                Aura ownerTired = me.GetOwner().GetAura(Spells.TiredPlayer);
+                Aura ownerTired = me.GetOwner().GetAura(SpellIds.TiredPlayer);
                 if (ownerTired != null)
                 {
-                    Aura squireTired = me.AddAura(IsArgentSquire() ? Spells.AuraTiredS : Spells.AuraTiredG, me);
+                    Aura squireTired = me.AddAura(IsArgentSquire() ? SpellIds.AuraTiredS : SpellIds.AuraTiredG, me);
                     if (squireTired != null)
                         squireTired.SetDuration(ownerTired.GetDuration());
                 }
             });
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
-                if ((me.HasAura(Spells.AuraTiredS) || me.HasAura(Spells.AuraTiredG)) && me.HasNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor))
+                if ((me.HasAura(SpellIds.AuraTiredS) || me.HasAura(SpellIds.AuraTiredG)) && me.HasNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor))
                     me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
                 task.Repeat();
             });
@@ -2241,23 +2179,23 @@ namespace Scripts.World.NpcSpecial
                 case GossipMenus.OptionIdBank:
                     {
                         me.AddNpcFlag(NPCFlags.Banker);
-                        uint _bankAura = IsArgentSquire() ? Spells.AuraBankS : Spells.AuraBankG;
+                        uint _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
                         if (!me.HasAura(_bankAura))
                             DoCastSelf(_bankAura);
 
-                        if (!player.HasAura(Spells.TiredPlayer))
-                            player.CastSpell(player, Spells.TiredPlayer, true);
+                        if (!player.HasAura(SpellIds.TiredPlayer))
+                            player.CastSpell(player, SpellIds.TiredPlayer, true);
                         break;
                     }
                 case GossipMenus.OptionIdShop:
                     {
                         me.AddNpcFlag(NPCFlags.Vendor);
-                        uint _shopAura = IsArgentSquire() ? Spells.AuraShopS : Spells.AuraShopG;
+                        uint _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
                         if (!me.HasAura(_shopAura))
                             DoCastSelf(_shopAura);
 
-                        if (!player.HasAura(Spells.TiredPlayer))
-                            player.CastSpell(player, Spells.TiredPlayer, true);
+                        if (!player.HasAura(SpellIds.TiredPlayer))
+                            player.CastSpell(player, SpellIds.TiredPlayer, true);
                         break;
                     }
                 case GossipMenus.OptionIdMail:
@@ -2265,12 +2203,12 @@ namespace Scripts.World.NpcSpecial
                         me.AddNpcFlag(NPCFlags.Mailbox);
                         player.GetSession().SendShowMailBox(me.GetGUID());
 
-                        uint _mailAura = IsArgentSquire() ? Spells.AuraPostmanS : Spells.AuraPostmanG;
+                        uint _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;
                         if (!me.HasAura(_mailAura))
                             DoCastSelf(_mailAura);
 
-                        if (!player.HasAura(Spells.TiredPlayer))
-                            player.CastSpell(player, Spells.TiredPlayer, true);
+                        if (!player.HasAura(SpellIds.TiredPlayer))
+                            player.CastSpell(player, SpellIds.TiredPlayer, true);
                         break;
                     }
                 case GossipMenus.OptionIdDarnassusSenjinPennant:
