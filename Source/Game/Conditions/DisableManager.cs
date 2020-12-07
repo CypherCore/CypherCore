@@ -259,14 +259,13 @@ namespace Game
 
         public void CheckQuestDisables()
         {
-            uint oldMSTime = Time.GetMSTime();
-
-            int count = m_DisableMap[DisableType.Quest].Count;
-            if (count == 0)
+            if (!m_DisableMap.ContainsKey(DisableType.Quest) || m_DisableMap[DisableType.Quest].Count == 0)
             {
                 Log.outInfo(LogFilter.ServerLoading, "Checked 0 quest disables.");
                 return;
             }
+
+            uint oldMSTime = Time.GetMSTime();
 
             // check only quests, rest already done at startup
             foreach (var pair in m_DisableMap[DisableType.Quest])
@@ -282,7 +281,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Disable flags specified for quest {0}, useless data.", entry);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public bool IsDisabledFor(DisableType type, uint entry, Unit unit, byte flags = 0)
