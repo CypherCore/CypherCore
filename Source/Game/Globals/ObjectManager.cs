@@ -9314,7 +9314,7 @@ namespace Game
                     currencyRewardCount++;
                     response.Reward.Value.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
 
-                } while (rewards.NextRow());
+                } while (rewardCurrency.NextRow());
             }
 
             SQLResult rewardFaction = DB.World.Query("SELECT ChoiceId, ResponseId, FactionId, Quantity FROM playerchoice_response_reward_faction ORDER BY `Index` ASC");

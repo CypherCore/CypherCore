@@ -172,8 +172,8 @@ namespace Game.DataStorage
                     conversationTemplate.TextureKitId = templateResult.Read<uint>(3);
                     conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
-                    conversationTemplate.Actors = actorsByConversation[conversationTemplate.Id].ToList();
-                    conversationTemplate.ActorGuids = actorGuidsByConversation[conversationTemplate.Id].ToList();
+                    conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : null;
+                    conversationTemplate.ActorGuids = actorGuidsByConversation.TryGetValue(conversationTemplate.Id, out var actorGuids) ? actorGuids.ToList() : null;
 
                     ConversationLineRecord currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(conversationTemplate.FirstLineId);
                     if (currentConversationLine == null)
