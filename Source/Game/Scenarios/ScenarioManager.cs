@@ -167,7 +167,7 @@ namespace Game.Scenarios
             if (!points.IsEmpty())
             {
                 // The first result should have the highest criteriaTreeId
-                uint criteriaTreeIdMax = result.Read<uint>(0);
+                uint criteriaTreeIdMax = points.Read<uint>(0);
                 POIs = new List<Vector2>[criteriaTreeIdMax + 1][];
 
                 do
@@ -177,8 +177,11 @@ namespace Game.Scenarios
                     int X = points.Read<int>(2);
                     int Y = points.Read<int>(3);
 
-                    if (POIs[CriteriaTreeID].Length <= Idx1 + 1)
+                    if (POIs[CriteriaTreeID] == null)
                         POIs[CriteriaTreeID] = new List<Vector2>[Idx1 + 10];
+
+                    if (POIs[CriteriaTreeID][Idx1] == null)
+                        POIs[CriteriaTreeID][Idx1] = new List<Vector2>();
 
                     POIs[CriteriaTreeID][Idx1].Add(new Vector2(X, Y));
                 } while (points.NextRow());
