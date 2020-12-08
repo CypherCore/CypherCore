@@ -511,9 +511,13 @@ namespace Game.Entities
                 134110, // Hidden Helm
                 134111, // Hidden Cloak
                 134112, // Hidden Shoulder
+                168659, // Hidden Chestpiece
                 142503, // Hidden Shirt
                 142504, // Hidden Tabard
-                143539  // Hidden Belt
+                168665, // Hidden Bracers
+                158329, // Hidden Gloves
+                143539, // Hidden Belt
+                168664  // Hidden Boots
             };
 
             foreach (uint hiddenItem in hiddenAppearanceItems)
