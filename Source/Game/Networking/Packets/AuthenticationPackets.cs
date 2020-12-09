@@ -153,13 +153,13 @@ namespace Game.Networking.Packets
                 _worldPacket.FlushBits();
 
                 {
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.Billing.BillingPlan);
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.Billing.TimeRemain);
-                    _worldPacket.WriteUInt32(SuccessInfo.Value.Billing.Unknown735);
+                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.BillingPlan);
+                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.TimeRemain);
+                    _worldPacket.WriteUInt32(SuccessInfo.Value.GameTimeInfo.Unknown735);
                     // 3x same bit is not a mistake - preserves legacy client behavior of BillingPlanFlags::SESSION_IGR
-                    _worldPacket.WriteBit(SuccessInfo.Value.Billing.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
-                    _worldPacket.WriteBit(SuccessInfo.Value.Billing.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
-                    _worldPacket.WriteBit(SuccessInfo.Value.Billing.InGameRoom); // not used anywhere in the client
+                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
+                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
+                    _worldPacket.WriteBit(SuccessInfo.Value.GameTimeInfo.InGameRoom); // not used anywhere in the client
                     _worldPacket.FlushBits();
                 }
 
@@ -213,7 +213,7 @@ namespace Game.Networking.Packets
             public uint CurrencyID; // this is probably used for the ingame shop. @todo implement
             public uint Time;
 
-            public BillingInfo Billing;
+            public GameTime GameTimeInfo;
 
             public List<VirtualRealmInfo> VirtualRealms = new List<VirtualRealmInfo>();     // list of realms connected to this one (inclusive) @todo implement
             public List<CharacterTemplate> Templates = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
@@ -226,7 +226,7 @@ namespace Game.Networking.Packets
             public Optional<ushort> NumPlayersAlliance; // number of alliance players in this realm. @todo implement
             public Optional<int> ExpansionTrialExpiration; // expansion trial expiration unix timestamp
 
-            public struct BillingInfo
+            public struct GameTime
             {
                 public uint BillingPlan;
                 public uint TimeRemain;

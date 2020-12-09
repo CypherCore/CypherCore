@@ -54,11 +54,6 @@ namespace Game
 
         void HandleCharEnumCallback(SQLResult result)
         {
-            byte demonHunterCount = 0; // We use this counter to allow multiple demon hunter creations when allowed in config
-            bool canAlwaysCreateDemonHunter = HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
-            if (WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter) == 0) // char level = 0 means this check is disabled, so always true
-                canAlwaysCreateDemonHunter = true;
-
             EnumCharactersResult charResult = new EnumCharactersResult();
             charResult.Success = true;
             charResult.IsDeletedCharacters = false;
@@ -101,14 +96,6 @@ namespace Game
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                         Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, false);
 
-                    if (charInfo.ClassId == Class.DemonHunter)
-                        demonHunterCount++;
-
-                    if (demonHunterCount >= WorldConfig.GetIntValue(WorldCfg.DemonHuntersPerRealm) && !canAlwaysCreateDemonHunter)
-                        charResult.HasDemonHunterOnRealm = true;
-                    else
-                        charResult.HasDemonHunterOnRealm = false;
-
                     charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.ExperienceLevel);
 
                     charResult.Characters.Add(charInfo);
@@ -116,8 +103,6 @@ namespace Game
                 while (result.NextRow());
             }
 
-            charResult.IsTestDemonHunterCreationAllowed = canAlwaysCreateDemonHunter;
-            charResult.IsDemonHunterCreationAllowed = GetAccountExpansion() >= Expansion.Legion || canAlwaysCreateDemonHunter;
             charResult.IsAlliedRacesCreationAllowed = GetAccountExpansion() >= Expansion.BattleForAzeroth;
 
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
@@ -360,25 +345,10 @@ namespace Game
                     if (result1 != null && !result1.IsEmpty())
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
-                        int freeDemonHunterSlots = WorldConfig.GetIntValue(WorldCfg.DemonHuntersPerRealm);
-
                         byte accRace = result1.Read<byte>(1);
 
                         if (checkDemonHunterReqs)
                         {
-                            byte accClass = result1.Read<byte>(2);
-                            if (accClass == (byte)Class.DemonHunter)
-                            {
-                                if (freeDemonHunterSlots > 0)
-                                    --freeDemonHunterSlots;
-
-                                if (freeDemonHunterSlots == 0)
-                                {
-                                    SendCharCreate(ResponseCodes.CharCreateFailed);
-                                    return;
-                                }
-                            }
-
                             if (!hasDemonHunterReqLevel)
                             {
                                 byte accLevel = result1.Read<byte>(0);
@@ -1077,6 +1047,40 @@ namespace Game
         void HandleSetFactionInactive(SetFactionInactive packet)
         {
             GetPlayer().GetReputationMgr().SetInactive(packet.Index, packet.State);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.CheckCharacterNameAvailability)]
+        void HandleCheckCharacterNameAvailability(CheckCharacterNameAvailability checkCharacterNameAvailability)
+        {
+            // prevent character rename to invalid name
+            if (!ObjectManager.NormalizePlayerName(ref checkCharacterNameAvailability.Name))
+            {
+                SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, ResponseCodes.CharNameNoName));
+                return;
+            }
+
+            ResponseCodes res = ObjectManager.CheckPlayerName(checkCharacterNameAvailability.Name, GetSessionDbcLocale(), true);
+            if (res != ResponseCodes.CharNameSuccess)
+            {
+                SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, res));
+                return;
+            }
+
+            // check name limitations
+            if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) && Global.ObjectMgr.IsReservedName(checkCharacterNameAvailability.Name))
+            {
+                SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, ResponseCodes.CharNameReserved));
+                return;
+            }
+
+            // Ensure that there is no character with the desired new name
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
+            stmt.AddValue(0, checkCharacterNameAvailability.Name);
+
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
+            {
+                SendPacket(new CheckCharacterNameAvailabilityResult(checkCharacterNameAvailability.SequenceIndex, !result.IsEmpty() ? ResponseCodes.CharCreateNameInUse : ResponseCodes.Success));
+            }));
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestForcedReactions)]
@@ -2455,13 +2459,8 @@ namespace Game
                 packet.Display.HasValue = true;
                 packet.Display.Value.Name = factionChangeInfo.Name;
                 packet.Display.Value.SexID = (byte)factionChangeInfo.SexID;
-                packet.Display.Value.SkinID = factionChangeInfo.SkinID;
-                packet.Display.Value.HairColorID = factionChangeInfo.HairColorID;
-                packet.Display.Value.HairStyleID = factionChangeInfo.HairStyleID;
-                packet.Display.Value.FacialHairStyleID = factionChangeInfo.FacialHairStyleID;
-                packet.Display.Value.FaceID = factionChangeInfo.FaceID;
+                packet.Display.Value.Customizations = factionChangeInfo.Customizations;
                 packet.Display.Value.RaceID = (byte)factionChangeInfo.RaceID;
-                packet.Display.Value.CustomDisplay = factionChangeInfo.CustomDisplay;
             }
 
             SendPacket(packet);

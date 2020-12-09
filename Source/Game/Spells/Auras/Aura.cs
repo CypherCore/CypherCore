@@ -33,6 +33,7 @@ namespace Game.Spells
         Unit,
         DynObj
     }
+
     public enum AuraRemoveMode
     {
         None = 0,
@@ -43,6 +44,7 @@ namespace Game.Spells
         Expire,            // aura duration has ended
         Death
     }
+
     public enum AuraFlags
     {
         None = 0x00,
@@ -211,7 +213,7 @@ namespace Game.Spells
             AuraDataInfo auraData = auraInfo.AuraData.Value;
             auraData.CastID = aura.GetCastGUID();
             auraData.SpellID = (int)aura.GetId();
-            auraData.SpellXSpellVisualID = (int)aura.GetSpellXSpellVisualId();
+            auraData.Visual.SpellXSpellVisualID = (int)aura.GetSpellXSpellVisualId();
             auraData.Flags = GetFlags();
             if (aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.HideDuration))
                 auraData.Flags |= AuraFlags.Duration;

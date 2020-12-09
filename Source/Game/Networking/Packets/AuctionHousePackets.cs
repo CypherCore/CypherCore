@@ -616,6 +616,9 @@ namespace Game.Networking.Packets
 
             foreach (AuctionItem item in Items)
                 item.Write(_worldPacket);
+
+            foreach (AuctionItem item in SoldItems)
+                item.Write(_worldPacket);
         }
     }
 
@@ -857,10 +860,12 @@ namespace Game.Networking.Packets
         public AuctionBucketKey Key;
         public int TotalQuantity;
         public ulong MinPrice;
+        public int RequiredLevel;
         public List<uint> ItemModifiedAppearanceIDs = new List<uint>();
         public Optional<byte> MaxBattlePetQuality;
         public Optional<byte> MaxBattlePetLevel;
         public Optional<byte> BattlePetBreedID;
+        public Optional<uint> Unk901_1;
         public bool ContainsOwnerItem;
         public bool ContainsOnlyCollectedAppearances;
 
@@ -868,6 +873,7 @@ namespace Game.Networking.Packets
         {
             Key.Write(data);
             data.WriteInt32(TotalQuantity);
+            data.WriteInt32(RequiredLevel);
             data.WriteUInt64(MinPrice);
             data.WriteInt32(ItemModifiedAppearanceIDs.Count);
             if (!ItemModifiedAppearanceIDs.Empty())
@@ -879,6 +885,7 @@ namespace Game.Networking.Packets
             data.WriteBit(MaxBattlePetQuality.HasValue);
             data.WriteBit(MaxBattlePetLevel.HasValue);
             data.WriteBit(BattlePetBreedID.HasValue);
+            data.WriteBit(Unk901_1.HasValue);
             data.WriteBit(ContainsOwnerItem);
             data.WriteBit(ContainsOnlyCollectedAppearances);
             data.FlushBits();
@@ -891,6 +898,9 @@ namespace Game.Networking.Packets
 
             if (BattlePetBreedID.HasValue)
                 data.WriteUInt8(BattlePetBreedID.Value);
+
+            if (Unk901_1.HasValue)
+                data.WriteUInt32(Unk901_1.Value);
         }
     }
 

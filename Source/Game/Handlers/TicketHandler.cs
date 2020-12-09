@@ -43,32 +43,33 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.SupportTicketSubmitBug)]
-        void HandleSupportTicketSubmitBug(SupportTicketSubmitBug packet)
+        [WorldPacketHandler(ClientOpcodes.SubmitUserFeedback)]
+        void HandleSubmitUserFeedback(SubmitUserFeedback userFeedback)
         {
-            if (!Global.SupportMgr.GetBugSystemStatus())
-                return;
+            if (userFeedback.IsSuggestion)
+            {
+                if (!Global.SupportMgr.GetSuggestionSystemStatus())
+                    return;
 
-            BugTicket ticket = new BugTicket(GetPlayer());
-            ticket.SetPosition(packet.Header.MapID, packet.Header.Position);
-            ticket.SetFacing(packet.Header.Facing);
-            ticket.SetNote(packet.Note);
+                SuggestionTicket ticket = new SuggestionTicket(GetPlayer());
+                ticket.SetPosition(userFeedback.Header.MapID, userFeedback.Header.Position);
+                ticket.SetFacing(userFeedback.Header.Facing);
+                ticket.SetNote(userFeedback.Note);
 
-            Global.SupportMgr.AddTicket(ticket);
-        }
+                Global.SupportMgr.AddTicket(ticket);
+            }
+            else
+            {
+                if (!Global.SupportMgr.GetBugSystemStatus())
+                    return;
 
-        [WorldPacketHandler(ClientOpcodes.SupportTicketSubmitSuggestion)]
-        void HandleSupportTicketSubmitSuggestion(SupportTicketSubmitSuggestion packet)
-        {
-            if (!Global.SupportMgr.GetSuggestionSystemStatus())
-                return;
+                BugTicket ticket = new BugTicket(GetPlayer());
+                ticket.SetPosition(userFeedback.Header.MapID, userFeedback.Header.Position);
+                ticket.SetFacing(userFeedback.Header.Facing);
+                ticket.SetNote(userFeedback.Note);
 
-            SuggestionTicket ticket = new SuggestionTicket(GetPlayer());
-            ticket.SetPosition(packet.Header.MapID, packet.Header.Position);
-            ticket.SetFacing(packet.Header.Facing);
-            ticket.SetNote(packet.Note);
-
-            Global.SupportMgr.AddTicket(ticket);
+                Global.SupportMgr.AddTicket(ticket);
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.SupportTicketSubmitComplaint)]

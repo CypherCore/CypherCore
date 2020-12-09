@@ -1107,11 +1107,11 @@ namespace Game.Guilds
             else
                 member.RemoveFlag(GuildMemberFlags.DND);
 
-            GuildEventAwayChange awayChange = new GuildEventAwayChange();
-            awayChange.Guid = memberGuid;
-            awayChange.AFK = afk;
-            awayChange.DND = dnd;
-            BroadcastPacket(awayChange);
+            GuildEventStatusChange statusChange = new GuildEventStatusChange();
+            statusChange.Guid = memberGuid;
+            statusChange.AFK = afk;
+            statusChange.DND = dnd;
+            BroadcastPacket(statusChange);
         }
 
         void SendEventBankMoneyChanged()

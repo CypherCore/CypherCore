@@ -275,9 +275,8 @@ namespace Game.Misc
                 {
                     ClientGossipText text = new ClientGossipText();
                     text.QuestID = (int)questID;
+                    text.ContentTuningID = quest.ContentTuningId;
                     text.QuestType = item.QuestIcon;
-                    text.QuestLevel = quest.Level;
-                    text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestFlags = (int)quest.Flags;
                     text.QuestFlagsEx = (int)quest.FlagsEx;
                     text.Repeatable = quest.IsRepeatable();
@@ -365,24 +364,22 @@ namespace Game.Misc
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
-                    string title = quest.LogTitle;
+                    ClientGossipText text = new ClientGossipText();
+                    text.QuestID = questID;
+                    text.ContentTuningID = quest.ContentTuningId;
+                    text.QuestType = questMenuItem.QuestIcon;
+                    text.QuestFlags = (uint)quest.Flags;
+                    text.QuestFlagsEx = (uint)quest.FlagsEx;
+                    text.Repeatable = quest.IsRepeatable();
+                    text.QuestTitle = quest.LogTitle;
 
                     if (localeConstant != Locale.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                         if (localeData != null)
-                            ObjectManager.GetLocaleString(localeData.LogTitle, localeConstant, ref title);
+                            ObjectManager.GetLocaleString(localeData.LogTitle, localeConstant, ref text.QuestTitle);
                     }
 
-                    GossipText text = new GossipText();
-                    text.QuestID = questID;
-                    text.QuestType = questMenuItem.QuestIcon;
-                    text.QuestLevel = (uint)quest.Level;
-                    text.QuestMaxScalingLevel = (uint)quest.MaxScalingLevel;
-                    text.QuestFlags = (uint)quest.Flags;
-                    text.QuestFlagsEx = (uint)quest.FlagsEx;
-                    text.Repeatable = false; // NYI
-                    text.QuestTitle = title;
                     questList.QuestDataText.Add(text);
                 }
             }

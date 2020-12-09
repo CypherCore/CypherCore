@@ -62,12 +62,12 @@ namespace Game
                 garrison.SendBlueprintAndSpecializationData();
         }
 
-        [WorldPacketHandler(ClientOpcodes.GarrisonGetBuildingLandmarks)]
-        void HandleGarrisonGetBuildingLandmarks(GarrisonGetBuildingLandmarks garrisonGetBuildingLandmarks)
+        [WorldPacketHandler(ClientOpcodes.GarrisonGetMapData)]
+        void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
         {
             Garrison garrison = _player.GetGarrison();
             if (garrison != null)
-                garrison.SendBuildingLandmarks(_player);
+                garrison.SendMapData(_player);
         }
     }
 }

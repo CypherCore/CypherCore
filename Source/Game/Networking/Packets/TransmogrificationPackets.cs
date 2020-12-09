@@ -91,10 +91,12 @@ namespace Game.Networking.Packets
             ItemModifiedAppearanceID = data.ReadInt32();
             Slot = data.ReadUInt32();
             SpellItemEnchantmentID = data.ReadInt32();
+            SecondaryItemModifiedAppearanceID = data.ReadInt32();
         }
 
         public int ItemModifiedAppearanceID;
         public uint Slot;
         public int SpellItemEnchantmentID;
+        public int SecondaryItemModifiedAppearanceID;
     }
 }

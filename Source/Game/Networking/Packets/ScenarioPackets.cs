@@ -147,12 +147,14 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(scenarioPOI.Flags);
                     _worldPacket.WriteInt32(scenarioPOI.WorldEffectID);
                     _worldPacket.WriteInt32(scenarioPOI.PlayerConditionID);
+                    _worldPacket.WriteInt32(scenarioPOI.NavigationPlayerConditionID);
                     _worldPacket.WriteInt32(scenarioPOI.Points.Count);
 
                     foreach (var scenarioPOIBlobPoint in scenarioPOI.Points)
                     {
                         _worldPacket.WriteInt32((int)scenarioPOIBlobPoint.X);
                         _worldPacket.WriteInt32((int)scenarioPOIBlobPoint.Y);
+                        _worldPacket.WriteInt32((int)scenarioPOIBlobPoint.Z);
                     }
                 }
             }

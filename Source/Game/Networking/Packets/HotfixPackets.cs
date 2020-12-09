@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(TableHash);
             _worldPacket.WriteUInt32(RecordID);
             _worldPacket.WriteUInt32(Timestamp);
-            _worldPacket.WriteBit(Allow);
+            _worldPacket.WriteBits(Status, 2);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data.GetData());
         }
@@ -71,7 +71,7 @@ namespace Game.Networking.Packets
         public uint TableHash;
         public uint Timestamp;
         public uint RecordID;
-        public bool Allow;
+        public byte Status = 3;
 
         public ByteBuffer Data = new ByteBuffer();
     }
@@ -147,12 +147,12 @@ namespace Game.Networking.Packets
                 if (Size.HasValue)
                 {
                     data.WriteUInt32(Size.Value);
-                    data.WriteBit(true);
+                    data.WriteBits(1, 2);
                 }
                 else
                 {
                     data.WriteUInt32(0);
-                    data.WriteBit(false);
+                    data.WriteBits(3, 2);
                 }
                 data.FlushBits();
             }

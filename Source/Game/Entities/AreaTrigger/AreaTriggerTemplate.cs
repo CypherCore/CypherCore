@@ -175,6 +175,18 @@ namespace Game.Entities
         public float ZOffset;
     }
 
+    public struct AreaTriggerMovementScriptInfo
+    {
+        public uint SpellScriptID;
+        public Vector3 Center;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(SpellScriptID);
+            data.WriteVector3(Center);
+        }
+    }
+
     public class AreaTriggerTemplate : AreaTriggerData
     {
         public unsafe void InitMaxSearchRadius()

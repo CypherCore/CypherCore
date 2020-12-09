@@ -20,6 +20,7 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
@@ -223,25 +224,25 @@ namespace Game.Networking.Packets
         public List<uint> BlueprintsKnown = null;
     }
 
-    class GarrisonGetBuildingLandmarks : ClientPacket
+    class GarrisonGetMapData : ClientPacket
     {
-        public GarrisonGetBuildingLandmarks(WorldPacket packet) : base(packet) { }
+        public GarrisonGetMapData(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class GarrisonBuildingLandmarks : ServerPacket
+    class GarrisonMapDataResponse : ServerPacket
     {
-        public GarrisonBuildingLandmarks() : base(ServerOpcodes.GarrisonBuildingLandmarks, ConnectionType.Instance) { }
+        public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonBuildingLandmarks, ConnectionType.Instance) { }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Landmarks.Count);
-            foreach (GarrisonBuildingLandmark landmark in Landmarks)
+            _worldPacket.WriteInt32(Buildings.Count);
+            foreach (GarrisonBuildingMapData landmark in Buildings)
                 landmark.Write(_worldPacket);
         }
 
-        public List<GarrisonBuildingLandmark> Landmarks = new List<GarrisonBuildingLandmark>();
+        public List<GarrisonBuildingMapData> Buildings = new List<GarrisonBuildingMapData>();
     }
 
     class GarrisonPlotPlaced : ServerPacket
@@ -369,6 +370,9 @@ namespace Game.Networking.Packets
             data.WriteInt32(AbilityID.Count);
             data.WriteUInt32(ZoneSupportSpellID);
             data.WriteUInt32(FollowerStatus);
+            data.WriteInt32(Health);
+            data .WriteInt8(BoardIndex);
+            data .WriteInt32(HealingTimestamp);
 
             AbilityID.ForEach(ability => data.WriteUInt32(ability.Id));
 
@@ -390,6 +394,9 @@ namespace Game.Networking.Packets
         public List<GarrAbilityRecord> AbilityID = new List<GarrAbilityRecord>();
         public uint ZoneSupportSpellID;
         public uint FollowerStatus;
+        public int Health;
+        public int HealingTimestamp;
+        public sbyte BoardIndex;
         public string CustomName = "";
     }
 
@@ -405,8 +412,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32(TravelDuration);
             data.WriteUInt32(MissionDuration);
             data.WriteUInt32(MissionState);
-            data.WriteUInt32(Unknown1);
-            data.WriteUInt32(Unknown2);
+            data.WriteUInt32(SuccessChance);
+            data.WriteUInt32(Flags);
+            data.WriteFloat(MissionScalar);
         }
 
         public ulong DbID;
@@ -417,8 +425,9 @@ namespace Game.Networking.Packets
         public uint TravelDuration;
         public uint MissionDuration;
         public uint MissionState;
-        public uint Unknown1 = 0;
-        public uint Unknown2 = 0;
+        public uint SuccessChance;
+        public uint Flags;
+        public float MissionScalar = 1.0f;
     }
 
     struct GarrisonMissionReward
@@ -455,6 +464,18 @@ namespace Game.Networking.Packets
         public long StartTime;
     }
 
+    struct GarrisonTalentSocketData
+    {
+        public int SoulbindConduitID;
+        public int SoulbindConduitRank;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(SoulbindConduitID);
+            data.WriteInt32(SoulbindConduitRank);
+        }
+    }
+
     struct GarrisonTalent
     {
         public void Write(WorldPacket data)
@@ -463,12 +484,70 @@ namespace Game.Networking.Packets
             data.WriteInt32(Rank);
             data.WriteUInt32((uint)ResearchStartTime);
             data.WriteInt32(Flags);
+            data.WriteBit(Socket.HasValue);
+            data.FlushBits();
+
+            if (Socket.HasValue)
+                Socket.Value.Write(data);
         }
 
         public int GarrTalentID;
         public int Rank;
         public long ResearchStartTime;
         public int Flags;
+        public Optional<GarrisonTalentSocketData> Socket;
+    }
+
+    struct GarrisonCollectionEntry
+    {
+        public int EntryID;
+        public int Rank;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(EntryID);
+            data.WriteInt32(Rank);
+        }
+    }
+
+    class GarrisonCollection
+    {
+        public int Type;
+        public List<GarrisonCollectionEntry> Entries = new List<GarrisonCollectionEntry>();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Type);
+            data.WriteInt32(Entries.Count);
+            foreach (GarrisonCollectionEntry collectionEntry in Entries)
+                collectionEntry.Write(data);
+        }
+    }
+
+    struct GarrisonEventEntry
+    {
+        public int EntryID;
+        public int EventValue;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(EntryID);
+            data.WriteInt32(EventValue);
+        }
+    }
+
+    class GarrisonEventList
+    {
+        public int Type;
+        public List<GarrisonEventEntry> Events = new List<GarrisonEventEntry>();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Type);
+            data.WriteInt32(Events.Count);
+            foreach (GarrisonEventEntry eventEntry in Events)
+                eventEntry.Write(data);
+        }
     }
 
     class GarrisonInfo
@@ -481,11 +560,14 @@ namespace Game.Networking.Packets
             data.WriteInt32(Buildings.Count);
             data.WriteInt32(Plots.Count);
             data.WriteInt32(Followers.Count);
+            data.WriteInt32(AutoTroops.Count);
             data.WriteInt32(Missions.Count);
             data.WriteInt32(MissionRewards.Count);
             data.WriteInt32(MissionOvermaxRewards.Count);
             data.WriteInt32(MissionAreaBonuses.Count);
             data.WriteInt32(Talents.Count);
+            data.WriteInt32(Collections.Count);
+            data.WriteInt32(EventLists.Count);
             data.WriteInt32(CanStartMission.Count);
             data.WriteInt32(ArchivedMissions.Count);
             data.WriteUInt32(NumFollowerActivationsRemaining);
@@ -514,11 +596,14 @@ namespace Game.Networking.Packets
             foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);
 
-            foreach (GarrisonTalent talent in Talents)
-                talent.Write(data);
+            foreach (GarrisonCollection collection in Collections)
+                collection.Write(data);
 
-            foreach(var id in ArchivedMissions)
-                    data.WriteInt32(id);
+            foreach (GarrisonEventList eventList in EventLists)
+                eventList.Write(data);
+
+            foreach (var id in ArchivedMissions)
+                data.WriteInt32(id);
 
             foreach (GarrisonBuildingInfo building in Buildings)
                 building.Write(data);
@@ -530,6 +615,12 @@ namespace Game.Networking.Packets
 
             foreach (GarrisonFollower follower in Followers)
                 follower.Write(data);
+
+            foreach (GarrisonFollower follower in AutoTroops)
+                follower.Write(data);
+
+            foreach (GarrisonTalent talent in Talents)
+                talent.Write(data);
         }
 
         public GarrisonType GarrTypeID;
@@ -540,11 +631,14 @@ namespace Game.Networking.Packets
         public List<GarrisonPlotInfo> Plots = new List<GarrisonPlotInfo>();
         public List<GarrisonBuildingInfo> Buildings = new List<GarrisonBuildingInfo>();
         public List<GarrisonFollower> Followers = new List<GarrisonFollower>();
+        public List<GarrisonFollower> AutoTroops = new List<GarrisonFollower>();
         public List<GarrisonMission> Missions = new List<GarrisonMission>();
         public List<List<GarrisonMissionReward>> MissionRewards = new List<List<GarrisonMissionReward>>();
         public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new List<List<GarrisonMissionReward>>();
         public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new List<GarrisonMissionBonusAbility>();
         public List<GarrisonTalent> Talents = new List<GarrisonTalent>();
+        public List<GarrisonCollection> Collections = new List<GarrisonCollection>();
+        public List<GarrisonEventList> EventLists = new List<GarrisonEventList>();
         public List<bool> CanStartMission = new List<bool>();
         public List<int> ArchivedMissions = new List<int>();
     }
@@ -593,9 +687,9 @@ namespace Game.Networking.Packets
         public List<GarrisonRemoteBuildingInfo> Buildings = new List<GarrisonRemoteBuildingInfo>();
     }
 
-    struct GarrisonBuildingLandmark
+    struct GarrisonBuildingMapData
     {
-        public GarrisonBuildingLandmark(uint buildingPlotInstId, Position pos)
+        public GarrisonBuildingMapData(uint buildingPlotInstId, Position pos)
         {
             GarrBuildingPlotInstID = buildingPlotInstId;
             Pos = pos;

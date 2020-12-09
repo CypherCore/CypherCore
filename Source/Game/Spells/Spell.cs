@@ -3525,7 +3525,7 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             CastFailed castFailed = new CastFailed();
-            castFailed.SpellXSpellVisualID = (int)m_SpellVisual;
+            castFailed.Visual.SpellXSpellVisualID = (int)m_SpellVisual;
             FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
             m_caster.ToPlayer().SendPacket(castFailed);
         }
@@ -3553,7 +3553,7 @@ namespace Game.Spells
                 return;
 
             CastFailed packet = new CastFailed();
-            packet.SpellXSpellVisualID = (int)spellVisual;
+            packet.Visual.SpellXSpellVisualID = (int)spellVisual;
             FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
         }
@@ -3610,7 +3610,7 @@ namespace Game.Spells
             castData.CastID = m_castId;
             castData.OriginalCastID = m_originalCastId;
             castData.SpellID = (int)m_spellInfo.Id;
-            castData.SpellXSpellVisualID = m_SpellVisual;
+            castData.Visual.SpellXSpellVisualID = m_SpellVisual;
             castData.CastFlags = castFlags;
             castData.CastFlagsEx = m_castFlagsEx;
             castData.CastTime = (uint)m_casttime;
@@ -3724,7 +3724,7 @@ namespace Game.Spells
             castData.CastID = m_castId;
             castData.OriginalCastID = m_originalCastId;
             castData.SpellID = (int)m_spellInfo.Id;
-            castData.SpellXSpellVisualID = m_SpellVisual;
+            castData.Visual.SpellXSpellVisualID = m_SpellVisual;
             castData.CastFlags = castFlags;
             castData.CastFlagsEx = m_castFlagsEx;
             castData.CastTime = Time.GetMSTime();
@@ -4019,7 +4019,7 @@ namespace Game.Spells
             failurePacket.CasterUnit = m_caster.GetGUID();
             failurePacket.CastID = m_castId;
             failurePacket.SpellID = m_spellInfo.Id;
-            failurePacket.SpellXSpellVisualID = m_SpellVisual;
+            failurePacket.Visual.SpellXSpellVisualID = m_SpellVisual;
             failurePacket.Reason = result;
             m_caster.SendMessageToSet(failurePacket, true);
 
@@ -4027,6 +4027,7 @@ namespace Game.Spells
             failedPacket.CasterUnit = m_caster.GetGUID();
             failedPacket.CastID = m_castId;
             failedPacket.SpellID = m_spellInfo.Id;
+            failedPacket.Visual.SpellXSpellVisualID = m_SpellVisual;
             failedPacket.Reason = result;
             m_caster.SendMessageToSet(failedPacket, true);
         }
@@ -4051,7 +4052,7 @@ namespace Game.Spells
             SpellChannelStart spellChannelStart = new SpellChannelStart();
             spellChannelStart.CasterGUID = m_caster.GetGUID();
             spellChannelStart.SpellID = (int)m_spellInfo.Id;
-            spellChannelStart.SpellXSpellVisualID = (int)m_SpellVisual;
+            spellChannelStart.Visual.SpellXSpellVisualID = m_SpellVisual;
             spellChannelStart.ChannelDuration = duration;
 
             uint schoolImmunityMask = m_caster.GetSchoolImmunityMask();

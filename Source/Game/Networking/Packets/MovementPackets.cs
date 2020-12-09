@@ -161,8 +161,8 @@ namespace Game.Networking.Packets
             data.WriteBit(hasTransportData);
             data.WriteBit(hasFallData);
             data.WriteBit(hasSpline);
-            data.WriteBit(0); // HeightChangeFailed
-            data.WriteBit(0); // RemoteTimeValid
+            data.WriteBit(false); // HeightChangeFailed
+            data.WriteBit(false); // RemoteTimeValid
             data.FlushBits();
 
             if (hasTransportData)
@@ -206,10 +206,11 @@ namespace Game.Networking.Packets
                 data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
                 bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
                 data.WriteBits(moveSpline.GetPath().Length, 16);
-                data.WriteBits((byte)moveSpline.spline.m_mode, 2);      // Mode
-                data.WriteBit(0);                                       // HasSplineFilter
+                data.WriteBit(false);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
                 data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic));        // HasJumpExtraData
+                data.WriteBit(moveSpline.anim_tier.HasValue);                   // HasAnimationTierTransition
+                data.WriteBit(false);                                                   // HasUnknown901
                 data.FlushBits();
 
                 //if (HasSplineFilterKey)
@@ -258,6 +259,25 @@ namespace Game.Networking.Packets
                     data.WriteInt32(moveSpline.effect_start_time);
                     data.WriteUInt32(0);                                                  // Duration (override)
                 }
+
+                if (moveSpline.anim_tier.HasValue)
+                {
+                    data.WriteUInt32(moveSpline.anim_tier.Value.TierTransitionId);
+                    data.WriteInt32(moveSpline.effect_start_time);
+                    data.WriteUInt32(0);
+                    data.WriteUInt8(moveSpline.anim_tier.Value.AnimTier);
+                }
+
+                //if (HasUnknown901)
+                //{
+                //    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
+                //    {
+                //        data << int32(unkInner.Unknown_1);
+                //        data << int32(unkInner.Unknown_2);
+                //        data << int32(unkInner.Unknown_3);
+                //        data << uint32(unkInner.Unknown_4);
+                //    }
+                //}
             }
         }
 
@@ -353,8 +373,10 @@ namespace Game.Networking.Packets
 
             if (splineFlags.HasFlag(SplineFlag.Animation))
             {
-                movementSpline.AnimTier = splineFlags.GetAnimTier();
-                movementSpline.TierTransStartTime = (uint)moveSpline.effect_start_time;
+                movementSpline.AnimTierTransition.HasValue = true;
+                movementSpline.AnimTierTransition.Value.TierTransitionID = (int)moveSpline.anim_tier.Value.TierTransitionId;
+                movementSpline.AnimTierTransition.Value.StartTime = (uint)moveSpline.effect_start_time;
+                movementSpline.AnimTierTransition.Value.AnimTier = moveSpline.anim_tier.Value.AnimTier;
             }
 
             movementSpline.MoveTime = (uint)moveSpline.Duration();
@@ -562,14 +584,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(MapID);
-            _worldPacket.WriteXYZO(Pos);
+            Loc.Write(_worldPacket);
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteXYZ(MovementOffset);
         }
 
         public uint MapID;
         public uint Reason;
-        public Position Pos;
+        public TeleportLocation Loc = new TeleportLocation();
         public Position MovementOffset;    // Adjusts all pending movement events by this offset
     }
 
@@ -894,10 +916,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SequenceIndex);
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
+            _worldPacket.WriteUInt8((byte)Reason);
             _worldPacket.WriteUInt32(MountDisplayID);
             _worldPacket.WriteInt32(ScaleDuration);
-            _worldPacket.WriteBits((uint)Reason, 2);
-            _worldPacket.FlushBits();
         }
 
         public float Scale = 1.0f;
@@ -934,7 +955,7 @@ namespace Game.Networking.Packets
             Data.Read(_worldPacket);
             Height = _worldPacket.ReadFloat();
             MountDisplayID = _worldPacket.ReadUInt32();
-            Reason = (UpdateCollisionHeightReason)_worldPacket.ReadBits<uint>(2);
+            Reason = (UpdateCollisionHeightReason)_worldPacket.ReadUInt8();
         }
 
         public MovementAck Data;
@@ -1118,13 +1139,10 @@ namespace Game.Networking.Packets
                 data.WriteBit(MovementForceGUID.HasValue);
                 data.FlushBits();
 
-                if (CollisionHeight.HasValue)
-                {
-                    data.WriteFloat(CollisionHeight.Value.Height);
-                    data.WriteFloat(CollisionHeight.Value.Scale);
-                    data.WriteBits(CollisionHeight.Value.Reason, 2);
-                    data.FlushBits();
-                }
+                if (MovementForce_.HasValue)
+                    MovementForce_.Value.Write(data);
+
+
 
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
@@ -1139,11 +1157,16 @@ namespace Game.Networking.Packets
                 if (VehicleRecID.HasValue)
                     data.WriteInt32(VehicleRecID.Value);
 
+                if (CollisionHeight.HasValue)
+                {
+                    data.WriteFloat(CollisionHeight.Value.Height);
+                    data.WriteFloat(CollisionHeight.Value.Scale);
+                    data.WriteBits(CollisionHeight.Value.Reason, 2);
+                    data.FlushBits();
+                }
+
                 if (MovementForceGUID.HasValue)
                     data.WritePackedGuid(MovementForceGUID.Value);
-
-                if (MovementForce_.HasValue)
-                    MovementForce_.Value.Write(data);
             }
 
             public ServerOpcodes MessageID;
@@ -1238,26 +1261,81 @@ namespace Game.Networking.Packets
         }
     }
 
+    struct MonsterSplineAnimTierTransition
+    {
+        public int TierTransitionID;
+        public uint StartTime;
+        public uint EndTime;
+        public byte AnimTier;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(TierTransitionID);
+            data .WriteUInt32(StartTime);
+            data.WriteUInt32(EndTime);
+            data.WriteUInt8(AnimTier);
+        }
+    }
+
+    class MonsterSplineUnknown901
+    {    
+        public Array<Inner> Data = new Array<Inner>(16);
+
+        public void Write(WorldPacket data)
+        {
+            foreach (var unkInner in Data)
+            {
+                data.WriteInt32(unkInner.Unknown_1);
+                data.WriteInt32(unkInner.Unknown_2);
+                data.WriteInt32(unkInner.Unknown_3);
+                data.WriteUInt32(unkInner.Unknown_4);
+            }
+        }
+
+        public struct Inner
+        {
+            public int Unknown_1;
+            public int Unknown_2;
+            public int Unknown_3;
+            public uint Unknown_4;
+        }
+    }
+
+    public class TeleportLocation
+    {
+        public Vector4 Pos;
+        public int Unused901_1 = -1;
+        public int Unused901_2 = -1;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteVector4(Pos);
+            data.WriteInt32(Unused901_1);
+            data.WriteInt32(Unused901_2);
+        }
+    }
+
     public class MovementSpline
     {
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Flags);
-            data.WriteUInt8(AnimTier);
-            data.WriteUInt32(TierTransStartTime);
             data.WriteInt32(Elapsed);
             data.WriteUInt32(MoveTime);
             data.WriteUInt32(FadeObjectTime);
             data.WriteUInt8(Mode);
-            data.WriteUInt8(VehicleExitVoluntary);
             data.WritePackedGuid(TransportGUID);
             data.WriteInt8(VehicleSeat);
             data.WriteBits((byte)Face, 2);
             data.WriteBits(Points.Count, 16);
+            data.WriteBit(VehicleExitVoluntary);
+            data.WriteBit(Interpolate);
             data.WriteBits(PackedDeltas.Count, 16);
             data.WriteBit(SplineFilter.HasValue);
             data.WriteBit(SpellEffectExtraData.HasValue);
             data.WriteBit(JumpExtraData.HasValue);
+            data.WriteBit(AnimTierTransition.HasValue);
+            data.WriteBit(Unknown901.HasValue);
             data.FlushBits();
 
             if (SplineFilter.HasValue)
@@ -1288,24 +1366,31 @@ namespace Game.Networking.Packets
 
             if (JumpExtraData.HasValue)
                 JumpExtraData.Value.Write(data);
+
+            if (AnimTierTransition.HasValue)
+                AnimTierTransition.Value.Write(data);
+
+            if (Unknown901.HasValue)
+                Unknown901.Value.Write(data);
         }
 
         public uint Flags; // Spline flags
         public MonsterMoveType Face; // Movement direction (see MonsterMoveType enum)
-        public byte AnimTier;
-        public uint TierTransStartTime;
         public int Elapsed;
         public uint MoveTime;
         public uint FadeObjectTime;
         public List<Vector3> Points = new List<Vector3>(); // Spline path
         public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
-        public byte VehicleExitVoluntary;
+        public bool VehicleExitVoluntary;
+        public bool Interpolate;
         public ObjectGuid TransportGUID;
         public sbyte VehicleSeat = -1;
         public List<Vector3> PackedDeltas = new List<Vector3>();
         public Optional<MonsterSplineFilter> SplineFilter;
         public Optional<MonsterSplineSpellEffectExtraData> SpellEffectExtraData;
         public Optional<MonsterSplineJumpExtraData> JumpExtraData;
+        public Optional<MonsterSplineAnimTierTransition> AnimTierTransition;
+        public Optional<MonsterSplineUnknown901> Unknown901;
         public float FaceDirection;
         public ObjectGuid FaceGUID;
         public Vector3 FaceSpot;

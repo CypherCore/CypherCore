@@ -85,9 +85,8 @@ namespace Game.Networking.Packets
 
             ProposedRoles = proposedRoles;
 
-            InviterVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-            InviterRealmNameActual = Global.WorldMgr.GetRealm().Name;
-            InviterRealmNameNormalized = Global.WorldMgr.GetRealm().NormalizedName;
+            var realm = Global.WorldMgr.GetRealm();
+            InviterRealm = new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName);
         }
 
         public override void Write()
@@ -97,15 +96,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsXRealm);
             _worldPacket.WriteBit(MustBeBNetFriend);
             _worldPacket.WriteBit(AllowMultipleRoles);
+            _worldPacket.WriteBit(QuestSessionActive);
             _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
 
-            _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
-            _worldPacket.WriteBit(IsLocal);
-            _worldPacket.WriteBit(Unk2);
-            _worldPacket.WriteBits(InviterRealmNameActual.GetByteCount(), 8);
-            _worldPacket.WriteBits(InviterRealmNameNormalized.GetByteCount(), 8);
-            _worldPacket.WriteString(InviterRealmNameActual);
-            _worldPacket.WriteString(InviterRealmNameNormalized);
+            InviterRealm.Write(_worldPacket);
 
             _worldPacket.WritePackedGuid(InviterGUID);
             _worldPacket.WritePackedGuid(InviterBNetAccountId);
@@ -123,22 +117,19 @@ namespace Game.Networking.Packets
         public bool MightCRZYou;
         public bool MustBeBNetFriend;
         public bool AllowMultipleRoles;
-        public bool Unk2;
+        public bool QuestSessionActive;
         public ushort Unk1;
 
         public bool CanAccept;
 
         // Inviter
+        public VirtualRealmInfo InviterRealm;
         public ObjectGuid InviterGUID;
         public ObjectGuid InviterBNetAccountId;
         public string InviterName;
 
         // Realm
         public bool IsXRealm;
-        public bool IsLocal = true;
-        public uint InviterVirtualRealmAddress;
-        public string InviterRealmNameActual;
-        public string InviterRealmNameNormalized;
 
         // Lfg
         public uint ProposedRoles;
@@ -919,21 +910,21 @@ namespace Game.Networking.Packets
     }
 
     class PartyMemberAuraStates
-    {
+    {      
+        public int SpellID;
+        public ushort Flags;
+        public uint ActiveFlags;
+        public List<float> Points = new List<float>();
+
         public void Write(WorldPacket data)
         {
             data.WriteInt32(SpellID);
-            data.WriteUInt8(Flags);
+            data.WriteUInt16(Flags);
             data.WriteUInt32(ActiveFlags);
             data.WriteInt32(Points.Count);
             foreach (float points in Points)
                 data.WriteFloat(points);
         }
-
-        public int SpellID;
-        public byte Flags;
-        public uint ActiveFlags;
-        public List<float> Points = new List<float>();
     }
 
     class PartyMemberPetStats
@@ -962,6 +953,20 @@ namespace Game.Networking.Packets
         public List<PartyMemberAuraStates> Auras = new List<PartyMemberAuraStates>();
     }
 
+    public struct CTROptions
+    {
+        public uint ContentTuningConditionMask;
+        public int Unused901;
+        public uint ExpansionLevelMask;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ContentTuningConditionMask);
+            data.WriteInt32(Unused901);
+            data.WriteUInt32(ExpansionLevelMask);
+        }
+    }
+
     class PartyMemberStats
     {
         public void Write(WorldPacket data)
@@ -988,6 +993,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Auras.Count);
 
             Phases.Write(data);
+            ChromieTime.Write(data);
 
             foreach (PartyMemberAuraStates aura in Auras)
                 aura.Write(data);
@@ -1025,6 +1031,7 @@ namespace Game.Networking.Packets
         public ushort WmoGroupID;
         public uint WmoDoodadPlacementID;
         public sbyte[] PartyType = new sbyte[2];
+        public CTROptions ChromieTime;
     }
 
     struct PartyPlayerInfo

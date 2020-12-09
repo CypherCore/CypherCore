@@ -332,6 +332,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(SpellID.Count);
             _worldPacket.WriteInt32(FavoriteSpellID.Count);
+            _worldPacket.WriteUInt32(SpecializationID);
 
             foreach (uint spell in SpellID)
                 _worldPacket.WriteUInt32(spell);
@@ -345,6 +346,7 @@ namespace Game.Networking.Packets
 
         public List<uint> SpellID = new List<uint>();
         public List<int> FavoriteSpellID = new List<int>();
+        public uint SpecializationID;
         public bool SuppressMessaging;
     }
 
@@ -357,13 +359,15 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterUnit);
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+
+            Visual.Write(_worldPacket);
+
             _worldPacket.WriteUInt16(Reason);
         }
 
         public ObjectGuid CasterUnit;
         public uint SpellID;
-        public uint SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public ushort Reason;
         public ObjectGuid CastID;
     }
@@ -377,49 +381,51 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterUnit);
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+
+            Visual.Write(_worldPacket);
+
             _worldPacket.WriteUInt16(Reason);
         }
 
         public ObjectGuid CasterUnit;
         public uint SpellID;
-        public uint SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public ushort Reason;
         public ObjectGuid CastID;
     }
 
-    class CastFailedBase : ServerPacket
+    class CastFailed : ServerPacket
     {
-        public CastFailedBase(ServerOpcodes serverOpcodes, ConnectionType connectionType) : base(serverOpcodes, connectionType) { }
-
-        public override void Write() { throw new NotImplementedException(); }
-
         public ObjectGuid CastID;
         public int SpellID;
+        public SpellCastVisual Visual;
         public SpellCastResult Reason;
         public int FailedArg1 = -1;
         public int FailedArg2 = -1;
-    }
 
-    class CastFailed : CastFailedBase
-    {
         public CastFailed() : base(ServerOpcodes.CastFailed, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteInt32(SpellXSpellVisualID);
+
+            Visual.Write(_worldPacket);
+
             _worldPacket.WriteInt32((int)Reason);
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
         }
-
-        public int SpellXSpellVisualID;
     }
 
-    class PetCastFailed : CastFailedBase
+    class PetCastFailed : ServerPacket
     {
+        public ObjectGuid CastID;
+        public int SpellID;
+        public SpellCastResult Reason;
+        public int FailedArg1 = -1;
+        public int FailedArg2 = -1;
+
         public PetCastFailed() : base(ServerOpcodes.PetCastFailed, ConnectionType.Instance) { }
 
         public override void Write()
@@ -673,10 +679,13 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(Source);
             _worldPacket.WriteUInt32(SpellVisualKitID);
+            _worldPacket.WriteBit(MountedVisual);
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid Source;
         public uint SpellVisualKitID;
+        public bool MountedVisual;
     }
 
     class PlayOrphanSpellVisual : ServerPacket
@@ -753,12 +762,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(KitRecID);
             _worldPacket.WriteUInt32(KitType);
             _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteBit(MountedVisual);
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid Unit;
         public uint KitRecID;
         public uint KitType;
         public uint Duration;
+        public bool MountedVisual;
     }
 
     public class CancelCast : ClientPacket
@@ -797,7 +809,9 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteInt32(SpellXSpellVisualID);
+
+            Visual.Write(_worldPacket);
+
             _worldPacket.WriteUInt32(ChannelDuration);
             _worldPacket.WriteBit(InterruptImmunities.HasValue);
             _worldPacket.WriteBit(HealPrediction.HasValue);
@@ -811,7 +825,7 @@ namespace Game.Networking.Packets
         }
 
         public int SpellID;
-        public int SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public Optional<SpellChannelStartInterruptImmunities> InterruptImmunities;
         public ObjectGuid CasterGUID;
         public Optional<SpellTargetedHealPrediction> HealPrediction;
@@ -905,19 +919,16 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteInt32(DisplayID);
+            _worldPacket.WriteInt32(SpellVisualKitID);
             _worldPacket.WriteUInt8(RaceID);
             _worldPacket.WriteUInt8(Gender);
             _worldPacket.WriteUInt8(ClassID);
-            _worldPacket.WriteUInt8(SkinColor);
-            _worldPacket.WriteUInt8(FaceVariation);
-            _worldPacket.WriteUInt8(HairVariation);
-            _worldPacket.WriteUInt8(HairColor);
-            _worldPacket.WriteUInt8(BeardVariation);
-
-            CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
-
+            _worldPacket.WriteInt32(Customizations.Count);
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteInt32(ItemDisplayID.Count);
+
+            foreach (ChrCustomizationChoice customization in Customizations)
+                customization.Write(_worldPacket);
 
             foreach (var itemDisplayId in ItemDisplayID)
                 _worldPacket.WriteInt32(itemDisplayId);
@@ -925,15 +936,11 @@ namespace Game.Networking.Packets
 
         public ObjectGuid UnitGUID;
         public int DisplayID;
+        public int SpellVisualKitID;
         public byte RaceID;
         public byte Gender;
         public byte ClassID;
-        public byte SkinColor;
-        public byte FaceVariation;
-        public byte HairVariation;
-        public byte HairColor;
-        public byte BeardVariation;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public List<ChrCustomizationChoice> Customizations = new List<ChrCustomizationChoice>();
         public ObjectGuid GuildGUID;
 
         public List<int> ItemDisplayID = new List<int>();
@@ -947,10 +954,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteInt32(DisplayID);
+            _worldPacket.WriteInt32(SpellVisualKitID);
         }
 
         public ObjectGuid UnitGUID;
         public int DisplayID;
+        public int SpellVisualKitID;
     }
 
     class SpellClick : ClientPacket
@@ -1299,10 +1308,10 @@ namespace Game.Networking.Packets
         }
 
         public void Write(WorldPacket data)
-        {
+        {   
+            data.WriteFloat(PlayerItemLevel);
+            data.WriteFloat(TargetItemLevel);
             data.WriteInt16(PlayerLevelDelta);
-            data.WriteUInt16(PlayerItemLevel);
-            data.WriteUInt16(TargetItemLevel);
             data.WriteUInt16(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
@@ -1316,8 +1325,8 @@ namespace Game.Networking.Packets
 
         public ContentTuningType TuningType;
         public short PlayerLevelDelta;
-        public ushort PlayerItemLevel;
-        public ushort TargetItemLevel;
+        public float PlayerItemLevel;
+        public float TargetItemLevel;
         public ushort ScalingHealthItemLevelCurveID;
         public byte TargetLevel;
         public byte Expansion;
@@ -1335,14 +1344,34 @@ namespace Game.Networking.Packets
         }
     }
 
+    public struct SpellCastVisual
+    {
+        public uint SpellXSpellVisualID;
+        public int ScriptVisualID;
+
+        public void Read(WorldPacket data)
+        {
+            SpellXSpellVisualID = data.ReadUInt32();
+            ScriptVisualID = data.ReadInt32();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(SpellXSpellVisualID);
+            data.WriteInt32(ScriptVisualID);
+        }
+    }
+
     public class AuraDataInfo
     {
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(CastID);
             data.WriteInt32(SpellID);
-            data.WriteInt32(SpellXSpellVisualID);
-            data.WriteUInt8((byte)Flags);
+
+            Visual.Write(data);
+
+            data.WriteUInt16((ushort)Flags);
             data.WriteUInt32(ActiveFlags);
             data.WriteUInt16(CastLevel);
             data.WriteUInt8(Applications);
@@ -1379,7 +1408,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid CastID;
         public int SpellID;
-        public int SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public AuraFlags Flags;
         public uint ActiveFlags;
         public ushort CastLevel = 1;
@@ -1519,17 +1548,68 @@ namespace Game.Networking.Packets
         public uint Quantity;
     }
 
-    public class SpellCastRequest
+    public struct SpellOptionalReagent
     {
+        public int ItemID;
+        public int Slot;
+        public int Count;
+
+        public void Read(WorldPacket data)
+        {
+            ItemID = data.ReadInt32();
+            Slot = data.ReadInt32();
+            Count = data.ReadInt32();
+        }
+    }
+
+    public struct SpellExtraCurrencyCost
+    {
+        public int CurrencyID;
+        public int Count;
+
+        public void Read(WorldPacket data)
+        {
+            CurrencyID = data.ReadInt32();
+            Count = data.ReadInt32();
+        }
+    }
+
+    public class SpellCastRequest
+    {   
+        public ObjectGuid CastID;
+        public uint SpellID;
+        public SpellCastVisual Visual;
+        public uint SendCastFlags;
+        public SpellTargetData Target = new SpellTargetData();
+        public MissileTrajectoryRequest MissileTrajectory;
+        public Optional<MovementInfo> MoveUpdate;
+        public List<SpellWeight> Weight = new List<SpellWeight>();
+        public Array<SpellOptionalReagent> OptionalReagents = new Array<SpellOptionalReagent>(3);
+        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new Array<SpellExtraCurrencyCost>(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
+        public ObjectGuid CraftingNPC;
+        public uint[] Misc = new uint[2];
+
         public void Read(WorldPacket data)
         {
             CastID = data.ReadPackedGuid();
             Misc[0] = data.ReadUInt32();
             Misc[1] = data.ReadUInt32();
             SpellID = data.ReadUInt32();
-            SpellXSpellVisualID = data.ReadUInt32();
+
+            Visual.Read(data);
+
             MissileTrajectory.Read(data);
             CraftingNPC = data.ReadPackedGuid();
+
+            var optionalReagents = data.ReadUInt32();
+            var optionalCurrencies = data.ReadUInt32();
+
+            for (var i = 0; i < optionalReagents; ++i)
+                OptionalReagents[i].Read(data);
+
+            for (var i = 0; i < optionalCurrencies; ++i)
+                OptionalCurrencies[i].Read(data);
+
             SendCastFlags = data.ReadBits<uint>(5);
             MoveUpdate.HasValue = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
@@ -1548,17 +1628,6 @@ namespace Game.Networking.Packets
                 Weight.Add(weight);
             }
         }
-
-        public ObjectGuid CastID;
-        public uint SpellID;
-        public uint SpellXSpellVisualID;
-        public uint SendCastFlags;
-        public SpellTargetData Target = new SpellTargetData();
-        public MissileTrajectoryRequest MissileTrajectory;
-        public Optional<MovementInfo> MoveUpdate;
-        public List<SpellWeight> Weight = new List<SpellWeight>();
-        public ObjectGuid CraftingNPC;
-        public uint[] Misc = new uint[2];
     }
 
     public struct SpellHitStatus
@@ -1685,7 +1754,9 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(CastID);
             data.WritePackedGuid(OriginalCastID);
             data.WriteInt32(SpellID);
-            data.WriteUInt32(SpellXSpellVisualID);
+
+            Visual.Read(data);
+
             data.WriteUInt32((uint)CastFlags);
             data.WriteUInt32((uint)CastFlagsEx);
             data.WriteUInt32(CastTime);
@@ -1736,7 +1807,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CastID;
         public ObjectGuid OriginalCastID;
         public int SpellID;
-        public uint SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public SpellCastFlags CastFlags;
         public SpellCastFlagsEx CastFlagsEx;
         public uint CastTime;

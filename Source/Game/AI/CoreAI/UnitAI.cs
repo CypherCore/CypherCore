@@ -516,12 +516,17 @@ namespace Game.AI
         /// <summary>
         /// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
         /// </summary>
-        public virtual void QuestReward(Player player, Quest quest, uint opt) { }
+        public virtual void QuestReward(Player player, Quest quest, uint opt)
+        {
+            QuestReward(player, quest, LootItemType.Item, opt);
+        }
+        public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
-        /// <summary>
-        /// Called when a game event starts or ends
-        /// </summary>
-        public virtual void OnGameEvent(bool start, ushort eventId) { }
+
+    /// <summary>
+    /// Called when a game event starts or ends
+    /// </summary>
+    public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         // Called when the dialog status between a player and the creature is requested.
         public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedNoStatus; }

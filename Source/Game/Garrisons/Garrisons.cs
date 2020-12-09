@@ -581,9 +581,9 @@ namespace Game.Garrisons
             _owner.SendPacket(data);
         }
 
-        public void SendBuildingLandmarks(Player receiver)
+        public void SendMapData(Player receiver)
         {
-            GarrisonBuildingLandmarks buildingLandmarks = new GarrisonBuildingLandmarks();
+            GarrisonMapDataResponse mapData = new GarrisonMapDataResponse();
 
             foreach (var plot in _plots.Values)
             {
@@ -591,11 +591,11 @@ namespace Game.Garrisons
                 {
                     uint garrBuildingPlotInstId = Global.GarrisonMgr.GetGarrBuildingPlotInst(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID, plot.GarrSiteLevelPlotInstId);
                     if (garrBuildingPlotInstId != 0)
-                        buildingLandmarks.Landmarks.Add(new GarrisonBuildingLandmark(garrBuildingPlotInstId, plot.PacketInfo.PlotPos));
+                        mapData.Buildings.Add(new GarrisonBuildingMapData(garrBuildingPlotInstId, plot.PacketInfo.PlotPos));
                 }
             }
 
-            receiver.SendPacket(buildingLandmarks);
+            receiver.SendPacket(mapData);
         }
 
         Map FindMap()

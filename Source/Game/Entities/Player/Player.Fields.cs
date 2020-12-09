@@ -497,6 +497,8 @@ namespace Game.Entities
             public Array<ObjectGuid> Pieces = new Array<ObjectGuid>(EquipmentSlot.End);
             public Array<int> Appearances = new Array<int>(EquipmentSlot.End);  // ItemModifiedAppearanceID
             public Array<int> Enchants = new Array<int>(2);  // SpellItemEnchantmentID
+            public int Unknown901_1;
+            public int Unknown901_2;
         }
 
         public enum EquipmentSetType

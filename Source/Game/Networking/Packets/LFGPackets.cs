@@ -278,7 +278,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(BlackList.Count);
             _worldPacket.WriteInt32(BlackListNames.Count);
 
-            foreach (LFGJoinBlackList blackList in BlackList)
+            foreach (LFGBlackListPkt blackList in BlackList)
                 blackList.Write(_worldPacket);
 
             foreach (string str in BlackListNames)
@@ -292,7 +292,7 @@ namespace Game.Networking.Packets
         public RideTicket Ticket = new RideTicket();
         public byte Result;
         public byte ResultDetail;
-        public List<LFGJoinBlackList> BlackList = new List<LFGJoinBlackList>();
+        public List<LFGBlackListPkt> BlackList = new List<LFGBlackListPkt>();
         public List<string> BlackListNames = new List<string>();
     }
 
@@ -440,23 +440,37 @@ namespace Game.Networking.Packets
 
     //Structs
     public class LFGBlackListSlot
-    {
-        public LFGBlackListSlot(uint slot, uint reason, int subReason1, int subReason2)
+    {   
+        public uint Slot;
+        public uint Reason;
+        public int SubReason1;
+        public int SubReason2;
+        public uint SoftLock;
+
+        public LFGBlackListSlot(uint slot, uint reason, int subReason1, int subReason2, uint softLock)
         {
             Slot = slot;
             Reason = reason;
             SubReason1 = subReason1;
             SubReason2 = subReason2;
+            SoftLock = softLock;
         }
 
-        public uint Slot { get; set; }
-        public uint Reason { get; set; }
-        public int SubReason1 { get; set; }
-        public int SubReason2 { get; set; }
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Slot);
+            data.WriteUInt32(Reason);
+            data.WriteInt32(SubReason1);
+            data.WriteInt32(SubReason2);
+            data.WriteUInt32(SoftLock);
+        }
     }
 
     public class LFGBlackList
-    {
+    {     
+        public Optional<ObjectGuid> PlayerGuid;
+        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
+
         public void Write(WorldPacket data)
         {
             data.WriteBit(PlayerGuid.HasValue);
@@ -464,17 +478,9 @@ namespace Game.Networking.Packets
             if (PlayerGuid.HasValue)
                 data.WritePackedGuid(PlayerGuid.Value);
 
-            foreach (LFGBlackListSlot lfgBlackListSlot in Slot)
-            {
-                data.WriteUInt32(lfgBlackListSlot.Slot);
-                data.WriteUInt32(lfgBlackListSlot.Reason);
-                data.WriteInt32(lfgBlackListSlot.SubReason1);
-                data.WriteInt32(lfgBlackListSlot.SubReason2);
-            }
+            foreach (LFGBlackListSlot slot in Slot)
+                slot.Write(data);
         }
-
-        public Optional<ObjectGuid> PlayerGuid;
-        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
     }
 
     public struct LfgPlayerQuestRewardItem
@@ -639,40 +645,22 @@ namespace Game.Networking.Packets
         public bool RoleCheckComplete;
     }
 
-    public struct LFGJoinBlackListSlot
-    {
-        public LFGJoinBlackListSlot(int slot, int reason, int subReason1, int subReason2)
-        {
-            Slot = slot;
-            Reason = reason;
-            SubReason1 = subReason1;
-            SubReason2 = subReason2;
-        }
-
-        public int Slot { get; set; }
-        public int Reason { get; set; }
-        public int SubReason1 { get; set; }
-        public int SubReason2 { get; set; }
-    }
-
-    public class LFGJoinBlackList
+    public class LFGBlackListPkt
     {
         public void Write(WorldPacket data)
         {
-            data.WritePackedGuid(PlayerGuid);
-            data.WriteInt32(Slots.Count);
+            data.WriteBit(PlayerGuid.HasValue);
+            data.WriteInt32(Slot.Count);
 
-            foreach (LFGJoinBlackListSlot lfgBlackListSlot in Slots)
-            {
-                data.WriteInt32(lfgBlackListSlot.Slot);
-                data.WriteInt32(lfgBlackListSlot.Reason);
-                data.WriteInt32(lfgBlackListSlot.SubReason1);
-                data.WriteInt32(lfgBlackListSlot.SubReason2);
-            }
+            if (PlayerGuid.HasValue)
+                data.WritePackedGuid(PlayerGuid.Value);
+
+            foreach (LFGBlackListSlot slot in Slot)
+                slot.Write(data);
         }
 
-        public ObjectGuid PlayerGuid;
-        public List<LFGJoinBlackListSlot> Slots = new List<LFGJoinBlackListSlot>();
+        public Optional<ObjectGuid> PlayerGuid;
+        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
     }
 
     public struct LFGPlayerRewards

@@ -224,14 +224,9 @@ namespace Game.Networking.Packets
         public string Name;
         public uint SpecializationID;
         public byte GenderID;
-        public byte Skin;
-        public byte HairColor;
-        public byte HairStyle;
-        public byte FacialHairStyle;
-        public byte Face;
         public byte Race;
         public byte ClassID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public List<ChrCustomizationChoice> Customizations = new List<ChrCustomizationChoice>();
 
         public void Initialize(Player player)
         {
@@ -239,14 +234,11 @@ namespace Game.Networking.Packets
             SpecializationID = player.GetPrimarySpecialization();
             Name = player.GetName();
             GenderID = player.m_playerData.NativeSex;
-            Skin = player.m_playerData.SkinID;
-            HairColor = player.m_playerData.HairColorID;
-            HairStyle = player.m_playerData.HairStyleID;
-            FacialHairStyle = player.m_playerData.FacialHairStyleID;
-            Face = player.m_playerData.FaceID;
             Race = (byte)player.GetRace();
             ClassID = (byte)player.GetClass();
-            CustomDisplay.AddRange(player.m_playerData.CustomDisplayOption._values);
+
+            foreach (var customization in player.m_playerData.Customizations)
+                Customizations.Add(new ChrCustomizationChoice(customization.ChrCustomizationOptionID, customization.ChrCustomizationChoiceID));
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
@@ -263,16 +255,13 @@ namespace Game.Networking.Packets
             data.WriteInt32(Items.Count);
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteUInt8(GenderID);
-            data.WriteUInt8(Skin);
-            data.WriteUInt8(HairColor);
-            data.WriteUInt8(HairStyle);
-            data.WriteUInt8(FacialHairStyle);
-            data.WriteUInt8(Face);
             data.WriteUInt8(Race);
             data.WriteUInt8(ClassID);
-            CustomDisplay.ForEach(id => data.WriteUInt8(id));
-
+            data.WriteInt32(Customizations.Count);
             data.WriteString(Name);
+
+            foreach (var customization in Customizations)
+                customization.Write(data);
 
             foreach (InspectItemData item in Items)
                 item.Write(data);

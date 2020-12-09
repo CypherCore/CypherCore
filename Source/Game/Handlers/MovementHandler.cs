@@ -429,7 +429,7 @@ namespace Game
 
             NewWorld packet = new NewWorld();
             packet.MapID = loc.GetMapId();
-            packet.Pos = loc;
+            packet.Loc.Pos = loc;
             packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
             SendPacket(packet);
 

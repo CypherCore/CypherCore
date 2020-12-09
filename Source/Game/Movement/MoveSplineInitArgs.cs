@@ -47,6 +47,7 @@ namespace Game.Movement
         public uint splineId;
         public float initialOrientation;
         public Optional<SpellEffectExtraData> spellEffectExtra;
+        public Optional<AnimTierTransition> animTier;
         public bool walk;
         public bool HasVelocity;
         public bool TransformForTransport;
@@ -91,5 +92,11 @@ namespace Game.Movement
         public uint SpellVisualId;
         public uint ProgressCurveId;
         public uint ParabolicCurveId;
+    }
+
+    public class AnimTierTransition
+    {
+        public uint TierTransitionId;
+        public byte AnimTier;
     }
 }

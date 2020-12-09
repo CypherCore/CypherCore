@@ -42,9 +42,9 @@ namespace Game.Networking.Packets
         public ulong EventID;
     }
 
-    class CalendarCommunityFilter : ClientPacket
+    class CalendarCommunityInviteRequest : ClientPacket
     {
-        public CalendarCommunityFilter(WorldPacket packet) : base(packet) { }
+        public CalendarCommunityInviteRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -260,9 +260,9 @@ namespace Game.Networking.Packets
         public string EventName;
     }
 
-    class CalendarEventInvite : ClientPacket
+    class CalendarInvitePkt : ClientPacket
     {
-        public CalendarEventInvite(WorldPacket packet) : base(packet) { }
+        public CalendarInvitePkt(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -285,9 +285,9 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class CalendarEventRSVP : ClientPacket
+    class HandleCalendarRsvp : ClientPacket
     {
-        public CalendarEventRSVP(WorldPacket packet) : base(packet) { }
+        public HandleCalendarRsvp(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -502,9 +502,9 @@ namespace Game.Networking.Packets
         public ulong InviteID;
     }
 
-    class CalendarEventStatus : ClientPacket
+    class CalendarStatus : ClientPacket
     {
-        public CalendarEventStatus(WorldPacket packet) : base(packet) { }
+        public CalendarStatus(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -538,9 +538,9 @@ namespace Game.Networking.Packets
         public uint DifficultyID;
     }
 
-    class CalendarEventModeratorStatus : ClientPacket
+    class CalendarModeratorStatusQuery : ClientPacket
     {
-        public CalendarEventModeratorStatus(WorldPacket packet) : base(packet) { }
+        public CalendarModeratorStatusQuery(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {

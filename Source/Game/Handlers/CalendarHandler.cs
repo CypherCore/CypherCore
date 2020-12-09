@@ -108,12 +108,12 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(GetPlayer().GetGUID(), CalendarError.EventInvalid);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarCommunityFilter)]
-        void HandleCalendarCommunityFilter(CalendarCommunityFilter calendarCommunityFilter)
+        [WorldPacketHandler(ClientOpcodes.CalendarCommunityInviteRequest)]
+        void HandleCalendarCommunityInvite(CalendarCommunityInviteRequest calendarCommunityInvite)
         {
             Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
             if (guild)
-                guild.MassInviteToEvent(this, calendarCommunityFilter.MinLevel, calendarCommunityFilter.MaxLevel, calendarCommunityFilter.MaxRankOrder);
+                guild.MassInviteToEvent(this, calendarCommunityInvite.MinLevel, calendarCommunityInvite.MaxLevel, calendarCommunityInvite.MaxRankOrder);
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarAddEvent)]
@@ -234,8 +234,8 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarEventInvite)]
-        void HandleCalendarEventInvite(CalendarEventInvite calendarEventInvite)
+        [WorldPacketHandler(ClientOpcodes.CalendarInvite)]
+        void HandleCalendarInvite(CalendarInvitePkt calendarInvite)
         {
             ObjectGuid playerGuid = GetPlayer().GetGUID();
 
@@ -243,10 +243,10 @@ namespace Game
             Team inviteeTeam = 0;
             ulong inviteeGuildId = 0;
 
-            if (!ObjectManager.NormalizePlayerName(ref calendarEventInvite.Name))
+            if (!ObjectManager.NormalizePlayerName(ref calendarInvite.Name))
                 return;
 
-            Player player = Global.ObjAccessor.FindPlayerByName(calendarEventInvite.Name);
+            Player player = Global.ObjAccessor.FindPlayerByName(calendarInvite.Name);
             if (player)
             {
                 // Invitee is online
@@ -257,7 +257,7 @@ namespace Game
             else
             {
                 // Invitee offline, get data from database
-                ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(calendarEventInvite.Name);
+                ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(calendarInvite.Name);
                 if (!guid.IsEmpty())
                 {
                     CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
@@ -288,14 +288,14 @@ namespace Game
 
                 if (Convert.ToBoolean(result1.Read<byte>(0) & (byte)SocialFlag.Ignored))
                 {
-                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, calendarEventInvite.Name);
+                    Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.IgnoringYouS, calendarInvite.Name);
                     return;
                 }
             }
 
-            if (!calendarEventInvite.Creating)
+            if (!calendarInvite.Creating)
             {
-                CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarEventInvite.EventID);
+                CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarInvite.EventID);
                 if (calendarEvent != null)
                 {
                     if (calendarEvent.IsGuildEvent() && calendarEvent.GuildId == inviteeGuildId)
@@ -305,7 +305,7 @@ namespace Game
                         return;
                     }
 
-                    CalendarInvite invite = new CalendarInvite(Global.CalendarMgr.GetFreeInviteId(), calendarEventInvite.EventID, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
+                    CalendarInvite invite = new CalendarInvite(Global.CalendarMgr.GetFreeInviteId(), calendarInvite.EventID, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
                     Global.CalendarMgr.AddInvite(calendarEvent, invite);
                 }
                 else
@@ -313,13 +313,13 @@ namespace Game
             }
             else
             {
-                if (calendarEventInvite.IsSignUp && inviteeGuildId == GetPlayer().GetGuildId())
+                if (calendarInvite.IsSignUp && inviteeGuildId == GetPlayer().GetGuildId())
                 {
                     Global.CalendarMgr.SendCalendarCommandResult(playerGuid, CalendarError.NoGuildInvites);
                     return;
                 }
 
-                CalendarInvite invite = new CalendarInvite(calendarEventInvite.EventID, 0, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
+                CalendarInvite invite = new CalendarInvite(calendarInvite.EventID, 0, inviteeGuid, playerGuid, SharedConst.CalendarDefaultResponseTime, CalendarInviteStatus.Invited, CalendarModerationRank.Player, "");
                 Global.CalendarMgr.SendCalendarEventInvite(invite);
             }
         }
@@ -347,25 +347,25 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarEventRsvp)]
-        void HandleCalendarEventRsvp(CalendarEventRSVP calendarEventRSVP)
+        [WorldPacketHandler(ClientOpcodes.CalendarRsvp)]
+        void HandleCalendarRsvp(HandleCalendarRsvp calendarRSVP)
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarEventRSVP.EventID);
+            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarRSVP.EventID);
             if (calendarEvent != null)
             {
                 // i think we still should be able to remove self from locked events
-                if (calendarEventRSVP.Status != CalendarInviteStatus.Removed && calendarEvent.IsLocked())
+                if (calendarRSVP.Status != CalendarInviteStatus.Removed && calendarEvent.IsLocked())
                 {
                     Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventLocked);
                     return;
                 }
 
-                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarEventRSVP.InviteID);
+                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarRSVP.InviteID);
                 if (invite != null)
                 {
-                    invite.Status = calendarEventRSVP.Status;
+                    invite.Status = calendarRSVP.Status;
                     invite.ResponseTime = Time.UnixTime;
 
                     Global.CalendarMgr.UpdateInvite(invite);
@@ -399,22 +399,22 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.NoInvite);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarEventStatus)]
-        void HandleCalendarEventStatus(CalendarEventStatus calendarEventStatus)
+        [WorldPacketHandler(ClientOpcodes.CalendarStatus)]
+        void HandleCalendarStatus(CalendarStatus calendarStatus)
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarEventStatus.EventID);
+            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarStatus.EventID);
             if (calendarEvent != null)
             {
-                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarEventStatus.InviteID);
+                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarStatus.InviteID);
                 if (invite != null)
                 {
-                    invite.Status = (CalendarInviteStatus)calendarEventStatus.Status;
+                    invite.Status = (CalendarInviteStatus)calendarStatus.Status;
 
                     Global.CalendarMgr.UpdateInvite(invite);
                     Global.CalendarMgr.SendCalendarEventStatus(calendarEvent, invite);
-                    Global.CalendarMgr.SendCalendarClearPendingAction(calendarEventStatus.Guid);
+                    Global.CalendarMgr.SendCalendarClearPendingAction(calendarStatus.Guid);
                 }
                 else
                     Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.NoInvite); // correct?
@@ -424,17 +424,17 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarEventModeratorStatus)]
-        void HandleCalendarEventModeratorStatus(CalendarEventModeratorStatus calendarEventModeratorStatus)
+        void HandleCalendarModeratorStatus(CalendarModeratorStatusQuery calendarModeratorStatus)
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarEventModeratorStatus.EventID);
+            CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarModeratorStatus.EventID);
             if (calendarEvent != null)
             {
-                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarEventModeratorStatus.InviteID);
+                CalendarInvite invite = Global.CalendarMgr.GetInvite(calendarModeratorStatus.InviteID);
                 if (invite != null)
                 {
-                    invite.Rank = (CalendarModerationRank)calendarEventModeratorStatus.Status;
+                    invite.Rank = (CalendarModerationRank)calendarModeratorStatus.Status;
                     Global.CalendarMgr.UpdateInvite(invite);
                     Global.CalendarMgr.SendCalendarEventModeratorStatusAlert(calendarEvent, invite);
                 }

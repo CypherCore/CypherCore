@@ -531,13 +531,8 @@ namespace Game
 
                 Guild guild = player.GetGuild();
 
-                mirrorImageComponentedData.SkinColor = player.m_playerData.SkinID;
-                mirrorImageComponentedData.FaceVariation = player.m_playerData.FaceID;
-                mirrorImageComponentedData.HairVariation = player.m_playerData.HairStyleID;
-                mirrorImageComponentedData.HairColor = player.m_playerData.HairColorID;
-                mirrorImageComponentedData.BeardVariation = player.m_playerData.FacialHairStyleID;
-                for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    mirrorImageComponentedData.CustomDisplay[i] = player.m_playerData.CustomDisplayOption[i];
+                foreach (var customization in player.m_playerData.Customizations)
+                    mirrorImageComponentedData.Customizations.Add(new ChrCustomizationChoice(customization.ChrCustomizationOptionID, customization.ChrCustomizationChoiceID));
                 mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =

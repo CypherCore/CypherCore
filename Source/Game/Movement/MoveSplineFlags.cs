@@ -29,7 +29,6 @@ namespace Game.Movement
         public bool IsSmooth() { return Flags.HasAnyFlag(SplineFlag.Catmullrom); }
         public bool IsLinear() { return !IsSmooth(); }
 
-        public byte GetAnimTier() { return animTier; }
         public bool HasAllFlags(SplineFlag f) { return (Flags & f) == f; }
         public bool HasFlag(SplineFlag f) { return (Flags & f) != 0; }
 
@@ -41,10 +40,10 @@ namespace Game.Movement
                 Flags &= ~f;
         }
 
-        public void EnableAnimation(uint anim) { Flags = (Flags & ~(SplineFlag.MaskAnimations | SplineFlag.Falling | SplineFlag.Parabolic | SplineFlag.FallingSlow | SplineFlag.FadeObject)) | SplineFlag.Animation | ((SplineFlag)anim & SplineFlag.MaskAnimations); }
-        public void EnableParabolic() { Flags = (Flags & ~(SplineFlag.MaskAnimations | SplineFlag.Falling | SplineFlag.Animation | SplineFlag.FallingSlow | SplineFlag.FadeObject)) | SplineFlag.Parabolic; }
+        public void EnableAnimation() { Flags = (Flags & ~(SplineFlag.Falling | SplineFlag.Parabolic | SplineFlag.FallingSlow | SplineFlag.FadeObject)) | SplineFlag.Animation; }
+        public void EnableParabolic() { Flags = (Flags & ~(SplineFlag.Falling | SplineFlag.Animation | SplineFlag.FallingSlow | SplineFlag.FadeObject)) | SplineFlag.Parabolic; }
         public void EnableFlying() { Flags = (Flags & ~SplineFlag.Falling) | SplineFlag.Flying; }
-        public void EnableFalling() { Flags = (Flags & ~(SplineFlag.MaskAnimations | SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.Flying)) | SplineFlag.Falling; }
+        public void EnableFalling() { Flags = (Flags & ~(SplineFlag.Parabolic | SplineFlag.Animation | SplineFlag.Flying)) | SplineFlag.Falling; }
         public void EnableCatmullRom() { Flags = (Flags & ~SplineFlag.SmoothGroundPath) | SplineFlag.Catmullrom; }
         public void EnableTransportEnter() { Flags = (Flags & ~SplineFlag.TransportExit) | SplineFlag.TransportEnter; }
         public void EnableTransportExit() { Flags = (Flags & ~SplineFlag.TransportEnter) | SplineFlag.TransportExit; }

@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteInt32(SpellXSpellVisualID);
+            Visual.Write(_worldPacket);
             _worldPacket.WriteInt32(Damage);
             _worldPacket.WriteInt32(OriginalDamage);
             _worldPacket.WriteInt32(Overkill);
@@ -90,7 +90,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CasterGUID;
         public ObjectGuid CastID;
         public int SpellID;
-        public int SpellXSpellVisualID;
+        public SpellCastVisual Visual;
         public int Damage;
         public int OriginalDamage;
         public int Overkill = -1;
@@ -578,8 +578,8 @@ namespace Game.Networking.Packets
             attackRoundInfo.WriteUInt8(ContentTuning.TargetMaxScalingLevel);
             attackRoundInfo.WriteInt16(ContentTuning.PlayerLevelDelta);
             attackRoundInfo.WriteInt8(ContentTuning.TargetScalingLevelDelta);
-            attackRoundInfo.WriteUInt16(ContentTuning.PlayerItemLevel);
-            attackRoundInfo.WriteUInt16(ContentTuning.TargetItemLevel);
+            attackRoundInfo.WriteFloat(ContentTuning.PlayerItemLevel);
+            attackRoundInfo.WriteFloat(ContentTuning.TargetItemLevel);
             attackRoundInfo.WriteUInt16(ContentTuning.ScalingHealthItemLevelCurveID);
             attackRoundInfo.WriteUInt8((byte)(ContentTuning.ScalesWithItemLevel ? 1 : 0));
 

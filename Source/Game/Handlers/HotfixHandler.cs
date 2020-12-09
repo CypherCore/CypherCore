@@ -43,7 +43,7 @@ namespace Game
 
                 if (store.HasRecord(record.RecordID))
                 {
-                    dbReply.Allow = true;
+                    dbReply.Status = 1;
                     dbReply.Timestamp = (uint)GameTime.GetGameTime();
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
                 }

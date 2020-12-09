@@ -52,7 +52,7 @@ namespace Game.Networking.Packets
             Muid = _worldPacket.ReadUInt32();
             Slot = _worldPacket.ReadUInt32();
             Item.Read(_worldPacket);
-            ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(2);
+            ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(3);
         }
 
         public ObjectGuid VendorGUID;
@@ -678,7 +678,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    public class ItemBonusInstanceData
+    public class ItemBonuses
     {
         public void Write(WorldPacket data)
         {
@@ -708,13 +708,13 @@ namespace Game.Networking.Packets
 
         public override bool Equals(object obj)
         {
-            if (obj is ItemBonusInstanceData)
-                return (ItemBonusInstanceData)obj == this;
+            if (obj is ItemBonuses)
+                return (ItemBonuses)obj == this;
 
             return false;
         }
 
-        public static bool operator ==(ItemBonusInstanceData left, ItemBonusInstanceData right)
+        public static bool operator ==(ItemBonuses left, ItemBonuses right)
         {
             if (left.Context != right.Context)
                 return false;
@@ -725,7 +725,7 @@ namespace Game.Networking.Packets
             return left.BonusListIDs.SequenceEqual(right.BonusListIDs);
         }
 
-        public static bool operator !=(ItemBonusInstanceData left, ItemBonusInstanceData right)
+        public static bool operator !=(ItemBonuses left, ItemBonuses right)
         {
             return !(left == right);
         }
@@ -734,8 +734,118 @@ namespace Game.Networking.Packets
         public List<uint> BonusListIDs = new List<uint>();
     }
 
+    public class ItemMod
+    {  
+        public uint Value;
+        public ItemModifier Type;
+
+        public ItemMod()
+        {
+            Type = ItemModifier.Max;
+        }
+        public ItemMod(uint value, ItemModifier type)
+        {
+            Value = value;
+            Type = type;
+        }
+
+        public void Read(WorldPacket data)
+        {
+            Value = data.ReadUInt32();
+            Type = (ItemModifier)data.ReadUInt8();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Value);
+            data.WriteUInt8((byte)Type);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode() ^ Type.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ItemMod)
+                return (ItemMod)obj == this;
+
+            return false;
+        }
+
+        public static bool operator ==(ItemMod left, ItemMod right)
+        {
+            if (left.Value != right.Value)
+                return false;
+
+            return left.Type != right.Type;
+        }
+
+        public static bool operator !=(ItemMod left, ItemMod right)
+        {
+            return !(left == right);
+        }
+    }
+
+    public class ItemModList
+    {
+        public Array<ItemMod> Values = new Array<ItemMod>(ItemModifier.Max);
+
+        public void Read(WorldPacket data)
+        {
+            var itemModListCount = data.ReadBits<uint>(6);
+
+            for (var i = 0; i < itemModListCount; ++i)
+            {
+                var itemMod = new ItemMod();
+                itemMod.Read(data);
+                Values[i] = itemMod;
+            }
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits(Values.Count, 6);
+            data.FlushBits();
+
+            foreach (ItemMod itemMod in Values)
+                itemMod.Write(data);
+        }
+
+        public override int GetHashCode()
+        {
+            return Values.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ItemModList)
+                return (ItemModList)obj == this;
+
+            return false;
+        }
+
+        public static bool operator ==(ItemModList left, ItemModList right)
+        {
+            if (left.Values.Count != right.Values.Count)
+                return false;
+
+            return !left.Values.Except(right.Values).Any();
+        }
+
+        public static bool operator !=(ItemModList left, ItemModList right)
+        {
+            return !(left == right);
+        }
+    }
+
     public class ItemInstance
     {
+        public uint ItemID;
+        public Optional<ItemBonuses> ItemBonus;
+        public ItemModList Modifications = new ItemModList();
+
         public ItemInstance() { }
 
         public ItemInstance(Item item)
@@ -749,17 +859,8 @@ namespace Game.Networking.Packets
                 ItemBonus.Value.Context = item.GetContext();
             }
 
-            uint mask = item.m_itemData.ModifiersMask;
-            if (mask != 0)
-            {
-                Modifications.HasValue = true;
-
-                for (int i = 0; mask != 0; mask >>= 1, ++i)
-                {
-                    if ((mask & 1) != 0)
-                        Modifications.Value.Insert(i, (int)item.GetModifier((ItemModifier)i));
-                }
-            }
+            foreach (var mod in item.m_itemData.Modifiers.Values)
+                Modifications.Values.Add(mod.Value, (ItemModifier)mod.Type);
         }
 
         public ItemInstance(Loots.LootItem lootItem)
@@ -780,14 +881,11 @@ namespace Game.Networking.Packets
         {
             ItemID = voidItem.ItemEntry;
 
-            if (voidItem.FixedScalingLevel != 0 || voidItem.ArtifactKnowledgeLevel != 0)
-            {
-                Modifications.HasValue = true;
-                if (voidItem.FixedScalingLevel != 0)
-                    Modifications.Value.Insert((int)ItemModifier.TimewalkerLevel, (int)voidItem.FixedScalingLevel);
-                if (voidItem.ArtifactKnowledgeLevel != 0)
-                    Modifications.Value.Insert((int)ItemModifier.ArtifactKnowledgeLevel, (int)voidItem.ArtifactKnowledgeLevel);
-            }
+            if (voidItem.FixedScalingLevel != 0)
+                Modifications.Values.Add(new ItemMod(voidItem.FixedScalingLevel, ItemModifier.TimewalkerLevel));
+
+            if (voidItem.ArtifactKnowledgeLevel != 0)
+                Modifications.Values.Add(new ItemMod(voidItem.ArtifactKnowledgeLevel, ItemModifier.ArtifactKnowledgeLevel));
 
             if (!voidItem.BonusListIDs.Empty())
             {
@@ -801,7 +899,7 @@ namespace Game.Networking.Packets
         {
             ItemID = gem.ItemId;
 
-            ItemBonusInstanceData bonus = new ItemBonusInstanceData();
+            ItemBonuses bonus = new ItemBonuses();
             bonus.Context = (ItemContext)(byte)gem.Context;
             foreach (ushort bonusListId in gem.BonusListIDs)
                 if (bonusListId != 0)
@@ -816,14 +914,12 @@ namespace Game.Networking.Packets
             data.WriteUInt32(ItemID);
 
             data.WriteBit(ItemBonus.HasValue);
-            data.WriteBit(Modifications.HasValue);
             data.FlushBits();
+
+            Modifications.Write(data);
 
             if (ItemBonus.HasValue)
                 ItemBonus.Value.Write(data);
-
-            if (Modifications.HasValue)
-                Modifications.Value.Write(data);
         }
 
         public void Read(WorldPacket data)
@@ -831,14 +927,12 @@ namespace Game.Networking.Packets
             ItemID = data.ReadUInt32();
 
             ItemBonus.HasValue = data.HasBit();
-            Modifications.HasValue = data.HasBit();
             data.ResetBitPos();
+
+            Modifications.Read(data);
 
             if (ItemBonus.HasValue)
                 ItemBonus.Value.Read(data);
-
-            if (Modifications.HasValue)
-                Modifications.Value.Read(data);
         }
 
         public override int GetHashCode()
@@ -859,10 +953,10 @@ namespace Game.Networking.Packets
             if (left.ItemID != right.ItemID)
                 return false;
 
-            if (left.ItemBonus.HasValue != right.ItemBonus.HasValue || left.Modifications.HasValue != right.Modifications.HasValue)
+            if (left.ItemBonus.HasValue != right.ItemBonus.HasValue)
                 return false;
 
-            if (left.Modifications.HasValue && left.Modifications.Value != right.Modifications.Value)
+            if (left.Modifications != right.Modifications)
                 return false;
 
             if (left.ItemBonus.HasValue && left.ItemBonus.Value != right.ItemBonus.Value)
@@ -875,10 +969,6 @@ namespace Game.Networking.Packets
         {
             return !(left == right);
         }
-
-        public uint ItemID;
-        public Optional<ItemBonusInstanceData> ItemBonus;
-        public Optional<CompactArray> Modifications;
     }
 
     public class ItemEnchantData

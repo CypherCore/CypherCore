@@ -732,8 +732,8 @@ namespace Game
             GetPlayer().SetPendingBind(0, 0);
         }
 
-        [WorldPacketHandler(ClientOpcodes.WardenData)]
-        void HandleWardenDataOpcode(WardenData packet)
+        [WorldPacketHandler(ClientOpcodes.Warden3Data)]
+        void HandleWarden3Data(WardenData packet)
         {
             if (_warden == null || packet.Data.GetSize() == 0)
                 return;

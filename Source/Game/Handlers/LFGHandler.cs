@@ -150,7 +150,7 @@ namespace Game
 
             // Get player locked Dungeons
             foreach (var locked in Global.LFGMgr.GetLockedDungeons(_player.GetGUID()))
-                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel));
+                lfgPlayerInfo.BlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
 
             foreach (var slot in randomDungeons)
             {
@@ -231,7 +231,7 @@ namespace Game
                 LFGBlackList lfgBlackList = new LFGBlackList();
                 lfgBlackList.PlayerGuid.Set(pguid);
                 foreach (var locked in Global.LFGMgr.GetLockedDungeons(pguid))
-                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel));
+                    lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
 
                 lfgPartyInfo.Player.Add(lfgBlackList);
             }
@@ -353,7 +353,7 @@ namespace Game
 
             foreach (var it in joinData.lockmap)
             {
-                var blackList = new LFGJoinBlackList();
+                var blackList = new LFGBlackListPkt();
                 blackList.PlayerGuid = it.Key;
 
                 foreach (var lockInfo in it.Value)
@@ -361,8 +361,10 @@ namespace Game
                     Log.outTrace(LogFilter.Lfg, "SendLfgJoinResult:: {0} DungeonID: {1} Lock status: {2} Required itemLevel: {3} Current itemLevel: {4}",
                         it.Key.ToString(), (lockInfo.Key & 0x00FFFFFF), lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, lockInfo.Value.currentItemLevel);
 
-                    blackList.Slots.Add(new LFGJoinBlackListSlot((int)lockInfo.Key, (int)lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, (int)lockInfo.Value.currentItemLevel));
+                    blackList.Slot.Add(new LFGBlackListSlot(lockInfo.Key, (uint)lockInfo.Value.lockStatus, lockInfo.Value.requiredItemLevel, (int)lockInfo.Value.currentItemLevel, 0));
                 }
+
+                lfgJoinResult.BlackList.Add(blackList);
             }
 
             SendPacket(lfgJoinResult);

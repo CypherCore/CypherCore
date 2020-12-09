@@ -50,6 +50,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(TwitterPostThrottleCooldown);
 
             _worldPacket.WriteUInt32(TokenPollTimeSeconds);
+            _worldPacket.WriteUInt32(KioskSessionMinutes);
             _worldPacket.WriteInt64(TokenBalanceAmount);
 
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
@@ -71,7 +72,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(RestrictedAccount);
             _worldPacket.WriteBit(CommerceSystemEnabled);
             _worldPacket.WriteBit(TutorialsEnabled);
-            _worldPacket.WriteBit(NPETutorialsEnabled);
             _worldPacket.WriteBit(TwitterEnabled);
             _worldPacket.WriteBit(Unk67);
             _worldPacket.WriteBit(WillKickFromWorld);
@@ -88,6 +88,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(QuestSessionEnabled);
             _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
+            _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.FlushBits();
 
             {
@@ -123,22 +124,12 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
             }
 
-            _worldPacket.WriteBit(VoiceChatManagerSettings.IsSquelched);
-            _worldPacket.WritePackedGuid(VoiceChatManagerSettings.BnetAccountGuid);
-            _worldPacket.WritePackedGuid(VoiceChatManagerSettings.GuildGuid);
+            _worldPacket.WriteBit(Squelch.IsSquelched);
+            _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
+            _worldPacket.WritePackedGuid(Squelch.GuildGuid);
 
             if (EuropaTicketSystemStatus.HasValue)
-            {
-                _worldPacket.WriteBit(EuropaTicketSystemStatus.Value.TicketsEnabled);
-                _worldPacket.WriteBit(EuropaTicketSystemStatus.Value.BugsEnabled);
-                _worldPacket.WriteBit(EuropaTicketSystemStatus.Value.ComplaintsEnabled);
-                _worldPacket.WriteBit(EuropaTicketSystemStatus.Value.SuggestionsEnabled);
-
-                _worldPacket.WriteUInt32(EuropaTicketSystemStatus.Value.ThrottleState.MaxTries);
-                _worldPacket.WriteUInt32(EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds);
-                _worldPacket.WriteUInt32(EuropaTicketSystemStatus.Value.ThrottleState.TryCount);
-                _worldPacket.WriteUInt32(EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow);
-            }
+                EuropaTicketSystemStatus.Value.Write(_worldPacket);
         }
 
         public bool VoiceEnabled;
@@ -160,6 +151,7 @@ namespace Game.Networking.Packets
         public uint BpayStoreProductDeliveryDelay;
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
+        public uint KioskSessionMinutes;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -183,28 +175,11 @@ namespace Game.Networking.Packets
         public bool QuestSessionEnabled;
         public bool IsMuted;
         public bool ClubFinderEnabled;
+        public bool Unknown901CheckoutRelated;
 
         public SocialQueueConfig QuickJoinConfig;
-        public VoiceChatProxySettings VoiceChatManagerSettings;
+        public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
-
-        public struct SavedThrottleObjectState
-        {
-            public uint MaxTries;
-            public uint PerMilliseconds;
-            public uint TryCount;
-            public uint LastResetTimeBeforeNow;
-        }
-
-        public struct EuropaTicketConfig
-        {
-            public bool TicketsEnabled;
-            public bool BugsEnabled;
-            public bool ComplaintsEnabled;
-            public bool SuggestionsEnabled;
-
-            public SavedThrottleObjectState ThrottleState;
-        }
 
         public struct SessionAlertConfig
         {
@@ -240,7 +215,7 @@ namespace Game.Networking.Packets
             public float ThrottleDfBestPriority;
         }
 
-        public struct VoiceChatProxySettings
+        public struct SquelchInfo
         {
             public bool IsSquelched;
             public ObjectGuid BnetAccountGuid;
@@ -279,16 +254,28 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
+            _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
+            _worldPacket.WriteBit(Unknown901CheckoutRelated);
+            _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
             _worldPacket.FlushBits();
 
+            if (EuropaTicketSystemStatus.HasValue)
+                EuropaTicketSystemStatus.Value.Write(_worldPacket);
+
             _worldPacket.WriteUInt32(TokenPollTimeSeconds);
+            _worldPacket.WriteUInt32(KioskSessionMinutes);
             _worldPacket.WriteInt64(TokenBalanceAmount);
             _worldPacket.WriteInt32(MaxCharactersPerRealm);
+            _worldPacket.WriteInt32(LiveRegionCharacterCopySourceRegions.Count);
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
             _worldPacket.WriteInt32(ActiveCharacterUpgradeBoostType);
             _worldPacket.WriteInt32(ActiveClassTrialBoostType);
             _worldPacket.WriteInt32(MinimumExpansionLevel);
             _worldPacket.WriteInt32(MaximumExpansionLevel);
+
+            foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
+                _worldPacket.WriteInt32(sourceRegion);
+
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -306,6 +293,10 @@ namespace Game.Networking.Packets
         public bool LiveRegionCharacterListEnabled; // NYI
         public bool LiveRegionCharacterCopyEnabled; // NYI
         public bool LiveRegionAccountCopyEnabled; // NYI
+        public bool LiveRegionKeyBindingsCopyEnabled = false;
+        public bool Unknown901CheckoutRelated = false; // NYI
+        public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
+        public List<int> LiveRegionCharacterCopySourceRegions = new List<int>();
         public uint TokenPollTimeSeconds;     // NYI
         public long TokenBalanceAmount;     // NYI 
         public int MaxCharactersPerRealm;
@@ -314,6 +305,7 @@ namespace Game.Networking.Packets
         public int ActiveClassTrialBoostType;     // NYI
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
+        public uint KioskSessionMinutes;
     }
 
     public class MOTD : ServerPacket
@@ -350,5 +342,41 @@ namespace Game.Networking.Packets
 
         public string ServerTimeTZ;
         public string GameTimeTZ;
+    }
+
+    public struct SavedThrottleObjectState
+    {
+        public uint MaxTries;
+        public uint PerMilliseconds;
+        public uint TryCount;
+        public uint LastResetTimeBeforeNow;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(MaxTries);
+            data.WriteUInt32(PerMilliseconds);
+            data.WriteUInt32(TryCount);
+            data.WriteUInt32(LastResetTimeBeforeNow);
+        }
+    }
+
+    public struct EuropaTicketConfig
+    {
+        public bool TicketsEnabled;
+        public bool BugsEnabled;
+        public bool ComplaintsEnabled;
+        public bool SuggestionsEnabled;
+
+        public SavedThrottleObjectState ThrottleState;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(TicketsEnabled);
+            data.WriteBit(BugsEnabled);
+            data.WriteBit(ComplaintsEnabled);
+            data.WriteBit(SuggestionsEnabled);
+
+            ThrottleState.Write(data);
+        }
     }
 }

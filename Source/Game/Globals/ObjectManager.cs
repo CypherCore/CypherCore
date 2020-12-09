@@ -7544,7 +7544,7 @@ namespace Game
                     _questPOIStorage[questID] = new QuestPOIData(questID);
 
                 QuestPOIData poiData = _questPOIStorage[questID];
-                poiData.QuestPOIBlobDataStats.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags, worldEffectID, playerConditionID, spawnTrackingID, POIs[questID][idx1], alwaysAllowMergingBlobs));
+                poiData.Blobs.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags, worldEffectID, playerConditionID, spawnTrackingID, POIs[questID][idx1], alwaysAllowMergingBlobs));
 
                 ++count;
             } while (result.NextRow());
@@ -10490,8 +10490,23 @@ namespace Game
 
     public class QuestPOIBlobData
     {
+        public int BlobIndex;
+        public int ObjectiveIndex;
+        public int QuestObjectiveID;
+        public int QuestObjectID;
+        public int MapID;
+        public int UiMapID;
+        public int Priority;
+        public int Flags;
+        public int WorldEffectID;
+        public int PlayerConditionID;
+        public int NavigationPlayerConditionID;
+        public int SpawnTrackingID;
+        public List<QuestPOIBlobPoint> Points;
+        public bool AlwaysAllowMergingBlobs;
+
         public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags, 
-            int worldEffectID, int playerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> questPOIBlobPointStats, bool alwaysAllowMergingBlobs)
+            int worldEffectID, int playerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
         {
             BlobIndex = blobIndex;
             ObjectiveIndex = objectiveIndex;
@@ -10504,46 +10519,36 @@ namespace Game
             WorldEffectID = worldEffectID;
             PlayerConditionID = playerConditionID;
             SpawnTrackingID = spawnTrackingID;
-            QuestPOIBlobPointStats = questPOIBlobPointStats;
+            Points = points;
             AlwaysAllowMergingBlobs = alwaysAllowMergingBlobs;
-        }
-
-        public int BlobIndex;
-        public int ObjectiveIndex;
-        public int QuestObjectiveID;
-        public int QuestObjectID;
-        public int MapID;
-        public int UiMapID;
-        public int Priority;
-        public int Flags;
-        public int WorldEffectID;
-        public int PlayerConditionID;
-        public int SpawnTrackingID;
-        public List<QuestPOIBlobPoint> QuestPOIBlobPointStats;
-        public bool AlwaysAllowMergingBlobs;
+        } 
     }
 
     public class QuestPOIBlobPoint
-    {
-        public QuestPOIBlobPoint(int _x, int _y)
-        {
-            X = _x;
-            Y = _y;
-        }
-
+    {  
         public int X;
         public int Y;
+        public int Z;
+
+        public QuestPOIBlobPoint(int x, int y, int z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
     }
 
     public class QuestPOIData
     {
         public uint QuestID;
-        public List<QuestPOIBlobData> QuestPOIBlobDataStats = new List<QuestPOIBlobData>();
-        public ByteBuffer QueryDataBuffer = new ByteBuffer();
+        public List<QuestPOIBlobData> Blobs;
+        public ByteBuffer QueryDataBuffer;
 
         public QuestPOIData(uint questId)
         {
             QuestID = questId;
+            Blobs = new List<QuestPOIBlobData>();
+            QueryDataBuffer = new ByteBuffer();
         }
 
         public void InitializeQueryData()
@@ -10554,9 +10559,9 @@ namespace Game
         public void Write(ByteBuffer data)
         {
             data.WriteUInt32(QuestID);
-            data.WriteInt32(QuestPOIBlobDataStats.Count);
+            data.WriteInt32(Blobs.Count);
 
-            foreach (QuestPOIBlobData questPOIBlobData in QuestPOIBlobDataStats)
+            foreach (QuestPOIBlobData questPOIBlobData in Blobs)
             {
                 data.WriteInt32(questPOIBlobData.BlobIndex);
                 data.WriteInt32(questPOIBlobData.ObjectiveIndex);
@@ -10568,13 +10573,15 @@ namespace Game
                 data.WriteInt32(questPOIBlobData.Flags);
                 data.WriteInt32(questPOIBlobData.WorldEffectID);
                 data.WriteInt32(questPOIBlobData.PlayerConditionID);
+                data.WriteInt32(questPOIBlobData.NavigationPlayerConditionID);
                 data.WriteInt32(questPOIBlobData.SpawnTrackingID);
-                data.WriteInt32(questPOIBlobData.QuestPOIBlobPointStats.Count);
+                data.WriteInt32(questPOIBlobData.Points.Count);
 
-                foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.QuestPOIBlobPointStats)
+                foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.Points)
                 {
-                    data.WriteInt32(questPOIBlobPoint.X);
-                    data.WriteInt32(questPOIBlobPoint.Y);
+                    data.WriteInt16((short)questPOIBlobPoint.X);
+                    data.WriteInt16((short)questPOIBlobPoint.Y);
+                    data.WriteInt16((short)questPOIBlobPoint.Z);
                 }
 
                 data.WriteBit(questPOIBlobData.AlwaysAllowMergingBlobs);

@@ -47,7 +47,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Contacts.Count, 8);
             _worldPacket.FlushBits();
 
-            Contacts.ForEach(p => p.Write(_worldPacket));
+            foreach (ContactInfo contact in Contacts)
+                contact.Write(_worldPacket);
         }
 
         public List<ContactInfo> Contacts;

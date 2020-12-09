@@ -1335,10 +1335,6 @@ namespace Game.Entities
             if (thisPlayer != null)
                 thisPlayer.SendMovementSetCollisionHeight(thisPlayer.GetCollisionHeight(false));
 
-            Dismount data = new Dismount();
-            data.Guid = GetGUID();
-            SendMessageToSet(data, true);
-
             // dismount as a vehicle
             if (IsTypeId(TypeId.Player) && GetVehicleKit() != null)
             {

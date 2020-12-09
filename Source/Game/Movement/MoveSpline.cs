@@ -51,6 +51,7 @@ namespace Game.Movement
             vertical_acceleration = 0.0f;
             effect_start_time = 0;
             spell_effect_extra = args.spellEffectExtra;
+            anim_tier = args.animTier;
             splineIsFacingOnly = args.path.Length == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).GetLength() < 0.1f);
 
             // Check if its a stop spline
@@ -155,7 +156,7 @@ namespace Game.Movement
             }
             else
             {
-                if (!splineflags.HasFlag(SplineFlag.OrientationFixed | SplineFlag.Falling | SplineFlag.Unknown0))
+                if (!splineflags.HasFlag(SplineFlag.OrientationFixed | SplineFlag.Falling | SplineFlag.Unknown0x8))
                 {
                     Vector3 hermite;
                     spline.Evaluate_Derivative(point_Idx, u, out hermite);
@@ -309,6 +310,7 @@ namespace Game.Movement
         public int point_Idx;
         public int point_Idx_offset;
         public Optional<SpellEffectExtraData> spell_effect_extra;
+        public Optional<AnimTierTransition> anim_tier;
         #endregion
 
         public class CommonInitializer : IInitializer

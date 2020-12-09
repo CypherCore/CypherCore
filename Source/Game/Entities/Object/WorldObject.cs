@@ -323,11 +323,11 @@ namespace Game.Entities
 
                 data.WriteBits((uint)unit.GetUnitMovementFlags(), 30);
                 data.WriteBits((uint)unit.GetUnitMovementFlags2(), 18);
-                data.WriteBit(!unit.m_movementInfo.transport.guid.IsEmpty()); // HasTransport
+                data.WriteBit(!unit.m_movementInfo.transport.guid.IsEmpty());  // HasTransport
                 data.WriteBit(HasFall);                                        // HasFall
                 data.WriteBit(HasSpline);                                      // HasSpline - marks that the unit uses spline movement
-                data.WriteBit(0);                                              // HeightChangeFailed
-                data.WriteBit(0);                                              // RemoteTimeValid
+                data.WriteBit(false);                                          // HeightChangeFailed
+                data.WriteBit(false);                                          // RemoteTimeValid
 
                 if (!unit.m_movementInfo.transport.guid.IsEmpty())
                     MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
@@ -467,6 +467,7 @@ namespace Game.Entities
                 bool hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
+                bool hasMovementScript = false;
 
                 data.WriteBit(hasAbsoluteOrientation);
                 data.WriteBit(hasDynamicShape);
@@ -489,6 +490,7 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerCylinder);
                 data.WriteBit(hasAreaTriggerSpline);
                 data.WriteBit(hasOrbit);
+                data.WriteBit(hasMovementScript);
 
                 if (hasUnk3)
                     data.WriteBit(0);
@@ -570,6 +572,9 @@ namespace Game.Entities
                     data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffset);
                     data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffsetTarget);
                 }
+
+                //if (hasMovementScript)
+                //    *data << *areaTrigger->GetMovementScript(); // AreaTriggerMovementScriptInfo
 
                 if (hasOrbit)
                    areaTrigger.GetCircularMovementInfo().Value.Write(data);

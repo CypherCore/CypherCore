@@ -115,7 +115,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(ChannelWelcomeMsg.GetByteCount(), 11);
             _worldPacket.WriteUInt32((uint)ChannelFlags);
             _worldPacket.WriteInt32(ChatChannelID);
-            _worldPacket.WriteUInt64((ulong)InstanceID);
+            _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WritePackedGuid(ChannelGUID);
             _worldPacket.WriteString(Channel);
             _worldPacket.WriteString(ChannelWelcomeMsg);
@@ -123,7 +123,7 @@ namespace Game.Networking.Packets
 
         public string ChannelWelcomeMsg = "";
         public int ChatChannelID;
-        public int InstanceID;
+        public ulong InstanceID;
         public ChannelFlags ChannelFlags;
         public string Channel = "";
         public ObjectGuid ChannelGUID;

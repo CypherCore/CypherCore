@@ -41,9 +41,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBit(Success);
             _worldPacket.WriteBit(IsDeletedCharacters);
-            _worldPacket.WriteBit(IsTestDemonHunterCreationAllowed);
-            _worldPacket.WriteBit(HasDemonHunterOnRealm);
-            _worldPacket.WriteBit(IsDemonHunterCreationAllowed);
+            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
+            _worldPacket.WriteBit(IsNewPlayer);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
             _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
             _worldPacket.WriteInt32(Characters.Count);
@@ -66,9 +65,8 @@ namespace Game.Networking.Packets
 
         public bool Success;
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsTestDemonHunterCreationAllowed = false; //allows client to skip 1 per realm and level 70 requirements
-        public bool HasDemonHunterOnRealm = false;
-        public bool IsDemonHunterCreationAllowed = false; //used for demon hunter early access
+        public bool IsNewPlayerRestrictionSkipped = false; // allows client to skip new player restrictions
+        public bool IsNewPlayer = false; // forbids hero classes and allied races
         public bool IsAlliedRacesCreationAllowed = false;
 
         public int MaxCharacterLevel = 1;
@@ -187,14 +185,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt8(RaceId);
                 data.WriteUInt8((byte)ClassId);
                 data.WriteUInt8(SexId);
-                data.WriteUInt8(SkinId);
-                data.WriteUInt8(FaceId);
-                data.WriteUInt8(HairStyle);
-                data.WriteUInt8(HairColor);
-                data.WriteUInt8(FacialHair);
-
-                foreach (var display in CustomDisplay)
-                    data.WriteUInt8(display);
+                data.WriteInt32(Customizations.Count);
 
                 data.WriteUInt8(ExperienceLevel);
                 data.WriteUInt32(ZoneId);
@@ -219,18 +210,23 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);
                 data.WriteUInt32(Flags4);
-                data.WriteInt32(Unknown830.Count);
+                data.WriteInt32(MailSenders.Count);
+                data.WriteUInt32(OverrideSelectScreenFileDataID);
+
+                foreach (ChrCustomizationChoice customization in Customizations)
+                    customization.Write(data);
+
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
                 data.WriteBit(BoostInProgress);
                 data.WriteBits(unkWod61x, 5);
 
-                foreach (string str in Unknown830)
+                foreach (string str in MailSenders)
                     data.WriteBits(str.GetByteCount() + 1, 6);
 
                 data.FlushBits();
 
-                foreach (string str in Unknown830)
+                foreach (string str in MailSenders)
                     if (!str.IsEmpty())
                         data.WriteCString(str);
 
@@ -244,12 +240,7 @@ namespace Game.Networking.Packets
             public byte RaceId;
             public Class ClassId;
             public byte SexId;
-            public byte SkinId;
-            public byte FaceId;
-            public byte HairStyle;
-            public byte HairColor;
-            public byte FacialHair;
-            public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+            public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
             public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
@@ -265,14 +256,14 @@ namespace Game.Networking.Packets
             public ushort SpecID;
             public uint Unknown703;
             public uint LastLoginVersion;
+            public uint OverrideSelectScreenFileDataID;
             public uint PetCreatureDisplayId;
             public uint PetExperienceLevel;
             public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
-            public List<string> Unknown830 = new List<string>(); // Something with character names, same length limit as name,
-                                                 // client accepts unlimited number of these in packet but only uses first 3
+            public List<string> MailSenders = new List<string>();
 
             public struct VisualItemInfo
             {
@@ -280,12 +271,14 @@ namespace Game.Networking.Packets
                 {
                     data.WriteUInt32(DisplayId);
                     data.WriteUInt32(DisplayEnchantId);
+                    data.WriteInt32(ItemModifiedAppearanceID);
                     data.WriteUInt8(InvType);
                     data.WriteUInt8(Subclass);
                 }
 
                 public uint DisplayId;
                 public uint DisplayEnchantId;
+                public int ItemModifiedAppearanceID; // also -1 is some special value
                 public byte InvType;
                 public byte Subclass;
             }
@@ -328,6 +321,38 @@ namespace Game.Networking.Packets
         }
     }
 
+    class CheckCharacterNameAvailability : ClientPacket
+    {     
+        public uint SequenceIndex;
+        public string Name;
+
+        public CheckCharacterNameAvailability(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SequenceIndex = _worldPacket.ReadUInt32();
+            Name = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+        }
+    }
+
+    class CheckCharacterNameAvailabilityResult : ServerPacket
+    {
+        public uint SequenceIndex;
+        public ResponseCodes Result;
+
+        public CheckCharacterNameAvailabilityResult(uint sequenceIndex, ResponseCodes result) : base(ServerOpcodes.SMSG_CHECK_CHARACTER_NAME_AVAILABILITY_RESULT)
+        {
+            SequenceIndex = sequenceIndex;
+            Result = result;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteUInt32((uint)Result);
+        }
+    }
+    
     public class CreateCharacter : ClientPacket
     {
         public CreateCharacter(WorldPacket packet) : base(packet) { }
@@ -338,23 +363,19 @@ namespace Game.Networking.Packets
             uint nameLength = _worldPacket.ReadBits<uint>(6);
             bool hasTemplateSet = _worldPacket.HasBit();
             CreateInfo.IsTrialBoost = _worldPacket.HasBit();
+            CreateInfo.UseNPE = _worldPacket.HasBit();
 
             CreateInfo.RaceId = (Race)_worldPacket.ReadUInt8();
             CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
             CreateInfo.Sex = (Gender)_worldPacket.ReadUInt8();
-            CreateInfo.Skin = _worldPacket.ReadUInt8();
-            CreateInfo.Face = _worldPacket.ReadUInt8();
-            CreateInfo.HairStyle = _worldPacket.ReadUInt8();
-            CreateInfo.HairColor = _worldPacket.ReadUInt8();
-            CreateInfo.FacialHairStyle = _worldPacket.ReadUInt8();
-            CreateInfo.OutfitId = _worldPacket.ReadUInt8();
-
-            for (var i = 0; i < CreateInfo.CustomDisplay.GetLimit(); ++i)
-                CreateInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
+            var customizationCount = _worldPacket.ReadUInt32();
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (CreateInfo.TemplateSet.HasValue)
                 CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
+
+            for (var i = 0; i < customizationCount; ++i)
+                CreateInfo.Customizations[i].Read(_worldPacket);
         }
 
         public CharacterCreateInfo CreateInfo;
@@ -446,14 +467,10 @@ namespace Game.Networking.Packets
             CustomizeInfo = new CharCustomizeInfo();
             CustomizeInfo.CharGUID = _worldPacket.ReadPackedGuid();
             CustomizeInfo.SexID = (Gender)_worldPacket.ReadUInt8();
-            CustomizeInfo.SkinID = _worldPacket.ReadUInt8();
-            CustomizeInfo.HairColorID = _worldPacket.ReadUInt8();
-            CustomizeInfo.HairStyleID = _worldPacket.ReadUInt8();
-            CustomizeInfo.FacialHairStyleID = _worldPacket.ReadUInt8();
-            CustomizeInfo.FaceID = _worldPacket.ReadUInt8();
+            var customizationCount = _worldPacket.ReadUInt32();
 
-            for (var i = 0; i < CustomizeInfo.CustomDisplay.GetLimit(); ++i)
-                CustomizeInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
+            for (var i = 0; i < customizationCount; ++i)
+                CustomizeInfo.Customizations[i].Read(_worldPacket);
 
             CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
@@ -478,17 +495,11 @@ namespace Game.Networking.Packets
             RaceOrFactionChangeInfo.Guid = _worldPacket.ReadPackedGuid();
             RaceOrFactionChangeInfo.SexID = (Gender)_worldPacket.ReadUInt8();
             RaceOrFactionChangeInfo.RaceID = (Race)_worldPacket.ReadUInt8();
-
-            RaceOrFactionChangeInfo.SkinID = _worldPacket.ReadUInt8();
-            RaceOrFactionChangeInfo.HairColorID = _worldPacket.ReadUInt8();
-            RaceOrFactionChangeInfo.HairStyleID = _worldPacket.ReadUInt8();
-            RaceOrFactionChangeInfo.FacialHairStyleID = _worldPacket.ReadUInt8();
-            RaceOrFactionChangeInfo.FaceID = _worldPacket.ReadUInt8();
-
-            for (var i = 0; i < RaceOrFactionChangeInfo.CustomDisplay.GetLimit(); ++i)
-                RaceOrFactionChangeInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
-
+            var customizationCount = _worldPacket.ReadUInt32();
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
+
+            for (var i = 0; i < customizationCount; ++i)
+                RaceOrFactionChangeInfo.Customizations[i].Read(_worldPacket);
         }
 
         public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo;
@@ -512,14 +523,11 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteBits(Display.Value.Name.GetByteCount(), 6);
                 _worldPacket.WriteUInt8(Display.Value.SexID);
-                _worldPacket.WriteUInt8(Display.Value.SkinID);
-                _worldPacket.WriteUInt8(Display.Value.HairColorID);
-                _worldPacket.WriteUInt8(Display.Value.HairStyleID);
-                _worldPacket.WriteUInt8(Display.Value.FacialHairStyleID);
-                _worldPacket.WriteUInt8(Display.Value.FaceID);
                 _worldPacket.WriteUInt8(Display.Value.RaceID);
-                Display.Value.CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
                 _worldPacket.WriteString(Display.Value.Name);
+
+                foreach (ChrCustomizationChoice customization in Display.Value.Customizations)
+                    customization.Write(_worldPacket);
             }
         }
 
@@ -531,13 +539,8 @@ namespace Game.Networking.Packets
         {
             public string Name;
             public byte SexID;
-            public byte SkinID;
-            public byte HairColorID;
-            public byte HairStyleID;
-            public byte FacialHairStyleID;
-            public byte FaceID;
             public byte RaceID;
-            public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+            public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
         }
     }
 
@@ -587,7 +590,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public ReorderInfo[] Entries = new ReorderInfo[WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm)];
+        public ReorderInfo[] Entries = new ReorderInfo[200];
 
         public struct ReorderInfo
         {
@@ -660,7 +663,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;      // Guid of the player that is logging in
-        float FarClip; // Visibility distance (for terrain)
+        public float FarClip; // Visibility distance (for terrain)
     }
 
     public class LoginVerifyWorld : ServerPacket
@@ -706,7 +709,7 @@ namespace Game.Networking.Packets
             IdleLogout = _worldPacket.HasBit();
         }
 
-        bool IdleLogout;
+        public bool IdleLogout;
     }
 
     public class LogoutResponse : ServerPacket
@@ -755,8 +758,8 @@ namespace Game.Networking.Packets
             Showing = _worldPacket.HasBit();
         }
 
-        int MapID = -1;
-        bool Showing;
+        public int MapID = -1;
+        public bool Showing;
     }
 
     public class InitialSetup : ServerPacket
@@ -832,22 +835,15 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            NewHairStyle = _worldPacket.ReadUInt32();
-            NewHairColor = _worldPacket.ReadUInt32();
-            NewFacialHair = _worldPacket.ReadUInt32();
-            NewSkinColor = _worldPacket.ReadUInt32();
-            NewFace = _worldPacket.ReadUInt32();
+            var customizationCount = _worldPacket.ReadUInt32();
+            NewSex = _worldPacket.ReadUInt8();
 
-            for (var i = 0; i < NewCustomDisplay.GetLimit(); ++i)
-                NewCustomDisplay[i] = _worldPacket.ReadUInt32();
+            for (var i = 0; i < customizationCount; ++i)
+                Customizations[i].Read(_worldPacket);
         }
 
-        public uint NewHairStyle;
-        public uint NewHairColor;
-        public uint NewFacialHair;
-        public uint NewSkinColor;
-        public uint NewFace;
-        public Array<uint> NewCustomDisplay = new Array<uint>(PlayerConst.CustomDisplaySize);
+        public byte NewSex;
+        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
     }
 
     public class BarberShopResult : ServerPacket
@@ -975,25 +971,18 @@ namespace Game.Networking.Packets
         {
             CharGUID = customizeInfo.CharGUID;
             SexID = (byte)customizeInfo.SexID;
-            SkinID = customizeInfo.SkinID;
-            HairColorID = customizeInfo.HairColorID;
-            HairStyleID = customizeInfo.HairStyleID;
-            FacialHairStyleID = customizeInfo.FacialHairStyleID;
-            FaceID = customizeInfo.FaceID;
             CharName = customizeInfo.CharName;
-            CustomDisplay = customizeInfo.CustomDisplay;
+            Customizations = customizeInfo.Customizations;
         }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(CharGUID);
             _worldPacket.WriteUInt8(SexID);
-            _worldPacket.WriteUInt8(SkinID);
-            _worldPacket.WriteUInt8(HairColorID);
-            _worldPacket.WriteUInt8(HairStyleID);
-            _worldPacket.WriteUInt8(FacialHairStyleID);
-            _worldPacket.WriteUInt8(FaceID);
-            CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
+            _worldPacket.WriteInt32(Customizations.Count);
+            foreach (ChrCustomizationChoice customization in Customizations)
+                customization.Write(_worldPacket);
+
             _worldPacket.WriteBits(CharName.GetByteCount(), 6);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(CharName);
@@ -1002,12 +991,7 @@ namespace Game.Networking.Packets
         ObjectGuid CharGUID;
         string CharName = "";
         byte SexID;
-        byte SkinID;
-        byte HairColorID;
-        byte HairStyleID;
-        byte FacialHairStyleID;
-        byte FaceID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
     }
 
     class CharCustomizeFailure : ServerPacket
@@ -1063,21 +1047,40 @@ namespace Game.Networking.Packets
     }
 
     //Structs
+    public struct ChrCustomizationChoice
+    {
+        public uint ChrCustomizationOptionID;
+        public uint ChrCustomizationChoiceID;
+
+        public ChrCustomizationChoice(uint chrCustomizationOptionID, uint chrCustomizationChoiceID)
+        {
+            ChrCustomizationOptionID = chrCustomizationOptionID;
+            ChrCustomizationChoiceID = chrCustomizationChoiceID;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ChrCustomizationOptionID);
+            data.WriteUInt32(ChrCustomizationChoiceID);
+        }
+
+        public void Read(WorldPacket data)
+        {
+            ChrCustomizationOptionID = data.ReadUInt32();
+            ChrCustomizationChoiceID = data.ReadUInt32();
+        }
+    }
+
     public class CharacterCreateInfo
     {
         // User specified variables
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public byte Skin;
-        public byte Face;
-        public byte HairStyle;
-        public byte HairColor;
-        public byte FacialHairStyle;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-        public byte OutfitId;
+        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
         public Optional<uint> TemplateSet = new Optional<uint>();
         public bool IsTrialBoost;
+        public bool UseNPE;
         public string Name;
 
         // Server side data
@@ -1092,30 +1095,20 @@ namespace Game.Networking.Packets
 
     public class CharCustomizeInfo
     {
-        public byte HairStyleID;
-        public byte FaceID;
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public byte HairColorID;
-        public byte FacialHairStyleID;
-        public byte SkinID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
     }
 
     public class CharRaceOrFactionChangeInfo
     {
-        public byte HairColorID;
         public Race RaceID = Race.None;
         public Gender SexID = Gender.None;
-        public byte SkinID;
-        public byte FacialHairStyleID;
         public ObjectGuid Guid;
         public bool FactionChange;
         public string Name;
-        public byte FaceID;
-        public byte HairStyleID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
     }
 
     public class CharacterUndeleteInfo

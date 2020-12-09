@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.IO;
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
@@ -29,13 +30,13 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(PlayerGuid);
             _worldPacket.WriteUInt32(ServerTime);
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
-                _worldPacket.WriteUInt32(AccountTimes[i]);
+            foreach (var accounttime in AccountTimes)
+                _worldPacket.WriteUInt32(accounttime);
         }
 
         public ObjectGuid PlayerGuid;
         public uint ServerTime = 0;
-        public uint[] AccountTimes = new uint[(int)AccountDataTypes.Max];
+        public Array<uint> AccountTimes = new Array<uint>((int)AccountDataTypes.Max);
     }
 
     public class ClientCacheVersion : ServerPacket

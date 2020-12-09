@@ -242,6 +242,16 @@ namespace Game.Scenarios
 
     public class ScenarioPOI
     {
+        public int BlobIndex;
+        public int MapID;
+        public int UiMapID;
+        public int Priority;
+        public int Flags;
+        public int WorldEffectID;
+        public int PlayerConditionID;
+        public int NavigationPlayerConditionID;
+        public List<Vector2> Points = new List<Vector2>();
+
         public ScenarioPOI(int blobIndex, int mapID, int uiMapID, int priority, int flags, int worldEffectID, int playerConditionID, List<Vector2> points)
         {
             BlobIndex = blobIndex;
@@ -253,14 +263,5 @@ namespace Game.Scenarios
             PlayerConditionID = playerConditionID;
             Points = points;
         }
-
-        public int BlobIndex;
-        public int MapID;
-        public int UiMapID;
-        public int Priority;
-        public int Flags;
-        public int WorldEffectID;
-        public int PlayerConditionID;
-        public List<Vector2> Points = new List<Vector2>();
     }
 }

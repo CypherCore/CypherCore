@@ -257,12 +257,12 @@ namespace Game.Chat.Commands
             var poiData = Global.ObjectMgr.GetQuestPOIData(questID);
             if (poiData != null)
             {
-                var data = poiData.QuestPOIBlobDataStats[0];
+                var data = poiData.Blobs[0];
 
                 mapId = (uint)data.MapID;
 
-                x = data.QuestPOIBlobPointStats[0].X;
-                y = data.QuestPOIBlobPointStats[0].Y;
+                x = data.Points[0].X;
+                y = data.Points[0].Y;
             }
             else
             {

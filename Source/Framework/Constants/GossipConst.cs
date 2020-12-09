@@ -123,4 +123,18 @@ namespace Framework.Constants
         public const uint GossipSenderSecMailbox = 9;
         public const uint GossipSenderSecStablemaster = 10;
     }
+
+    public enum GossipOptionStatus
+    {
+        Available = 0,
+        Unavailable = 1,
+        Locked = 2,
+        AlreadyComplete = 3
+    }
+
+    public enum GossipOptionRewardType
+    {
+        Item = 0,
+        Currency = 1
+    }
 }

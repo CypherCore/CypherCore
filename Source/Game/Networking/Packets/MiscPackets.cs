@@ -124,6 +124,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WeeklyQuantity.HasValue);
             _worldPacket.WriteBit(TrackedQuantity.HasValue);
             _worldPacket.WriteBit(MaxQuantity.HasValue);
+            _worldPacket.WriteBit(Unused901.HasValue);
             _worldPacket.WriteBit(SuppressChatLog);
             _worldPacket.WriteBit(QuantityChange.HasValue);
             _worldPacket.WriteBit(QuantityGainSource.HasValue);
@@ -138,6 +139,9 @@ namespace Game.Networking.Packets
 
             if (MaxQuantity.HasValue)
                 _worldPacket.WriteInt32(MaxQuantity.Value);
+
+            if (Unused901.HasValue)
+                _worldPacket.WriteInt32(Unused901.Value);
 
             if (QuantityChange.HasValue)
                 _worldPacket.WriteInt32(QuantityChange.Value);
@@ -155,6 +159,7 @@ namespace Game.Networking.Packets
         public Optional<int> WeeklyQuantity;
         public Optional<int> TrackedQuantity;
         public Optional<int> MaxQuantity;
+        public Optional<int> Unused901;
         public Optional<int> QuantityChange;
         public Optional<int> QuantityGainSource;
         public Optional<int> QuantityLostSource;
@@ -204,6 +209,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
                 _worldPacket.WriteBit(data.TrackedQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxQuantity.HasValue);
+                _worldPacket.WriteBit(data.Unused901.HasValue);
                 _worldPacket.WriteBits(data.Flags, 5);
                 _worldPacket.FlushBits();
 
@@ -215,6 +221,8 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteUInt32(data.TrackedQuantity.Value);
                 if (data.MaxQuantity.HasValue)
                     _worldPacket.WriteInt32(data.MaxQuantity.Value);
+                if (data.Unused901.HasValue)
+                    _worldPacket.WriteInt32(data.Unused901.Value);
             }
         }
 
@@ -228,6 +236,7 @@ namespace Game.Networking.Packets
             public Optional<uint> MaxWeeklyQuantity;    // Weekly Currency cap.
             public Optional<uint> TrackedQuantity;
             public Optional<int> MaxQuantity;
+            public Optional<int> Unused901;
             public byte Flags;                      // 0 = none, 
         }
     }
@@ -366,7 +375,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(RestrictedAccountMaxLevel.Value);
 
             if (RestrictedAccountMaxMoney.HasValue)
-                _worldPacket.WriteUInt32(RestrictedAccountMaxMoney.Value);
+                _worldPacket.WriteUInt64(RestrictedAccountMaxMoney.Value);
 
             if (InstanceGroupSize.HasValue)
                 _worldPacket.WriteUInt32(InstanceGroupSize.Value);
@@ -378,7 +387,7 @@ namespace Game.Networking.Packets
         public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
                                                     // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
         public Optional<uint> RestrictedAccountMaxLevel;
-        public Optional<uint> RestrictedAccountMaxMoney;
+        public Optional<ulong> RestrictedAccountMaxMoney;
         public Optional<uint> InstanceGroupSize;
     }
 
@@ -864,12 +873,14 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(SourceObjectGUID);
             _worldPacket.WritePackedGuid(TargetObjectGUID);
             _worldPacket.WriteVector3(Position);
+            _worldPacket.WriteInt32(BroadcastTextID);
         }
 
-        ObjectGuid TargetObjectGUID;
-        ObjectGuid SourceObjectGUID;
-        uint SoundKitID;
-        Vector3 Position;
+        public ObjectGuid TargetObjectGUID;
+        public ObjectGuid SourceObjectGUID;
+        public uint SoundKitID;
+        public Vector3 Position;
+        public int BroadcastTextID;
     }
 
     class PlaySound : ServerPacket
@@ -884,10 +895,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(SoundKitID);
             _worldPacket.WritePackedGuid(SourceObjectGuid);
+            _worldPacket.WriteInt32(BroadcastTextID);
         }
 
-        ObjectGuid SourceObjectGuid;
-        uint SoundKitID;
+        public ObjectGuid SourceObjectGuid;
+        public uint SoundKitID;
+        public int BroadcastTextID;
     }
 
     class PlaySpeakerBoxSound : ServerPacket
@@ -946,18 +959,6 @@ namespace Game.Networking.Packets
         }
 
         public bool Enable;
-    }
-
-    class Dismount : ServerPacket
-    {
-        public Dismount() : base(ServerOpcodes.Dismount) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Guid);
-        }
-
-        public ObjectGuid Guid;
     }
 
     class SaveCUFProfiles : ClientPacket

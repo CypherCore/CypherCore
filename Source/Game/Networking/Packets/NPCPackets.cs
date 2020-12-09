@@ -65,27 +65,17 @@ namespace Game.Networking.Packets
 
                 _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
                 _worldPacket.WriteBits(options.Confirm.GetByteCount(), 12);
+                _worldPacket.WriteBits((byte)options.Status, 2);
                 _worldPacket.FlushBits();
+
+                options.Treasure.Write(_worldPacket);
 
                 _worldPacket.WriteString(options.Text);
                 _worldPacket.WriteString(options.Confirm);
             }
 
             foreach (ClientGossipText text in GossipText)
-            {
-                _worldPacket.WriteInt32(text.QuestID);
-                _worldPacket.WriteInt32(text.QuestType);
-                _worldPacket.WriteInt32(text.QuestLevel);
-                _worldPacket.WriteInt32(text.QuestMaxScalingLevel);
-                _worldPacket.WriteInt32(text.QuestFlags);
-                _worldPacket.WriteInt32(text.QuestFlagsEx);
-
-                _worldPacket.WriteBit(text.Repeatable);
-                _worldPacket.WriteBits(text.QuestTitle.GetByteCount(), 9);
-                _worldPacket.FlushBits();
-
-                _worldPacket.WriteString(text.QuestTitle);
-            }
+                text.Write(_worldPacket);
         }
 
         public List<ClientGossipOptions> GossipOptions = new List<ClientGossipOptions>();
@@ -297,26 +287,68 @@ namespace Game.Networking.Packets
     }
 
     //Structs
+    public struct TreasureItem
+    {
+        public GossipOptionRewardType Type;
+        public int ID;
+        public int Quantity;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits((byte)Type, 1);
+            data.WriteInt32(ID);
+            data.WriteInt32(Quantity);
+        }
+    }
+
+    public class TreasureLootList
+    {
+        public List<TreasureItem> Items = new List<TreasureItem>();
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Items.Count);
+            foreach (TreasureItem treasureItem in Items)
+                treasureItem.Write(data);
+        }
+    }
+
     public struct ClientGossipOptions
     {
         public int ClientOption;
         public byte OptionNPC;
         public byte OptionFlags;
         public int OptionCost;
+        public GossipOptionStatus Status;
         public string Text;
         public string Confirm;
+        public TreasureLootList Treasure;
     }
 
     public class ClientGossipText
     {
-        public int QuestID;
+        public uint QuestID;
+        public int ContentTuningID;
         public int QuestType;
-        public int QuestLevel;
-        public int QuestMaxScalingLevel;
         public bool Repeatable;
         public string QuestTitle;
-        public int QuestFlags;
-        public int QuestFlagsEx;
+        public uint QuestFlags;
+        public uint QuestFlagsEx;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(QuestID);
+            data.WriteInt32(ContentTuningID);
+            data.WriteInt32(QuestType);
+            data.WriteUInt32(QuestFlags);
+            data.WriteUInt32(QuestFlagsEx);
+
+            data.WriteBit(Repeatable);
+            data.WriteBits(QuestTitle.GetByteCount(), 9);
+            data.FlushBits();
+
+            data.WriteString(QuestTitle);
+        }
     }
 
     public class VendorItemPkt
@@ -332,6 +364,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(ExtendedCostID);
             data.WriteInt32(PlayerConditionFailed);
             Item.Write(data);
+            data.WriteBit(Locked);
             data.WriteBit(DoNotFilterOnVendor);
             data.WriteBit(Refundable);
             data.FlushBits();
@@ -346,6 +379,7 @@ namespace Game.Networking.Packets
         public int StackCount;
         public int ExtendedCostID;
         public int PlayerConditionFailed;
+        public bool Locked;
         public bool DoNotFilterOnVendor;
         public bool Refundable;
     }

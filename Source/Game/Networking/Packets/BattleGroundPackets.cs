@@ -33,13 +33,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MythicPlusSeasonID);
             _worldPacket.WriteInt32(CurrentSeason);
             _worldPacket.WriteInt32(PreviousSeason);
+            _worldPacket.WriteInt32(ConquestWeeklyProgressCurrencyID);
             _worldPacket.WriteInt32(PvpSeasonID);
+            _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
+            _worldPacket.FlushBits();
         }
 
         public int MythicPlusSeasonID;
         public int PreviousSeason;
         public int CurrentSeason;
         public int PvpSeasonID;
+        public int ConquestWeeklyProgressCurrencyID;
+        public bool WeeklyRewardChestsEnabled;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket
@@ -435,9 +440,9 @@ namespace Game.Networking.Packets
         public uint RandomMaxRewardPointsThisWeek;
     }
 
-    class RequestRatedBattlefieldInfo : ClientPacket
+    class RequestRatedPvpInfo : ClientPacket
     {
-        public RequestRatedBattlefieldInfo(WorldPacket packet) : base(packet) { }
+        public RequestRatedPvpInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }

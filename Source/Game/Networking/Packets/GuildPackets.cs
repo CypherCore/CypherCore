@@ -278,9 +278,9 @@ namespace Game.Networking.Packets
         public string OldGuildName;
     }
 
-    public class GuildEventAwayChange : ServerPacket
+    public class GuildEventStatusChange : ServerPacket
     {
-        public GuildEventAwayChange() : base(ServerOpcodes.GuildEventAwayChange) { }
+        public GuildEventStatusChange() : base(ServerOpcodes.GuildEventAwayChange) { }
 
         public override void Write()
         {
@@ -426,7 +426,6 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBit(Removed);
             _worldPacket.WriteBits(LeaverName.GetByteCount(), 6);
-            _worldPacket.FlushBits();
 
             if (Removed)
             {

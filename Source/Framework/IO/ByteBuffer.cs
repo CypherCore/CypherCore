@@ -305,6 +305,14 @@ namespace Framework.IO
             WriteBytes(buffer.GetData());
         }
 
+        public void WriteVector4(Vector4 pos)
+        {
+            WriteFloat(pos.X);
+            WriteFloat(pos.Y);
+            WriteFloat(pos.Z);
+            WriteFloat(pos.W);
+        }
+
         public void WriteVector3(Vector3 pos)
         {
             WriteFloat(pos.X);

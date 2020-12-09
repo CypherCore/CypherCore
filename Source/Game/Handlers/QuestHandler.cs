@@ -242,10 +242,13 @@ namespace Game
             if (quest == null)
                 return;
 
-            // This is Real Item Entry, not slot id as pre 5.x
+            // TODO: currency choice items
+            if (packet.Choice.LootItemType != LootItemType.Item)
+                return;
+
             if (packet.ItemChoiceID != 0)
             {
-                ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.ItemChoiceID);
+                ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.Choice.Item.ItemID);
                 if (rewardProto == null)
                 {
                     Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.ItemChoiceID, packet.QuestID);
@@ -255,7 +258,7 @@ namespace Game
                 bool itemValid = false;
                 for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
                 {
-                    if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemId[i] == packet.ItemChoiceID)
+                    if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
                     {
                         itemValid = true;
                         break;
@@ -269,7 +272,7 @@ namespace Game
                     {
                         foreach (var questPackageItem in questPackageItems)
                         {
-                            if (questPackageItem.ItemID != packet.ItemChoiceID)
+                            if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
                                 continue;
 
                             if (_player.CanSelectQuestPackageItem(questPackageItem))
@@ -287,7 +290,7 @@ namespace Game
                         {
                             foreach (var questPackageItem in questPackageItems1)
                             {
-                                if (questPackageItem.ItemID != packet.ItemChoiceID)
+                                if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
                                     continue;
 
                                 itemValid = true;
@@ -324,9 +327,9 @@ namespace Game
                 return;
             }
 
-            if (GetPlayer().CanRewardQuest(quest, packet.ItemChoiceID, true))
+            if (GetPlayer().CanRewardQuest(quest, packet.Choice.Item.ItemID, true))
             {
-                GetPlayer().RewardQuest(quest, packet.ItemChoiceID, obj);
+                GetPlayer().RewardQuest(quest, packet.Choice.Item.ItemID, obj);
 
                 switch (obj.GetTypeId())
                 {
@@ -350,7 +353,7 @@ namespace Game
                             }
 
                             _player.PlayerTalkClass.ClearMenus();
-                            creatureQGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
+                            creatureQGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
                     case TypeId.GameObject:
@@ -371,7 +374,7 @@ namespace Game
                             }
 
                             _player.PlayerTalkClass.ClearMenus();
-                            questGiver.GetAI().QuestReward(_player, quest, packet.ItemChoiceID);
+                            questGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
                     default:

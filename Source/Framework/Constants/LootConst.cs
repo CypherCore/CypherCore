@@ -85,6 +85,12 @@ namespace Framework.Constants
         FishingJunk = 22 // unsupported by client, sending LOOT_FISHING instead
     }
 
+    public enum LootItemType
+    {
+        Item = 0,
+        Currency = 1
+    }
+
     public enum LootError
     {
         DidntKill = 0,    // You don't have permission to loot that corpse.

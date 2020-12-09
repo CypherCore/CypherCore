@@ -578,8 +578,8 @@ namespace Game
             reportedPlayer.ReportedAfkBy(GetPlayer());
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestRatedBattlefieldInfo)]
-        void HandleRequestRatedBattlefieldInfo(RequestRatedBattlefieldInfo packet)
+        [WorldPacketHandler(ClientOpcodes.RequestRatedPvpInfo)]
+        void HandleRequestRatedPvpInfo(RequestRatedPvpInfo packet)
         {
             RatedPvpInfo ratedPvpInfo = new RatedPvpInfo();
             SendPacket(ratedPvpInfo);

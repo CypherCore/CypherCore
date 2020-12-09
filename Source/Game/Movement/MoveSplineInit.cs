@@ -285,7 +285,9 @@ namespace Game.Movement
         public void SetAnimation(AnimType anim)
         {
             args.time_perc = 0.0f;
-            args.flags.EnableAnimation((byte)anim);
+            args.animTier.emplace();
+            args.animTier.AnimTier = anim;
+            args.flags.EnableAnimation();
         }
 
         public void SetFacing(Vector3 spot)

@@ -102,31 +102,22 @@ namespace Game.Networking.Packets
         int CaseID;
     }
 
-    public class SupportTicketSubmitBug : ClientPacket
+    public class SubmitUserFeedback : ClientPacket
     {
         public SupportTicketHeader Header;
         public string Note;
+        public bool IsSuggestion;
 
-        public SupportTicketSubmitBug(WorldPacket packet) : base(packet) { }
+        public SubmitUserFeedback(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Header.Read(_worldPacket);
-            Note = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
-        }
-    }
+            uint noteLength = _worldPacket.ReadBits<uint>(24);
+            IsSuggestion = _worldPacket.HasBit();
 
-    public class SupportTicketSubmitSuggestion : ClientPacket
-    {
-        public SupportTicketHeader Header;
-        public string Note;
-
-        public SupportTicketSubmitSuggestion(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Header.Read(_worldPacket);
-            Note = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
+            if (noteLength != 0)
+                Note = _worldPacket.ReadString(noteLength - 1);
         }
     }
 
