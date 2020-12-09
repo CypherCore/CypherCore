@@ -410,7 +410,11 @@ namespace Framework.Constants
     {
         ReagentBankUnlocked = 0x01,
         MercenaryMode = 0x02,
-        ArtifactForgeCheat = 0x04
+        ArtifactForgeCheat = 0x04,
+        InPvpCombat = 0x0040,       // Forbids /Follow
+        Mentor = 0x0080,
+        Newcomer = 0x0100,
+        UnlockedAoeLoot = 0x0200
     }
 
     public enum CharacterFlags : uint
