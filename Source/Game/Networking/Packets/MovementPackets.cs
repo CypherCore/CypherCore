@@ -1261,7 +1261,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct MonsterSplineAnimTierTransition
+    public struct MonsterSplineAnimTierTransition
     {
         public int TierTransitionID;
         public uint StartTime;
@@ -1277,7 +1277,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class MonsterSplineUnknown901
+    public class MonsterSplineUnknown901
     {    
         public Array<Inner> Data = new Array<Inner>(16);
 
@@ -1303,13 +1303,13 @@ namespace Game.Networking.Packets
 
     public class TeleportLocation
     {
-        public Vector4 Pos;
+        public Position Pos;
         public int Unused901_1 = -1;
         public int Unused901_2 = -1;
 
         public void Write(WorldPacket data)
         {
-            data.WriteVector4(Pos);
+            data.WriteXYZO(Pos);
             data.WriteInt32(Unused901_1);
             data.WriteInt32(Unused901_2);
         }

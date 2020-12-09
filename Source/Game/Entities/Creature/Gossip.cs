@@ -274,11 +274,11 @@ namespace Game.Misc
                 if (quest != null)
                 {
                     ClientGossipText text = new ClientGossipText();
-                    text.QuestID = (int)questID;
+                    text.QuestID = questID;
                     text.ContentTuningID = quest.ContentTuningId;
                     text.QuestType = item.QuestIcon;
-                    text.QuestFlags = (int)quest.Flags;
-                    text.QuestFlagsEx = (int)quest.FlagsEx;
+                    text.QuestFlags = (uint)quest.Flags;
+                    text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.Repeatable = quest.IsRepeatable();
 
                     text.QuestTitle = quest.LogTitle;

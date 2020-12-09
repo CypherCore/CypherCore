@@ -85,7 +85,6 @@ namespace Game.Entities
         public float ModExperience;
         public bool RacialLeader;
         public uint MovementId;
-        public float FadeRegionRadius;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public bool RegenHealth;
@@ -266,7 +265,6 @@ namespace Game.Entities
             stats.HealthScalingExpansion = HealthScalingExpansion;
             stats.VignetteID = VignetteID;
             stats.Class = (int)UnitClass;
-            stats.FadeRegionRadius = FadeRegionRadius;
             stats.WidgetSetID = WidgetSetID;
             stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
 

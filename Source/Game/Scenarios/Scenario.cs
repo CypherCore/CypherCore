@@ -71,7 +71,7 @@ namespace Game.Scenarios
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
-                        player.RewardQuest(quest, 0, null, false);
+                        player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
             }
 

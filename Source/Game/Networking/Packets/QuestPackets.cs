@@ -1006,7 +1006,7 @@ namespace Game.Networking.Packets
     }
 
     public class QuestRewards
-    {     
+    {
         public uint ChoiceItemCount;
         public uint ItemCount;
         public uint Money;
@@ -1016,20 +1016,20 @@ namespace Game.Networking.Packets
         public uint Honor;
         public uint Title;
         public uint FactionFlags;
-        public Array<int> SpellCompletionDisplayID = new Array<int>(SharedConst.QuestRewardDisplaySpellCount);
+        public int[] SpellCompletionDisplayID = new int[SharedConst.QuestRewardDisplaySpellCount];
         public uint SpellCompletionID;
         public uint SkillLineID;
         public uint NumSkillUps;
         public uint TreasurePickerID;
-        public Array<QuestChoiceItem> ChoiceItems = new Array<QuestChoiceItem>(SharedConst.QuestRewardChoicesCount);
-        public Array<uint> ItemID = new Array<uint>(SharedConst.QuestRewardItemCount);
-        public Array<uint> ItemQty = new Array<uint>(SharedConst.QuestRewardItemCount);
-        public Array<uint> FactionID = new Array<uint>(SharedConst.QuestRewardReputationsCount);
-        public Array<int> FactionValue = new Array<int>(SharedConst.QuestRewardReputationsCount);
-        public Array<int> FactionOverride = new Array<int>(SharedConst.QuestRewardReputationsCount);
-        public Array<int> FactionCapIn = new Array<int>(SharedConst.QuestRewardReputationsCount);
-        public Array<uint> CurrencyID = new Array<uint>(SharedConst.QuestRewardCurrencyCount);
-        public Array<uint> CurrencyQty = new Array<uint>(SharedConst.QuestRewardCurrencyCount);
+        public QuestChoiceItem[] ChoiceItems = new QuestChoiceItem[SharedConst.QuestRewardChoicesCount];
+        public uint[] ItemID = new uint[SharedConst.QuestRewardItemCount];
+        public uint[] ItemQty = new uint[SharedConst.QuestRewardItemCount];
+        public uint[] FactionID = new uint[SharedConst.QuestRewardReputationsCount];
+        public int[] FactionValue = new int[SharedConst.QuestRewardReputationsCount];
+        public int[] FactionOverride = new int[SharedConst.QuestRewardReputationsCount];
+        public int[] FactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
+        public uint[] CurrencyID = new uint[SharedConst.QuestRewardCurrencyCount];
+        public uint[] CurrencyQty = new uint[SharedConst.QuestRewardCurrencyCount];
         public bool IsBoostSpell;
 
         public void Write(WorldPacket data)

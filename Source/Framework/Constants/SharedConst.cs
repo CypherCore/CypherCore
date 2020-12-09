@@ -1372,7 +1372,6 @@ namespace Framework.Constants
         TalentsInspecting,
         ThreatRadius,
         TradeLevelReq,
-        UiQuestLevelsInDialogs,     // Should We Add Quest Levels To The Title In The Npc Dialogs?
         UptimeUpdate,
         VmapIndoorCheck,
         WardenClientBanDuration,

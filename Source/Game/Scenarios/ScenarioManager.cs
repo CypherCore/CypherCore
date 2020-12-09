@@ -151,45 +151,40 @@ namespace Game.Scenarios
 
             uint count = 0;
 
-            //                                         0               1          2     3      4        5         6      7              8
-            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+            //                                         0               1          2     3      4        5         6      7              8                  9
+            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
                 return;
             }
 
-            //                                                0        1    2  3
-            SQLResult points = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
-
             List<Vector2>[][] POIs = new List<Vector2>[0][];
+            Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new Dictionary<uint, MultiMap<int, ScenarioPOIPoint>>();
 
-            if (!points.IsEmpty())
+            //                                               0               1    2  3  4
+            SQLResult pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
+            if (!pointsResult.IsEmpty())
             {
-                // The first result should have the highest criteriaTreeId
-                uint criteriaTreeIdMax = points.Read<uint>(0);
-                POIs = new List<Vector2>[criteriaTreeIdMax + 1][];
-
                 do
                 {
-                    int CriteriaTreeID = points.Read<int>(0);
-                    int Idx1 = points.Read<int>(1);
-                    int X = points.Read<int>(2);
-                    int Y = points.Read<int>(3);
+                    uint CriteriaTreeID = pointsResult.Read<uint>(0);
+                    int Idx1 = pointsResult.Read<int>(1);
+                    int X = pointsResult.Read<int>(2);
+                    int Y = pointsResult.Read<int>(3);
+                    int Z = pointsResult.Read<int>(4);
 
-                    if (POIs[CriteriaTreeID] == null)
-                        POIs[CriteriaTreeID] = new List<Vector2>[Idx1 + 10];
+                    if (!allPoints.ContainsKey(CriteriaTreeID))
+                        allPoints[CriteriaTreeID] = new MultiMap<int, ScenarioPOIPoint>();
 
-                    if (POIs[CriteriaTreeID][Idx1] == null)
-                        POIs[CriteriaTreeID][Idx1] = new List<Vector2>();
+                    allPoints[CriteriaTreeID].Add(Idx1, new ScenarioPOIPoint(X, Y, Z));
 
-                    POIs[CriteriaTreeID][Idx1].Add(new Vector2(X, Y));
-                } while (points.NextRow());
+                } while (pointsResult.NextRow());
             }
 
             do
             {
-                int criteriaTreeID = result.Read<int>(0);
+                uint criteriaTreeID = result.Read<uint>(0);
                 int blobIndex = result.Read<int>(1);
                 int idx1 = result.Read<int>(2);
                 int mapID = result.Read<int>(3);
@@ -198,19 +193,28 @@ namespace Game.Scenarios
                 int flags = result.Read<int>(6);
                 int worldEffectID = result.Read<int>(7);
                 int playerConditionID = result.Read<int>(8);
+                int navigationPlayerConditionID = result.Read<int>(9);
 
-                if (Global.CriteriaMgr.GetCriteriaTree((uint)criteriaTreeID) == null)
-                    Log.outError(LogFilter.Sql, "`scenario_poi` CriteriaTreeID ({0}) Idx1 ({1}) does not correspond to a valid criteria tree", criteriaTreeID, idx1);
+                if (Global.CriteriaMgr.GetCriteriaTree(criteriaTreeID) == null)
+                    Log.outError(LogFilter.Sql, $"`scenario_poi` CriteriaTreeID ({criteriaTreeID}) Idx1 ({idx1}) does not correspond to a valid criteria tree");
 
-                if (criteriaTreeID < POIs.Length && idx1 < POIs[criteriaTreeID].Length)
-                    _scenarioPOIStore.Add((uint)criteriaTreeID, new ScenarioPOI(blobIndex, mapID, uiMapID, priority, flags, worldEffectID, playerConditionID, POIs[criteriaTreeID][idx1]));
-                else
-                    Log.outError(LogFilter.ServerLoading, "Table scenario_poi references unknown scenario poi points for criteria tree id {0} POI id {1}", criteriaTreeID, blobIndex);
+                var blobs = allPoints.LookupByKey(criteriaTreeID);
+                if (blobs != null)
+                {
+                    var points = blobs.LookupByKey(idx1);
+                    if (!points.Empty())
+                    {
+                        _scenarioPOIStore.Add(criteriaTreeID, new ScenarioPOI(blobIndex, mapID, uiMapID, priority, flags, worldEffectID, playerConditionID, navigationPlayerConditionID, points));
+                        ++count;
+                        continue;
+                    }
+                }
 
-                ++count;
+                Log.outError(LogFilter.Sql, $"Table scenario_poi references unknown scenario poi points for criteria tree id {criteriaTreeID} POI id {blobIndex}");
+
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scenario POI definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public List<ScenarioPOI> GetScenarioPOIs(uint CriteriaTreeID)
@@ -240,6 +244,20 @@ namespace Game.Scenarios
         public uint Scenario_H;
     }
 
+    public struct ScenarioPOIPoint
+    {
+        public int X;
+        public int Y;
+        public int Z;
+
+        public ScenarioPOIPoint(int x, int y, int z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+    }
+
     public class ScenarioPOI
     {
         public int BlobIndex;
@@ -250,9 +268,9 @@ namespace Game.Scenarios
         public int WorldEffectID;
         public int PlayerConditionID;
         public int NavigationPlayerConditionID;
-        public List<Vector2> Points = new List<Vector2>();
+        public List<ScenarioPOIPoint> Points = new List<ScenarioPOIPoint>();
 
-        public ScenarioPOI(int blobIndex, int mapID, int uiMapID, int priority, int flags, int worldEffectID, int playerConditionID, List<Vector2> points)
+        public ScenarioPOI(int blobIndex, int mapID, int uiMapID, int priority, int flags, int worldEffectID, int playerConditionID, int navigationPlayerConditionID, List<ScenarioPOIPoint> points)
         {
             BlobIndex = blobIndex;
             MapID = mapID;
@@ -261,6 +279,7 @@ namespace Game.Scenarios
             Flags = flags;
             WorldEffectID = worldEffectID;
             PlayerConditionID = playerConditionID;
+            NavigationPlayerConditionID = navigationPlayerConditionID;
             Points = points;
         }
     }

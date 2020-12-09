@@ -1865,13 +1865,12 @@ namespace Game
             creature.ModExperience = fields.Read<float>(68);
             creature.RacialLeader = fields.Read<bool>(69);
             creature.MovementId = fields.Read<uint>(70);
-            creature.FadeRegionRadius = fields.Read<float>(71);
-            creature.WidgetSetID = fields.Read<int>(72);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(73);
-            creature.RegenHealth = fields.Read<bool>(74);
-            creature.MechanicImmuneMask = fields.Read<uint>(75);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
-            creature.ScriptID = GetScriptId(fields.Read<string>(77));
+            creature.WidgetSetID = fields.Read<int>(71);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(72);
+            creature.RegenHealth = fields.Read<bool>(73);
+            creature.MechanicImmuneMask = fields.Read<uint>(74);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(75);
+            creature.ScriptID = GetScriptId(fields.Read<string>(76));
 
             _creatureTemplateStorage.Add(entry, creature);
         }
@@ -6133,6 +6132,7 @@ namespace Game
                         info.stats[STAT_STAMINA] += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
                         info.stats[STAT_AGILITY] += (lvl > 38 ? 2 : (lvl > 8 && (lvl % 2) ? 1 : 0));
                         info.stats[STAT_INTELLECT] += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
+                        break;
                 }
             }
         }
@@ -6502,35 +6502,35 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0  1          2           3                    4                5               6         7            8            9                  10               11                  12
-                "ID, QuestType, QuestLevel, ScalingFactionGroup, MaxScalingLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //13          14                     15                     16                17                   18                   19                   20           21           22               23
-                "RewardMoney, RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardDisplaySpell1, RewardDisplaySpell2, RewardDisplaySpell3, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //24                         25                          26                        27     28       29
+                //0   1          2               3                4            5            6                  7                8                   9
+                "ID, QuestType, QuestPackageID, ContentTuningID, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
+                //10           11                     12                     13                14           15           16               17
+                "RewardMoney, RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
+                //18                          19                          20                        21     22       23
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, FlagsEx2, " +
-                //30          31             32           33               34           35             36         37
+                //24           25             26         27                 28           29             30         31
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //38           39            40         41                42            43             44         45
+                //32           33             34         35                 36           37             38         39
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //46                  47                         48                          49                   50                         51
+                //40                   41                         42                          43                   44                         45
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //52                  53                         54                          55                   56                         57
+                //46                   47                         48                          49                   50                         51
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //58                  59                         60                          61                   62                         63
+                //52                   53                         54                          55                   56                         57
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //64           65    66    67           68           69                 70                 71                 72             73                  74
+                //58            59    60    61           62           63                 64                 65                 66             67                  68
                 "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, PortraitGiver, PortraitGiverMount, PortraitTurnIn, " +
-                //75               76                   77                      78                   79                80                   81                      82
+                //69                70                   71                      72                   73                74                   75                      76
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //83               84                   85                      86                   87                88                   89                      90
+                //77                78                   79                      80                   81                82                   83                      84
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //91               92                   93                      94                   95
+                //85                86                   87                      88                   89
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //96                97                  98                 99                  100                101                 102                103
+                //90                 91                  92                 93                  94                 95                  96                 97
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //104                105                 106          107          108             109               110        111                  112
+                //98                  99                  100          101          102             103               104        105                  106
                 "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
-                //113      114             115               116              117                118                119                 120                 121
+                //107       108             109               110              111                112                113                 114                 115
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog" +
                 " FROM quest_template");
 
@@ -6549,6 +6549,51 @@ namespace Game
                 _questTemplates[newQuest.Id] = newQuest;
             }
             while (result.NextRow());
+
+
+            // Load `quest_reward_choice_items`
+            //                               0        1      2      3      4      5      6
+            result = DB.World.Query("SELECT QuestID, Type1, Type2, Type3, Type4, Type5, Type6 FROM quest_reward_choice_items");
+            if (result.IsEmpty())
+            {
+                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest reward choice items. DB table `quest_reward_choice_items` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadRewardChoiceItems(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `quest_reward_choice_items` has data for quest {questId} but such quest does not exist");
+                } while (result.NextRow());
+            }
+
+
+            // Load `quest_reward_display_spell`
+            //                               0        1        2
+            result = DB.World.Query("SELECT QuestID, SpellID, PlayerConditionID FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
+            if (result.IsEmpty())
+            {
+                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest reward display spells. DB table `quest_reward_display_spell` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadRewardDisplaySpell(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has data for quest {questId} but such quest does not exist");
+                } while (result.NextRow());
+            }
+
 
             // Load `quest_details`
             //                               0   1       2       3       4       5            6            7            8
@@ -6639,7 +6684,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            // Load `quest_objectives`
+            // Load `quest_mail_sender`
             //                               0        1
             result = DB.World.Query("SELECT QuestId, RewardMailSenderEntry FROM quest_mail_sender");
             if (result.IsEmpty())
@@ -6785,11 +6830,8 @@ namespace Game
                     }
                 }
 
-                if (qinfo.MinLevel == -1 || qinfo.MinLevel > SharedConst.DefaultMaxLevel)
-                {
-                    Log.outError(LogFilter.Sql, "Quest {0} should be disabled because `MinLevel` = {1}", qinfo.Id, qinfo.MinLevel);
-                    // no changes needed, sending -1 in SMSGQUESTQUERYRESPONSE is valid
-                }
+                if (qinfo.ContentTuningId != 0 && !CliDB.ContentTuningStorage.ContainsKey(qinfo.ContentTuningId))
+                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `ContentTuningID` = {qinfo.ContentTuningId} but content tuning with this id does not exist.");
 
                 // client quest log visual (area case)
                 if (qinfo.QuestSortID > 0)
@@ -7073,24 +7115,34 @@ namespace Game
                     var id = qinfo.RewardChoiceItemId[j];
                     if (id != 0)
                     {
-                        if (Global.ObjectMgr.GetItemTemplate(id) == null)
+                        switch (qinfo.RewardChoiceItemType[j])
                         {
-                            Log.outError(LogFilter.Sql, "Quest {0} has `RewardChoiceItemId{1}` = {2} but item with entry {2} does not exist, quest will not reward this item.",
-                                qinfo.Id, j + 1, id);
-                            qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
+                            case LootItemType.Item:
+                                if (Global.ObjectMgr.GetItemTemplate(id) == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but item with entry {id} does not exist, quest will not reward this item.");
+                                    qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
+                                }
+                                break;
+                            case LootItemType.Currency:
+                                if (!CliDB.CurrencyTypesStorage.HasRecord(id))
+                                {
+                                    Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but currency with id {id} does not exist, quest will not reward this currency.");
+                                    qinfo.RewardChoiceItemId[j] = 0;          // no changes, quest will not reward this
+                                }
+                                break;
+                            default:
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemType{j + 1}` = {qinfo.RewardChoiceItemType[j]} but it is not a valid item type, reward removed.");
+                                qinfo.RewardChoiceItemId[j] = 0;
+                                break;
                         }
 
                         if (qinfo.RewardChoiceItemCount[j] == 0)
-                        {
-                            Log.outError(LogFilter.Sql, "Quest {0} has `RewardChoiceItemId{1}` = {2} but `RewardChoiceItemCount{1}` = 0, quest can't be done.",
-                                qinfo.Id, j + 1, id);
-                            // no changes, quest can't be done
-                        }
+                            Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = {id} but `RewardChoiceItemCount{j + 1}` = 0, quest can't be done.");
                     }
                     else if (qinfo.RewardChoiceItemCount[j] > 0)
                     {
-                        Log.outError(LogFilter.Sql, "Quest {0} has `RewardChoiceItemId{1}` = 0 but `RewardChoiceItemCount{1}` = {3}.",
-                            qinfo.Id, j + 1, qinfo.RewardChoiceItemCount[j]);
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has `RewardChoiceItemId{j + 1}` = 0 but `RewardChoiceItemCount{j + 1}` = {qinfo.RewardChoiceItemCount[j]}.");
                         // no changes, quest ignore this data
                     }
                 }
@@ -7143,26 +7195,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "Quest {0} has `RewardFactionId{1}` = 0 but `RewardFactionValueIdOverride{2}` = {3}.",
                             qinfo.Id, j + 1, j + 1, qinfo.RewardFactionOverride[j]);
                         // no changes, quest ignore this data
-                    }
-                }
-
-                for (uint i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
-                {
-                    if (qinfo.RewardDisplaySpell[i] != 0)
-                    {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(qinfo.RewardSpell, Difficulty.None);
-                        if (spellInfo == null)
-                        {
-                            Log.outError(LogFilter.Sql, "Quest {0} has `RewardSpell` = {1} but spell {2} does not exist, spell removed as display reward.",
-                                qinfo.Id, qinfo.RewardSpell, qinfo.RewardSpell);
-                            qinfo.RewardDisplaySpell[i] = 0;                        // no spell reward will display for this quest
-                        }
-                        else if (!Global.SpellMgr.IsSpellValid(spellInfo))
-                        {
-                            Log.outError(LogFilter.Sql, "Quest {0} has `RewardSpell` = {1} but spell {2} is broken, quest will not have a spell reward.",
-                                qinfo.Id, qinfo.RewardSpell, qinfo.RewardSpell);
-                            qinfo.RewardDisplaySpell[i] = 0;                        // no spell reward will display for this quest
-                        }
                     }
                 }
 
@@ -7485,33 +7517,33 @@ namespace Game
 
             uint count = 0;
 
-            //                                         0        1          2     3               4                 5              6      7        8         9      10             11                 12               13
-            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, SpawnTrackingID, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
+            //                                         0        1          2     3               4                 5              6      7        8         9      10             11                 12                           13               14
+            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID, SpawnTrackingID, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
                 return;
             }
 
-            //                                         0        1    2  3 
-            SQLResult points = DB.World.Query("SELECT QuestID, Idx1, X, Y FROM quest_poi_points ORDER BY QuestID DESC, Idx1, Idx2");
-            Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>> POIs = new Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>>();
+            Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>> allPoints = new Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>>();
 
-            if (!points.IsEmpty())
+            //                                               0        1    2  3  4
+            SQLResult pointsResult = DB.World.Query("SELECT QuestID, Idx1, X, Y, Z FROM quest_poi_points ORDER BY QuestID DESC, Idx1, Idx2");
+            if (!pointsResult.IsEmpty())
             {
                 do
                 {
-                    uint questId = points.Read<uint>(0);
-                    int Idx1 = points.Read<int>(1);
-                    int x = points.Read<int>(2);
-                    int y = points.Read<int>(3);
+                    uint questId = pointsResult.Read<uint>(0);
+                    int Idx1 = pointsResult.Read<int>(1);
+                    int x = pointsResult.Read<int>(2);
+                    int y = pointsResult.Read<int>(3);
+                    int z = pointsResult.Read<int>(4);
 
-                    if (!POIs.ContainsKey(questId))
-                        POIs[questId] = new MultiMap<int, QuestPOIBlobPoint>();
+                    if (!allPoints.ContainsKey(questId))
+                        allPoints[questId] = new MultiMap<int, QuestPOIBlobPoint>();
 
-                    QuestPOIBlobPoint point = new QuestPOIBlobPoint(x, y);
-                    POIs[questId].Add(Idx1, point);
-                } while (points.NextRow());
+                    allPoints[questId].Add(Idx1, new QuestPOIBlobPoint(x, y, z));
+                } while (pointsResult.NextRow());
             }
 
             do
@@ -7528,25 +7560,32 @@ namespace Game
                 int flags = result.Read<int>(9);
                 int worldEffectID = result.Read<int>(10);
                 int playerConditionID = result.Read<int>(11);
-                int spawnTrackingID = result.Read<int>(12);
-                bool alwaysAllowMergingBlobs = result.Read<bool>(13);
+                int navigationPlayerConditionID = result.Read<int>(12);
+                int spawnTrackingID = result.Read<int>(13);
+                bool alwaysAllowMergingBlobs = result.Read<bool>(14);
 
                 if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
-                    Log.outError(LogFilter.Sql, "`quest_poi` quest id ({0}) Idx1 ({1}) does not exist in `quest_template`", questID, idx1);
+                    Log.outError(LogFilter.Sql, $"`quest_poi` quest id ({questID}) Idx1 ({idx1}) does not exist in `quest_template`");
 
-                if (!POIs.ContainsKey(questID) || !POIs[questID].ContainsKey(idx1))
+                var blobs = allPoints.LookupByKey(questID);
+                if (blobs != null)
                 {
-                    Log.outError(LogFilter.Sql, "Table quest_poi references unknown quest points for quest {0} POI id {1}", questID, blobIndex);
-                    continue;
+                    var points = blobs.LookupByKey(idx1);
+                    if (!points.Empty())
+                    {
+                        if (!_questPOIStorage.ContainsKey(questID))
+                            _questPOIStorage[questID] = new QuestPOIData(questID);
+
+                        QuestPOIData poiData = _questPOIStorage[questID];
+                        poiData.QuestID = questID;
+                        poiData.Blobs.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags,
+                            worldEffectID, playerConditionID, navigationPlayerConditionID, spawnTrackingID, points, alwaysAllowMergingBlobs));
+                        ++count;
+                        continue;
+                    }
                 }
+                Log.outError(LogFilter.Sql, $"Table quest_poi references unknown quest points for quest {questID} POI id {blobIndex}");
 
-                if (!_questPOIStorage.ContainsKey(questID))
-                    _questPOIStorage[questID] = new QuestPOIData(questID);
-
-                QuestPOIData poiData = _questPOIStorage[questID];
-                poiData.Blobs.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags, worldEffectID, playerConditionID, spawnTrackingID, POIs[questID][idx1], alwaysAllowMergingBlobs));
-
-                ++count;
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest POI definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -9116,6 +9155,8 @@ namespace Game
             uint itemRewardCount = 0;
             uint currencyRewardCount = 0;
             uint factionRewardCount = 0;
+            uint itemChoiceRewardCount = 0;
+            uint mawPowersCount = 0;
 
             do
             {
@@ -9131,7 +9172,11 @@ namespace Game
 
             } while (choiceResult.NextRow());
 
-            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ChoiceArtFileId, Flags, WidgetSetID, UiTextureAtlasElementID, SoundKitID, GroupID, Answer, Header, SubHeader, ButtonTemplate, Description, Confirmation, RewardQuestID FROM playerchoice_response ORDER BY `Index` ASC");
+            //                                            0         1           2                   3                4      5
+            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ResponseIdentifier, ChoiceArtFileId, Flags, WidgetSetID, " +
+                //6                        7           8        9               10      11      12         13              14           15            16
+                "UiTextureAtlasElementID, SoundKitID, GroupID, UiTextureKitID, Answer, Header, SubHeader, ButtonTemplate, Description, Confirmation, RewardQuestID " +
+                "FROM playerchoice_response ORDER BY `Index` ASC");
             if (!responses.IsEmpty())
             {
                 do
@@ -9149,20 +9194,23 @@ namespace Game
                     PlayerChoiceResponse response = new PlayerChoiceResponse();
 
                     response.ResponseId = responseId;
-                    response.ChoiceArtFileId = responses.Read<int>(2);
-                    response.Flags = responses.Read<int>(3);
-                    response.WidgetSetID = responses.Read<uint>(4);
-                    response.UiTextureAtlasElementID = responses.Read<uint>(5);
-                    response.SoundKitID = responses.Read<uint>(6);
-                    response.GroupID = responses.Read<byte>(7);
-                    response.Answer = responses.Read<string>(8);
-                    response.Header = responses.Read<string>(9);
-                    response.SubHeader = responses.Read<string>(10);
-                    response.ButtonTooltip = responses.Read<string>(11);
-                    response.Description = responses.Read<string>(12);
-                    response.Confirmation = responses.Read<string>(13);
-                    if (!responses.IsNull(14))
-                        response.RewardQuestID.Set(responses.Read<uint>(14));
+                    response.ResponseIdentifier = responses.Read<ushort>(2);
+                    response.ChoiceArtFileId = responses.Read<int>(3);
+                    response.Flags = responses.Read<int>(4);
+                    response.WidgetSetID = responses.Read<uint>(5);
+                    response.UiTextureAtlasElementID = responses.Read<uint>(6);
+                    response.SoundKitID = responses.Read<uint>(7);
+                    response.GroupID = responses.Read<byte>(8);
+                    response.UiTextureKitID = responses.Read<int>(9);
+                    response.Answer = responses.Read<string>(10);
+                    response.Header = responses.Read<string>(11);
+                    response.SubHeader = responses.Read<string>(12);
+                    response.ButtonTooltip = responses.Read<string>(13);
+                    response.Description = responses.Read<string>(14);
+                    response.Confirmation = responses.Read<string>(15);
+                    if (!responses.IsNull(16))
+                        response.RewardQuestID.Set(responses.Read<uint>(16));
+
                     ++responseCount;
 
                     choice.Responses[responseId] = response;
@@ -9199,7 +9247,6 @@ namespace Game
                     reward.HonorPointCount = rewards.Read<uint>(7);
                     reward.Money = rewards.Read<ulong>(8);
                     reward.Xp = rewards.Read<uint>(9);
-                    ++rewardCount;
 
                     if (reward.TitleId != 0 && !CliDB.CharTitlesStorage.ContainsKey(reward.TitleId))
                     {
@@ -9221,6 +9268,7 @@ namespace Game
                     }
 
                     choice.Responses[responseId].Reward.Set(reward);
+                    ++rewardCount;
 
                 } while (rewards.NextRow());
             }
@@ -9269,8 +9317,8 @@ namespace Game
                         continue;
                     }
 
-                    itemRewardCount++;
                     response.Reward.Value.Items.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
+                    itemRewardCount++;
 
                 } while (rewardItem.NextRow());
             }
@@ -9311,8 +9359,8 @@ namespace Game
                         continue;
                     }
 
-                    currencyRewardCount++;
                     response.Reward.Value.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
+                    currencyRewardCount++;
 
                 } while (rewardCurrency.NextRow());
             }
@@ -9353,14 +9401,96 @@ namespace Game
                         continue;
                     }
 
-                    factionRewardCount++;
                     response.Reward.Value.Faction.Add(new PlayerChoiceResponseRewardEntry(factionId, quantity));
+                    factionRewardCount++;
 
                 } while (rewardFaction.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoices.Count} player choices, {responseCount} responses, {rewardCount} rewards, {itemRewardCount} item rewards, {currencyRewardCount} " +
-                $"currency rewards and {factionRewardCount} faction rewards in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            SQLResult rewardItems = DB.World.Query("SELECT ChoiceId, ResponseId, ItemId, BonusListIDs, Quantity FROM playerchoice_response_reward_item_choice ORDER BY `Index` ASC");
+            if (!rewardItems.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardItems.Read<int>(0);
+                    int responseId = rewardItems.Read<int>(1);
+                    uint itemId = rewardItems.Read<uint>(2);
+                    StringArray bonusListIDsTok = new StringArray(rewardItems.Read<string>(3), ' ');
+                    List<int> bonusListIds = new List<int>();
+                    foreach (string token in bonusListIDsTok)
+                        bonusListIds.Add(int.Parse(token));
+
+                    int quantity = rewardItems.Read<int>(4);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.Find(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (GetItemTemplate(itemId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    response.Reward.ItemChoices.Add(itemId, bonusListIds, quantity);
+                    itemChoiceRewardCount++;
+
+                } while (rewards.NextRow());
+            }
+
+            SQLResult mawPowersResult = DB.World.Query("SELECT ChoiceId, ResponseId, TypeArtFileID, Rarity, RarityColor, SpellID, MaxStacks FROM playerchoice_response_maw_power");
+            if (!mawPowersResult.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = mawPowersResult.Read<int>(0);
+                    int responseId = mawPowersResult.Read<int>(1);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.Find(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `playerchoice_response_maw_power` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoiceResponseMawPower mawPower = new PlayerChoiceResponseMawPower();
+                    mawPower.TypeArtFileID = mawPowersResult.Read<int>(2);
+                    mawPower.Rarity = mawPowersResult.Read<int>(3);
+                    mawPower.RarityColor = mawPowersResult.Read<uint>(4);
+                    mawPower.SpellID = mawPowersResult.Read<int>(5);
+                    mawPower.MaxStacks = mawPowersResult.Read<int>(6);
+                    response.MawPower.Add(mawPower);
+
+                    ++mawPowersCount;
+
+                } while (mawPowersResult.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoices.Count} player choices, {responseCount} responses, {rewardCount} rewards, {itemRewardCount} item rewards, " +
+                $"{currencyRewardCount} currency rewards, {factionRewardCount} faction rewards, {itemChoiceRewardCount} item choice rewards and {mawPowersCount} maw powers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
         public void LoadPlayerChoicesLocale()
         {
@@ -10506,7 +10636,7 @@ namespace Game
         public bool AlwaysAllowMergingBlobs;
 
         public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags, 
-            int worldEffectID, int playerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
+            int worldEffectID, int playerConditionID, int navigationPlayerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
         {
             BlobIndex = blobIndex;
             ObjectiveIndex = objectiveIndex;
@@ -10518,6 +10648,7 @@ namespace Game
             Flags = flags;
             WorldEffectID = worldEffectID;
             PlayerConditionID = playerConditionID;
+            NavigationPlayerConditionID = navigationPlayerConditionID;
             SpawnTrackingID = spawnTrackingID;
             Points = points;
             AlwaysAllowMergingBlobs = alwaysAllowMergingBlobs;
@@ -11000,17 +11131,29 @@ namespace Game
         public List<PlayerChoiceResponseRewardItem> Items = new List<PlayerChoiceResponseRewardItem>();
         public List<PlayerChoiceResponseRewardEntry> Currency = new List<PlayerChoiceResponseRewardEntry>();
         public List<PlayerChoiceResponseRewardEntry> Faction = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardItem> ItemChoices = new List<PlayerChoiceResponseRewardItem>();
+    }
+
+    public struct PlayerChoiceResponseMawPower
+    {
+        public int TypeArtFileID;
+        public int Rarity;
+        public uint RarityColor;
+        public int SpellID;
+        public int MaxStacks;
     }
 
     public class PlayerChoiceResponse
     {
         public int ResponseId;
+        public ushort ResponseIdentifier;
         public int ChoiceArtFileId;
         public int Flags;
         public uint WidgetSetID;
         public uint UiTextureAtlasElementID;
         public uint SoundKitID;
         public byte GroupID;
+        public int UiTextureKitID;
         public string Answer;
         public string Header;
         public string SubHeader;
@@ -11019,6 +11162,7 @@ namespace Game
         public string Confirmation;
         public Optional<PlayerChoiceResponseReward> Reward;
         public Optional<uint> RewardQuestID;
+        public Optional<PlayerChoiceResponseMawPower> MawPower;
     }
 
     public class PlayerChoice

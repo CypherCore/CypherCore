@@ -354,7 +354,7 @@ namespace Game
             foreach (var it in joinData.lockmap)
             {
                 var blackList = new LFGBlackListPkt();
-                blackList.PlayerGuid = it.Key;
+                blackList.PlayerGuid.Set(it.Key);
 
                 foreach (var lockInfo in it.Value)
                 {

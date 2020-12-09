@@ -394,14 +394,25 @@ namespace Game.Networking.Packets
         public ObjectGuid CastID;
     }
 
-    class CastFailed : ServerPacket
+    class CastFailedBase : ServerPacket
     {
         public ObjectGuid CastID;
         public int SpellID;
-        public SpellCastVisual Visual;
         public SpellCastResult Reason;
         public int FailedArg1 = -1;
-        public int FailedArg2 = -1;
+        public int FailedArg2 = -1; 
+        
+        public CastFailedBase(ServerOpcodes opcode, ConnectionType connectionType) : base(opcode, connectionType) { }
+
+        public override void Write()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class CastFailed : CastFailedBase
+    {
+        public SpellCastVisual Visual;
 
         public CastFailed() : base(ServerOpcodes.CastFailed, ConnectionType.Instance) { }
 
@@ -418,14 +429,8 @@ namespace Game.Networking.Packets
         }
     }
 
-    class PetCastFailed : ServerPacket
+    class PetCastFailed : CastFailedBase
     {
-        public ObjectGuid CastID;
-        public int SpellID;
-        public SpellCastResult Reason;
-        public int FailedArg1 = -1;
-        public int FailedArg2 = -1;
-
         public PetCastFailed() : base(ServerOpcodes.PetCastFailed, ConnectionType.Instance) { }
 
         public override void Write()

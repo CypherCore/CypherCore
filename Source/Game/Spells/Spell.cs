@@ -3525,7 +3525,7 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             CastFailed castFailed = new CastFailed();
-            castFailed.Visual.SpellXSpellVisualID = (int)m_SpellVisual;
+            castFailed.Visual.SpellXSpellVisualID = m_SpellVisual;
             FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
             m_caster.ToPlayer().SendPacket(castFailed);
         }
@@ -3553,7 +3553,7 @@ namespace Game.Spells
                 return;
 
             CastFailed packet = new CastFailed();
-            packet.Visual.SpellXSpellVisualID = (int)spellVisual;
+            packet.Visual.SpellXSpellVisualID = spellVisual;
             FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
         }

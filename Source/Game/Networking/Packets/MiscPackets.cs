@@ -357,7 +357,7 @@ namespace Game.Networking.Packets
             InstanceGroupSize = new Optional<uint>();
 
             RestrictedAccountMaxLevel = new Optional<uint>();
-            RestrictedAccountMaxMoney = new Optional<uint>();
+            RestrictedAccountMaxMoney = new Optional<ulong>();
         }
 
         public override void Write()

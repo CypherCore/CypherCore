@@ -896,7 +896,6 @@ namespace Game
             // misc
             Values[WorldCfg.PdumpNoPaths] = GetDefaultValue("PlayerDump.DisallowPaths", true);
             Values[WorldCfg.PdumpNoOverwrite] = GetDefaultValue("PlayerDump.DisallowOverwrite", true);
-            Values[WorldCfg.UiQuestLevelsInDialogs] = GetDefaultValue("UI.ShowQuestLevelsInDialogs", false);
 
             // Wintergrasp battlefield
             Values[WorldCfg.WintergraspEnable] = GetDefaultValue("Wintergrasp.Enable", false);

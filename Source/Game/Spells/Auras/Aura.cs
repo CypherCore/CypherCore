@@ -213,7 +213,7 @@ namespace Game.Spells
             AuraDataInfo auraData = auraInfo.AuraData.Value;
             auraData.CastID = aura.GetCastGUID();
             auraData.SpellID = (int)aura.GetId();
-            auraData.Visual.SpellXSpellVisualID = (int)aura.GetSpellXSpellVisualId();
+            auraData.Visual.SpellXSpellVisualID = aura.GetSpellXSpellVisualId();
             auraData.Flags = GetFlags();
             if (aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.HideDuration))
                 auraData.Flags |= AuraFlags.Duration;
