@@ -320,8 +320,19 @@ namespace Framework.Constants
         ChallengeKeystoneAffixId4 = 22,
         ArtifactKnowledgeLevel = 23,
         ArtifactTier = 24,
-        Unused25 = 25,
+        TransmogAppearanceSpec5 = 25,
         PvpRating = 26,
+        EnchantIllusionSpec5 = 27,
+        ContentTuningId = 28,
+        ChangeModifiedCraftingStat1 = 29,
+        ChangeModifiedCraftingStat2 = 30,
+        TransmogSecondaryAppearanceAllSpecs = 31,
+        TransmogSecondaryAppearanceSpec1 = 32,
+        TransmogSecondaryAppearanceSpec2 = 33,
+        TransmogSecondaryAppearanceSpec3 = 34,
+        TransmogSecondaryAppearanceSpec4 = 35,
+        TransmogSecondaryAppearanceSpec5 = 36,
+        SoulbindConduitRank = 37,
 
         Max
     }
