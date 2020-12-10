@@ -5602,7 +5602,7 @@ namespace Game.Spells
             uint resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetSpellInfo(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
+            SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
             log.damage = damage;
             log.originalDamage = dmg;
             log.absorb = absorb;
@@ -5895,7 +5895,7 @@ namespace Game.Spells
 
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, target, spellProto, GetBase().GetSpellXSpellVisualId(), spellProto.SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastGUID());
             // no SpellDamageBonus for burn mana
             caster.CalculateSpellDamageTaken(damageInfo, (int)(gain * dmgMultiplier), spellProto);
 
@@ -5973,7 +5973,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect, GetSpellEffectInfo());
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
@@ -6114,7 +6114,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this);
+                AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellVisual(), ObjectGuid.Empty, this);
             }
             else
             {

@@ -450,12 +450,12 @@ namespace Game.Entities
 
     public class SpellNonMeleeDamage
     {
-        public SpellNonMeleeDamage(Unit _attacker, Unit _target, SpellInfo _spellInfo, uint _SpellXSpellVisualID, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
+        public SpellNonMeleeDamage(Unit _attacker, Unit _target, SpellInfo _spellInfo, SpellCastVisual spellVisual, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
         {
             target = _target;
             attacker = _attacker;
             Spell = _spellInfo;
-            SpellXSpellVisualID = _SpellXSpellVisualID;
+            SpellVisual = spellVisual;
             schoolMask = _schoolMask;
             castId = _castId;
             preHitHealth = (uint)_target.GetHealth();
@@ -465,7 +465,7 @@ namespace Game.Entities
         public Unit attacker;
         public ObjectGuid castId;
         public SpellInfo Spell;
-        public uint SpellXSpellVisualID;
+        public SpellCastVisual SpellVisual;
         public uint damage;
         public uint originalDamage;
         public SpellSchoolMask schoolMask;

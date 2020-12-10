@@ -44,7 +44,7 @@ namespace Game.Spells
             m_preGeneratedPath = new PathGenerator(m_caster);
             m_castItemLevel = -1;
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
-            m_SpellVisual = caster.GetCastSpellXSpellVisualId(m_spellInfo);
+            m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             m_customError = SpellCustomErrors.None;
             m_skipCheck = skipcheck;
@@ -3525,7 +3525,7 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             CastFailed castFailed = new CastFailed();
-            castFailed.Visual.SpellXSpellVisualID = m_SpellVisual;
+            castFailed.Visual = m_SpellVisual;
             FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
             m_caster.ToPlayer().SendPacket(castFailed);
         }
@@ -3547,13 +3547,13 @@ namespace Game.Spells
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
-        public static void SendCastResult(Player caster, SpellInfo spellInfo, uint spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
+        public static void SendCastResult(Player caster, SpellInfo spellInfo, SpellCastVisual spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
 
             CastFailed packet = new CastFailed();
-            packet.Visual.SpellXSpellVisualID = spellVisual;
+            packet.Visual = spellVisual;
             FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
         }
@@ -3610,7 +3610,7 @@ namespace Game.Spells
             castData.CastID = m_castId;
             castData.OriginalCastID = m_originalCastId;
             castData.SpellID = (int)m_spellInfo.Id;
-            castData.Visual.SpellXSpellVisualID = m_SpellVisual;
+            castData.Visual = m_SpellVisual;
             castData.CastFlags = castFlags;
             castData.CastFlagsEx = m_castFlagsEx;
             castData.CastTime = (uint)m_casttime;
@@ -3724,7 +3724,7 @@ namespace Game.Spells
             castData.CastID = m_castId;
             castData.OriginalCastID = m_originalCastId;
             castData.SpellID = (int)m_spellInfo.Id;
-            castData.Visual.SpellXSpellVisualID = m_SpellVisual;
+            castData.Visual = m_SpellVisual;
             castData.CastFlags = castFlags;
             castData.CastFlagsEx = m_castFlagsEx;
             castData.CastTime = Time.GetMSTime();
@@ -4019,7 +4019,7 @@ namespace Game.Spells
             failurePacket.CasterUnit = m_caster.GetGUID();
             failurePacket.CastID = m_castId;
             failurePacket.SpellID = m_spellInfo.Id;
-            failurePacket.Visual.SpellXSpellVisualID = m_SpellVisual;
+            failurePacket.Visual = m_SpellVisual;
             failurePacket.Reason = result;
             m_caster.SendMessageToSet(failurePacket, true);
 
@@ -4027,7 +4027,7 @@ namespace Game.Spells
             failedPacket.CasterUnit = m_caster.GetGUID();
             failedPacket.CastID = m_castId;
             failedPacket.SpellID = m_spellInfo.Id;
-            failedPacket.Visual.SpellXSpellVisualID = m_SpellVisual;
+            failedPacket.Visual = m_SpellVisual;
             failedPacket.Reason = result;
             m_caster.SendMessageToSet(failedPacket, true);
         }
@@ -4038,7 +4038,7 @@ namespace Game.Spells
             {
                 m_caster.ClearChannelObjects();
                 m_caster.SetChannelSpellId(0);
-                m_caster.SetChannelSpellXSpellVisualId(0);
+                m_caster.SetChannelSpellXSpellVisualId(default);
             }
 
             SpellChannelUpdate spellChannelUpdate = new SpellChannelUpdate();
@@ -4052,7 +4052,7 @@ namespace Game.Spells
             SpellChannelStart spellChannelStart = new SpellChannelStart();
             spellChannelStart.CasterGUID = m_caster.GetGUID();
             spellChannelStart.SpellID = (int)m_spellInfo.Id;
-            spellChannelStart.Visual.SpellXSpellVisualID = m_SpellVisual;
+            spellChannelStart.Visual = m_SpellVisual;
             spellChannelStart.ChannelDuration = duration;
 
             uint schoolImmunityMask = m_caster.GetSchoolImmunityMask();
@@ -6700,7 +6700,7 @@ namespace Game.Spells
 
         bool IsNeedSendToClient()
         {
-            return m_SpellVisual != 0 || m_spellInfo.IsChanneled() ||
+            return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
                 m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered());
         }
 
@@ -7404,7 +7404,7 @@ namespace Game.Spells
         public bool m_fromClient;
         public SpellCastFlagsEx m_castFlagsEx;
         public SpellMisc m_misc;
-        public uint m_SpellVisual;
+        public SpellCastVisual m_SpellVisual;
         public SpellCastTargets m_targets;
         public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;

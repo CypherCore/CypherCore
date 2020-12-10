@@ -1354,6 +1354,12 @@ namespace Game.Networking.Packets
         public uint SpellXSpellVisualID;
         public int ScriptVisualID;
 
+        public SpellCastVisual(uint spellXSpellVisualID, int scriptVisualID)
+        {
+            SpellXSpellVisualID = spellXSpellVisualID;
+            ScriptVisualID = scriptVisualID;
+        }
+
         public void Read(WorldPacket data)
         {
             SpellXSpellVisualID = data.ReadUInt32();

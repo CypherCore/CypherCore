@@ -2674,10 +2674,10 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
         }
         public uint GetChannelSpellXSpellVisualId() { return ((UnitChannel)m_unitData.ChannelData).SpellXSpellVisualID; }
-        public void SetChannelSpellXSpellVisualId(uint channelSpellXSpellVisualId)
+        public void SetChannelSpellXSpellVisualId(SpellCastVisual channelVisual)
         {
             UnitChannel unitChannel = m_unitData.ModifyValue(m_unitData.ChannelData);
-            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, channelSpellXSpellVisualId);
+            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, channelVisual.SpellXSpellVisualID);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }

@@ -2650,7 +2650,7 @@ namespace Game.Entities
                     uint split_absorb = 0;
                     DealDamageMods(caster, ref splitDamage, ref split_absorb);
 
-                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo(), itr.GetBase().GetSpellXSpellVisualId(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
+                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
                     CleanDamage cleanDamage = new CleanDamage(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
                     DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;

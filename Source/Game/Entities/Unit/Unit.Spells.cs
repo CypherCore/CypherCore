@@ -2495,7 +2495,7 @@ namespace Game.Entities
             packet.CasterGUID = log.attacker.GetGUID();
             packet.CastID = log.castId;
             packet.SpellID = (int)(log.Spell != null ? log.Spell.Id : 0);
-            packet.Visual.SpellXSpellVisualID = log.SpellXSpellVisualID;
+            packet.Visual = log.SpellVisual;
             packet.Damage = (int)log.damage;
             packet.OriginalDamage = (int)log.originalDamage;
             if (log.damage > log.preHitHealth)
@@ -4273,7 +4273,7 @@ namespace Game.Entities
                 {
                     Unit caster = aura.GetCaster();
                     if (caster && caster.IsTypeId(TypeId.Player))
-                        Spell.SendCastResult(caster.ToPlayer(), aura.GetSpellInfo(), aura.GetSpellXSpellVisualId(), aura.GetCastGUID(), SpellCastResult.AuraBounced);
+                        Spell.SendCastResult(caster.ToPlayer(), aura.GetSpellInfo(), aura.GetSpellVisual(), aura.GetCastGUID(), SpellCastResult.AuraBounced);
                 }
 
                 aura.Remove();

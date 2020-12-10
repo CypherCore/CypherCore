@@ -78,16 +78,7 @@ namespace Game.Entities
             }
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId = default, AuraEffect aurEff = null)
-        {
-            AreaTrigger at = new AreaTrigger();
-            if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellXSpellVisualId, castId, aurEff))
-                return null;
-
-            return at;
-        }
-
-        unsafe bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId, AuraEffect aurEff)
+        bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisual spellVisual, ObjectGuid castId, AuraEffect aurEff)
         {
             _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -119,7 +110,7 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellID), spell.Id);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellForVisuals), spell.Id);
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellXSpellVisualID), spellXSpellVisualId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellXSpellVisualID), spellVisual.SpellXSpellVisualID);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetScale), GetMiscTemplate().TimeToTargetScale != 0 ? GetMiscTemplate().TimeToTargetScale : m_areaTriggerData.Duration);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.BoundsRadius2D), GetTemplate().MaxSearchRadius);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.DecalPropertiesID), GetMiscTemplate().DecalPropertiesId);
@@ -138,10 +129,13 @@ namespace Game.Entities
                 Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
                 SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 1), point);
             }
-            if (GetMiscTemplate().ExtraScale.Raw.Data[5] != 0)
-                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), GetMiscTemplate().ExtraScale.Raw.Data[5]);
-            if (GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0)
-                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0 ? true : false);
+            unsafe
+            {
+                if (GetMiscTemplate().ExtraScale.Raw.Data[5] != 0)
+                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), GetMiscTemplate().ExtraScale.Raw.Data[5]);
+                if (GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0)
+                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0 ? true : false);
+            }
 
 
             PhasingHandler.InheritPhaseShift(this, caster);
@@ -201,6 +195,15 @@ namespace Game.Entities
             _ai.OnCreate();
 
             return true;
+        }
+
+        public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisual spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
+        {
+            AreaTrigger at = new AreaTrigger();
+            if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
+                return null;
+
+            return at;
         }
 
         public override void Update(uint diff)

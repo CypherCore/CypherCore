@@ -213,7 +213,7 @@ namespace Game.Spells
             AuraDataInfo auraData = auraInfo.AuraData.Value;
             auraData.CastID = aura.GetCastGUID();
             auraData.SpellID = (int)aura.GetId();
-            auraData.Visual.SpellXSpellVisualID = aura.GetSpellXSpellVisualId();
+            auraData.Visual= aura.GetSpellVisual();
             auraData.Flags = GetFlags();
             if (aura.GetMaxDuration() > 0 && !aura.GetSpellInfo().HasAttribute(SpellAttr5.HideDuration))
                 auraData.Flags |= AuraFlags.Duration;
@@ -295,7 +295,7 @@ namespace Game.Spells
             m_castItemGuid = castItem != null ? castItem.GetGUID() : castItemGuid;
             m_castItemId = castItem != null ? castItem.GetEntry() : castItemId;
             m_castItemLevel = castItemLevel;
-            m_spellXSpellVisualId = caster ? caster.GetCastSpellXSpellVisualId(spellproto) : spellproto.GetSpellXSpellVisualId();
+            m_spellVisual = new SpellCastVisual(caster ? caster.GetCastSpellXSpellVisualId(spellproto) : spellproto.GetSpellXSpellVisualId(), 0);
             m_applyTime = Time.UnixTime;
             m_owner = owner;
             m_timeCla = 0;
@@ -2246,7 +2246,7 @@ namespace Game.Spells
         public ObjectGuid GetCastItemGUID() { return m_castItemGuid; }
         public uint GetCastItemId() { return m_castItemId; }
         public int GetCastItemLevel() { return m_castItemLevel; }
-        public uint GetSpellXSpellVisualId() { return m_spellXSpellVisualId; }
+        public SpellCastVisual GetSpellVisual() { return m_spellVisual; }
         public WorldObject GetOwner() { return m_owner; }
         public Unit GetUnitOwner()
         {
@@ -2483,7 +2483,7 @@ namespace Game.Spells
         ObjectGuid m_castItemGuid;
         uint m_castItemId;
         int m_castItemLevel;
-        uint m_spellXSpellVisualId;
+        SpellCastVisual m_spellVisual;
         long m_applyTime;
         WorldObject m_owner;
 
