@@ -761,7 +761,7 @@ namespace Game.Entities
                             GetReputationMgr().SetVisible(factionEntry);
                         break;
                     case QuestObjectiveType.CriteriaTree:
-                        if (quest.HasFlagEx(QuestFlagsEx.ClearProgressOfCriteriaTreeObjectivesOnAccept))
+                        if (quest.HasFlagEx(QuestFlagsEx.IsWorldQuest))
                             m_questObjectiveCriteriaMgr.ResetCriteriaTree((uint)obj.ObjectID);
                         break;
                     default:

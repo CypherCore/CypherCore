@@ -50,9 +50,10 @@ namespace Framework.Constants
         Sequenced = 0x02, // Client Will Not See The Objective Displayed Until All Previous Objectives Are Completed
         Optional = 0x04, // Not Required To Complete The Quest
         Hidden = 0x08, // Never Displayed In Quest Log
-        HideItemGains = 0x10, // Skip Showing Item Objective Progress
-        ProgressCountsItemsInInventory = 0x20, // Item Objective Progress Counts Items In Inventory Instead Of Reading It From Updatefields
+        HideCreditMsg = 0x10, // Skip Showing Item Objective Progress
+        PreserveQuestItems = 0x20,
         PartOfProgressBar = 0x40, // Hidden Objective Used To Calculate Progress Bar Percent (Quests Are Limited To A Single Progress Bar Objective)
+        KillPlayersSameFaction = 0x80
     }
 
     public struct QuestSlotOffsets
@@ -259,7 +260,7 @@ namespace Framework.Constants
         HasCondition = 0x10,            // Not Used Currently
         HideRewardPoi = 0x20,           // Not Used Currently: Unsure Of Content
         Raid = 0x40,                    // Can be completed while in raid
-        TBC = 0x80,                     // Not Used Currently: Available If Tbc Expansion Enabled Only
+        WarModeRewardsOptIn = 0x80,     // Not Used Currently
         NoMoneyFromXp = 0x100,          // Not Used Currently: Experience Is Not Converted To Gold At Max Level
         HiddenRewards = 0x200,          // Items And Money Rewarded Only Sent In Smsg_Questgiver_Offer_Reward (Not In Smsg_Questgiver_Quest_Details Or In Client Quest Log(Smsg_Quest_Query_Response))
         Tracking = 0x400,               // These Quests Are Automatically Rewarded On Quest Complete And They Will Never Appear In Quest Log Client Side.
@@ -286,9 +287,8 @@ namespace Framework.Constants
         FailOnLogout = 0x80000000
     }
 
-    // last checked in 19802
     [Flags]
-    public enum QuestFlagsEx
+    public enum QuestFlagsEx : uint
     {
         None = 0x00,
         KeepAdditionalItems = 0x01,
@@ -297,7 +297,7 @@ namespace Framework.Constants
         DisallowPlayerAsQuestgiver = 0x08,
         DisplayClassChoiceRewards = 0x10,
         DisplaySpecChoiceRewards = 0x20,
-        RemoveFromLogOnPeriodicReset = 0x40,
+        RemoveFromLogOnPeridoicReset = 0x40,
         AccountLevelQuest = 0x80,
         LegendaryQuest = 0x100,
         NoGuildXp = 0x200,
@@ -313,14 +313,36 @@ namespace Framework.Constants
         DisplayHeaderAsObjectiveForTasks = 0x80000,
         GarrisonNonOwnersAllowed = 0x100000,
         RemoveQuestOnWeeklyReset = 0x200000,
-        SuppressFarewellAudioAfterQuestAccept = 0x0400000,
-        RewardsBypassWeeklyCapsAndSeasonTotal = 0x0800000,
-        ClearProgressOfCriteriaTreeObjectivesOnAccept = 0x1000000
+        SuppressFarewellAudioAfterQuestAccept = 0x400000,
+        RewardsBypassWeeklyCapsAndSeasonTotal = 0x800000,
+        IsWorldQuest = 0x1000000,
+        NotIgnorable = 0x2000000,
+        AutoPush = 0x4000000,
+        NoSpellCompleteEffects = 0x8000000,
+        DoNotToastHonorReward = 0x10000000,
+        KeepRepeatableQuestOnFactionChange = 0x20000000,
+        KeepProgressOnFactionChange = 0x40000000,
+        PushTeamQuestUsingMapController = 0x80000000
     }
 
     public enum QuestFlagsEx2
     {
-        NoWarModeBonus = 0x2
+        ResetOnGameMilestone = 0x01,
+        NoWarModeBonus = 0x02,
+        AwardHighestProfession = 0x04,
+        NotReplayable = 0x08,
+        NoReplayRewards = 0x10,
+        DisableWaypointPathing = 0x20,
+        ResetOnMythicPlusSeason = 0x40,
+        ResetOnPvpSeason = 0x80,
+        EnableOverrideSortOrder = 0x100,
+        ForceStartingLocOnZoneMap = 0x200,
+        BonusLootNever = 0x400,
+        BonusLootAlways = 0x800,
+        HideTaskOnMainMap = 0x1000,
+        HideTaskInTracker = 0x2000,
+        SkipDisabledCheck = 0x4000,
+        EnforceMaximumQuestLevel = 0x8000
     }
 
     public enum QuestSpecialFlags
