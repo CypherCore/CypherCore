@@ -37,8 +37,11 @@ namespace Framework.Constants
         WinPvpPetBattles = 13,
         CriteriaTree = 14,
         ProgressBar = 15,
-        HaveCurrency = 16,   // requires the player to have X currency when turning in but does not consume it
-        ObtainCurrency = 17    // requires the player to gain X currency after starting the quest but not required to keep it until the end (does not consume)
+        HaveCurrency = 16,      // requires the player to have X currency when turning in but does not consume it
+        ObtainCurrency = 17,    // requires the player to gain X currency after starting the quest but not required to keep it until the end (does not consume)
+        IncreaseReputation = 18,// requires the player to gain X reputation with a faction
+        AreaTriggerEnter = 19,
+        AreaTriggerExit = 20
     }
 
     public enum QuestObjectiveFlags
