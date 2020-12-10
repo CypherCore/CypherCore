@@ -170,9 +170,9 @@ namespace Game.Entities
             return (_updateMask[index / 32] & (1 << (index % 32))) != 0;
         }
 
-        public void WriteUpdateMask(WorldPacket data)
+        public void WriteUpdateMask(WorldPacket data, int bitsForSize = 32)
         {
-            data.WriteBits(_values.Count, 32);
+            data.WriteBits(_values.Count, bitsForSize);
             if (_values.Count > 32)
             {
                 if (data.HasUnfinishedBitPack())
@@ -450,9 +450,9 @@ namespace Game.Entities
             _changesMask.Set(updateField.FirstElementBit + index);
         }
 
-        public void WriteCompleteDynamicFieldUpdateMask(int size, WorldPacket data)
+        public void WriteCompleteDynamicFieldUpdateMask(int size, WorldPacket data, int bitsForSize = 32)
         {
-            data.WriteBits(size, 32);
+            data.WriteBits(size, bitsForSize);
             if (size > 32)
             {
                 if (data.HasUnfinishedBitPack())
