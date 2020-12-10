@@ -1808,6 +1808,7 @@ namespace Game
         {
             bucketInfo.Key = new AuctionBucketKey(Key);
             bucketInfo.MinPrice = MinPrice;
+            bucketInfo.RequiredLevel = RequiredLevel;
             bucketInfo.TotalQuantity = 0;
 
             foreach (AuctionPosting auction in Auctions)

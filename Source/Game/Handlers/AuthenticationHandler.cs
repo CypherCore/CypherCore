@@ -100,6 +100,18 @@ namespace Game
             features.MinimumExpansionLevel = (int)Expansion.Classic;
             features.MaximumExpansionLevel = WorldConfig.GetIntValue(WorldCfg.Expansion);
 
+            var europaTicketConfig = new EuropaTicketConfig();
+            europaTicketConfig.ThrottleState.MaxTries = 10;
+            europaTicketConfig.ThrottleState.PerMilliseconds = 60000;
+            europaTicketConfig.ThrottleState.TryCount = 1;
+            europaTicketConfig.ThrottleState.LastResetTimeBeforeNow = 111111;
+            europaTicketConfig.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
+            europaTicketConfig.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
+            europaTicketConfig.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
+            europaTicketConfig.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+
+            features.EuropaTicketSystemStatus.Set(europaTicketConfig);
+
             SendPacket(features);
         }
     }

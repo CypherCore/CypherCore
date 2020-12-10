@@ -242,68 +242,91 @@ namespace Game
             if (quest == null)
                 return;
 
-            // TODO: currency choice items
-            if (packet.Choice.LootItemType != LootItemType.Item)
-                return;
-
-            if (packet.ItemChoiceID != 0)
+            if (packet.Choice.Item.ItemID != 0)
             {
-                ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.Choice.Item.ItemID);
-                if (rewardProto == null)
+                switch (packet.Choice.LootItemType)
                 {
-                    Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.ItemChoiceID, packet.QuestID);
-                    return;
-                }
+                    case LootItemType.Item:
+                        ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(packet.Choice.Item.ItemID);
+                        if (rewardProto == null)
+                        {
+                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get invalid reward item (Item Entry: {2}) for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.ItemChoiceID, packet.QuestID);
+                            return;
+                        }
 
-                bool itemValid = false;
-                for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
-                {
-                    if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
-                    {
-                        itemValid = true;
+                        bool itemValid = false;
+                        for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
+                        {
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
+                            {
+                                itemValid = true;
+                                break;
+                            }
+                        }
+
+                        if (!itemValid && quest.PackageID != 0)
+                        {
+                            var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
+                            if (questPackageItems != null)
+                            {
+                                foreach (var questPackageItem in questPackageItems)
+                                {
+                                    if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
+                                        continue;
+
+                                    if (_player.CanSelectQuestPackageItem(questPackageItem))
+                                    {
+                                        itemValid = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!itemValid)
+                            {
+                                var questPackageItems1 = Global.DB2Mgr.GetQuestPackageItemsFallback(quest.PackageID);
+                                if (questPackageItems1 != null)
+                                {
+                                    foreach (var questPackageItem in questPackageItems1)
+                                    {
+                                        if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
+                                            continue;
+
+                                        itemValid = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!itemValid)
+                        {
+                            Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.ItemChoiceID, packet.QuestID);
+                            return;
+                        }
                         break;
-                    }
-                }
-
-                if (!itemValid && quest.PackageID != 0)
-                {
-                    var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
-                    if (questPackageItems != null)
-                    {
-                        foreach (var questPackageItem in questPackageItems)
+                    case LootItemType.Currency:
+                        if (!CliDB.CurrencyTypesStorage.HasRecord(packet.Choice.Item.ItemID))
                         {
-                            if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
-                                continue;
+                            Log.outError(LogFilter.Player, $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) tried to get invalid reward currency (Currency ID: {packet.Choice.Item.ItemID}) for quest {packet.QuestID} (possible packet-hacking detected)");
+                            return;
+                        }
 
-                            if (_player.CanSelectQuestPackageItem(questPackageItem))
+                        bool currencyValid = false;
+                        for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
+                        {
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
                             {
-                                itemValid = true;
+                                currencyValid = true;
                                 break;
                             }
                         }
-                    }
-
-                    if (!itemValid)
-                    {
-                        var questPackageItems1 = Global.DB2Mgr.GetQuestPackageItemsFallback(quest.PackageID);
-                        if (questPackageItems1 != null)
+                        if (!currencyValid)
                         {
-                            foreach (var questPackageItem in questPackageItems1)
-                            {
-                                if (questPackageItem.ItemID != packet.Choice.Item.ItemID)
-                                    continue;
-
-                                itemValid = true;
-                                break;
-                            }
+                            Log.outError(LogFilter.Player, $"Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {_player.GetName()} ({_player.GetGUID()}) tried to get reward currency (Currency ID: {packet.Choice.Item.ItemID}) wich is not a reward for quest {packet.QuestID} (possible packet-hacking detected)");
+                            return;
                         }
-                    }
-                }
-
-                if (!itemValid)
-                {
-                    Log.outError(LogFilter.Network, "Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player {0} ({1}) tried to get reward item (Item Entry: {2}) wich is not a reward for quest {3} (possible packet-hacking detected)", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), packet.ItemChoiceID, packet.QuestID);
-                    return;
+                        break;
                 }
             }
 
@@ -327,9 +350,9 @@ namespace Game
                 return;
             }
 
-            if (GetPlayer().CanRewardQuest(quest, packet.Choice.Item.ItemID, true))
+            if (GetPlayer().CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true))
             {
-                GetPlayer().RewardQuest(quest, packet.Choice.Item.ItemID, obj);
+                GetPlayer().RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, obj);
 
                 switch (obj.GetTypeId())
                 {

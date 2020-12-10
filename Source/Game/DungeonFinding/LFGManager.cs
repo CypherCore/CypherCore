@@ -1353,7 +1353,7 @@ namespace Game.DungeonFinding
 
                 // if we can take the quest, means that we haven't done this kind of "run", IE: First Heroic Random of Day.
                 if (player.CanRewardQuest(quest, false))
-                    player.RewardQuest(quest, 0, null, false);
+                    player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 else
                 {
                     done = true;
@@ -1361,7 +1361,7 @@ namespace Game.DungeonFinding
                     if (quest == null)
                         continue;
                     // we give reward without informing client (retail does this)
-                    player.RewardQuest(quest, 0, null, false);
+                    player.RewardQuest(quest, LootItemType.Item, 0, null, false);
                 }
 
                 // Give rewards

@@ -569,6 +569,105 @@ namespace Game.Entities
             return true;
         }
 
+        public bool CanRewardQuest(Quest quest, LootItemType rewardType, uint rewardId, bool msg)
+        {
+            // prevent receive reward with quest items in bank or for not completed quest
+            if (!CanRewardQuest(quest, msg))
+                return false;
+
+            List<ItemPosCount> dest = new List<ItemPosCount>();
+            if (quest.GetRewChoiceItemsCount() > 0)
+            {
+                switch (rewardType)
+                {
+                    case LootItemType.Item:
+                        for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                        {
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
+                            {
+                                InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i]);
+                                if (res != InventoryResult.Ok)
+                                {
+                                    if (msg)
+                                        SendQuestFailed(quest.Id, res);
+
+                                    return false;
+                                }
+                            }
+                        }
+                        break;
+                    case LootItemType.Currency:
+                        break;
+                }
+            }
+
+            if (quest.GetRewItemsCount() > 0)
+            {
+                for (uint i = 0; i < quest.GetRewItemsCount(); ++i)
+                {
+                    if (quest.RewardItemId[i] != 0)
+                    {
+                        InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardItemId[i], quest.RewardItemCount[i]);
+                        if (res != InventoryResult.Ok)
+                        {
+                            if (msg)
+                                SendQuestFailed(quest.Id, res);
+
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // QuestPackageItem.db2
+            if (quest.PackageID != 0)
+            {
+                bool hasFilteredQuestPackageReward = false;
+                var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
+                if (questPackageItems != null)
+                {
+                    foreach (var questPackageItem in questPackageItems)
+                    {
+                        if (questPackageItem.ItemID != rewardId)
+                            continue;
+
+                        if (CanSelectQuestPackageItem(questPackageItem))
+                        {
+                            hasFilteredQuestPackageReward = true;
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
+                            if (res != InventoryResult.Ok)
+                            {
+                                SendEquipError(res, null, null, questPackageItem.ItemID);
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                if (!hasFilteredQuestPackageReward)
+                {
+                    List<QuestPackageItemRecord> questPackageItems1 = Global.DB2Mgr.GetQuestPackageItemsFallback(quest.PackageID);
+                    if (questPackageItems1 != null)
+                    {
+                        foreach (QuestPackageItemRecord questPackageItem in questPackageItems1)
+                        {
+                            if (questPackageItem.ItemID != rewardId)
+                                continue;
+
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
+                            if (res != InventoryResult.Ok)
+                            {
+                                SendEquipError(res, null, null, questPackageItem.ItemID);
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public void AddQuestAndCheckCompletion(Quest quest, WorldObject questGiver)
         {
             AddQuest(quest, questGiver);
@@ -621,98 +720,6 @@ namespace Game.Entities
                 default:
                     break;
             }
-        }
-
-        public bool CanRewardQuest(Quest quest, uint reward, bool msg)
-        {
-            // prevent receive reward with quest items in bank or for not completed quest
-            if (!CanRewardQuest(quest, msg))
-                return false;
-
-            List<ItemPosCount> dest = new List<ItemPosCount>();
-            if (quest.GetRewChoiceItemsCount() > 0)
-            {
-                for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
-                {
-                    if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemId[i] == reward)
-                    {
-                        InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i]);
-                        if (res != InventoryResult.Ok)
-                        {
-                            if (msg)
-                                SendQuestFailed(quest.Id, res);
-
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            if (quest.GetRewItemsCount() > 0)
-            {
-                for (uint i = 0; i < quest.GetRewItemsCount(); ++i)
-                {
-                    if (quest.RewardItemId[i] != 0)
-                    {
-                        InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardItemId[i], quest.RewardItemCount[i]);
-                        if (res != InventoryResult.Ok)
-                        {
-                            if (msg)
-                                SendQuestFailed(quest.Id, res);
-
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            // QuestPackageItem.db2
-            if (quest.PackageID != 0)
-            {
-                bool hasFilteredQuestPackageReward = false;
-                var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
-                if (questPackageItems != null)
-                {
-                    foreach (var questPackageItem in questPackageItems)
-                    {
-                        if (questPackageItem.ItemID != reward)
-                            continue;
-
-                        if (CanSelectQuestPackageItem(questPackageItem))
-                        {
-                            hasFilteredQuestPackageReward = true;
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
-                            if (res != InventoryResult.Ok)
-                            {
-                                SendEquipError(res, null, null, questPackageItem.ItemID);
-                                return false;
-                            }
-                        }
-                    }
-                }
-
-                if (!hasFilteredQuestPackageReward)
-                {
-                    List<QuestPackageItemRecord> questPackageItems1 = Global.DB2Mgr.GetQuestPackageItemsFallback(quest.PackageID);
-                    if (questPackageItems1 != null)
-                    {
-                        foreach (QuestPackageItemRecord questPackageItem in questPackageItems1)
-                        {
-                            if (questPackageItem.ItemID != reward)
-                                continue;
-
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
-                            if (res != InventoryResult.Ok)
-                            {
-                                SendEquipError(res, null, null, questPackageItem.ItemID);
-                                return false;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return true;
         }
 
         public void AddQuest(Quest quest, WorldObject questGiver)
@@ -823,7 +830,7 @@ namespace Game.Entities
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
                 if (qInfo != null)
                     if (qInfo.HasFlag(QuestFlags.Tracking))
-                        RewardQuest(qInfo, 0, this, false);
+                        RewardQuest(qInfo, LootItemType.Item, 0, this, false);
             }
         }
 
@@ -932,7 +939,7 @@ namespace Game.Entities
             }
         }
 
-        public void RewardQuest(Quest quest, uint reward, WorldObject questGiver, bool announce = true)
+        public void RewardQuest(Quest quest, LootItemType rewardType, uint rewardId, WorldObject questGiver, bool announce = true)
         {
             //this THING should be here to protect code from quest, which cast on player far teleport as a reward
             //should work fine, cause far teleport will be executed in Update()
@@ -986,27 +993,41 @@ namespace Game.Entities
                     }
                 }
             }
-            
-            ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(reward);
-            if (rewardProto != null && quest.GetRewChoiceItemsCount() != 0)
+
+            switch (rewardType)
             {
-                for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
-                {
-                    if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemId[i] == reward)
+                case LootItemType.Item:
+                    ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(rewardId);
+                    if (rewardProto != null && quest.GetRewChoiceItemsCount() != 0)
                     {
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, reward, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                        for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                         {
-                            Item item = StoreNewItem(dest, reward, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(reward));
-                            SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
+                            {
+                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                {
+                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(rewardId));
+                                    SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            // QuestPackageItem.db2
-            if (rewardProto != null && quest.PackageID != 0)
-                RewardQuestPackage(quest.PackageID, reward);
+
+                    // QuestPackageItem.db2
+                    if (rewardProto != null && quest.PackageID != 0)
+                        RewardQuestPackage(quest.PackageID, rewardId);
+                    break;
+                case LootItemType.Currency:
+                    if (CliDB.CurrencyTypesStorage.HasRecord(rewardId) && quest.GetRewChoiceItemsCount() != 0)
+                    {
+                        for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == rewardId)
+                                ModifyCurrency((CurrencyTypes)quest.RewardChoiceItemId[i], (int)quest.RewardChoiceItemCount[i]);
+                    }
+                    break;
+            }
 
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
@@ -1107,21 +1128,23 @@ namespace Game.Entities
             }
             else
             {
-                for (uint i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
+                foreach (QuestRewardDisplaySpell displaySpell in quest.RewardDisplaySpell)
                 {
-                    if (quest.RewardDisplaySpell[i] > 0)
-                    {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i], GetMap().GetDifficultyID());
-                        Unit caster = this;
-                        if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
-                        {
-                            Unit unit = questGiver.ToUnit();
-                            if (unit != null)
-                                caster = unit;
-                        }
+                    var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
+                    if (playerCondition != null)
+                        if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                            continue;
 
-                        caster.CastSpell(this, spellInfo, true);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(displaySpell.SpellId, GetMap().GetDifficultyID());
+                    Unit caster = this;
+                    if (questGiver && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                    {
+                        Unit unit = questGiver.ToUnit();
+                        if (unit)
+                            caster = unit;
                     }
+
+                    caster.CastSpell(this, spellInfo, true);
                 }
             }
 

@@ -2495,6 +2495,7 @@ namespace Game.Entities
             packet.CasterGUID = log.attacker.GetGUID();
             packet.CastID = log.castId;
             packet.SpellID = (int)(log.Spell != null ? log.Spell.Id : 0);
+            packet.Visual.SpellXSpellVisualID = log.SpellXSpellVisualID;
             packet.Damage = (int)log.damage;
             packet.OriginalDamage = (int)log.originalDamage;
             if (log.damage > log.preHitHealth)

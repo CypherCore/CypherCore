@@ -5034,12 +5034,14 @@ namespace Game.Entities
                 var playerChoiceResponse = new Networking.Packets.PlayerChoiceResponse();
 
                 playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
+                playerChoiceResponse.ResponseIdentifier = playerChoiceResponseTemplate.ResponseIdentifier;
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
                 playerChoiceResponse.Flags = playerChoiceResponseTemplate.Flags;
                 playerChoiceResponse.WidgetSetID = playerChoiceResponseTemplate.WidgetSetID;
                 playerChoiceResponse.UiTextureAtlasElementID = playerChoiceResponseTemplate.UiTextureAtlasElementID;
                 playerChoiceResponse.SoundKitID = playerChoiceResponseTemplate.SoundKitID;
                 playerChoiceResponse.GroupID = playerChoiceResponseTemplate.GroupID;
+                playerChoiceResponse.UiTextureKitID = playerChoiceResponseTemplate.UiTextureKitID;
                 playerChoiceResponse.Answer = playerChoiceResponseTemplate.Answer;
                 playerChoiceResponse.Header = playerChoiceResponseTemplate.Header;
                 playerChoiceResponse.SubHeader = playerChoiceResponseTemplate.SubHeader;
@@ -5101,11 +5103,37 @@ namespace Game.Entities
                         reward.Items.Add(rewardEntry);
                     }
 
+                    foreach (PlayerChoiceResponseRewardItem item in playerChoiceResponseTemplate.Reward.Value.ItemChoices)
+                    {
+                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = item.Id;
+                        rewardEntry.Quantity = item.Quantity;
+                        if (!item.BonusListIDs.Empty())
+                        {
+                            rewardEntry.Item.ItemBonus.HasValue = true;
+                            rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
+                        }
+
+                        reward.ItemChoices.Add(rewardEntry);
+                    }
+                    
                     playerChoiceResponse.Reward.Set(reward);
                     displayPlayerChoice.Responses[i] = playerChoiceResponse;
                 }
 
                 playerChoiceResponse.RewardQuestID = playerChoiceResponseTemplate.RewardQuestID;
+
+                if (playerChoiceResponseTemplate.MawPower.HasValue)
+                {
+                    var mawPower = new Networking.Packets.PlayerChoiceResponseMawPower();
+                    mawPower.TypeArtFileID = playerChoiceResponse.MawPower.Value.TypeArtFileID;
+                    mawPower.Rarity = playerChoiceResponse.MawPower.Value.Rarity;
+                    mawPower.RarityColor = playerChoiceResponse.MawPower.Value.RarityColor;
+                    mawPower.SpellID = playerChoiceResponse.MawPower.Value.SpellID;
+                    mawPower.MaxStacks = playerChoiceResponse.MawPower.Value.MaxStacks;
+
+                    playerChoiceResponse.MawPower.Set(mawPower);
+                }
             }
 
             SendPacket(displayPlayerChoice);

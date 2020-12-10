@@ -238,7 +238,7 @@ namespace Game.Chat
                 return false;
             }
 
-            player.RewardQuest(quest, 0, player);
+            player.RewardQuest(quest, LootItemType.Item, 0, player);
             return true;
         }
     }
