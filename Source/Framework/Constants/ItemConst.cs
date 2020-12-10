@@ -81,11 +81,11 @@ namespace Framework.Constants
             ItemModifier.TransmogAppearanceSpec4
         };
 
-        public const uint AppearanceModifierMaskSpecSpecific =
-            (1 << (int)ItemModifier.TransmogAppearanceSpec1) |
-            (1 << (int)ItemModifier.TransmogAppearanceSpec2) |
-            (1 << (int)ItemModifier.TransmogAppearanceSpec3) |
-            (1 << (int)ItemModifier.TransmogAppearanceSpec4);
+        public const ulong AppearanceModifierMaskSpecSpecific =
+            (1ul << (int)ItemModifier.TransmogAppearanceSpec1) |
+            (1ul << (int)ItemModifier.TransmogAppearanceSpec2) |
+            (1ul << (int)ItemModifier.TransmogAppearanceSpec3) |
+            (1ul << (int)ItemModifier.TransmogAppearanceSpec4);
 
         public static ItemModifier[] IllusionModifierSlotBySpec =
             {
@@ -95,11 +95,25 @@ namespace Framework.Constants
             ItemModifier.EnchantIllusionSpec4
         };
 
-        public const uint IllusionModifierMaskSpecSpecific =
-            (1 << (int)ItemModifier.EnchantIllusionSpec1) |
-            (1 << (int)ItemModifier.EnchantIllusionSpec2) |
-            (1 << (int)ItemModifier.EnchantIllusionSpec3) |
-            (1 << (int)ItemModifier.EnchantIllusionSpec4);
+        public const ulong IllusionModifierMaskSpecSpecific =
+            (1ul << (int)ItemModifier.EnchantIllusionSpec1) |
+            (1ul << (int)ItemModifier.EnchantIllusionSpec2) |
+            (1ul << (int)ItemModifier.EnchantIllusionSpec3) |
+            (1ul << (int)ItemModifier.EnchantIllusionSpec4);
+
+        public static ItemModifier[] SecondaryAppearanceModifierSlotBySpec =
+        {
+            ItemModifier.TransmogSecondaryAppearanceSpec1,
+            ItemModifier.TransmogSecondaryAppearanceSpec2,
+            ItemModifier.TransmogSecondaryAppearanceSpec3,
+            ItemModifier.TransmogSecondaryAppearanceSpec4
+        };
+
+        public const ulong SecondaryAppearanceModifierMaskSpecSpecific =
+            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec1) |
+            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec2) |
+            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec3) |
+            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec4);
     }
 
     public struct InventorySlots

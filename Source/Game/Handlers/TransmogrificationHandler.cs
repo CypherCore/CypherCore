@@ -40,12 +40,62 @@ namespace Game
             }
 
             long cost = 0;
-            Dictionary<Item, uint> transmogItems = new Dictionary<Item, uint>();
+            Dictionary<Item, uint[]> transmogItems = new Dictionary<Item, uint[]>();// new Dictionary<Item, Tuple<uint, uint>>();
             Dictionary<Item, uint> illusionItems = new Dictionary<Item, uint>();
 
             List<Item> resetAppearanceItems = new List<Item>();
             List<Item> resetIllusionItems = new List<Item>();
             List<uint> bindAppearances = new List<uint>();
+
+            bool validateAndStoreTransmogItem(Item itemTransmogrified, uint itemModifiedAppearanceId, bool isSecondary)
+            {
+                var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
+                if (itemModifiedAppearance == null)
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify using invalid appearance ({itemModifiedAppearanceId}).");
+                    return false;
+                }
+
+                if (isSecondary && itemTransmogrified.GetTemplate().GetInventoryType() != InventoryType.Shoulders)
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify secondary appearance to non-shoulder item.");
+                    return false;
+                }
+
+                bool hasAppearance, isTemporary;
+                (hasAppearance, isTemporary) = GetCollectionMgr().HasItemAppearance(itemModifiedAppearanceId);
+                if (!hasAppearance)
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify using appearance he has not collected ({itemModifiedAppearanceId}).");
+                    return false;
+                }
+                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID);
+                if (player.CanUseItem(itemTemplate) != InventoryResult.Ok)
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} tried to transmogrify using appearance he can never use ({itemModifiedAppearanceId}).");
+                    return false;
+                }
+
+                // validity of the transmogrification items
+                if (!Item.CanTransmogrifyItemWithItem(itemTransmogrified, itemModifiedAppearance))
+                {
+                    Log.outDebug(LogFilter.Network, $"WORLD: HandleTransmogrifyItems - {player.GetGUID()}, Name: {player.GetName()} failed CanTransmogrifyItemWithItem ({itemTransmogrified.GetEntry()} with appearance {itemModifiedAppearanceId}).");
+                    return false;
+                }
+
+                if (!transmogItems.ContainsKey(itemTransmogrified))
+                    transmogItems[itemTransmogrified] = new uint[2];
+
+                if (!isSecondary)
+                    transmogItems[itemTransmogrified][0] = itemModifiedAppearanceId;
+                else
+                    transmogItems[itemTransmogrified][1] = itemModifiedAppearanceId;
+
+                if (isTemporary)
+                    bindAppearances.Add(itemModifiedAppearanceId);
+
+                return true;
+            };
 
             foreach (TransmogrifyItem transmogItem in transmogrifyItems.Items)
             {
@@ -64,38 +114,13 @@ namespace Game
                     return;
                 }
 
-                if (transmogItem.ItemModifiedAppearanceID != 0)
+                if (transmogItem.ItemModifiedAppearanceID != 0 || transmogItem.SecondaryItemModifiedAppearanceID != 0)
                 {
-                    ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(transmogItem.ItemModifiedAppearanceID);
-                    if (itemModifiedAppearance == null)
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify using invalid appearance ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.ItemModifiedAppearanceID);
+                    if (!validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.ItemModifiedAppearanceID, false))
                         return;
-                    }
 
-                    var pairValue = GetCollectionMgr().HasItemAppearance((uint)transmogItem.ItemModifiedAppearanceID);
-                    if (!pairValue.Item1)
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify using appearance he has not collected ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.ItemModifiedAppearanceID);
+                    if (!validateAndStoreTransmogItem(itemTransmogrified, (uint)transmogItem.SecondaryItemModifiedAppearanceID, true))
                         return;
-                    }
-                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID);
-                    if (player.CanUseItem(itemTemplate) != InventoryResult.Ok)
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify using appearance he can never use ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.ItemModifiedAppearanceID);
-                        return;
-                    }
-
-                    // validity of the transmogrification items
-                    if (!Item.CanTransmogrifyItemWithItem(itemTransmogrified, itemModifiedAppearance))
-                    {
-                        Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} failed CanTransmogrifyItemWithItem ({2} with appearance {3}).", player.GetGUID().ToString(), player.GetName(), itemTransmogrified.GetEntry(), transmogItem.ItemModifiedAppearanceID);
-                        return;
-                    }
-
-                    transmogItems[itemTransmogrified] = (uint)transmogItem.ItemModifiedAppearanceID;
-                    if (pairValue.Item2)
-                        bindAppearances.Add((uint)transmogItem.ItemModifiedAppearanceID);
 
                     // add cost
                     cost += itemTransmogrified.GetSellPrice(_player);
@@ -162,11 +187,17 @@ namespace Game
 
                 if (!transmogrifyItems.CurrentSpecOnly)
                 {
-                    transmogrified.SetModifier(ItemModifier.TransmogAppearanceAllSpecs, transmogPair.Value);
+                    transmogrified.SetModifier(ItemModifier.TransmogAppearanceAllSpecs, transmogPair.Value[0]);
                     transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec1, 0);
                     transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec2, 0);
                     transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec3, 0);
                     transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec4, 0);
+
+                    transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs, transmogPair.Value[1]);
+                    transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, 0);
+                    transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, 0);
+                    transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, 0);
+                    transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, 0);
                 }
                 else
                 {
@@ -178,7 +209,18 @@ namespace Game
                         transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec3, transmogrified.GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
                     if (transmogrified.GetModifier(ItemModifier.TransmogAppearanceSpec4) == 0)
                         transmogrified.SetModifier(ItemModifier.TransmogAppearanceSpec4, transmogrified.GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
-                    transmogrified.SetModifier(ItemConst.AppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], transmogPair.Value);
+
+                    if (transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1) == 0)
+                        transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2) == 0)
+                        transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3) == 0)
+                        transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4) == 0)
+                        transmogrified.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, transmogrified.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+
+                    transmogrified.SetModifier(ItemConst.AppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], transmogPair.Value[0]);
+                    transmogrified.SetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], transmogPair.Value[1]);
                 }
 
                 player.SetVisibleItemSlot(transmogrified.GetSlot(), transmogrified);
@@ -229,6 +271,12 @@ namespace Game
                     item.SetModifier(ItemModifier.TransmogAppearanceSpec2, 0);
                     item.SetModifier(ItemModifier.TransmogAppearanceSpec3, 0);
                     item.SetModifier(ItemModifier.TransmogAppearanceSpec4, 0);
+
+                    item.SetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs, 0);
+                    item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, 0);
+                    item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, 0);
+                    item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, 0);
+                    item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, 0);
                 }
                 else
                 {
@@ -240,7 +288,18 @@ namespace Game
                         item.SetModifier(ItemModifier.TransmogAppearanceSpec3, item.GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
                     if (item.GetModifier(ItemModifier.TransmogAppearanceSpec4) == 0)
                         item.SetModifier(ItemModifier.TransmogAppearanceSpec4, item.GetModifier(ItemModifier.TransmogAppearanceAllSpecs));
+
+                    if (item.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1) == 0)
+                        item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec1, item.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (item.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2) == 0)
+                        item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec2, item.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (item.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3) == 0)
+                        item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec3, item.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+                    if (item.GetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4) == 0)
+                        item.SetModifier(ItemModifier.TransmogSecondaryAppearanceSpec4, item.GetModifier(ItemModifier.TransmogSecondaryAppearanceAllSpecs));
+
                     item.SetModifier(ItemConst.AppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], 0);
+                    item.SetModifier(ItemConst.SecondaryAppearanceModifierSlotBySpec[player.GetActiveTalentGroup()], 0);
                     item.SetModifier(ItemModifier.EnchantIllusionAllSpecs, 0);
                 }
 
@@ -268,6 +327,7 @@ namespace Game
                         item.SetModifier(ItemModifier.EnchantIllusionSpec3, item.GetModifier(ItemModifier.EnchantIllusionAllSpecs));
                     if (item.GetModifier(ItemModifier.EnchantIllusionSpec4) == 0)
                         item.SetModifier(ItemModifier.EnchantIllusionSpec4, item.GetModifier(ItemModifier.EnchantIllusionAllSpecs));
+
                     item.SetModifier(ItemConst.IllusionModifierSlotBySpec[player.GetActiveTalentGroup()], 0);
                     item.SetModifier(ItemModifier.TransmogAppearanceAllSpecs, 0);
                 }
