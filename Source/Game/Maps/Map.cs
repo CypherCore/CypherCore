@@ -169,6 +169,10 @@ namespace Game.Maps
                         Log.outError(LogFilter.Maps, $"VMap file '{Global.WorldMgr.GetDataPath() + "vmaps/" + name}e' couldn't b loaded");
                         Log.outError(LogFilter.Maps, "This is because the version of the VMap file and the version of this module are different, please re-extract the maps with the tools compiled with this module.");
                         return false;
+                    case LoadResult.ReadFromFileFailed:
+                        Log.outError(LogFilter.Maps, $"VMap file '{Global.WorldMgr.GetDataPath() + "vmaps/" + name}' couldn't be loaded");
+                        Log.outError(LogFilter.Maps, "This is because VMAP files are corrupted, please re-extract the maps with the tools compiled with this module.");
+                        return false;
                 }
             }
             return true;
@@ -243,7 +247,7 @@ namespace Game.Maps
 
             if (map.GridMaps[gx][gy] != null)
                 Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
-            else if (gridMapLoadResult == LoadResult.InvalidFile)
+            else if (gridMapLoadResult == LoadResult.ReadFromFileFailed)
                 Log.outError(LogFilter.Maps, $"Error loading map file: {fileName}");
         }
 

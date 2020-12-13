@@ -49,25 +49,25 @@ namespace Game.Maps
                 if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
                     Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
-                    return LoadResult.InvalidFile;
+                    return LoadResult.ReadFromFileFailed;
                 }
 
                 if (header.areaMapOffset != 0 && !LoadAreaData(reader, header.areaMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map area data");
-                    return LoadResult.InvalidFile;
+                    return LoadResult.ReadFromFileFailed;
                 }
 
                 if (header.heightMapOffset != 0 && !LoadHeightData(reader, header.heightMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map height data");
-                    return LoadResult.InvalidFile;
+                    return LoadResult.ReadFromFileFailed;
                 }
 
                 if (header.liquidMapOffset != 0 && !LoadLiquidData(reader, header.liquidMapOffset))
                 {
                     Log.outError(LogFilter.Maps, "Error loading map liquids data");
-                    return LoadResult.InvalidFile;
+                    return LoadResult.ReadFromFileFailed;
                 }
 
                 return LoadResult.Success;

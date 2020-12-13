@@ -58,41 +58,41 @@ namespace Game.Collision
             iMapID = mapId;
         }
 
-        public bool InitMap(string fname)
+        public LoadResult InitMap(string fname)
         {
             Log.outDebug(LogFilter.Maps, "StaticMapTree.InitMap() : initializing StaticMapTree '{0}'", fname);
-            bool success = false;
             if (!File.Exists(fname))
-                return false;
+                return LoadResult.FileNotFound;
 
             using (BinaryReader reader = new BinaryReader(new FileStream(fname, FileMode.Open, FileAccess.Read)))
             {
                 var magic = reader.ReadStringFromChars(8);
+                if (magic != MapConst.VMapMagic)
+                    return LoadResult.VersionMismatch;
+
                 var node = reader.ReadStringFromChars(4);
+                if (node != "NODE")
+                    return LoadResult.ReadFromFileFailed;
 
-                if (magic == MapConst.VMapMagic && node == "NODE" && iTree.ReadFromFile(reader))
-                {
-                    iNTreeValues = iTree.PrimCount();
-                    iTreeValues = new ModelInstance[iNTreeValues];
-                    success = true;
-                }
+                if (!iTree.ReadFromFile(reader))
+                    return LoadResult.ReadFromFileFailed;
 
-                if (success)
+                iNTreeValues = iTree.PrimCount();
+                iTreeValues = new ModelInstance[iNTreeValues];
+
+                if (reader.ReadStringFromChars(4) != "SIDX")
+                    return LoadResult.ReadFromFileFailed;
+
+                uint spawnIndicesSize = reader.ReadUInt32();
+                for (uint i = 0; i < spawnIndicesSize; ++i)
                 {
-                    success = reader.ReadStringFromChars(4) == "SIDX";
-                    if (success)
-                    {
-                        uint spawnIndicesSize = reader.ReadUInt32();
-                        for (uint i = 0; i < spawnIndicesSize; ++i)
-                        {
-                            uint spawnId = reader.ReadUInt32();
-                            uint spawnIndex = reader.ReadUInt32();
-                            iSpawnIndices[spawnId] = spawnIndex;
-                        }
-                    }
+                    uint spawnId = reader.ReadUInt32();
+                    uint spawnIndex = reader.ReadUInt32();
+                    iSpawnIndices[spawnId] = spawnIndex;
                 }
             }
-            return success;
+
+            return LoadResult.Success;
         }
 
         public void UnloadMap(VMapManager vm)
@@ -107,35 +107,29 @@ namespace Game.Collision
             iLoadedTiles.Clear();
         }
 
-        public bool LoadMapTile(uint tileX, uint tileY, VMapManager vm)
+        public LoadResult LoadMapTile(uint tileX, uint tileY, VMapManager vm)
         {
             if (iTreeValues == null)
             {
                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : tree has not been initialized [{0}, {1}]", tileX, tileY);
-                return false;
+                return LoadResult.ReadFromFileFailed;
             }
-            bool result = true;
 
-            FileStream stream = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
-            if (stream == null)
+            LoadResult result = LoadResult.FileNotFound;
+
+            TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+            if (fileResult.File != null)
             {
-                iLoadedTiles[PackTileID(tileX, tileY)] = false;
-            }
-            else
-            {
-                using (BinaryReader reader = new BinaryReader(stream))
+                using (BinaryReader reader = new BinaryReader(fileResult.File))
                 {
                     if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                        return false;
+                        return LoadResult.VersionMismatch;
 
                     uint numSpawns = reader.ReadUInt32();
-
-                    for (uint i = 0; i < numSpawns && result; ++i)
+                    for (uint i = 0; i < numSpawns && result == LoadResult.Success; ++i)
                     {
                         // read model spawns
-                        ModelSpawn spawn;
-                        result = ModelSpawn.ReadFromFile(reader, out spawn);
-                        if (result)
+                        if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
                         {
                             // acquire model instance
                             WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
@@ -150,7 +144,7 @@ namespace Game.Collision
                                 {
                                     if (referencedVal >= iNTreeValues)
                                     {
-                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, stream.Name);
+                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, fileResult.Name);
                                         continue;
                                     }
 
@@ -160,13 +154,27 @@ namespace Game.Collision
                                 else
                                     ++iLoadedSpawns[referencedVal];
                             }
+                            else if (iMapID == fileResult.UsedMapId)
+                            {
+                                // unknown parent spawn might appear in because it overlaps multiple tiles
+                                // in case the original tile is swapped but its neighbour is now (adding this spawn)
+                                // we want to not mark it as loading error and just skip that model
+                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {iMapID}");
+                                return LoadResult.ReadFromFileFailed;
+                            }
                             else
-                                result = false;
-
+                            {
+                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : cannot read model from file (spawn index {i}) referenced in tile {fileResult.Name} by map {iMapID}");
+                                return LoadResult.ReadFromFileFailed;
+                            }
                         }
                     }
                 }
                 iLoadedTiles[PackTileID(tileX, tileY)] = true;
+            }
+            else
+            {
+                iLoadedTiles[PackTileID(tileX, tileY)] = false;
             }
             return result;
         }
@@ -182,10 +190,10 @@ namespace Game.Collision
             }
             if (tile) // file associated with tile
             {
-                FileStream stream = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
-                if (stream != null)
+                TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+                if (fileResult.File != null)
                 {
-                    using (BinaryReader reader = new BinaryReader(stream))
+                    using (BinaryReader reader = new BinaryReader(fileResult.File))
                     {
                         bool result = true;
                         if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
@@ -203,9 +211,7 @@ namespace Game.Collision
                                 vm.ReleaseModelInstance(spawn.name);
 
                                 // update tree
-                                if (!iSpawnIndices.ContainsKey(spawn.Id))
-                                    result = false;
-                                else
+                                if (iSpawnIndices.ContainsKey(spawn.Id))
                                 {
                                     uint referencedNode = iSpawnIndices[spawn.Id];
                                     if (!iLoadedSpawns.ContainsKey(referencedNode))
@@ -216,7 +222,8 @@ namespace Game.Collision
                                         iLoadedSpawns.Remove(referencedNode);
                                     }
                                 }
-
+                                else if (iMapID == fileResult.UsedMapId) // logic documented in StaticMapTree::LoadMapTile
+                                    result = false;
                             }
                         }
                     }
@@ -228,26 +235,33 @@ namespace Game.Collision
         static uint PackTileID(uint tileX, uint tileY) { return tileX << 16 | tileY; }
         static void UnpackTileID(uint ID, ref uint tileX, ref uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
 
-        static FileStream OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
+        static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
-            string tilefile = vmapPath + GetTileFileName(mapID, tileX, tileY);
-            if (!File.Exists(tilefile))
-            {
-                int parentMapId = vm.GetParentMapId(mapID);
-                while (parentMapId != -1)
-                {
-                    tilefile = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
-                    if (File.Exists(tilefile))
-                        break;
+            TileFileOpenResult result = new TileFileOpenResult();
+            result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
 
-                    parentMapId = vm.GetParentMapId((uint)parentMapId);
-                }
+            if (File.Exists(result.Name))
+            {
+                result.UsedMapId = mapID;
+                result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
+                return result;
             }
 
-            if (!File.Exists(tilefile))
-                return null;
+            int parentMapId = vm.GetParentMapId(mapID);
+            while (parentMapId != -1)
+            {
+                result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
+                if (File.Exists(result.Name))
+                {
+                    result.File = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
+                    result.UsedMapId = (uint)parentMapId;
+                    return result;
+                }
 
-            return new FileStream(tilefile, FileMode.Open, FileAccess.Read);
+                parentMapId = vm.GetParentMapId((uint)parentMapId);
+            }
+
+            return null;
         }
 
         public static LoadResult CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
@@ -262,7 +276,7 @@ namespace Game.Collision
                     return LoadResult.VersionMismatch;
             }
 
-            FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm);
+            FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm).File;
             if (stream == null)
                 return LoadResult.FileNotFound;
 
@@ -403,5 +417,12 @@ namespace Game.Collision
 
         Dictionary<uint, bool> iLoadedTiles = new Dictionary<uint, bool>();
         Dictionary<uint, uint> iLoadedSpawns = new Dictionary<uint, uint>();
+    }
+
+    class TileFileOpenResult
+    {
+        public string Name;
+        public FileStream File;
+        public uint UsedMapId;
     }
 }

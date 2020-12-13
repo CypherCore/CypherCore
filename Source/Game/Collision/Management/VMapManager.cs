@@ -35,7 +35,7 @@ namespace Game.Collision
         Success,
         FileNotFound,
         VersionMismatch,
-        InvalidFile
+        ReadFromFileFailed
     }
 
     public class VMapManager : Singleton<VMapManager>
@@ -56,13 +56,20 @@ namespace Game.Collision
             var result = VMAPLoadResult.Ignored;
             if (IsMapLoadingEnabled())
             {
-                if (LoadSingleMap(mapId, x, y))
+                LoadResult parentLoadResult = LoadSingleMap(mapId, x, y);
+                if (parentLoadResult == LoadResult.Success || parentLoadResult == LoadResult.FileNotFound)
                 {
-                    result = VMAPLoadResult.OK;
+                    if (parentLoadResult == LoadResult.Success)
+                        result = VMAPLoadResult.OK;
+                    // else VMAP_LOAD_RESULT_IGNORED
+
                     var childMaps = iChildMapData.LookupByKey(mapId);
                     foreach (uint childMapId in childMaps)
-                        if (!LoadSingleMap(childMapId, x, y))
+                    {
+                        LoadResult childLoadResult = LoadSingleMap(childMapId, x, y);
+                        if (childLoadResult != LoadResult.Success && childLoadResult != LoadResult.FileNotFound)
                             result = VMAPLoadResult.Error;
+                    }
                 }
                 else
                     result = VMAPLoadResult.Error;
@@ -71,15 +78,16 @@ namespace Game.Collision
             return result;
         }
 
-        bool LoadSingleMap(uint mapId, uint tileX, uint tileY)
+        LoadResult LoadSingleMap(uint mapId, uint tileX, uint tileY)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree == null)
             {
                 string filename = VMapPath + GetMapFileName(mapId);
                 StaticMapTree newTree = new StaticMapTree(mapId);
-                if (!newTree.InitMap(filename))
-                    return false;
+                LoadResult treeInitResult = newTree.InitMap(filename);
+                if (treeInitResult != LoadResult.Success)
+                    return treeInitResult;
 
                 iInstanceMapTrees.Add(mapId, newTree);
 
