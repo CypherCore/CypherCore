@@ -933,7 +933,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ItemDisplayID.Count);
 
             foreach (ChrCustomizationChoice customization in Customizations)
-                customization.Write(_worldPacket);
+            {
+                _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
+                _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
 
             foreach (var itemDisplayId in ItemDisplayID)
                 _worldPacket.WriteInt32(itemDisplayId);
@@ -1352,9 +1355,9 @@ namespace Game.Networking.Packets
     public struct SpellCastVisual
     {
         public uint SpellXSpellVisualID;
-        public int ScriptVisualID;
+        public uint ScriptVisualID;
 
-        public SpellCastVisual(uint spellXSpellVisualID, int scriptVisualID)
+        public SpellCastVisual(uint spellXSpellVisualID, uint scriptVisualID)
         {
             SpellXSpellVisualID = spellXSpellVisualID;
             ScriptVisualID = scriptVisualID;
@@ -1363,13 +1366,21 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             SpellXSpellVisualID = data.ReadUInt32();
-            ScriptVisualID = data.ReadInt32();
+            ScriptVisualID = data.ReadUInt32();
         }
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(SpellXSpellVisualID);
-            data.WriteInt32(ScriptVisualID);
+            data.WriteUInt32(ScriptVisualID);
+        }
+
+        public static implicit operator SpellCastVisualField(SpellCastVisual spellCastVisual)
+        {
+            SpellCastVisualField visual;
+            visual.SpellXSpellVisualID = spellCastVisual.SpellXSpellVisualID;
+            visual.ScriptVisualID = spellCastVisual.ScriptVisualID;
+            return visual;
         }
     }
 

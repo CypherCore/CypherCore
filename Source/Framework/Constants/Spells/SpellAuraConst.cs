@@ -515,6 +515,16 @@ namespace Framework.Constants
         Unk491 = 491,
         Unk492 = 492,
         Unk493 = 493,
+        SetPowerPointCharge = 494, // NYI
+        TriggerSpellOnExpire = 495, // NYI
+        AllowChangingEquipmentInTorghast = 496, // NYI
+        ModAnimaGain = 497, // NYI
+        CurrencyLossPctOnDeath = 498, // NYI
+        ModRestedXpConsumption = 499,
+        IgnoreSpellChargeCooldown = 500, // NYI
+        ModCriticalDamageTakenFromCaster = 501,
+        ModVersatilityDamageDoneBenefit = 502, // NYI
+        ModVersatilityHealingDoneBenefit = 503, // NYI
         Total
     }
 

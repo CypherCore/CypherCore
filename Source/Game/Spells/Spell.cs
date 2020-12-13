@@ -2501,13 +2501,13 @@ namespace Game.Spells
                 if (!m_caster.ToPlayer().GetCommandStatus(PlayerCommandStates.Casttime))
                 {
                     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-                    m_casttime = m_spellInfo.CalcCastTime(m_caster.GetLevel(), this);
+                    m_casttime = m_spellInfo.CalcCastTime(this);
                 }
                 else
                     m_casttime = 0;
             }
             else
-                m_casttime = m_spellInfo.CalcCastTime(m_caster.GetLevel(), this);
+                m_casttime = m_spellInfo.CalcCastTime(this);
 
             // don't allow channeled spells / spells with cast time to be casted while moving
             // exception are only channeled spells that have no casttime and SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
@@ -3547,7 +3547,7 @@ namespace Game.Spells
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
-        public static void SendCastResult(Player caster, SpellInfo spellInfo, SpellCastVisual spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
+        public static void SendCastResult(Player caster, SpellInfo spellInfo, Networking.Packets.SpellCastVisual spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -4038,7 +4038,7 @@ namespace Game.Spells
             {
                 m_caster.ClearChannelObjects();
                 m_caster.SetChannelSpellId(0);
-                m_caster.SetChannelSpellXSpellVisualId(default);
+                m_caster.SetChannelVisual(default);
             }
 
             SpellChannelUpdate spellChannelUpdate = new SpellChannelUpdate();
@@ -4087,7 +4087,7 @@ namespace Game.Spells
                 m_caster.AddChannelObject(target.targetGUID);
 
             m_caster.SetChannelSpellId(m_spellInfo.Id);
-            m_caster.SetChannelSpellXSpellVisualId(m_SpellVisual);
+            m_caster.SetChannelVisual(m_SpellVisual);
         }
 
         void SendResurrectRequest(Player target)
@@ -7404,7 +7404,7 @@ namespace Game.Spells
         public bool m_fromClient;
         public SpellCastFlagsEx m_castFlagsEx;
         public SpellMisc m_misc;
-        public SpellCastVisual m_SpellVisual;
+        public Networking.Packets.SpellCastVisual m_SpellVisual;
         public SpellCastTargets m_targets;
         public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;

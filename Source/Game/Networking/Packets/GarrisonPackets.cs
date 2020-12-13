@@ -233,7 +233,7 @@ namespace Game.Networking.Packets
 
     class GarrisonMapDataResponse : ServerPacket
     {
-        public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonBuildingLandmarks, ConnectionType.Instance) { }
+        public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonMapDataResponse, ConnectionType.Instance) { }
 
         public override void Write()
         {

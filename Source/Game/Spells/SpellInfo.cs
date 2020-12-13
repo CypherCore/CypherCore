@@ -63,6 +63,7 @@ namespace Game.Spells
                 AttributesEx11 = (SpellAttr11)_misc.Attributes[11];
                 AttributesEx12 = (SpellAttr12)_misc.Attributes[12];
                 AttributesEx13 = (SpellAttr13)_misc.Attributes[13];
+                AttributesEx14 = (SpellAttr14)_misc.Attributes[14];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
                 RangeIndex = _misc.RangeIndex;
@@ -2608,31 +2609,11 @@ namespace Game.Spells
             return (DurationEntry.MaxDuration == -1) ? -1 : Math.Abs(DurationEntry.MaxDuration);
         }
 
-        public int CalcCastTime(uint level = 0, Spell spell = null)
+        public int CalcCastTime(Spell spell = null)
         {
             int castTime = 0;
             if (CastTimeEntry != null)
-            {
-                int calcLevel = spell != null ? (int)spell.GetCaster().GetLevel() : 0;
-                if (MaxLevel != 0 && calcLevel > MaxLevel)
-                    calcLevel = (int)MaxLevel;
-
-                if (HasAttribute(SpellAttr13.Unk17))
-                    calcLevel *= 5;
-
-                if (MaxLevel != 0 && calcLevel > MaxLevel)
-                    calcLevel = (int)MaxLevel;
-
-                if (BaseLevel != 0)
-                    calcLevel -= (int)BaseLevel;
-
-                if (calcLevel < 0)
-                    calcLevel = 0;
-
-                castTime = (int)(CastTimeEntry.Base + CastTimeEntry.PerLevel * level);
-                if (castTime < CastTimeEntry.Minimum)
-                    castTime = CastTimeEntry.Minimum;
-            }
+                castTime = Math.Max(CastTimeEntry.Base, CastTimeEntry.Minimum);
 
             if (castTime <= 0)
                 return 0;
@@ -2963,7 +2944,7 @@ namespace Game.Spells
                         }
                     case SpellProcsPerMinuteModType.Class:
                         {
-                            if (caster.GetClassMask().HasAnyFlag(mod.Param))
+                            if (caster.GetClassMask().HasAnyFlag((uint)mod.Param))
                                 ppm *= 1.0f + mod.Coeff;
                             break;
                         }
@@ -3513,6 +3494,7 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr11 attribute) { return Convert.ToBoolean(AttributesEx11 & attribute); }
         public bool HasAttribute(SpellAttr12 attribute) { return Convert.ToBoolean(AttributesEx12 & attribute); }
         public bool HasAttribute(SpellAttr13 attribute) { return Convert.ToBoolean(AttributesEx13 & attribute); }
+        public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
         public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags.Any(flag => flag != 0); }
@@ -3542,6 +3524,7 @@ namespace Game.Spells
         public SpellAttr11 AttributesEx11 { get; set; }
         public SpellAttr12 AttributesEx12 { get; set; }
         public SpellAttr13 AttributesEx13 { get; set; }
+        public SpellAttr14 AttributesEx14 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }
@@ -4359,6 +4342,18 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 269 SPELL_EFFECT_UPGRADE_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 270 SPELL_EFFECT_270
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 271 SPELL_EFFECT_APPLY_AREA_AURA_PARTY_NONRANDOM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 272 SPELL_EFFECT_SET_COVENANT
+            new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 273 SPELL_EFFECT_CRAFT_RUNEFORGE_LEGENDARY
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 274 SPELL_EFFECT_274
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 275 SPELL_EFFECT_275
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 276 SPELL_EFFECT_LEARN_TRANSMOG_ILLUSION
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 277 SPELL_EFFECT_SET_CHROMIE_TIME
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 278 SPELL_EFFECT_270
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 279 SPELL_EFFECT_LEARN_GARR_TALENT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 280 SPELL_EFFECT_270
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 281 SPELL_EFFECT_LEARN_SOULBIND_CONDUIT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 282 SPELL_EFFECT_CONVERT_ITEMS_TO_CURRENCY
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 283 SPELL_EFFECT_283
         };
 
         #region Fields
@@ -4726,7 +4721,8 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 147
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 148
             new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Random),      // 149
-            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 150
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 150 TARGET_UNIT_OWN_CRITTER
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Area,    SpellTargetCheckTypes.Enemy,    SpellTargetDirectionTypes.None),        // 151
         };
     }
 

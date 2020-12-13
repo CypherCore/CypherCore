@@ -27,15 +27,16 @@ namespace Game.DataStorage
         public int Flags;
         public int System;
         public UiMapType Type;
-        public uint LevelRangeMin;
-        public uint LevelRangeMax;
         public int BountySetID;
         public uint BountyDisplayLocation;
         public int VisibilityPlayerConditionID;
         public sbyte HelpTextPosition;
         public int BkgAtlasID;
         public int AlternateUiMapGroup;
-    }
+        public int ContentTuningID;
+
+        public UiMapFlag GetFlags() { return (UiMapFlag)Flags; }
+}
 
     public sealed class UiMapAssignmentRecord
     {
@@ -61,6 +62,7 @@ namespace Game.DataStorage
         public int ChildUiMapID;
         public int OverrideHighlightFileDataID;
         public int OverrideHighlightAtlasID;
+        public int Flags;
     }
 
     public sealed class UiMapXMapArtRecord

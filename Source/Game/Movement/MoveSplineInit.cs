@@ -285,8 +285,8 @@ namespace Game.Movement
         public void SetAnimation(AnimType anim)
         {
             args.time_perc = 0.0f;
-            args.animTier.emplace();
-            args.animTier.AnimTier = anim;
+            args.animTier.HasValue = true;
+            args.animTier.Value.AnimTier = (byte)anim;
             args.flags.EnableAnimation();
         }
 

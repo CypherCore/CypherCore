@@ -28,6 +28,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -41,57 +42,77 @@ namespace Game
             DB.Characters.Execute(stmt);
 
             // get all the data necessary for loading all characters (along with their pets) on the account
-            if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed))
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ENUM_DECLINED_NAME);
-            else
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ENUM);
+            EnumCharactersQueryHolder holder = new EnumCharactersQueryHolder();
+            if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), false))
+            {
+                HandleCharEnum(holder);
+                return;
+            }
 
-            stmt.AddValue(0, PetSaveMode.AsCurrent);
-            stmt.AddValue(1, GetAccountId());
-
-            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharEnumCallback));
+            _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
         }
 
-        void HandleCharEnumCallback(SQLResult result)
+        void HandleCharEnum(EnumCharactersQueryHolder holder)
         {
             EnumCharactersResult charResult = new EnumCharactersResult();
             charResult.Success = true;
-            charResult.IsDeletedCharacters = false;
+            charResult.IsDeletedCharacters = holder.IsDeletedCharacters();
             charResult.DisabledClassesMask.Set(WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask));
 
-            _legitCharacters.Clear();
+            if (!charResult.IsDeletedCharacters)
+                _legitCharacters.Clear();
+
+            MultiMap<ulong, ChrCustomizationChoice> customizations = new MultiMap<ulong, ChrCustomizationChoice>();
+            SQLResult customizationsResult = holder.GetResult(EnumCharacterQueryLoad.Customizations);
+            if (!customizationsResult.IsEmpty())
+            {
+                do
+                {
+                    var customizationsForCharacter = customizations[customizationsResult.Read<ulong>(0)];
+
+                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(1);
+                    choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(2);
+                    customizationsForCharacter.Add(choice);
+
+                } while (customizationsResult.NextRow());
+            }
+
+            SQLResult result = holder.GetResult(EnumCharacterQueryLoad.Characters);
             if (!result.IsEmpty())
             {
                 do
                 {
                     EnumCharactersResult.CharacterInfo charInfo = new EnumCharactersResult.CharacterInfo(result.GetFields());
 
+                    var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
+                    if (!customizationsForChar.Empty())
+                        charInfo.Customizations = (Array<ChrCustomizationChoice>)customizationsForChar.ToList();
+
                     Log.outInfo(LogFilter.Network, "Loading Character {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
-                    if (!Player.ValidateAppearance((Race)charInfo.RaceId, charInfo.ClassId, (Gender)charInfo.SexId, charInfo.HairStyle, charInfo.HairColor, charInfo.FaceId, charInfo.FacialHair, charInfo.SkinId, charInfo.CustomDisplay))
+                    if (!charResult.IsDeletedCharacters)
                     {
-                        Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString());
-
-                        // Make sure customization always works properly - send all zeroes instead
-                        charInfo.SkinId = 0;
-                        charInfo.FaceId = 0;
-                        charInfo.HairStyle = 0;
-                        charInfo.HairColor = 0;
-                        charInfo.FacialHair = 0;
-
-                        if (charInfo.Flags2 != CharacterCustomizeFlags.Customize)
+                        if (!ValidateAppearance((Race)charInfo.RaceId, charInfo.ClassId, (Gender)charInfo.SexId, charInfo.Customizations))
                         {
-                            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                            stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
-                            stmt.AddValue(1, charInfo.Guid.GetCounter());
-                            DB.Characters.Execute(stmt);
-                            charInfo.Flags2 = CharacterCustomizeFlags.Customize;
-                        }
-                    }
+                            Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), forcing recustomize", charInfo.Guid.ToString());
 
-                    // Do not allow locked characters to login
-                    if (!charInfo.Flags.HasAnyFlag(CharacterFlags.CharacterLockedForTransfer | CharacterFlags.LockedByBilling))
-                        _legitCharacters.Add(charInfo.Guid);
+                            charInfo.Customizations.Clear();
+
+                            if (charInfo.Flags2 != CharacterCustomizeFlags.Customize)
+                            {
+                                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                                stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
+                                stmt.AddValue(1, charInfo.Guid.GetCounter());
+                                DB.Characters.Execute(stmt);
+                                charInfo.Flags2 = CharacterCustomizeFlags.Customize;
+                            }
+                        }
+
+                        // Do not allow locked characters to login
+                        if (!charInfo.Flags.HasAnyFlag(CharacterFlags.CharacterLockedForTransfer | CharacterFlags.LockedByBilling))
+                            _legitCharacters.Add(charInfo.Guid);
+                    }
 
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                         Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, false);
@@ -120,16 +141,14 @@ namespace Game
         void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
         {
             // get all the data necessary for loading all undeleted characters (along with their pets) on the account
-            PreparedStatement stmt;
-            if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed))
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_UNDELETE_ENUM_DECLINED_NAME);
-            else
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_UNDELETE_ENUM);
-
-            stmt.AddValue(0, (uint)PetSaveMode.AsCurrent);
-            stmt.AddValue(1, GetAccountId());
-
-            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharUndeleteEnumCallback));
+            EnumCharactersQueryHolder holder = new EnumCharactersQueryHolder();
+            if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), true))
+            {
+                HandleCharEnum(holder);
+                return;
+            }
+            
+            _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
         }
 
         void HandleCharUndeleteEnumCallback(SQLResult result)
@@ -156,6 +175,94 @@ namespace Game
             }
 
             SendPacket(charEnum);
+        }
+
+        public bool MeetsChrCustomizationReq(ChrCustomizationReqRecord req, Class playerClass, bool checkRequiredDependentChoices, List<ChrCustomizationChoice> selectedChoices)
+        {
+            if (!req.GetFlags().HasFlag(ChrCustomizationReqFlag.HasRequirements))
+                return true;
+
+            if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
+                return false;
+
+            if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)
+                return false;
+
+            if (req.ItemModifiedAppearanceID != 0 && !GetCollectionMgr().HasItemAppearance(req.ItemModifiedAppearanceID).PermAppearance)
+                return false;
+
+            if (checkRequiredDependentChoices)
+            {
+                var requiredChoices = Global.DB2Mgr.GetRequiredCustomizationChoices(req.Id);
+                if (!requiredChoices.Empty())
+                {
+                    foreach (var key in requiredChoices.Keys)
+                    {
+                        bool hasRequiredChoiceForOption = false;
+                        foreach (uint requiredChoice in requiredChoices[key])
+                        {
+                            if (selectedChoices.Any(choice => choice.ChrCustomizationChoiceID == requiredChoice))
+                            {
+                                hasRequiredChoiceForOption = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasRequiredChoiceForOption)
+                            return false;
+                    }
+                }
+
+            }
+
+            return true;
+        }
+
+        public bool ValidateAppearance(Race race, Class playerClass, Gender gender, List<ChrCustomizationChoice> customizations)
+        {
+            var options = Global.DB2Mgr.GetCustomiztionOptions(race, gender);
+            if (options.Empty())
+                return false;
+
+            uint previousOption = 0;
+
+            foreach (var playerChoice in customizations)
+            {
+                // check uniqueness of options
+                if (playerChoice.ChrCustomizationOptionID == previousOption)
+                    return false;
+
+                previousOption = playerChoice.ChrCustomizationOptionID;
+
+                // check if we can use this option
+                var customizationOptionData = options.Find(option => { return option.Id == playerChoice.ChrCustomizationOptionID; });
+
+                // option not found for race/gender combination
+                if (customizationOptionData == null)
+                    return false;
+
+                ChrCustomizationReqRecord req = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationOptionData.ChrCustomizationReqID);
+                if (req != null)
+                    if (!MeetsChrCustomizationReq(req, playerClass, false, customizations))
+                        return false;
+
+                var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(playerChoice.ChrCustomizationOptionID);
+                if (choicesForOption.Empty())
+                    return false;
+
+                var customizationChoiceData = choicesForOption.Find(choice => { return choice.Id == playerChoice.ChrCustomizationChoiceID; });
+
+                // choice not found for option
+                if (customizationChoiceData == null)
+                    return false;
+
+                ChrCustomizationReqRecord reqEntry = CliDB.ChrCustomizationReqStorage.LookupByKey(customizationChoiceData.ChrCustomizationReqID);
+                if (reqEntry != null)
+                    if (!MeetsChrCustomizationReq(reqEntry, playerClass, true, customizations))
+                        return false;
+            }
+
+            return true;
         }
 
         [WorldPacketHandler(ClientOpcodes.CreateCharacter, Status = SessionStatus.Authed)]
@@ -332,7 +439,7 @@ namespace Game
                         return;
                     }
                 }
-                
+
                 int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
                 bool hasDemonHunterReqLevel = demonHunterReqLevel == 0;
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
@@ -386,19 +493,6 @@ namespace Game
 
                             if (checkDemonHunterReqs)
                             {
-                                byte acc_class = result1.Read<byte>(2);
-                                if (acc_class == (byte)Class.DemonHunter)
-                                {
-                                    if (freeDemonHunterSlots > 0)
-                                        --freeDemonHunterSlots;
-
-                                    if (freeDemonHunterSlots == 0)
-                                    {
-                                        SendCharCreate(ResponseCodes.CharCreateFailed);
-                                        return;
-                                    }
-                                }
-
                                 if (!hasDemonHunterReqLevel)
                                 {
                                     byte acc_level = result1.Read<byte>(0);
@@ -457,7 +551,7 @@ namespace Game
                         {
                             Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                             Global.ScriptMgr.OnPlayerCreate(newChar);
-                            Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
+                            Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeSex(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
                             SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
                         }
@@ -474,7 +568,7 @@ namespace Game
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_CREATE_INFO);
                 stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter) ? 12 : 1);
+                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter) ? 1200 : 1); // 200 (max chars per realm) + 1000 (max deleted chars per realm)
                 queryCallback.WithCallback(finalizeCharacterCreation).SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }));
         }
@@ -1227,37 +1321,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AlterAppearance)]
         void HandleAlterAppearance(AlterApperance packet)
         {
-            BarberShopStyleRecord bs_hair = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewHairStyle);
-            if (bs_hair == null || bs_hair.Type != 0 || bs_hair.Race != (byte)GetPlayer().GetRace() || bs_hair.Sex != GetPlayer().m_playerData.NativeSex)
-                return;
-
-            BarberShopStyleRecord bs_facialHair = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewFacialHair);
-            if (bs_facialHair == null || bs_facialHair.Type != 2 || bs_facialHair.Race != (byte)GetPlayer().GetRace() || bs_facialHair.Sex != GetPlayer().m_playerData.NativeSex)
-                return;
-
-            BarberShopStyleRecord bs_skinColor = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewSkinColor);
-            if (bs_skinColor != null && (bs_skinColor.Type != 3 || bs_skinColor.Race != (byte)GetPlayer().GetRace() || bs_skinColor.Sex != GetPlayer().m_playerData.NativeSex))
-                return;
-
-            BarberShopStyleRecord bs_face = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewFace);
-            if (bs_face != null && (bs_face.Type != 4 || bs_face.Race != (byte)GetPlayer().GetRace() || bs_face.Sex != GetPlayer().m_playerData.NativeSex))
-                return;
-
-            Array<BarberShopStyleRecord> customDisplayEntries = new Array<BarberShopStyleRecord>(PlayerConst.CustomDisplaySize);
-            Array<byte> customDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-            {
-                BarberShopStyleRecord bs_customDisplay = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewCustomDisplay[i]);
-                if (bs_customDisplay != null && (bs_customDisplay.Type != 5 + i || bs_customDisplay.Race != (byte)_player.GetRace() || bs_customDisplay.Sex != _player.m_playerData.NativeSex))
-                    return;
-
-                customDisplayEntries[i] = bs_customDisplay;
-                customDisplay[i] = (byte)(bs_customDisplay != null ? bs_customDisplay.Data : 0);
-            }
-
-            if (!Player.ValidateAppearance(GetPlayer().GetRace(), GetPlayer().GetClass(), (Gender)(byte)GetPlayer().m_playerData.NativeSex,
-                bs_hair.Data, (byte)packet.NewHairColor, bs_face != null ? bs_face.Data : GetPlayer().m_playerData.FaceID,
-                bs_facialHair.Data, bs_skinColor != null ? bs_skinColor.Data : GetPlayer().m_playerData.SkinID, customDisplay))
+            if (!ValidateAppearance(_player.GetRace(), _player.GetClass(), (Gender)packet.NewSex, packet.Customizations))
                 return;
 
             GameObject go = GetPlayer().FindNearestGameObjectOfType(GameObjectTypes.BarberChair, 5.0f);
@@ -1273,8 +1337,8 @@ namespace Game
                 return;
             }
 
-            uint cost = GetPlayer().GetBarberShopCost(bs_hair, packet.NewHairColor, bs_facialHair, bs_skinColor, bs_face, customDisplayEntries);
-            if (!GetPlayer().HasEnoughMoney((ulong)cost))
+            long cost = GetPlayer().GetBarberShopCost(packet.Customizations);
+            if (!GetPlayer().HasEnoughMoney(cost))
             {
                 SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.NoMoney));
                 return;
@@ -1283,22 +1347,16 @@ namespace Game
             SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.Success));
 
             _player.ModifyMoney(-cost);
-            _player.UpdateCriteria(CriteriaTypes.GoldSpentAtBarber, cost);
+            _player.UpdateCriteria(CriteriaTypes.GoldSpentAtBarber, (ulong)cost);
 
-            _player.SetHairStyleId(bs_hair.Data);
-            _player.SetHairColorId((byte)packet.NewHairColor);
-            _player.SetFacialHairStyleId(bs_facialHair.Data);
-            if (bs_skinColor != null)
-                GetPlayer().SetSkinId(bs_skinColor.Data);
-            if (bs_face != null)
-                _player.SetFaceId(bs_face.Data);
-
-            for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                _player.SetCustomDisplayOption(i, customDisplay[i]);
+            _player.SetNativeSex((Gender)packet.NewSex);
+            _player.SetCustomizations(packet.Customizations);
 
             _player.UpdateCriteria(CriteriaTypes.VisitBarberShop, 1);
 
             _player.SetStandState(UnitStandStateType.Stand);
+
+            Global.CharacterCacheStorage.UpdateCharacterGender(_player.GetGUID(), packet.NewSex);
         }
 
         [WorldPacketHandler(ClientOpcodes.CharCustomize, Status = SessionStatus.Authed)]
@@ -1327,13 +1385,12 @@ namespace Game
             }
 
             string oldName = result.Read<string>(0);
-            byte plrRace = result.Read<byte>(1);
-            byte plrClass = result.Read<byte>(2);
-            byte plrGender = result.Read<byte>(3);
+            Race plrRace = (Race)result.Read<byte>(1);
+            Class plrClass = (Class)result.Read<byte>(2);
+            Gender plrGender = (Gender)result.Read<byte>(3);
             AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<ushort>(4);
 
-            if (!Player.ValidateAppearance((Race)plrRace, (Class)plrClass, (Gender)plrGender, customizeInfo.HairStyleID, customizeInfo.HairColorID, customizeInfo.FaceID, 
-                customizeInfo.FacialHairStyleID, customizeInfo.SkinID, customizeInfo.CustomDisplay))
+            if (!ValidateAppearance(plrRace, plrClass, plrGender, customizeInfo.Customizations))
             {
                 SendCharCustomize(ResponseCodes.CharCreateError, customizeInfo);
                 return;
@@ -1392,22 +1449,7 @@ namespace Game
             ulong lowGuid = customizeInfo.CharGUID.GetCounter();
 
             // Customize
-            {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GENDER_AND_APPEARANCE);
-
-                stmt.AddValue(0, customizeInfo.SexID);
-                stmt.AddValue(1, customizeInfo.SkinID);
-                stmt.AddValue(2, customizeInfo.FaceID);
-                stmt.AddValue(3, customizeInfo.HairStyleID);
-                stmt.AddValue(4, customizeInfo.HairColorID);
-                stmt.AddValue(5, customizeInfo.FacialHairStyleID);
-                stmt.AddValue(6, customizeInfo.CustomDisplay[0]);
-                stmt.AddValue(7, customizeInfo.CustomDisplay[1]);
-                stmt.AddValue(8, customizeInfo.CustomDisplay[2]);
-                stmt.AddValue(9, lowGuid);
-
-                trans.Append(stmt);
-            }
+            Player.SaveCustomizations(trans, lowGuid, customizeInfo.Customizations);
 
             // Name Change and update atLogin flags
             {
@@ -1505,7 +1547,7 @@ namespace Game
                     if (illusion.ItemVisual == 0 || !illusion.Flags.HasAnyFlag(EnchantmentSlotMask.Collectable))
                         return false;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogPlayerConditionID);
+                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
                     if (condition != null)
                         if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
                             return false;
@@ -1735,21 +1777,7 @@ namespace Game
             }
 
             // Customize
-            {
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GENDER_AND_APPEARANCE);
-                stmt.AddValue(0, factionChangeInfo.SexID);
-                stmt.AddValue(1, factionChangeInfo.SkinID);
-                stmt.AddValue(2, factionChangeInfo.FaceID);
-                stmt.AddValue(3, factionChangeInfo.HairStyleID);
-                stmt.AddValue(4, factionChangeInfo.HairColorID);
-                stmt.AddValue(5, factionChangeInfo.FacialHairStyleID);
-                stmt.AddValue(6, factionChangeInfo.CustomDisplay[0]);
-                stmt.AddValue(7, factionChangeInfo.CustomDisplay[1]);
-                stmt.AddValue(8, factionChangeInfo.CustomDisplay[2]);
-                stmt.AddValue(9, lowGuid);
-
-                trans.Append(stmt);
-            }
+            Player.SaveCustomizations(trans, lowGuid, factionChangeInfo.Customizations);
 
             // Race Change
             {
@@ -2511,6 +2539,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.From, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_CUSTOMIZATIONS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.Customizations, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Group, stmt);
@@ -2736,10 +2768,41 @@ namespace Game
         ObjectGuid m_guid;
     }
 
+    class EnumCharactersQueryHolder : SQLQueryHolder<EnumCharacterQueryLoad>
+    {
+        public bool Initialize(uint accountId, bool withDeclinedNames, bool isDeletedCharacters)
+        {
+            _isDeletedCharacters = isDeletedCharacters;
+
+            CharStatements[][] statements =
+            {
+                new [] { CharStatements.SEL_ENUM, CharStatements.SEL_ENUM_DECLINED_NAME, CharStatements.SEL_ENUM_CUSTOMIZATIONS },
+                new [] { CharStatements.SEL_UNDELETE_ENUM, CharStatements.SEL_UNDELETE_ENUM_DECLINED_NAME, CharStatements.SEL_UNDELETE_ENUM_CUSTOMIZATIONS }
+            };
+
+            bool result = true;
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][withDeclinedNames ? 1 : 0]);
+            stmt.AddValue(0, (byte)PetSaveMode.AsCurrent);
+            stmt.AddValue(1, accountId);
+            SetQuery(EnumCharacterQueryLoad.Characters, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(statements[isDeletedCharacters ? 1 : 0][2]);
+            stmt.AddValue(0, accountId);
+            SetQuery(EnumCharacterQueryLoad.Customizations, stmt);
+
+            return result;
+        }
+
+        public bool IsDeletedCharacters() { return _isDeletedCharacters; }
+
+        bool _isDeletedCharacters = false;
+    }
+
     // used at player loading query list preparing, and later result selection
     public enum PlayerLoginQueryLoad
     {
         From,
+        Customizations,
         Group,
         BoundInstances,
         Auras,
@@ -2794,5 +2857,11 @@ namespace Game
         GarrisonFollowers,
         GarrisonFollowerAbilities,
         Max
+    }
+
+    enum EnumCharacterQueryLoad
+    {
+        Characters,
+        Customizations
     }
 }

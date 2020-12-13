@@ -1832,6 +1832,38 @@ namespace Game.Entities
                 pair.Value.state = PlayerCurrencyState.Unchanged;
             }
         }
+
+        public static void SavePlayerCustomizations(SQLTransaction trans, ulong guid, List<ChrCustomizationChoice> customizations)
+        {
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS);
+            stmt.AddValue(0, guid);
+            trans.Append(stmt);
+
+            foreach (var customization in customizations)
+            {
+                stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_CUSTOMIZATION);
+                stmt.AddValue(0, guid);
+                stmt.AddValue(1, customization.ChrCustomizationOptionID);
+                stmt.AddValue(2, customization.ChrCustomizationChoiceID);
+                trans.Append(stmt);
+            }
+        }
+
+        public static void SaveCustomizations(SQLTransaction trans, ulong guid, List<ChrCustomizationChoice> customizations)
+        {
+            SavePlayerCustomizations(trans, guid, customizations);
+        }
+
+        void _SaveCustomizations(SQLTransaction trans)
+        {
+            if (!m_customizationsChanged)
+                return;
+
+            m_customizationsChanged = false;
+
+            SavePlayerCustomizations(trans, GetGUID().GetCounter(), m_playerData.Customizations);
+        }
+
         void _SaveActions(SQLTransaction trans)
         {
             PreparedStatement stmt = null;
@@ -2418,19 +2450,86 @@ namespace Game.Entities
             SQLResult result = holder.GetResult(PlayerLoginQueryLoad.From);
             if (result.IsEmpty())
             {
-                string name;
-                Global.CharacterCacheStorage.GetCharacterNameByGuid(guid, out name);
-                Log.outError(LogFilter.Player, "Player {0} {1} not found in table `characters`, can't load. ", name, guid.ToString());
+                Global.CharacterCacheStorage.GetCharacterNameByGuid(guid, out string cacheName);
+                Log.outError(LogFilter.Player, "Player {0} {1} not found in table `characters`, can't load. ", cacheName, guid.ToString());
                 return false;
             }
 
-            uint dbAccountId = result.Read<uint>(1);
+            int fieldIndex = 1;
+            uint accountId = result.Read<uint>(fieldIndex++);
+            string name = result.Read<string>(fieldIndex++);
+            Race race = (Race)result.Read<byte>(fieldIndex++);
+            Class class_ = (Class)result.Read<byte>(fieldIndex++);
+            Gender gender = (Gender)result.Read<byte>(fieldIndex++);
+            byte level = result.Read<byte>(fieldIndex++);
+            uint xp = result.Read<uint>(fieldIndex++);
+            ulong money = result.Read<ulong>(fieldIndex++);
+            byte inventorySlots = result.Read<byte>(fieldIndex++);
+            byte bankSlots = result.Read<byte>(fieldIndex++);
+            PlayerRestState restState = (PlayerRestState)result.Read<byte>(fieldIndex++);
+            PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(fieldIndex++);
+            PlayerFlagsEx playerFlagsEx = (PlayerFlagsEx)result.Read<uint>(fieldIndex++);
+            float position_x = result.Read<float>(fieldIndex++);
+            float position_y = result.Read<float>(fieldIndex++);
+            float position_z = result.Read<float>(fieldIndex++);
+            uint mapId = result.Read<ushort>(fieldIndex++);
+            float orientation = result.Read<float>(fieldIndex++);
+            string taximask = result.Read<string>(fieldIndex++);
+            byte cinematic = result.Read<byte>(fieldIndex++);
+            uint totaltime = result.Read<uint> (fieldIndex++);
+            uint leveltime = result.Read<uint>(fieldIndex++);
+            float rest_bonus = result.Read<float>(fieldIndex++);
+            uint logout_time = result.Read<uint>(fieldIndex++);
+            byte is_logout_resting = result.Read<byte>(fieldIndex++);
+            uint resettalents_cost = result.Read<uint>(fieldIndex++);
+            uint resettalents_time = result.Read<uint>(fieldIndex++);
+            uint primarySpecialization = result.Read<uint>(fieldIndex++);
+            float trans_x = result.Read<float>(fieldIndex++);
+            float trans_y = result.Read<float>(fieldIndex++);
+            float trans_z = result.Read<float>(fieldIndex++);
+            float trans_o = result.Read<float>(fieldIndex++);
+            ulong transguid = result.Read<ulong>(fieldIndex++);
+            PlayerExtraFlags extra_flags = (PlayerExtraFlags)result.Read<ushort>(fieldIndex++);
+            byte stable_slots = result.Read<byte>(fieldIndex++);
+            ushort at_login = result.Read<ushort>(fieldIndex++);
+            ushort zone = result.Read<ushort>(fieldIndex++);
+            byte online = result.Read<byte>(fieldIndex++);
+            uint death_expire_time = result.Read<uint>(fieldIndex++);
+            string taxi_path = result.Read<string>(fieldIndex++);
+            Difficulty dungeonDifficulty = (Difficulty)result.Read<byte>(fieldIndex++);
+            uint totalKills = result.Read<uint>(fieldIndex++);
+            ushort todayKills = result.Read<ushort>(fieldIndex++);
+            ushort yesterdayKills = result.Read<ushort>(fieldIndex++);
+            uint chosenTitle = result.Read<uint>(fieldIndex++);
+            uint watchedFaction = result.Read<uint>(fieldIndex++);
+            byte drunk = result.Read<byte>(fieldIndex++);
+            uint health = result.Read<uint>(fieldIndex++);
+
+            uint[] powers = new uint[(int)PowerType.MaxPerClass];
+            for (var i = 0; fieldIndex < powers.Length; ++i)
+                powers[i] = result.Read<uint>(fieldIndex++);
+
+            uint instance_id = result.Read<uint>(fieldIndex++);
+            byte activeTalentGroup = result.Read<byte>(fieldIndex++);
+            uint lootSpecId = result.Read<uint>(fieldIndex++);
+            string exploredZones = result.Read<string>(fieldIndex++);
+            string knownTitles = result.Read<string>(fieldIndex++);
+            byte actionBars = result.Read<byte>(fieldIndex++);
+            Difficulty raidDifficulty = (Difficulty)result.Read<byte>(fieldIndex++);
+            Difficulty legacyRaidDifficulty = (Difficulty)result.Read<byte>(fieldIndex++);
+            byte fishingSteps = result.Read<byte>(fieldIndex++);
+            uint honor = result.Read<uint>(fieldIndex++);
+            uint honorLevel = result.Read<uint>(fieldIndex++);
+            PlayerRestState honorRestState = (PlayerRestState)result.Read<byte>(fieldIndex++);
+            float honorRestBonus = result.Read<float>(fieldIndex++);
+            byte numRespecs = result.Read<byte>(fieldIndex++);
+
 
             // check if the character's account in the db and the logged in account match.
             // player should be able to load/delete character only with correct account!
-            if (dbAccountId != GetSession().GetAccountId())
+            if (accountId != GetSession().GetAccountId())
             {
-                Log.outError(LogFilter.Player, "Player (GUID: {0}) loading from wrong account (is: {1}, should be: {2})", GetGUID().ToString(), GetSession().GetAccountId(), dbAccountId);
+                Log.outError(LogFilter.Player, "Player (GUID: {0}) loading from wrong account (is: {1}, should be: {2})", GetGUID().ToString(), GetSession().GetAccountId(), accountId);
                 return false;
             }
 
@@ -2443,7 +2542,7 @@ namespace Game.Entities
 
             _Create(guid);
 
-            SetName(result.Read<string>(2));
+            SetName(name);
 
             // check name limitations
             if (ObjectManager.CheckPlayerName(GetName(), GetSession().GetSessionDbcLocale()) != ResponseCodes.CharNameSuccess ||
@@ -2456,18 +2555,18 @@ namespace Game.Entities
                 return false;
             }
 
-            // overwrite possible wrong/corrupted guid
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
 
-            Gender gender = (Gender)result.Read<byte>(5);
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BnetAccount), GetSession().GetBattlenetAccountGUID());
+
             if (gender >= Gender.None)
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong gender ({1}), can't be loaded.", guid.ToString(), gender);
                 return false;
             }
 
-            SetRace((Race)result.Read<byte>(3));
-            SetClass((Class)result.Read<byte>(4));
+            SetRace(race);
+            SetClass(class_);
             SetGender(gender);
 
             // check if race/class combination is valid
@@ -2478,19 +2577,19 @@ namespace Game.Entities
                 return false;
             }
 
-            SetLevel(result.Read<uint>(6));
-            SetXP(result.Read<uint>(7));
+            SetLevel(level);
+            SetXP(xp);
 
-            StringArray exploredZones = new StringArray(result.Read<string>(66), ' ');
-            if (exploredZones.Length == PlayerConst.ExploredZonesSize * 2)
-                for (int i = 0; i < exploredZones.Length; ++i)
-                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZones[i])) << (32 * (i % 2))));
+            StringArray exploredZonesStrings = new StringArray(exploredZones, ' ');
+            if (exploredZonesStrings.Length == PlayerConst.ExploredZonesSize * 2)
+                for (int i = 0; i < exploredZonesStrings.Length; ++i)
+                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
 
-            StringArray knownTitles = new StringArray(result.Read<string>(67), ' ');
-            if ((knownTitles.Length % 2) == 0)
+            StringArray knownTitlesStrings = new StringArray(knownTitles, ' ');
+            if ((knownTitlesStrings.Length % 2) == 0)
             {
-                for (int i = 0; i < knownTitles.Length; ++i)
-                    SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, i / 2), (ulong)((long.Parse(knownTitles[i])) << (32 * (i % 2))));
+                for (int i = 0; i < knownTitlesStrings.Length; ++i)
+                    SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, i / 2), (ulong)((long.Parse(knownTitlesStrings[i])) << (32 * (i % 2))));
             }
 
             SetObjectScale(1.0f);
@@ -2500,42 +2599,42 @@ namespace Game.Entities
             m_achievementSys.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Achievements), holder.GetResult(PlayerLoginQueryLoad.CriteriaProgress));
             m_questObjectiveCriteriaMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteria), holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress));
 
-            ulong money = result.Read<ulong>(8);
-            if (money > PlayerConst.MaxMoneyAmount)
-                money = PlayerConst.MaxMoneyAmount;
-            SetMoney(money);
+            SetMoney(Math.Min(money, PlayerConst.MaxMoneyAmount));
 
-            Array<byte> customDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            customDisplay[0] = result.Read<byte>(14);
-            customDisplay[1] = result.Read<byte>(15);
-            customDisplay[2] = result.Read<byte>(16);
+            List<ChrCustomizationChoice> customizations = new List<ChrCustomizationChoice>();
+            SQLResult customizationsResult = holder.GetResult(PlayerLoginQueryLoad.Customizations);
+            if (!customizationsResult.IsEmpty())
+            {
+                do
+                {
 
-            SetSkinId(result.Read<byte>(9));
-            SetFaceId(result.Read<byte>(10));
-            SetHairStyleId(result.Read<byte>(11));
-            SetHairColorId(result.Read<byte>(12));
-            SetFacialHairStyleId(result.Read<byte>(13));
-            for (byte i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                SetCustomDisplayOption(i, customDisplay[i]);
-            SetInventorySlotCount(result.Read<byte>(17));
-            SetBankBagSlotCount(result.Read<byte>(18));
+                    ChrCustomizationChoice choice;
+                    choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(0);
+                    choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(1); 
+                    customizations.Add(choice);
+
+                } while (customizationsResult.NextRow());
+            }
+
+            SetCustomizations(customizations, false);
+            SetInventorySlotCount(inventorySlots);
+            SetBankBagSlotCount(bankSlots);
             SetNativeSex(gender);
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), result.Read<byte>(55));
-            SetPlayerFlags((PlayerFlags)result.Read<uint>(20));
-            SetPlayerFlagsEx((PlayerFlagsEx)result.Read<uint>(21));
-            SetWatchedFactionIndex(result.Read<uint>(54));
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), drunk);
+            SetPlayerFlags(playerFlags);
+            SetPlayerFlagsEx(playerFlagsEx);
+            SetWatchedFactionIndex(watchedFaction);
 
-            if (!ValidateAppearance((Race)result.Read<byte>(3), (Class)result.Read<byte>(4), (Gender)gender,
-                m_playerData.HairStyleID, m_playerData.HairColorID, m_playerData.FaceID, m_playerData.FacialHairStyleID, m_playerData.SkinID, customDisplay))
+            if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), can't be loaded.", guid.ToString());
                 return false;
             }
 
             // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
-            SetMultiActionBars(result.Read<byte>(68));
+            SetMultiActionBars(actionBars);
 
-            m_fishingSteps = result.Read<byte>(71);
+            m_fishingSteps = fishingSteps;
 
             InitDisplayIds();
 
@@ -2560,27 +2659,20 @@ namespace Game.Entities
             InitPrimaryProfessions();                               // to max set before any spell loaded
 
             // init saved position, and fix it later if problematic
-            ulong transLowGUID = result.Read<ulong>(41);
+            Relocate(position_x, position_y, position_z, orientation);
 
-            Relocate(result.Read<float>(22), result.Read<float>(23), result.Read<float>(24), result.Read<float>(26));
+            SetDungeonDifficultyID(CheckLoadedDungeonDifficultyID(dungeonDifficulty));
+            SetRaidDifficultyID(CheckLoadedRaidDifficultyID(raidDifficulty));
+            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID(legacyRaidDifficulty));
 
-            uint mapId = result.Read<uint>(25);
-            uint instanceId = result.Read<uint>(63);
-
-            var RelocateToHomebind = new Action(() => { mapId = homebind.GetMapId(); instanceId = 0; Relocate(homebind); });
-
-            SetDungeonDifficultyID(CheckLoadedDungeonDifficultyID((Difficulty)result.Read<byte>(49)));
-            SetRaidDifficultyID(CheckLoadedRaidDifficultyID((Difficulty)result.Read<byte>(69)));
-            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID((Difficulty)result.Read<byte>(70)));
-
-            string taxi_nodes = result.Read<string>(48);
+            var RelocateToHomebind = new Action(() => { mapId = (ushort)homebind.GetMapId(); instance_id = 0; Relocate(homebind); });
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
             _LoadCurrency(holder.GetResult(PlayerLoginQueryLoad.Currency));
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), result.Read<uint>(50));
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), result.Read<ushort>(51));
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), result.Read<ushort>(52));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), totalKills);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), todayKills);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), yesterdayKills);
 
             _LoadBoundInstances(holder.GetResult(PlayerLoginQueryLoad.BoundInstances));
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
@@ -2632,7 +2724,7 @@ namespace Game.Entities
                     // Do not look for instance if bg not found
                     WorldLocation _loc = GetBattlegroundEntryPoint();
                     mapId = _loc.GetMapId();
-                    instanceId = 0;
+                    instance_id = 0;
 
                     if (mapId == 0xFFFFFFFF) // BattlegroundEntry Point not found (???)
                     {
@@ -2647,9 +2739,9 @@ namespace Game.Entities
                 }
             }
             // currently we do not support transport in bg
-            else if (transLowGUID != 0)
+            else if (transguid != 0)
             {
-                ObjectGuid transGUID = ObjectGuid.Create(HighGuid.Transport, transLowGUID);
+                ObjectGuid transGUID = ObjectGuid.Create(HighGuid.Transport, transguid);
 
                 Transport transport = null;
                 Transport go = Global.ObjAccessor.FindTransport(transGUID);
@@ -2658,10 +2750,11 @@ namespace Game.Entities
 
                 if (transport)
                 {
-                    float x = result.Read<float>(37);
-                    float y = result.Read<float>(38);
-                    float z = result.Read<float>(39);
-                    float o = result.Read<float>(40);
+                    float x = trans_x;
+                    float y = trans_y;
+                    float z = trans_z;
+                    float o = trans_o;
+
                     m_movementInfo.transport.pos = new Position(x, y, z, o);
                     transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 
@@ -2671,8 +2764,7 @@ namespace Game.Entities
                         Math.Abs(m_movementInfo.transport.pos.posY) > 250.0f ||
                         Math.Abs(m_movementInfo.transport.pos.posZ) > 250.0f)
                     {
-                        Log.outError(LogFilter.Player, "Player (guidlow {0}) have invalid transport coordinates (X: {1} Y: {2} Z: {3} O: {4}). Teleport to bind location.",
-                            guid.ToString(), x, y, z, o);
+                        Log.outError(LogFilter.Player, "Player (guidlow {0}) have invalid transport coordinates (X: {1} Y: {2} Z: {3} O: {4}). Teleport to bind location.", guid.ToString(), x, y, z, o);
 
                         m_movementInfo.transport.Reset();
                         RelocateToHomebind();
@@ -2687,16 +2779,15 @@ namespace Game.Entities
                 }
                 else
                 {
-                    Log.outError(LogFilter.Player, "Player (guidlow {0}) have problems with transport guid ({1}). Teleport to bind location.",
-                        guid.ToString(), transLowGUID);
+                    Log.outError(LogFilter.Player, "Player (guidlow {0}) have problems with transport guid ({1}). Teleport to bind location.", guid.ToString(), transguid);
 
                     RelocateToHomebind();
                 }
             }
             // currently we do not support taxi in instance
-            else if (!string.IsNullOrEmpty(taxi_nodes))
+            else if (!taxi_path.IsEmpty())
             {
-                instanceId = 0;
+                instance_id = 0;
 
                 // Not finish taxi flight path
                 if (m_bgData.HasTaxiPath())
@@ -2704,7 +2795,7 @@ namespace Game.Entities
                     for (int i = 0; i < 2; ++i)
                         m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
                 }
-                if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeam()))
+                if (!m_taxi.LoadTaxiDestinationsFromString(taxi_path, GetTeam()))
                 {
                     // problems with taxi path loading
                     TaxiNodesRecord nodeEntry = null;
@@ -2753,19 +2844,20 @@ namespace Game.Entities
                 }
 
                 // fix crash (because of if (Map* map = _FindMap(instanceId)) in MapInstanced.CreateInstance)
-                if (instanceId != 0)
+                if (instance_id != 0)
                 {
                     InstanceSave save = GetInstanceSave(mapId);
                     if (save != null)
-                        if (save.GetInstanceId() != instanceId)
-                            instanceId = 0;
+                        if (save.GetInstanceId() != instance_id)
+                            instance_id = 0;
                 }
             }
 
             // NOW player must have valid map
             // load the player's map here if it's not already loaded
             if (!map)
-                map = Global.MapMgr.CreateMap(mapId, this, instanceId);
+                map = Global.MapMgr.CreateMap(mapId, this, instance_id);
+
             AreaTriggerStruct areaTrigger = null;
             bool check = false;
 
@@ -2802,7 +2894,7 @@ namespace Game.Entities
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
                     check = true;
                 }
-                else if (instanceId != 0 && Global.InstanceSaveMgr.GetInstanceSave(instanceId) == null) // ... and instance is reseted then look for entrance.
+                else if (instance_id != 0 && Global.InstanceSaveMgr.GetInstanceSave(instance_id) == null) // ... and instance is reseted then look for entrance.
                 {
                     areaTrigger = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
                     check = true;
@@ -2857,7 +2949,7 @@ namespace Game.Entities
             SaveRecallPosition();
 
             long now = Time.UnixTime;
-            long logoutTime = result.Read<int>(32);
+            long logoutTime = logout_time;
 
             // since last logout (in seconds)
             uint time_diff = (uint)(now - logoutTime);
@@ -2870,32 +2962,30 @@ namespace Game.Entities
 
             SetDrunkValue(newDrunkValue);
 
-            m_cinematic = result.Read<byte>(28);
-            m_PlayedTimeTotal = result.Read<uint>(29);
-            m_PlayedTimeLevel = result.Read<uint>(30);
+            m_cinematic = cinematic;
+            m_PlayedTimeTotal = totaltime;
+            m_PlayedTimeLevel = leveltime;
 
-            SetTalentResetCost(result.Read<uint>(34));
-            SetTalentResetTime(result.Read<uint>(35));
+            SetTalentResetCost(resettalents_cost);
+            SetTalentResetTime(resettalents_time);
 
-            m_taxi.LoadTaxiMask(result.Read<string>(27));            // must be before InitTaxiNodesForLevel
+            m_taxi.LoadTaxiMask(taximask);            // must be before InitTaxiNodesForLevel
 
-            PlayerExtraFlags extraflags = (PlayerExtraFlags)result.Read<uint>(42);
-
-            m_stableSlots = result.Read<byte>(43);
+            m_stableSlots = stable_slots;
             if (m_stableSlots > 4)
             {
                 Log.outError(LogFilter.Player, "Player can have not more {0} stable slots, but have in DB {1}", 4, m_stableSlots);
                 m_stableSlots = 4;
             }
 
-            atLoginFlags = (AtLoginFlags)result.Read<uint>(44);
+            atLoginFlags = (AtLoginFlags)at_login;
 
             // Honor system
             // Update Honor kills data
             m_lastHonorUpdateTime = logoutTime;
             UpdateHonorFields();
 
-            m_deathExpireTime = result.Read<uint>(47);
+            m_deathExpireTime = death_expire_time;
             if (m_deathExpireTime > now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep)
                 m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - 1;
 
@@ -2910,20 +3000,19 @@ namespace Game.Entities
             InitRunes();
 
             // rest bonus can only be calculated after InitStatsForLevel()
-            _restMgr.LoadRestBonus(RestTypes.XP, (PlayerRestState)result.Read<byte>(19), result.Read<float>(31));
+            _restMgr.LoadRestBonus(RestTypes.XP, restState, rest_bonus);
 
             // load skills after InitStatsForLevel because it triggering aura apply also
             _LoadSkills(holder.GetResult(PlayerLoginQueryLoad.Skills));
             UpdateSkillsForLevel();
 
-            SetNumRespecs(result.Read<byte>(76));
-            SetPrimarySpecialization(result.Read<uint>(36));
-            SetActiveTalentGroup(result.Read<byte>(64));
+            SetNumRespecs(numRespecs);
+            SetPrimarySpecialization(primarySpecialization);
+            SetActiveTalentGroup(activeTalentGroup);
             ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
             if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
                 ResetTalentSpecialization();
 
-            uint lootSpecId = result.Read<byte>(65);
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
             if (chrSpec != null)
             {
@@ -2986,11 +3075,10 @@ namespace Game.Entities
 
             // check PLAYER_CHOSEN_TITLE compatibility with PLAYER__FIELD_KNOWN_TITLES
             // note: PLAYER__FIELD_KNOWN_TITLES updated at quest status loaded
-            uint curTitle = result.Read<uint>(53);
-            if (curTitle != 0 && !HasTitle(curTitle))
-                curTitle = 0;
+            if (chosenTitle != 0 && !HasTitle(chosenTitle))
+                chosenTitle = 0;
 
-            SetChosenTitle(curTitle);
+            SetChosenTitle(chosenTitle);
 
             // has to be called after last Relocate() in Player.LoadFromDB
             SetFallInformation(0, GetPositionZ());
@@ -3009,14 +3097,13 @@ namespace Game.Entities
             UpdateAllStats();
 
             // restore remembered power/health values (but not more max values)
-            uint savedHealth = result.Read<uint>(56);
-            SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
+            SetHealth(health > GetMaxHealth() ? GetMaxHealth() : health);
             int loadedPowers = 0;
             for (PowerType i = 0; i < PowerType.Max; ++i)
             {
                 if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
                 {
-                    uint savedPower = result.Read<uint>(56 + loadedPowers);
+                    uint savedPower = powers[loadedPowers];
                     uint maxPower = m_unitData.MaxPower[loadedPowers];
                     SetPower(i, (int)(savedPower > maxPower ? maxPower : savedPower));
                     if (++loadedPowers >= (int)PowerType.MaxPerClass)
@@ -3025,7 +3112,7 @@ namespace Game.Entities
             }
 
             for (; loadedPowers < (int)PowerType.MaxPerClass; ++loadedPowers)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)loadedPowers), 0);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);
 
             SetPower(PowerType.LunarPower, 0);
             // Init rune recharge
@@ -3054,7 +3141,7 @@ namespace Game.Entities
                     case 1: SetGameMaster(true);
                         break;             // enable
                     case 2:                                         // save state
-                        if (extraflags.HasAnyFlag(PlayerExtraFlags.GMOn))
+                        if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMOn))
                             SetGameMaster(true);
                         break;
                 }
@@ -3067,7 +3154,7 @@ namespace Game.Entities
                     case 1:
                         break;             // visible
                     case 2:                                         // save state
-                        if (extraflags.HasAnyFlag(PlayerExtraFlags.GMInvisible))
+                        if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMInvisible))
                             SetGMVisible(false);
                         break;
                 }
@@ -3080,7 +3167,7 @@ namespace Game.Entities
                     case 1: SetGMChat(true);
                         break;                 // enable
                     case 2:                                         // save state
-                        if (extraflags.HasAnyFlag(PlayerExtraFlags.GMChat))
+                        if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMChat))
                             SetGMChat(true);
                         break;
                 }
@@ -3093,7 +3180,7 @@ namespace Game.Entities
                     case 1: SetAcceptWhispers(true);
                         break;         // enable
                     case 2:                                         // save state
-                        if (extraflags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers))
+                        if (extra_flags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers))
                             SetAcceptWhispers(true);
                         break;
                 }
@@ -3118,16 +3205,16 @@ namespace Game.Entities
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowerAbilities)))
                 _garrison = garrison;
 
-            _InitHonorLevelOnLoadFromDB(result.Read<uint>(72), result.Read<uint>(73));
+            _InitHonorLevelOnLoadFromDB(honor, honorLevel);
 
-            _restMgr.LoadRestBonus(RestTypes.Honor, (PlayerRestState)result.Read<byte>(74), result.Read<float>(75));
+            _restMgr.LoadRestBonus(RestTypes.Honor, honorRestState, honorRestBonus);
             if (time_diff > 0)
             {
                 //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
                 float bubble0 = 0.031f;
                 //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
                 float bubble1 = 0.125f;
-                float bubble = result.Read<byte>(33) > 0
+                float bubble = is_logout_resting > 0
                     ? bubble1 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInTavernOrCity)
                     : bubble0 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInWilderness);
 
@@ -3191,15 +3278,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, (uint)m_activePlayerData.XP);
+                stmt.AddValue(index++, (uint)GetNativeSex());
                 stmt.AddValue(index++, GetMoney());
-                stmt.AddValue(index++, (byte)m_playerData.SkinID);
-                stmt.AddValue(index++, (byte)m_playerData.FaceID);
-                stmt.AddValue(index++, (byte)m_playerData.HairStyleID);
-                stmt.AddValue(index++, (byte)m_playerData.HairColorID);
-                stmt.AddValue(index++, (byte)m_playerData.FacialHairStyleID);
-                for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    stmt.AddValue(index++, m_playerData.CustomDisplayOption[i]);
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
@@ -3321,17 +3401,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, (uint)m_activePlayerData.XP);
+                stmt.AddValue(index++, (uint)GetNativeSex());
                 stmt.AddValue(index++, GetMoney());
-                stmt.AddValue(index++, (byte)m_playerData.SkinID);
-                stmt.AddValue(index++, (byte)m_playerData.FaceID);
-                stmt.AddValue(index++, (byte)m_playerData.HairStyleID);
-                stmt.AddValue(index++, (byte)m_playerData.HairColorID);
-                stmt.AddValue(index++, (byte)m_playerData.FacialHairStyleID);
-
-                for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    stmt.AddValue(index++, m_playerData.CustomDisplayOption[i]);
-
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
@@ -3485,6 +3556,7 @@ namespace Game.Entities
             if (m_mailsUpdated)                                     //save mails only when needed
                 _SaveMail(characterTransaction);
 
+            _SaveCustomizations(characterTransaction);
             _SaveBGData(characterTransaction);
             _SaveInventory(characterTransaction);
             _SaveVoidStorage(characterTransaction);
@@ -3804,6 +3876,10 @@ namespace Game.Entities
                         }
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER);
+                        stmt.AddValue(0, guid);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS);
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 

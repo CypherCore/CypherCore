@@ -233,12 +233,12 @@ namespace Game.Networking.Packets
             GUID = player.GetGUID();
             SpecializationID = player.GetPrimarySpecialization();
             Name = player.GetName();
-            GenderID = player.m_playerData.NativeSex;
+            GenderID = (byte)player.GetNativeSex();
             Race = (byte)player.GetRace();
             ClassID = (byte)player.GetClass();
 
             foreach (var customization in player.m_playerData.Customizations)
-                Customizations.Add(new ChrCustomizationChoice(customization.ChrCustomizationOptionID, customization.ChrCustomizationChoiceID));
+                Customizations.Add(customization);
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
@@ -261,7 +261,10 @@ namespace Game.Networking.Packets
             data.WriteString(Name);
 
             foreach (var customization in Customizations)
-                customization.Write(data);
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
 
             foreach (InspectItemData item in Items)
                 item.Write(data);

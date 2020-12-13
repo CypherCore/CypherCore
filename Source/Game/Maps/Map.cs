@@ -3290,9 +3290,20 @@ namespace Game.Maps
 
         public void LoadCorpseData()
         {
-            MultiMap<ulong, uint> phases = new MultiMap<ulong, uint>();
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSES);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
+            //        0     1     2     3            4      5          6          7       8       9      10        11    12          13          14
+            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, bytes1, bytes2, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
+            SQLResult result = DB.Characters.Query(stmt);
+            if (result.IsEmpty())
+                return;
+
+            MultiMap<ulong, uint> phases = new MultiMap<ulong, uint>();
+            MultiMap<ulong, ChrCustomizationChoice> customizations = new MultiMap<ulong, ChrCustomizationChoice>();
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetInstanceId());
 
@@ -3311,15 +3322,22 @@ namespace Game.Maps
                 } while (phaseResult.NextRow());
             }
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSES);
-            stmt.AddValue(0, GetId());
-            stmt.AddValue(1, GetInstanceId());
+            //        0             1                            2
+            // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
+            SQLResult customizationResult = DB.Characters.Query(stmt);
+            if (!customizationResult.IsEmpty())
+            {
+                do
+                {
+                    ulong guid = customizationResult.Read<ulong>(0);
 
-            //        0     1     2     3            4      5          6          7       8       9      10        11    12          13          14
-            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, bytes1, bytes2, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
-            SQLResult result = DB.Characters.Query(stmt);
-            if (result.IsEmpty())
-                return;
+                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
+                    choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
+                    customizations.Add(guid, choice);
+
+                } while (customizationResult.NextRow());
+            }
 
             do
             {
@@ -3337,6 +3355,8 @@ namespace Game.Maps
 
                 foreach (var phaseId in phases[guid])
                     PhasingHandler.AddPhase(corpse, phaseId, false);
+
+                corpse.SetCustomizations(customizations[guid]);
 
                 AddCorpse(corpse);
             } while (result.NextRow());
@@ -3414,18 +3434,11 @@ namespace Game.Maps
                 bones.SetDisplayId(corpse.m_corpseData.DisplayID);
                 bones.SetRace((Race)(byte)corpse.m_corpseData.RaceID);
                 bones.SetSex((Gender)(byte)corpse.m_corpseData.Sex);
-                bones.SetSkin(corpse.m_corpseData.SkinID);
-                bones.SetFace(corpse.m_corpseData.FaceID);
-                bones.SetHairStyle(corpse.m_corpseData.HairStyleID);
-                bones.SetHairColor(corpse.m_corpseData.HairColorID);
-                bones.SetFacialHairStyle(corpse.m_corpseData.FacialHairStyleID);
+                bones.SetCustomizations(corpse.m_corpseData.Customizations);
                 bones.SetFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
                 bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);
                 for (int i = 0; i < EquipmentSlot.End; ++i)
                     bones.SetItem((uint)i, corpse.m_corpseData.Items[i]);
-
-                for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    bones.SetCustomDisplayOption((uint)i, corpse.m_corpseData.CustomDisplayOption[i]);
 
                 bones.SetCellCoord(corpse.GetCellCoord());
                 bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());

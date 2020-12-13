@@ -84,6 +84,12 @@ namespace Game.Achievements
                 return false;
             }
 
+            if (achievement.CovenantID != 0 && referencePlayer.m_playerData.CovenantID != achievement.CovenantID)
+            {
+                Log.outTrace(LogFilter.Achievement, $"CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Achievement {achievement.Id}) Wrong covenant");
+                return false;
+            }
+
             return base.CanUpdateCriteriaTree(criteria, tree, referencePlayer);
         }
 
@@ -535,7 +541,7 @@ namespace Game.Achievements
             //! Since no common attributes were found, (not even in titleRewardFlags field)
             //! we explicitly check by ID. Maybe in the future we could move the achievement_reward
             //! condition fields to the condition system.
-            uint titleId = reward.TitleId[achievement.Id == 1793 ? _owner.m_playerData.NativeSex : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
+            uint titleId = reward.TitleId[achievement.Id == 1793 ? (int)_owner.GetNativeSex() : (_owner.GetTeam() == Team.Alliance ? 0 : 1)];
             if (titleId != 0)
             {
                 CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(titleId);

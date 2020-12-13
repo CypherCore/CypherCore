@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Info.QuestID);
                 _worldPacket.WriteInt32(Info.QuestType);
                 _worldPacket.WriteUInt32(Info.QuestPackageID);
-                _worldPacket.WriteInt32(Info.ContentTuningID);
+                _worldPacket.WriteUInt32(Info.ContentTuningID);
                 _worldPacket.WriteInt32(Info.QuestSortID);
                 _worldPacket.WriteUInt32(Info.QuestInfoID);
                 _worldPacket.WriteUInt32(Info.SuggestedGroupNum);
@@ -350,7 +350,7 @@ namespace Game.Networking.Packets
         {
             QuestGiverGUID = _worldPacket.ReadPackedGuid();
             QuestID = _worldPacket.ReadUInt32();
-            ItemChoiceID = _worldPacket.ReadUInt32();
+            Choice.Read(_worldPacket);
         }
 
         public ObjectGuid QuestGiverGUID;
@@ -887,13 +887,19 @@ namespace Game.Networking.Packets
 
     public struct QuestCompleteDisplaySpell
     {
-        public int SpellID;
-        public int PlayerConditionID;
+        public uint SpellID;
+        public uint PlayerConditionID;
+
+        public QuestCompleteDisplaySpell(uint spellID, uint playerConditionID)
+        {
+            SpellID = spellID;
+            PlayerConditionID = playerConditionID;
+        }
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(SpellID);
-            data.WriteInt32(PlayerConditionID);
+            data.WriteUInt32(SpellID);
+            data.WriteUInt32(PlayerConditionID);
         }
     }
 
@@ -914,7 +920,7 @@ namespace Game.Networking.Packets
 
         public uint QuestID;
         public int QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
-        public int ContentTuningID;
+        public uint ContentTuningID;
         public uint QuestPackageID;
         public int QuestSortID; // zone or sort to display in quest log
         public uint QuestInfoID;

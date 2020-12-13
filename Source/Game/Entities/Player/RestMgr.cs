@@ -114,7 +114,11 @@ namespace Game.Entities
             if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
                 rested_bonus = xp;
 
-            SetRestBonus(restType, GetRestBonus(restType) - rested_bonus);
+            uint rested_loss = rested_bonus;
+            if (restType == RestTypes.XP)
+               MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
+
+            SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 
             Log.outDebug(LogFilter.Player, "RestMgr.GetRestBonus: Player '{0}' ({1}) gain {2} xp (+{3} Rested Bonus). Rested points={4}",
                 _player.GetGUID().ToString(), _player.GetName(), xp + rested_bonus, rested_bonus, GetRestBonus(restType));

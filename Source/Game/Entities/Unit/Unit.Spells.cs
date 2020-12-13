@@ -516,7 +516,14 @@ namespace Game.Entities
 
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
-                return thisPlayer.m_activePlayerData.ModHealingDonePercent;
+            {
+                float maxModDamagePercentSchool = 0.0f;
+                for (int i = 0; i < (int)SpellSchools.Max; ++i)
+                    if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
+                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent[i]);
+
+                return maxModDamagePercentSchool;
+            }
 
             float DoneTotalMod = 1.0f;
 
@@ -1201,8 +1208,10 @@ namespace Game.Entities
             {
                 // mainly for DoTs which are 3500 here otherwise
                 int OriginalCastTime = spellProto.CalcCastTime();
-                if (OriginalCastTime > 7000) OriginalCastTime = 7000;
-                if (OriginalCastTime < 1500) OriginalCastTime = 1500;
+                if (OriginalCastTime > 7000)
+                    OriginalCastTime = 7000;
+                if (OriginalCastTime < 1500)
+                    OriginalCastTime = 1500;
                 // Portion to Over Time
                 float PtOT = (overTime / 15000.0f) / ((overTime / 15000.0f) + (OriginalCastTime / 3500.0f));
 
@@ -2068,7 +2077,7 @@ namespace Game.Entities
                                 InterruptSpell(CurrentSpellTypes.AutoRepeat);
                             m_AutoRepeatFirstCast = true;
                         }
-                        if (pSpell.m_spellInfo.CalcCastTime(GetLevel()) > 0)
+                        if (pSpell.m_spellInfo.CalcCastTime() > 0)
                             AddUnitState(UnitState.Casting);
 
                         break;
@@ -2152,25 +2161,18 @@ namespace Game.Entities
         public uint SpellCriticalDamageBonus(SpellInfo spellProto, uint damage, Unit victim = null)
         {
             // Calculate critical bonus
-            int crit_bonus = (int)damage;
+            int crit_bonus = (int)damage * 2;
             float crit_mod = 0.0f;
-
-            switch (spellProto.DmgClass)
-            {
-                case SpellDmgClass.Melee:                      // for melee based spells is 100%
-                case SpellDmgClass.Ranged:
-                    // @todo write here full calculation for melee/ranged spells
-                    crit_bonus += (int)damage;
-                    break;
-                default:
-                    crit_bonus += (int)damage / 2;                       // for spells is 50%
-                    break;
-            }
 
             crit_mod += (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellProto.GetSchoolMask()) - 1.0f) * 100;
 
             if (crit_bonus != 0)
                 MathFunctions.AddPct(ref crit_bonus, (int)crit_mod);
+
+            MathFunctions.AddPct(ref crit_bonus, victim.GetTotalAuraModifier(AuraType.ModCriticalDamageTakenFromCaster, aurEff =>
+            {
+                return aurEff.GetCasterGUID() == GetGUID();
+            }));
 
             crit_bonus -= (int)damage;
 

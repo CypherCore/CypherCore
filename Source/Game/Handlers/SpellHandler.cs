@@ -529,10 +529,10 @@ namespace Game
                 mirrorImageComponentedData.Gender = (byte)creator.GetGender();
                 mirrorImageComponentedData.ClassID = (byte)creator.GetClass();
 
-                Guild guild = player.GetGuild();
-
                 foreach (var customization in player.m_playerData.Customizations)
                     mirrorImageComponentedData.Customizations.Add(new ChrCustomizationChoice(customization.ChrCustomizationOptionID, customization.ChrCustomizationChoiceID));
+
+                Guild guild = player.GetGuild();
                 mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =

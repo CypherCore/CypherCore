@@ -284,17 +284,16 @@ namespace Game
                 if (questXp == null || RewardXPDifficulty >= 10)
                     return 0;
 
-                float multiplier = 1.0f;
-                if (questLevel != player.GetLevel())
-                    multiplier = CliDB.XpGameTable.GetRow(Math.Min(player.GetLevel(), questLevel)).Divisor / CliDB.XpGameTable.GetRow(player.GetLevel()).Divisor;
-
-                int diffFactor = (int)(2 * (questLevel + (Level == -1 ? 0 : 5) - player.GetLevel()) + 10);
+                int diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
                 if (diffFactor < 1)
                     diffFactor = 1;
                 else if (diffFactor > 10)
                     diffFactor = 10;
 
-                uint xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10 * multiplier);
+                uint xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10);
+                if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && Expansion < (int)PlayerConst.CurrentExpansion)
+                    xp = (uint)(xp / 9.0f);
+
                 if (xp <= 100)
                     xp = 5 * ((xp + 2) / 5);
                 else if (xp <= 500)
@@ -329,7 +328,7 @@ namespace Game
             rewards.Title = RewardTitleId;
             rewards.FactionFlags = RewardReputationMask;
 
-            var displaySpellItr = rewards.SpellCompletionDisplayID.begin();
+            var displaySpellIndex = 0;
             foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
             {
                 PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
@@ -337,8 +336,8 @@ namespace Game
                     if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                         continue;
 
-                displaySpellItr = displaySpell.SpellId;
-                if (++displaySpellItr == null)
+                rewards.SpellCompletionDisplayID[displaySpellIndex] = (int)displaySpell.SpellId;
+                if (++displaySpellIndex >= rewards.SpellCompletionDisplayID.Length)
                     break;
             }
             
@@ -456,11 +455,8 @@ namespace Game
 
             QueryData.Info.QuestID = Id;
             QueryData.Info.QuestType = (int)Type;
-            QueryData.Info.QuestLevel = Level;
-            QueryData.Info.QuestScalingFactionGroup = ScalingFactionGroup;
-            QueryData.Info.QuestMaxScalingLevel = MaxScalingLevel;
+            QueryData.Info.ContentTuningID = ContentTuningId;
             QueryData.Info.QuestPackageID = PackageID;
-            QueryData.Info.QuestMinLevel = MinLevel;
             QueryData.Info.QuestSortID = QuestSortID;
             QueryData.Info.QuestInfoID = QuestInfoID;
             QueryData.Info.SuggestedGroupNum = SuggestedPlayers;
@@ -474,8 +470,8 @@ namespace Game
             QueryData.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
             QueryData.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
             QueryData.Info.RewardBonusMoney = RewardBonusMoney;
-            for (byte i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
-                QueryData.Info.RewardDisplaySpell[i] = RewardDisplaySpell[i];
+            foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
+                QueryData.Info.RewardDisplaySpell.Add(new QuestCompleteDisplaySpell(displaySpell.SpellId, displaySpell.PlayerConditionId));
 
             QueryData.Info.RewardSpell = RewardSpell;
 
@@ -580,15 +576,6 @@ namespace Game
 
         public void SetEventIdForQuest(ushort eventId) { _eventIdForQuest = eventId; }
         public ushort GetEventIdForQuest() { return _eventIdForQuest; }
-
-        [Obsolete]  
-        public int MinLevel;
-        [Obsolete]
-        public int Level;
-        [Obsolete]
-        public int ScalingFactionGroup;
-        [Obsolete]
-        public int MaxScalingLevel;
 
         #region Fields
         public uint Id;
@@ -699,7 +686,7 @@ namespace Game
         public uint ScriptId;
 
         public List<uint> DependentPreviousQuests = new List<uint>();
-        public QueryQuestInfoResponse[] QueryData = new QueryQuestInfoResponse[(int)Locale.Total];
+        public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;
         uint _rewItemsCount;

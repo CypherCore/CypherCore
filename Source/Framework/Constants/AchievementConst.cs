@@ -371,24 +371,50 @@ namespace Framework.Constants
         //Unk265                     = 265,
         SelectedAzeriteEssenceRankLower = 266,
         SelectedAzeriteEssenceRankGreater = 267,
-        //Unk268                     = 268,
-        //Unk269                     = 269,
+        SourceLevelInRangeCt = 268,
+        TargetLevelInRangeCt = 269,
         //Unk270                     = 270,
         //Unk271                     = 271,
-        //Unk272                     = 272,
-        //Unk273                     = 273,
+        SourceLevelGreaterCt = 272, // Compare Levels Using Content Tuning
+        TargetLevelGreaterCt = 273, // Compare Levels Using Content Tuning
         //Unk274                     = 274,
         //Unk275                     = 275,
         //Unk276                     = 276,
-        //Unk277                     = 277,
+        RafRecruitInParty = 277, // NYI
         //Unk278                     = 278,
         //Unk279                     = 279,
         MapOrCosmeticMap = 280,
         //Unk281                     = 281,
-        HasEntitlement = 282,
-        HasQuestSession = 283,
+        HasEntitlement = 282, // NYI
+        HasQuestSession = 283, // NYI
         //Unk284                     = 284,
         //Unk285                     = 285,
+        //Unk286                     = 286,
+        //Unk287                     = 287,
+        Covenant = 288,
+        //Unk289                     = 289, // Related To Pvp Ranking
+        PermanentAnimaDiversionTalent = 290, // NYI
+        Soulbind = 291,
+        //Unk292                     = 292,
+        SourceAreaOrZoneInGroup = 293,
+        //Unk294                     = 294,
+        //Unk295                     = 295,
+        //Unk296                     = 296,
+        //Unk297                     = 297,
+        //Unk298                     = 298,
+        //Unk299                     = 299,
+        SourceInSpecificChromieTime = 300,
+        SourceInAnyChromieTime = 301,
+        //Unk302                     = 302,
+        SourceRuneforgeLegendaryKnown = 303,
+        //Unk304                     = 304,
+        //Unk305                     = 305,
+        //Unk306                     = 306,
+        SoulbindConduitRank = 307, // NYI
+        ShapeshiftFormCustomizationDisplay = 308,
+        SoulbindMinConduitsAtRank = 309, // NYI
+        IsRestrictedAccount = 310, // NYI
+        SourceFlying = 311,
     }
 
     public enum CriteriaFlags
@@ -628,7 +654,21 @@ namespace Framework.Constants
         ReachAccountHonorLevel = 213,
         HeartOfAzerothArtifactPowerEarned = 214,
         HeartOfAzerothLevelReached = 215,
-        TotalTypes = 219
+        MythicKeystoneCompleted = 216, // NYI
+        // 217 - 0 Criterias
+        CompleteQuestAccumulate = 218,
+        BoughtItemFromVendor = 219,
+        SoldItemToVendor = 220,
+        // 221 - 0 Criterias
+        // 222 - 0 Criterias
+        // 223 - 0 Criterias
+        // 224 - 0 Criterias
+        TravelledToArea = 225,
+        // 226 - 0 Criterias
+        // 227 - 0 Criterias
+        ApplyConduit = 228,
+        ConvertItemsToCurrency = 229,
+        TotalTypes = 230
     }
 
     public enum CriteriaDataType

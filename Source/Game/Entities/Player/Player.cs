@@ -59,6 +59,7 @@ namespace Game.Entities
 
             m_zoneUpdateId = 0xffffffff;
             m_nextSave = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            m_customizationsChanged = false;
 
             SetGroupInvite(null);
 
@@ -184,7 +185,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!ValidateAppearance(createInfo.RaceId, createInfo.ClassId, createInfo.Sex, createInfo.HairStyle, createInfo.HairColor, createInfo.Face, createInfo.FacialHairStyle, createInfo.Skin, createInfo.CustomDisplay, true))
+            if (!GetSession().ValidateAppearance(createInfo.RaceId, createInfo.ClassId, createInfo.Sex, createInfo.Customizations))
             {
                 Log.outError(LogFilter.Player, "Player.Create: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with invalid appearance attributes - refusing to do so",
                     GetSession().GetAccountId(), GetName());
@@ -223,14 +224,7 @@ namespace Game.Entities
 
             SetWatchedFactionIndex(0xFFFFFFFF);
 
-            SetSkinId(createInfo.Skin);
-            SetFaceId(createInfo.Face);
-            SetHairStyleId(createInfo.HairStyle);
-            SetHairColorId(createInfo.HairColor);
-            SetFacialHairStyleId(createInfo.FacialHairStyle);
-            for (byte i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                SetCustomDisplayOption(i, createInfo.CustomDisplay[i]);
-
+            SetCustomizations(createInfo.Customizations);
             SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
             SetRestState(RestTypes.Honor, PlayerRestState.NotRAFLinked);
             SetNativeSex(createInfo.Sex);
@@ -308,46 +302,8 @@ namespace Game.Entities
             }
 
             // original items
-            CharStartOutfitRecord oEntry = Global.DB2Mgr.GetCharStartOutfitEntry((byte)createInfo.RaceId, (byte)createInfo.ClassId, (byte)createInfo.Sex);
-            if (oEntry != null)
-            {
-                for (int j = 0; j < ItemConst.MaxOutfitItems - 1; ++j)
-                {
-                    if (oEntry.ItemID[j] <= 0)
-                        continue;
-
-                    uint itemId = (uint)oEntry.ItemID[j];
-
-                    ItemTemplate iProto = Global.ObjectMgr.GetItemTemplate(itemId);
-                    if (iProto == null)
-                        continue;
-
-                    // BuyCount by default
-                    uint count = iProto.GetBuyCount();
-
-                    // special amount for food/drink
-                    if (iProto.GetClass() == ItemClass.Consumable && iProto.GetSubClass() == (uint)ItemSubClassConsumable.FoodDrink)
-                    {
-                        if (!iProto.Effects.Empty())
-                        {
-                            switch (iProto.Effects[0].SpellCategoryID)
-                            {
-                                case 11:                                // food
-                                    count = (uint)(GetClass() == Class.Deathknight ? 10 : 4);
-                                    break;
-                                case 59:                                // drink
-                                    count = 2;
-                                    break;
-                            }
-                        }
-                        if (iProto.GetMaxStackSize() < count)
-                            count = iProto.GetMaxStackSize();
-                    }
-                    StoreNewItemInBestSlots(itemId, count);
-                }
-            }
-            foreach (var item in info.item)
-                StoreNewItemInBestSlots(item.item_id, item.item_amount);
+            foreach (PlayerCreateInfoItem initialItem in info.item)
+                StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount);
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -1193,7 +1149,7 @@ namespace Game.Entities
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(currency.FactionID);
             if (factionEntry != null)
             {
-                if (currency.Flags.HasAnyFlag((uint)CurrencyFlags.HighPrecision))
+                if (currency.Flags[0].HasAnyFlag((int)CurrencyFlags.HighPrecision))
                     count /= 100;
                 GetReputationMgr().ModifyReputation(factionEntry, count, false, true);
                 return;
@@ -1582,8 +1538,12 @@ namespace Game.Entities
                 {
                     LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
-                        if (dungeon.TargetLevel == 80)
-                            ChampioningFaction = GetChampioningFaction();
+                    {
+                        var dungeonLevels = Global.DB2Mgr.GetContentTuningData(dungeon.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        if (dungeonLevels.HasValue)
+                            if (dungeonLevels.Value.TargetLevelMax == Global.ObjectMgr.GetMaxLevelForExpansion(Expansion.WrathOfTheLichKing))
+                                ChampioningFaction = GetChampioningFaction();
+                    }
                 }
             }
 
@@ -2613,6 +2573,9 @@ namespace Game.Entities
             if (channel.Flags.HasAnyFlag(ChannelDBCFlags.GuildReq) && GetGuildId() != 0)
                 return false;
 
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.NoClientJoin))
+                return false;
+
             return true;
         }
         public void JoinedChannel(Channel c)
@@ -2658,6 +2621,9 @@ namespace Game.Entities
 
             foreach (var channelEntry in CliDB.ChatChannelsStorage.Values)
             {
+                if (!channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Initial))
+                    continue;
+
                 Channel usedChannel = null;
                 foreach (var channel in m_channels)
                 {
@@ -3467,51 +3433,27 @@ namespace Game.Entities
             SendBattlefieldWorldStates();
         }
 
-        public uint GetBarberShopCost(BarberShopStyleRecord newHairStyle, uint newHairColor, BarberShopStyleRecord newFacialHair, BarberShopStyleRecord newSkin, BarberShopStyleRecord newFace, Array<BarberShopStyleRecord> newCustomDisplay)
+        public long GetBarberShopCost(List<ChrCustomizationChoice> newCustomizations)
         {
-            byte hairstyle = m_playerData.HairStyleID;
-            byte haircolor = m_playerData.HairColorID;
-            byte facialhair = m_playerData.FacialHairStyleID;
-            byte skincolor = m_playerData.SkinID;
-            byte face = m_playerData.FaceID;
-
-            Array<byte> customDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                customDisplay[i] = m_playerData.CustomDisplayOption[i];
-
-            if ((hairstyle == newHairStyle.Data) &&
-                (haircolor == newHairColor) &&
-                (facialhair == newFacialHair.Data) &&
-                (newSkin == null || (newSkin.Data == skincolor)) &&
-                (newFace == null || (newFace.Data == face)) &&
-                (newCustomDisplay[0] == null || (newCustomDisplay[0].Data == customDisplay[0])) &&
-                (newCustomDisplay[1] == null || (newCustomDisplay[1].Data == customDisplay[1])) &&
-                (newCustomDisplay[2] == null || (newCustomDisplay[2].Data == customDisplay[2])))
-                return 0;
-
             GtBarberShopCostBaseRecord bsc = CliDB.BarberShopCostBaseGameTable.GetRow(GetLevel());
             if (bsc == null)                                                // shouldn't happen
-                return 0xFFFFFFFF;
+                return 0;
 
-            uint cost = 0;
-            if (hairstyle != newHairStyle.Data)
-                cost += (uint)(bsc.Cost * newHairStyle.CostModifier);
+            long cost = 0;
+            foreach (ChrCustomizationChoice newChoice in newCustomizations)
+            {
+                int currentCustomizationIndex = m_playerData.Customizations.FindIndexIf(currentCustomization =>
+                {
+                    return currentCustomization.ChrCustomizationOptionID == newChoice.ChrCustomizationOptionID;
+                });
 
-            if ((haircolor != newHairColor) && (hairstyle == newHairStyle.Data))
-                cost += (uint)(bsc.Cost * 0.5f);                    // +1/2 of price
-
-            if (facialhair != newFacialHair.Data)
-                cost += (uint)(bsc.Cost * newFacialHair.CostModifier);
-
-            if (newSkin != null && skincolor != newSkin.Data)
-                cost += (uint)(bsc.Cost * newSkin.CostModifier);
-
-            if (newFace != null && face != newFace.Data)
-                cost += (uint)(bsc.Cost * newFace.CostModifier);
-
-            for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                if (newCustomDisplay[i] != null && customDisplay[i] != newCustomDisplay[i].Data)
-                    cost += (uint)(bsc.Cost * newCustomDisplay[i].CostModifier);
+                if (currentCustomizationIndex == -1 || m_playerData.Customizations[currentCustomizationIndex].ChrCustomizationChoiceID != newChoice.ChrCustomizationChoiceID)
+                {
+                    ChrCustomizationOptionRecord customizationOption = CliDB.ChrCustomizationOptionStorage.LookupByKey(newChoice.ChrCustomizationOptionID);
+                    if (customizationOption != null)
+                        cost += (long)(bsc.Cost * customizationOption.BarberShopCostModifier);
+                }
+            }
 
             return cost;
         }
@@ -3950,138 +3892,9 @@ namespace Game.Entities
             return null;
         }
 
-        static uint GetSelectionFromContext(uint context, Class playerClass)
-        {
-            switch (context)
-            {
-                case 1:
-                    if (playerClass == Class.Deathknight)
-                        return 1;
-                    if (playerClass == Class.DemonHunter)
-                        return 3;
-                    return 0;
-                case 2:
-                    if (playerClass == Class.Deathknight)
-                        return 5;
-                    if (playerClass == Class.DemonHunter)
-                        return 6;
-                    return 4;
-                case 3:
-                    return 7;
-                case 4:
-                    if (playerClass == Class.Deathknight)
-                        return 9;
-                    if (playerClass == Class.DemonHunter)
-                        return 10;
-                    return 8;
-                default:
-                    if (playerClass == Class.Deathknight)
-                        return 1;
-                    if (playerClass == Class.DemonHunter)
-                        return 2;
-                    return 0;
-            }
-        }
-
-        static bool ComponentFlagsMatch(CharSectionsRecord entry, uint selection)
-        {
-            switch (selection)
-            {
-                case 0:
-                    if (!entry.Flags.HasAnyFlag((short)1))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)0x2C);
-                case 1:
-                    if (!entry.Flags.HasAnyFlag((short)1))
-                        return false;
-                    if (!entry.Flags.HasAnyFlag((short)0x94))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)8);
-                case 2:
-                    if (!entry.Flags.HasAnyFlag((short)1))
-                        return false;
-                    if (!entry.Flags.HasAnyFlag((short)0x70))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)8);
-                case 3:
-                    if (!entry.Flags.HasAnyFlag((short)1))
-                        return false;
-                    if (!entry.Flags.HasAnyFlag((short)0x20))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)8);
-                case 4:
-                case 8:
-                    if (!entry.Flags.HasAnyFlag((short)3))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)0x2C);
-                case 5:
-                case 9:
-                    if (!entry.Flags.HasAnyFlag((short)3))
-                        return false;
-                    if (!entry.Flags.HasAnyFlag((short)0x94))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)8);
-                case 6:
-                case 10:
-                    if (!entry.Flags.HasAnyFlag((short)3))
-                        return false;
-                    if (!entry.Flags.HasAnyFlag((short)0x70))
-                        return false;
-                    return !entry.Flags.HasAnyFlag((short)8);
-                case 7:
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
-        static bool IsSectionFlagValid(CharSectionsRecord entry, Class class_, bool create)
-        {
-            if (create)
-                return ComponentFlagsMatch(entry, GetSelectionFromContext(0, class_));
-
-            return ComponentFlagsMatch(entry, GetSelectionFromContext(2, class_));
-        }
-        static bool IsSectionValid(Race race, Class class_, Gender gender, CharBaseSectionVariation variation, byte variationIndex, byte colorIndex, bool create)
-        {
-            CharSectionsRecord section = Global.DB2Mgr.GetCharSectionEntry(race, gender, variation, variationIndex, colorIndex);
-            if (section != null)
-                return IsSectionFlagValid(section, class_, create);
-
-            return false;
-        }
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
         public static bool IsValidRace(Race _race) { return Convert.ToBoolean((1 << ((int)_race - 1)) & (int)Race.RaceMaskAllPlayable); }
-
-        public static bool ValidateAppearance(Race race, Class class_, Gender gender, byte hairID, byte hairColor, byte faceID, byte facialHairId, byte skinColor, Array<byte> customDisplay, bool create = false)
-        {
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Skin, 0, skinColor, create))
-                return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Face, faceID, skinColor, create))
-                return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Hair, hairID, hairColor, create))
-                return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.FacialHair, facialHairId, hairColor, create))
-                if (Global.DB2Mgr.HasCharSections(race, gender, CharBaseSectionVariation.FacialHair) || !Global.DB2Mgr.HasCharacterFacialHairStyle(race, gender, facialHairId))
-                    return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay1, customDisplay[0], 0, create))
-                return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay2, customDisplay[1], 0, create))
-                return false;
-
-            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay3, customDisplay[2], 0, create))
-                return false;
-
-            return true;
-        }
 
         public void OnCombatExit()
         {
@@ -4594,12 +4407,8 @@ namespace Game.Entities
                 flags |= CorpseFlags.FFAPvP;
 
             corpse.SetRace(GetRace());
-            corpse.SetSex((Gender)(byte)m_playerData.NativeSex);
-            corpse.SetSkin(m_playerData.SkinID);
-            corpse.SetFace(m_playerData.FaceID);
-            corpse.SetHairStyle(m_playerData.HairStyleID);
-            corpse.SetHairColor(m_playerData.HairColorID);
-            corpse.SetFacialHairStyle(m_playerData.FacialHairStyleID);
+            corpse.SetSex(GetNativeSex());
+            corpse.SetCustomizations(m_playerData.Customizations);
             corpse.SetFlags(flags);
             corpse.SetDisplayId(GetNativeDisplayId());
             corpse.SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(GetRace()).FactionID);
@@ -5475,8 +5284,7 @@ namespace Game.Entities
                 return;
             }
 
-            byte gender = m_playerData.NativeSex;
-            switch ((Gender)gender)
+            switch (GetNativeSex())
             {
                 case Gender.Female:
                     SetDisplayId(info.DisplayId_f);
@@ -5487,7 +5295,7 @@ namespace Game.Entities
                     SetNativeDisplayId(info.DisplayId_m);
                     break;
                 default:
-                    Log.outError(LogFilter.Player, "Player {0} ({1}) has invalid gender {2}", GetName(), GetGUID().ToString(), (Gender)gender);
+                    Log.outError(LogFilter.Player, "Player {0} ({1}) has invalid gender {2}", GetName(), GetGUID().ToString(), GetNativeSex());
                     return;
             }
 
@@ -5883,13 +5691,13 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePos), 0);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingPercent), 1.0f);
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent), 1.0f);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModPeriodicHealingDonePercent), 1.0f);
-            for (byte i = 0; i < 7; ++i)
+            for (byte i = 0; i < (int)SpellSchools.Max; ++i)
             {
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, i), 0);
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePos, i), 0);
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDonePercent, i), 1.0f);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent, i), 1.0f);
             }
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModSpellPowerPercent), 1.0f);
@@ -6324,7 +6132,8 @@ namespace Game.Entities
 
                 UpdateCriteria(CriteriaTypes.ExploreArea, GetAreaId());
 
-                if (areaEntry.ExplorationLevel > 0)
+                var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                if (areaLevels.HasValue)
                 {
                     if (GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
@@ -6332,7 +6141,8 @@ namespace Game.Entities
                     }
                     else
                     {
-                        int diff = (int)(GetLevel() - areaEntry.ExplorationLevel);
+                        ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
+                        int diff = (int)(GetLevel()) - areaLevel;
                         uint XP = 0;
                         if (diff < -5)
                         {
@@ -6344,11 +6154,11 @@ namespace Game.Entities
                             if (exploration_percent < 0)
                                 exploration_percent = 0;
 
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP((byte)areaEntry.ExplorationLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * exploration_percent / 100 * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else
                         {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP((byte)areaEntry.ExplorationLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
 
                         GiveXP(XP, null);
@@ -7477,17 +7287,40 @@ namespace Game.Entities
         public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
         public void SetPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
 
-        public void SetSkinId(byte skinId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.SkinID), skinId); }
-        public void SetFaceId(byte faceId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FaceID), faceId); }
-        public void SetHairStyleId(byte hairStyleId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HairStyleID), hairStyleId); }
-        public void SetHairColorId(byte hairColorId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HairColorID), hairColorId); }
-        public void SetFacialHairStyleId(byte facialHairStyleId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FacialHairStyleID), facialHairStyleId); }
+        public uint GetCustomizationChoice(uint chrCustomizationOptionId)
+        {
+            int choiceIndex = m_playerData.Customizations.FindIndexIf(choice =>
+            {
+                return choice.ChrCustomizationOptionID == chrCustomizationOptionId;
+            });
+
+            if (choiceIndex >= 0)
+                return m_playerData.Customizations[choiceIndex].ChrCustomizationChoiceID;
+
+            return 0;
+        }
+
+        public void SetCustomizations(List<ChrCustomizationChoice> customizations, bool markChanged = true)
+        {
+            if (markChanged)
+                m_customizationsChanged = true;
+
+            ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Customizations));
+            foreach (var customization in customizations)
+            {
+                ChrCustomizationChoice newChoice = new ChrCustomizationChoice();
+                newChoice.ChrCustomizationOptionID = customization.ChrCustomizationOptionID;
+                newChoice.ChrCustomizationChoiceID = customization.ChrCustomizationChoiceID;
+                AddDynamicUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Customizations), newChoice);
+            }
+        }
+        
+        public Gender GetNativeSex() { return (Gender)(byte)m_playerData.NativeSex; }
         public void SetNativeSex(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
         public void SetPvpTitle(byte pvpTitle) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PvpTitle), pvpTitle); }
         public void SetArenaFaction(byte arenaFaction) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ArenaFaction), arenaFaction); }
         public void ApplyModFakeInebriation(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FakeInebriation), mod, apply); }
         public void SetVirtualPlayerRealm(uint virtualRealmAddress) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VirtualPlayerRealm), virtualRealmAddress); }
-        public void SetCustomDisplayOption(int slot, byte customDisplayOption) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CustomDisplayOption, slot), customDisplayOption); }
 
         public void AddHeirloom(uint itemId, uint flags)
         {
@@ -7537,9 +7370,9 @@ namespace Game.Entities
         public void ApplyModOverrideAPBySpellPowerPercent(float mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideAPBySpellPowerPercent), mod, apply); }
 
         public bool HasPlayerLocalFlag(PlayerLocalFlags flags) { return (m_activePlayerData.LocalFlags & (int)flags) != 0; }
-        public void AddPlayerLocalFlag(PlayerLocalFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
-        public void RemovePlayerLocalFlag(PlayerLocalFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
-        public void SetPlayerLocalFlags(PlayerLocalFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (int)flags); }
+        public void AddPlayerLocalFlag(PlayerLocalFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
+        public void RemovePlayerLocalFlag(PlayerLocalFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
+        public void SetPlayerLocalFlags(PlayerLocalFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LocalFlags), (uint)flags); }
 
         public byte GetNumRespecs() { return m_activePlayerData.NumRespecs; }
         public void SetNumRespecs(byte numRespecs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NumRespecs), numRespecs); }

@@ -108,7 +108,7 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(GetPlayer().GetGUID(), CalendarError.EventInvalid);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarCommunityInviteRequest)]
+        [WorldPacketHandler(ClientOpcodes.CalendarCommunityInvite)]
         void HandleCalendarCommunityInvite(CalendarCommunityInviteRequest calendarCommunityInvite)
         {
             Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
@@ -423,7 +423,7 @@ namespace Game
                 Global.CalendarMgr.SendCalendarCommandResult(guid, CalendarError.EventInvalid);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CalendarEventModeratorStatus)]
+        [WorldPacketHandler(ClientOpcodes.CalendarModeratorStatus)]
         void HandleCalendarModeratorStatus(CalendarModeratorStatusQuery calendarModeratorStatus)
         {
             ObjectGuid guid = GetPlayer().GetGUID();

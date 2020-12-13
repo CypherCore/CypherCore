@@ -57,6 +57,7 @@ namespace Game.DataStorage
         public sbyte SoundOverrideSubclassID;
         public int IconFileDataID;
         public byte ItemGroupSoundsID;
+        public int ModifiedCraftingReagentItemID;
     }
 
     public sealed class ItemAppearanceRecord
@@ -66,6 +67,7 @@ namespace Game.DataStorage
         public uint ItemDisplayInfoID;
         public int DefaultIconFileDataID;
         public int UiOrder;
+        public int PlayerConditionID;
     }
 
     public sealed class ItemArmorQualityRecord
@@ -100,7 +102,7 @@ namespace Game.DataStorage
     public sealed class ItemBonusRecord
     {
         public uint Id;
-        public int[] Value = new int[3];
+        public int[] Value = new int[4];
         public ushort ParentItemBonusListID;
         public ItemBonusType BonusType;
         public byte OrderIndex;
@@ -109,11 +111,12 @@ namespace Game.DataStorage
     public sealed class ItemBonusListGroupEntryRecord
     {
         public uint Id;
+        public int ItemBonusListGroupID;
         public int ItemBonusListID;
         public int ItemLevelSelectorID;
         public int OrderIndex;
         public int ItemExtendedCostID;
-        public int ItemBonusListGroupID;
+        public int PlayerConditionID;
     }
 
     public sealed class ItemBonusListLevelDeltaRecord
@@ -345,6 +348,9 @@ namespace Game.DataStorage
         public float PriceRandomValue;
         public int[] Flags = new int[4];
         public int FactionRelated;
+        public int ModifiedCraftingReagentItemID;
+        public uint ContentTuningID;
+        public uint PlayerLevelToItemLevelCurveID;
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;
         public ushort RequiredHoliday;
@@ -359,7 +365,6 @@ namespace Game.DataStorage
         public ushort StartQuestID;
         public ushort PageID;
         public ushort ItemDelay;
-        public ushort ScalingStatDistributionID;
         public ushort MinFactionID;
         public ushort RequiredSkillRank;
         public ushort RequiredSkill;

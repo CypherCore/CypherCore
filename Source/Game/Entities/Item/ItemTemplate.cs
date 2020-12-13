@@ -277,22 +277,11 @@ namespace Game.Entities
         public uint GetRequiredReputationRank() { return ExtendedData.MinReputation; }
         public uint GetMaxCount() { return ExtendedData.MaxCount; }
         public uint GetContainerSlots() { return ExtendedData.ContainerSlots; }
-        public int GetItemStatType(uint index)
-        {
-            Cypher.Assert(index < ItemConst.MaxStats);
-            return ExtendedData.StatModifierBonusStat[index];
-        }
-        public int GetItemStatAllocation(uint index)
-        {
-            Cypher.Assert(index < ItemConst.MaxStats);
-            return ExtendedData.StatPercentEditor[index];
-        }
-        public float GetItemStatSocketCostMultiplier(uint index)
-        {
-            Cypher.Assert(index < ItemConst.MaxStats);
-            return ExtendedData.StatPercentageOfSocket[index];
-        }
-        public uint GetScalingStatDistribution() { return ExtendedData.ScalingStatDistributionID; }
+        public int GetStatModifierBonusStat(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatModifierBonusStat[index]; }
+        public int GetStatPercentEditor(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentEditor[index]; }
+        public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
+        public uint GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
+        public uint GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
         public uint GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }
         public float GetRangedModRange() { return ExtendedData.ItemRange; }

@@ -47,13 +47,13 @@ namespace Game.DataStorage
         public Vector3 Pos;
         public float[] Rot = new float[4];
         public uint Id;
-        public ushort OwnerID;
-        public ushort DisplayID;
+        public uint OwnerID;
+        public uint DisplayID;
         public float Scale;
         public GameObjectTypes TypeID;
-        public byte PhaseUseFlags;
-        public ushort PhaseID;
-        public ushort PhaseGroupID;
+        public int PhaseUseFlags;
+        public int PhaseID;
+        public int PhaseGroupID;
         public int[] PropValue = new int[8];
     }
 
@@ -80,7 +80,7 @@ namespace Game.DataStorage
         public byte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
-        public byte GarrSiteID;
+        public int GarrSiteID;
         public byte UpgradeLevel;
         public int BuildSeconds;
         public ushort CurrencyTypeID;
@@ -153,6 +153,8 @@ namespace Game.DataStorage
         public byte ChrClassID;
         public byte Flags;
         public byte Gender;
+        public int AutoCombatantID;
+        public int CovenantID;
     }
 
     public sealed class GarrFollowerXAbilityRecord
@@ -218,7 +220,6 @@ namespace Game.DataStorage
         public uint Id;
         public ushort EnchantId;
         public SocketColor Type;
-        public ushort MinItemLevel;
     }
 
     public sealed class GlyphBindableSpellRecord

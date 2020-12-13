@@ -21,14 +21,6 @@ using System;
 
 namespace Game.DataStorage
 {
-    public sealed class ScalingStatDistributionRecord
-    {
-        public uint Id;
-        public ushort PlayerLevelToItemLevelCurveID;
-        public int MinLevel;
-        public int MaxLevel;
-    }
-
     public sealed class ScenarioRecord
     {
         public uint Id;
@@ -46,7 +38,7 @@ namespace Game.DataStorage
         public string Title;
         public ushort ScenarioID;
         public uint CriteriaTreeId;
-        public ushort RewardQuestID;
+        public uint RewardQuestID;
         public int RelatedStep;                                              // Bonus step can only be completed if scenario is in the step specified in this field
         public ushort Supersedes;                                              // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
         public byte OrderIndex;
@@ -117,7 +109,7 @@ namespace Game.DataStorage
         public AbilityLearnType AcquireMethod;
         public ushort TrivialSkillLineRankHigh;
         public ushort TrivialSkillLineRankLow;
-        public sbyte Flags;
+        public int Flags;
         public byte NumSkillUps;
         public short UniqueBit;
         public short TradeSkillCategoryID;
@@ -205,7 +197,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int Base;
-        public short PerLevel;
         public int Minimum;
     }
 
@@ -269,7 +260,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int Duration;
-        public uint DurationPerLevel;
         public int MaxDuration;
     }
 
@@ -333,14 +323,16 @@ namespace Game.DataStorage
 
     public sealed class SpellItemEnchantmentRecord
     {
-        public uint Id;
         public string Name;
         public string HordeName;
+        public uint Id;
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
-        public uint TransmogPlayerConditionID;
-        public uint TransmogCost;
         public uint IconFileDataID;
+        public int MinItemLevel;
+        public int MaxItemLevel;
+        public uint TransmogUseConditionID;
+        public uint TransmogCost;
         public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
         public EnchantmentSlotMask Flags;
@@ -379,17 +371,17 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DifficultyID;
-        public ushort BaseLevel;
         public ushort MaxLevel;
-        public ushort SpellLevel;
         public byte MaxPassiveAuraLevel;
+        public ushort BaseLevel;
+        public ushort SpellLevel;
         public uint SpellID;
     }
 
     public sealed class SpellMiscRecord
     {
         public uint Id;
-        public int[] Attributes = new int[14];
+        public int[] Attributes = new int[15];
         public byte DifficultyID;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;
@@ -401,6 +393,9 @@ namespace Game.DataStorage
         public uint SpellIconFileDataID;
         public uint ActiveIconFileDataID;
         public uint ContentTuningID;
+        public int ShowFutureSpellPlayerConditionID;
+        public int SpellVisualScript;
+        public int ActiveSpellVisualScript;
         public uint SpellID;
     }
 
@@ -447,7 +442,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public SpellProcsPerMinuteModType Type;
-        public ushort Param;
+        public uint Param;
         public float Coeff;
         public uint SpellProcsPerMinuteID;
     }
@@ -550,7 +545,6 @@ namespace Game.DataStorage
         public byte DifficultyID;
         public uint SpellVisualID;
         public float Probability;
-        public byte Flags;
         public byte Priority;
         public int SpellIconFileID;
         public int ActiveIconFileID;

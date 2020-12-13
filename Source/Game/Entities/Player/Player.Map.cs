@@ -144,6 +144,8 @@ namespace Game.Entities
                 _restMgr.SetRestFlag(RestFlag.FactionArea);
             else
                 _restMgr.RemoveRestFlag(RestFlag.FactionArea);
+
+            UpdateCriteria(CriteriaTypes.TravelledToArea, newArea);
         }
 
         public void UpdateZone(uint newZone, uint newArea)

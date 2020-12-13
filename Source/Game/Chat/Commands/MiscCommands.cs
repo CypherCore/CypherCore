@@ -591,7 +591,7 @@ namespace Game.Chat
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
             attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -1596,7 +1596,7 @@ namespace Game.Chat
                 mapId = target.GetMapId();
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
-                gender = (Gender)(byte)target.m_playerData.NativeSex;
+                gender = target.GetNativeSex();
             }
             // get additional information from DB
             else
@@ -2367,7 +2367,7 @@ namespace Game.Chat
                 if (caster)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, SPELL_UNSTUCK_VISUAL, castId, SpellCastResult.CantDoThatRightNow);
+                    Spell.SendCastResult(caster, spellInfo, new Networking.Packets.SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
                 }
 
                 return false;

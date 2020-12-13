@@ -138,6 +138,10 @@ namespace Game.Achievements
                     case CriteriaTypes.OwnBattlePetCount:
                     case CriteriaTypes.HonorLevelReached:
                     case CriteriaTypes.PrestigeReached:
+                    case CriteriaTypes.CompleteQuestAccumulate:
+                    case CriteriaTypes.BoughtItemFromVendor:
+                    case CriteriaTypes.SoldItemToVendor:
+                    case CriteriaTypes.TravelledToArea:
                         SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
                         break;
                     // std case: increment at miscValue1
@@ -437,6 +441,9 @@ namespace Game.Achievements
                     case CriteriaTypes.EarnHonorXp:
                     case CriteriaTypes.RelicTalentUnlocked:
                     case CriteriaTypes.ReachAccountHonorLevel:
+                    case CriteriaTypes.MythicKeystoneCompleted:
+                    case CriteriaTypes.ApplyConduit:
+                    case CriteriaTypes.ConvertItemsToCurrency:
                         break;                                   // Not implemented yet :(
                 }
 
@@ -812,6 +819,10 @@ namespace Game.Achievements
                 case CriteriaTypes.ReachAccountHonorLevel:
                 case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
                 case CriteriaTypes.HeartOfAzerothLevelReached:
+                case CriteriaTypes.CompleteQuestAccumulate:
+                case CriteriaTypes.BoughtItemFromVendor:
+                case CriteriaTypes.SoldItemToVendor:
+                case CriteriaTypes.TravelledToArea:
                     return progress.Counter >= requiredAmount;
                 case CriteriaTypes.CompleteAchievement:
                 case CriteriaTypes.CompleteQuest:
@@ -942,6 +953,9 @@ namespace Game.Achievements
                 case CriteriaTypes.WinDuel:
                 case CriteriaTypes.WinRatedArena:
                 case CriteriaTypes.WonAuctions:
+                case CriteriaTypes.CompleteQuestAccumulate:
+                case CriteriaTypes.BoughtItemFromVendor:
+                case CriteriaTypes.SoldItemToVendor:
                     if (miscValue1 == 0)
                         return false;
                     break;
@@ -1188,6 +1202,10 @@ namespace Game.Achievements
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
+                case CriteriaTypes.TravelledToArea:
+                    if (miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
                 default:
                     break;
             }
@@ -1227,8 +1245,8 @@ namespace Game.Achievements
         bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
         {
             uint reqValue = modifier.Asset;
-        int secondaryAsset = modifier.SecondaryAsset;
-        int tertiaryAsset = modifier.TertiaryAsset;
+            int secondaryAsset = modifier.SecondaryAsset;
+            int tertiaryAsset = modifier.TertiaryAsset;
 
             switch ((CriteriaAdditionalCondition)modifier.Type)
             {
@@ -1621,7 +1639,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.SourceNativeSex: // 98
-                    if (referencePlayer.m_playerData.NativeSex != reqValue)
+                    if (referencePlayer.GetNativeSex() != (Gender)reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.Skill: // 99
@@ -1656,7 +1674,7 @@ namespace Game.Achievements
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
                     if (questBit != 0)
                         if ((referencePlayer.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
-                        return false;
+                            return false;
                     break;
                 case CriteriaAdditionalCondition.CompletedQuest: // 111
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
@@ -2402,7 +2420,7 @@ namespace Game.Achievements
                         break;
                     }
                 case CriteriaAdditionalCondition.SourceLevel120: // 264
-                    if (referencePlayer.GetLevel() != 120)
+                    if (referencePlayer.GetLevel() != 60)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankLower: // 266
@@ -2441,8 +2459,54 @@ namespace Game.Achievements
                                 }
                             }
                         }
+                        return false;
                     }
-                    return false;
+                case CriteriaAdditionalCondition.SourceLevelInRangeCt: // 268
+                    {
+                        uint level = referencePlayer.GetLevel();
+                        var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
+                        if (levels.HasValue)
+                        {
+                            if (secondaryAsset != 0)
+                                return level >= levels.Value.MinLevelWithDelta && level <= levels.Value.MaxLevelWithDelta;
+                            return level >= levels.Value.MinLevel && level <= levels.Value.MaxLevel;
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.TargetLevelInRangeCt: // 269
+                    {
+                        if (!unit)
+                            return false;
+
+                        uint level = unit.GetLevel();
+                        var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
+                        if (levels.HasValue)
+                        {
+                            if (secondaryAsset != 0)
+                                return level >= levels.Value.MinLevelWithDelta && level <= levels.Value.MaxLevelWithDelta;
+                            return level >= levels.Value.MinLevel && level <= levels.Value.MaxLevel;
+                        }
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.SourceLevelGreaterCt: // 272
+                    {
+                        uint level = referencePlayer.GetLevel();
+                        var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
+                        if (levels.HasValue)
+                            return secondaryAsset != 0 ? level >= levels.Value.MinLevelWithDelta : level >= levels.Value.MinLevel;
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.TargetLevelGreaterCt: // 273
+                    {
+                        if (!unit)
+                            return false;
+
+                        uint level = unit.GetLevel();
+                        var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
+                        if (levels.HasValue)
+                            return secondaryAsset != 0 ? level >= levels.Value.MinLevelWithDelta : level >= levels.Value.MinLevel;
+                        return false;
+                    }
                 case CriteriaAdditionalCondition.MapOrCosmeticMap: // 280
                     {
                         MapRecord map = referencePlayer.GetMap().GetEntry();
@@ -2450,6 +2514,60 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.Covenant: // 288
+                    if (referencePlayer.m_playerData.CovenantID != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.Soulbind: // 291
+                    if (referencePlayer.m_playerData.SoulbindID != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceAreaOrZoneInGroup: // 293
+                    {
+                        var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
+                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(referencePlayer.GetAreaId());
+                        if (area != null)
+                            foreach (uint areaInGroup in areas)
+                                if (areaInGroup == area.Id || areaInGroup == area.ParentAreaID)
+                                    return true;
+                        return false;
+                    }
+                case CriteriaAdditionalCondition.SourceInSpecificChromieTime: // 300
+                    if (referencePlayer.m_activePlayerData.UiChromieTimeExpansionID != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceInAnyChromieTime: // 301
+                    if (referencePlayer.m_activePlayerData.UiChromieTimeExpansionID == 0)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceRuneforgeLegendaryKnown: // 303
+                    {
+                        int block = (int)reqValue / 32;
+                        if (block >= referencePlayer.m_activePlayerData.RuneforgePowers.Size())
+                            return false;
+
+                        uint bit = reqValue % 32;
+                        return (referencePlayer.m_activePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
+                    }
+                case CriteriaAdditionalCondition.ShapeshiftFormCustomizationDisplay: // 308
+                    {
+                        ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(referencePlayer.GetRace(), referencePlayer.GetNativeSex(), (ShapeShiftForm)secondaryAsset);
+                        if (formModelData == null)
+                            return false;
+
+                        uint formChoice = referencePlayer.GetCustomizationChoice(formModelData.OptionID);
+                        var choiceIndex = formModelData.Choices.FindIndex(choice => { return choice.Id == formChoice; });
+                        if (choiceIndex == -1)
+                            return false;
+
+                        if (reqValue != formModelData.Displays[choiceIndex].DisplayID)
+                            return false;
+                        break;
+                    }
+                case CriteriaAdditionalCondition.SourceFlying: // 311
+                    if (!referencePlayer.IsFlying())
+                        return false;
+                    break;
                 default:
                     break;
             }
@@ -2851,7 +2969,7 @@ namespace Game.Achievements
         {
             return _criteriasByFailEvent[(int)condition].LookupByKey(asset);
         }
-        
+
         public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
         {
             return _criteriaDataMap.LookupByKey(criteria.Id);
@@ -2917,7 +3035,7 @@ namespace Game.Achievements
     }
 
     public class CriteriaTree
-    {    
+    {
         public uint Id;
         public CriteriaTreeRecord Entry;
         public AchievementRecord Achievement;

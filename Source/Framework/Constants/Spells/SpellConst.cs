@@ -1853,6 +1853,10 @@ namespace Framework.Constants
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000  // 23
     }
+    public enum SpellAttr14
+    {
+
+    }
     public enum SpellCustomAttributes
     {
         EnchantProc = 0x01,
@@ -2156,6 +2160,18 @@ namespace Framework.Constants
         UpgradeItem = 269,
         Unk270 = 270,
         ApplyAreaAuraPartyNonrandom = 271,
+        SetCovenant = 272,
+        CraftRuneforgeLegendary = 273,
+        Unk274 = 274,
+        Unk275 = 275,
+        LearnTransmogIllusion = 276,
+        SetChromieTime = 277,
+        Unk278 = 278,
+        LearnGarrTalent = 279,
+        Unk280 = 280,
+        LearnSoulbindConduit = 281,
+        ConvertItemsToCurrency = 282,
+        Unk283 = 283,
         TotalSpellEffects
     }
 
@@ -2463,6 +2479,7 @@ namespace Framework.Constants
         Unk148 = 148,
         Unk149 = 149,
         UnitOwnCritter = 150, // own battle pet from UNIT_FIELD_CRITTER
+        Unk151 = 151,
         TotalSpellTargets
     }
     public enum SpellTargetSelectionCategories

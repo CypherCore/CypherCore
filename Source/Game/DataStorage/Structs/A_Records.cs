@@ -39,6 +39,7 @@ namespace Game.DataStorage
         public int RewardItemID;
         public uint CriteriaTree;
         public ushort SharesCriteria;
+        public int CovenantID;
     }
 
     public sealed class AnimationDataRecord
@@ -79,7 +80,6 @@ namespace Game.DataStorage
         public ushort UwAmbience;
         public ushort ZoneMusic;
         public ushort UwZoneMusic;
-        public sbyte ExplorationLevel;
         public ushort IntroSound;
         public uint UwIntroSound;
         public byte FactionGroupMask;
@@ -89,6 +89,7 @@ namespace Game.DataStorage
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
+        public uint ContentTuningID;
         public AreaFlags[] Flags = new AreaFlags[2];
         public ushort[] LiquidTypeID = new ushort[4];
 

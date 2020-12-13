@@ -1727,11 +1727,30 @@ namespace Game
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
-            if (condition.MinLevel != 0 && player.GetLevel() < condition.MinLevel)
-                return false;
+            ContentTuningLevels? levels = Global.DB2Mgr.GetContentTuningData(condition.ContentTuningID, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            if (levels.HasValue)
+            {
+                byte minLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MinLevelWithDelta : levels.Value.MinLevel);
+                byte maxLevel = 0;
+                if (!condition.Flags.HasAnyFlag(0x20))
+                    maxLevel = (byte)(condition.Flags.HasAnyFlag(0x800) ? levels.Value.MaxLevelWithDelta : levels.Value.MaxLevel);
+                if (condition.Flags.HasAnyFlag(0x80))
+                {
+                    if (minLevel != 0 && player.GetLevel() >= minLevel && (maxLevel == 0 || player.GetLevel() <= maxLevel))
+                        return false;
 
-            if (condition.MaxLevel != 0 && player.GetLevel() > condition.MaxLevel)
-                return false;
+                    if (maxLevel != 0 && player.GetLevel() <= maxLevel && (minLevel == 0 || player.GetLevel() >= minLevel))
+                        return false;
+                }
+                else
+                {
+                    if (minLevel != 0 && player.GetLevel() < minLevel)
+                        return false;
+
+                    if (maxLevel != 0 && player.GetLevel() > maxLevel)
+                        return false;
+                }
+            }
 
             if (condition.RaceMask != 0 && !Convert.ToBoolean(player.GetRaceMask() & condition.RaceMask))
                 return false;
@@ -1742,7 +1761,7 @@ namespace Game
             if (condition.Gender >= 0 && (int)player.GetGender() != condition.Gender)
                 return false;
 
-            if (condition.NativeGender >= 0 && player.m_playerData.NativeSex != condition.NativeGender)
+            if (condition.NativeGender >= 0 && player.GetNativeSex() != (Gender)condition.NativeGender)
                 return false;
 
             if (condition.PowerType != -1 && condition.PowerTypeComp != 0)
@@ -2138,6 +2157,9 @@ namespace Game
                 return false;
 
             if (condition.ModifierTreeID != 0 && !player.ModifierTreeSatisfied(condition.ModifierTreeID))
+                return false;
+
+            if (condition.CovenantID != 0 && player.m_playerData.CovenantID != condition.CovenantID)
                 return false;
 
             return true;

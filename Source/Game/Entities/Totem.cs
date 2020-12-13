@@ -77,7 +77,7 @@ namespace Game.Entities
             // Get spell cast by totem
             SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
             if (totemSpell != null)
-                if (totemSpell.CalcCastTime(GetLevel()) != 0)   // If spell has cast time . its an active totem
+                if (totemSpell.CalcCastTime() != 0)   // If spell has cast time -> its an active totem
                     m_type = TotemType.Active;
 
             m_duration = duration;

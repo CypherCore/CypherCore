@@ -355,11 +355,11 @@ namespace Game
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
-            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 16);
-            if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 16)
+            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 50);
+            if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 200)
             {
-                Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..16. Set to 16.", Values[WorldCfg.CharactersPerRealm]);
-                Values[WorldCfg.CharactersPerRealm] = 16;
+                Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..200. Set to 200.", Values[WorldCfg.CharactersPerRealm]);
+                Values[WorldCfg.CharactersPerRealm] = 200;
             }
 
             // must be after CharactersPerRealm
@@ -370,14 +370,7 @@ namespace Game
                 Values[WorldCfg.CharactersPerAccount] = Values[WorldCfg.CharactersPerRealm];
             }
 
-            Values[WorldCfg.DemonHuntersPerRealm] = GetDefaultValue("DemonHuntersPerRealm", 1);
-            if ((int)Values[WorldCfg.DemonHuntersPerRealm] < 0 || (int)Values[WorldCfg.DemonHuntersPerRealm] > 12)
-            {
-                Log.outError(LogFilter.ServerLoading, "DemonHuntersPerRealm ({0}) must be in range 0..12. Set to 1.", Values[WorldCfg.DemonHuntersPerRealm]);
-                Values[WorldCfg.DemonHuntersPerRealm] = 1;
-            }
-
-            Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 70);
+            Values[WorldCfg.CharacterCreatingMinLevelForDemonHunter] = GetDefaultValue("CharacterCreating.MinLevelForDemonHunter", 0);
 
             Values[WorldCfg.SkipCinematics] = GetDefaultValue("SkipCinematics", 0);
             if ((int)Values[WorldCfg.SkipCinematics] < 0 || (int)Values[WorldCfg.SkipCinematics] > 2)

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Game.BattleFields;
+using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -3848,6 +3849,8 @@ namespace Game.Entities
                     if (guild != null)
                         guild.AddGuildNews(GuildNews.ItemPurchased, GetGUID(), 0, item);
                 }
+
+                UpdateCriteria(CriteriaTypes.BoughtItemFromVendor, 1);
                 return true;
             }
 
@@ -5186,9 +5189,12 @@ namespace Game.Entities
                             return InventoryResult.ClientLockedOut;
                     }
 
-                    ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(pItem.GetScalingStatDistribution());
+                    ContentTuningLevels? requiredLevels = null;
                     // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
-                    if (ssd != null && ssd.MaxLevel < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) && ssd.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
+                    if (pItem.GetQuality() == ItemQuality.Heirloom)
+                        requiredLevels = Global.DB2Mgr.GetContentTuningData(pItem.GetScalingContentTuningId(), 0, true);
+
+                    if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
                         return InventoryResult.NotEquippable;
 
                     byte eslot = FindEquipSlot(pProto, slot, swap);

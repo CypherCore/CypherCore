@@ -30,6 +30,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Directory;
         public LocalizedString MapName;
+        public string InternalName;
         public string MapDescription0;                               // Horde
         public string MapDescription1;                               // Alliance
         public string PvpShortDescription;

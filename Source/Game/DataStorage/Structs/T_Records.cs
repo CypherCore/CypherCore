@@ -103,6 +103,15 @@ namespace Game.DataStorage
         public int RequiredTransmogHoliday;
     }
 
+    public sealed class TransmogIllusionRecord
+    {
+        public uint Id;
+        public int UnlockConditionID;
+        public int TransmogCost;
+        public int SpellItemEnchantmentID;
+        public int Flags;
+    }
+
     public sealed class TransmogSetRecord
     {
         public string Name;

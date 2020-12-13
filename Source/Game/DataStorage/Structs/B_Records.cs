@@ -54,7 +54,7 @@ namespace Game.DataStorage
     public sealed class BattlePetBreedStateRecord
     {
         public uint Id;
-        public byte BattlePetStateID;
+        public int BattlePetStateID;
         public ushort Value;
         public uint BattlePetBreedID;
     }
@@ -72,6 +72,7 @@ namespace Game.DataStorage
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
+        public int CovenantID;
     }
 
     public sealed class BattlePetSpeciesStateRecord
@@ -100,7 +101,7 @@ namespace Game.DataStorage
         public ushort HolidayWorldState;
         public BattlemasterListFlags Flags;
         public int IconFileDataID;
-        public short RequiredPlayerConditionID;
+        public int RequiredPlayerConditionID;
         public short[] MapId = new short[16];
     }
 
@@ -109,7 +110,7 @@ namespace Game.DataStorage
         public LocalizedString Text;
         public LocalizedString Text1;
         public uint Id;
-        public byte LanguageID;
+        public int LanguageID;
         public int ConditionID;
         public ushort EmotesID;
         public byte Flags;

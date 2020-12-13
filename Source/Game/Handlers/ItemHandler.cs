@@ -451,6 +451,7 @@ namespace Game
                         }
 
                         _player.UpdateCriteria(CriteriaTypes.MoneyFromVendors, money);
+                        _player.UpdateCriteria(CriteriaTypes.SoldItemToVendor, 1);
 
                         if (packet.Amount < pItem.GetCount())               // need split items
                         {

@@ -91,7 +91,8 @@ namespace Framework.Constants
         Defense = 0x10000,              // Localdefense, Worlddefense
         GuildReq = 0x20000,              // Guildrecruitment
         Lfg = 0x40000,              // Lfg
-        Unk1 = 0x80000               // General
+        Unk1 = 0x80000,               // General
+        NoClientJoin = 0x200000
     }
 
     public enum ChannelMemberFlags

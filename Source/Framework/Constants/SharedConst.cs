@@ -34,8 +34,8 @@ namespace Framework.Constants
         public const int MaxHolidayDurations = 10;
         public const int MaxHolidayDates = 26;
         public const int MaxHolidayFlags = 10;
-        public const int DefaultMaxLevel = 120;
-        public const int MaxLevel = 120;
+        public const int DefaultMaxLevel = 60;
+        public const int MaxLevel = 123;
         public const int StrongMaxLevel = 255;
         public const int MaxOverrideSpell = 10;
         public const int MaxWorldMapOverlayArea = 4;
@@ -48,7 +48,7 @@ namespace Framework.Constants
         /// <summary>
         /// BattlePets Const
         /// </summary>
-        public const int MaxBattlePetSpeciesId = 2873;
+        public const int MaxBattlePetSpeciesId = 3084;
         public const int MaxPetBattleSlots = 3;
         public const int MaxBattlePetsPerSpecies = 3;
         public const int BattlePetCageItemId = 82800;
@@ -587,9 +587,8 @@ namespace Framework.Constants
         WarlordsOfDraenor = 5,
         Legion = 6,
         BattleForAzeroth = 7,
-        Max,
-
         ShadowLands = 8,
+        Max,
 
         MaxAccountExpansions
     }
@@ -1140,7 +1139,6 @@ namespace Framework.Constants
         DeathCorpseReclaimDelayPvp,
         DeathSicknessLevel,
         DeclinedNamesUsed,
-        DemonHuntersPerRealm,
         DetectPosCollision,
         DieCommandMode,
         DisableBreathing,

@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using Framework.Dynamic;
 
 namespace Game.DataStorage
 {
@@ -123,41 +124,6 @@ namespace Game.DataStorage
                 }
             }
 
-            foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
-                _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
-
-            CliDB.CharacterFacialHairStylesStorage.Clear();
-
-            CharBaseSectionVariation[] sectionToBase = new CharBaseSectionVariation[(int)CharSectionType.Max];
-            foreach (CharBaseSectionRecord charBaseSection in CliDB.CharBaseSectionStorage.Values)
-            {
-                Cypher.Assert(charBaseSection.ResolutionVariationEnum < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charBaseSection.ResolutionVariationEnum + 1}");
-                Cypher.Assert(charBaseSection.VariationEnum < CharBaseSectionVariation.Max, $"CharBaseSectionVariation.Max {(byte)CharBaseSectionVariation.Max} must be equal to or greater than {charBaseSection.VariationEnum + 1}");
-
-                sectionToBase[charBaseSection.ResolutionVariationEnum] = charBaseSection.VariationEnum;
-            }
-
-            CliDB.CharBaseSectionStorage.Clear();
-
-            MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>> addedSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>>();
-            foreach (CharSectionsRecord charSection in CliDB.CharSectionsStorage.Values)
-            {
-                Cypher.Assert(charSection.BaseSection < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charSection.BaseSection + 1}");
-
-                Tuple<byte, byte, CharBaseSectionVariation> sectionKey = Tuple.Create(charSection.RaceID, charSection.SexID, sectionToBase[charSection.BaseSection]);
-                Tuple<byte, byte> sectionCombination = Tuple.Create(charSection.VariationIndex, charSection.ColorIndex);
-                if (addedSections.Contains(sectionKey, sectionCombination))
-                    continue;
-
-                addedSections.Add(sectionKey, sectionCombination);
-                _charSections.Add(sectionKey, charSection);
-            }
-
-            CliDB.CharSectionsStorage.Clear();
-
-            foreach (var outfit in CliDB.CharStartOutfitStorage.Values)
-                _charStartOutfits[(uint)((byte)outfit.RaceID | (outfit.ClassID << 8) | (outfit.SexID << 16))] = outfit;
-
             var powers = new List<ChrClassesXPowerTypesRecord>();
             foreach (var chrClasses in CliDB.ChrClassesXPowerTypesStorage.Values)
                 powers.Add(chrClasses);
@@ -175,6 +141,71 @@ namespace Game.DataStorage
                 _powersByClass[power.ClassID][power.PowerType] = index;
             }
 
+            foreach (var customizationChoice in CliDB.ChrCustomizationChoiceStorage.Values)
+                _chrCustomizationChoicesByOption.Add(customizationChoice.ChrCustomizationOptionID, customizationChoice);
+
+            MultiMap<uint, Tuple<uint, byte>> shapeshiftFormByModel = new MultiMap<uint, Tuple<uint, byte>>();
+            Dictionary<uint, ChrCustomizationDisplayInfoRecord> displayInfoByCustomizationChoice = new Dictionary<uint, ChrCustomizationDisplayInfoRecord>();
+
+            // build shapeshift form model lookup
+            foreach (ChrCustomizationElementRecord customizationElement in CliDB.ChrCustomizationElementStorage.Values)
+            {
+                ChrCustomizationDisplayInfoRecord customizationDisplayInfo = CliDB.ChrCustomizationDisplayInfoStorage.LookupByKey(customizationElement.ChrCustomizationDisplayInfoID);
+                if (customizationDisplayInfo != null)
+                {
+                    ChrCustomizationChoiceRecord customizationChoice = CliDB.ChrCustomizationChoiceStorage.LookupByKey(customizationElement.ChrCustomizationChoiceID);
+                    if (customizationChoice != null)
+                    {
+                        displayInfoByCustomizationChoice[customizationElement.ChrCustomizationChoiceID] = customizationDisplayInfo;
+                        ChrCustomizationOptionRecord customizationOption = CliDB.ChrCustomizationOptionStorage.LookupByKey(customizationChoice.ChrCustomizationOptionID);
+                        if (customizationOption != null)
+                            shapeshiftFormByModel.Add(customizationOption.ChrModelID, Tuple.Create(customizationOption.Id, (byte)customizationDisplayInfo.ShapeshiftFormID));
+                    }
+                }
+            }
+
+            MultiMap<uint, ChrCustomizationOptionRecord> customizationOptionsByModel = new MultiMap<uint, ChrCustomizationOptionRecord>();
+            foreach (ChrCustomizationOptionRecord customizationOption in CliDB.ChrCustomizationOptionStorage.Values)
+                customizationOptionsByModel.Add(customizationOption.ChrModelID, customizationOption);
+
+            foreach (ChrCustomizationReqChoiceRecord reqChoice in CliDB.ChrCustomizationReqChoiceStorage.Values)
+            {
+                ChrCustomizationChoiceRecord customizationChoice = CliDB.ChrCustomizationChoiceStorage.LookupByKey(reqChoice.ChrCustomizationChoiceID);
+                if (customizationChoice != null)
+                {
+                    if (!_chrCustomizationRequiredChoices.ContainsKey(reqChoice.ChrCustomizationReqID))
+                        _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID] = new MultiMap<uint, uint>();
+
+                    _chrCustomizationRequiredChoices[reqChoice.ChrCustomizationReqID].Add(customizationChoice.ChrCustomizationOptionID, reqChoice.ChrCustomizationChoiceID);
+                }
+            }
+
+            foreach (ChrRaceXChrModelRecord raceModel in CliDB.ChrRaceXChrModelStorage.Values)
+            {
+                ChrModelRecord model = CliDB.ChrModelStorage.LookupByKey(raceModel.ChrModelID);
+                if (model != null)
+                {
+                    _chrModelsByRaceAndGender[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex)] = model;
+
+                    var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
+                    if (customizationOptionsForModel != null)
+                        _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex), customizationOptionsForModel);
+
+                    // link shapeshift displays to race/gender/form
+                    foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
+                    {
+                        ShapeshiftFormModelData data = _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex, shapeshiftOptionsForModel.Item2)];
+                        data.OptionID = shapeshiftOptionsForModel.Item2;
+                        data.Choices = _chrCustomizationChoicesByOption.LookupByKey(shapeshiftOptionsForModel.Item2);
+                        if (!data.Choices.Empty())
+                        {
+                            for (int i = 0; i < data.Choices.Count; ++i)
+                                data.Displays[i] = displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id);
+                        }
+                    }
+                }
+            }
+
             foreach (ChrSpecializationRecord chrSpec in CliDB.ChrSpecializationStorage.Values)
             {
                 //ASSERT(chrSpec.ClassID < MAX_CLASSES);
@@ -190,9 +221,6 @@ namespace Game.DataStorage
                     _chrSpecializationsByIndex[storageIndex] = new ChrSpecializationRecord[PlayerConst.MaxSpecializations];
 
                 _chrSpecializationsByIndex[storageIndex][chrSpec.OrderIndex] = chrSpec;
-
-                if (chrSpec.Flags.HasAnyFlag(ChrSpecializationFlag.Recommended))
-                    _defaultChrSpecializationsByClass[(uint)chrSpec.ClassID] = chrSpec;
             }
 
             foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in CliDB.ContentTuningXExpectedStorage.Values)
@@ -557,7 +585,7 @@ namespace Game.DataStorage
                 UiMapRecord parentUiMap = CliDB.UiMapStorage.LookupByKey(uiMap.ParentUiMapID);
                 if (parentUiMap != null)
                 {
-                    if (Convert.ToBoolean(parentUiMap.Flags & 0x80))
+                    if (parentUiMap.GetFlags().HasAnyFlag(UiMapFlag.NoWorldPositions))
                         continue;
                     UiMapAssignmentRecord uiMapAssignment = null;
                     UiMapAssignmentRecord parentUiMapAssignment = null;
@@ -744,9 +772,7 @@ namespace Game.DataStorage
 
         public uint GetEmptyAnimStateID()
         {
-            return 1484;
-            // TEMP: well... AnimationData.db2 in 8.3.0 has more rows than max hardcoded anim id in client
-            // return sAnimationDataStore.GetNumRows();
+            return (uint)CliDB.AnimationDataStorage.Count;
         }
 
         public List<uint> GetAreasForGroup(uint areaGroupId)
@@ -855,31 +881,6 @@ namespace Game.DataStorage
             return broadcastText.Text[SharedConst.DefaultLocale];
         }
 
-        public bool HasCharacterFacialHairStyle(Race race, Gender gender, uint variationId)
-        {
-            return _characterFacialHairStyles.Contains(Tuple.Create((byte)race, (byte)gender, variationId));
-        }
-
-        public bool HasCharSections(Race race, Gender gender, CharBaseSectionVariation variation)
-        {
-            return _charSections.ContainsKey(Tuple.Create((byte)race, (byte)gender, variation));
-        }
-
-        public CharSectionsRecord GetCharSectionEntry(Race race, Gender gender, CharBaseSectionVariation variation, byte variationIndex, byte colorIndex)
-        {
-            var list = _charSections.LookupByKey(Tuple.Create((byte)race, (byte)gender, variation));
-            foreach (var charSection in list)
-                if (charSection.VariationIndex == variationIndex && charSection.ColorIndex == colorIndex)
-                    return charSection;
-
-            return null;
-        }
-
-        public CharStartOutfitRecord GetCharStartOutfitEntry(uint race, uint class_, uint gender)
-        {
-            return _charStartOutfits.LookupByKey(race | (class_ << 8) | (gender << 16));
-        }
-
         public string GetClassName(Class class_, Locale locale = Locale.enUS)
         {
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(class_);
@@ -895,6 +896,26 @@ namespace Game.DataStorage
         public uint GetPowerIndexByClass(PowerType powerType, Class classId)
         {
             return _powersByClass[(int)classId][(int)powerType];
+        }
+
+        public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(uint chrCustomizationOptionId)
+        {
+            return _chrCustomizationChoicesByOption.LookupByKey(chrCustomizationOptionId);
+        }
+
+        public List<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
+        {
+            return _chrCustomizationOptionsByRaceAndGender.LookupByKey(Tuple.Create(race, gender));
+        }
+
+        public MultiMap<uint, uint> GetRequiredCustomizationChoices(uint chrCustomizationReqId)
+        {
+            return _chrCustomizationRequiredChoices.LookupByKey(chrCustomizationReqId);
+        }
+
+        public ChrModelRecord GetChrModel(Race race, Gender gender)
+        {
+            return _chrModelsByRaceAndGender.LookupByKey(Tuple.Create(race, gender));
         }
 
         public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
@@ -916,7 +937,46 @@ namespace Game.DataStorage
 
         public ChrSpecializationRecord GetDefaultChrSpecializationForClass(Class class_)
         {
-            return _defaultChrSpecializationsByClass.LookupByKey(class_);
+            return GetChrSpecializationByIndex(class_, PlayerConst.InitialSpecializationIndex);
+        }
+
+        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint replacementConditionMask, bool forItem = false)
+        {
+            ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
+            if (contentTuning == null)
+                return null;
+
+            if (forItem && contentTuning.GetFlags().HasFlag(ContentTuningFlag.DisabledForItem))
+                return null;
+
+            int getLevelAdjustment(ContentTuningCalcType type) => type switch
+            {
+                ContentTuningCalcType.PlusOne => 1,
+                ContentTuningCalcType.PlusMaxLevelForExpansion => (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion)),
+                _ => 0
+            };
+
+            ContentTuningLevels levels = new ContentTuningLevels();
+            levels.MinLevel = (short)(contentTuning.MinLevel + getLevelAdjustment((ContentTuningCalcType)contentTuning.MinLevelType));
+            levels.MaxLevel = (short)(contentTuning.MaxLevel + getLevelAdjustment((ContentTuningCalcType)contentTuning.MaxLevelType));
+            levels.MinLevelWithDelta = (short)Math.Clamp(levels.MinLevel + contentTuning.TargetLevelDelta, 1, SharedConst.MaxLevel);
+            levels.MaxLevelWithDelta = (short)Math.Clamp(levels.MaxLevel + contentTuning.TargetLevelMaxDelta, 1, SharedConst.MaxLevel);
+
+            // clamp after calculating levels with delta (delta can bring "overflown" level back into correct range)
+            levels.MinLevel = (short)Math.Clamp((int)levels.MinLevel, 1, SharedConst.MaxLevel);
+            levels.MaxLevel = (short)Math.Clamp((int)levels.MaxLevel, 1, SharedConst.MaxLevel);
+
+            if (contentTuning.TargetLevelMin != 0)
+                levels.TargetLevelMin = (short)contentTuning.TargetLevelMin;
+            else
+                levels.TargetLevelMin = levels.MinLevelWithDelta;
+
+            if (contentTuning.TargetLevelMax != 0)
+                levels.TargetLevelMax = (short)contentTuning.TargetLevelMax;
+            else
+                levels.TargetLevelMax = levels.MaxLevelWithDelta;
+
+            return levels;
         }
 
         public string GetCreatureFamilyPetName(CreatureFamily petfamily, Locale locale)
@@ -1708,6 +1768,11 @@ namespace Game.DataStorage
             return _rewardPackItems.LookupByKey(rewardPackID);
         }
 
+        public ShapeshiftFormModelData GetShapeshiftFormModelData(Race race, Gender gender, ShapeShiftForm form)
+        {
+            return _chrCustomizationChoicesForShapeshifts.LookupByKey(Tuple.Create((byte)race, (byte)gender, (byte)form));
+        }
+        
         public List<SkillLineRecord> GetSkillLinesForParentSkill(uint parentSkillId)
         {
             return _skillLinesByParentSkillLine.LookupByKey(parentSkillId);
@@ -2091,12 +2156,13 @@ namespace Game.DataStorage
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new MultiMap<uint, AzeritePowerSetMemberRecord>();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]>();
         Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord>();
-        List<Tuple<byte, byte, uint>> _characterFacialHairStyles = new List<Tuple<byte, byte, uint>>();
-        MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord> _charSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord>();
-        Dictionary<uint, CharStartOutfitRecord> _charStartOutfits = new Dictionary<uint, CharStartOutfitRecord>();
         uint[][] _powersByClass = new uint[(int)Class.Max][];
+        MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new MultiMap<uint, ChrCustomizationChoiceRecord>();
+        Dictionary<Tuple<byte, byte>, ChrModelRecord> _chrModelsByRaceAndGender = new Dictionary<Tuple<byte, byte>, ChrModelRecord>();
+        Dictionary<Tuple<byte, byte, byte>, ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new Dictionary<Tuple<byte, byte, byte>, ShapeshiftFormModelData>();
+        MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord>();
+        Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new Dictionary<uint, MultiMap<uint, uint>>();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
-        Dictionary<uint, ChrSpecializationRecord> _defaultChrSpecializationsByClass = new Dictionary<uint, ChrSpecializationRecord>();
         MultiMap<uint, CurvePointRecord> _curvePoints = new MultiMap<uint, CurvePointRecord>();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord>();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new Dictionary<Tuple<uint, int>, ExpectedStatRecord>();
@@ -2361,6 +2427,23 @@ namespace Game.DataStorage
         {
             return left.Quality.CompareTo(right.Quality);
         }
+    }
+
+    public struct ContentTuningLevels
+    {
+        public short MinLevel;
+        public short MaxLevel;
+        public short MinLevelWithDelta;
+        public short MaxLevelWithDelta;
+        public short TargetLevelMin;
+        public short TargetLevelMax;
+    }
+
+    public class ShapeshiftFormModelData
+    {
+        public uint OptionID;
+        public List<ChrCustomizationChoiceRecord> Choices = new List<ChrCustomizationChoiceRecord>();
+        public List<ChrCustomizationDisplayInfoRecord> Displays = new List<ChrCustomizationDisplayInfoRecord>();
     }
 
     enum CurveInterpolationMode

@@ -82,7 +82,7 @@ namespace Game.Entities
                         for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
                             stmt.AddValue(5 + specIndex * 5 + j, m_azeriteItemData.SelectedEssences[specIndex].AzeriteEssenceID[j]);
                     }
-                    for (; specIndex < PlayerConst.MaxSpecializations; ++specIndex)
+                    for (; specIndex < 4; ++specIndex)
                     {
                         stmt.AddValue(4 + specIndex * 5, 0);
                         for (int j = 0; j < SharedConst.MaxAzeriteEssenceSlot; ++j)
@@ -557,6 +557,6 @@ namespace Game.Entities
         public uint KnowledgeLevel;
         public List<uint> AzeriteItemMilestonePowers = new List<uint>();
         public List<AzeriteEssencePowerRecord> UnlockedAzeriteEssences = new List<AzeriteEssencePowerRecord>();
-        public AzeriteItemSelectedEssencesData[] SelectedAzeriteEssences = new AzeriteItemSelectedEssencesData[PlayerConst.MaxSpecializations];
+        public AzeriteItemSelectedEssencesData[] SelectedAzeriteEssences = new AzeriteItemSelectedEssencesData[4];
     }
 }

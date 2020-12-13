@@ -663,6 +663,12 @@ namespace Game
                 HandlePlayerLogin((LoginQueryHolder)_charLoginCallback.Result);
                 _charLoginCallback = null;
             }
+
+            if (_charEnumCallback != null && _charEnumCallback.IsCompleted)
+            {
+                HandleCharEnum((EnumCharactersQueryHolder)_charEnumCallback.Result);
+                _charEnumCallback = null;
+            }
         }
 
         TransactionCallback AddTransactionCallback(TransactionCallback callback)
@@ -909,6 +915,7 @@ namespace Game
         Task<SQLQueryHolder<AccountInfoQueryLoad>> _realmAccountLoginCallback;
         Task<SQLQueryHolder<AccountInfoQueryLoad>> _accountLoginCallback;
         Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
+        Task<SQLQueryHolder<EnumCharacterQueryLoad>> _charEnumCallback;
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
         AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new AsyncCallbackProcessor<TransactionCallback>();

@@ -1535,10 +1535,6 @@ namespace Game.DungeonFinding
                     lockStatus = LfgLockStatusType.RaidLocked;
                 else if (dungeon.difficulty > Difficulty.Normal && player.GetBoundInstance(dungeon.map, dungeon.difficulty) != null)
                     lockStatus = LfgLockStatusType.RaidLocked;
-                else if (dungeon.minlevel > level)
-                    lockStatus = LfgLockStatusType.TooLowLevel;
-                else if (dungeon.maxlevel < level)
-                    lockStatus = LfgLockStatusType.TooHighLevel;
                 else if (dungeon.seasonal && !IsSeasonActive(dungeon.id))
                     lockStatus = LfgLockStatusType.NotInSeason;
                 else if (dungeon.requiredItemLevel > player.GetAverageItemLevel())
@@ -1560,16 +1556,23 @@ namespace Game.DungeonFinding
                     else if (ar.item2 != 0 && !player.HasItemCount(ar.item2))
                         lockStatus = LfgLockStatusType.MissingItem;
                 }
+                else
+                {
+                    var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    if (levels.HasValue)
+                    {
+                        if (levels.Value.MinLevel > level)
+                            lockStatus = LfgLockStatusType.TooLowLevel;
+                        if (levels.Value.MaxLevel < level)
+                            lockStatus = LfgLockStatusType.TooHighLevel;
+                    }
+                }
 
                 /* @todo VoA closed if WG is not under team control (LFG_LOCKSTATUS_RAID_LOCKED)
                 lockData = LFG_LOCKSTATUS_TOO_HIGH_GEAR_SCORE;
                 lockData = LFG_LOCKSTATUS_ATTUNEMENT_TOO_LOW_LEVEL;
                 lockData = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
                 */
-                if (lockStatus == 0)
-                {
-
-                }
                 if (lockStatus != 0)
                     lockDic[dungeon.Entry()] = new LfgLockInfoData(lockStatus, dungeon.requiredItemLevel, player.GetAverageItemLevel());
             }
@@ -1985,13 +1988,23 @@ namespace Game.DungeonFinding
             return 0;
         }
 
-        public List<uint> GetRandomAndSeasonalDungeons(uint level, uint expansion)
+        public List<uint> GetRandomAndSeasonalDungeons(uint level, uint expansion, uint contentTuningReplacementConditionMask)
         {
             List<uint> randomDungeons = new List<uint>();
             foreach (var dungeon in LfgDungeonStore.Values)
             {
-                if ((dungeon.seasonal && IsSeasonActive(dungeon.id) || !dungeon.seasonal && dungeon.type == LfgType.RandomDungeon) && dungeon.expansion <= expansion && dungeon.minlevel <= level && level <= dungeon.maxlevel)
-                    randomDungeons.Add(dungeon.Entry());
+                if (!(dungeon.type == LfgType.RandomDungeon || (dungeon.seasonal && Global.LFGMgr.IsSeasonActive(dungeon.id))))
+                    continue;
+
+                if (dungeon.expansion > expansion)
+                    continue;
+
+                var levels = Global.DB2Mgr.GetContentTuningData(dungeon.contentTuningId, contentTuningReplacementConditionMask);
+                if (levels.HasValue)
+                    if (levels.Value.MinLevel > level || level > levels.Value.MaxLevel)
+                        continue;
+
+                randomDungeons.Add(dungeon.Entry());
             }
             return randomDungeons;
         }
@@ -2184,8 +2197,7 @@ namespace Game.DungeonFinding
             type = dbc.TypeID;
             expansion = dbc.ExpansionLevel;
             group = dbc.GroupID;
-            minlevel = dbc.MinLevel;
-            maxlevel = dbc.MaxLevel;
+            contentTuningId = dbc.ContentTuningID;
             difficulty = dbc.DifficultyID;
             seasonal = dbc.Flags[0].HasAnyFlag(LfgFlags.Seasonal);
         }
@@ -2196,8 +2208,7 @@ namespace Game.DungeonFinding
         public LfgType type;
         public uint expansion;
         public uint group;
-        public uint minlevel;
-        public uint maxlevel;
+        public uint contentTuningId;
         public Difficulty difficulty;
         public bool seasonal;
         public float x, y, z, o;

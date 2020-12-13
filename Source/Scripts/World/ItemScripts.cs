@@ -128,7 +128,7 @@ namespace Scripts.World
                 case 34475:
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellArcaneCharges, player.GetMap().GetDifficultyID());
                     if (spellInfo != null)
-                        Spell.SendCastResult(player, spellInfo, 0, castId, SpellCastResult.NotOnGround);
+                        Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotOnGround);
                     break;
             }
 
@@ -277,7 +277,7 @@ namespace Scripts.World
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellPetrovBomb, Difficulty.None);
                 if (spellInfo != null)
-                    Spell.SendCastResult(player, spellInfo, 0, castId, SpellCastResult.NotHere);
+                    Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotHere);
 
                 return true;
             }

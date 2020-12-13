@@ -16,13 +16,13 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
+using Framework.GameMath;
+using Game.DataStorage;
 using Game.Networking;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Framework.GameMath;
-using Game.Spells;
-using Game.DataStorage;
-using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -45,8 +45,8 @@ namespace Game.Entities
         {
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
-        
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver) 
+
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlock(0), 4);
 
@@ -204,6 +204,82 @@ namespace Game.Entities
         }
     }
 
+    public class ItemMod
+    {
+        public uint Value;
+        public byte Type;
+
+        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        {
+            data.WriteUInt32(Value);
+            data.WriteUInt8(Type);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        {
+            data.WriteUInt32(Value);
+            data.WriteUInt8(Type);
+        }
+    }
+
+    public class ItemModList : BaseUpdateData<Item>
+    {
+        public DynamicUpdateField<ItemMod> Values = new DynamicUpdateField<ItemMod>(0, 0);
+
+        public ItemModList() : base(1) { }
+
+        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        {
+            data.WriteBits(Values.Size(), 6);
+            for (int i = 0; i < Values.Size(); ++i)
+            {
+                Values[i].WriteCreate(data, owner, receiver);
+            }
+            data.FlushBits();
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        {
+            UpdateMask changesMask = _changesMask;
+            if (ignoreChangesMask)
+                changesMask.SetAll();
+
+            data.WriteBits(changesMask.GetBlock(0), 1);
+
+            if (changesMask[0])
+            {
+                if (changesMask[0])
+                {
+                    if (!ignoreChangesMask)
+                        Values.WriteUpdateMask(data, 6);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(Values.Size(), data, 6);
+                }
+            }
+            data.FlushBits();
+            if (changesMask[0])
+            {
+                if (changesMask[0])
+                {
+                    for (int i = 0; i < Values.Size(); ++i)
+                    {
+                        if (Values.HasChanged(i) || ignoreChangesMask)
+                        {
+                            Values[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        }
+                    }
+                }
+            }
+            data.FlushBits();
+        }
+
+        public override void ClearChangesMask()
+        {
+            ClearChangesMask(Values);
+            _changesMask.ResetAll();
+        }
+    }
+
     public class ArtifactPower
     {
         public ushort ArtifactPowerId;
@@ -288,23 +364,23 @@ namespace Game.Entities
     public class ItemData : BaseUpdateData<Item>
     {
         public UpdateField<List<uint>> BonusListIDs = new UpdateField<List<uint>>(0, 1);
-        public DynamicUpdateField<uint> Modifiers = new DynamicUpdateField<uint>(0, 2);
-        public DynamicUpdateField<ArtifactPower> ArtifactPowers = new DynamicUpdateField<ArtifactPower>(0, 3);
-        public DynamicUpdateField<SocketedGem> Gems = new DynamicUpdateField<SocketedGem>(0, 4);
-        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 5);
-        public UpdateField<ObjectGuid> ContainedIn = new UpdateField<ObjectGuid>(0, 6);
-        public UpdateField<ObjectGuid> Creator = new UpdateField<ObjectGuid>(0, 7);
-        public UpdateField<ObjectGuid> GiftCreator = new UpdateField<ObjectGuid>(0, 8);
-        public UpdateField<uint> StackCount = new UpdateField<uint>(0, 9);
-        public UpdateField<uint> Expiration = new UpdateField<uint>(0, 10);
-        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 11);
-        public UpdateField<uint> Durability = new UpdateField<uint>(0, 12);
-        public UpdateField<uint> MaxDurability = new UpdateField<uint>(0, 13);
-        public UpdateField<uint> CreatePlayedTime = new UpdateField<uint>(0, 14);
-        public UpdateField<uint> ModifiersMask = new UpdateField<uint>(0, 15);
-        public UpdateField<int> Context = new UpdateField<int>(0, 16);
-        public UpdateField<ulong> ArtifactXP = new UpdateField<ulong>(0, 17);
-        public UpdateField<byte> ItemAppearanceModID = new UpdateField<byte>(0, 18);
+        public DynamicUpdateField<ArtifactPower> ArtifactPowers = new DynamicUpdateField<ArtifactPower>(0, 2);
+        public DynamicUpdateField<SocketedGem> Gems = new DynamicUpdateField<SocketedGem>(0, 3);
+        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 4);
+        public UpdateField<ObjectGuid> ContainedIn = new UpdateField<ObjectGuid>(0, 5);
+        public UpdateField<ObjectGuid> Creator = new UpdateField<ObjectGuid>(0, 6);
+        public UpdateField<ObjectGuid> GiftCreator = new UpdateField<ObjectGuid>(0, 7);
+        public UpdateField<uint> StackCount = new UpdateField<uint>(0, 8);
+        public UpdateField<uint> Expiration = new UpdateField<uint>(0, 9);
+        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 10);
+        public UpdateField<uint> Durability = new UpdateField<uint>(0, 11);
+        public UpdateField<uint> MaxDurability = new UpdateField<uint>(0, 12);
+        public UpdateField<uint> CreatePlayedTime = new UpdateField<uint>(0, 13);
+        public UpdateField<int> Context = new UpdateField<int>(0, 14);
+        public UpdateField<int> CreateTime = new UpdateField<int>(0, 15);
+        public UpdateField<ulong> ArtifactXP = new UpdateField<ulong>(0, 16);
+        public UpdateField<byte> ItemAppearanceModID = new UpdateField<byte>(0, 17);
+        public UpdateField<ItemModList> Modifiers = new UpdateField<ItemModList>(0, 18);
         public UpdateField<uint> DynamicFlags2 = new UpdateField<uint>(0, 19);
         public UpdateFieldArray<int> SpellCharges = new UpdateFieldArray<int>(5, 20, 21);
         public UpdateFieldArray<ItemEnchantment> Enchantment = new UpdateFieldArray<ItemEnchantment>(13, 26, 27);
@@ -342,26 +418,18 @@ namespace Game.Entities
                 data.WriteUInt32(MaxDurability);
             }
             data.WriteUInt32(CreatePlayedTime);
-            if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-            {
-                data.WriteUInt32(ModifiersMask);
-            }
             data.WriteInt32(Context);
+            data.WriteInt32(CreateTime);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteUInt64(ArtifactXP);
                 data.WriteUInt8(ItemAppearanceModID);
             }
-            data.WriteInt32(Modifiers.Size());
             data.WriteInt32(ArtifactPowers.Size());
             data.WriteInt32(Gems.Size());
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteUInt32(DynamicFlags2);
-            }
-            for (int i = 0; i < Modifiers.Size(); ++i)
-            {
-                data.WriteUInt32(Modifiers[i]);
             }
             for (int i = 0; i < ArtifactPowers.Size(); ++i)
             {
@@ -371,11 +439,12 @@ namespace Game.Entities
             {
                 Gems[i].WriteCreate(data, owner, receiver);
             }
+            ((ItemModList)Modifiers).WriteCreate(data, owner, receiver);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(40, new uint[] { 0xFC0149FFu, 0x000000FFu });
+            UpdateMask allowedMaskForTarget = new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0x000000FFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -383,15 +452,15 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(40, new uint[] { 0x03FEB600u, 0x00000000u });
+                allowedMaskForTarget |= new UpdateMask(40, new uint[] { 0x03FB1B00u, 0x00000000u });
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(40, new uint[] { 0xFC0149FFu, 0xFFFFFFFFu });
+                changesMask &= new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0xFFFFFFFFu });
         }
-        
+
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Item owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 2);
@@ -415,18 +484,11 @@ namespace Game.Entities
                 if (changesMask[2])
                 {
                     if (!ignoreNestedChangesMask)
-                        Modifiers.WriteUpdateMask(data);
-                    else
-                        WriteCompleteDynamicFieldUpdateMask(Modifiers.Size(), data);
-                }
-                if (changesMask[3])
-                {
-                    if (!ignoreNestedChangesMask)
                         ArtifactPowers.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ArtifactPowers.Size(), data);
                 }
-                if (changesMask[4])
+                if (changesMask[3])
                 {
                     if (!ignoreNestedChangesMask)
                         Gems.WriteUpdateMask(data);
@@ -439,16 +501,6 @@ namespace Game.Entities
             {
                 if (changesMask[2])
                 {
-                    for (int i = 0; i < Modifiers.Size(); ++i)
-                    {
-                        if (Modifiers.HasChanged(i) || ignoreNestedChangesMask)
-                        {
-                            data.WriteUInt32(Modifiers[i]);
-                        }
-                    }
-                }
-                if (changesMask[3])
-                {
                     for (int i = 0; i < ArtifactPowers.Size(); ++i)
                     {
                         if (ArtifactPowers.HasChanged(i) || ignoreNestedChangesMask)
@@ -457,7 +509,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[4])
+                if (changesMask[3])
                 {
                     for (int i = 0; i < Gems.Size(); ++i)
                     {
@@ -467,65 +519,69 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[5])
+                if (changesMask[4])
                 {
                     data.WritePackedGuid(Owner);
                 }
-                if (changesMask[6])
+                if (changesMask[5])
                 {
                     data.WritePackedGuid(ContainedIn);
                 }
-                if (changesMask[7])
+                if (changesMask[6])
                 {
                     data.WritePackedGuid(Creator);
                 }
-                if (changesMask[8])
+                if (changesMask[7])
                 {
                     data.WritePackedGuid(GiftCreator);
                 }
-                if (changesMask[9])
+                if (changesMask[8])
                 {
                     data.WriteUInt32(StackCount);
                 }
-                if (changesMask[10])
+                if (changesMask[9])
                 {
                     data.WriteUInt32(Expiration);
                 }
-                if (changesMask[11])
+                if (changesMask[10])
                 {
                     data.WriteUInt32(DynamicFlags);
                 }
-                if (changesMask[12])
+                if (changesMask[11])
                 {
                     data.WriteUInt32(Durability);
                 }
-                if (changesMask[13])
+                if (changesMask[12])
                 {
                     data.WriteUInt32(MaxDurability);
                 }
-                if (changesMask[14])
+                if (changesMask[13])
                 {
                     data.WriteUInt32(CreatePlayedTime);
                 }
-                if (changesMask[15])
-                {
-                    data.WriteUInt32(ModifiersMask);
-                }
-                if (changesMask[16])
+                if (changesMask[14])
                 {
                     data.WriteInt32(Context);
                 }
-                if (changesMask[17])
+                if (changesMask[15])
+                {
+                    data.WriteInt32(CreateTime);
+                }
+                if (changesMask[16])
                 {
                     data.WriteUInt64(ArtifactXP);
                 }
-                if (changesMask[18])
+                if (changesMask[17])
                 {
                     data.WriteUInt8(ItemAppearanceModID);
                 }
                 if (changesMask[19])
                 {
                     data.WriteUInt32(DynamicFlags2);
+                }
+                if (changesMask[18])
+                {
+                    ((ItemModList)Modifiers).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
             }
             if (changesMask[20])
@@ -553,7 +609,6 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(BonusListIDs);
-            ClearChangesMask(Modifiers);
             ClearChangesMask(ArtifactPowers);
             ClearChangesMask(Gems);
             ClearChangesMask(Owner);
@@ -566,10 +621,11 @@ namespace Game.Entities
             ClearChangesMask(Durability);
             ClearChangesMask(MaxDurability);
             ClearChangesMask(CreatePlayedTime);
-            ClearChangesMask(ModifiersMask);
             ClearChangesMask(Context);
+            ClearChangesMask(CreateTime);
             ClearChangesMask(ArtifactXP);
             ClearChangesMask(ItemAppearanceModID);
+            ClearChangesMask(Modifiers);
             ClearChangesMask(DynamicFlags2);
             ClearChangesMask(SpellCharges);
             ClearChangesMask(Enchantment);
@@ -762,16 +818,17 @@ namespace Game.Entities
 
     public class AzeriteItemData : BaseUpdateData<AzeriteItem>
     {
-        public DynamicUpdateField<UnlockedAzeriteEssence> UnlockedEssences = new DynamicUpdateField<UnlockedAzeriteEssence>(0, 1);
-        public DynamicUpdateField<SelectedAzeriteEssences> SelectedEssences = new DynamicUpdateField<SelectedAzeriteEssences>(0, 2);
-        public DynamicUpdateField<uint> UnlockedEssenceMilestones = new DynamicUpdateField<uint>(0, 3);
-        public UpdateField<ulong> Xp = new UpdateField<ulong>(0, 4);
-        public UpdateField<uint> Level = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> AuraLevel = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> KnowledgeLevel = new UpdateField<uint>(0, 7);
-        public UpdateField<int> DEBUGknowledgeWeek = new UpdateField<int>(0, 8);
+        public UpdateField<bool> Enabled = new UpdateField<bool>(0, 1);
+        public DynamicUpdateField<UnlockedAzeriteEssence>UnlockedEssences = new DynamicUpdateField<UnlockedAzeriteEssence>(0, 2);
+        public DynamicUpdateField<uint>UnlockedEssenceMilestones = new DynamicUpdateField<uint>(0, 4);
+        public DynamicUpdateField<SelectedAzeriteEssences>SelectedEssences = new DynamicUpdateField<SelectedAzeriteEssences>(0, 3);
+        public UpdateField<ulong> Xp = new UpdateField<ulong>(0, 5);
+        public UpdateField<uint> Level = new UpdateField<uint>(0, 6);
+        public UpdateField<uint> AuraLevel = new UpdateField<uint>(0, 7);
+        public UpdateField<uint> KnowledgeLevel = new UpdateField<uint>(0, 8);
+        public UpdateField<int> DEBUGknowledgeWeek = new UpdateField<int>(0, 9);
 
-        public AzeriteItemData() : base(9) { }
+        public AzeriteItemData() : base(10) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
@@ -794,15 +851,18 @@ namespace Game.Entities
             {
                 data.WriteUInt32(UnlockedEssenceMilestones[i]);
             }
+            data.FlushBits();
+            data.WriteBit(Enabled);
             for (int i = 0; i < SelectedEssences.Size(); ++i)
             {
                 SelectedEssences[i].WriteCreate(data, owner, receiver);
             }
+            data.FlushBits();
         }
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000000Fu });
+            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Fu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -810,36 +870,40 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(9, new[] { 0x000001F0u });
+                allowedMaskForTarget |= new UpdateMask(9, new[] { 0x000003E0u });
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(9, new[] { 0xFFFFFE0Fu });
+                changesMask &= new UpdateMask(9, new[] { 0xFFFFFC1Fu });
         }
-        
+
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteItem owner, Player receiver)
         {
-            data.WriteBits(changesMask.GetBlock(0), 9);
+            data.WriteBits(changesMask.GetBlock(0), 10);
 
             if (changesMask[0])
             {
                 if (changesMask[1])
+                {
+                    data.WriteBit(Enabled);
+                }
+                if (changesMask[2])
                 {
                     if (!ignoreNestedChangesMask)
                         UnlockedEssences.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(UnlockedEssences.Size(), data);
                 }
-                if (changesMask[2])
+                if (changesMask[3])
                 {
                     if (!ignoreNestedChangesMask)
                         SelectedEssences.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(SelectedEssences.Size(), data);
                 }
-                if (changesMask[3])
+                if (changesMask[4])
                 {
                     if (!ignoreNestedChangesMask)
                         UnlockedEssenceMilestones.WriteUpdateMask(data);
@@ -850,7 +914,7 @@ namespace Game.Entities
             data.FlushBits();
             if (changesMask[0])
             {
-                if (changesMask[1])
+                if (changesMask[2])
                 {
                     for (int i = 0; i < UnlockedEssences.Size(); ++i)
                     {
@@ -860,17 +924,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[2])
-                {
-                    for (int i = 0; i < SelectedEssences.Size(); ++i)
-                    {
-                        if (SelectedEssences.HasChanged(i) || ignoreNestedChangesMask)
-                        {
-                            SelectedEssences[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
-                        }
-                    }
-                }
-                if (changesMask[3])
+                if (changesMask[4])
                 {
                     for (int i = 0; i < UnlockedEssenceMilestones.Size(); ++i)
                     {
@@ -880,31 +934,43 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[4])
+                if (changesMask[3])
                 {
-                    data.WriteUInt64(Xp);
+                    for (int i = 0; i < SelectedEssences.Size(); ++i)
+                    {
+                        if (SelectedEssences.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            SelectedEssences[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(Level);
+                    data.WriteUInt64(Xp);
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(AuraLevel);
+                    data.WriteUInt32(Level);
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(KnowledgeLevel);
+                    data.WriteUInt32(AuraLevel);
                 }
                 if (changesMask[8])
+                {
+                    data.WriteUInt32(KnowledgeLevel);
+                }
+                if (changesMask[9])
                 {
                     data.WriteInt32(DEBUGknowledgeWeek);
                 }
             }
+            data.FlushBits();
         }
 
         public override void ClearChangesMask()
         {
+            ClearChangesMask(Enabled);
             ClearChangesMask(UnlockedEssences);
             ClearChangesMask(UnlockedEssenceMilestones);
             ClearChangesMask(SelectedEssences);
@@ -917,35 +983,56 @@ namespace Game.Entities
         }
     }
 
+    public struct SpellCastVisualField
+    {
+        public uint SpellXSpellVisualID;
+        public uint ScriptVisualID;
+
+        public void WriteCreate(WorldPacket data, Object owner, Player receiver)
+        {
+            data.WriteUInt32(SpellXSpellVisualID);
+            data.WriteUInt32(ScriptVisualID);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, WorldObject owner, Player receiver)
+        {
+            data.WriteUInt32(SpellXSpellVisualID);
+            data.WriteUInt32(ScriptVisualID);
+        }
+    }
+
     public class UnitChannel
     {
         public uint SpellID;
         public uint SpellXSpellVisualID;
+        public SpellCastVisualField SpellVisual;
 
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
             data.WriteUInt32(SpellID);
-            data.WriteUInt32(SpellXSpellVisualID);
+            SpellVisual.WriteCreate(data, owner, receiver);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
         {
             data.WriteUInt32(SpellID);
-            data.WriteUInt32(SpellXSpellVisualID);
+            SpellVisual.WriteUpdate(data, ignoreChangesMask, owner, receiver);
         }
     }
 
     public class VisibleItem : BaseUpdateData<Unit>
     {
         public UpdateField<uint> ItemID = new UpdateField<uint>(0, 1);
-        public UpdateField<ushort> ItemAppearanceModID = new UpdateField<ushort>(0, 2);
-        public UpdateField<ushort> ItemVisual = new UpdateField<ushort>(0, 3);
+        public UpdateField<int> ItemModifiedAppearanceID = new UpdateField<int>(0, 2);
+        public UpdateField<ushort> ItemAppearanceModID = new UpdateField<ushort>(0, 3);
+        public UpdateField<ushort> ItemVisual = new UpdateField<ushort>(0, 4);
 
-        public VisibleItem() : base(4) { }
+        public VisibleItem() : base(5) { }
 
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
             data.WriteUInt32(ItemID);
+            data.WriteInt32(ItemModifiedAppearanceID);
             data.WriteUInt16(ItemAppearanceModID);
             data.WriteUInt16(ItemVisual);
         }
@@ -956,7 +1043,7 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlock(0), 4);
+            data.WriteBits(changesMask.GetBlock(0), 5);
 
             data.FlushBits();
             if (changesMask[0])
@@ -967,9 +1054,13 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt16(ItemAppearanceModID);
+                    data.WriteInt32(ItemModifiedAppearanceID);
                 }
                 if (changesMask[3])
+                {
+                    data.WriteUInt16(ItemAppearanceModID);
+                }
+                if (changesMask[4])
                 {
                     data.WriteUInt16(ItemVisual);
                 }
@@ -979,6 +1070,7 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(ItemID);
+            ClearChangesMask(ItemModifiedAppearanceID);
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(ItemVisual);
             _changesMask.ResetAll();
@@ -1014,125 +1106,128 @@ namespace Game.Entities
         public UpdateField<uint> StateAnimID = new UpdateField<uint>(0, 7);
         public UpdateField<uint> StateAnimKitID = new UpdateField<uint>(0, 8);
         public UpdateField<uint> StateWorldEffectsQuestObjectiveID = new UpdateField<uint>(0, 9);
-        public UpdateField<ObjectGuid> Charm = new UpdateField<ObjectGuid>(0, 10);
-        public UpdateField<ObjectGuid> Summon = new UpdateField<ObjectGuid>(0, 11);
-        public UpdateField<ObjectGuid> Critter = new UpdateField<ObjectGuid>(0, 12);
-        public UpdateField<ObjectGuid> CharmedBy = new UpdateField<ObjectGuid>(0, 13);
-        public UpdateField<ObjectGuid> SummonedBy = new UpdateField<ObjectGuid>(0, 14);
-        public UpdateField<ObjectGuid> CreatedBy = new UpdateField<ObjectGuid>(0, 15);
-        public UpdateField<ObjectGuid> DemonCreator = new UpdateField<ObjectGuid>(0, 16);
-        public UpdateField<ObjectGuid> LookAtControllerTarget = new UpdateField<ObjectGuid>(0, 17);
-        public UpdateField<ObjectGuid> Target = new UpdateField<ObjectGuid>(0, 18);
-        public UpdateField<ObjectGuid> BattlePetCompanionGUID = new UpdateField<ObjectGuid>(0, 19);
-        public UpdateField<ulong> BattlePetDBID = new UpdateField<ulong>(0, 20);
-        public UpdateField<UnitChannel> ChannelData = new UpdateField<UnitChannel>(0, 21);
-        public UpdateField<uint> SummonedByHomeRealm = new UpdateField<uint>(0, 22);
-        public UpdateField<byte> Race = new UpdateField<byte>(0, 23);
-        public UpdateField<byte> ClassId = new UpdateField<byte>(0, 24);
-        public UpdateField<byte> PlayerClassId = new UpdateField<byte>(0, 25);
-        public UpdateField<byte> Sex = new UpdateField<byte>(0, 26);
-        public UpdateField<byte> DisplayPower = new UpdateField<byte>(0, 27);
-        public UpdateField<uint> OverrideDisplayPowerID = new UpdateField<uint>(0, 28);
-        public UpdateField<ulong> Health = new UpdateField<ulong>(0, 29);
-        public UpdateField<ulong> MaxHealth = new UpdateField<ulong>(0, 30);
-        public UpdateField<uint> Level = new UpdateField<uint>(0, 31);
-        public UpdateField<int> EffectiveLevel = new UpdateField<int>(32, 33);
-        public UpdateField<uint> ContentTuningID = new UpdateField<uint>(32, 34);
-        public UpdateField<int> ScalingLevelMin = new UpdateField<int>(32, 35);
-        public UpdateField<int> ScalingLevelMax = new UpdateField<int>(32, 36);
-        public UpdateField<int> ScalingLevelDelta = new UpdateField<int>(32, 37);
-        public UpdateField<int> ScalingFactionGroup = new UpdateField<int>(32, 38);
-        public UpdateField<int> ScalingHealthItemLevelCurveID = new UpdateField<int>(32, 39);
-        public UpdateField<int> ScalingDamageItemLevelCurveID = new UpdateField<int>(32, 40);
-        public UpdateField<uint> FactionTemplate = new UpdateField<uint>(32, 41);
-        public UpdateField<uint> Flags = new UpdateField<uint>(32, 42);
-        public UpdateField<uint> Flags2 = new UpdateField<uint>(32, 43);
-        public UpdateField<uint> Flags3 = new UpdateField<uint>(32, 44);
-        public UpdateField<uint> AuraState = new UpdateField<uint>(32, 45);
-        public UpdateField<uint> RangedAttackRoundBaseTime = new UpdateField<uint>(32, 46);
-        public UpdateField<float> BoundingRadius = new UpdateField<float>(32, 47);
-        public UpdateField<float> CombatReach = new UpdateField<float>(32, 48);
-        public UpdateField<float> DisplayScale = new UpdateField<float>(32, 49);
-        public UpdateField<uint> NativeDisplayID = new UpdateField<uint>(32, 50);
-        public UpdateField<float> NativeXDisplayScale = new UpdateField<float>(32, 51);
-        public UpdateField<uint> MountDisplayID = new UpdateField<uint>(32, 52);
-        public UpdateField<int> CosmeticMountDisplayID = new UpdateField<int>(32, 53);
-        public UpdateField<float> MinDamage = new UpdateField<float>(32, 54);
-        public UpdateField<float> MaxDamage = new UpdateField<float>(32, 55);
-        public UpdateField<float> MinOffHandDamage = new UpdateField<float>(32, 56);
-        public UpdateField<float> MaxOffHandDamage = new UpdateField<float>(32, 57);
-        public UpdateField<byte> StandState = new UpdateField<byte>(32, 58);
-        public UpdateField<byte> PetTalentPoints = new UpdateField<byte>(32, 59);
-        public UpdateField<byte> VisFlags = new UpdateField<byte>(32, 60);
-        public UpdateField<byte> AnimTier = new UpdateField<byte>(32, 61);
-        public UpdateField<uint> PetNumber = new UpdateField<uint>(32, 62);
-        public UpdateField<uint> PetNameTimestamp = new UpdateField<uint>(32, 63);
-        public UpdateField<uint> PetExperience = new UpdateField<uint>(64, 65);
-        public UpdateField<uint> PetNextLevelExperience = new UpdateField<uint>(64, 66);
-        public UpdateField<float> ModCastingSpeed = new UpdateField<float>(64, 67);
-        public UpdateField<float> ModSpellHaste = new UpdateField<float>(64, 68);
-        public UpdateField<float> ModHaste = new UpdateField<float>(64, 69);
-        public UpdateField<float> ModRangedHaste = new UpdateField<float>(64, 70);
-        public UpdateField<float> ModHasteRegen = new UpdateField<float>(64, 71);
-        public UpdateField<float> ModTimeRate = new UpdateField<float>(64, 72);
-        public UpdateField<uint> CreatedBySpell = new UpdateField<uint>(64, 73);
-        public UpdateField<int> EmoteState = new UpdateField<int>(64, 74);
-        public UpdateField<uint> BaseMana = new UpdateField<uint>(64, 75);
-        public UpdateField<uint> BaseHealth = new UpdateField<uint>(64, 76);
-        public UpdateField<byte> SheatheState = new UpdateField<byte>(64, 77);
-        public UpdateField<byte> PvpFlags = new UpdateField<byte>(64, 78);
-        public UpdateField<byte> PetFlags = new UpdateField<byte>(64, 79);
-        public UpdateField<byte> ShapeshiftForm = new UpdateField<byte>(64, 80);
-        public UpdateField<int> AttackPower = new UpdateField<int>(64, 81);
-        public UpdateField<int> AttackPowerModPos = new UpdateField<int>(64, 82);
-        public UpdateField<int> AttackPowerModNeg = new UpdateField<int>(64, 83);
-        public UpdateField<float> AttackPowerMultiplier = new UpdateField<float>(64, 84);
-        public UpdateField<int> RangedAttackPower = new UpdateField<int>(64, 85);
-        public UpdateField<int> RangedAttackPowerModPos = new UpdateField<int>(64, 86);
-        public UpdateField<int> RangedAttackPowerModNeg = new UpdateField<int>(64, 87);
-        public UpdateField<float> RangedAttackPowerMultiplier = new UpdateField<float>(64, 88);
-        public UpdateField<int> MainHandWeaponAttackPower = new UpdateField<int>(64, 89);
-        public UpdateField<int> OffHandWeaponAttackPower = new UpdateField<int>(64, 90);
-        public UpdateField<int> RangedWeaponAttackPower = new UpdateField<int>(64, 91);
-        public UpdateField<int> SetAttackSpeedAura = new UpdateField<int>(64, 92);
-        public UpdateField<float> Lifesteal = new UpdateField<float>(64, 93);
-        public UpdateField<float> MinRangedDamage = new UpdateField<float>(64, 94);
-        public UpdateField<float> MaxRangedDamage = new UpdateField<float>(64, 95);
-        public UpdateField<float> ManaCostModifierModifier = new UpdateField<float>(96, 97);
-        public UpdateField<float> MaxHealthModifier = new UpdateField<float>(96, 98);
-        public UpdateField<float> HoverHeight = new UpdateField<float>(96, 99);
-        public UpdateField<uint> MinItemLevelCutoff = new UpdateField<uint>(96, 100);
-        public UpdateField<uint> MinItemLevel = new UpdateField<uint>(96, 101);
-        public UpdateField<uint> MaxItemLevel = new UpdateField<uint>(96, 102);
-        public UpdateField<int> AzeriteItemLevel = new UpdateField<int>(96, 103);
-        public UpdateField<int> WildBattlePetLevel = new UpdateField<int>(96, 104);
-        public UpdateField<uint> BattlePetCompanionNameTimestamp = new UpdateField<uint>(96, 105);
-        public UpdateField<int> InteractSpellID = new UpdateField<int>(96, 106);
-        public UpdateField<int> ScaleDuration = new UpdateField<int>(96, 107);
-        public UpdateField<int> SpellOverrideNameID = new UpdateField<int>(96, 108);
-        public UpdateField<int> LooksLikeMountID = new UpdateField<int>(96, 109);
-        public UpdateField<int> LooksLikeCreatureID = new UpdateField<int>(96, 110);
-        public UpdateField<int> LookAtControllerID = new UpdateField<int>(96, 111);
-        public UpdateField<int> TaxiNodesID = new UpdateField<int>(96, 112);
-        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(96, 113);
-        public UpdateField<ObjectGuid>SkinningOwnerGUID = new UpdateField<ObjectGuid>(96, 114);
-        public UpdateFieldArray<uint> NpcFlags = new UpdateFieldArray<uint>(2, 114, 115);
+        public UpdateField<int> SpellOverrideNameID = new UpdateField<int>(0, 10);
+        public UpdateField<ObjectGuid> Charm = new UpdateField<ObjectGuid>(0, 11);
+        public UpdateField<ObjectGuid> Summon = new UpdateField<ObjectGuid>(0, 12);
+        public UpdateField<ObjectGuid> Critter = new UpdateField<ObjectGuid>(0, 13);
+        public UpdateField<ObjectGuid> CharmedBy = new UpdateField<ObjectGuid>(0, 14);
+        public UpdateField<ObjectGuid> SummonedBy = new UpdateField<ObjectGuid>(0, 15);
+        public UpdateField<ObjectGuid> CreatedBy = new UpdateField<ObjectGuid>(0, 16);
+        public UpdateField<ObjectGuid> DemonCreator = new UpdateField<ObjectGuid>(0, 17);
+        public UpdateField<ObjectGuid> LookAtControllerTarget = new UpdateField<ObjectGuid>(0, 18);
+        public UpdateField<ObjectGuid> Target = new UpdateField<ObjectGuid>(0, 19);
+        public UpdateField<ObjectGuid> BattlePetCompanionGUID = new UpdateField<ObjectGuid>(0, 20);
+        public UpdateField<ulong> BattlePetDBID = new UpdateField<ulong>(0, 21);
+        public UpdateField<UnitChannel> ChannelData = new UpdateField<UnitChannel>(0, 22);
+        public UpdateField<uint> SummonedByHomeRealm = new UpdateField<uint>(0, 23);
+        public UpdateField<byte> Race = new UpdateField<byte>(0, 24);
+        public UpdateField<byte> ClassId = new UpdateField<byte>(0, 25);
+        public UpdateField<byte> PlayerClassId = new UpdateField<byte>(0, 26);
+        public UpdateField<byte> Sex = new UpdateField<byte>(0, 27);
+        public UpdateField<byte> DisplayPower = new UpdateField<byte>(0, 28);
+        public UpdateField<uint> OverrideDisplayPowerID = new UpdateField<uint>(0, 29);
+        public UpdateField<ulong> Health = new UpdateField<ulong>(0, 30);
+        public UpdateField<ulong> MaxHealth = new UpdateField<ulong>(0, 31);
+        public UpdateField<uint> Level = new UpdateField<uint>(32, 33);
+        public UpdateField<int> EffectiveLevel = new UpdateField<int>(32, 34);
+        public UpdateField<uint> ContentTuningID = new UpdateField<uint>(32, 35);
+        public UpdateField<int> ScalingLevelMin = new UpdateField<int>(32, 36);
+        public UpdateField<int> ScalingLevelMax = new UpdateField<int>(32, 37);
+        public UpdateField<int> ScalingLevelDelta = new UpdateField<int>(32, 38);
+        public UpdateField<int> ScalingFactionGroup = new UpdateField<int>(32, 39);
+        public UpdateField<int> ScalingHealthItemLevelCurveID = new UpdateField<int>(32, 40);
+        public UpdateField<int> ScalingDamageItemLevelCurveID = new UpdateField<int>(32, 41);
+        public UpdateField<uint> FactionTemplate = new UpdateField<uint>(32, 42);
+        public UpdateField<uint> Flags = new UpdateField<uint>(32, 43);
+        public UpdateField<uint> Flags2 = new UpdateField<uint>(32, 44);
+        public UpdateField<uint> Flags3 = new UpdateField<uint>(32, 45);
+        public UpdateField<uint> AuraState = new UpdateField<uint>(32, 46);
+        public UpdateField<uint> RangedAttackRoundBaseTime = new UpdateField<uint>(32, 47);
+        public UpdateField<float> BoundingRadius = new UpdateField<float>(32, 48);
+        public UpdateField<float> CombatReach = new UpdateField<float>(32, 49);
+        public UpdateField<float> DisplayScale = new UpdateField<float>(32, 50);
+        public UpdateField<int> CreatureFamily = new UpdateField<int>(32, 51);
+        public UpdateField<int> CreatureType = new UpdateField<int>(32, 52);
+        public UpdateField<uint> NativeDisplayID = new UpdateField<uint>(32, 53);
+        public UpdateField<float> NativeXDisplayScale = new UpdateField<float>(32, 54);
+        public UpdateField<uint> MountDisplayID = new UpdateField<uint>(32, 55);
+        public UpdateField<int> CosmeticMountDisplayID = new UpdateField<int>(32, 56);
+        public UpdateField<float> MinDamage = new UpdateField<float>(32, 57);
+        public UpdateField<float> MaxDamage = new UpdateField<float>(32, 58);
+        public UpdateField<float> MinOffHandDamage = new UpdateField<float>(32, 59);
+        public UpdateField<float> MaxOffHandDamage = new UpdateField<float>(32, 60);
+        public UpdateField<byte> StandState = new UpdateField<byte>(32, 61);
+        public UpdateField<byte> PetTalentPoints = new UpdateField<byte>(32, 62);
+        public UpdateField<byte> VisFlags = new UpdateField<byte>(32, 63);
+        public UpdateField<byte> AnimTier = new UpdateField<byte>(64, 65);
+        public UpdateField<uint> PetNumber = new UpdateField<uint>(64, 66);
+        public UpdateField<uint> PetNameTimestamp = new UpdateField<uint>(64, 67);
+        public UpdateField<uint> PetExperience = new UpdateField<uint>(64, 68);
+        public UpdateField<uint> PetNextLevelExperience = new UpdateField<uint>(64, 69);
+        public UpdateField<float> ModCastingSpeed = new UpdateField<float>(64, 70);
+        public UpdateField<float> ModCastingSpeedNeg = new UpdateField<float>(64, 71);
+        public UpdateField<float> ModSpellHaste = new UpdateField<float>(64, 72);
+        public UpdateField<float> ModHaste = new UpdateField<float>(64, 73);
+        public UpdateField<float> ModRangedHaste = new UpdateField<float>(64, 74);
+        public UpdateField<float> ModHasteRegen = new UpdateField<float>(64, 75);
+        public UpdateField<float> ModTimeRate = new UpdateField<float>(64, 76);
+        public UpdateField<uint> CreatedBySpell = new UpdateField<uint>(64, 77);
+        public UpdateField<int> EmoteState = new UpdateField<int>(64, 78);
+        public UpdateField<uint> BaseMana = new UpdateField<uint>(64, 79);
+        public UpdateField<uint> BaseHealth = new UpdateField<uint>(64, 80);
+        public UpdateField<byte> SheatheState = new UpdateField<byte>(64, 81);
+        public UpdateField<byte> PvpFlags = new UpdateField<byte>(64, 82);
+        public UpdateField<byte> PetFlags = new UpdateField<byte>(64, 83);
+        public UpdateField<byte> ShapeshiftForm = new UpdateField<byte>(64, 84);
+        public UpdateField<int> AttackPower = new UpdateField<int>(64, 85);
+        public UpdateField<int> AttackPowerModPos = new UpdateField<int>(64, 86);
+        public UpdateField<int> AttackPowerModNeg = new UpdateField<int>(64, 87);
+        public UpdateField<float> AttackPowerMultiplier = new UpdateField<float>(64, 88);
+        public UpdateField<int> RangedAttackPower = new UpdateField<int>(64, 89);
+        public UpdateField<int> RangedAttackPowerModPos = new UpdateField<int>(64, 90);
+        public UpdateField<int> RangedAttackPowerModNeg = new UpdateField<int>(64, 91);
+        public UpdateField<float> RangedAttackPowerMultiplier = new UpdateField<float>(64, 92);
+        public UpdateField<int> MainHandWeaponAttackPower = new UpdateField<int>(64, 93);
+        public UpdateField<int> OffHandWeaponAttackPower = new UpdateField<int>(64, 94);
+        public UpdateField<int> RangedWeaponAttackPower = new UpdateField<int>(64, 95);
+        public UpdateField<int> SetAttackSpeedAura = new UpdateField<int>(96, 97);
+        public UpdateField<float> Lifesteal = new UpdateField<float>(96, 98);
+        public UpdateField<float> MinRangedDamage = new UpdateField<float>(96, 99);
+        public UpdateField<float> MaxRangedDamage = new UpdateField<float>(96, 100);
+        public UpdateField<float> ManaCostModifierModifier = new UpdateField<float>(96, 101);
+        public UpdateField<float> MaxHealthModifier = new UpdateField<float>(96, 102);
+        public UpdateField<float> HoverHeight = new UpdateField<float>(96, 103);
+        public UpdateField<uint> MinItemLevelCutoff = new UpdateField<uint>(96, 104);
+        public UpdateField<uint> MinItemLevel = new UpdateField<uint>(96, 105);
+        public UpdateField<uint> MaxItemLevel = new UpdateField<uint>(96, 106);
+        public UpdateField<int> AzeriteItemLevel = new UpdateField<int>(96, 107);
+        public UpdateField<int> WildBattlePetLevel = new UpdateField<int>(96, 108);
+        public UpdateField<uint> BattlePetCompanionNameTimestamp = new UpdateField<uint>(96, 109);
+        public UpdateField<int> InteractSpellID = new UpdateField<int>(96, 110);
+        public UpdateField<int> ScaleDuration = new UpdateField<int>(96, 111);
+        public UpdateField<int> LooksLikeMountID = new UpdateField<int>(96, 112);
+        public UpdateField<int> LooksLikeCreatureID = new UpdateField<int>(96, 113);
+        public UpdateField<int> LookAtControllerID = new UpdateField<int>(96, 114);
+        public UpdateField<int> TaxiNodesID = new UpdateField<int>(96, 115);
+        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(96, 116);
+        public UpdateField<ObjectGuid> SkinningOwnerGUID = new UpdateField<ObjectGuid>(96, 117);
+        public UpdateField<uint> SilencedSchoolMask = new UpdateField<uint>(96, 118);
+        public UpdateFieldArray<uint> NpcFlags = new UpdateFieldArray<uint>(2, 119, 120);
+        public UpdateFieldArray<int> Power = new UpdateFieldArray<int>(6, 122, 123);
+        public UpdateFieldArray<uint> MaxPower = new UpdateFieldArray<uint>(6, 122, 129);
+        public UpdateFieldArray<float> PowerRegenFlatModifier = new UpdateFieldArray<float>(6, 122, 135);
+        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new UpdateFieldArray<float>(6, 122, 141);
+        public UpdateFieldArray<VisibleItem> VirtualItems = new UpdateFieldArray<VisibleItem>(3, 147, 148);
+        public UpdateFieldArray<uint> AttackRoundBaseTime = new UpdateFieldArray<uint>(2, 151, 152);
+        public UpdateFieldArray<int> Stats = new UpdateFieldArray<int>(4, 154, 155);
+        public UpdateFieldArray<int> StatPosBuff = new UpdateFieldArray<int>(4, 154, 159);
+        public UpdateFieldArray<int> StatNegBuff = new UpdateFieldArray<int>(4, 154, 163);
+        public UpdateFieldArray<int> Resistances = new UpdateFieldArray<int>(7, 167, 168);
+        public UpdateFieldArray<int> BonusResistanceMods = new UpdateFieldArray<int>(7, 167, 175);
+        public UpdateFieldArray<int> PowerCostModifier = new UpdateFieldArray<int>(7, 167, 182);
+        public UpdateFieldArray<float> PowerCostMultiplier = new UpdateFieldArray<float>(7, 167, 189);
 
-        public UpdateFieldArray<int>Power = new UpdateFieldArray<int>(6, 118, 119);
-        public UpdateFieldArray<uint>MaxPower = new UpdateFieldArray<uint>(6, 118, 125);
-        public UpdateFieldArray<float>PowerRegenFlatModifier = new UpdateFieldArray<float>(6, 118, 131);
-        public UpdateFieldArray<float>PowerRegenInterruptedFlatModifier = new UpdateFieldArray<float>(6, 118, 137);
-        public UpdateFieldArray<VisibleItem>VirtualItems = new UpdateFieldArray<VisibleItem>(3, 143, 144);
-        public UpdateFieldArray<uint>AttackRoundBaseTime = new UpdateFieldArray<uint>(2, 147, 148);
-        public UpdateFieldArray<int>Stats = new UpdateFieldArray<int>(4, 150, 151);
-        public UpdateFieldArray<int>StatPosBuff = new UpdateFieldArray<int>(4, 150, 155);
-        public UpdateFieldArray<int>StatNegBuff = new UpdateFieldArray<int>(4, 150, 159);
-        public UpdateFieldArray<int>Resistances = new UpdateFieldArray<int>(7, 163, 164);
-        public UpdateFieldArray<int>BonusResistanceMods = new UpdateFieldArray<int>(7, 163, 171);
-        public UpdateFieldArray<int>PowerCostModifier = new UpdateFieldArray<int>(7, 163, 178);
-        public UpdateFieldArray<float>PowerCostMultiplier = new UpdateFieldArray<float>(7, 163, 185);
-
-        public UnitData() : base(0, TypeId.Unit, 192) { }
+        public UnitData() : base(0, TypeId.Unit, 196) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
@@ -1145,6 +1240,7 @@ namespace Game.Entities
             data.WriteUInt32(StateAnimKitID);
             data.WriteInt32(((List<uint>)StateWorldEffectIDs).Count);
             data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
+            data.WriteInt32(SpellOverrideNameID);
             for (int i = 0; i < ((List<uint>)StateWorldEffectIDs).Count; ++i)
                 data.WriteUInt32(((List<uint>)StateWorldEffectIDs)[i]);
 
@@ -1210,6 +1306,8 @@ namespace Game.Entities
             data.WriteFloat(BoundingRadius);
             data.WriteFloat(CombatReach);
             data.WriteFloat(DisplayScale);
+            data.WriteInt32(CreatureFamily);
+            data.WriteInt32(CreatureType);
             data.WriteUInt32(NativeDisplayID);
             data.WriteFloat(NativeXDisplayScale);
             data.WriteUInt32(MountDisplayID);
@@ -1230,6 +1328,7 @@ namespace Game.Entities
             data.WriteUInt32(PetExperience);
             data.WriteUInt32(PetNextLevelExperience);
             data.WriteFloat(ModCastingSpeed);
+            data.WriteFloat(ModCastingSpeedNeg);
             data.WriteFloat(ModSpellHaste);
             data.WriteFloat(ModHaste);
             data.WriteFloat(ModRangedHaste);
@@ -1299,7 +1398,6 @@ namespace Game.Entities
             data.WriteUInt32(BattlePetCompanionNameTimestamp);
             data.WriteInt32(InteractSpellID);
             data.WriteInt32(ScaleDuration);
-            data.WriteInt32(SpellOverrideNameID);
             data.WriteInt32(LooksLikeMountID);
             data.WriteInt32(LooksLikeCreatureID);
             data.WriteInt32(LookAtControllerID);
@@ -1309,6 +1407,7 @@ namespace Game.Entities
             data.WriteInt32(WorldEffects.Size());
             data.WriteInt32(ChannelObjects.Size());
             data.WritePackedGuid(SkinningOwnerGUID);
+            data.WriteUInt32(SilencedSchoolMask);
 
             for (int i = 0; i < PassiveSpells.Size(); ++i)
                 PassiveSpells[i].WriteCreate(data, owner, receiver);
@@ -1322,7 +1421,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(192, new uint[] { 0xFFFFEFFFu, 0xFC3FBFFFu, 0x0001EFFFu, 0xFFBFFFF9u, 0x003F8007u, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFBFFFF81u, 0x03F8007Fu, 0x00000000u, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -1330,27 +1429,27 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00001000u, 0x03C04000u, 0xFFFE1000u, 0x00400006u, 0xFFC07FF8u, 0xFFFFFFFFu });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00002000u, 0x1E008000u, 0xFFE10000u, 0x0400007Eu, 0xFC07FF80u, 0xFFFFFFFFu, 0x0000000Fu });
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x00400000u, 0x00007FF8u, 0x00000000u });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x04000000u, 0x0007FF80u, 0x00000000u, 0x00000000 });
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x03C00000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x000007F8u });
+                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x1E000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00007F80u, 0x00000000u });
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFEFFFu, 0xFC3FBFFFu, 0x0001EFFFu, 0xFFBFFFF9u, 0x003F8007u, 0x00000000u });
+                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFBFFFF81u, 0x03F8007Fu, 0x00000000u, 0xFFFFFFF0u });
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFBFFFFFu, 0xFFFF8007u, 0xFFFFFFFFu });
+                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFBFFFFFFu, 0xFFF8007Fu, 0xFFFFFFFFu, 0xFFFFFFFFu });
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFC3FFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFF807u });
+                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xE1FFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFF807Fu, 0xFFFFFFFFu });
         }
-        
+
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Unit owner, Player receiver)
         {
-            data.WriteBits(changesMask.GetBlocksMask(0), 6);
-            for (uint i = 0; i < 6; ++i)
+            data.WriteBits(changesMask.GetBlocksMask(0), 7);
+            for (uint i = 0; i < 7; ++i)
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
@@ -1358,11 +1457,10 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    List<uint> list = StateWorldEffectIDs;
-                    data.WriteBits(list.Count, 32);
-                    for (int i = 0; i < list.Count; ++i)
+                    data.WriteBits(((List<uint>)StateWorldEffectIDs).Count, 32);
+                    for (int i = 0; i < ((List<uint>)StateWorldEffectIDs).Count; ++i)
                     {
-                        data.WriteUInt32(list[i]);
+                        data.WriteUInt32(((List<uint>)StateWorldEffectIDs)[i]);
                     }
                 }
             }
@@ -1446,511 +1544,523 @@ namespace Game.Entities
                 }
                 if (changesMask[10])
                 {
-                    data.WritePackedGuid(Charm);
+                    data.WriteInt32(SpellOverrideNameID);
                 }
                 if (changesMask[11])
                 {
-                    data.WritePackedGuid(Summon);
+                    data.WritePackedGuid(Charm);
                 }
                 if (changesMask[12])
                 {
-                    data.WritePackedGuid(Critter);
+                    data.WritePackedGuid(Summon);
                 }
                 if (changesMask[13])
                 {
-                    data.WritePackedGuid(CharmedBy);
+                    data.WritePackedGuid(Critter);
                 }
                 if (changesMask[14])
                 {
-                    data.WritePackedGuid(SummonedBy);
+                    data.WritePackedGuid(CharmedBy);
                 }
                 if (changesMask[15])
                 {
-                    data.WritePackedGuid(CreatedBy);
+                    data.WritePackedGuid(SummonedBy);
                 }
                 if (changesMask[16])
                 {
-                    data.WritePackedGuid(DemonCreator);
+                    data.WritePackedGuid(CreatedBy);
                 }
                 if (changesMask[17])
                 {
-                    data.WritePackedGuid(LookAtControllerTarget);
+                    data.WritePackedGuid(DemonCreator);
                 }
                 if (changesMask[18])
                 {
-                    data.WritePackedGuid(Target);
+                    data.WritePackedGuid(LookAtControllerTarget);
                 }
                 if (changesMask[19])
                 {
-                    data.WritePackedGuid(BattlePetCompanionGUID);
+                    data.WritePackedGuid(Target);
                 }
                 if (changesMask[20])
                 {
-                    data.WriteUInt64(BattlePetDBID);
+                    data.WritePackedGuid(BattlePetCompanionGUID);
                 }
                 if (changesMask[21])
                 {
-                    ((UnitChannel)ChannelData).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    data.WriteUInt64(BattlePetDBID);
                 }
                 if (changesMask[22])
                 {
-                    data.WriteUInt32(SummonedByHomeRealm);
+                    ((UnitChannel)ChannelData).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (changesMask[23])
                 {
-                    data.WriteUInt8(Race);
+                    data.WriteUInt32(SummonedByHomeRealm);
                 }
                 if (changesMask[24])
                 {
-                    data.WriteUInt8(ClassId);
+                    data.WriteUInt8(Race);
                 }
                 if (changesMask[25])
                 {
-                    data.WriteUInt8(PlayerClassId);
+                    data.WriteUInt8(ClassId);
                 }
                 if (changesMask[26])
                 {
-                    data.WriteUInt8(Sex);
+                    data.WriteUInt8(PlayerClassId);
                 }
                 if (changesMask[27])
                 {
-                    data.WriteUInt8(DisplayPower);
+                    data.WriteUInt8(Sex);
                 }
                 if (changesMask[28])
                 {
-                    data.WriteUInt32(OverrideDisplayPowerID);
+                    data.WriteUInt8(DisplayPower);
                 }
                 if (changesMask[29])
                 {
-                    data.WriteUInt64(Health);
+                    data.WriteUInt32(OverrideDisplayPowerID);
                 }
                 if (changesMask[30])
                 {
-                    data.WriteUInt64(MaxHealth);
+                    data.WriteUInt64(Health);
                 }
                 if (changesMask[31])
                 {
-                    data.WriteUInt32(Level);
+                    data.WriteUInt64(MaxHealth);
                 }
             }
             if (changesMask[32])
             {
                 if (changesMask[33])
                 {
-                    data.WriteInt32(EffectiveLevel);
+                    data.WriteUInt32(Level);
                 }
                 if (changesMask[34])
                 {
-                    data.WriteUInt32(ContentTuningID);
+                    data.WriteInt32(EffectiveLevel);
                 }
                 if (changesMask[35])
                 {
-                    data.WriteInt32(ScalingLevelMin);
+                    data.WriteUInt32(ContentTuningID);
                 }
                 if (changesMask[36])
                 {
-                    data.WriteInt32(ScalingLevelMax);
+                    data.WriteInt32(ScalingLevelMin);
                 }
                 if (changesMask[37])
                 {
-                    data.WriteInt32(ScalingLevelDelta);
+                    data.WriteInt32(ScalingLevelMax);
                 }
                 if (changesMask[38])
                 {
-                    data.WriteInt32(ScalingFactionGroup);
+                    data.WriteInt32(ScalingLevelDelta);
                 }
                 if (changesMask[39])
                 {
-                    data.WriteInt32(ScalingHealthItemLevelCurveID);
+                    data.WriteInt32(ScalingFactionGroup);
                 }
                 if (changesMask[40])
                 {
-                    data.WriteInt32(ScalingDamageItemLevelCurveID);
+                    data.WriteInt32(ScalingHealthItemLevelCurveID);
                 }
                 if (changesMask[41])
                 {
-                    data.WriteUInt32(GetViewerDependentFactionTemplate(FactionTemplate, owner, receiver));
+                    data.WriteInt32(ScalingDamageItemLevelCurveID);
                 }
                 if (changesMask[42])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags(Flags, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFactionTemplate(FactionTemplate, owner, receiver));
                 }
                 if (changesMask[43])
                 {
-                    data.WriteUInt32(Flags2);
+                    data.WriteUInt32(GetViewerDependentFlags(Flags, owner, receiver));
                 }
                 if (changesMask[44])
                 {
-                    data.WriteUInt32(Flags3);
+                    data.WriteUInt32(Flags2);
                 }
                 if (changesMask[45])
                 {
-                    data.WriteUInt32(GetViewerDependentAuraState(AuraState, owner, receiver));
+                    data.WriteUInt32(Flags3);
                 }
                 if (changesMask[46])
                 {
-                    data.WriteUInt32(RangedAttackRoundBaseTime);
+                    data.WriteUInt32(GetViewerDependentAuraState(AuraState, owner, receiver));
                 }
                 if (changesMask[47])
                 {
-                    data.WriteFloat(BoundingRadius);
+                    data.WriteUInt32(RangedAttackRoundBaseTime);
                 }
                 if (changesMask[48])
                 {
-                    data.WriteFloat(CombatReach);
+                    data.WriteFloat(BoundingRadius);
                 }
                 if (changesMask[49])
                 {
-                    data.WriteFloat(DisplayScale);
+                    data.WriteFloat(CombatReach);
                 }
                 if (changesMask[50])
                 {
-                    data.WriteUInt32(NativeDisplayID);
+                    data.WriteFloat(DisplayScale);
                 }
                 if (changesMask[51])
                 {
-                    data.WriteFloat(NativeXDisplayScale);
+                    data.WriteInt32(CreatureFamily);
                 }
                 if (changesMask[52])
                 {
-                    data.WriteUInt32(MountDisplayID);
+                    data.WriteInt32(CreatureType);
                 }
                 if (changesMask[53])
                 {
-                    data.WriteInt32(CosmeticMountDisplayID);
+                    data.WriteUInt32(NativeDisplayID);
                 }
                 if (changesMask[54])
                 {
-                    data.WriteFloat(MinDamage);
+                    data.WriteFloat(NativeXDisplayScale);
                 }
                 if (changesMask[55])
                 {
-                    data.WriteFloat(MaxDamage);
+                    data.WriteUInt32(MountDisplayID);
                 }
                 if (changesMask[56])
                 {
-                    data.WriteFloat(MinOffHandDamage);
+                    data.WriteInt32(CosmeticMountDisplayID);
                 }
                 if (changesMask[57])
                 {
-                    data.WriteFloat(MaxOffHandDamage);
+                    data.WriteFloat(MinDamage);
                 }
                 if (changesMask[58])
                 {
-                    data.WriteUInt8(StandState);
+                    data.WriteFloat(MaxDamage);
                 }
                 if (changesMask[59])
                 {
-                    data.WriteUInt8(PetTalentPoints);
+                    data.WriteFloat(MinOffHandDamage);
                 }
                 if (changesMask[60])
                 {
-                    data.WriteUInt8(VisFlags);
+                    data.WriteFloat(MaxOffHandDamage);
                 }
                 if (changesMask[61])
                 {
-                    data.WriteUInt8(AnimTier);
+                    data.WriteUInt8(StandState);
                 }
                 if (changesMask[62])
                 {
-                    data.WriteUInt32(PetNumber);
+                    data.WriteUInt8(PetTalentPoints);
                 }
                 if (changesMask[63])
                 {
-                    data.WriteUInt32(PetNameTimestamp);
+                    data.WriteUInt8(VisFlags);
                 }
             }
             if (changesMask[64])
             {
                 if (changesMask[65])
                 {
-                    data.WriteUInt32(PetExperience);
+                    data.WriteUInt8(AnimTier);
                 }
                 if (changesMask[66])
                 {
-                    data.WriteUInt32(PetNextLevelExperience);
+                    data.WriteUInt32(PetNumber);
                 }
                 if (changesMask[67])
                 {
-                    data.WriteFloat(ModCastingSpeed);
+                    data.WriteUInt32(PetNameTimestamp);
                 }
                 if (changesMask[68])
                 {
-                    data.WriteFloat(ModSpellHaste);
+                    data.WriteUInt32(PetExperience);
                 }
                 if (changesMask[69])
                 {
-                    data.WriteFloat(ModHaste);
+                    data.WriteUInt32(PetNextLevelExperience);
                 }
                 if (changesMask[70])
                 {
-                    data.WriteFloat(ModRangedHaste);
+                    data.WriteFloat(ModCastingSpeed);
                 }
                 if (changesMask[71])
                 {
-                    data.WriteFloat(ModHasteRegen);
+                    data.WriteFloat(ModCastingSpeedNeg);
                 }
                 if (changesMask[72])
                 {
-                    data.WriteFloat(ModTimeRate);
+                    data.WriteFloat(ModSpellHaste);
                 }
                 if (changesMask[73])
                 {
-                    data.WriteUInt32(CreatedBySpell);
+                    data.WriteFloat(ModHaste);
                 }
                 if (changesMask[74])
                 {
-                    data.WriteInt32(EmoteState);
+                    data.WriteFloat(ModRangedHaste);
                 }
                 if (changesMask[75])
                 {
-                    data.WriteUInt32(BaseMana);
+                    data.WriteFloat(ModHasteRegen);
                 }
                 if (changesMask[76])
                 {
-                    data.WriteUInt32(BaseHealth);
+                    data.WriteFloat(ModTimeRate);
                 }
                 if (changesMask[77])
                 {
-                    data.WriteUInt8(SheatheState);
+                    data.WriteUInt32(CreatedBySpell);
                 }
                 if (changesMask[78])
                 {
-                    data.WriteUInt8((byte)GetViewerDependentPvpFlags(PvpFlags, owner, receiver));
+                    data.WriteInt32(EmoteState);
                 }
                 if (changesMask[79])
                 {
-                    data.WriteUInt8(PetFlags);
+                    data.WriteUInt32(BaseMana);
                 }
                 if (changesMask[80])
                 {
-                    data.WriteUInt8(ShapeshiftForm);
+                    data.WriteUInt32(BaseHealth);
                 }
                 if (changesMask[81])
                 {
-                    data.WriteInt32(AttackPower);
+                    data.WriteUInt8(SheatheState);
                 }
                 if (changesMask[82])
                 {
-                    data.WriteInt32(AttackPowerModPos);
+                    data.WriteUInt8((byte)GetViewerDependentPvpFlags(PvpFlags, owner, receiver));
                 }
                 if (changesMask[83])
                 {
-                    data.WriteInt32(AttackPowerModNeg);
+                    data.WriteUInt8(PetFlags);
                 }
                 if (changesMask[84])
                 {
-                    data.WriteFloat(AttackPowerMultiplier);
+                    data.WriteUInt8(ShapeshiftForm);
                 }
                 if (changesMask[85])
                 {
-                    data.WriteInt32(RangedAttackPower);
+                    data.WriteInt32(AttackPower);
                 }
                 if (changesMask[86])
                 {
-                    data.WriteInt32(RangedAttackPowerModPos);
+                    data.WriteInt32(AttackPowerModPos);
                 }
                 if (changesMask[87])
                 {
-                    data.WriteInt32(RangedAttackPowerModNeg);
+                    data.WriteInt32(AttackPowerModNeg);
                 }
                 if (changesMask[88])
                 {
-                    data.WriteFloat(RangedAttackPowerMultiplier);
+                    data.WriteFloat(AttackPowerMultiplier);
                 }
                 if (changesMask[89])
                 {
-                    data.WriteInt32(MainHandWeaponAttackPower);
+                    data.WriteInt32(RangedAttackPower);
                 }
                 if (changesMask[90])
                 {
-                    data.WriteInt32(OffHandWeaponAttackPower);
+                    data.WriteInt32(RangedAttackPowerModPos);
                 }
                 if (changesMask[91])
                 {
-                    data.WriteInt32(RangedWeaponAttackPower);
+                    data.WriteInt32(RangedAttackPowerModNeg);
                 }
                 if (changesMask[92])
                 {
-                    data.WriteInt32(SetAttackSpeedAura);
+                    data.WriteFloat(RangedAttackPowerMultiplier);
                 }
                 if (changesMask[93])
                 {
-                    data.WriteFloat(Lifesteal);
+                    data.WriteInt32(MainHandWeaponAttackPower);
                 }
                 if (changesMask[94])
                 {
-                    data.WriteFloat(MinRangedDamage);
+                    data.WriteInt32(OffHandWeaponAttackPower);
                 }
                 if (changesMask[95])
                 {
-                    data.WriteFloat(MaxRangedDamage);
+                    data.WriteInt32(RangedWeaponAttackPower);
                 }
             }
             if (changesMask[96])
             {
                 if (changesMask[97])
                 {
-                    data.WriteFloat(ManaCostModifierModifier);
+                    data.WriteInt32(SetAttackSpeedAura);
                 }
                 if (changesMask[98])
                 {
-                    data.WriteFloat(MaxHealthModifier);
+                    data.WriteFloat(Lifesteal);
                 }
                 if (changesMask[99])
                 {
-                    data.WriteFloat(HoverHeight);
+                    data.WriteFloat(MinRangedDamage);
                 }
                 if (changesMask[100])
                 {
-                    data.WriteUInt32(MinItemLevelCutoff);
+                    data.WriteFloat(MaxRangedDamage);
                 }
                 if (changesMask[101])
                 {
-                    data.WriteUInt32(MinItemLevel);
+                    data.WriteFloat(ManaCostModifierModifier);
                 }
                 if (changesMask[102])
                 {
-                    data.WriteUInt32(MaxItemLevel);
+                    data.WriteFloat(MaxHealthModifier);
                 }
                 if (changesMask[103])
                 {
-                    data.WriteInt32(AzeriteItemLevel);
+                    data.WriteFloat(HoverHeight);
                 }
                 if (changesMask[104])
                 {
-                    data.WriteInt32(WildBattlePetLevel);
+                    data.WriteUInt32(MinItemLevelCutoff);
                 }
                 if (changesMask[105])
                 {
-                    data.WriteUInt32(BattlePetCompanionNameTimestamp);
+                    data.WriteUInt32(MinItemLevel);
                 }
                 if (changesMask[106])
                 {
-                    data.WriteInt32(InteractSpellID);
+                    data.WriteUInt32(MaxItemLevel);
                 }
                 if (changesMask[107])
                 {
-                    data.WriteInt32(ScaleDuration);
+                    data.WriteInt32(AzeriteItemLevel);
                 }
                 if (changesMask[108])
                 {
-                    data.WriteInt32(SpellOverrideNameID);
+                    data.WriteInt32(WildBattlePetLevel);
                 }
                 if (changesMask[109])
                 {
-                    data.WriteInt32(LooksLikeMountID);
+                    data.WriteUInt32(BattlePetCompanionNameTimestamp);
                 }
                 if (changesMask[110])
                 {
-                    data.WriteInt32(LooksLikeCreatureID);
+                    data.WriteInt32(InteractSpellID);
                 }
                 if (changesMask[111])
                 {
-                    data.WriteInt32(LookAtControllerID);
+                    data.WriteInt32(ScaleDuration);
                 }
                 if (changesMask[112])
                 {
-                    data.WriteInt32(TaxiNodesID);
+                    data.WriteInt32(LooksLikeMountID);
                 }
                 if (changesMask[113])
                 {
-                    data.WritePackedGuid(GuildGUID);
+                    data.WriteInt32(LooksLikeCreatureID);
                 }
                 if (changesMask[114])
                 {
+                    data.WriteInt32(LookAtControllerID);
+                }
+                if (changesMask[115])
+                {
+                    data.WriteInt32(TaxiNodesID);
+                }
+                if (changesMask[116])
+                {
+                    data.WritePackedGuid(GuildGUID);
+                }
+                if (changesMask[117])
+                {
                     data.WritePackedGuid(SkinningOwnerGUID);
                 }
+                if (changesMask[118])
+                {
+                    data.WriteUInt32(SilencedSchoolMask);
+                }
             }
-            if (changesMask[115])
+            if (changesMask[119])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[116 + i])
+                    if (changesMask[120 + i])
                     {
                         data.WriteUInt32(GetViewerDependentNpcFlags(NpcFlags[i], i, owner, receiver));
                     }
                 }
             }
-            if (changesMask[118])
+            if (changesMask[122])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[119 + i])
+                    if (changesMask[123 + i])
                     {
                         data.WriteInt32(Power[i]);
                     }
-                    if (changesMask[125 + i])
+                    if (changesMask[129 + i])
                     {
                         data.WriteUInt32(MaxPower[i]);
                     }
-                    if (changesMask[131 + i])
+                    if (changesMask[135 + i])
                     {
                         data.WriteFloat(PowerRegenFlatModifier[i]);
                     }
-                    if (changesMask[137 + i])
+                    if (changesMask[141 + i])
                     {
                         data.WriteFloat(PowerRegenInterruptedFlatModifier[i]);
                     }
                 }
             }
-            if (changesMask[143])
+            if (changesMask[147])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (changesMask[144 + i])
+                    if (changesMask[148 + i])
                     {
                         VirtualItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[147])
+            if (changesMask[151])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[148 + i])
+                    if (changesMask[152 + i])
                     {
                         data.WriteUInt32(AttackRoundBaseTime[i]);
                     }
                 }
             }
-            if (changesMask[150])
+            if (changesMask[154])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[151 + i])
+                    if (changesMask[155 + i])
                     {
                         data.WriteInt32(Stats[i]);
                     }
-                    if (changesMask[155 + i])
+                    if (changesMask[159 + i])
                     {
                         data.WriteInt32(StatPosBuff[i]);
                     }
-                    if (changesMask[159 + i])
+                    if (changesMask[163 + i])
                     {
                         data.WriteInt32(StatNegBuff[i]);
                     }
                 }
             }
-            if (changesMask[163])
+            if (changesMask[167])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[164 + i])
+                    if (changesMask[168 + i])
                     {
                         data.WriteInt32(Resistances[i]);
                     }
-                    if (changesMask[171 + i])
+                    if (changesMask[175 + i])
                     {
                         data.WriteInt32(BonusResistanceMods[i]);
                     }
-                    if (changesMask[178 + i])
+                    if (changesMask[182 + i])
                     {
                         data.WriteInt32(PowerCostModifier[i]);
-                    }
-                    if (changesMask[185 + i])
-                    {
-                        data.WriteFloat(PowerCostMultiplier[i]);
                     }
                 }
             }
@@ -1967,6 +2077,7 @@ namespace Game.Entities
             ClearChangesMask(StateAnimID);
             ClearChangesMask(StateAnimKitID);
             ClearChangesMask(StateWorldEffectsQuestObjectiveID);
+            ClearChangesMask(SpellOverrideNameID);
             ClearChangesMask(Charm);
             ClearChangesMask(Summon);
             ClearChangesMask(Critter);
@@ -2006,6 +2117,8 @@ namespace Game.Entities
             ClearChangesMask(BoundingRadius);
             ClearChangesMask(CombatReach);
             ClearChangesMask(DisplayScale);
+            ClearChangesMask(CreatureFamily);
+            ClearChangesMask(CreatureType);
             ClearChangesMask(NativeDisplayID);
             ClearChangesMask(NativeXDisplayScale);
             ClearChangesMask(MountDisplayID);
@@ -2023,6 +2136,7 @@ namespace Game.Entities
             ClearChangesMask(PetExperience);
             ClearChangesMask(PetNextLevelExperience);
             ClearChangesMask(ModCastingSpeed);
+            ClearChangesMask(ModCastingSpeedNeg);
             ClearChangesMask(ModSpellHaste);
             ClearChangesMask(ModHaste);
             ClearChangesMask(ModRangedHaste);
@@ -2062,13 +2176,13 @@ namespace Game.Entities
             ClearChangesMask(BattlePetCompanionNameTimestamp);
             ClearChangesMask(InteractSpellID);
             ClearChangesMask(ScaleDuration);
-            ClearChangesMask(SpellOverrideNameID);
             ClearChangesMask(LooksLikeMountID);
             ClearChangesMask(LooksLikeCreatureID);
             ClearChangesMask(LookAtControllerID);
             ClearChangesMask(TaxiNodesID);
             ClearChangesMask(GuildGUID);
             ClearChangesMask(SkinningOwnerGUID);
+            ClearChangesMask(SilencedSchoolMask);
             ClearChangesMask(NpcFlags);
             ClearChangesMask(Power);
             ClearChangesMask(MaxPower);
@@ -2162,6 +2276,30 @@ namespace Game.Entities
             }
 
             return pvpFlags;
+        }
+    }
+
+    public struct ChrCustomizationChoice
+    {
+        public uint ChrCustomizationOptionID;
+        public uint ChrCustomizationChoiceID;
+
+        public ChrCustomizationChoice(uint chrCustomizationOptionID, uint chrCustomizationChoiceID)
+        {
+            ChrCustomizationOptionID = chrCustomizationOptionID;
+            ChrCustomizationChoiceID = chrCustomizationChoiceID;
+        }
+
+        public void WriteCreate(WorldPacket data, Object owner, Player receiver)
+        {
+            data.WriteUInt32(ChrCustomizationOptionID);
+            data.WriteUInt32(ChrCustomizationChoiceID);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, WorldObject owner, Player receiver)
+        {
+            data.WriteUInt32(ChrCustomizationOptionID);
+            data.WriteUInt32(ChrCustomizationChoiceID);
         }
     }
 
@@ -2325,49 +2463,66 @@ namespace Game.Entities
         }
     }
 
+    public struct CTROptions
+    {
+        public uint ContentTuningConditionMask;
+        public uint Field_4;
+        public uint ExpansionLevelMask;
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WriteUInt32(ContentTuningConditionMask);
+            data.WriteUInt32(Field_4);
+            data.WriteUInt32(ExpansionLevelMask);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            data.WriteUInt32(ContentTuningConditionMask);
+            data.WriteUInt32(Field_4);
+            data.WriteUInt32(ExpansionLevelMask);
+        }
+    }
+
     public class PlayerData : BaseUpdateData<Player>
     {
         public UpdateField<bool> HasQuestSession = new UpdateField<bool>(0, 1);
         public UpdateField<bool> HasLevelLink = new UpdateField<bool>(0, 2);
-        public DynamicUpdateField<QuestLog> QuestSessionQuestLog = new DynamicUpdateField<QuestLog>(0, 3);
-        public DynamicUpdateField<ArenaCooldown> ArenaCooldowns = new DynamicUpdateField<ArenaCooldown>(0, 4);
-        public UpdateField<ObjectGuid> DuelArbiter = new UpdateField<ObjectGuid>(0, 5);
-        public UpdateField<ObjectGuid> WowAccount = new UpdateField<ObjectGuid>(0, 6);
-        public UpdateField<ObjectGuid> LootTargetGUID = new UpdateField<ObjectGuid>(0, 7);
-        public UpdateField<uint> PlayerFlags = new UpdateField<uint>(0, 8);
-        public UpdateField<uint> PlayerFlagsEx = new UpdateField<uint>(0, 9);
-        public UpdateField<uint> GuildRankID = new UpdateField<uint>(0, 10);
-        public UpdateField<uint> GuildDeleteDate = new UpdateField<uint>(0, 11);
-        public UpdateField<uint> GuildLevel = new UpdateField<uint>(0, 12);
-        public UpdateField<byte> SkinID = new UpdateField<byte>(0, 13);
-        public UpdateField<byte> FaceID = new UpdateField<byte>(0, 14);
-        public UpdateField<byte> HairStyleID = new UpdateField<byte>(0, 15);
-        public UpdateField<byte> HairColorID = new UpdateField<byte>(0, 16);
-        public UpdateField<byte> FacialHairStyleID = new UpdateField<byte>(0, 17);
-        public UpdateField<byte> PartyType = new UpdateField<byte>(0, 18);
-        public UpdateField<byte> NativeSex = new UpdateField<byte>(0, 19);
-        public UpdateField<byte> Inebriation = new UpdateField<byte>(0, 20);
-        public UpdateField<byte> PvpTitle = new UpdateField<byte>(0, 21);
-        public UpdateField<byte> ArenaFaction = new UpdateField<byte>(0, 22);
-        public UpdateField<uint> DuelTeam = new UpdateField<uint>(0, 23);
-        public UpdateField<int> GuildTimeStamp = new UpdateField<int>(0, 24);
-        public UpdateField<uint> PlayerTitle = new UpdateField<uint>(0, 25);
-        public UpdateField<int> FakeInebriation = new UpdateField<int>(0, 26);
-        public UpdateField<uint> VirtualPlayerRealm = new UpdateField<uint>(0, 27);
-        public UpdateField<uint> CurrentSpecID = new UpdateField<uint>(0, 28);
-        public UpdateField<int> TaxiMountAnimKitID = new UpdateField<int>(0, 29);
-        public UpdateField<byte> CurrentBattlePetBreedQuality = new UpdateField<byte>(0, 30);
-        public UpdateField<uint> HonorLevel = new UpdateField<uint>(0, 31);
-        public UpdateField<int> Field_B0 = new UpdateField<int>(32, 33);
-        public UpdateField<int> Field_B4 = new UpdateField<int>(32, 34);
-        public UpdateField<ObjectGuid> Field_F8 = new UpdateField<ObjectGuid>(32, 35);
-        public UpdateField<int> Field_108 = new UpdateField<int>(32, 36);
-        public UpdateFieldArray<byte> CustomDisplayOption = new UpdateFieldArray<byte>(3, 37, 38);
-        public UpdateFieldArray<QuestLog> QuestLog = new UpdateFieldArray<QuestLog>(125, 41, 42);
-        public UpdateFieldArray<VisibleItem> VisibleItems = new UpdateFieldArray<VisibleItem>(19, 167, 168);
-        public UpdateFieldArray<float> AvgItemLevel = new UpdateFieldArray<float>(4, 187, 188);
+        public DynamicUpdateField<ChrCustomizationChoice>Customizations = new DynamicUpdateField<ChrCustomizationChoice>(0, 3);
+        public DynamicUpdateField<QuestLog>QuestSessionQuestLog = new DynamicUpdateField<QuestLog>(0, 4);
+        public DynamicUpdateField<ArenaCooldown>ArenaCooldowns = new DynamicUpdateField<ArenaCooldown>(0, 5);
+        public UpdateField<ObjectGuid> DuelArbiter = new UpdateField<ObjectGuid>(0, 6);
+        public UpdateField<ObjectGuid> WowAccount = new UpdateField<ObjectGuid>(0, 7);
+        public UpdateField<ObjectGuid> LootTargetGUID = new UpdateField<ObjectGuid>(0, 8);
+        public UpdateField<uint> PlayerFlags = new UpdateField<uint>(0, 9);
+        public UpdateField<uint> PlayerFlagsEx = new UpdateField<uint>(0, 10);
+        public UpdateField<uint> GuildRankID = new UpdateField<uint>(0, 11);
+        public UpdateField<uint> GuildDeleteDate = new UpdateField<uint>(0, 12);
+        public UpdateField<uint> GuildLevel = new UpdateField<uint>(0, 13);
+        public UpdateField<byte> PartyType = new UpdateField<byte>(0, 14);
+        public UpdateField<byte> NativeSex = new UpdateField<byte>(0, 15);
+        public UpdateField<byte> Inebriation = new UpdateField<byte>(0, 16);
+        public UpdateField<byte> PvpTitle = new UpdateField<byte>(0, 17);
+        public UpdateField<byte> ArenaFaction = new UpdateField<byte>(0, 18);
+        public UpdateField<uint> DuelTeam = new UpdateField<uint>(0, 19);
+        public UpdateField<int> GuildTimeStamp = new UpdateField<int>(0, 20);
+        public UpdateField<uint> PlayerTitle = new UpdateField<uint>(0, 21);
+        public UpdateField<int> FakeInebriation = new UpdateField<int>(0, 22);
+        public UpdateField<uint> VirtualPlayerRealm = new UpdateField<uint>(0, 23);
+        public UpdateField<uint> CurrentSpecID = new UpdateField<uint>(0, 24);
+        public UpdateField<int> TaxiMountAnimKitID = new UpdateField<int>(0, 25);
+        public UpdateField<byte> CurrentBattlePetBreedQuality = new UpdateField<byte>(0, 26);
+        public UpdateField<uint> HonorLevel = new UpdateField<uint>(0, 27);
+        public UpdateField<int> Field_B0 = new UpdateField<int>(0, 28);
+        public UpdateField<int> Field_B4 = new UpdateField<int>(0, 29);
+        public UpdateField<CTROptions> CtrOptions = new UpdateField<CTROptions>(0, 30);
+        public UpdateField<int> CovenantID = new UpdateField<int>(0, 31);
+        public UpdateField<int> SoulbindID = new UpdateField<int>(32, 33);
+        public UpdateFieldArray<QuestLog>QuestLog = new UpdateFieldArray<QuestLog>(125, 34, 35);
+        public UpdateFieldArray<VisibleItem> VisibleItems = new UpdateFieldArray<VisibleItem>(19, 160, 161);
+        public UpdateFieldArray<float>AvgItemLevel = new UpdateFieldArray<float>(4, 180, 181);
 
-        public PlayerData() : base(0, TypeId.Player, 192) { }
+        public PlayerData() : base(0, TypeId.Player, 185) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -2379,15 +2534,7 @@ namespace Game.Entities
             data.WriteUInt32(GuildRankID);
             data.WriteUInt32(GuildDeleteDate);
             data.WriteUInt32(GuildLevel);
-            data.WriteUInt8(SkinID);
-            data.WriteUInt8(FaceID);
-            data.WriteUInt8(HairStyleID);
-            data.WriteUInt8(HairColorID);
-            for (int i = 0; i < 3; ++i)
-            {
-                data.WriteUInt8(CustomDisplayOption[i]);
-            }
-            data.WriteUInt8(FacialHairStyleID);
+            data.WriteInt32(Customizations.Size());
             data.WriteUInt8(PartyType);
             data.WriteUInt8(NativeSex);
             data.WriteUInt8(Inebriation);
@@ -2421,8 +2568,13 @@ namespace Game.Entities
             data.WriteInt32(ArenaCooldowns.Size());
             data.WriteInt32(Field_B0);
             data.WriteInt32(Field_B4);
-            data.WritePackedGuid(Field_F8);
-            data.WriteInt32(Field_108);
+            ((CTROptions)CtrOptions).WriteCreate(data, owner, receiver);
+            data.WriteInt32(CovenantID);
+            data.WriteInt32(SoulbindID);
+            for (int i = 0; i < Customizations.Size(); ++i)
+            {
+                Customizations[i].WriteCreate(data, owner, receiver);
+            }
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
                 for (int i = 0; i < QuestSessionQuestLog.Size(); ++i)
@@ -2434,6 +2586,7 @@ namespace Game.Entities
             {
                 ArenaCooldowns[i].WriteCreate(data, owner, receiver);
             }
+            data.FlushBits();
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
                 data.WriteBit((bool)HasQuestSession);
@@ -2444,7 +2597,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(192, new[] { 0xFFFFFFF5u, 0x000001FFu, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFF80u });
+            UpdateMask allowedMaskForTarget = new UpdateMask(192, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -2452,15 +2605,15 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                allowedMaskForTarget |= new UpdateMask(192, new[] { 0x0000000Au, 0xFFFFFE00u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x0000007Fu });
+                allowedMaskForTarget |= new UpdateMask(192, new[] { 0x00000012u, 0xFFFFFFFCu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000000u });
         }
 
         void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFF5u, 0x000001FFu, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFF80u });
+                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu });
         }
-        
+
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 6);
@@ -2482,11 +2635,18 @@ namespace Game.Entities
                 if (changesMask[3])
                 {
                     if (!ignoreNestedChangesMask)
+                        Customizations.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(Customizations.Size(), data);
+                }
+                if (changesMask[4])
+                {
+                    if (!ignoreNestedChangesMask)
                         QuestSessionQuestLog.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(QuestSessionQuestLog.Size(), data);
                 }
-                if (changesMask[4])
+                if (changesMask[5])
                 {
                     if (!ignoreNestedChangesMask)
                         ArenaCooldowns.WriteUpdateMask(data);
@@ -2499,6 +2659,16 @@ namespace Game.Entities
             {
                 if (changesMask[3])
                 {
+                    for (int i = 0; i < Customizations.Size(); ++i)
+                    {
+                        if (Customizations.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            Customizations[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[4])
+                {
                     for (int i = 0; i < QuestSessionQuestLog.Size(); ++i)
                     {
                         if (QuestSessionQuestLog.HasChanged(i) || ignoreNestedChangesMask)
@@ -2510,7 +2680,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[4])
+                if (changesMask[5])
                 {
                     for (int i = 0; i < ArenaCooldowns.Size(); ++i)
                     {
@@ -2520,149 +2690,123 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (changesMask[5])
+                if (changesMask[6])
                 {
                     data.WritePackedGuid(DuelArbiter);
                 }
-                if (changesMask[6])
+                if (changesMask[7])
                 {
                     data.WritePackedGuid(WowAccount);
                 }
-                if (changesMask[7])
+                if (changesMask[8])
                 {
                     data.WritePackedGuid(LootTargetGUID);
                 }
-                if (changesMask[8])
+                if (changesMask[9])
                 {
                     data.WriteUInt32(PlayerFlags);
                 }
-                if (changesMask[9])
+                if (changesMask[10])
                 {
                     data.WriteUInt32(PlayerFlagsEx);
                 }
-                if (changesMask[10])
+                if (changesMask[11])
                 {
                     data.WriteUInt32(GuildRankID);
                 }
-                if (changesMask[11])
+                if (changesMask[12])
                 {
                     data.WriteUInt32(GuildDeleteDate);
                 }
-                if (changesMask[12])
+                if (changesMask[13])
                 {
                     data.WriteUInt32(GuildLevel);
                 }
-                if (changesMask[13])
-                {
-                    data.WriteUInt8(SkinID);
-                }
                 if (changesMask[14])
-                {
-                    data.WriteUInt8(FaceID);
-                }
-                if (changesMask[15])
-                {
-                    data.WriteUInt8(HairStyleID);
-                }
-                if (changesMask[16])
-                {
-                    data.WriteUInt8(HairColorID);
-                }
-                if (changesMask[17])
-                {
-                    data.WriteUInt8(FacialHairStyleID);
-                }
-                if (changesMask[18])
                 {
                     data.WriteUInt8(PartyType);
                 }
-                if (changesMask[19])
+                if (changesMask[15])
                 {
                     data.WriteUInt8(NativeSex);
                 }
-                if (changesMask[20])
+                if (changesMask[16])
                 {
                     data.WriteUInt8(Inebriation);
                 }
-                if (changesMask[21])
+                if (changesMask[17])
                 {
                     data.WriteUInt8(PvpTitle);
                 }
-                if (changesMask[22])
+                if (changesMask[18])
                 {
                     data.WriteUInt8(ArenaFaction);
                 }
-                if (changesMask[23])
+                if (changesMask[19])
                 {
                     data.WriteUInt32(DuelTeam);
                 }
-                if (changesMask[24])
+                if (changesMask[20])
                 {
                     data.WriteInt32(GuildTimeStamp);
                 }
-                if (changesMask[25])
+                if (changesMask[21])
                 {
                     data.WriteUInt32(PlayerTitle);
                 }
-                if (changesMask[26])
+                if (changesMask[22])
                 {
                     data.WriteInt32(FakeInebriation);
                 }
-                if (changesMask[27])
+                if (changesMask[23])
                 {
                     data.WriteUInt32(VirtualPlayerRealm);
                 }
-                if (changesMask[28])
+                if (changesMask[24])
                 {
                     data.WriteUInt32(CurrentSpecID);
                 }
-                if (changesMask[29])
+                if (changesMask[25])
                 {
                     data.WriteInt32(TaxiMountAnimKitID);
                 }
-                if (changesMask[30])
+                if (changesMask[26])
                 {
                     data.WriteUInt8(CurrentBattlePetBreedQuality);
                 }
-                if (changesMask[31])
+                if (changesMask[27])
                 {
                     data.WriteUInt32(HonorLevel);
+                }
+                if (changesMask[28])
+                {
+                    data.WriteInt32(Field_B0);
+                }
+                if (changesMask[29])
+                {
+                    data.WriteInt32(Field_B4);
+                }
+                if (changesMask[30])
+                {
+                    ((CTROptions)CtrOptions).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                }
+                if (changesMask[31])
+                {
+                    data.WriteInt32(CovenantID);
                 }
             }
             if (changesMask[32])
             {
                 if (changesMask[33])
                 {
-                    data.WriteInt32(Field_B0);
-                }
-                if (changesMask[34])
-                {
-                    data.WriteInt32(Field_B4);
-                }
-                if (changesMask[35])
-                {
-                    data.WritePackedGuid(Field_F8);
-                }
-                if (changesMask[36])
-                {
-                    data.WriteInt32(Field_108);
+                    data.WriteInt32(SoulbindID);
                 }
             }
-            if (changesMask[37])
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (changesMask[38 + i])
-                    {
-                        data.WriteUInt8(CustomDisplayOption[i]);
-                    }
-                }
-            }
-            if (changesMask[41])
+            if (changesMask[34])
             {
                 for (int i = 0; i < 125; ++i)
                 {
-                    if (changesMask[42 + i])
+                    if (changesMask[35 + i])
                     {
                         if (noQuestLogChangesMask)
                             QuestLog[i].WriteCreate(data, owner, receiver);
@@ -2671,21 +2815,21 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[167])
+            if (changesMask[160])
             {
                 for (int i = 0; i < 19; ++i)
                 {
-                    if (changesMask[168 + i])
+                    if (changesMask[161 + i])
                     {
                         VisibleItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[187])
+            if (changesMask[180])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[188 + i])
+                    if (changesMask[181 + i])
                     {
                         data.WriteFloat(AvgItemLevel[i]);
                     }
@@ -2698,6 +2842,7 @@ namespace Game.Entities
         {
             ClearChangesMask(HasQuestSession);
             ClearChangesMask(HasLevelLink);
+            ClearChangesMask(Customizations);
             ClearChangesMask(QuestSessionQuestLog);
             ClearChangesMask(ArenaCooldowns);
             ClearChangesMask(DuelArbiter);
@@ -2708,11 +2853,6 @@ namespace Game.Entities
             ClearChangesMask(GuildRankID);
             ClearChangesMask(GuildDeleteDate);
             ClearChangesMask(GuildLevel);
-            ClearChangesMask(SkinID);
-            ClearChangesMask(FaceID);
-            ClearChangesMask(HairStyleID);
-            ClearChangesMask(HairColorID);
-            ClearChangesMask(FacialHairStyleID);
             ClearChangesMask(PartyType);
             ClearChangesMask(NativeSex);
             ClearChangesMask(Inebriation);
@@ -2729,9 +2869,9 @@ namespace Game.Entities
             ClearChangesMask(HonorLevel);
             ClearChangesMask(Field_B0);
             ClearChangesMask(Field_B4);
-            ClearChangesMask(Field_F8);
-            ClearChangesMask(Field_108);
-            ClearChangesMask(CustomDisplayOption);
+            ClearChangesMask(CtrOptions);
+            ClearChangesMask(CovenantID);
+            ClearChangesMask(SoulbindID);
             ClearChangesMask(QuestLog);
             ClearChangesMask(VisibleItems);
             ClearChangesMask(AvgItemLevel);
@@ -3050,6 +3190,112 @@ namespace Game.Entities
         }
     }
 
+    public struct MawPower
+    {
+        public int Field_0;
+        public int Field_4;
+        public int Field_8;
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WriteInt32(Field_0);
+            data.WriteInt32(Field_4);
+            data.WriteInt32(Field_8);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            data.WriteInt32(Field_0);
+            data.WriteInt32(Field_4);
+            data.WriteInt32(Field_8);
+        }
+    }
+
+    public class MultiFloorExplore
+    {
+        public List<int> WorldMapOverlayIDs = new List<int>();
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WriteInt32(WorldMapOverlayIDs.Count);
+            for (int i = 0; i < WorldMapOverlayIDs.Count; ++i)
+            {
+                data.WriteInt32(WorldMapOverlayIDs[i]);
+            }
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            data.WriteInt32(WorldMapOverlayIDs.Count);
+            for (int i = 0; i < WorldMapOverlayIDs.Count; ++i)
+            {
+                data.WriteInt32(WorldMapOverlayIDs[i]);
+            }
+            data.FlushBits();
+        }
+    }
+
+    public struct RecipeProgressionInfo
+    {
+        public ushort RecipeProgressionGroupID;
+        public ushort Experience;
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WriteUInt16(RecipeProgressionGroupID);
+            data.WriteUInt16(Experience);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            data.WriteUInt16(RecipeProgressionGroupID);
+            data.WriteUInt16(Experience);
+        }
+    }
+
+    public class ActivePlayerUnk901 : BaseUpdateData<Player>
+    {
+        public UpdateField<ObjectGuid> Field_0 = new UpdateField<ObjectGuid>(0, 1 );
+        public UpdateField<int> Field_10 = new UpdateField<int>(0, 2 );
+
+        public ActivePlayerUnk901() : base(3) { }
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WritePackedGuid(Field_0);
+            data.WriteInt32(Field_10);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            UpdateMask changesMask = _changesMask;
+            if (ignoreChangesMask)
+                changesMask.SetAll();
+
+            data.WriteBits(changesMask.GetBlock(0), 3);
+
+            data.FlushBits();
+            if (changesMask[0])
+            {
+                if (changesMask[1])
+                {
+                    data.WritePackedGuid(Field_0);
+                }
+                if (changesMask[2])
+                {
+                    data.WriteInt32(Field_10);
+                }
+            }
+        }
+
+        public override void ClearChangesMask()
+        {
+            ClearChangesMask(Field_0);
+            ClearChangesMask(Field_10);
+            _changesMask.ResetAll();
+        }
+    }
+
     public class ReplayedQuest : BaseUpdateData<Player>
     {
         public UpdateField<int> QuestID = new UpdateField<int>(0, 1);
@@ -3154,7 +3400,7 @@ namespace Game.Entities
         public UpdateField<bool> BankAutoSortDisabled = new UpdateField<bool>(0, 2);
         public UpdateField<bool> SortBagsRightToLeft = new UpdateField<bool>(0, 3);
         public UpdateField<bool> InsertItemsLeftToRight = new UpdateField<bool>(0, 4);
-        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new UpdateFieldArray<DynamicUpdateField<Research>>(1, 22, 23);
+        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new UpdateFieldArray<DynamicUpdateField<Research>>(1, 27, 28);
         public DynamicUpdateField<ulong> KnownTitles = new DynamicUpdateField<ulong>(0, 5);
         public DynamicUpdateField<ushort> ResearchSites = new DynamicUpdateField<ushort>(0, 6);
         public DynamicUpdateField<uint> ResearchSiteProgress = new DynamicUpdateField<uint>(0, 7);
@@ -3167,109 +3413,119 @@ namespace Game.Entities
         public DynamicUpdateField<uint> Transmog = new DynamicUpdateField<uint>(0, 14);
         public DynamicUpdateField<uint> ConditionalTransmog = new DynamicUpdateField<uint>(0, 15);
         public DynamicUpdateField<uint> SelfResSpells = new DynamicUpdateField<uint>(0, 16);
-        public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new DynamicUpdateField<SpellPctModByLabel>(0, 18);
-        public DynamicUpdateField<SpellFlatModByLabel> SpellFlatModByLabel = new DynamicUpdateField<SpellFlatModByLabel>(0, 19);
-        public DynamicUpdateField<ReplayedQuest> ReplayedQuests = new DynamicUpdateField<ReplayedQuest>(0, 20);
-        public DynamicUpdateField<int> DisabledSpells = new DynamicUpdateField<int>(0, 21);
-        public DynamicUpdateField<CharacterRestriction> CharacterRestrictions = new DynamicUpdateField<CharacterRestriction>(0, 17);
-        public UpdateField<ObjectGuid> FarsightObject = new UpdateField<ObjectGuid>(0, 24);
-        public UpdateField<ObjectGuid> SummonedBattlePetGUID = new UpdateField<ObjectGuid>(0, 25);
-        public UpdateField<ulong> Coinage = new UpdateField<ulong>(0, 26);
-        public UpdateField<uint> XP = new UpdateField<uint>(0, 27);
-        public UpdateField<uint> NextLevelXP = new UpdateField<uint>(0, 28);
-        public UpdateField<int> TrialXP = new UpdateField<int>(0, 29);
-        public UpdateField<SkillInfo> Skill = new UpdateField<SkillInfo>(0, 30);
-        public UpdateField<uint> CharacterPoints = new UpdateField<uint>(0, 31);
-        public UpdateField<uint> MaxTalentTiers = new UpdateField<uint>(0, 32);
-        public UpdateField<uint> TrackCreatureMask = new UpdateField<uint>(0, 33);
-        public UpdateField<float> MainhandExpertise = new UpdateField<float>(34, 35);
-        public UpdateField<float> OffhandExpertise = new UpdateField<float>(34, 36);
-        public UpdateField<float> RangedExpertise = new UpdateField<float>(34, 37);
-        public UpdateField<float> CombatRatingExpertise = new UpdateField<float>(34, 38);
-        public UpdateField<float> BlockPercentage = new UpdateField<float>(34, 39);
-        public UpdateField<float> DodgePercentage = new UpdateField<float>(34, 40);
-        public UpdateField<float> DodgePercentageFromAttribute = new UpdateField<float>(34, 41);
-        public UpdateField<float> ParryPercentage = new UpdateField<float>(34, 42);
-        public UpdateField<float> ParryPercentageFromAttribute = new UpdateField<float>(34, 43);
-        public UpdateField<float> CritPercentage = new UpdateField<float>(34, 44);
-        public UpdateField<float> RangedCritPercentage = new UpdateField<float>(34, 45);
-        public UpdateField<float> OffhandCritPercentage = new UpdateField<float>(34, 46);
-        public UpdateField<float> SpellCritPercentage = new UpdateField<float>(34, 47);
-        public UpdateField<uint> ShieldBlock = new UpdateField<uint>(34, 48);
-        public UpdateField<float> ShieldBlockCritPercentage = new UpdateField<float>(34, 49);
-        public UpdateField<float> Mastery = new UpdateField<float>(34, 50);
-        public UpdateField<float> Speed = new UpdateField<float>(34, 51);
-        public UpdateField<float> Avoidance = new UpdateField<float>(34, 52);
-        public UpdateField<float> Sturdiness = new UpdateField<float>(34, 53);
-        public UpdateField<int> Versatility = new UpdateField<int>(34, 54);
-        public UpdateField<float> VersatilityBonus = new UpdateField<float>(34, 55);
-        public UpdateField<float> PvpPowerDamage = new UpdateField<float>(34, 56);
-        public UpdateField<float> PvpPowerHealing = new UpdateField<float>(34, 57);
-        public UpdateField<int> ModHealingDonePos = new UpdateField<int>(34, 58);
-        public UpdateField<float> ModHealingPercent = new UpdateField<float>(34, 59);
-        public UpdateField<float> ModHealingDonePercent = new UpdateField<float>(34, 60);
-        public UpdateField<float> ModPeriodicHealingDonePercent = new UpdateField<float>(34, 61);
-        public UpdateField<float> ModSpellPowerPercent = new UpdateField<float>(34, 62);
-        public UpdateField<float> ModResiliencePercent = new UpdateField<float>(34, 63);
-        public UpdateField<float> OverrideSpellPowerByAPPercent = new UpdateField<float>(34, 64);
-        public UpdateField<float> OverrideAPBySpellPowerPercent = new UpdateField<float>(34, 65);
-        public UpdateField<int> ModTargetResistance = new UpdateField<int>(66, 67);
-        public UpdateField<int> ModTargetPhysicalResistance = new UpdateField<int>(66, 68);
-        public UpdateField<int> LocalFlags = new UpdateField<int>(66, 69);
-        public UpdateField<byte> GrantableLevels = new UpdateField<byte>(66, 70);
-        public UpdateField<byte> MultiActionBars = new UpdateField<byte>(66, 71);
-        public UpdateField<byte> LifetimeMaxRank = new UpdateField<byte>(66, 72);
-        public UpdateField<byte> NumRespecs = new UpdateField<byte>(66, 73);
-        public UpdateField<uint> PvpMedals = new UpdateField<uint>(66, 74);
-        public UpdateField<ushort> TodayHonorableKills = new UpdateField<ushort>(66, 75);
-        public UpdateField<ushort> YesterdayHonorableKills = new UpdateField<ushort>(66, 76);
-        public UpdateField<uint> LifetimeHonorableKills = new UpdateField<uint>(66, 77);
-        public UpdateField<uint> WatchedFactionIndex = new UpdateField<uint>(66, 78);
-        public UpdateField<int> MaxLevel = new UpdateField<int>(66, 79);
-        public UpdateField<int> ScalingPlayerLevelDelta = new UpdateField<int>(66, 80);
-        public UpdateField<int> MaxCreatureScalingLevel = new UpdateField<int>(66, 81);
-        public UpdateField<uint> PetSpellPower = new UpdateField<uint>(66, 82);
-        public UpdateField<float> UiHitModifier = new UpdateField<float>(66, 83);
-        public UpdateField<float> UiSpellHitModifier = new UpdateField<float>(66, 84);
-        public UpdateField<int> HomeRealmTimeOffset = new UpdateField<int>(66, 85);
-        public UpdateField<float> ModPetHaste = new UpdateField<float>(66, 86);
-        public UpdateField<byte> LocalRegenFlags = new UpdateField<byte>(66, 87);
-        public UpdateField<byte> AuraVision = new UpdateField<byte>(66, 88);
-        public UpdateField<byte> NumBackpackSlots = new UpdateField<byte>(66, 89);
-        public UpdateField<uint> OverrideSpellsID = new UpdateField<uint>(66, 90);
-        public UpdateField<int> LfgBonusFactionID = new UpdateField<int>(66, 91);
-        public UpdateField<ushort> LootSpecID = new UpdateField<ushort>(66, 92);
-        public UpdateField<uint> OverrideZonePVPType = new UpdateField<uint>(66, 93);
-        public UpdateField<uint> Honor = new UpdateField<uint>(66, 94);
-        public UpdateField<uint> HonorNextLevel = new UpdateField<uint>(66, 95);
-        public UpdateField<int> PvpRewardAchieved = new UpdateField<int>(66, 96);
-        public UpdateField<int> PvpTierMaxFromWins = new UpdateField<int>(66, 97);
-        public UpdateField<int> PvpLastWeeksRewardAchieved = new UpdateField<int>(98, 99);
-        public UpdateField<int> PvpLastWeeksTierMaxFromWins = new UpdateField<int>(98, 100);
-        public UpdateField<int> PvpLastWeeksRewardClaimed = new UpdateField<int>(98, 101);
-        public UpdateField<byte> NumBankSlots = new UpdateField<byte>(98, 102);
-        public UpdateField<Optional<QuestSession>> QuestSession = new UpdateField<Optional<QuestSession>>(98, 103);
+        public DynamicUpdateField<uint> RuneforgePowers = new DynamicUpdateField<uint>(0, 17);
+        public DynamicUpdateField<uint> TransmogIllusions = new DynamicUpdateField<uint>(0, 18);
+        public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new DynamicUpdateField<SpellPctModByLabel>(0, 20);
+        public DynamicUpdateField<SpellFlatModByLabel> SpellFlatModByLabel = new DynamicUpdateField<SpellFlatModByLabel>(0, 21);
+        public DynamicUpdateField<MawPower> MawPowers = new DynamicUpdateField<MawPower>(0, 22);
+        public DynamicUpdateField<MultiFloorExplore> MultiFloorExploration = new DynamicUpdateField<MultiFloorExplore>(0, 23);
+        public DynamicUpdateField<RecipeProgressionInfo> RecipeProgression = new DynamicUpdateField<RecipeProgressionInfo>(0, 24);
+        public DynamicUpdateField<ReplayedQuest> ReplayedQuests = new DynamicUpdateField<ReplayedQuest>(0, 25);
+        public DynamicUpdateField<int> DisabledSpells = new DynamicUpdateField<int>(0, 26);
+        public DynamicUpdateField<CharacterRestriction> CharacterRestrictions = new DynamicUpdateField<CharacterRestriction>(0, 19);
+        public UpdateField<ObjectGuid> FarsightObject = new UpdateField<ObjectGuid>(0, 29);
+        public UpdateField<ObjectGuid> SummonedBattlePetGUID = new UpdateField<ObjectGuid>(0, 30);
+        public UpdateField<ulong> Coinage = new UpdateField<ulong>(0, 31);
+        public UpdateField<uint> XP = new UpdateField<uint>(0, 32);
+        public UpdateField<uint> NextLevelXP = new UpdateField<uint>(0, 33);
+        public UpdateField<int> TrialXP = new UpdateField<int>(34, 35);
+        public UpdateField<SkillInfo> Skill = new UpdateField<SkillInfo>(34, 36);
+        public UpdateField<uint> CharacterPoints = new UpdateField<uint>(34, 37);
+        public UpdateField<uint> MaxTalentTiers = new UpdateField<uint>(34, 38);
+        public UpdateField<uint> TrackCreatureMask = new UpdateField<uint>(34, 39);
+        public UpdateField<float> MainhandExpertise = new UpdateField<float>(34, 40);
+        public UpdateField<float> OffhandExpertise = new UpdateField<float>(34, 41);
+        public UpdateField<float> RangedExpertise = new UpdateField<float>(34, 42);
+        public UpdateField<float> CombatRatingExpertise = new UpdateField<float>(34, 43);
+        public UpdateField<float> BlockPercentage = new UpdateField<float>(34, 44);
+        public UpdateField<float> DodgePercentage = new UpdateField<float>(34, 45);
+        public UpdateField<float> DodgePercentageFromAttribute = new UpdateField<float>(34, 46);
+        public UpdateField<float> ParryPercentage = new UpdateField<float>(34, 47);
+        public UpdateField<float> ParryPercentageFromAttribute = new UpdateField<float>(34, 48);
+        public UpdateField<float> CritPercentage = new UpdateField<float>(34, 49);
+        public UpdateField<float> RangedCritPercentage = new UpdateField<float>(34, 50);
+        public UpdateField<float> OffhandCritPercentage = new UpdateField<float>(34, 51);
+        public UpdateField<float> SpellCritPercentage = new UpdateField<float>(34, 52);
+        public UpdateField<uint> ShieldBlock = new UpdateField<uint>(34, 53);
+        public UpdateField<float> ShieldBlockCritPercentage = new UpdateField<float>(34, 54);
+        public UpdateField<float> Mastery = new UpdateField<float>(34, 55);
+        public UpdateField<float> Speed = new UpdateField<float>(34, 56);
+        public UpdateField<float> Avoidance = new UpdateField<float>(34, 57);
+        public UpdateField<float> Sturdiness = new UpdateField<float>(34, 58);
+        public UpdateField<int> Versatility = new UpdateField<int>(34, 59);
+        public UpdateField<float> VersatilityBonus = new UpdateField<float>(34, 60);
+        public UpdateField<float> PvpPowerDamage = new UpdateField<float>(34, 61);
+        public UpdateField<float> PvpPowerHealing = new UpdateField<float>(34, 62);
+        public UpdateField<int> ModHealingDonePos = new UpdateField<int>(34, 63);
+        public UpdateField<float> ModHealingPercent = new UpdateField<float>(34, 64);
+        public UpdateField<float> ModPeriodicHealingDonePercent = new UpdateField<float>(34, 65);
+        public UpdateField<float> ModSpellPowerPercent = new UpdateField<float>(66, 67);
+        public UpdateField<float> ModResiliencePercent = new UpdateField<float>(66, 68);
+        public UpdateField<float> OverrideSpellPowerByAPPercent = new UpdateField<float>(66, 69);
+        public UpdateField<float> OverrideAPBySpellPowerPercent = new UpdateField<float>(66, 70);
+        public UpdateField<int> ModTargetResistance = new UpdateField<int>(66, 71);
+        public UpdateField<int> ModTargetPhysicalResistance = new UpdateField<int>(66, 72);
+        public UpdateField<uint> LocalFlags = new UpdateField<uint>(66, 73);
+        public UpdateField<byte> GrantableLevels = new UpdateField<byte>(66, 74);
+        public UpdateField<byte> MultiActionBars = new UpdateField<byte>(66, 75);
+        public UpdateField<byte> LifetimeMaxRank = new UpdateField<byte>(66, 76);
+        public UpdateField<byte> NumRespecs = new UpdateField<byte>(66, 77);
+        public UpdateField<uint> PvpMedals = new UpdateField<uint>(66, 78);
+        public UpdateField<ushort> TodayHonorableKills = new UpdateField<ushort>(66, 79);
+        public UpdateField<ushort> YesterdayHonorableKills = new UpdateField<ushort>(66, 80);
+        public UpdateField<uint> LifetimeHonorableKills = new UpdateField<uint>(66, 81);
+        public UpdateField<uint> WatchedFactionIndex = new UpdateField<uint>(66, 82);
+        public UpdateField<int> MaxLevel = new UpdateField<int>(66, 83);
+        public UpdateField<int> ScalingPlayerLevelDelta = new UpdateField<int>(66, 84);
+        public UpdateField<int> MaxCreatureScalingLevel = new UpdateField<int>(66, 85);
+        public UpdateField<uint> PetSpellPower = new UpdateField<uint>(66, 86);
+        public UpdateField<float> UiHitModifier = new UpdateField<float>(66, 87);
+        public UpdateField<float> UiSpellHitModifier = new UpdateField<float>(66, 88);
+        public UpdateField<int> HomeRealmTimeOffset = new UpdateField<int>(66, 89);
+        public UpdateField<float> ModPetHaste = new UpdateField<float>(66, 90);
+        public UpdateField<sbyte> JailersTowerLevelMax = new UpdateField<sbyte>(66, 91);
+        public UpdateField<sbyte> JailersTowerLevel = new UpdateField<sbyte>(66, 92);
+        public UpdateField<byte> LocalRegenFlags = new UpdateField<byte>(66, 93);
+        public UpdateField<byte> AuraVision = new UpdateField<byte>(66, 94);
+        public UpdateField<byte> NumBackpackSlots = new UpdateField<byte>(66, 95);
+        public UpdateField<uint> OverrideSpellsID = new UpdateField<uint>(66, 96);
+        public UpdateField<ushort> LootSpecID = new UpdateField<ushort>(66, 97);
+        public UpdateField<uint> OverrideZonePVPType = new UpdateField<uint>(98, 99);
+        public UpdateField<ObjectGuid> BnetAccount = new UpdateField<ObjectGuid>(98, 100);
+        public UpdateField<ulong> GuildClubMemberID = new UpdateField<ulong>(98, 101);
+        public UpdateField<uint> Honor = new UpdateField<uint>(98, 102);
+        public UpdateField<uint> HonorNextLevel = new UpdateField<uint>(98, 103);
+        public UpdateField<int> PvpRewardAchieved = new UpdateField<int>(98, 104);
+        public UpdateField<int> PvpTierMaxFromWins = new UpdateField<int>(98, 105);
+        public UpdateField<int> PvpLastWeeksRewardAchieved = new UpdateField<int>(98, 106);
+        public UpdateField<int> PvpLastWeeksTierMaxFromWins = new UpdateField<int>(98, 107);
+        public UpdateField<int> PvpLastWeeksRewardClaimed = new UpdateField<int>(98, 108);
+        public UpdateField<byte> NumBankSlots = new UpdateField<byte>(98, 109);
+        public UpdateField<ActivePlayerUnk901> Field_1410 = new UpdateField<ActivePlayerUnk901>(98, 111);
+        public UpdateField<Optional<QuestSession>> QuestSession = new UpdateField<Optional<QuestSession>>(98, 110);
+        public UpdateField<int> UiChromieTimeExpansionID = new UpdateField<int>(98, 112);
+        public UpdateField<int> TransportServerTime = new UpdateField<int>(98, 113);
+        public UpdateFieldArray<ObjectGuid> InvSlots = new UpdateFieldArray<ObjectGuid>(199, 114, 115);
+        public UpdateFieldArray<uint> TrackResourceMask = new UpdateFieldArray<uint>(2, 314, 315);
+        public UpdateFieldArray<ulong> ExploredZones = new UpdateFieldArray<ulong>(192, 317, 318);
+        public UpdateFieldArray<RestInfo> RestInfo = new UpdateFieldArray<RestInfo>(2, 510, 511);
+        public UpdateFieldArray<int> ModDamageDonePos = new UpdateFieldArray<int>(7, 513, 514);
+        public UpdateFieldArray<int> ModDamageDoneNeg = new UpdateFieldArray<int>(7, 513, 521);
+        public UpdateFieldArray<float> ModDamageDonePercent = new UpdateFieldArray<float>(7, 513, 528);
+        public UpdateFieldArray<float> ModHealingDonePercent = new UpdateFieldArray<float>(7, 513, 535);
+        public UpdateFieldArray<float> WeaponDmgMultipliers = new UpdateFieldArray<float>(3, 542, 543);
+        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new UpdateFieldArray<float>(3, 542, 546);
+        public UpdateFieldArray<uint> BuybackPrice = new UpdateFieldArray<uint>(12, 549, 550);
+        public UpdateFieldArray<uint> BuybackTimestamp = new UpdateFieldArray<uint>(12, 549, 562);
+        public UpdateFieldArray<uint> CombatRatings = new UpdateFieldArray<uint>(32, 574, 575);
+        public UpdateFieldArray<PVPInfo> PvpInfo = new UpdateFieldArray<PVPInfo>(6, 607, 608);
+        public UpdateFieldArray<uint> NoReagentCostMask = new UpdateFieldArray<uint>(4, 614, 615);
+        public UpdateFieldArray<uint> ProfessionSkillLine = new UpdateFieldArray<uint>(2, 619, 620);
+        public UpdateFieldArray<uint> BagSlotFlags = new UpdateFieldArray<uint>(4, 622, 623);
+        public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 627, 628);
+        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 635, 636);
 
-        public UpdateFieldArray<ObjectGuid> InvSlots = new UpdateFieldArray<ObjectGuid>(199, 104, 105);
-        public UpdateFieldArray<uint> TrackResourceMask = new UpdateFieldArray<uint>(2, 304, 305);
-        public UpdateFieldArray<ulong> ExploredZones = new UpdateFieldArray<ulong>(192, 307, 308);
-        public UpdateFieldArray<RestInfo> RestInfo = new UpdateFieldArray<RestInfo>(2, 500, 501);
-        public UpdateFieldArray<int> ModDamageDonePos = new UpdateFieldArray<int>(7, 503, 504);
-        public UpdateFieldArray<int> ModDamageDoneNeg = new UpdateFieldArray<int>(7, 503, 511);
-        public UpdateFieldArray<float> ModDamageDonePercent = new UpdateFieldArray<float>(7, 503, 518);
-        public UpdateFieldArray<float> WeaponDmgMultipliers = new UpdateFieldArray<float>(3, 525, 526);
-        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new UpdateFieldArray<float>(3, 525, 529);
-        public UpdateFieldArray<uint> BuybackPrice = new UpdateFieldArray<uint>(12, 532, 533);
-        public UpdateFieldArray<uint> BuybackTimestamp = new UpdateFieldArray<uint>(12, 532, 545);
-        public UpdateFieldArray<uint> CombatRatings = new UpdateFieldArray<uint>(32, 557, 558);
-        public UpdateFieldArray<PVPInfo> PvpInfo = new UpdateFieldArray<PVPInfo>(6, 590, 591);
-        public UpdateFieldArray<uint> NoReagentCostMask = new UpdateFieldArray<uint>(4, 597, 598);
-        public UpdateFieldArray<uint> ProfessionSkillLine = new UpdateFieldArray<uint>(2, 602, 603);
-        public UpdateFieldArray<uint> BagSlotFlags = new UpdateFieldArray<uint>(4, 605, 606);
-        public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 610, 611);
-        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 618, 619);
-
-        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1494) { }
+        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1511) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -3328,10 +3584,10 @@ namespace Game.Entities
                 data.WriteInt32(ModDamageDonePos[i]);
                 data.WriteInt32(ModDamageDoneNeg[i]);
                 data.WriteFloat(ModDamageDonePercent[i]);
+                data.WriteFloat(ModHealingDonePercent[i]);
             }
             data.WriteInt32(ModHealingDonePos);
             data.WriteFloat(ModHealingPercent);
-            data.WriteFloat(ModHealingDonePercent);
             data.WriteFloat(ModPeriodicHealingDonePercent);
             for (int i = 0; i < 3; ++i)
             {
@@ -3344,7 +3600,7 @@ namespace Game.Entities
             data.WriteFloat(OverrideAPBySpellPowerPercent);
             data.WriteInt32(ModTargetResistance);
             data.WriteInt32(ModTargetPhysicalResistance);
-            data.WriteInt32(LocalFlags);
+            data.WriteUInt32(LocalFlags);
             data.WriteUInt8(GrantableLevels);
             data.WriteUInt8(MultiActionBars);
             data.WriteUInt8(LifetimeMaxRank);
@@ -3379,13 +3635,16 @@ namespace Game.Entities
             data.WriteFloat(UiSpellHitModifier);
             data.WriteInt32(HomeRealmTimeOffset);
             data.WriteFloat(ModPetHaste);
+            data.WriteInt8(JailersTowerLevelMax);
+            data.WriteInt8(JailersTowerLevel);
             data.WriteUInt8(LocalRegenFlags);
             data.WriteUInt8(AuraVision);
             data.WriteUInt8(NumBackpackSlots);
             data.WriteUInt32(OverrideSpellsID);
-            data.WriteInt32(LfgBonusFactionID);
             data.WriteUInt16(LootSpecID);
             data.WriteUInt32(OverrideZonePVPType);
+            data.WritePackedGuid(BnetAccount);
+            data.WriteUInt64(GuildClubMemberID);
             for (int i = 0; i < 4; ++i)
             {
                 data.WriteUInt32(BagSlotFlags[i]);
@@ -3417,6 +3676,8 @@ namespace Game.Entities
             data.WriteInt32(Transmog.Size());
             data.WriteInt32(ConditionalTransmog.Size());
             data.WriteInt32(SelfResSpells.Size());
+            data.WriteInt32(RuneforgePowers.Size());
+            data.WriteInt32(TransmogIllusions.Size());
             data.WriteInt32(CharacterRestrictions.Size());
             data.WriteInt32(SpellPctModByLabel.Size());
             data.WriteInt32(SpellFlatModByLabel.Size());
@@ -3428,8 +3689,13 @@ namespace Game.Entities
                     Research[i][j].WriteCreate(data, owner, receiver);
                 }
             }
+            data.WriteInt32(MawPowers.Size());
+            data.WriteInt32(MultiFloorExploration.Size());
+            data.WriteInt32(RecipeProgression.Size());
             data.WriteInt32(ReplayedQuests.Size());
             data.WriteInt32(DisabledSpells.Size());
+            data.WriteInt32(UiChromieTimeExpansionID);
+            data.WriteInt32(TransportServerTime);
             for (int i = 0; i < KnownTitles.Size(); ++i)
             {
                 data.WriteUInt64(KnownTitles[i]);
@@ -3478,6 +3744,14 @@ namespace Game.Entities
             {
                 data.WriteUInt32(SelfResSpells[i]);
             }
+            for (int i = 0; i < RuneforgePowers.Size(); ++i)
+            {
+                data.WriteUInt32(RuneforgePowers[i]);
+            }
+            for (int i = 0; i < TransmogIllusions.Size(); ++i)
+            {
+                data.WriteUInt32(TransmogIllusions[i]);
+            }
             for (int i = 0; i < SpellPctModByLabel.Size(); ++i)
             {
                 SpellPctModByLabel[i].WriteCreate(data, owner, receiver);
@@ -3485,6 +3759,18 @@ namespace Game.Entities
             for (int i = 0; i < SpellFlatModByLabel.Size(); ++i)
             {
                 SpellFlatModByLabel[i].WriteCreate(data, owner, receiver);
+            }
+            for (int i = 0; i < MawPowers.Size(); ++i)
+            {
+                MawPowers[i].WriteCreate(data, owner, receiver);
+            }
+            for (int i = 0; i < MultiFloorExploration.Size(); ++i)
+            {
+                MultiFloorExploration[i].WriteCreate(data, owner, receiver);
+            }
+            for (int i = 0; i < RecipeProgression.Size(); ++i)
+            {
+                RecipeProgression[i].WriteCreate(data, owner, receiver);
             }
             for (int i = 0; i < ReplayedQuests.Size(); ++i)
             {
@@ -3498,18 +3784,20 @@ namespace Game.Entities
             {
                 PvpInfo[i].WriteCreate(data, owner, receiver);
             }
+            data.FlushBits();
             data.WriteBit((bool)BackpackAutoSortDisabled);
             data.WriteBit((bool)BankAutoSortDisabled);
             data.WriteBit((bool)SortBagsRightToLeft);
             data.WriteBit((bool)InsertItemsLeftToRight);
-            data.WriteBit(QuestSession.GetValue().HasValue);
-            for (int i = 0; i < CharacterRestrictions.Size(); ++i)
-            {
-                CharacterRestrictions[i].WriteCreate(data, owner, receiver);
-            }
+            data.WriteBits(QuestSession.GetValue().HasValue, 1);
+            ((ActivePlayerUnk901)Field_1410).WriteCreate(data, owner, receiver);
             if (QuestSession.GetValue().HasValue)
             {
                 QuestSession.GetValue().Value.WriteCreate(data, owner, receiver);
+            }
+            for (int i = 0; i < CharacterRestrictions.Size(); ++i)
+            {
+                CharacterRestrictions[i].WriteCreate(data, owner, receiver);
             }
             data.FlushBits();
         }
@@ -3522,129 +3810,144 @@ namespace Game.Entities
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
         {
             for (uint i = 0; i < 1; ++i)
-                data.WriteUInt32(_changesMask.GetBlocksMask(i));
-            data.WriteBits(_changesMask.GetBlocksMask(1), 15);
-            for (uint i = 0; i < 47; ++i)
-                if (_changesMask.GetBlock(i) != 0)
-                    data.WriteBits(_changesMask.GetBlock(i), 32);
+                data.WriteUInt32(changesMask.GetBlocksMask(i));
 
-            if (_changesMask[0])
+            data.WriteBits(changesMask.GetBlocksMask(1), 16);
+            for (uint i = 0; i < 48; ++i)
+                if (changesMask.GetBlock(i) != 0)
+                    data.WriteBits(changesMask.GetBlock(i), 32);
+
+            if (changesMask[0])
             {
-                if (_changesMask[1])
+                if (changesMask[1])
                 {
                     data.WriteBit(BackpackAutoSortDisabled);
                 }
-                if (_changesMask[2])
+                if (changesMask[2])
                 {
                     data.WriteBit(BankAutoSortDisabled);
                 }
-                if (_changesMask[3])
+                if (changesMask[3])
                 {
                     data.WriteBit(SortBagsRightToLeft);
                 }
-                if (_changesMask[4])
+                if (changesMask[4])
                 {
                     data.WriteBit(InsertItemsLeftToRight);
                 }
-                if (_changesMask[5])
+                if (changesMask[5])
                 {
                     if (!ignoreNestedChangesMask)
                         KnownTitles.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(KnownTitles.Size(), data);
                 }
-                if (_changesMask[6])
+                if (changesMask[6])
                 {
                     if (!ignoreNestedChangesMask)
                         ResearchSites.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ResearchSites.Size(), data);
                 }
-                if (_changesMask[7])
+                if (changesMask[7])
                 {
                     if (!ignoreNestedChangesMask)
                         ResearchSiteProgress.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ResearchSiteProgress.Size(), data);
                 }
-                if (_changesMask[8])
+                if (changesMask[8])
                 {
                     if (!ignoreNestedChangesMask)
                         DailyQuestsCompleted.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(DailyQuestsCompleted.Size(), data);
                 }
-                if (_changesMask[9])
+                if (changesMask[9])
                 {
                     if (!ignoreNestedChangesMask)
                         AvailableQuestLineXQuestIDs.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(AvailableQuestLineXQuestIDs.Size(), data);
                 }
-                if (_changesMask[10])
+                if (changesMask[10])
                 {
                     if (!ignoreNestedChangesMask)
                         Heirlooms.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(Heirlooms.Size(), data);
                 }
-                if (_changesMask[11])
+                if (changesMask[11])
                 {
                     if (!ignoreNestedChangesMask)
                         HeirloomFlags.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(HeirloomFlags.Size(), data);
                 }
-                if (_changesMask[12])
+                if (changesMask[12])
                 {
                     if (!ignoreNestedChangesMask)
                         Toys.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(Toys.Size(), data);
                 }
-                if (_changesMask[13])
+                if (changesMask[13])
                 {
                     if (!ignoreNestedChangesMask)
                         ToyFlags.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ToyFlags.Size(), data);
                 }
-                if (_changesMask[14])
+                if (changesMask[14])
                 {
                     if (!ignoreNestedChangesMask)
                         Transmog.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(Transmog.Size(), data);
                 }
-                if (_changesMask[15])
+                if (changesMask[15])
                 {
                     if (!ignoreNestedChangesMask)
                         ConditionalTransmog.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ConditionalTransmog.Size(), data);
                 }
-                if (_changesMask[16])
+                if (changesMask[16])
                 {
                     if (!ignoreNestedChangesMask)
                         SelfResSpells.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(SelfResSpells.Size(), data);
                 }
-                if (_changesMask[17])
+                if (changesMask[17])
+                {
+                    if (!ignoreNestedChangesMask)
+                        RuneforgePowers.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(RuneforgePowers.Size(), data);
+                }
+                if (changesMask[18])
+                {
+                    if (!ignoreNestedChangesMask)
+                        TransmogIllusions.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(TransmogIllusions.Size(), data);
+                }
+                if (changesMask[19])
                 {
                     if (!ignoreNestedChangesMask)
                         CharacterRestrictions.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(CharacterRestrictions.Size(), data);
                 }
-                if (_changesMask[18])
+                if (changesMask[20])
                 {
                     if (!ignoreNestedChangesMask)
                         SpellPctModByLabel.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(SpellPctModByLabel.Size(), data);
                 }
-                if (_changesMask[19])
+                if (changesMask[21])
                 {
                     if (!ignoreNestedChangesMask)
                         SpellFlatModByLabel.WriteUpdateMask(data);
@@ -3652,25 +3955,16 @@ namespace Game.Entities
                         WriteCompleteDynamicFieldUpdateMask(SpellFlatModByLabel.Size(), data);
                 }
             }
-            if (_changesMask[22])
+            if (changesMask[27])
             {
                 for (int i = 0; i < 1; ++i)
                 {
-                    if (_changesMask[23 + i])
+                    if (changesMask[28 + i])
                     {
                         if (!ignoreNestedChangesMask)
                             Research[i].WriteUpdateMask(data);
                         else
                             WriteCompleteDynamicFieldUpdateMask(Research[i].Size(), data);
-                    }
-                }
-            }
-            if (_changesMask[22])
-            {
-                for (int i = 0; i < 1; ++i)
-                {
-                    if (_changesMask[23 + i])
-                    {
                         for (int j = 0; j < Research[i].Size(); ++j)
                         {
                             if (Research[i].HasChanged(j) || ignoreNestedChangesMask)
@@ -3681,17 +3975,37 @@ namespace Game.Entities
                     }
                 }
             }
-            data.FlushBits();
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[20])
+                if (changesMask[22])
+                {
+                    if (!ignoreNestedChangesMask)
+                        MawPowers.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(MawPowers.Size(), data);
+                }
+                if (changesMask[23])
+                {
+                    if (!ignoreNestedChangesMask)
+                        MultiFloorExploration.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(MultiFloorExploration.Size(), data);
+                }
+                if (changesMask[24])
+                {
+                    if (!ignoreNestedChangesMask)
+                        RecipeProgression.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(RecipeProgression.Size(), data);
+                }
+                if (changesMask[25])
                 {
                     if (!ignoreNestedChangesMask)
                         ReplayedQuests.WriteUpdateMask(data);
                     else
                         WriteCompleteDynamicFieldUpdateMask(ReplayedQuests.Size(), data);
                 }
-                if (_changesMask[21])
+                if (changesMask[26])
                 {
                     if (!ignoreNestedChangesMask)
                         DisabledSpells.WriteUpdateMask(data);
@@ -3700,9 +4014,9 @@ namespace Game.Entities
                 }
             }
             data.FlushBits();
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[5])
+                if (changesMask[5])
                 {
                     for (int i = 0; i < KnownTitles.Size(); ++i)
                     {
@@ -3712,7 +4026,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[6])
+                if (changesMask[6])
                 {
                     for (int i = 0; i < ResearchSites.Size(); ++i)
                     {
@@ -3722,7 +4036,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[7])
+                if (changesMask[7])
                 {
                     for (int i = 0; i < ResearchSiteProgress.Size(); ++i)
                     {
@@ -3732,7 +4046,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[8])
+                if (changesMask[8])
                 {
                     for (int i = 0; i < DailyQuestsCompleted.Size(); ++i)
                     {
@@ -3742,7 +4056,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[9])
+                if (changesMask[9])
                 {
                     for (int i = 0; i < AvailableQuestLineXQuestIDs.Size(); ++i)
                     {
@@ -3752,7 +4066,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[10])
+                if (changesMask[10])
                 {
                     for (int i = 0; i < Heirlooms.Size(); ++i)
                     {
@@ -3762,7 +4076,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[11])
+                if (changesMask[11])
                 {
                     for (int i = 0; i < HeirloomFlags.Size(); ++i)
                     {
@@ -3772,7 +4086,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[12])
+                if (changesMask[12])
                 {
                     for (int i = 0; i < Toys.Size(); ++i)
                     {
@@ -3782,7 +4096,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[13])
+                if (changesMask[13])
                 {
                     for (int i = 0; i < ToyFlags.Size(); ++i)
                     {
@@ -3792,7 +4106,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[14])
+                if (changesMask[14])
                 {
                     for (int i = 0; i < Transmog.Size(); ++i)
                     {
@@ -3802,7 +4116,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[15])
+                if (changesMask[15])
                 {
                     for (int i = 0; i < ConditionalTransmog.Size(); ++i)
                     {
@@ -3812,7 +4126,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[16])
+                if (changesMask[16])
                 {
                     for (int i = 0; i < SelfResSpells.Size(); ++i)
                     {
@@ -3822,17 +4136,27 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[17])
+                if (changesMask[17])
                 {
-                    for (int i = 0; i < CharacterRestrictions.Size(); ++i)
+                    for (int i = 0; i < RuneforgePowers.Size(); ++i)
                     {
-                        if (CharacterRestrictions.HasChanged(i) || ignoreNestedChangesMask)
+                        if (RuneforgePowers.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CharacterRestrictions[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            data.WriteUInt32(RuneforgePowers[i]);
                         }
                     }
                 }
-                if (_changesMask[18])
+                if (changesMask[18])
+                {
+                    for (int i = 0; i < TransmogIllusions.Size(); ++i)
+                    {
+                        if (TransmogIllusions.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            data.WriteUInt32(TransmogIllusions[i]);
+                        }
+                    }
+                }
+                if (changesMask[20])
                 {
                     for (int i = 0; i < SpellPctModByLabel.Size(); ++i)
                     {
@@ -3842,7 +4166,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[19])
+                if (changesMask[21])
                 {
                     for (int i = 0; i < SpellFlatModByLabel.Size(); ++i)
                     {
@@ -3852,7 +4176,37 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[20])
+                if (changesMask[22])
+                {
+                    for (int i = 0; i < MawPowers.Size(); ++i)
+                    {
+                        if (MawPowers.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            MawPowers[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[23])
+                {
+                    for (int i = 0; i < MultiFloorExploration.Size(); ++i)
+                    {
+                        if (MultiFloorExploration.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            MultiFloorExploration[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[24])
+                {
+                    for (int i = 0; i < RecipeProgression.Size(); ++i)
+                    {
+                        if (RecipeProgression.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            RecipeProgression[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[25])
                 {
                     for (int i = 0; i < ReplayedQuests.Size(); ++i)
                     {
@@ -3862,7 +4216,7 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[21])
+                if (changesMask[26])
                 {
                     for (int i = 0; i < DisabledSpells.Size(); ++i)
                     {
@@ -3872,333 +4226,354 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[22])
+                if (changesMask[19])
+                {
+                    for (int i = 0; i < CharacterRestrictions.Size(); ++i)
+                    {
+                        if (CharacterRestrictions.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            CharacterRestrictions[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[29])
                 {
                     data.WritePackedGuid(FarsightObject);
                 }
-                if (_changesMask[23])
+                if (changesMask[30])
                 {
                     data.WritePackedGuid(SummonedBattlePetGUID);
                 }
-                if (_changesMask[24])
-                {
-                    data.WritePackedGuid(FarsightObject);
-                }
-                if (_changesMask[25])
-                {
-                    data.WritePackedGuid(SummonedBattlePetGUID);
-                }
-                if (_changesMask[26])
+                if (changesMask[31])
                 {
                     data.WriteUInt64(Coinage);
                 }
-                if (_changesMask[27])
+                if (changesMask[32])
                 {
                     data.WriteUInt32(XP);
                 }
-                if (_changesMask[28])
+                if (changesMask[33])
                 {
                     data.WriteUInt32(NextLevelXP);
                 }
-                if (_changesMask[29])
+            }
+            if (changesMask[34])
+            {
+                if (changesMask[35])
                 {
                     data.WriteInt32(TrialXP);
                 }
-                if (_changesMask[30])
+                if (changesMask[36])
                 {
                     ((SkillInfo)Skill).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
-                if (_changesMask[31])
+                if (changesMask[37])
                 {
                     data.WriteUInt32(CharacterPoints);
                 }
-                if (_changesMask[32])
+                if (changesMask[38])
                 {
-                    data.WriteFloat(MaxTalentTiers);
+                    data.WriteUInt32(MaxTalentTiers);
                 }
-                if (_changesMask[33])
+                if (changesMask[39])
                 {
-                    data.WriteFloat(TrackCreatureMask);
+                    data.WriteUInt32(TrackCreatureMask);
                 }
-            }
-            if (_changesMask[34])
-            {
-                if (_changesMask[35])
+                if (changesMask[40])
                 {
                     data.WriteFloat(MainhandExpertise);
                 }
-                if (_changesMask[36])
+                if (changesMask[41])
                 {
                     data.WriteFloat(OffhandExpertise);
                 }
-                if (_changesMask[37])
+                if (changesMask[42])
                 {
                     data.WriteFloat(RangedExpertise);
                 }
-                if (_changesMask[38])
+                if (changesMask[43])
                 {
                     data.WriteFloat(CombatRatingExpertise);
                 }
-                if (_changesMask[39])
+                if (changesMask[44])
                 {
                     data.WriteFloat(BlockPercentage);
                 }
-                if (_changesMask[40])
+                if (changesMask[45])
                 {
                     data.WriteFloat(DodgePercentage);
                 }
-                if (_changesMask[41])
+                if (changesMask[46])
                 {
                     data.WriteFloat(DodgePercentageFromAttribute);
                 }
-                if (_changesMask[42])
+                if (changesMask[47])
                 {
                     data.WriteFloat(ParryPercentage);
                 }
-                if (_changesMask[43])
+                if (changesMask[48])
                 {
                     data.WriteFloat(ParryPercentageFromAttribute);
                 }
-                if (_changesMask[44])
+                if (changesMask[49])
                 {
                     data.WriteFloat(CritPercentage);
                 }
-                if (_changesMask[45])
+                if (changesMask[50])
                 {
                     data.WriteFloat(RangedCritPercentage);
                 }
-                if (_changesMask[46])
+                if (changesMask[51])
                 {
                     data.WriteFloat(OffhandCritPercentage);
                 }
-                if (_changesMask[47])
+                if (changesMask[52])
                 {
                     data.WriteFloat(SpellCritPercentage);
                 }
-                if (_changesMask[48])
+                if (changesMask[53])
                 {
-                    data.WriteFloat(ShieldBlock);
+                    data.WriteUInt32(ShieldBlock);
                 }
-                if (_changesMask[49])
+                if (changesMask[54])
                 {
                     data.WriteFloat(ShieldBlockCritPercentage);
                 }
-                if (_changesMask[50])
+                if (changesMask[55])
                 {
                     data.WriteFloat(Mastery);
                 }
-                if (_changesMask[51])
+                if (changesMask[56])
                 {
                     data.WriteFloat(Speed);
                 }
-                if (_changesMask[52])
+                if (changesMask[57])
                 {
                     data.WriteFloat(Avoidance);
                 }
-                if (_changesMask[53])
+                if (changesMask[58])
                 {
                     data.WriteFloat(Sturdiness);
                 }
-                if (_changesMask[54])
+                if (changesMask[59])
                 {
-                    data.WriteFloat(Versatility);
+                    data.WriteInt32(Versatility);
                 }
-                if (_changesMask[55])
+                if (changesMask[60])
                 {
                     data.WriteFloat(VersatilityBonus);
                 }
-                if (_changesMask[56])
+                if (changesMask[61])
                 {
                     data.WriteFloat(PvpPowerDamage);
                 }
-                if (_changesMask[57])
+                if (changesMask[62])
                 {
                     data.WriteFloat(PvpPowerHealing);
                 }
-                if (_changesMask[58])
+                if (changesMask[63])
                 {
-                    data.WriteFloat(ModHealingDonePos);
+                    data.WriteInt32(ModHealingDonePos);
                 }
-                if (_changesMask[59])
+                if (changesMask[64])
                 {
                     data.WriteFloat(ModHealingPercent);
                 }
-                if (_changesMask[60])
-                {
-                    data.WriteFloat(ModHealingDonePercent);
-                }
-                if (_changesMask[61])
+                if (changesMask[65])
                 {
                     data.WriteFloat(ModPeriodicHealingDonePercent);
                 }
-                if (_changesMask[62])
+            }
+            if (changesMask[66])
+            {
+                if (changesMask[67])
                 {
                     data.WriteFloat(ModSpellPowerPercent);
                 }
-                if (_changesMask[63])
+                if (changesMask[68])
                 {
                     data.WriteFloat(ModResiliencePercent);
                 }
-                if (_changesMask[64])
+                if (changesMask[69])
                 {
                     data.WriteFloat(OverrideSpellPowerByAPPercent);
                 }
-                if (_changesMask[65])
+                if (changesMask[70])
                 {
                     data.WriteFloat(OverrideAPBySpellPowerPercent);
                 }
-            }
-            if (_changesMask[66])
-            {
-                if (_changesMask[67])
+                if (changesMask[71])
                 {
                     data.WriteInt32(ModTargetResistance);
                 }
-                if (_changesMask[68])
+                if (changesMask[72])
                 {
                     data.WriteInt32(ModTargetPhysicalResistance);
                 }
-                if (_changesMask[69])
+                if (changesMask[73])
                 {
-                    data.WriteInt32(LocalFlags);
+                    data.WriteUInt32(LocalFlags);
                 }
-                if (_changesMask[70])
+                if (changesMask[74])
                 {
                     data.WriteUInt8(GrantableLevels);
                 }
-                if (_changesMask[71])
+                if (changesMask[75])
                 {
                     data.WriteUInt8(MultiActionBars);
                 }
-                if (_changesMask[72])
+                if (changesMask[76])
                 {
-                    data.WriteUInt32(LifetimeMaxRank);
+                    data.WriteUInt8(LifetimeMaxRank);
                 }
-                if (_changesMask[73])
+                if (changesMask[77])
                 {
-                    data.WriteUInt16(NumRespecs);
+                    data.WriteUInt8(NumRespecs);
                 }
-                if (_changesMask[74])
+                if (changesMask[78])
                 {
                     data.WriteUInt32(PvpMedals);
                 }
-                if (_changesMask[75])
+                if (changesMask[79])
                 {
-                    data.WriteUInt32(TodayHonorableKills);
+                    data.WriteUInt16(TodayHonorableKills);
                 }
-                if (_changesMask[76])
+                if (changesMask[80])
                 {
-                    data.WriteUInt32(YesterdayHonorableKills);
+                    data.WriteUInt16(YesterdayHonorableKills);
                 }
-                if (_changesMask[77])
+                if (changesMask[81])
                 {
                     data.WriteUInt32(LifetimeHonorableKills);
                 }
-                if (_changesMask[78])
+                if (changesMask[82])
                 {
                     data.WriteUInt32(WatchedFactionIndex);
                 }
-                if (_changesMask[79])
+                if (changesMask[83])
                 {
                     data.WriteInt32(MaxLevel);
                 }
-                if (_changesMask[80])
+                if (changesMask[84])
                 {
                     data.WriteInt32(ScalingPlayerLevelDelta);
                 }
-                if (_changesMask[81])
+                if (changesMask[85])
                 {
-                    data.WriteFloat(MaxCreatureScalingLevel);
+                    data.WriteInt32(MaxCreatureScalingLevel);
                 }
-                if (_changesMask[82])
+                if (changesMask[86])
                 {
-                    data.WriteFloat(PetSpellPower);
+                    data.WriteUInt32(PetSpellPower);
                 }
-                if (_changesMask[83])
+                if (changesMask[87])
                 {
                     data.WriteFloat(UiHitModifier);
                 }
-                if (_changesMask[84])
+                if (changesMask[88])
                 {
                     data.WriteFloat(UiSpellHitModifier);
                 }
-                if (_changesMask[85])
+                if (changesMask[89])
                 {
                     data.WriteInt32(HomeRealmTimeOffset);
                 }
-                if (_changesMask[86])
+                if (changesMask[90])
                 {
                     data.WriteFloat(ModPetHaste);
                 }
-                if (_changesMask[87])
+                if (changesMask[91])
+                {
+                    data.WriteInt8(JailersTowerLevelMax);
+                }
+                if (changesMask[92])
+                {
+                    data.WriteInt8(JailersTowerLevel);
+                }
+                if (changesMask[93])
                 {
                     data.WriteUInt8(LocalRegenFlags);
                 }
-                if (_changesMask[88])
+                if (changesMask[94])
                 {
-                    data.WriteUInt32(AuraVision);
+                    data.WriteUInt8(AuraVision);
                 }
-                if (_changesMask[89])
+                if (changesMask[95])
                 {
-                    data.WriteInt32(NumBackpackSlots);
+                    data.WriteUInt8(NumBackpackSlots);
                 }
-                if (_changesMask[90])
+                if (changesMask[96])
                 {
                     data.WriteUInt32(OverrideSpellsID);
                 }
-                if (_changesMask[91])
+                if (changesMask[97])
                 {
-                    data.WriteInt32(LfgBonusFactionID);
+                    data.WriteUInt16(LootSpecID);
                 }
-                if (_changesMask[92])
-                {
-                    data.WriteUInt32(LootSpecID);
-                }
-                if (_changesMask[93])
+            }
+            if (changesMask[98])
+            {
+                if (changesMask[99])
                 {
                     data.WriteUInt32(OverrideZonePVPType);
                 }
-                if (_changesMask[94])
+                if (changesMask[100])
+                {
+                    data.WritePackedGuid(BnetAccount);
+                }
+                if (changesMask[101])
+                {
+                    data.WriteUInt64(GuildClubMemberID);
+                }
+                if (changesMask[102])
                 {
                     data.WriteUInt32(Honor);
                 }
-                if (_changesMask[95])
+                if (changesMask[103])
                 {
                     data.WriteUInt32(HonorNextLevel);
                 }
-                if (_changesMask[96])
+                if (changesMask[104])
                 {
                     data.WriteInt32(PvpRewardAchieved);
                 }
-                if (_changesMask[97])
+                if (changesMask[105])
                 {
                     data.WriteInt32(PvpTierMaxFromWins);
                 }
-            }
-            if (_changesMask[98])
-            {
-                if (_changesMask[99])
+                if (changesMask[106])
                 {
                     data.WriteInt32(PvpLastWeeksRewardAchieved);
                 }
-                if (_changesMask[100])
+                if (changesMask[107])
                 {
                     data.WriteInt32(PvpLastWeeksTierMaxFromWins);
                 }
-                if (_changesMask[101])
+                if (changesMask[108])
                 {
                     data.WriteInt32(PvpLastWeeksRewardClaimed);
                 }
-                if (_changesMask[102])
+                if (changesMask[109])
                 {
                     data.WriteUInt8(NumBankSlots);
                 }
+                if (changesMask[112])
+                {
+                    data.WriteInt32(UiChromieTimeExpansionID);
+                }
+                if (changesMask[113])
+                {
+                    data.WriteInt32(TransportServerTime);
+                }
             }
-            data.FlushBits();
-            if (_changesMask[98])
+            if (changesMask[98])
             {
-                data.WriteBit(QuestSession.GetValue().HasValue);
-                if (_changesMask[103])
+                data.WriteBits(QuestSession.GetValue().HasValue, 1);
+                if (changesMask[111])
+                {
+                    ((ActivePlayerUnk901)Field_1410).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                }
+                if (changesMask[110])
                 {
                     if (QuestSession.GetValue().HasValue)
                     {
@@ -4206,157 +4581,161 @@ namespace Game.Entities
                     }
                 }
             }
-            if (_changesMask[104])
+            if (changesMask[114])
             {
                 for (int i = 0; i < 199; ++i)
                 {
-                    if (_changesMask[105 + i])
+                    if (changesMask[115 + i])
                     {
                         data.WritePackedGuid(InvSlots[i]);
                     }
                 }
             }
-            if (_changesMask[304])
+            if (changesMask[314])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[305 + i])
+                    if (changesMask[315 + i])
                     {
                         data.WriteUInt32(TrackResourceMask[i]);
                     }
                 }
             }
-            if (_changesMask[307])
+            if (changesMask[317])
             {
                 for (int i = 0; i < 192; ++i)
                 {
-                    if (_changesMask[308 + i])
+                    if (changesMask[318 + i])
                     {
                         data.WriteUInt64(ExploredZones[i]);
                     }
                 }
             }
-            if (_changesMask[500])
+            if (changesMask[510])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[501 + i])
+                    if (changesMask[511 + i])
                     {
                         RestInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (_changesMask[503])
+            if (changesMask[513])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (_changesMask[504 + i])
+                    if (changesMask[514 + i])
                     {
                         data.WriteInt32(ModDamageDonePos[i]);
                     }
-                    if (_changesMask[511 + i])
+                    if (changesMask[521 + i])
                     {
                         data.WriteInt32(ModDamageDoneNeg[i]);
                     }
-                    if (_changesMask[518 + i])
+                    if (changesMask[528 + i])
                     {
                         data.WriteFloat(ModDamageDonePercent[i]);
                     }
+                    if (changesMask[535 + i])
+                    {
+                        data.WriteFloat(ModHealingDonePercent[i]);
+                    }
                 }
             }
-            if (_changesMask[525])
+            if (changesMask[542])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (_changesMask[526 + i])
+                    if (changesMask[543 + i])
                     {
                         data.WriteFloat(WeaponDmgMultipliers[i]);
                     }
-                    if (_changesMask[529 + i])
+                    if (changesMask[546 + i])
                     {
                         data.WriteFloat(WeaponAtkSpeedMultipliers[i]);
                     }
                 }
             }
-            if (_changesMask[532])
+            if (changesMask[549])
             {
                 for (int i = 0; i < 12; ++i)
                 {
-                    if (_changesMask[533 + i])
+                    if (changesMask[550 + i])
                     {
                         data.WriteUInt32(BuybackPrice[i]);
                     }
-                    if (_changesMask[545 + i])
+                    if (changesMask[562 + i])
                     {
                         data.WriteUInt32(BuybackTimestamp[i]);
                     }
                 }
             }
-            if (_changesMask[557])
+            if (changesMask[574])
             {
                 for (int i = 0; i < 32; ++i)
                 {
-                    if (_changesMask[558 + i])
+                    if (changesMask[575 + i])
                     {
                         data.WriteUInt32(CombatRatings[i]);
                     }
                 }
             }
-            if (_changesMask[597])
+            if (changesMask[614])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (_changesMask[598 + i])
+                    if (changesMask[615 + i])
                     {
                         data.WriteUInt32(NoReagentCostMask[i]);
                     }
                 }
             }
-            if (_changesMask[602])
+            if (changesMask[619])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (_changesMask[603 + i])
+                    if (changesMask[620 + i])
                     {
                         data.WriteUInt32(ProfessionSkillLine[i]);
                     }
                 }
             }
-            if (_changesMask[605])
+            if (changesMask[622])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (_changesMask[606 + i])
+                    if (changesMask[623 + i])
                     {
                         data.WriteUInt32(BagSlotFlags[i]);
                     }
                 }
             }
-            if (_changesMask[610])
+            if (changesMask[627])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (_changesMask[611 + i])
+                    if (changesMask[628 + i])
                     {
                         data.WriteUInt32(BankBagSlotFlags[i]);
                     }
                 }
             }
-            if (_changesMask[618])
+            if (changesMask[635])
             {
                 for (int i = 0; i < 875; ++i)
                 {
-                    if (_changesMask[619 + i])
+                    if (changesMask[636 + i])
                     {
                         data.WriteUInt64(QuestCompleted[i]);
                     }
                 }
             }
-            if (_changesMask[590])
+            if (changesMask[607])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (_changesMask[591 + i])
+                    if (changesMask[608 + i])
                     {
                         PvpInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
@@ -4384,8 +4763,13 @@ namespace Game.Entities
             ClearChangesMask(Transmog);
             ClearChangesMask(ConditionalTransmog);
             ClearChangesMask(SelfResSpells);
+            ClearChangesMask(RuneforgePowers);
+            ClearChangesMask(TransmogIllusions);
             ClearChangesMask(SpellPctModByLabel);
             ClearChangesMask(SpellFlatModByLabel);
+            ClearChangesMask(MawPowers);
+            ClearChangesMask(MultiFloorExploration);
+            ClearChangesMask(RecipeProgression);
             ClearChangesMask(ReplayedQuests);
             ClearChangesMask(DisabledSpells);
             ClearChangesMask(CharacterRestrictions);
@@ -4424,7 +4808,6 @@ namespace Game.Entities
             ClearChangesMask(PvpPowerHealing);
             ClearChangesMask(ModHealingDonePos);
             ClearChangesMask(ModHealingPercent);
-            ClearChangesMask(ModHealingDonePercent);
             ClearChangesMask(ModPeriodicHealingDonePercent);
             ClearChangesMask(ModSpellPowerPercent);
             ClearChangesMask(ModResiliencePercent);
@@ -4450,13 +4833,16 @@ namespace Game.Entities
             ClearChangesMask(UiSpellHitModifier);
             ClearChangesMask(HomeRealmTimeOffset);
             ClearChangesMask(ModPetHaste);
+            ClearChangesMask(JailersTowerLevelMax);
+            ClearChangesMask(JailersTowerLevel);
             ClearChangesMask(LocalRegenFlags);
             ClearChangesMask(AuraVision);
             ClearChangesMask(NumBackpackSlots);
             ClearChangesMask(OverrideSpellsID);
-            ClearChangesMask(LfgBonusFactionID);
             ClearChangesMask(LootSpecID);
             ClearChangesMask(OverrideZonePVPType);
+            ClearChangesMask(BnetAccount);
+            ClearChangesMask(GuildClubMemberID);
             ClearChangesMask(Honor);
             ClearChangesMask(HonorNextLevel);
             ClearChangesMask(PvpRewardAchieved);
@@ -4465,7 +4851,10 @@ namespace Game.Entities
             ClearChangesMask(PvpLastWeeksTierMaxFromWins);
             ClearChangesMask(PvpLastWeeksRewardClaimed);
             ClearChangesMask(NumBankSlots);
+            ClearChangesMask(Field_1410);
             ClearChangesMask(QuestSession);
+            ClearChangesMask(UiChromieTimeExpansionID);
+            ClearChangesMask(TransportServerTime);
             ClearChangesMask(InvSlots);
             ClearChangesMask(TrackResourceMask);
             ClearChangesMask(ExploredZones);
@@ -4473,6 +4862,7 @@ namespace Game.Entities
             ClearChangesMask(ModDamageDonePos);
             ClearChangesMask(ModDamageDoneNeg);
             ClearChangesMask(ModDamageDonePercent);
+            ClearChangesMask(ModHealingDonePercent);
             ClearChangesMask(WeaponDmgMultipliers);
             ClearChangesMask(WeaponAtkSpeedMultipliers);
             ClearChangesMask(BuybackPrice);
@@ -4503,14 +4893,15 @@ namespace Game.Entities
         public UpdateField<uint> Flags = new UpdateField<uint>(0, 11);
         public UpdateField<Quaternion> ParentRotation = new UpdateField<Quaternion>(0, 12);
         public UpdateField<uint> FactionTemplate = new UpdateField<uint>(0, 13);
-        public UpdateField<uint> Level = new UpdateField<uint>(0, 14);
-        public UpdateField<sbyte> State = new UpdateField<sbyte>(0, 15);
-        public UpdateField<sbyte> TypeID = new UpdateField<sbyte>(0, 16);
-        public UpdateField<byte> PercentHealth = new UpdateField<byte>(0, 17);
-        public UpdateField<uint> ArtKit = new UpdateField<uint>(0, 18);
-        public UpdateField<uint> CustomParam = new UpdateField<uint>(0, 19);
+        public UpdateField<sbyte> State = new UpdateField<sbyte>(0, 14);
+        public UpdateField<sbyte> TypeID = new UpdateField<sbyte>(0, 15);
+        public UpdateField<byte> PercentHealth = new UpdateField<byte>(0, 16);
+        public UpdateField<uint> ArtKit = new UpdateField<uint>(0, 17);
+        public UpdateField<uint> CustomParam = new UpdateField<uint>(0, 18);
+        public UpdateField<uint> Level = new UpdateField<uint>(0, 19);
+        public UpdateField<uint> AnimGroupInstance = new UpdateField<uint>(0, 20);
 
-        public GameObjectFieldData() : base(0, TypeId.GameObject, 20) { }
+        public GameObjectFieldData() : base(0, TypeId.GameObject, 21) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
@@ -4534,13 +4925,14 @@ namespace Game.Entities
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
-            data.WriteInt8((sbyte)GetViewerGameObjectState(State, owner, receiver));
-            data.WriteInt8((sbyte)TypeID);
+            data.WriteInt8(GetViewerGameObjectState(State, owner, receiver));
+            data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
             data.WriteInt32(EnableDoodadSets.Size());
             data.WriteUInt32(CustomParam);
+            data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
+            data.WriteUInt32(AnimGroupInstance);
             for (int i = 0; i < EnableDoodadSets.Size(); ++i)
             {
                 data.WriteInt32(EnableDoodadSets[i]);
@@ -4554,24 +4946,23 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
         {
-            data.WriteBits(_changesMask.GetBlock(0), 20);
+            data.WriteBits(changesMask.GetBlock(0), 21);
 
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[1])
+                if (changesMask[1])
                 {
-                    List<uint> list = StateWorldEffectIDs;
-                    data.WriteBits(list.Count, 32);
-                    for (int i = 0; i < list.Count; ++i)
+                    data.WriteBits(((List<uint>)StateWorldEffectIDs).Count, 32);
+                    for (int i = 0; i < ((List<uint>)StateWorldEffectIDs).Count; ++i)
                     {
-                        data.WriteUInt32(list[i]);
+                        data.WriteUInt32(((List<uint>)StateWorldEffectIDs)[i]);
                     }
                 }
             }
             data.FlushBits();
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[2])
+                if (changesMask[2])
                 {
                     if (!ignoreNestedChangesMask)
                         EnableDoodadSets.WriteUpdateMask(data);
@@ -4580,9 +4971,9 @@ namespace Game.Entities
                 }
             }
             data.FlushBits();
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[2])
+                if (changesMask[2])
                 {
                     for (int i = 0; i < EnableDoodadSets.Size(); ++i)
                     {
@@ -4592,77 +4983,80 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[3])
+                if (changesMask[3])
                 {
                     data.WriteUInt32(DisplayID);
                 }
-                if (_changesMask[4])
+                if (changesMask[4])
                 {
                     data.WriteUInt32(SpellVisualID);
                 }
-                if (_changesMask[5])
+                if (changesMask[5])
                 {
                     data.WriteUInt32(StateSpellVisualID);
                 }
-                if (_changesMask[6])
+                if (changesMask[6])
                 {
                     data.WriteUInt32(SpawnTrackingStateAnimID);
                 }
-                if (_changesMask[7])
+                if (changesMask[7])
                 {
                     data.WriteUInt32(SpawnTrackingStateAnimKitID);
                 }
-                if (_changesMask[8])
+                if (changesMask[8])
                 {
                     data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
                 }
-                if (_changesMask[9])
+                if (changesMask[9])
                 {
                     data.WritePackedGuid(CreatedBy);
                 }
-                if (_changesMask[10])
+                if (changesMask[10])
                 {
                     data.WritePackedGuid(GuildGUID);
                 }
-                if (_changesMask[11])
+                if (changesMask[11])
                 {
                     data.WriteUInt32(GetViewerGameObjectFlags(Flags, owner, receiver));
                 }
-                if (_changesMask[12])
+                if (changesMask[12])
                 {
-                    Quaternion rotation = ParentRotation;
-                    data.WriteFloat(rotation.X);
-                    data.WriteFloat(rotation.Y);
-                    data.WriteFloat(rotation.Z);
-                    data.WriteFloat(rotation.W);
+                    data.WriteFloat(((Quaternion)ParentRotation).X);
+                    data.WriteFloat(((Quaternion)ParentRotation).Y);
+                    data.WriteFloat(((Quaternion)ParentRotation).Z);
+                    data.WriteFloat(((Quaternion)ParentRotation).W);
                 }
-                if (_changesMask[13])
+                if (changesMask[13])
                 {
                     data.WriteUInt32(FactionTemplate);
                 }
-                if (_changesMask[14])
+                if (changesMask[14])
                 {
-                    data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
+                    data.WriteInt8(GetViewerGameObjectState(State, owner, receiver));
                 }
-                if (_changesMask[15])
+                if (changesMask[15])
                 {
-                    data.WriteInt8((sbyte)GetViewerGameObjectState(State, owner, receiver));
+                    data.WriteInt8(TypeID);
                 }
-                if (_changesMask[16])
-                {
-                    data.WriteInt8((sbyte)TypeID);
-                }
-                if (_changesMask[17])
+                if (changesMask[16])
                 {
                     data.WriteUInt8(PercentHealth);
                 }
-                if (_changesMask[18])
+                if (changesMask[17])
                 {
                     data.WriteUInt32(ArtKit);
                 }
-                if (_changesMask[19])
+                if (changesMask[18])
                 {
                     data.WriteUInt32(CustomParam);
+                }
+                if (changesMask[19])
+                {
+                    data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
+                }
+                if (changesMask[20])
+                {
+                    data.WriteUInt32(AnimGroupInstance);
                 }
             }
         }
@@ -4682,12 +5076,13 @@ namespace Game.Entities
             ClearChangesMask(Flags);
             ClearChangesMask(ParentRotation);
             ClearChangesMask(FactionTemplate);
-            ClearChangesMask(Level);
             ClearChangesMask(State);
             ClearChangesMask(TypeID);
             ClearChangesMask(PercentHealth);
             ClearChangesMask(ArtKit);
             ClearChangesMask(CustomParam);
+            ClearChangesMask(Level);
+            ClearChangesMask(AnimGroupInstance);
             _changesMask.ResetAll();
         }
 
@@ -4720,7 +5115,7 @@ namespace Game.Entities
     public class DynamicObjectData : BaseUpdateData<DynamicObject>
     {
         public UpdateField<ObjectGuid> Caster = new UpdateField<ObjectGuid>(0, 1);
-        public UpdateField<uint> SpellXSpellVisualID = new UpdateField<uint>(0, 2);
+        public UpdateField<SpellCastVisualField> SpellVisual = new UpdateField<SpellCastVisualField>(0, 2);
         public UpdateField<uint> SpellID = new UpdateField<uint>(0, 3);
         public UpdateField<float> Radius = new UpdateField<float>(0, 4);
         public UpdateField<uint> CastTime = new UpdateField<uint>(0, 5);
@@ -4731,7 +5126,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
         {
             data.WritePackedGuid(Caster);
-            data.WriteUInt32(SpellXSpellVisualID);
+            ((SpellCastVisualField)SpellVisual).WriteCreate(data, owner, receiver);
             data.WriteUInt32(SpellID);
             data.WriteFloat(Radius);
             data.WriteUInt32(CastTime);
@@ -4756,7 +5151,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[2])
                 {
-                    data.WriteUInt32(SpellXSpellVisualID);
+                    ((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (_changesMask[3])
                 {
@@ -4780,7 +5175,7 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(Caster);
-            ClearChangesMask(SpellXSpellVisualID);
+            ClearChangesMask(SpellVisual);
             ClearChangesMask(SpellID);
             ClearChangesMask(Radius);
             ClearChangesMask(CastTime);
@@ -4791,25 +5186,21 @@ namespace Game.Entities
 
     public class CorpseData : BaseUpdateData<Corpse>
     {
-        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 1);
-        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 2);
-        public UpdateField<ObjectGuid> PartyGUID = new UpdateField<ObjectGuid>(0, 3);
-        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(0, 4);
-        public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 5);
-        public UpdateField<byte> Unused = new UpdateField<byte>(0, 6);
-        public UpdateField<byte> RaceID = new UpdateField<byte>(0, 7);
-        public UpdateField<byte> Sex = new UpdateField<byte>(0, 8);
-        public UpdateField<byte> SkinID = new UpdateField<byte>(0, 9);
-        public UpdateField<byte> FaceID = new UpdateField<byte>(0, 10);
-        public UpdateField<byte> HairStyleID = new UpdateField<byte>(0, 11);
-        public UpdateField<byte> HairColorID = new UpdateField<byte>(0, 12);
-        public UpdateField<byte> FacialHairStyleID = new UpdateField<byte>(0, 13);
-        public UpdateField<uint> Flags = new UpdateField<uint>(0, 14);
-        public UpdateField<int> FactionTemplate = new UpdateField<int>(0, 15);
-        public UpdateFieldArray<uint> Items = new UpdateFieldArray<uint>(19, 16, 17);
-        public UpdateFieldArray<byte> CustomDisplayOption = new UpdateFieldArray<byte>(3, 36, 37);
+        public DynamicUpdateField<ChrCustomizationChoice> Customizations = new DynamicUpdateField<ChrCustomizationChoice>(0, 1);
+        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 2);
+        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 3);
+        public UpdateField<ObjectGuid> PartyGUID = new UpdateField<ObjectGuid>(0, 4);
+        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(0, 5);
+        public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 6);
+        public UpdateField<byte> Unused = new UpdateField<byte>(0, 7);
+        public UpdateField<byte> RaceID = new UpdateField<byte>(0, 8);
+        public UpdateField<byte> Sex = new UpdateField<byte>(0, 9);
+        public UpdateField<uint> Flags = new UpdateField<uint>(0, 10);
+        public UpdateField<int> FactionTemplate = new UpdateField<int>(0, 11);
+        public UpdateField<uint> StateSpellVisualKitID = new UpdateField<uint>(0, 12);
+        public UpdateFieldArray<uint> Items = new UpdateFieldArray<uint>(19, 13, 14);
 
-        public CorpseData() : base(0, TypeId.Corpse, 40) { }
+        public CorpseData() : base(0, TypeId.Corpse, 33) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Corpse owner, Player receiver)
         {
@@ -4825,16 +5216,13 @@ namespace Game.Entities
             data.WriteUInt8(Unused);
             data.WriteUInt8(RaceID);
             data.WriteUInt8(Sex);
-            data.WriteUInt8(SkinID);
-            data.WriteUInt8(FaceID);
-            data.WriteUInt8(HairStyleID);
-            data.WriteUInt8(HairColorID);
-            data.WriteUInt8(FacialHairStyleID);
+            data.WriteInt32(Customizations.Size());
             data.WriteUInt32(Flags);
             data.WriteInt32(FactionTemplate);
-            for (int i = 0; i < 3; ++i)
+            data.WriteUInt32(StateSpellVisualKitID);
+            for (int i = 0; i < Customizations.Size(); ++i)
             {
-                data.WriteUInt8(CustomDisplayOption[i]);
+                Customizations[i].WriteCreate(data, owner, receiver);
             }
         }
 
@@ -4845,92 +5233,86 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Corpse owner, Player receiver)
         {
-            data.WriteBits(_changesMask.GetBlocksMask(0), 2);
+            data.WriteBits(changesMask.GetBlocksMask(0), 2);
             for (uint i = 0; i < 2; ++i)
-                if (_changesMask.GetBlock(i) != 0)
-                    data.WriteBits(_changesMask.GetBlock(i), 32);
+                if (changesMask.GetBlock(i) != 0)
+                    data.WriteBits(changesMask.GetBlock(i), 32);
 
-            data.FlushBits();
-            if (_changesMask[0])
+            if (changesMask[0])
             {
-                if (_changesMask[1])
+                if (changesMask[1])
+                {
+                    if (!ignoreNestedChangesMask)
+                        Customizations.WriteUpdateMask(data);
+                    else
+                        WriteCompleteDynamicFieldUpdateMask(Customizations.Size(), data);
+                }
+            }
+            data.FlushBits();
+            if (changesMask[0])
+            {
+                if (changesMask[1])
+                {
+                    for (int i = 0; i < Customizations.Size(); ++i)
+                    {
+                        if (Customizations.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            Customizations[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[2])
                 {
                     data.WriteUInt32(DynamicFlags);
                 }
-                if (_changesMask[2])
+                if (changesMask[3])
                 {
                     data.WritePackedGuid(Owner);
                 }
-                if (_changesMask[3])
+                if (changesMask[4])
                 {
                     data.WritePackedGuid(PartyGUID);
                 }
-                if (_changesMask[4])
+                if (changesMask[5])
                 {
                     data.WritePackedGuid(GuildGUID);
                 }
-                if (_changesMask[5])
+                if (changesMask[6])
                 {
                     data.WriteUInt32(DisplayID);
                 }
-                if (_changesMask[6])
+                if (changesMask[7])
                 {
                     data.WriteUInt8(Unused);
                 }
-                if (_changesMask[7])
+                if (changesMask[8])
                 {
                     data.WriteUInt8(RaceID);
                 }
-                if (_changesMask[8])
+                if (changesMask[9])
                 {
                     data.WriteUInt8(Sex);
                 }
-                if (_changesMask[9])
-                {
-                    data.WriteUInt8(SkinID);
-                }
-                if (_changesMask[10])
-                {
-                    data.WriteUInt8(FaceID);
-                }
-                if (_changesMask[11])
-                {
-                    data.WriteUInt8(HairStyleID);
-                }
-                if (_changesMask[12])
-                {
-                    data.WriteUInt8(HairColorID);
-                }
-                if (_changesMask[13])
-                {
-                    data.WriteUInt8(FacialHairStyleID);
-                }
-                if (_changesMask[14])
+                if (changesMask[10])
                 {
                     data.WriteUInt32(Flags);
                 }
-                if (_changesMask[15])
+                if (changesMask[11])
                 {
                     data.WriteInt32(FactionTemplate);
                 }
+                if (changesMask[12])
+                {
+                    data.WriteUInt32(StateSpellVisualKitID);
+                }
             }
-            if (_changesMask[16])
+            if (changesMask[13])
             {
                 for (int i = 0; i < 19; ++i)
                 {
-                    if (_changesMask[17 + i])
+                    if (changesMask[14 + i])
                     {
                         data.WriteUInt32(Items[i]);
-                    }
-                }
-            }
-            if (_changesMask[36])
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (_changesMask[37 + i])
-                    {
-                        data.WriteUInt8(CustomDisplayOption[i]);
                     }
                 }
             }
@@ -4938,6 +5320,7 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
+            ClearChangesMask(Customizations);
             ClearChangesMask(DynamicFlags);
             ClearChangesMask(Owner);
             ClearChangesMask(PartyGUID);
@@ -4946,15 +5329,10 @@ namespace Game.Entities
             ClearChangesMask(Unused);
             ClearChangesMask(RaceID);
             ClearChangesMask(Sex);
-            ClearChangesMask(SkinID);
-            ClearChangesMask(FaceID);
-            ClearChangesMask(HairStyleID);
-            ClearChangesMask(HairColorID);
-            ClearChangesMask(FacialHairStyleID);
             ClearChangesMask(Flags);
             ClearChangesMask(FactionTemplate);
+            ClearChangesMask(StateSpellVisualKitID);
             ClearChangesMask(Items);
-            ClearChangesMask(CustomDisplayOption);
             _changesMask.ResetAll();
         }
     }
@@ -4976,6 +5354,7 @@ namespace Game.Entities
                 data.WriteVector2(Points[i]);
             }
             data.WriteUInt32(ParameterCurve);
+            data.FlushBits();
             data.WriteBit(OverrideActive);
             data.FlushBits();
         }
@@ -5042,7 +5421,7 @@ namespace Game.Entities
         public UpdateField<uint> TimeToTargetExtraScale = new UpdateField<uint>(0, 7);
         public UpdateField<uint> SpellID = new UpdateField<uint>(0, 8);
         public UpdateField<uint> SpellForVisuals = new UpdateField<uint>(0, 9);
-        public UpdateField<uint> SpellXSpellVisualID = new UpdateField<uint>(0, 10);
+        public UpdateField<SpellCastVisualField> SpellVisual = new UpdateField<SpellCastVisualField>(0, 10);
         public UpdateField<float> BoundsRadius2D = new UpdateField<float>(0, 11);
         public UpdateField<uint> DecalPropertiesID = new UpdateField<uint>(0, 12);
         public UpdateField<ObjectGuid> CreatingEffectGUID = new UpdateField<ObjectGuid>(0, 13);
@@ -5050,7 +5429,7 @@ namespace Game.Entities
         public AreaTriggerFieldData() : base(0, TypeId.AreaTrigger, 14) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
-        {
+        {     
             ((ScaleCurve)OverrideScaleCurve).WriteCreate(data, owner, receiver);
             data.WritePackedGuid(Caster);
             data.WriteUInt32(Duration);
@@ -5059,7 +5438,9 @@ namespace Game.Entities
             data.WriteUInt32(TimeToTargetExtraScale);
             data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellForVisuals);
-            data.WriteUInt32(SpellXSpellVisualID);
+
+            ((SpellCastVisualField)SpellVisual).WriteCreate(data, owner, receiver);
+
             data.WriteFloat(BoundsRadius2D);
             data.WriteUInt32(DecalPropertiesID);
             data.WritePackedGuid(CreatingEffectGUID);
@@ -5112,7 +5493,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[10])
                 {
-                    data.WriteUInt32(SpellXSpellVisualID);
+                    ((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                 }
                 if (_changesMask[11])
                 {
@@ -5144,7 +5525,7 @@ namespace Game.Entities
             ClearChangesMask(TimeToTargetExtraScale);
             ClearChangesMask(SpellID);
             ClearChangesMask(SpellForVisuals);
-            ClearChangesMask(SpellXSpellVisualID);
+            ClearChangesMask(SpellVisual);
             ClearChangesMask(BoundsRadius2D);
             ClearChangesMask(DecalPropertiesID);
             ClearChangesMask(CreatingEffectGUID);
@@ -5217,6 +5598,7 @@ namespace Game.Entities
         public uint UiCameraID;
         public byte ActorIndex;
         public byte Flags;
+        public byte ChatType;
 
         public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
         {
@@ -5225,6 +5607,7 @@ namespace Game.Entities
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
+            data.WriteUInt8(ChatType);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Conversation owner, Player receiver)
@@ -5234,6 +5617,7 @@ namespace Game.Entities
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
+            data.WriteUInt8(ChatType);
         }
     }
 
@@ -5244,6 +5628,7 @@ namespace Game.Entities
         public ObjectGuid ActorGUID;
         public int Field_18;
         public ConversationActorType Type;
+        public uint NoActorObject;
 
         public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
         {
@@ -5252,6 +5637,7 @@ namespace Game.Entities
             data.WritePackedGuid(ActorGUID);
             data.WriteInt32(Field_18);
             data.WriteBits(Type, 1);
+            data.WriteBits(NoActorObject, 1);
             data.FlushBits();
         }
 
@@ -5262,6 +5648,7 @@ namespace Game.Entities
             data.WritePackedGuid(ActorGUID);
             data.WriteInt32(Field_18);
             data.WriteBits(Type, 1);
+            data.WriteBits(NoActorObject, 1);
             data.FlushBits();
         }
     }

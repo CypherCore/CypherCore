@@ -938,7 +938,7 @@ namespace Framework.Constants
 
     public enum AzeriteTierUnlockSetFlags
     {
-        Default = 0x1
+        Default = 0x01
     }
 
     public enum BattlegroundBracketId                                  // bracketId for level ranges
@@ -948,26 +948,14 @@ namespace Framework.Constants
         Max
     }
 
-    public enum CharBaseSectionVariation : byte
+    public enum ChrCustomizationOptionFlag
     {
-        Skin = 0,
-        Face = 1,
-        FacialHair = 2,
-        Hair = 3,
-        Underwear = 4,
-        CustomDisplay1 = 5,
-        CustomDisplay2 = 6,
-        CustomDisplay3 = 7,
-
-        Max
+        Disabled = 0x04
     }
 
-    public enum CharSectionFlags
+    public enum ChrCustomizationReqFlag
     {
-        Player = 0x01,
-        DeathKnight = 0x04,
-        DemonHunter = 0x20,
-        Conditional = 0x400
+        HasRequirements = 0x01
     }
 
     public enum CharSectionType
@@ -992,7 +980,7 @@ namespace Framework.Constants
         Max
     }
 
-    public enum BattlemasterListFlags : sbyte
+    public enum BattlemasterListFlags : int
     {
         Disabled = 0x01,
         SkipRoleCheck = 0x02,
@@ -1012,6 +1000,20 @@ namespace Framework.Constants
         DualWieldTwoHanded = 0x10,     // Used For Cunitdisplay::Setsheatheinvertedfordualwield
         PetOverrideSpec = 0x20,
         Recommended = 0x40,
+    }
+
+    public enum ContentTuningCalcType
+    {
+        Base = 0,
+        PlusOne = 1,
+        PlusMaxLevelForExpansion = 2
+    }
+
+    public enum ContentTuningFlag
+    {
+        DisabledForItem = 0x04,
+        Horde = 0x8,
+        Alliance = 0x10
     }
 
     public enum Curves
@@ -1852,12 +1854,34 @@ namespace Framework.Constants
         CreatureSpellDamage = 9
     }
 
+    public enum UiMapFlag
+    {
+        None = 0x00,
+        NoHighlight = 0x01,
+        ShowOverlays = 0x02,
+        ShowTaxiNodes = 0x04,
+        GarrisonMap = 0x08,
+        FallbackToParentMap = 0x10,
+        NoHighlightTexture = 0x20,
+        ShowTaskObjectives = 0x40,
+        NoWorldPositions = 0x80,
+        HideArchaeologyDigs = 0x100,
+        Deprecated = 0x200,
+        HideIcons = 0x400,
+        HideVignettes = 0x800,
+        ForceAllOverlayExplored = 0x1000,
+        FlightMapShowZoomOut = 0x2000,
+        FlightMapAutoZoom = 0x4000,
+        ForceOnNavbar = 0x8000
+    }
+
     public enum UiMapSystem : sbyte
     {
         World = 0,
         Taxi = 1,
         Adventure = 2,
-        Max = 3
+        SystemMinimap = 3,
+        Max
     }
 
     public enum UiMapType

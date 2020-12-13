@@ -280,7 +280,7 @@ namespace Game.Networking.Packets
 
     public class GuildEventStatusChange : ServerPacket
     {
-        public GuildEventStatusChange() : base(ServerOpcodes.GuildEventAwayChange) { }
+        public GuildEventStatusChange() : base(ServerOpcodes.GuildEventStatusChange) { }
 
         public override void Write()
         {

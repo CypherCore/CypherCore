@@ -328,7 +328,7 @@ namespace Game.Networking.Packets
     public class ClientGossipText
     {
         public uint QuestID;
-        public int ContentTuningID;
+        public uint ContentTuningID;
         public int QuestType;
         public bool Repeatable;
         public string QuestTitle;
@@ -338,7 +338,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(QuestID);
-            data.WriteInt32(ContentTuningID);
+            data.WriteUInt32(ContentTuningID);
             data.WriteInt32(QuestType);
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);

@@ -790,7 +790,7 @@ namespace Game.Networking.Packets
 
     public class ItemModList
     {
-        public Array<ItemMod> Values = new Array<ItemMod>(ItemModifier.Max);
+        public Array<ItemMod> Values = new Array<ItemMod>((int)ItemModifier.Max);
 
         public void Read(WorldPacket data)
         {
@@ -859,8 +859,8 @@ namespace Game.Networking.Packets
                 ItemBonus.Value.Context = item.GetContext();
             }
 
-            foreach (var mod in item.m_itemData.Modifiers.Values)
-                Modifications.Values.Add(mod.Value, (ItemModifier)mod.Type);
+            foreach (var mod in item.m_itemData.Modifiers.GetValue().Values)
+                Modifications.Values.Add(new ItemMod(mod.Value, (ItemModifier)mod.Type));
         }
 
         public ItemInstance(Loots.LootItem lootItem)

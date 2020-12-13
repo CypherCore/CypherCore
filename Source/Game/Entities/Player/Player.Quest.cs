@@ -49,14 +49,18 @@ namespace Game.Entities
 
         public int GetQuestMinLevel(Quest quest)
         {
-            if (quest.Level == -1 && quest.ScalingFactionGroup != 0)
+            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            if (questLevels.HasValue)
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
                 FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                if (raceFaction == null || raceFaction.FactionGroup != quest.ScalingFactionGroup)
-                    return quest.MaxScalingLevel;
+                if (raceFaction == null || raceFaction.FactionGroup != CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId).GetScalingFactionGroup())
+                    return questLevels.Value.MaxLevel;
+
+                return questLevels.Value.MinLevelWithDelta;
             }
-            return quest.MinLevel;
+
+            return 0;
         }
 
         public int GetQuestLevel(Quest quest)
@@ -64,16 +68,18 @@ namespace Game.Entities
             if (quest == null)
                 return 0;
 
-            if (quest.Level == -1)
+            var questLevels = Global.DB2Mgr.GetContentTuningData(quest.ContentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            if (questLevels.HasValue)
             {
                 int minLevel = GetQuestMinLevel(quest);
-                int maxLevel = quest.MaxScalingLevel;
+                int maxLevel = questLevels.Value.MaxLevel;
                 int level = (int)GetLevel();
                 if (level >= minLevel)
                     return Math.Min(level, maxLevel);
                 return minLevel;
             }
-            return quest.Level;
+
+            return 0;
         }
 
         public int GetRewardedQuestCount() { return m_RewardedQuests.Count; }
@@ -1153,6 +1159,7 @@ namespace Game.Entities
 
             UpdateCriteria(CriteriaTypes.CompleteQuestCount);
             UpdateCriteria(CriteriaTypes.CompleteQuest, quest.Id);
+            UpdateCriteria(CriteriaTypes.CompleteQuestAccumulate, 1);
 
             // make full db save
             SaveToDB(false);

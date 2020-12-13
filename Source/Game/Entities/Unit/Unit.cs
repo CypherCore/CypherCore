@@ -1207,7 +1207,7 @@ namespace Game.Entities
                 if (artifactAura != null)
                 {
                     Item artifact = ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
-                    if (artifact)
+                    if (artifact != null)
                     {
                         ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
                         if (artifactAppearance != null)
@@ -1216,398 +1216,84 @@ namespace Game.Entities
                     }
                 }
 
-                byte hairColor = thisPlayer.m_playerData.HairColorID;
-                byte skinColor = thisPlayer.m_playerData.SkinID;
+                ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeSex(), form);
+                if (formModelData != null)
+                {
+                    bool useRandom = false;
+                    switch (form)
+                    {
+                        case ShapeShiftForm.CatForm:
+                            useRandom = HasAura(210333);
+                            break; // Glyph of the Feral Chameleon
+                        case ShapeShiftForm.TravelForm:
+                            useRandom = HasAura(344336);
+                            break; // Glyph of the Swift Chameleon
+                        case ShapeShiftForm.AquaticForm:
+                            useRandom = HasAura(344338);
+                            break; // Glyph of the Aquatic Chameleon
+                        case ShapeShiftForm.BearForm:
+                            useRandom = HasAura(107059);
+                            break; // Glyph of the Ursol Chameleon
+                        case ShapeShiftForm.FlightForm:
+                            useRandom = HasAura(344342);
+                            break; // Glyph of the Aerial Chameleon
+                        default:
+                            break;
+                    }
 
+                    if (useRandom)
+                    {
+                        List<uint> displayIds = new List<uint>();
+                        for (var i = 0; i < formModelData.Choices.Count; ++i)
+                        {
+                            ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[i];
+                            if (displayInfo != null)
+                            {
+                                ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
+                                if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.m_playerData.Customizations))
+                                    displayIds.Add(displayInfo.DisplayID);
+                            }
+                        }
+
+                        if (!displayIds.Empty())
+                            return displayIds.SelectRandom();
+                    }
+                    else
+                    {
+                        uint formChoice = thisPlayer.GetCustomizationChoice(formModelData.OptionID);
+                        if (formChoice != 0)
+                        {
+                            var choiceIndex = formModelData.Choices.FindIndex(choice =>
+                            {
+                                return choice.Id == formChoice;
+                            });
+
+                            if (choiceIndex != -1)
+                            {
+                                ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[choiceIndex];
+                                if (displayInfo != null)
+                                    return displayInfo.DisplayID;
+                            }
+                        }
+                    }
+                }
                 switch (form)
                 {
-                    case ShapeShiftForm.CatForm:
-                        {
-                            if (GetRace() == Race.NightElf)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 10);
-
-                                switch (hairColor)
-                                {
-                                    case 7: // Violet
-                                    case 8:
-                                        return 29405;
-                                    case 3: // Light Blue
-                                        return 29406;
-                                    case 0: // Green
-                                    case 1: // Light Green
-                                    case 2: // Dark Green
-                                        return 29407;
-                                    case 4: // White
-                                        return 29408;
-                                    default: // original - Dark Blue
-                                        return 892;
-                                }
-                            }
-                            else if (GetRace() == Race.Troll)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 12);
-
-                                switch (hairColor)
-                                {
-                                    case 0: // Red
-                                    case 1:
-                                        return 33668;
-                                    case 2: // Yellow
-                                    case 3:
-                                        return 33667;
-                                    case 4: // Blue
-                                    case 5:
-                                    case 6:
-                                        return 33666;
-                                    case 7: // Purple
-                                    case 10:
-                                        return 33665;
-                                    default: // original - white
-                                        return 33669;
-                                }
-                            }
-                            else if (GetRace() == Race.Worgen)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    skinColor = (byte)RandomHelper.URand(0, 9);
-
-                                // Male
-                                if (GetGender() == Gender.Male)
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 1: // Brown
-                                            return 33662;
-                                        case 2: // Black
-                                        case 7:
-                                            return 33661;
-                                        case 4: // yellow
-                                            return 33664;
-                                        case 3: // White
-                                        case 5:
-                                            return 33663;
-                                        default: // original - Gray
-                                            return 33660;
-                                    }
-                                }
-                                // Female
-                                else
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 5: // Brown
-                                        case 6:
-                                            return 33662;
-                                        case 7: // Black
-                                        case 8:
-                                            return 33661;
-                                        case 3: // yellow
-                                        case 4:
-                                            return 33664;
-                                        case 2: // White
-                                            return 33663;
-                                        default: // original - Gray
-                                            return 33660;
-                                    }
-                                }
-                            }
-                            else if (GetRace() == Race.Tauren)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    skinColor = (byte)RandomHelper.URand(0, 20);
-
-                                if (GetGender() == Gender.Male)
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 12: // White
-                                        case 13:
-                                        case 14:
-                                        case 18: // Completly White
-                                            return 29409;
-                                        case 9: // Light Brown
-                                        case 10:
-                                        case 11:
-                                            return 29410;
-                                        case 6: // Brown
-                                        case 7:
-                                        case 8:
-                                            return 29411;
-                                        case 0: // Dark
-                                        case 1:
-                                        case 2:
-                                        case 3: // Dark Grey
-                                        case 4:
-                                        case 5:
-                                            return 29412;
-                                        default: // original - Grey
-                                            return 8571;
-                                    }
-                                }
-                                // Female
-                                else
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 10: // White
-                                            return 29409;
-                                        case 6: // Light Brown
-                                        case 7:
-                                            return 29410;
-                                        case 4: // Brown
-                                        case 5:
-                                            return 29411;
-                                        case 0: // Dark
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                            return 29412;
-                                        default: // original - Grey
-                                            return 8571;
-                                    }
-                                }
-                            }
-                            else if (Player.TeamForRace(GetRace()) == Team.Alliance)
-                                return 892;
-                            else
-                                return 8571;
-                        }
-                    case ShapeShiftForm.BearForm:
-                        {
-                            if (GetRace() == Race.NightElf)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 8);
-
-                                switch (hairColor)
-                                {
-                                    case 0: // Green
-                                    case 1: // Light Green
-                                    case 2: // Dark Green
-                                        return 29413; // 29415?
-                                    case 6: // Dark Blue
-                                        return 29414;
-                                    case 4: // White
-                                        return 29416;
-                                    case 3: // Light Blue
-                                        return 29417;
-                                    default: // original - Violet
-                                        return 29415;
-                                }
-                            }
-                            else if (GetRace() == Race.Troll)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    hairColor = (byte)RandomHelper.URand(0, 14);
-
-                                switch (hairColor)
-                                {
-                                    case 0: // Red
-                                    case 1:
-                                        return 33657;
-                                    case 2: // Yellow
-                                    case 3:
-                                        return 33659;
-                                    case 7: // Purple
-                                    case 10:
-                                        return 33656;
-                                    case 8: // White
-                                    case 9:
-                                    case 11:
-                                    case 12:
-                                        return 33658;
-                                    default: // original - Blue
-                                        return 33655;
-                                }
-                            }
-                            else if (GetRace() == Race.Worgen)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    skinColor = (byte)RandomHelper.URand(0, 8);
-
-                                // Male
-                                if (GetGender() == Gender.Male)
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 1: // Brown
-                                            return 33652;
-                                        case 2: // Black
-                                        case 7:
-                                            return 33651;
-                                        case 4: // Yellow
-                                            return 33653;
-                                        case 3: // White
-                                        case 5:
-                                            return 33654;
-                                        default: // original - Gray
-                                            return 33650;
-                                    }
-                                }
-                                // Female
-                                else
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 5: // Brown
-                                        case 6:
-                                            return 33652;
-                                        case 7: // Black
-                                        case 8:
-                                            return 33651;
-                                        case 3: // yellow
-                                        case 4:
-                                            return 33654;
-                                        case 2: // White
-                                            return 33653;
-                                        default: // original - Gray
-                                            return 33650;
-                                    }
-                                }
-                            }
-                            else if (GetRace() == Race.Tauren)
-                            {
-                                if (HasAura(210333)) // Glyph of the Feral Chameleon
-                                    skinColor = (byte)RandomHelper.URand(0, 20);
-
-                                if (GetGender() == Gender.Male)
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 0: // Dark (Black)
-                                        case 1:
-                                        case 2:
-                                            return 29418;
-                                        case 3: // White
-                                        case 4:
-                                        case 5:
-                                        case 12:
-                                        case 13:
-                                        case 14:
-                                            return 29419;
-                                        case 9: // Light Brown/Grey
-                                        case 10:
-                                        case 11:
-                                        case 15:
-                                        case 16:
-                                        case 17:
-                                            return 29420;
-                                        case 18: // Completly White
-                                            return 29421;
-                                        default: // original - Brown
-                                            return 2289;
-                                    }
-                                }
-                                // Female
-                                else
-                                {
-                                    switch (skinColor)
-                                    {
-                                        case 0: // Dark (Black)
-                                        case 1:
-                                            return 29418;
-                                        case 2: // White
-                                        case 3:
-                                            return 29419;
-                                        case 6: // Light Brown/Grey
-                                        case 7:
-                                        case 8:
-                                        case 9:
-                                            return 29420;
-                                        case 10: // Completly White
-                                            return 29421;
-                                        default: // original - Brown
-                                            return 2289;
-                                    }
-                                }
-                            }
-                            else if (Player.TeamForRace(GetRace()) == Team.Alliance)
-                                return 29415;
-                            else
-                                return 2289;
-                        }
-                    case ShapeShiftForm.FlightForm:
-                        if (Player.TeamForRace(GetRace()) == Team.Alliance)
-                            return 20857;
-                        return 20872;
-                    case ShapeShiftForm.FlightFormEpic:
-                        if (HasAura(219062)) // Glyph of the Sentinel
-                        {
-                            switch (GetRace())
-                            {
-                                case Race.NightElf: // Blue
-                                    return 64328;
-                                case Race.Tauren: // Brown
-                                    return 64329;
-                                case Race.Worgen: // Purple
-                                    return 64330;
-                                case Race.Troll: // White
-                                    return 64331;
-                                default:
-                                    break;
-                            }
-                        }
-                        if (Player.TeamForRace(GetRace()) == Team.Alliance)
-                            return (GetRace() == Race.Worgen ? 37729 : 21243u);
-                        if (GetRace() == Race.Troll)
-                            return 37730;
-                        return 21244;
-                    case ShapeShiftForm.MoonkinForm:
-                        switch (GetRace())
-                        {
-                            case Race.NightElf:
-                                return 15374;
-                            case Race.Tauren:
-                                return 15375;
-                            case Race.Worgen:
-                                return 37173;
-                            case Race.Troll:
-                                return 37174;
-                            default:
-                                break;
-                        }
-                        break;
-                    case ShapeShiftForm.AquaticForm:
-                        if (HasAura(114333)) // Glyph of the Orca
-                            return 4591;
-                        return 2428;
-                    case ShapeShiftForm.TravelForm:
-                        {
-                            if (HasAura(131113)) // Glyph of the Cheetah
-                                return 1043;
-
-                            if (HasAura(224122)) // Glyph of the Doe
-                                return 70450;
-
-                            switch (GetRace())
-                            {
-                                case Race.NightElf:
-                                case Race.Worgen:
-                                    return 40816;
-                                case Race.Troll:
-                                case Race.Tauren:
-                                    return 45339;
-                                default:
-                                    break;
-                            }
-                            break;
-                        }
                     case ShapeShiftForm.GhostWolf:
                         if (HasAura(58135)) // Glyph of Spectral Wolf
                             return 60247;
+                        break;
+                    default:
                         break;
                 }
             }
 
             uint modelid = 0;
-            SpellShapeshiftFormRecord formEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)form);
+            SpellShapeshiftFormRecord formEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
             if (formEntry != null && formEntry.CreatureDisplayID[0] != 0)
             {
                 // Take the alliance modelid as default
-                if (!IsTypeId(TypeId.Player))
+                if (GetTypeId() != TypeId.Player)
                     return formEntry.CreatureDisplayID[0];
                 else
                 {
@@ -2673,11 +2359,12 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
         }
-        public uint GetChannelSpellXSpellVisualId() { return ((UnitChannel)m_unitData.ChannelData).SpellXSpellVisualID; }
-        public void SetChannelSpellXSpellVisualId(SpellCastVisual channelVisual)
+        public uint GetChannelSpellXSpellVisualId() { return m_unitData.ChannelData.GetValue().SpellVisual.SpellXSpellVisualID; }
+        public uint GetChannelScriptVisualId() { return m_unitData.ChannelData.GetValue().SpellVisual.ScriptVisualID; }
+        public void SetChannelVisual(SpellCastVisualField channelVisual)
         {
             UnitChannel unitChannel = m_unitData.ModifyValue(m_unitData.ChannelData);
-            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, channelVisual.SpellXSpellVisualID);
+            SetUpdateFieldValue(ref unitChannel.SpellVisual, channelVisual);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }

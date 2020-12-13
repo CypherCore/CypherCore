@@ -1009,10 +1009,9 @@ namespace Game.Entities
                             gemBonus.AddBonusList(bonusListId);
 
                         uint gemBaseItemLevel = gemTemplate.GetBaseItemLevel();
-                        ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(gemBonus.ScalingStatDistribution);
-                        if (ssd != null)
+                        if (gemBonus.PlayerLevelToItemLevelCurveId != 0)
                         {
-                            uint scaledIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.PlayerLevelToItemLevelCurveID, gemScalingLevel);
+                            uint scaledIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(gemBonus.PlayerLevelToItemLevelCurveId, gemScalingLevel);
                             if (scaledIlvl != 0)
                                 gemBaseItemLevel = scaledIlvl;
                         }
@@ -1446,7 +1445,7 @@ namespace Game.Entities
             Player owner = GetOwner();
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                if ((owner ? GetItemStatValue(i, owner) : proto.GetItemStatAllocation(i)) != 0)
+                if ((owner ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
                     return true;
             }
 
@@ -1457,7 +1456,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                if (bonus.ItemStatAllocation[i] != 0)
+                if (bonus.StatPercentEditor[i] != 0)
                     return true;
             }
 
@@ -1767,22 +1766,18 @@ namespace Game.Entities
             if (azeriteLevelInfo != null)
                 itemLevel = azeriteLevelInfo.ItemLevel;
 
-            ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(bonusData.ScalingStatDistribution);
-            if (ssd != null)
+            if (bonusData.PlayerLevelToItemLevelCurveId != 0)
             {
                 if (fixedLevel != 0)
                     level = fixedLevel;
                 else
-                    level = (uint)Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
+                {
+                    var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, 0, true);
+                    if (levels.HasValue)
+                        level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
+                }
 
-                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(bonusData.ContentTuningId);
-                if (contentTuning != null)
-                    if ((Convert.ToBoolean(contentTuning.Flags & 2) || contentTuning.MinLevel != 0 || contentTuning.MaxLevel != 0) && !Convert.ToBoolean(contentTuning.Flags & 4))
-                        level = (uint)Math.Min(Math.Max(level, contentTuning.MinLevel), contentTuning.MaxLevel);
-
-                uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.PlayerLevelToItemLevelCurveID, level);
-                if (heirloomIlvl != 0)
-                    itemLevel = heirloomIlvl;
+                itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level);
             }
 
             itemLevel += (uint)bonusData.ItemLevelBonus;
@@ -1814,7 +1809,7 @@ namespace Game.Entities
             {
                 case ItemModType.Corruption:
                 case ItemModType.CorruptionResistance:
-                    return _bonusData.ItemStatAllocation[index];
+                    return _bonusData.StatPercentEditor[index];
                 default:
                     break;
             }
@@ -1823,7 +1818,7 @@ namespace Game.Entities
             uint randomPropPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
             if (randomPropPoints != 0)
             {
-                float statValue = (_bonusData.ItemStatAllocation[index] * randomPropPoints) * 0.0001f;
+                float statValue = (_bonusData.StatPercentEditor[index] * randomPropPoints) * 0.0001f;
                 GtItemSocketCostPerLevelRecord gtCost = CliDB.ItemSocketCostPerLevelGameTable.GetRow(itemLevel);
                 if (gtCost != null)
                     statValue -= (_bonusData.ItemStatSocketCostMultiplier[index] * gtCost.SocketCost);
@@ -1881,11 +1876,11 @@ namespace Game.Entities
 
         public uint GetDisplayId(Player owner)
         {
-            ItemModifier transmogModifier = ItemModifier.TransmogAppearanceAllSpecs;
-            if ((m_itemData.ModifiersMask & ItemConst.AppearanceModifierMaskSpecSpecific) != 0)
-                transmogModifier = ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()];
+            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (itemModifiedAppearanceId == 0)
+                itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
-            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(GetModifier(transmogModifier));
+            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
             if (transmog != null)
             {
                 ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(transmog.ItemAppearanceID);
@@ -1903,51 +1898,57 @@ namespace Game.Entities
 
         public uint GetModifier(ItemModifier modifier)
         {
-            if ((m_itemData.ModifiersMask & (1 << (int)modifier)) == 0)
-                return 0;
+            int modifierIndex = m_itemData.Modifiers._value.Values.FindIndexIf(mod =>
+            {
+                return mod.Type == (byte)modifier;
+            });
 
-            int valueIndex = 0;
-            uint mask = m_itemData.ModifiersMask;
-            for (int i = 0; i < (int)modifier; ++i)
-                if ((mask & (1 << i)) != 0)
-                    ++valueIndex;
+            if (modifierIndex != -1)
+                return m_itemData.Modifiers._value.Values[modifierIndex].Value;
 
-            return m_itemData.Modifiers[valueIndex];
+            return 0;
         }
 
         public void SetModifier(ItemModifier modifier, uint value)
         {
-            int valueIndex = 0;
-            uint mask = m_itemData.ModifiersMask;
-            for (int i = 0; i < (int)modifier; ++i)
-                if ((mask & (1 << i)) != 0)
-                    ++valueIndex;
+            int modifierIndex = m_itemData.Modifiers._value.Values.FindIndexIf(mod =>
+            {
+                return mod.Type == (byte)modifier;
+            });
 
             if (value != 0)
             {
-                if ((mask & (1 << (int)modifier)) != 0)
-                    return;
+                if (modifierIndex == -1)
+                {
+                    ItemMod mod = new ItemMod();
+                    mod.Value = value;
+                    mod.Type = (byte)modifier;
 
-                SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ModifiersMask), 1u << (int)modifier);
-                InsertDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers), valueIndex, value);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers)._value.ModifyValue(m_itemData.Modifiers._value.Values), mod);
+                }
+                else
+                {
+                    ItemModList itemModList = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers);
+                    itemModList.ModifyValue(itemModList.Values, modifierIndex);
+                    SetUpdateFieldValue(ref itemModList.ModifyValue(itemModList.Values, modifierIndex).GetValue().Value, value);
+                }
             }
             else
             {
-                if ((mask & (1 << (int)modifier)) == 0)
+                if (modifierIndex == -1)
                     return;
 
-                RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ModifiersMask), 1u << (int)modifier);
-                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers), valueIndex);
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Modifiers)._value.ModifyValue(m_itemData.Modifiers._value.Values), modifierIndex);
             }
         }
 
         public uint GetVisibleEntry(Player owner)
         {
-            ItemModifier transmogModifier = ItemModifier.TransmogAppearanceAllSpecs;
-            if ((m_itemData.ModifiersMask & ItemConst.AppearanceModifierMaskSpecSpecific) != 0)
-                transmogModifier = ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()];
+            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (itemModifiedAppearanceId == 0)
+                itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
-            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(GetModifier(transmogModifier));
+            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
             if (transmog != null)
                 return transmog.ItemID;
 
@@ -1956,11 +1957,11 @@ namespace Game.Entities
 
         public ushort GetVisibleAppearanceModId(Player owner)
         {
-            ItemModifier transmogModifier = ItemModifier.TransmogAppearanceAllSpecs;
-            if ((m_itemData.ModifiersMask & ItemConst.AppearanceModifierMaskSpecSpecific) != 0)
-                transmogModifier = ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()];
+            uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (itemModifiedAppearanceId == 0)
+                itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
-            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(GetModifier(transmogModifier));
+            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
             if (transmog != null)
                 return transmog.ItemAppearanceModifierID;
 
@@ -1969,15 +1970,14 @@ namespace Game.Entities
 
         public uint GetVisibleEnchantmentId(Player owner)
         {
-            ItemModifier illusionModifier = ItemModifier.EnchantIllusionAllSpecs;
-            if ((m_itemData.ModifiersMask & ItemConst.IllusionModifierMaskSpecSpecific) != 0)
-                illusionModifier = ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()];
+            uint enchantmentId = GetModifier(ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()]);
+            if (enchantmentId == 0)
+                enchantmentId = GetModifier(ItemModifier.EnchantIllusionAllSpecs);
 
-            uint enchantIllusion = GetModifier(illusionModifier);
-            if (enchantIllusion != 0)
-                return enchantIllusion;
+            if (enchantmentId == 0)
+                enchantmentId = GetEnchantmentId(EnchantmentSlot.Perm);
 
-            return (uint)GetEnchantmentId(EnchantmentSlot.Perm);
+            return enchantmentId;
         }
 
         public ushort GetVisibleItemVisual(Player owner)
@@ -2255,15 +2255,11 @@ namespace Game.Entities
             if (!_bonusData.HasFixedLevel || GetModifier(ItemModifier.TimewalkerLevel) != 0)
                 return;
 
-            ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(_bonusData.ScalingStatDistribution);
-            if (ssd != null)
+            if (_bonusData.PlayerLevelToItemLevelCurveId != 0)
             {
-                level = (uint)Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
-
-                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(_bonusData.ContentTuningId);
-                if (contentTuning != null)
-                    if ((contentTuning.Flags.HasAnyFlag(2) || contentTuning.MinLevel != 0 || contentTuning.MaxLevel != 0) && !contentTuning.Flags.HasAnyFlag(4))
-                        level = (uint)Math.Min(Math.Max(level, contentTuning.MinLevel), contentTuning.MaxLevel);
+                var levels = Global.DB2Mgr.GetContentTuningData(_bonusData.ContentTuningId, 0, true);
+                if (levels.HasValue)
+                    level = (uint)Math.Min(Math.Max((short)level, levels.Value.MinLevel), levels.Value.MaxLevel);
 
                 SetModifier(ItemModifier.TimewalkerLevel, level);
             }
@@ -2271,12 +2267,14 @@ namespace Game.Entities
 
         public int GetRequiredLevel()
         {
+            int fixedLevel = (int)GetModifier(ItemModifier.TimewalkerLevel);
+            if (_bonusData.RequiredLevelCurve != 0)
+                return (int)Global.DB2Mgr.GetCurveValueAt(_bonusData.RequiredLevelCurve, fixedLevel);
             if (_bonusData.RequiredLevelOverride != 0)
                 return _bonusData.RequiredLevelOverride;
-            else if (_bonusData.HasFixedLevel)
-                return (int)GetModifier(ItemModifier.TimewalkerLevel);
-            else
-                return _bonusData.RequiredLevel;
+            if (_bonusData.HasFixedLevel && _bonusData.PlayerLevelToItemLevelCurveId != 0)
+                return fixedLevel;
+            return _bonusData.RequiredLevel;
         }
 
         public static Item NewItemOrBag(ItemTemplate proto)
@@ -2515,7 +2513,7 @@ namespace Game.Entities
         public uint GetAppearanceModId() { return m_itemData.ItemAppearanceModID; }
         public void SetAppearanceModId(uint appearanceModId) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ItemAppearanceModID), (byte)appearanceModId); }
         public float GetRepairCostMultiplier() { return _bonusData.RepairCostMultiplier; }
-        public uint GetScalingStatDistribution() { return _bonusData.ScalingStatDistribution; }
+        public uint GetScalingContentTuningId() { return _bonusData.ContentTuningId; }
 
         public void SetRefundRecipient(ObjectGuid guid) { m_refundRecipient = guid; }
         public void SetPaidMoney(ulong money) { m_paidMoney = money; }
@@ -2685,13 +2683,13 @@ namespace Game.Entities
             ItemLevelBonus = 0;
             RequiredLevel = proto.GetBaseRequiredLevel();
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                ItemStatType[i] = proto.GetItemStatType(i);
+                ItemStatType[i] = proto.GetStatModifierBonusStat(i);
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                ItemStatAllocation[i] = proto.GetItemStatAllocation(i);
+                StatPercentEditor[i] = proto.GetStatPercentEditor(i);
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                ItemStatSocketCostMultiplier[i] = proto.GetItemStatSocketCostMultiplier(i);
+                ItemStatSocketCostMultiplier[i] = proto.GetStatPercentageOfSocket(i);
 
             for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
@@ -2705,7 +2703,8 @@ namespace Game.Entities
 
             AppearanceModID = 0;
             RepairCostMultiplier = 1.0f;
-            ScalingStatDistribution = proto.GetScalingStatDistribution();
+            ContentTuningId = proto.GetScalingStatContentTuning();
+            PlayerLevelToItemLevelCurveId = proto.GetPlayerLevelToItemLevelCurveId();
             RelicType = -1;
             HasFixedLevel = false;
             RequiredLevelOverride = 0;
@@ -2729,6 +2728,7 @@ namespace Game.Entities
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
             _state.AzeriteTierUnlockSetPriority = int.MaxValue;
+            _state.RequiredLevelCurvePriority = int.MaxValue;
             _state.HasQualityBonus = false;
         }
 
@@ -2766,7 +2766,7 @@ namespace Game.Entities
                         if (statIndex < ItemConst.MaxStats)
                         {
                             ItemStatType[statIndex] = values[0];
-                            ItemStatAllocation[statIndex] += values[1];
+                            StatPercentEditor[statIndex] += values[1];
                         }
                         break;
                     }
@@ -2816,8 +2816,8 @@ namespace Game.Entities
                 case ItemBonusType.ScalingStatDistributionFixed:
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
-                        ScalingStatDistribution = (uint)values[0];
                         ContentTuningId = (uint)values[2];
+                        PlayerLevelToItemLevelCurveId = (uint)values[3];
                         _state.ScalingStatDistributionPriority = values[1];
                         HasFixedLevel = type == ItemBonusType.ScalingStatDistributionFixed;
                     }
@@ -2849,6 +2849,15 @@ namespace Game.Entities
                     if (itemEffect != null)
                         Effects[EffectCount++] = itemEffect;
                     break;
+                case ItemBonusType.RequiredLevelCurve:
+                    if (values[2] < _state.RequiredLevelCurvePriority)
+                    {
+                        RequiredLevelCurve = (uint)values[0];
+                        _state.RequiredLevelCurvePriority = values[2];
+                        if (values[1] != 0)
+                            ContentTuningId = (uint)values[1];
+                    }
+                    break;
             }
         }
 
@@ -2856,14 +2865,14 @@ namespace Game.Entities
         public int ItemLevelBonus;
         public int RequiredLevel;
         public int[] ItemStatType = new int[ItemConst.MaxStats];
-        public int[] ItemStatAllocation = new int[ItemConst.MaxStats];
+        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
         public uint AppearanceModID;
         public float RepairCostMultiplier;
-        public uint ScalingStatDistribution;
         public uint ContentTuningId;
+        public uint PlayerLevelToItemLevelCurveId;
         public uint DisenchantLootId;
         public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
         public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
@@ -2872,6 +2881,7 @@ namespace Game.Entities
         public int RequiredLevelOverride;
         public uint AzeriteTierUnlockSetId;
         public uint Suffix;
+        public uint RequiredLevelCurve;
         public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
         public int EffectCount;
         public bool CanDisenchant;
@@ -2885,6 +2895,7 @@ namespace Game.Entities
             public int AppearanceModPriority;
             public int ScalingStatDistributionPriority;
             public int AzeriteTierUnlockSetPriority;
+            public int RequiredLevelCurvePriority;
             public bool HasQualityBonus;
         }
     }
@@ -2972,7 +2983,7 @@ namespace Game.Entities
                     info.AzeriteItem.Xp = azeriteItemResult.Read<ulong>(1);
                     info.AzeriteItem.Level = azeriteItemResult.Read<uint>(2);
                     info.AzeriteItem.KnowledgeLevel = azeriteItemResult.Read<uint>(3);
-                    for (int i = 0; i < PlayerConst.MaxSpecializations; ++i)
+                    for (int i = 0; i < info.AzeriteItem.SelectedAzeriteEssences.Length; ++i)
                     {
                         uint specializationId = azeriteItemResult.Read<uint>(4 + i * 4);
                         if (!CliDB.ChrSpecializationStorage.ContainsKey(specializationId))

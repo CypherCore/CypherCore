@@ -21,12 +21,15 @@ namespace Framework.Constants
 {
     public struct PlayerConst
     {
+        public const Expansion CurrentExpansion = Expansion.ShadowLands;
+
         public const int MaxTalentTiers = 7;
         public const int MaxTalentColumns = 3;
         public const int MaxTalentRank = 5;
         public const int MaxPvpTalentSlots = 4;
         public const int MinSpecializationLevel = 10;
-        public const int MaxSpecializations = 4;
+        public const int MaxSpecializations = 5;
+        public const int InitialSpecializationIndex = 4;
         public const int MaxMasterySpells = 2;
 
         public const int ReqPrimaryTreeTalents = 31;
@@ -42,7 +45,7 @@ namespace Framework.Constants
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
-        public const int TaxiMaskSize = 319;
+        public const int TaxiMaskSize = 336;
 
         // corpse reclaim times
         public const int DeathExpireStep = (5 * Time.Minute);

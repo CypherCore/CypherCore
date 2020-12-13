@@ -196,6 +196,7 @@ namespace Game.Entities
         byte m_cinematic;
 
         uint m_movie;
+        bool m_customizationsChanged;
 
         SpecializationInfo _specializationInfo;
         public List<ObjectGuid> m_clientGUIDs = new List<ObjectGuid>();

@@ -4589,25 +4589,6 @@ namespace Game
                 itemTemplate.Effects.Add(effectEntry);
             }
 
-            // Check if item templates for DBC referenced character start outfit are present
-            List<uint> notFoundOutfit = new List<uint>();
-            foreach (var entry in CliDB.CharStartOutfitStorage.Values)
-            {
-                for (int j = 0; j < ItemConst.MaxOutfitItems; ++j)
-                {
-                    if (entry.ItemID[j] <= 0)
-                        continue;
-
-                    uint item_id = (uint)entry.ItemID[j];
-
-                    if (GetItemTemplate(item_id) == null)
-                        notFoundOutfit.Add(item_id);
-                }
-            }
-
-            foreach (var id in notFoundOutfit)
-                Log.outError(LogFilter.Sql, "Item (Entry: {0}) item does not exist but is referenced in `CharStartOutfit.dbc`", id);
-
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item templates in {1} ms", sparseCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
@@ -5510,28 +5491,42 @@ namespace Game
                     float positionZ = result.Read<float>(6);
                     float orientation = result.Read<float>(7);
 
-                    if (currentrace >= (int)Race.Max)
+                    if (CliDB.ChrRacesStorage.ContainsKey(currentrace))
                     {
-                        Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo` table, ignoring.", currentrace);
+                        Log.outError(LogFilter.Sql, $"Wrong race {currentrace} in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    var rEntry = CliDB.ChrRacesStorage.LookupByKey(currentrace);
-                    if (rEntry == null)
+                    if (CliDB.ChrClassesStorage.ContainsKey(currentclass))
                     {
-                        Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo` table, ignoring.", currentrace);
+                        Log.outError(LogFilter.Sql, $"Wrong class {currentclass} in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    if (currentclass >= (int)Class.Max)
+                    // accept DB data only for valid position (and non instanceable)
+                    if (!GridDefines.IsValidMapCoord(mapId, positionX, positionY, positionZ, orientation))
                     {
-                        Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo` table, ignoring.", currentclass);
+                        Log.outError(LogFilter.Sql, $"Wrong home position for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    if (CliDB.ChrClassesStorage.LookupByKey(currentclass) == null)
+                    if (CliDB.MapStorage.LookupByKey(mapId).Instanceable())
                     {
-                        Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo` table, ignoring.", currentclass);
+                        Log.outError(LogFilter.Sql, $"Home position in instanceable map for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                        continue;
+                    }
+
+                    ChrModelRecord maleModel = Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Male);
+                    if (maleModel == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Missing male model for race {currentrace}, ignoring.");
+                        continue;
+                    }
+
+                    ChrModelRecord femaleModel = Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Female);
+                    if (femaleModel == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Missing female model for race {currentrace}, ignoring.");
                         continue;
                     }
 
@@ -5543,8 +5538,8 @@ namespace Game
                     pInfo.PositionZ = positionZ;
                     pInfo.Orientation = orientation;
 
-                    pInfo.DisplayId_m = rEntry.MaleDisplayId;
-                    pInfo.DisplayId_f = rEntry.FemaleDisplayId;
+                    pInfo.DisplayId_m = maleModel.DisplayID;
+                    pInfo.DisplayId_f = femaleModel.DisplayID;
 
                     _playerInfo[currentrace][currentclass] = pInfo;
 
@@ -5556,6 +5551,63 @@ namespace Game
             time = Time.GetMSTime();
             // Load playercreate items
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Items Data...");
+            {
+                MultiMap<uint, ItemTemplate> itemsByCharacterLoadout = new MultiMap<uint, ItemTemplate>();
+                foreach (CharacterLoadoutItemRecord characterLoadoutItem in CliDB.CharacterLoadoutItemStorage.Values)
+                {
+                    ItemTemplate itemTemplate = GetItemTemplate(characterLoadoutItem.ItemID);
+                    if (itemTemplate != null)
+                        itemsByCharacterLoadout.Add(characterLoadoutItem.CharacterLoadoutID, itemTemplate);
+                }
+
+                foreach (CharacterLoadoutRecord characterLoadout in CliDB.CharacterLoadoutStorage.Values)
+                {
+                    if (!characterLoadout.IsForNewCharacter())
+                        continue;
+
+                    var items = itemsByCharacterLoadout.LookupByKey(characterLoadout.Id);
+                    if (items.Empty())
+                        continue;
+
+                    for (uint raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
+                    {
+                        if (!characterLoadout.RaceMask.HasAnyFlag(raceIndex))
+                            continue;
+
+                        PlayerInfo playerInfo = _playerInfo[raceIndex][characterLoadout.ChrClassID];
+                        if (playerInfo != null)
+                        {
+                            foreach (ItemTemplate itemTemplate in items)
+                            {
+                                // BuyCount by default
+                                uint count = itemTemplate.GetBuyCount();
+
+                                // special amount for food/drink
+                                if (itemTemplate.GetClass() == ItemClass.Consumable && (ItemSubClassConsumable)itemTemplate.GetSubClass() == ItemSubClassConsumable.FoodDrink)
+                                {
+                                    if (!itemTemplate.Effects.Empty())
+                                    {
+                                        switch ((SpellCategories)itemTemplate.Effects[0].SpellCategoryID)
+                                        {
+                                            case SpellCategories.Food:                                // food
+                                                count = characterLoadout.ChrClassID == (int)Class.Deathknight ? 10 : 4u;
+                                                break;
+                                            case SpellCategories.Drink:                                // drink
+                                                count = 2;
+                                                break;
+                                        }
+                                    }
+                                    if (itemTemplate.GetMaxStackSize() < count)
+                                        count = itemTemplate.GetMaxStackSize();
+                                }
+
+                                playerInfo.item.Add(new PlayerCreateInfoItem(itemTemplate.GetId(), count));
+                            }
+                        }
+                    }
+                }
+            }            
+            Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Items Override Data...");
             {
                 //                                         0     1      2       3
                 SQLResult result = DB.World.Query("SELECT race, class, itemid, amount FROM playercreateinfo_item");
@@ -5986,38 +6038,20 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} xp for level definition(s) from database in {1} ms", count, Time.GetMSTimeDiffToNow(time));
             }
         }
-        void PlayerCreateInfoAddItemHelper(uint race, uint _class, uint itemId, int count)
+        void PlayerCreateInfoAddItemHelper(uint race, uint class_, uint itemId, int count)
         {
-            if (_playerInfo[race][_class] == null)
+            if (_playerInfo[race][class_] == null)
                 return;
 
             if (count > 0)
-                _playerInfo[race][_class].item.Add(new PlayerCreateInfoItem(itemId, (uint)count));
+                _playerInfo[race][class_].item.Add(new PlayerCreateInfoItem(itemId, (uint)count));
             else
             {
                 if (count < -1)
                     Log.outError(LogFilter.Sql, "Invalid count {0} specified on item {1} be removed from original player create info (use -1)!", count, itemId);
 
-                for (byte gender = 0; gender < (int)Gender.None; ++gender)
-                {
-                    CharStartOutfitRecord entry = Global.DB2Mgr.GetCharStartOutfitEntry(race, _class, gender);
-                    if (entry != null)
-                    {
-                        bool found = false;
-                        for (var x = 0; x < ItemConst.MaxOutfitItems; ++x)
-                        {
-                            if (entry.ItemID[x] > 0 && entry.ItemID[x] == itemId)
-                            {
-                                found = true;
-                                entry.ItemID[x] = 0;
-                                break;
-                            }
-                        }
-
-                        if (!found)
-                            Log.outError(LogFilter.Sql, "Item {0} specified to be removed from original create info not found in dbc!", itemId);
-                    }
-                }
+                var items = _playerInfo[race][class_].item;
+                items.RemoveAll(item => { return item.item_id == itemId; });
             }
         }
 
@@ -9416,9 +9450,9 @@ namespace Game
                     int responseId = rewardItems.Read<int>(1);
                     uint itemId = rewardItems.Read<uint>(2);
                     StringArray bonusListIDsTok = new StringArray(rewardItems.Read<string>(3), ' ');
-                    List<int> bonusListIds = new List<int>();
+                    List<uint> bonusListIds = new List<uint>();
                     foreach (string token in bonusListIDsTok)
-                        bonusListIds.Add(int.Parse(token));
+                        bonusListIds.Add(uint.Parse(token));
 
                     int quantity = rewardItems.Read<int>(4);
 
@@ -9448,7 +9482,7 @@ namespace Game
                         continue;
                     }
 
-                    response.Reward.ItemChoices.Add(itemId, bonusListIds, quantity);
+                    response.Reward.Value.ItemChoices.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
                     itemChoiceRewardCount++;
 
                 } while (rewards.NextRow());
@@ -9482,7 +9516,7 @@ namespace Game
                     mawPower.RarityColor = mawPowersResult.Read<uint>(4);
                     mawPower.SpellID = mawPowersResult.Read<int>(5);
                     mawPower.MaxStacks = mawPowersResult.Read<int>(6);
-                    response.MawPower.Add(mawPower);
+                    response.MawPower.Set(mawPower);
 
                     ++mawPowersCount;
 
@@ -9757,21 +9791,23 @@ namespace Game
             switch (expansion)
             {
                 case Expansion.Classic:
-                    return 60;
+                    return 30;
                 case Expansion.BurningCrusade:
-                    return 70;
+                    return 30;
                 case Expansion.WrathOfTheLichKing:
-                    return 80;
+                    return 30;
                 case Expansion.Cataclysm:
-                    return 85;
+                    return 35;
                 case Expansion.MistsOfPandaria:
-                    return 90;
+                    return 35;
                 case Expansion.WarlordsOfDraenor:
-                    return 100;
+                    return 40;
                 case Expansion.Legion:
-                    return 110;
+                    return 45;
                 case Expansion.BattleForAzeroth:
-                    return 120;
+                    return 50;
+                case Expansion.ShadowLands:
+                    return 60;
                 default:
                     break;
             }

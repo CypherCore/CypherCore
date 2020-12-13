@@ -17,7 +17,7 @@
 
 namespace Framework.Constants
 {
-    public enum GameObjectTypes : byte
+    public enum GameObjectTypes : int
     {
         Door = 0,
         Button = 1,

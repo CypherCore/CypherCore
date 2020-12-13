@@ -1141,7 +1141,7 @@ namespace Framework.Constants
         GameObjectPlaySpellVisualKit = 0x2c4a,
         GameObjectResetState = 0x2723,
         GameObjectSetStateLocal = 0x2806,
-        GameObjectUiLink = 0x271f,
+        GameObjectUILink = 0x271f,
         GameSpeedSet = 0x267f,
         GameTimeSet = 0x2711,
         GameTimeUpdate = 0x2710,

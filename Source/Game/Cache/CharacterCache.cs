@@ -85,6 +85,14 @@ namespace Game.Cache
             _characterCacheByNameStore[name] = characterCacheEntry;
         }
 
+        public void UpdateCharacterGender(ObjectGuid guid, byte gender)
+        {
+            if (!_characterCacheStore.ContainsKey(guid))
+                return;
+
+            _characterCacheStore[guid].Sex = (Gender)gender;
+        }
+        
         public void UpdateCharacterLevel(ObjectGuid guid, byte level)
         {
             if (!_characterCacheStore.ContainsKey(guid))

@@ -80,41 +80,22 @@ namespace Game.Networking.Packets
         {
             public CharacterInfo(SQLFields fields)
             {
-                //         0                1                2                3                 4                  5                6                7
-                // "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.skin, characters.face, characters.hairStyle, "
-                //  8                     9                       10                         11                         12                         13
-                // "characters.hairColor, characters.facialStyle, characters.customDisplay1, characters.customDisplay2, characters.customDisplay3, characters.level, "
-                //  14               15              16                     17                     18
-                // "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, "
-                //  19                    20                      21                   22                   23                     24                   25
-                // "guild_member.guildid, characters.playerFlags, characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.equipmentCache, "
-                //  26                     27               28                      29                            30                         31
-                // "character_banned.guid, characters.slot, characters.logout_time, characters.activeTalentGroup, characters.lastLoginBuild, character_declinedname.genitive"
-
                 Guid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(0));
                 Name = fields.Read<string>(1);
                 RaceId = fields.Read<byte>(2);
                 ClassId = (Class)fields.Read<byte>(3);
                 SexId = fields.Read<byte>(4);
-                SkinId = fields.Read<byte>(5);
-                FaceId = fields.Read<byte>(6);
-                HairStyle = fields.Read<byte>(7);
-                HairColor = fields.Read<byte>(8);
-                FacialHair = fields.Read<byte>(9);
-                CustomDisplay[0] = fields.Read<byte>(10);
-                CustomDisplay[1] = fields.Read<byte>(11);
-                CustomDisplay[2] = fields.Read<byte>(12);
-                ExperienceLevel = fields.Read<byte>(13);
-                ZoneId = fields.Read<uint>(14);
-                MapId = fields.Read<uint>(15);
-                PreloadPos = new Vector3(fields.Read<float>(16), fields.Read<float>(17), fields.Read<float>(18));
+                ExperienceLevel = fields.Read<byte>(5);
+                ZoneId = fields.Read<uint>(6);
+                MapId = fields.Read<uint>(7);
+                PreloadPos = new Vector3(fields.Read<float>(8), fields.Read<float>(9), fields.Read<float>(10));
 
-                ulong guildId = fields.Read<ulong>(19);
+                ulong guildId = fields.Read<ulong>(11);
                 if (guildId != 0)
                     GuildGuid = ObjectGuid.Create(HighGuid.Guild, guildId);
 
-                PlayerFlags playerFlags = (PlayerFlags)fields.Read<uint>(20);
-                AtLoginFlags atLoginFlags = (AtLoginFlags)fields.Read<ushort>(21);
+                PlayerFlags playerFlags = (PlayerFlags)fields.Read<uint>(12);
+                AtLoginFlags atLoginFlags = (AtLoginFlags)fields.Read<ushort>(13);
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Resurrect))
                     playerFlags &= ~PlayerFlags.Ghost;
@@ -125,10 +106,10 @@ namespace Game.Networking.Packets
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Rename))
                     Flags |= CharacterFlags.Rename;
 
-                if (fields.Read<uint>(26) != 0)
+                if (fields.Read<uint>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(31)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(23)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -145,11 +126,11 @@ namespace Game.Networking.Packets
                 // show pet at selection character in character list only for non-ghost character
                 if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) && (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.Deathknight))
                 {
-                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(22));
+                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(14));
                     if (creatureInfo != null)
                     {
-                        PetCreatureDisplayId = fields.Read<uint>(23);
-                        PetExperienceLevel = fields.Read<ushort>(24);
+                        PetCreatureDisplayId = fields.Read<uint>(15);
+                        PetExperienceLevel = fields.Read<ushort>(16);
                         PetCreatureFamilyId = (uint)creatureInfo.Family;
                     }
                 }
@@ -158,15 +139,15 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArguments equipment = new StringArguments(fields.Read<string>(25));
-                ListPosition = fields.Read<byte>(27);
-                LastPlayedTime = fields.Read<uint>(28);
+                StringArguments equipment = new StringArguments(fields.Read<string>(17));
+                ListPosition = fields.Read<byte>(19);
+                LastPlayedTime = fields.Read<uint>(20);
 
-                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(29));
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
                 if (spec != null)
                     SpecID = (ushort)spec.Id;
 
-                LastLoginVersion = fields.Read<uint>(30);
+                LastLoginVersion = fields.Read<uint>(22);
 
                 for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
                 {
@@ -214,7 +195,10 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
 
                 foreach (ChrCustomizationChoice customization in Customizations)
-                    customization.Write(data);
+                {
+                    data.WriteUInt32(customization.ChrCustomizationOptionID);
+                    data.WriteUInt32(customization.ChrCustomizationChoiceID);
+                }
 
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
@@ -340,7 +324,7 @@ namespace Game.Networking.Packets
         public uint SequenceIndex;
         public ResponseCodes Result;
 
-        public CheckCharacterNameAvailabilityResult(uint sequenceIndex, ResponseCodes result) : base(ServerOpcodes.SMSG_CHECK_CHARACTER_NAME_AVAILABILITY_RESULT)
+        public CheckCharacterNameAvailabilityResult(uint sequenceIndex, ResponseCodes result) : base(ServerOpcodes.CheckCharacterNameAvailabilityResult)
         {
             SequenceIndex = sequenceIndex;
             Result = result;
@@ -375,7 +359,15 @@ namespace Game.Networking.Packets
                 CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
 
             for (var i = 0; i < customizationCount; ++i)
-                CreateInfo.Customizations[i].Read(_worldPacket);
+            {
+                CreateInfo.Customizations[i] = new ChrCustomizationChoice()
+                {
+                    ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
+                    ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
+                };
+            }
+
+            CreateInfo.Customizations.Sort();
         }
 
         public CharacterCreateInfo CreateInfo;
@@ -470,7 +462,15 @@ namespace Game.Networking.Packets
             var customizationCount = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < customizationCount; ++i)
-                CustomizeInfo.Customizations[i].Read(_worldPacket);
+            {
+                CustomizeInfo.Customizations[i] = new ChrCustomizationChoice()
+                {
+                    ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
+                    ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
+                };
+            }
+
+            CustomizeInfo.Customizations.Sort();
 
             CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
@@ -499,7 +499,15 @@ namespace Game.Networking.Packets
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
 
             for (var i = 0; i < customizationCount; ++i)
-                RaceOrFactionChangeInfo.Customizations[i].Read(_worldPacket);
+            {
+                RaceOrFactionChangeInfo.Customizations[i] = new ChrCustomizationChoice()
+                {
+                    ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
+                    ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
+                };
+            }
+
+            RaceOrFactionChangeInfo.Customizations.Sort();
         }
 
         public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo;
@@ -527,7 +535,10 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteString(Display.Value.Name);
 
                 foreach (ChrCustomizationChoice customization in Display.Value.Customizations)
-                    customization.Write(_worldPacket);
+                {
+                    _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
+                    _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
+                }
             }
         }
 
@@ -839,7 +850,15 @@ namespace Game.Networking.Packets
             NewSex = _worldPacket.ReadUInt8();
 
             for (var i = 0; i < customizationCount; ++i)
-                Customizations[i].Read(_worldPacket);
+            {
+                Customizations[i] = new ChrCustomizationChoice()
+                {
+                    ChrCustomizationOptionID = _worldPacket.ReadUInt32(),
+                    ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
+                };
+            }
+
+            Customizations.Sort();
         }
 
         public byte NewSex;
@@ -981,7 +1000,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(SexID);
             _worldPacket.WriteInt32(Customizations.Count);
             foreach (ChrCustomizationChoice customization in Customizations)
-                customization.Write(_worldPacket);
+            {
+                _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
+                _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
 
             _worldPacket.WriteBits(CharName.GetByteCount(), 6);
             _worldPacket.FlushBits();
@@ -1047,30 +1069,6 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    public struct ChrCustomizationChoice
-    {
-        public uint ChrCustomizationOptionID;
-        public uint ChrCustomizationChoiceID;
-
-        public ChrCustomizationChoice(uint chrCustomizationOptionID, uint chrCustomizationChoiceID)
-        {
-            ChrCustomizationOptionID = chrCustomizationOptionID;
-            ChrCustomizationChoiceID = chrCustomizationChoiceID;
-        }
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(ChrCustomizationOptionID);
-            data.WriteUInt32(ChrCustomizationChoiceID);
-        }
-
-        public void Read(WorldPacket data)
-        {
-            ChrCustomizationOptionID = data.ReadUInt32();
-            ChrCustomizationChoiceID = data.ReadUInt32();
-        }
-    }
-
     public class CharacterCreateInfo
     {
         // User specified variables

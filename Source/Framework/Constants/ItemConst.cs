@@ -78,42 +78,27 @@ namespace Framework.Constants
             ItemModifier.TransmogAppearanceSpec1,
             ItemModifier.TransmogAppearanceSpec2,
             ItemModifier.TransmogAppearanceSpec3,
-            ItemModifier.TransmogAppearanceSpec4
+            ItemModifier.TransmogAppearanceSpec4,
+            ItemModifier.TransmogAppearanceSpec5
         };
 
-        public const ulong AppearanceModifierMaskSpecSpecific =
-            (1ul << (int)ItemModifier.TransmogAppearanceSpec1) |
-            (1ul << (int)ItemModifier.TransmogAppearanceSpec2) |
-            (1ul << (int)ItemModifier.TransmogAppearanceSpec3) |
-            (1ul << (int)ItemModifier.TransmogAppearanceSpec4);
-
         public static ItemModifier[] IllusionModifierSlotBySpec =
-            {
+        {
             ItemModifier.EnchantIllusionSpec1,
             ItemModifier.EnchantIllusionSpec2,
             ItemModifier.EnchantIllusionSpec3,
-            ItemModifier.EnchantIllusionSpec4
+            ItemModifier.EnchantIllusionSpec4,
+            ItemModifier.EnchantIllusionSpec5
         };
-
-        public const ulong IllusionModifierMaskSpecSpecific =
-            (1ul << (int)ItemModifier.EnchantIllusionSpec1) |
-            (1ul << (int)ItemModifier.EnchantIllusionSpec2) |
-            (1ul << (int)ItemModifier.EnchantIllusionSpec3) |
-            (1ul << (int)ItemModifier.EnchantIllusionSpec4);
 
         public static ItemModifier[] SecondaryAppearanceModifierSlotBySpec =
         {
             ItemModifier.TransmogSecondaryAppearanceSpec1,
             ItemModifier.TransmogSecondaryAppearanceSpec2,
             ItemModifier.TransmogSecondaryAppearanceSpec3,
-            ItemModifier.TransmogSecondaryAppearanceSpec4
+            ItemModifier.TransmogSecondaryAppearanceSpec4,
+            ItemModifier.TransmogSecondaryAppearanceSpec5
         };
-
-        public const ulong SecondaryAppearanceModifierMaskSpecSpecific =
-            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec1) |
-            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec2) |
-            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec3) |
-            (1ul << (int)ItemModifier.TransmogSecondaryAppearanceSpec4);
     }
 
     public struct InventorySlots
@@ -219,8 +204,8 @@ namespace Framework.Constants
         CritSpellRating = 21,
         Corruption = 22,
         CorruptionResistance = 23,
-        HitTakenSpellRating = 24,
-        CritTakenMeleeRating = 25,
+        ModifiedCraftingStat1 = 24,
+        ModifiedCraftingStat2 = 25,
         CritTakenRangedRating = 26,
         CritTakenSpellRating = 27,
         HasteMeleeRating = 28,
@@ -356,7 +341,7 @@ namespace Framework.Constants
         ItemLevel = 1,
         Stat = 2,
         Quality = 3,
-        Description = 4,
+        NameSubtitle = 4, // Text under name
         Suffix = 5,
         Socket = 6,
         Appearance = 7,
@@ -376,6 +361,10 @@ namespace Framework.Constants
         OverrideCanDisenchant = 21,
         OverrideCanScrap = 22,
         ItemEffectId = 23,
+        ModifiedCraftingStat = 25,
+        RequiredLevelCurve = 27,
+        DescriptionText = 30,             // Item Description
+        OverrideName = 31,             // Itemnamedescription Id
     }
 
     public enum ItemContext : byte
