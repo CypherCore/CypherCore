@@ -549,7 +549,6 @@ namespace Game.Entities
         {
             UpdateTalentData packet = new UpdateTalentData();
             packet.Info.PrimarySpecialization = GetPrimarySpecialization();
-            packet.Info.ActiveGroup = GetActiveTalentGroup();
 
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
@@ -607,7 +606,11 @@ namespace Game.Entities
                     groupInfoPkt.PvPTalentIDs.Add((ushort)pvpTalents[slot]);
                 }
 
-                packet.Info.TalentGroups.Add(groupInfoPkt);
+                if (i == GetActiveTalentGroup())
+                    packet.Info.ActiveGroup = (byte)packet.Info.TalentGroups.Count;
+
+                if (!groupInfoPkt.TalentIDs.Empty() || !groupInfoPkt.PvPTalentIDs.Empty() || i == GetActiveTalentGroup())
+                    packet.Info.TalentGroups.Add(groupInfoPkt);
             }
 
             SendPacket(packet);
