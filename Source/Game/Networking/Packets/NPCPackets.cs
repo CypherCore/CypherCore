@@ -20,6 +20,7 @@ using Framework.GameMath;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
@@ -66,12 +67,16 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
                 _worldPacket.WriteBits(options.Confirm.GetByteCount(), 12);
                 _worldPacket.WriteBits((byte)options.Status, 2);
+                _worldPacket.WriteBit(options.SpellID.HasValue);
                 _worldPacket.FlushBits();
 
                 options.Treasure.Write(_worldPacket);
 
                 _worldPacket.WriteString(options.Text);
                 _worldPacket.WriteString(options.Confirm);
+
+                if (options.SpellID.HasValue)
+                    _worldPacket.WriteInt32(options.SpellID.Value);
             }
 
             foreach (ClientGossipText text in GossipText)
@@ -79,11 +84,11 @@ namespace Game.Networking.Packets
         }
 
         public List<ClientGossipOptions> GossipOptions = new List<ClientGossipOptions>();
-        public int FriendshipFactionID = 0;
+        public int FriendshipFactionID;
         public ObjectGuid GossipGUID;
         public List<ClientGossipText> GossipText = new List<ClientGossipText>();
-        public int TextID = 0;
-        public int GossipID = 0;
+        public int TextID;
+        public int GossipID;
     }
 
     public class GossipSelectOption : ClientPacket
@@ -323,6 +328,7 @@ namespace Game.Networking.Packets
         public string Text;
         public string Confirm;
         public TreasureLootList Treasure;
+        public Optional<int> SpellID;
     }
 
     public class ClientGossipText

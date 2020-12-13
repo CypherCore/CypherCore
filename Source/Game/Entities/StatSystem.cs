@@ -933,7 +933,6 @@ namespace Game.Entities
         }
 
         public void ApplyModPowerCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerCostModifier, (int)school), mod, apply); }
-        public void ApplyModPowerCostMultiplier(SpellSchools school, float pct, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerCostMultiplier, (int)school), pct, apply); }
     }
 
     public partial class Player
@@ -1013,18 +1012,6 @@ namespace Game.Entities
             UpdateSpellDamageAndHealingBonus();
             UpdateManaRegen();
 
-            // Update ratings in exist SPELL_AURA_MOD_RATING_FROM_STAT and only depends from stat
-            uint mask = 0;
-            var modRatingFromStat = GetAuraEffectsByType(AuraType.ModRatingFromStat);
-            foreach (var eff in modRatingFromStat)
-                if ((Stats)eff.GetMiscValueB() == stat)
-                    mask |= (uint)eff.GetMiscValue();
-            if (mask != 0)
-            {
-                for (int rating = 0; rating < (int)CombatRating.Max; ++rating)
-                    if (Convert.ToBoolean(mask & (1 << rating)))
-                        ApplyRatingMod((CombatRating)rating, 0, true);
-            }
             return true;
         }
 
@@ -1322,12 +1309,6 @@ namespace Game.Entities
         public void UpdateRating(CombatRating cr)
         {
             int amount = baseRatingValue[(int)cr];
-            // Apply bonus from SPELL_AURA_MOD_RATING_FROM_STAT
-            // stat used stored in miscValueB for this aura
-            var modRatingFromStat = GetAuraEffectsByType(AuraType.ModRatingFromStat);
-            foreach (var aurEff in modRatingFromStat)
-                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
-                    amount += (int)MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
 
             var modRatingPct = GetAuraEffectsByType(AuraType.ModRatingPct);
             foreach (var aurEff in modRatingPct)

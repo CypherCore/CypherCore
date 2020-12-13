@@ -355,8 +355,9 @@ namespace Framework.Constants
         // spellmod 36
         StackAmount2 = 37,  // same as SPELLMOD_STACK_AMOUNT but affects tooltips
         // spellmod 38
+        SpellCost3 = 39,
 
-        Max = 39
+        Max = 40
     }
     // Note: SPELLMOD_* values is aura types in fact
     public enum SpellModType

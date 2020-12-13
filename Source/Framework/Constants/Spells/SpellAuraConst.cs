@@ -241,7 +241,7 @@ namespace Framework.Constants
         ModMeleeHaste2 = 217,
         Unk218 = 218, // old SPELL_AURA_HASTE_RANGED
         ModManaRegenFromStat = 219,
-        ModRatingFromStat = 220,
+        ModAbilitySchoolMask = 220, //NYI
         ModDetaunt = 221,
         Unk222 = 222,
         Unk223 = 223,

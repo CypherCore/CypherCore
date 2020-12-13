@@ -3947,23 +3947,6 @@ namespace Game.Spells
                     target.ToPlayer().ApplyRatingMod((CombatRating)rating, GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.ModRatingFromStat)]
-        void HandleModRatingFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            // Just recalculate ratings
-            for (int rating = 0; rating < (int)CombatRating.Max; ++rating)
-                if (Convert.ToBoolean(GetMiscValue() & (1 << rating)))
-                    target.ToPlayer().UpdateRating((CombatRating)rating);
-        }
-
         [AuraEffectHandler(AuraType.ModRatingPct)]
         void HandleModRatingPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4155,20 +4138,6 @@ namespace Game.Spells
         /********************************/
         /***        POWER COST        ***/
         /********************************/
-        [AuraEffectHandler(AuraType.ModPowerCostSchoolPct)]
-        void HandleModPowerCostPCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            float amount = MathFunctions.CalculatePct(1.0f, GetAmount());
-            for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                    target.ApplyModPowerCostMultiplier((SpellSchools)i, amount, apply);
-        }
-
         [AuraEffectHandler(AuraType.ModPowerCostSchool)]
         void HandleModPowerCost(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

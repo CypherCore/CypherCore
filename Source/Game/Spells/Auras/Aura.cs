@@ -53,7 +53,10 @@ namespace Game.Spells
         Duration = 0x04,
         Scalable = 0x08,
         Negative = 0x10,
-        Unk20 = 0x20
+        Unk20 = 0x20,
+        Unk40 = 0x40,
+        Unk80 = 0x80,
+        MawPower = 0x100
     }
 
     public class AuraApplication

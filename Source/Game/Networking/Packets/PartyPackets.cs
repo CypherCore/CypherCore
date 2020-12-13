@@ -718,7 +718,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt8(PartyIndex);
-            _worldPacket.WriteBits(Name.GetByteCount(), 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteString(Name);
         }
 

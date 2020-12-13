@@ -2753,6 +2753,7 @@ namespace Game.Spells
                 if (power.PowerType != PowerType.Health)
                 {
                     // Flat mod from caster auras by spell school and power type
+                    int flatMod = 0;
                     var auras = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool);
                     foreach (var eff in auras)
                     {
@@ -2762,8 +2763,13 @@ namespace Game.Spells
                         if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
                             continue;
 
-                        powerCost += eff.GetAmount();
+                        flatMod += eff.GetAmount();
                     }
+
+                    if (power.PowerType == PowerType.Mana)
+                        flatMod *= (int)(1.0f + caster.m_unitData.ManaCostModifierModifier);
+
+                    powerCost += flatMod;
                 }
 
                 // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
@@ -2776,7 +2782,7 @@ namespace Game.Spells
                     else
                     {
                         WeaponAttackType slot = WeaponAttackType.BaseAttack;
-                        if (HasAttribute(SpellAttr3.ReqOffhand))
+                        if (!HasAttribute(SpellAttr3.MainHand) && HasAttribute(SpellAttr3.ReqOffhand))
                             slot = WeaponAttackType.OffAttack;
 
                         speed = caster.GetBaseAttackTime(slot);
@@ -2789,13 +2795,23 @@ namespace Game.Spells
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner)
                 {
-                    if (power.OrderIndex == 0)
-                        modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
-                    else if (power.OrderIndex == 1)
-                        modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
+                    switch (power.OrderIndex)
+                    {
+                        case 0:
+                            modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
+                            break;
+                        case 1:
+                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
+                            break;
+                        case 2:
+                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost3, ref powerCost, spell);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0)
+                if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
                 {
                     if (HasAttribute(SpellAttr0.LevelDamageCalculation))
                     {

@@ -435,21 +435,27 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(ItemID);
-            data.WriteUInt32(Quantity);
+            data.WriteUInt32(ItemQuantity);
             data.WriteInt32(CurrencyID);
             data.WriteUInt32(CurrencyQuantity);
             data.WriteUInt32(FollowerXP);
-            data.WriteUInt32(BonusAbilityID);
-            data.WriteInt32(Unknown);
+            data.WriteUInt32(GarrMssnBonusAbilityID);
+            data.WriteInt32(ItemFileDataID);
+            data.WriteBit(ItemInstance.HasValue);
+            data.FlushBits();
+
+            if (ItemInstance.HasValue)
+                ItemInstance.Value.Write(data);
         }
 
         public int ItemID;
-        public uint Quantity;
+        public uint ItemQuantity;
         public int CurrencyID;
         public uint CurrencyQuantity;
         public uint FollowerXP;
-        public uint BonusAbilityID;
-        public int Unknown;
+        public uint GarrMssnBonusAbilityID;
+        public int ItemFileDataID;
+        public Optional<ItemInstance> ItemInstance;
     }
 
     struct GarrisonMissionBonusAbility
@@ -582,16 +588,8 @@ namespace Game.Networking.Packets
             foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
                 data.WriteInt32(missionReward.Count);
 
-            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
-                    missionRewardItem.Write(data);
-
             foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
                 data.WriteInt32(missionReward.Count);
-
-            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
-                    missionRewardItem.Write(data);
 
             foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);
@@ -621,6 +619,14 @@ namespace Game.Networking.Packets
 
             foreach (GarrisonTalent talent in Talents)
                 talent.Write(data);
+
+            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
+                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+                    missionRewardItem.Write(data);
+
+            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
+                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+                    missionRewardItem.Write(data);
         }
 
         public GarrisonType GarrTypeID;

@@ -1325,9 +1325,9 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Expansion);
             data.WriteUInt8(TargetMinScalingLevel);
             data.WriteUInt8(TargetMaxScalingLevel);
-            data.WriteInt8(TargetScalingLevelDelta);
+            data.WriteInt8(TargetScalingLevelDelta); 
+            data.WriteUInt32((uint)Flags);
             data.WriteBits(TuningType, 4);
-            data.WriteBit(ScalesWithItemLevel);
             data.FlushBits();
         }
 
@@ -1341,14 +1341,21 @@ namespace Game.Networking.Packets
         public byte TargetMinScalingLevel;
         public byte TargetMaxScalingLevel;
         public sbyte TargetScalingLevelDelta;
-        public bool ScalesWithItemLevel;
+        public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling; 
 
         public enum ContentTuningType
-        {
-            PlayerToPlayer = 7, // NYI
+        {        
             CreatureToPlayerDamage = 1,
             PlayerToCreatureDamage = 2,
-            CreatureToCreatureDamage = 4
+            CreatureToCreatureDamage = 4,
+            PlayerToSandboxScaling = 7, // NYI
+            PlayerToPlayerExpectedStat = 8
+        }
+
+        public enum ContentTuningFlags
+        {
+            NoLevelScaling = 0x1,
+            NoItemLevelScaling = 0x2
         }
     }
 

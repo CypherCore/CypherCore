@@ -42,6 +42,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Success);
             _worldPacket.WriteBit(IsDeletedCharacters);
             _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
+            _worldPacket.WriteBit(IsNewPlayerRestricted);
             _worldPacket.WriteBit(IsNewPlayer);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
             _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
@@ -65,9 +66,10 @@ namespace Game.Networking.Packets
 
         public bool Success;
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsNewPlayerRestrictionSkipped = false; // allows client to skip new player restrictions
-        public bool IsNewPlayer = false; // forbids hero classes and allied races
-        public bool IsAlliedRacesCreationAllowed = false;
+        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
+        public bool IsNewPlayerRestricted; // forbids using level boost and class trials
+        public bool IsNewPlayer; // forbids hero classes and allied races
+        public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
         public Optional<uint> DisabledClassesMask = new Optional<uint>();
@@ -192,6 +194,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(LastLoginVersion);
                 data.WriteUInt32(Flags4);
                 data.WriteInt32(MailSenders.Count);
+                data.WriteInt32(MailSenderTypes.Count);
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
 
                 foreach (ChrCustomizationChoice customization in Customizations)
@@ -199,6 +202,9 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(customization.ChrCustomizationOptionID);
                     data.WriteUInt32(customization.ChrCustomizationChoiceID);
                 }
+
+                foreach (var mailSenderType in MailSenderTypes)
+                    data.WriteUInt32(mailSenderType);
 
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
@@ -248,6 +254,7 @@ namespace Game.Networking.Packets
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
             public List<string> MailSenders = new List<string>();
+            public List<uint> MailSenderTypes = new List<uint>();
 
             public struct VisualItemInfo
             {
