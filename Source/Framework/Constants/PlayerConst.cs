@@ -469,7 +469,10 @@ namespace Framework.Constants
         UsingPartGarrison = 0x100,
         CanUseObjectsMounted = 0x200,
         CanVisitPartyGarrison = 0x400,
-        AccountSecured = 0x1000 // Script_IsAccountSecured
+        AccountSecured = 0x1000, // Script_IsAccountSecured
+        OverrideTransportServerTime = 0x8000,
+        MentorRestricted = 0x20000,
+        WeeklyRewardAvailable = 0x40000
     }
 
     public enum PlayerFieldByte2Flags
