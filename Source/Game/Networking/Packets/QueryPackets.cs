@@ -297,8 +297,7 @@ namespace Game.Networking.Packets
                 foreach (uint questItem in Stats.QuestItems)
                     statsData.WriteUInt32(questItem);
 
-                statsData.WriteUInt32(Stats.RequiredLevel);
-
+                statsData.WriteUInt32(Stats.ContentTuningId);
             }
 
             _worldPacket.WriteUInt32(statsData.GetSize());
@@ -745,7 +744,7 @@ namespace Game.Networking.Packets
         public int[] Data = new int[SharedConst.MaxGOData];
         public float Size;
         public List<uint> QuestItems = new List<uint>();
-        public uint RequiredLevel;
+        public uint ContentTuningId;
     }
 
     class QuestCompletionNPC

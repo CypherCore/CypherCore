@@ -1789,12 +1789,15 @@ namespace Game.Entities
                             return;
 
                         //required lvl checks!
-                        uint level = player.GetLevel();
-                        if (level < info.MeetingStone.minLevel)
-                            return;
-                        level = targetPlayer.GetLevel();
-                        if (level < info.MeetingStone.minLevel)
-                            return;
+                        var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        if (userLevels.HasValue)
+                            if (player.GetLevel() < userLevels.Value.MaxLevel)
+                                return;
+
+                        var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                        if (targetLevels.HasValue)
+                            if (targetPlayer.GetLevel() < targetLevels.Value.MaxLevel)
+                                return;
 
                         if (info.entry == 194097)
                             spellId = 61994;                            // Ritual of Summoning

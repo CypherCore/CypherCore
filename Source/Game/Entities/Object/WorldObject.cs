@@ -124,8 +124,8 @@ namespace Game.Entities
 
             var area = CliDB.AreaTableStorage.LookupByKey(m_areaId);
             if (area != null)
-                if (area.Id != 0)
-                    m_zoneId = area.Id;
+                if (area.ParentAreaID != 0)
+                    m_zoneId = area.ParentAreaID;
 
             m_staticFloorZ = data.FloorZ;
         }
