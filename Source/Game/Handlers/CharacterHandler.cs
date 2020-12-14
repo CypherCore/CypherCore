@@ -505,7 +505,7 @@ namespace Game
 
                     if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateLevelRequirementDemonHunter);
+                        SendCharCreate(ResponseCodes.CharCreateNewPlayer);
                         return;
                     }
 
