@@ -318,6 +318,15 @@ namespace Game
                 return 0;
         }
 
+        public QuestTagType? GetQuestTag()
+        {
+            QuestInfoRecord questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
+            if (questInfo != null)
+                return (QuestTagType)questInfo.Type;
+
+            return null;
+        }
+        
         public void BuildQuestRewards(QuestRewards rewards, Player player)
         {
             rewards.ChoiceItemCount = GetRewChoiceItemsCount();

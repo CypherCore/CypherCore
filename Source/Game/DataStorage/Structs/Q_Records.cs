@@ -25,6 +25,15 @@ namespace Game.DataStorage
         public short[] Difficulty = new short[10];
     }
 
+    public sealed class QuestInfoRecord
+    {
+        public uint Id;
+        public LocalizedString InfoName;
+        public sbyte Type;
+        public byte Modifiers;
+        public ushort Profession;
+    }
+
     public sealed class QuestMoneyRewardRecord
     {
         public uint Id;

@@ -229,6 +229,7 @@ namespace Game.DataStorage
             PvpTalentCategoryStorage = ReadDB2<PvpTalentCategoryRecord>("PvpTalentCategory.db2", HotfixStatements.SEL_PVP_TALENT_CATEGORY);
             PvpTalentSlotUnlockStorage = ReadDB2<PvpTalentSlotUnlockRecord>("PvpTalentSlotUnlock.db2", HotfixStatements.SEL_PVP_TALENT_SLOT_UNLOCK);
             QuestFactionRewardStorage = ReadDB2<QuestFactionRewardRecord>("QuestFactionReward.db2", HotfixStatements.SEL_QUEST_FACTION_REWARD);
+            QuestInfoStorage = ReadDB2<QuestInfoRecord>("QuestInfo.db2", HotfixStatements.SEL_QUEST_INFO, HotfixStatements.SEL_QUEST_INFO_LOCALE);
             QuestMoneyRewardStorage = ReadDB2<QuestMoneyRewardRecord>("QuestMoneyReward.db2", HotfixStatements.SEL_QUEST_MONEY_REWARD);
             QuestPackageItemStorage = ReadDB2<QuestPackageItemRecord>("QuestPackageItem.db2", HotfixStatements.SEL_QUEST_PACKAGE_ITEM);
             QuestSortStorage = ReadDB2<QuestSortRecord>("QuestSort.db2", HotfixStatements.SEL_QUEST_SORT, HotfixStatements.SEL_QUEST_SORT_LOCALE);
@@ -584,6 +585,7 @@ namespace Game.DataStorage
         public static DB6Storage<PvpTalentCategoryRecord> PvpTalentCategoryStorage;
         public static DB6Storage<PvpTalentSlotUnlockRecord> PvpTalentSlotUnlockStorage;
         public static DB6Storage<QuestFactionRewardRecord> QuestFactionRewardStorage;
+        public static DB6Storage<QuestInfoRecord> QuestInfoStorage;
         public static DB6Storage<QuestMoneyRewardRecord> QuestMoneyRewardStorage;
         public static DB6Storage<QuestPackageItemRecord> QuestPackageItemStorage;
         public static DB6Storage<QuestSortRecord> QuestSortStorage;

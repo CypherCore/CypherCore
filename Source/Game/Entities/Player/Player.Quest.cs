@@ -1860,8 +1860,8 @@ namespace Game.Entities
             {
                 case TypeId.GameObject:
                     {
-                        QuestGiverStatus questStatus = (QuestGiverStatus)questgiver.ToGameObject().GetAI().GetDialogStatus(this);
-                        if (questStatus != QuestGiverStatus.ScriptedNoStatus)
+                        QuestGiverStatus questStatus = questgiver.ToGameObject().GetAI().GetDialogStatus(this);
+                        if (questStatus != QuestGiverStatus.ScriptedDefault)
                             return questStatus;
                         qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
                         qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(questgiver.GetEntry());
@@ -1869,8 +1869,8 @@ namespace Game.Entities
                     }
                 case TypeId.Unit:
                     {
-                        QuestGiverStatus questStatus = (QuestGiverStatus)questgiver.ToCreature().GetAI().GetDialogStatus(this);
-                        if (questStatus != QuestGiverStatus.ScriptedNoStatus)
+                        QuestGiverStatus questStatus = questgiver.ToCreature().GetAI().GetDialogStatus(this);
+                        if (questStatus != QuestGiverStatus.ScriptedDefault)
                             return questStatus;
                         qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());
                         qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(questgiver.GetEntry());
@@ -1886,27 +1886,41 @@ namespace Game.Entities
 
             foreach (var questId in qir)
             {
-                QuestGiverStatus result2 = QuestGiverStatus.None;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest == null)
                     continue;
 
-                QuestStatus status = GetQuestStatus(questId);
-                if (status == QuestStatus.Complete && !GetQuestRewardStatus(questId))
-                    result2 = QuestGiverStatus.Reward;
-                else if (status == QuestStatus.Incomplete)
-                    result2 = QuestGiverStatus.Incomplete;
+                switch (GetQuestStatus(questId))
+                {
+                    case QuestStatus.Complete:
+                        if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.CovenantCallingRewardCompleteNoPOI : QuestGiverStatus.CovenantCallingRewardCompletePOI;
+                        else if (quest.HasFlagEx(QuestFlagsEx.LegendaryQuest))
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.LegendaryRewardCompleteNoPOI : QuestGiverStatus.LegendaryRewardCompletePOI;
+                        else
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RewardCompleteNoPOI : QuestGiverStatus.RewardCompletePOI;
+                        break;
+                    case QuestStatus.Incomplete:
+                        if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
+                            result |= QuestGiverStatus.CovenantCallingReward;
+                        else
+                            result |= QuestGiverStatus.Reward;
+                        break;
+                    default:
+                        break;
+                }
 
                 if (quest.IsAutoComplete() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
-                    result2 = QuestGiverStatus.RewardRep;
-
-                if (result2 > result)
-                    result = result2;
+                {
+                    if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                        result |= QuestGiverStatus.RepeatableTurnin;
+                    else
+                        result |= QuestGiverStatus.TrivialRepeatableTurnin;
+                }
             }
 
             foreach (var questId in qr)
             {
-                QuestGiverStatus result2 = QuestGiverStatus.None;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest == null)
                     continue;
@@ -1914,8 +1928,7 @@ namespace Game.Entities
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAvailable, quest.Id, this))
                     continue;
 
-                QuestStatus status = GetQuestStatus(questId);
-                if (status == QuestStatus.None)
+                if (GetQuestStatus(questId) == QuestStatus.None)
                 {
                     if (CanSeeStartQuest(quest))
                     {
@@ -1923,21 +1936,24 @@ namespace Game.Entities
                         {
                             if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                             {
-                                if (quest.IsDaily())
-                                    result2 = QuestGiverStatus.AvailableRep;
+                                if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
+                                    result |= QuestGiverStatus.CovenantCallingQuest;
+                                else if (quest.HasFlagEx(QuestFlagsEx.LegendaryQuest))
+                                    result |= QuestGiverStatus.LegendaryQuest;
+                                else if (quest.IsDaily())
+                                    result |= QuestGiverStatus.DailyQuest;
                                 else
-                                    result2 = QuestGiverStatus.Available;
+                                    result |= QuestGiverStatus.Quest;
                             }
+                            else if (quest.IsDaily())
+                                result |= QuestGiverStatus.TrivialDailyQuest;
                             else
-                                result2 = QuestGiverStatus.LowLevelAvailable;
+                                result |= QuestGiverStatus.Trivial;
                         }
                         else
-                            result2 = QuestGiverStatus.Unavailable;
+                            result |= QuestGiverStatus.Future;
                     }
                 }
-
-                if (result2 > result)
-                    result = result2;
             }
 
             return result;

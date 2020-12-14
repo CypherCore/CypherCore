@@ -74,7 +74,7 @@ namespace Game.AI
         /// <summary>
         /// Called when the dialog status between a player and the gameobject is requested.
         /// </summary>
-        public virtual uint GetDialogStatus(Player player) { return 100; }
+        public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
 
         // Called when a Player clicks a GameObject, before GossipHello
         // prevents achievement tracking if returning true

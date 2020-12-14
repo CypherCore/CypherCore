@@ -790,6 +790,11 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_QUEST_FACTION_REWARD, "SELECT ID, Difficulty1, Difficulty2, Difficulty3, Difficulty4, Difficulty5, Difficulty6, " +        
                 "Difficulty7, Difficulty8, Difficulty9, Difficulty10 FROM quest_faction_reward");
 
+            // QuestInfo.db2
+            PrepareStatement(HotfixStatements.SEL_QUEST_INFO, "SELECT ID, InfoName, Type, Modifiers, Profession FROM quest_info");
+            PrepareStatement(HotfixStatements.SEL_QUEST_INFO_LOCALE, "SELECT ID, InfoName_lang FROM quest_info_locale WHERE locale = ?");
+
+
             // QuestMoneyReward.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_MONEY_REWARD, "SELECT ID, Difficulty1, Difficulty2, Difficulty3, Difficulty4, Difficulty5, Difficulty6, " +        
                 "Difficulty7, Difficulty8, Difficulty9, Difficulty10 FROM quest_money_reward");
@@ -1533,6 +1538,9 @@ namespace Framework.Database
         SEL_PVP_TALENT_SLOT_UNLOCK,
 
         SEL_QUEST_FACTION_REWARD,
+
+        SEL_QUEST_INFO,
+        SEL_QUEST_INFO_LOCALE,
 
         SEL_QUEST_MONEY_REWARD,
 

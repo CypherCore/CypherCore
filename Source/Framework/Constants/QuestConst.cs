@@ -230,23 +230,32 @@ namespace Framework.Constants
         Max
     }
 
-    public enum QuestGiverStatus
+    public enum QuestGiverStatus : uint
     {
-        None = 0x000,
-        Unk = 0x001,
-        Unavailable = 0x002,
-        LowLevelAvailable = 0x004,
-        LowLevelRewardRep = 0x008,
-        LowLevelAvailableRep = 0x010,
-        Incomplete = 0x020,
-        RewardRep = 0x040,
-        AvailableRep = 0x080,
-        Available = 0x100,
-        Reward2 = 0x200,         // No Yellow Dot On Minimap
-        Reward = 0x400,          // Yellow Dot On Minimap
+        None = 0x00,
+        Future = 0x02,
+        Trivial = 0x04,
+        TrivialRepeatableTurnin = 0x08,
+        TrivialDailyQuest = 0x10,
+        Reward = 0x20,
+        JourneyReward = 0x40,
+        CovenantCallingReward = 0x80,
+        RepeatableTurnin = 0x100,
+        DailyQuest = 0x200,
+        Quest = 0x400,
+        RewardCompleteNoPOI = 0x800,
+        RewardCompletePOI = 0x1000,
+        LegendaryQuest = 0x2000,
+        LegendaryRewardCompleteNoPOI = 0x4000,
+        LegendaryRewardCompletePOI = 0x8000,
+        JourneyQuest = 0x10000,
+        JourneyRewardCompleteNoPOI = 0x20000,
+        JourneyRewardCompletePOI = 0x40000,
+        CovenantCallingQuest = 0x80000,
+        CovenantCallingRewardCompleteNoPOI = 0x100000,
+        CovenantCallingRewardCompletePOI = 0x200000,
 
-        // Custom value meaning that script call did not return any valid quest status
-        ScriptedNoStatus = 0x1000
+        ScriptedDefault = 0x80000000
     }
 
     [Flags]
@@ -372,5 +381,25 @@ namespace Framework.Constants
         Default = 0,
         Delete,
         ForceDelete
+    }
+
+    public enum QuestTagType
+    {
+        Tag,
+        Profession,
+        Normal,
+        Pvp,
+        PetBattle,
+        Bounty,
+        Dungeon,
+        Invasion,
+        Raid,
+        Contribution,
+        RatedRreward,
+        InvasionWrapper,
+        FactionAssault,
+        Islands,
+        Threat,
+        CovenantCalling
     }
 }

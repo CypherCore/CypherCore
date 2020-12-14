@@ -1079,11 +1079,6 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
 
-        public override uint GetDialogStatus(Player player)
-        {
-            return 100;
-        }
-
         public override void Destroyed(Player player, uint eventId)
         {
             GetScript().ProcessEventsFor(SmartEvents.Death, player, eventId, 0, false, null, me);

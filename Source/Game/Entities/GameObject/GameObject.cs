@@ -1217,7 +1217,7 @@ namespace Game.Entities
             {
                 case GameObjectTypes.QuestGiver:
                     QuestGiverStatus questStatus = target.GetQuestDialogStatus(this);
-                    if (questStatus > QuestGiverStatus.Unavailable)
+                    if (questStatus != QuestGiverStatus.None && questStatus != QuestGiverStatus.Future)
                         return true;
                     break;
                 // scan GO chest with loot including quest items

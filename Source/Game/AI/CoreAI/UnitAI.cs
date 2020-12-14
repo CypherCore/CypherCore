@@ -529,7 +529,7 @@ namespace Game.AI
     public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         // Called when the dialog status between a player and the creature is requested.
-        public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedNoStatus; }
+        public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
 
         public virtual void WaypointStarted(uint nodeId, uint pathId) { }
 
