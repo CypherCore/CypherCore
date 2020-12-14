@@ -539,6 +539,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBits(Display.Value.Name.GetByteCount(), 6);
                 _worldPacket.WriteUInt8(Display.Value.SexID);
                 _worldPacket.WriteUInt8(Display.Value.RaceID);
+                _worldPacket.WriteInt32(Display.Value.Customizations.Count);
                 _worldPacket.WriteString(Display.Value.Name);
 
                 foreach (ChrCustomizationChoice customization in Display.Value.Customizations)
