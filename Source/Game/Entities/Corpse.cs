@@ -111,8 +111,9 @@ namespace Game.Entities
             stmt.AddValue(index++, GetMapId());                                             // mapId
             stmt.AddValue(index++, (uint)m_corpseData.DisplayID);                           // displayId
             stmt.AddValue(index++, items.ToString());                                       // itemCache
-            stmt.AddValue(index++, m_corpseData.RaceID);                                    // race
-            stmt.AddValue(index++, m_corpseData.Sex);                                       // gender
+            stmt.AddValue(index++, (byte)m_corpseData.RaceID);                              // race
+            stmt.AddValue(index++, (byte)m_corpseData.Class);                             // class
+            stmt.AddValue(index++, (byte)m_corpseData.Sex);                                 // gender
             stmt.AddValue(index++, (uint)m_corpseData.Flags);                               // flags
             stmt.AddValue(index++, (uint)m_corpseData.DynamicFlags);                        // dynFlags
             stmt.AddValue(index++, (uint)m_time);                                           // time
@@ -164,10 +165,10 @@ namespace Game.Entities
 
         public bool LoadCorpseFromDB(ulong guid, SQLFields field)
         {
-            //        0     1     2     3            4      5          6          7       8       9      10        11    12          13          14
-            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
+            //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
+            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
 
-            float posX = field.Read<float>(0);
+                        float posX = field.Read<float>(0);
             float posY = field.Read<float>(1);
             float posZ = field.Read<float>(2);
             float o = field.Read<float>(3);
@@ -181,16 +182,17 @@ namespace Game.Entities
             for (uint index = 0; index < EquipmentSlot.End; ++index)
                 SetItem(index, uint.Parse(items[(int)index]));
 
-            SetRace((Race)field.Read<byte>(7));
-            SetSex((Gender)field.Read<byte>(8));
-            SetFlags((CorpseFlags)field.Read<byte>(9));
-            SetCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(10));
-            SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(14)));
+            SetRace(field.Read<byte>(7));
+            SetClass(field.Read<byte>(8));
+            SetSex(field.Read<byte>(9));
+            SetFlags((CorpseFlags)field.Read<byte>(10));
+            SetCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(11));
+            SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(15)));
             SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(m_corpseData.RaceID).FactionID);
 
-            m_time = field.Read<uint>(11);
+            m_time = field.Read<uint>(12);
 
-            uint instanceId = field.Read<uint>(13);
+            uint instanceId = field.Read<uint>(14);
 
             // place
             SetLocationInstanceId(instanceId);
@@ -290,8 +292,9 @@ namespace Game.Entities
         public void SetPartyGUID(ObjectGuid partyGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.PartyGUID), partyGuid); }
         public void SetGuildGUID(ObjectGuid guildGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.GuildGUID), guildGuid); }
         public void SetDisplayId(uint displayId) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DisplayID), displayId); }
-        public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.RaceID), (byte)race); }
-        public void SetSex(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Sex), (byte)sex); }
+        public void SetRace(byte race) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.RaceID), race); }
+        public void SetClass(byte classId) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Class), classId); }
+        public void SetSex(byte sex) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Sex), sex); }
         public void SetFlags(CorpseFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Flags), (uint)flags); }
         public void SetFactionTemplate(int factionTemplate) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FactionTemplate), factionTemplate); }
         public void SetItem(uint slot, uint item) { SetUpdateFieldValue(ref m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Items, (int)slot), item); }

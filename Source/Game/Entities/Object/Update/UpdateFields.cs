@@ -5189,9 +5189,9 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> PartyGUID = new UpdateField<ObjectGuid>(0, 4);
         public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(0, 5);
         public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 6);
-        public UpdateField<byte> Unused = new UpdateField<byte>(0, 7);
-        public UpdateField<byte> RaceID = new UpdateField<byte>(0, 8);
-        public UpdateField<byte> Sex = new UpdateField<byte>(0, 9);
+        public UpdateField<byte> RaceID = new UpdateField<byte>(0, 7);
+        public UpdateField<byte> Sex = new UpdateField<byte>(0, 8);
+        public UpdateField<byte> Class = new UpdateField<byte>(0, 9);
         public UpdateField<uint> Flags = new UpdateField<uint>(0, 10);
         public UpdateField<int> FactionTemplate = new UpdateField<int>(0, 11);
         public UpdateField<uint> StateSpellVisualKitID = new UpdateField<uint>(0, 12);
@@ -5210,9 +5210,9 @@ namespace Game.Entities
             {
                 data.WriteUInt32(Items[i]);
             }
-            data.WriteUInt8(Unused);
             data.WriteUInt8(RaceID);
             data.WriteUInt8(Sex);
+            data.WriteUInt8(Class);
             data.WriteInt32(Customizations.Size());
             data.WriteUInt32(Flags);
             data.WriteInt32(FactionTemplate);
@@ -5280,15 +5280,15 @@ namespace Game.Entities
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt8(Unused);
+                    data.WriteUInt8(RaceID);
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt8(RaceID);
+                    data.WriteUInt8(Sex);
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt8(Sex);
+                    data.WriteUInt8(Class);
                 }
                 if (changesMask[10])
                 {
@@ -5323,9 +5323,9 @@ namespace Game.Entities
             ClearChangesMask(PartyGUID);
             ClearChangesMask(GuildGUID);
             ClearChangesMask(DisplayID);
-            ClearChangesMask(Unused);
             ClearChangesMask(RaceID);
             ClearChangesMask(Sex);
+            ClearChangesMask(Class);
             ClearChangesMask(Flags);
             ClearChangesMask(FactionTemplate);
             ClearChangesMask(StateSpellVisualKitID);

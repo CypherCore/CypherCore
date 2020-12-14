@@ -3298,8 +3298,8 @@ namespace Game.Maps
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetInstanceId());
 
-            //        0     1     2     3            4      5          6          7       8       9      10        11    12          13          14
-            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, bytes1, bytes2, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
+            //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
+            // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
                 return;
@@ -3345,8 +3345,8 @@ namespace Game.Maps
 
             do
             {
-                CorpseType type = (CorpseType)result.Read<byte>(12);
-                ulong guid = result.Read<ulong>(14);
+                CorpseType type = (CorpseType)result.Read<byte>(13);
+                ulong guid = result.Read<ulong>(15);
                 if (type >= CorpseType.Max || type == CorpseType.Bones)
                 {
                     Log.outError(LogFilter.Maps, "Corpse (guid: {0}) have wrong corpse type ({1}), not loading.", guid, type);
@@ -3436,8 +3436,9 @@ namespace Game.Maps
                 bones.SetPartyGUID(corpse.m_corpseData.PartyGUID);
                 bones.SetGuildGUID(corpse.m_corpseData.GuildGUID);
                 bones.SetDisplayId(corpse.m_corpseData.DisplayID);
-                bones.SetRace((Race)(byte)corpse.m_corpseData.RaceID);
-                bones.SetSex((Gender)(byte)corpse.m_corpseData.Sex);
+                bones.SetRace(corpse.m_corpseData.RaceID);
+                bones.SetSex(corpse.m_corpseData.Sex);
+                bones.SetClass(corpse.m_corpseData.Class);
                 bones.SetCustomizations(corpse.m_corpseData.Customizations);
                 bones.SetFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
                 bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);

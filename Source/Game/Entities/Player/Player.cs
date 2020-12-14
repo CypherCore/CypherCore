@@ -4406,8 +4406,9 @@ namespace Game.Entities
             if (HasPvpFlag(UnitPVPStateFlags.FFAPvp))
                 flags |= CorpseFlags.FFAPvP;
 
-            corpse.SetRace(GetRace());
-            corpse.SetSex(GetNativeSex());
+            corpse.SetRace((byte)GetRace());
+            corpse.SetSex((byte)GetNativeSex());
+            corpse.SetClass((byte)GetClass());
             corpse.SetCustomizations(m_playerData.Customizations);
             corpse.SetFlags(flags);
             corpse.SetDisplayId(GetNativeDisplayId());
