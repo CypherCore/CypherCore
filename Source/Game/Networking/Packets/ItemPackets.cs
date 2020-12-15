@@ -795,6 +795,7 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             var itemModListCount = data.ReadBits<uint>(6);
+            data.ResetBitPos();
 
             for (var i = 0; i < itemModListCount; ++i)
             {
@@ -1019,6 +1020,7 @@ namespace Game.Networking.Packets
         {
             Items = new List<InvItem>();
             int size = data.ReadBits<int>(2);
+            data.ResetBitPos();
             for (int i = 0; i < size; ++i)
             {
                 var item = new InvItem
