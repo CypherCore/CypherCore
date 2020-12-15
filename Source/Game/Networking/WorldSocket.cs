@@ -196,7 +196,7 @@ namespace Game.Networking
                 if (_headerBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred, _headerBuffer.GetRemainingSpace());
+                    int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
                     _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
                     currentReadIndex += readHeaderSize;
 
@@ -215,7 +215,7 @@ namespace Game.Networking
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need more data in the payload
-                    int readDataSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
+                    int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
                     _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
                     currentReadIndex += readDataSize;
 

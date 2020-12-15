@@ -214,7 +214,7 @@ namespace Game.Scenarios
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} scenario POI definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public List<ScenarioPOI> GetScenarioPOIs(uint CriteriaTreeID)

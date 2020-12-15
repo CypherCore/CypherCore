@@ -68,12 +68,10 @@ namespace Game
             {
                 do
                 {
-                    var customizationsForCharacter = customizations[customizationsResult.Read<ulong>(0)];
-
                     ChrCustomizationChoice choice = new ChrCustomizationChoice();
                     choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(1);
                     choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(2);
-                    customizationsForCharacter.Add(choice);
+                    customizations.Add(customizationsResult.Read<ulong>(0), choice);
 
                 } while (customizationsResult.NextRow());
             }
@@ -87,7 +85,7 @@ namespace Game
 
                     var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
                     if (!customizationsForChar.Empty())
-                        charInfo.Customizations = (Array<ChrCustomizationChoice>)customizationsForChar.ToList();
+                        charInfo.Customizations = new Array<ChrCustomizationChoice>(customizationsForChar.ToArray());
 
                     Log.outInfo(LogFilter.Network, "Loading Character {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
@@ -194,7 +192,7 @@ namespace Game
             if (checkRequiredDependentChoices)
             {
                 var requiredChoices = Global.DB2Mgr.GetRequiredCustomizationChoices(req.Id);
-                if (!requiredChoices.Empty())
+                if (requiredChoices != null)
                 {
                     foreach (var key in requiredChoices.Keys)
                     {

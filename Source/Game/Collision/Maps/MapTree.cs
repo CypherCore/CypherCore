@@ -261,7 +261,7 @@ namespace Game.Collision
                 parentMapId = vm.GetParentMapId((uint)parentMapId);
             }
 
-            return null;
+            return result;
         }
 
         public static LoadResult CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)

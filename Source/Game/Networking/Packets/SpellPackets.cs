@@ -1784,7 +1784,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(OriginalCastID);
             data.WriteInt32(SpellID);
 
-            Visual.Read(data);
+            Visual.Write(data);
 
             data.WriteUInt32((uint)CastFlags);
             data.WriteUInt32((uint)CastFlagsEx);

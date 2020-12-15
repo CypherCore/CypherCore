@@ -2506,7 +2506,7 @@ namespace Game.Entities
             uint health = result.Read<uint>(fieldIndex++);
 
             uint[] powers = new uint[(int)PowerType.MaxPerClass];
-            for (var i = 0; fieldIndex < powers.Length; ++i)
+            for (var i = 0; i < powers.Length; ++i)
                 powers[i] = result.Read<uint>(fieldIndex++);
 
             uint instance_id = result.Read<uint>(fieldIndex++);

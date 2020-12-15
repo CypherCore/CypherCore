@@ -2276,7 +2276,7 @@ namespace Game.Entities
         }
     }
 
-    public struct ChrCustomizationChoice
+    public struct ChrCustomizationChoice : IComparable<ChrCustomizationChoice>
     {
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationChoiceID;
@@ -2297,6 +2297,11 @@ namespace Game.Entities
         {
             data.WriteUInt32(ChrCustomizationOptionID);
             data.WriteUInt32(ChrCustomizationChoiceID);
+        }
+
+        public int CompareTo(ChrCustomizationChoice other)
+        {
+            return ChrCustomizationOptionID.CompareTo(other.ChrCustomizationOptionID);
         }
     }
 

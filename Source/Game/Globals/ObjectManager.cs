@@ -5491,13 +5491,13 @@ namespace Game
                     float positionZ = result.Read<float>(6);
                     float orientation = result.Read<float>(7);
 
-                    if (CliDB.ChrRacesStorage.ContainsKey(currentrace))
+                    if (!CliDB.ChrRacesStorage.ContainsKey(currentrace))
                     {
                         Log.outError(LogFilter.Sql, $"Wrong race {currentrace} in `playercreateinfo` table, ignoring.");
                         continue;
                     }
 
-                    if (CliDB.ChrClassesStorage.ContainsKey(currentclass))
+                    if (!CliDB.ChrClassesStorage.ContainsKey(currentclass))
                     {
                         Log.outError(LogFilter.Sql, $"Wrong class {currentclass} in `playercreateinfo` table, ignoring.");
                         continue;

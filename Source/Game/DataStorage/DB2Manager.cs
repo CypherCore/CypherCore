@@ -194,14 +194,16 @@ namespace Game.DataStorage
                     // link shapeshift displays to race/gender/form
                     foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
                     {
-                        ShapeshiftFormModelData data = _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex, shapeshiftOptionsForModel.Item2)];
+                        ShapeshiftFormModelData data = new ShapeshiftFormModelData();
                         data.OptionID = shapeshiftOptionsForModel.Item2;
                         data.Choices = _chrCustomizationChoicesByOption.LookupByKey(shapeshiftOptionsForModel.Item2);
                         if (!data.Choices.Empty())
                         {
                             for (int i = 0; i < data.Choices.Count; ++i)
-                                data.Displays[i] = displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id);
+                                data.Displays.Add(displayInfoByCustomizationChoice.LookupByKey(data.Choices[i].Id));
                         }
+
+                        _chrCustomizationChoicesForShapeshifts[Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex, shapeshiftOptionsForModel.Item2)] = data;
                     }
                 }
             }
@@ -905,7 +907,7 @@ namespace Game.DataStorage
 
         public List<ChrCustomizationOptionRecord> GetCustomiztionOptions(Race race, Gender gender)
         {
-            return _chrCustomizationOptionsByRaceAndGender.LookupByKey(Tuple.Create(race, gender));
+            return _chrCustomizationOptionsByRaceAndGender.LookupByKey(Tuple.Create((byte)race, (byte)gender));
         }
 
         public MultiMap<uint, uint> GetRequiredCustomizationChoices(uint chrCustomizationReqId)
@@ -915,7 +917,7 @@ namespace Game.DataStorage
 
         public ChrModelRecord GetChrModel(Race race, Gender gender)
         {
-            return _chrModelsByRaceAndGender.LookupByKey(Tuple.Create(race, gender));
+            return _chrModelsByRaceAndGender.LookupByKey(Tuple.Create((byte)race, (byte)gender));
         }
 
         public string GetChrRaceName(Race race, Locale locale = Locale.enUS)
