@@ -115,8 +115,6 @@ namespace Game.Collision
                 return LoadResult.ReadFromFileFailed;
             }
 
-            LoadResult result = LoadResult.FileNotFound;
-
             TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
             if (fileResult.File != null)
             {
@@ -126,7 +124,7 @@ namespace Game.Collision
                         return LoadResult.VersionMismatch;
 
                     uint numSpawns = reader.ReadUInt32();
-                    for (uint i = 0; i < numSpawns && result == LoadResult.Success; ++i)
+                    for (uint i = 0; i < numSpawns; ++i)
                     {
                         // read model spawns
                         if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
@@ -176,7 +174,8 @@ namespace Game.Collision
             {
                 iLoadedTiles[PackTileID(tileX, tileY)] = false;
             }
-            return result;
+
+            return LoadResult.Success;
         }
 
         public void UnloadMapTile(uint tileX, uint tileY, VMapManager vm)
