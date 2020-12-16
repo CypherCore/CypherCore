@@ -2377,7 +2377,7 @@ namespace Game.Entities
                     uint attributes = result.Read<uint>(1);
 
                     var spells = _GetSpellInfo(spellId);
-                    if (spells == null)
+                    if (spells.Empty())
                     {
                         Log.outError(LogFilter.Sql, "Table `spell_custom_attr` has wrong spell (entry: {0}), ignored.", spellId);
                         continue;

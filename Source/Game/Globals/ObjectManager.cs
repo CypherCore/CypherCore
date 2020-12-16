@@ -4440,14 +4440,14 @@ namespace Game
             if (Global.SpellMgr.HasSpellInfo(dataN, Difficulty.None))
                 return;
 
-            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3}  but Spell (Entry {4}) not exist.", goInfo.entry, goInfo.type, N, dataN, dataN);
+            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but Spell (Entry {4}) not exist.", goInfo.entry, goInfo.type, N, dataN, dataN);
         }
         void CheckAndFixGOChairHeightId(GameObjectTemplate goInfo, ref uint dataN, uint N)
         {
             if (dataN <= (UnitStandStateType.SitHighChair - UnitStandStateType.SitLowChair))
                 return;
 
-            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3}  but correct chair height in range 0..{4}.", goInfo.entry, goInfo.type, N, dataN, UnitStandStateType.SitHighChair - UnitStandStateType.SitLowChair);
+            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but correct chair height in range 0..{4}.", goInfo.entry, goInfo.type, N, dataN, UnitStandStateType.SitHighChair - UnitStandStateType.SitLowChair);
 
             // prevent client and server unexpected work
             dataN = 0;
@@ -4466,7 +4466,7 @@ namespace Game
             if (dataN <= 1)
                 return;
 
-            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3}  but expected boolean (0/1) consumable field value.",
+            Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3} but expected boolean (0/1) consumable field value.",
                 goInfo.entry, goInfo.type, N, dataN);
         }
 

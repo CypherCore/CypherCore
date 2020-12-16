@@ -78,7 +78,7 @@ class FileAppender : Appender, IDisposable
     {
         lock (locker)
         {
-            var logBytes = Encoding.Unicode.GetBytes(message.prefix + message.text + "\r\n");
+            var logBytes = Encoding.UTF8.GetBytes(message.prefix + message.text + "\r\n");
 
             if (_dynamicName)
             {
