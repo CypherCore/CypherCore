@@ -505,7 +505,7 @@ namespace Game.Entities
             {
                 for (int i = 0; i < (int)EnchantmentSlot.Max; ++i)
                 {
-                    ItemEnchantment enchantmentField = m_itemData.ModifyValue(m_itemData.Enchantment, i);
+                    ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, i);
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), uint.Parse(enchantmentTokens[i * 3 + 0]));
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), uint.Parse(enchantmentTokens[i * 3 + 1]));
                     SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), short.Parse(enchantmentTokens[i * 3 + 2]));
@@ -945,7 +945,7 @@ namespace Game.Entities
             ApplyArtifactPowerEnchantmentBonuses(slot, GetEnchantmentId(slot), false, owner);
             ApplyArtifactPowerEnchantmentBonuses(slot, id, true, owner);
 
-            ItemEnchantment enchantmentField = m_itemData.ModifyValue(m_itemData.Enchantment, (int)slot);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), id);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), duration);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)charges);
@@ -957,7 +957,8 @@ namespace Game.Entities
             if (GetEnchantmentDuration(slot) == duration)
                 return;
 
-            SetUpdateFieldValue(m_itemData.ModifyValue(m_itemData.Enchantment, (int)slot).ModifyValue((ItemEnchantment itemEnchantment) => itemEnchantment.Duration), duration);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), duration);
             SetState(ItemUpdateState.Changed, owner);
             // Cannot use GetOwner() here, has to be passed as an argument to avoid freeze due to hashtable locking
         }
@@ -967,7 +968,8 @@ namespace Game.Entities
             if (GetEnchantmentCharges(slot) == charges)
                 return;
 
-            SetUpdateFieldValue(m_itemData.ModifyValue(m_itemData.Enchantment, (int)slot).ModifyValue((ItemEnchantment itemEnchantment) => itemEnchantment.Charges), (short)charges);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)charges);
             SetState(ItemUpdateState.Changed, GetOwner());
         }
 
@@ -976,7 +978,7 @@ namespace Game.Entities
             if (GetEnchantmentId(slot) == 0)
                 return;
 
-            ItemEnchantment enchantmentField = m_itemData.ModifyValue(m_itemData.Enchantment, (int)slot);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, (int)slot);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), 0u);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), 0u);
             SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Charges), (short)0);
@@ -1055,7 +1057,7 @@ namespace Game.Entities
                 }
             }
 
-            SocketedGem gemField = m_itemData.ModifyValue(m_itemData.Gems, slot);
+            SocketedGem gemField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Gems, slot);
             SetUpdateFieldValue(gemField.ModifyValue(gemField.ItemId), gem.ItemId);
             SetUpdateFieldValue(gemField.ModifyValue(gemField.Context), gem.Context);
             for (int i = 0; i < 16; ++i)
@@ -2063,7 +2065,7 @@ namespace Game.Entities
             var foundIndex = m_artifactPowerIdToIndex.LookupByKey(artifactPowerId);
             if (foundIndex != 0)
             {
-                ArtifactPower artifactPower = m_itemData.ModifyValue(m_itemData.ArtifactPowers, foundIndex);
+                ArtifactPower artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, foundIndex);
                 SetUpdateFieldValue(ref artifactPower.PurchasedRank, purchasedRank);
                 SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, currentRankWithBonus);
             }
@@ -2118,7 +2120,7 @@ namespace Game.Entities
                                         else
                                             newRank -= (byte)enchant.EffectPointsMin[i];
 
-                                        artifactPower = m_itemData.ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
+                                        artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                         SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
                                         if (IsEquipped())
@@ -2142,7 +2144,7 @@ namespace Game.Entities
                                     else
                                         newRank -= (byte)enchant.EffectPointsMin[i];
 
-                                    ArtifactPower artifactPower = m_itemData.ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
+                                    ArtifactPower artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                     SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
                                     if (IsEquipped())
@@ -2174,7 +2176,7 @@ namespace Game.Entities
                                                 else
                                                     newRank -= (byte)enchant.EffectPointsMin[i];
 
-                                                artifactPower = m_itemData.ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
+                                                artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, artifactPowerIndex);
                                                 SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, newRank);
 
                                                 if (IsEquipped())
@@ -2243,11 +2245,13 @@ namespace Game.Entities
 
         public void SetPetitionId(uint petitionId)
         {
-            SetUpdateFieldValue(m_itemData.ModifyValue(m_itemData.Enchantment, 0).ModifyValue((ItemEnchantment itemEnchantment) => itemEnchantment.ID), petitionId);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.ID), petitionId);
         }
         public void SetPetitionNumSignatures(uint signatures)
         {
-            SetUpdateFieldValue(m_itemData.ModifyValue(m_itemData.Enchantment, 0).ModifyValue((ItemEnchantment itemEnchantment) => itemEnchantment.Duration), signatures);
+            ItemEnchantment enchantmentField = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Enchantment, 0);
+            SetUpdateFieldValue(enchantmentField.ModifyValue(enchantmentField.Duration), signatures);
         }
 
         public void SetFixedLevel(uint level)

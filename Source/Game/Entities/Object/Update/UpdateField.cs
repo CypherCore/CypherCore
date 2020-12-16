@@ -20,8 +20,6 @@ using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Game.Entities
 {
@@ -355,13 +353,13 @@ namespace Game.Entities
 
         public void ClearChangesMask<U>(UpdateField<U> updateField) where U : new()
         {
-            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
                 ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
 
         public void ClearChangesMask<U>(UpdateFieldArray<U> updateField) where U : new()
         {
-            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
             {
                 for (int i = 0; i < updateField.GetSize(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();
@@ -370,37 +368,13 @@ namespace Game.Entities
 
         public void ClearChangesMask<U>(DynamicUpdateField<U> updateField) where U : new()
         {
-            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
             {
                 for (int i = 0; i < updateField.Size(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();
 
                 updateField.ClearChangesMask();
             }
-        }
-
-        public UpdateField<UU> ModifyValue<U, UU>(Expression<Func<U, UpdateField<UU>>> expression) where UU : new()
-        {
-            var fieldInfo = ((MemberExpression)expression.Body).Member as FieldInfo;
-            if (fieldInfo == null)
-                throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-
-            var updateField = (UpdateField<UU>)fieldInfo.GetValue(this);
-            _changesMask.Set(updateField.BlockBit);
-            _changesMask.Set(updateField.Bit);
-            return updateField;
-        }
-
-        public ref UU ModifyValue<U, UU>(Expression<Func<U, UpdateFieldArray<UU>>> expression, int index) where UU : new()
-        {
-            var fieldInfo = ((MemberExpression)expression.Body).Member as FieldInfo;
-            if (fieldInfo == null)
-                throw new ArgumentException("The lambda expression should point to a valid Field");
-
-            var updateFieldArray = (UpdateFieldArray<UU>)fieldInfo.GetValue(this);
-            _changesMask.Set(updateFieldArray.Bit);
-            _changesMask.Set(updateFieldArray.FirstElementBit + index);
-            return ref updateFieldArray._values[index];
         }
 
         public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()

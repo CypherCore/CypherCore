@@ -2037,24 +2037,26 @@ namespace Game.Entities
             if (counter >= SharedConst.MaxQuestCounts)
                 return;
 
-            SetUpdateFieldValue(ref m_playerData.ModifyValue(m_playerData.QuestLog, slot).ModifyValue((QuestLog questLogField) => questLogField.ObjectiveProgress, counter), count);
+            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            SetUpdateFieldValue(ref questLog.ModifyValue(questLog.ObjectiveProgress, counter), count);
         }
 
         public void SetQuestSlotState(ushort slot, QuestSlotStateMask state)
         {
-            QuestLog questLogField = m_playerData.ModifyValue(m_playerData.QuestLog, slot);
+            QuestLog questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
         }
 
         public void RemoveQuestSlotState(ushort slot, QuestSlotStateMask state)
         {
-            QuestLog questLogField = m_playerData.ModifyValue(m_playerData.QuestLog, slot);
+            QuestLog questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
         }
 
         public void SetQuestSlotTimer(ushort slot, uint timer)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot).ModifyValue((QuestLog questLog) => questLog.EndTime), timer);
+            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), timer);
         }
 
         void SetQuestCompletedBit(uint questBit, bool completed)

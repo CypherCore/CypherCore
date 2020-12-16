@@ -1777,9 +1777,9 @@ namespace Game.Entities
                 return;
 
             var virtualItemField = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VirtualItems, (int)slot);
-            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemID), itemId);
-            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemAppearanceModID), appearanceModId);
-            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemVisual), itemVisual);
+            SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemID), itemId);
+            SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemAppearanceModID), appearanceModId);
+            SetUpdateFieldValue(virtualItemField.ModifyValue(virtualItemField.ItemVisual), itemVisual);
         }
 
         //Unit
@@ -2363,7 +2363,7 @@ namespace Game.Entities
         public uint GetChannelScriptVisualId() { return m_unitData.ChannelData.GetValue().SpellVisual.ScriptVisualID; }
         public void SetChannelVisual(SpellCastVisualField channelVisual)
         {
-            UnitChannel unitChannel = m_unitData.ModifyValue(m_unitData.ChannelData);
+            UnitChannel unitChannel = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
             SetUpdateFieldValue(ref unitChannel.SpellVisual, channelVisual);
         }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }

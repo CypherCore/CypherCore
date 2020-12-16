@@ -820,7 +820,8 @@ namespace Game.Entities
             // visualize enchantment at player and equipped items
             if (slot == EnchantmentSlot.Perm)
             {
-                SetUpdateFieldValue(m_playerData.ModifyValue(m_playerData.VisibleItems, item.GetSlot()).ModifyValue((VisibleItem visibleItemField) => visibleItemField.ItemVisual), item.GetVisibleItemVisual(this));
+                VisibleItem visibleItem = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, item.GetSlot());
+                SetUpdateFieldValue(visibleItem.ModifyValue(visibleItem.ItemVisual), item.GetVisibleItemVisual(this));
             }
 
             if (apply_dur)
@@ -3474,13 +3475,41 @@ namespace Game.Entities
 
         public void SetPetSpellPower(uint spellPower) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetSpellPower), spellPower); }
 
-        public void SetSkillLineId(uint pos, ushort skillLineId) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillLineID, (int)pos), skillLineId); }
-        public void SetSkillStep(uint pos, ushort step) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillStep, (int)pos), step); }
-        public void SetSkillRank(uint pos, ushort rank) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillRank, (int)pos), rank); }
-        public void SetSkillStartingRank(uint pos, ushort starting) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillStartingRank, (int)pos), starting); }
-        public void SetSkillMaxRank(uint pos, ushort max) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillMaxRank, (int)pos), max); }
-        public void SetSkillTempBonus(uint pos, ushort bonus) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillTempBonus, (int)pos), bonus); }
-        public void SetSkillPermBonus(uint pos, ushort bonus) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillPermBonus, (int)pos), bonus); }
+        public void SetSkillLineId(uint pos, ushort skillLineId)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillLineID, (int)pos), skillLineId);
+        }
+        public void SetSkillStep(uint pos, ushort step)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStep, (int)pos), step);
+        }
+        public void SetSkillRank(uint pos, ushort rank)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillRank, (int)pos), rank);
+        }
+        public void SetSkillStartingRank(uint pos, ushort starting)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStartingRank, (int)pos), starting);
+        }
+        public void SetSkillMaxRank(uint pos, ushort max)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillMaxRank, (int)pos), max);
+        }
+        public void SetSkillTempBonus(uint pos, ushort bonus)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillTempBonus, (int)pos), bonus);
+        }
+        public void SetSkillPermBonus(uint pos, ushort bonus)
+        {
+            SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
+            SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillPermBonus, (int)pos), bonus);
+        }
     }
 
     public class PlayerSpell

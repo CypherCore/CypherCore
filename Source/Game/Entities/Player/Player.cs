@@ -3548,8 +3548,8 @@ namespace Game.Entities
                     if (creature == null || (!creature.IsTrigger() && !creature.HasAuraType(AuraType.Transform) && !creature.HasUnitFlag(UnitFlags.NotSelectable)))
                         continue;
 
-                    creature.m_unitData.ModifyValue(m_unitData.DisplayID);
-                    creature.m_unitData.ModifyValue(m_unitData.Flags);
+                    creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID);
+                    creature.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags);
                     creature.ForceUpdateFieldChange();
                     creature.BuildValuesUpdateBlockForPlayer(udata, this);
                 }
@@ -7271,11 +7271,13 @@ namespace Game.Entities
 
         public void SetRestState(RestTypes type, PlayerRestState state)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type).ModifyValue((RestInfo restInfo) => restInfo.StateID), (byte)state);
+            RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
+            SetUpdateFieldValue(restInfo.ModifyValue(restInfo.StateID), (byte)state);
         }
         public void SetRestThreshold(RestTypes type, uint threshold)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type).ModifyValue((RestInfo restInfo) => restInfo.Threshold), threshold);
+            RestInfo restInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.RestInfo, (int)type);
+            SetUpdateFieldValue(restInfo.ModifyValue(restInfo.Threshold), threshold);
         }
 
         public bool HasPlayerFlag(PlayerFlags flags) { return (m_playerData.PlayerFlags & (uint)flags) != 0; }
