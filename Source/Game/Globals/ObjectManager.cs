@@ -9267,7 +9267,8 @@ namespace Game
                     }
 
                     PlayerChoice choice = _playerChoices[choiceId];
-                    if (!choice.Responses.Any(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId))
+                    var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
+                    if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
                         continue;
@@ -9302,7 +9303,7 @@ namespace Game
                         reward.SkillPointCount = 0;
                     }
 
-                    choice.Responses[responseId].Reward.Set(reward);
+                    response.Reward.Set(reward);
                     ++rewardCount;
 
                 } while (rewards.NextRow());
@@ -9333,7 +9334,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
+                    var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -9375,7 +9376,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
+                    var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -9417,7 +9418,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
+                    var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -9464,7 +9465,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.Find(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    var response = choice.Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item_choice` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
