@@ -9247,7 +9247,7 @@ namespace Game
 
                     ++responseCount;
 
-                    choice.Responses[responseId] = response;
+                    choice.Responses.Insert(responseId, response);
                 } while (responses.NextRow());
             }
 
@@ -9325,7 +9325,7 @@ namespace Game
 
                     int quantity = rewardItem.Read<int>(4);
 
-                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    PlayerChoice choice = _playerChoices[choiceId];
                     if (choice == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
