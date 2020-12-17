@@ -87,8 +87,7 @@ namespace Game.Collision
                 for (uint i = 0; i < spawnIndicesSize; ++i)
                 {
                     uint spawnId = reader.ReadUInt32();
-                    uint spawnIndex = reader.ReadUInt32();
-                    iSpawnIndices[spawnId] = spawnIndex;
+                    iSpawnIndices[spawnId] = i;
                 }
             }
 
