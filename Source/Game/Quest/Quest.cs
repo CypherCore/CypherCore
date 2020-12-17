@@ -95,7 +95,7 @@ namespace Game
                 RewardFactionId[i] = fields.Read<uint>(69 + i * 4);
                 RewardFactionValue[i] = fields.Read<int>(70 + i * 4);
                 RewardFactionOverride[i] = fields.Read<int>(71 + i * 4);
-                RewardFactionCapIn[i] = fields.Read<uint>(72 + i * 4);
+                RewardFactionCapIn[i] = fields.Read<int>(72 + i * 4);
             }
 
             RewardReputationMask = fields.Read<uint>(89);
@@ -374,7 +374,7 @@ namespace Game
                 rewards.FactionID[i] = RewardFactionId[i];
                 rewards.FactionOverride[i] = RewardFactionOverride[i];
                 rewards.FactionValue[i] = RewardFactionValue[i];
-                rewards.FactionCapIn[i] = (int)RewardFactionCapIn[i];
+                rewards.FactionCapIn[i] = RewardFactionCapIn[i];
             }
 
             for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
@@ -529,7 +529,7 @@ namespace Game
                 QueryData.Info.RewardFactionID[i] = RewardFactionId[i];
                 QueryData.Info.RewardFactionValue[i] = RewardFactionValue[i];
                 QueryData.Info.RewardFactionOverride[i] = RewardFactionOverride[i];
-                QueryData.Info.RewardFactionCapIn[i] = (int)RewardFactionCapIn[i];
+                QueryData.Info.RewardFactionCapIn[i] = RewardFactionCapIn[i];
             }
 
             QueryData.Info.POIContinent = POIContinent;
@@ -634,7 +634,7 @@ namespace Game
         public uint[] RewardFactionId = new uint[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionOverride = new int[SharedConst.QuestRewardReputationsCount];
-        public uint[] RewardFactionCapIn = new uint[SharedConst.QuestRewardReputationsCount];
+        public int[] RewardFactionCapIn = new int[SharedConst.QuestRewardReputationsCount];
         public uint RewardReputationMask;
         public uint[] RewardCurrencyId = new uint[SharedConst.QuestRewardCurrencyCount];
         public uint[] RewardCurrencyCount = new uint[SharedConst.QuestRewardCurrencyCount];

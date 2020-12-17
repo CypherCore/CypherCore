@@ -1605,7 +1605,7 @@ namespace Game.Entities
                 if (rep == 0)
                     continue;
 
-                if (quest.RewardFactionCapIn[i] != 0 && rep > 0 && (uint)GetReputationMgr().GetRank(factionEntry) >= quest.RewardFactionCapIn[i])
+                if (quest.RewardFactionCapIn[i] != 0 && rep > 0 && (int)GetReputationMgr().GetRank(factionEntry) >= quest.RewardFactionCapIn[i])
                     continue;
 
                 if (quest.IsDaily())
