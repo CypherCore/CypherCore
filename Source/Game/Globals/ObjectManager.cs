@@ -9245,9 +9245,10 @@ namespace Game
                     if (!responses.IsNull(16))
                         response.RewardQuestID.Set(responses.Read<uint>(16));
 
+                    choice.Responses.Add(response);
+
                     ++responseCount;
 
-                    choice.Responses.Insert(responseId, response);
                 } while (responses.NextRow());
             }
 
