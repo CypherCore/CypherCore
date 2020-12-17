@@ -65,6 +65,7 @@ namespace Framework.Constants
 
         public const uint MapMagic = 0x5350414D; //"MAPS";
         public const uint MapVersionMagic = 0x392E3176; //"v1.9";
+        public const uint MapVersionMagic2 = 0x302E3276; //"v2.0"; // Hack for some different extractors using v2.0 header
         public const uint MapAreaMagic = 0x41455241; //"AREA";
         public const uint MapHeightMagic = 0x5447484D; //"MHGT";
         public const uint MapLiquidMagic = 0x51494C4D; //"MLIQ";

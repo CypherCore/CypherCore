@@ -141,7 +141,7 @@ namespace Game.Maps
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 var header = reader.Read<MapFileHeader>();
-                if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
+                if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
                 {
                     Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
                         fileName, header.versionMagic, MapConst.MapVersionMagic);
