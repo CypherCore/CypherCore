@@ -180,6 +180,11 @@ namespace Game.DataStorage
                 }
             }
 
+            Dictionary<uint, uint> parentRaces = new Dictionary<uint, uint>();
+            foreach (ChrRacesRecord chrRace in CliDB.ChrRacesStorage.Values)
+                if (chrRace.UnalteredVisualRaceID != 0)
+                    parentRaces[(uint)chrRace.UnalteredVisualRaceID] = chrRace.Id;
+
             foreach (ChrRaceXChrModelRecord raceModel in CliDB.ChrRaceXChrModelStorage.Values)
             {
                 ChrModelRecord model = CliDB.ChrModelStorage.LookupByKey(raceModel.ChrModelID);
@@ -189,7 +194,13 @@ namespace Game.DataStorage
 
                     var customizationOptionsForModel = customizationOptionsByModel.LookupByKey(model.Id);
                     if (customizationOptionsForModel != null)
+                    {
                         _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)raceModel.ChrRacesID, (byte)model.Sex), customizationOptionsForModel);
+
+                        uint parentRace = parentRaces.LookupByKey(raceModel.ChrRacesID);
+                        if (parentRace != 0)
+                            _chrCustomizationOptionsByRaceAndGender.AddRange(Tuple.Create((byte)parentRace, (byte)model.Sex), customizationOptionsForModel);
+                    }
 
                     // link shapeshift displays to race/gender/form
                     foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
