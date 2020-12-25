@@ -54,7 +54,8 @@ namespace Game.Entities
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
                 FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
-                if (raceFaction == null || raceFaction.FactionGroup != CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId).GetScalingFactionGroup())
+                int questFactionGroup = CliDB.ContentTuningStorage.LookupByKey(quest.ContentTuningId).GetScalingFactionGroup();
+                if (questFactionGroup != 0 && raceFaction.FactionGroup != questFactionGroup)
                     return questLevels.Value.MaxLevel;
 
                 return questLevels.Value.MinLevelWithDelta;
