@@ -1347,7 +1347,13 @@ namespace Game
             _player.ModifyMoney(-cost);
             _player.UpdateCriteria(CriteriaTypes.GoldSpentAtBarber, (ulong)cost);
 
-            _player.SetNativeSex((Gender)packet.NewSex);
+            if (_player.GetNativeSex() != (Gender)packet.NewSex)
+            {
+                _player.SetNativeSex((Gender)packet.NewSex);
+                _player.InitDisplayIds();
+                _player.RestoreDisplayId(false);
+            }
+
             _player.SetCustomizations(packet.Customizations);
 
             _player.UpdateCriteria(CriteriaTypes.VisitBarberShop, 1);
