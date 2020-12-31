@@ -54,6 +54,11 @@ namespace Scripts.Spells.Mage
         public const uint TemporalDisplacement = 80354;
         public const uint WorgenForm = 32819;
         public const uint Chilled = 205708;
+        public const uint IceLanceTrigger = 228598;
+        public const uint ThermalVoid = 155149;
+        public const uint IcyVeins = 12472;
+        public const uint ChainReactionDummy = 278309;
+        public const uint ChainReaction = 278310;
 
         //Misc
         public const uint HunterInsanity = 95809;
@@ -238,6 +243,26 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 44544 - Fingers of Frost
+    class spell_mage_fingers_of_frost : AuraScript
+    {
+        void SuppressWarning(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            PreventDefaultAction();
+        }
+
+        void DropFingersOfFrost(ProcEventInfo eventInfo)
+        {
+            GetAura().ModStackAmount(-1);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(SuppressWarning, 1, AuraType.Dummy));
+            AfterProc.Add(new AuraProcHandler(DropFingersOfFrost));
+        }
+    }
+    
     [Script] // 11426 - Ice Barrier
     class spell_mage_ice_barrier : AuraScript
     {
@@ -270,8 +295,82 @@ namespace Scripts.Spells.Mage
         }
     }
 
-    // 11119 - Ignite
-    [Script]
+    [Script] // Ice Lance - 30455
+    class spell_mage_ice_lance : SpellScript
+    {
+        List<ObjectGuid> _orderedTargets = new List<ObjectGuid>();
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IceLanceTrigger, SpellIds.ThermalVoid, SpellIds.IcyVeins, SpellIds.ChainReactionDummy, SpellIds.ChainReaction, SpellIds.FingersOfFrost);
+        }
+
+        void IndexTarget(uint effIndex)
+        {
+            _orderedTargets.Add(GetHitUnit().GetGUID());
+        }
+
+        void HandleOnHit(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            int index = _orderedTargets.IndexOf(target.GetGUID());
+
+            if (index == 0 // only primary target triggers these benefits
+                && target.HasAuraState(AuraStateType.Frozen, GetSpellInfo(), caster))
+            {
+                // Thermal Void
+                Aura thermalVoid = caster.GetAura(SpellIds.ThermalVoid);
+                if (thermalVoid != null)
+                {
+                    SpellEffectInfo thermalVoidEffect = thermalVoid.GetSpellInfo().GetEffect(0);
+                    if (thermalVoidEffect != null)
+                    {
+                        Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
+                        if (icyVeins != null)
+                            icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoidEffect.CalcValue(caster) * Time.InMilliseconds);
+                    }
+                }
+
+                // Chain Reaction
+                if (caster.HasAura(SpellIds.ChainReactionDummy))
+                    caster.CastSpell(caster, SpellIds.ChainReaction, true);
+            }
+
+            // put target index for chain value multiplier into EFFECT_1 base points, otherwise triggered spell doesn't know which damage multiplier to apply
+            caster.CastCustomSpell(SpellIds.IceLanceTrigger, SpellValueMod.BasePoint1, index, target, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget.Add(new EffectHandler(IndexTarget, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new EffectHandler(HandleOnHit, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 228598 - Ice Lance
+    class spell_mage_ice_lance_damage : SpellScript
+    {
+        void ApplyDamageMultiplier(uint effIndex)
+        {
+            SpellValue spellValue = GetSpellValue();
+            if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
+            {
+                int originalDamage = GetHitDamage();
+                float targetIndex = (float)spellValue.EffectBasePoints[1];
+                float multiplier = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
+                SetHitDamage((int)(originalDamage * multiplier));
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+    
+    [Script] // 11119 - Ignite
     class spell_mage_ignite : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

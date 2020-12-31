@@ -2841,7 +2841,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).TriggerSpell = 33760;
                         break;
                     case 44544: // Fingers of Frost
-                        spellInfo.GetEffect(0).SpellClassMask = new FlagArray128(685904631, 1151048, 0, 0);
+                        spellInfo.GetEffect(0).SpellClassMask[0] |= 0x20000;
                         break;
                     case 52212: // Death and Decay
                     case 41485: // Deadly Poison - Black Temple
