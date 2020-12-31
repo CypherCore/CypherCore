@@ -360,7 +360,7 @@ namespace Game
                     case TypeId.Player:
                         {
                             //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
-                            Creature creatureQGiver = obj.ToCreature();
+                            Unit unitQGiver = obj.ToUnit();
                             // Send next quest
                             Quest nextQuest = _player.GetNextQuest(packet.QuestGiverGUID, quest);
                             if (nextQuest != null)
@@ -376,7 +376,9 @@ namespace Game
                             }
 
                             _player.PlayerTalkClass.ClearMenus();
-                            creatureQGiver.GetAI().QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
+                            var qGiverAI = unitQGiver.GetAI();
+                            if (qGiverAI != null)
+                                qGiverAI.QuestReward(_player, quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID);
                             break;
                         }
                     case TypeId.GameObject:
