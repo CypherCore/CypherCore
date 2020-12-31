@@ -161,8 +161,8 @@ namespace Game.Spells
             }
 
             EquippedItemClass = ItemClass.None;
-            EquippedItemSubClassMask = -1;
-            EquippedItemInventoryTypeMask = -1;
+            EquippedItemSubClassMask = 0;
+            EquippedItemInventoryTypeMask = 0;
             // SpellEquippedItemsEntry
             SpellEquippedItemsRecord _equipped = data.EquippedItems;
             if (_equipped != null)
