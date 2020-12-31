@@ -420,7 +420,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CORPSES, "SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?");
             PrepareStatement(CharStatements.INS_CORPSE, "INSERT INTO corpse (guid, posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CORPSE, "DELETE FROM corpse WHERE guid = ?");
-            PrepareStatement(CharStatements.DEL_CORPSES_FROM_MAP, "DELETE cp, c FROM corpse_phases cp INNER JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?");
+            PrepareStatement(CharStatements.DEL_CORPSES_FROM_MAP, "DELETE c, cc, cp FROM corpse c LEFT JOIN corpse_customizations cc ON c.guid = cc.ownerGuid LEFT JOIN corpse_phases cp ON c.guid = cp.OwnerGuid WHERE c.mapId = ? AND c.instanceId = ?");
             PrepareStatement(CharStatements.SEL_CORPSE_PHASES, "SELECT cp.OwnerGuid, cp.PhaseId FROM corpse_phases cp LEFT JOIN corpse c ON cp.OwnerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?");
             PrepareStatement(CharStatements.INS_CORPSE_PHASES, "INSERT INTO corpse_phases (OwnerGuid, PhaseId) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_CORPSE_PHASES, "DELETE FROM corpse_phases WHERE OwnerGuid = ?");

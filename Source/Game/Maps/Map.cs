@@ -3326,6 +3326,10 @@ namespace Game.Maps
                 } while (phaseResult.NextRow());
             }
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_CUSTOMIZATIONS);
+            stmt.AddValue(0, GetId());
+            stmt.AddValue(1, GetInstanceId());
+
             //        0             1                            2
             // SELECT cc.ownerGuid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM corpse_customizations cc LEFT JOIN corpse c ON cc.ownerGuid = c.guid WHERE c.mapId = ? AND c.instanceId = ?
             SQLResult customizationResult = DB.Characters.Query(stmt);
