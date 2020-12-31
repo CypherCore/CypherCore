@@ -410,6 +410,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix info...");
             Global.DB2Mgr.LoadHotfixData();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading hotfix optional data...");
+            Global.DB2Mgr.LoadHotfixOptionalData(m_availableDbcLocaleMask);
+
             //- Load M2 fly by cameras
             M2Storage.LoadM2Cameras(_dataPath);
 

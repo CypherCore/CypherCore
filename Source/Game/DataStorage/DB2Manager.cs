@@ -43,7 +43,10 @@ namespace Game.DataStorage
                 _nameValidators[i] = new List<string>();
 
             for (var i = 0; i < (int)Locale.Total; ++i)
-                _hotfixBlob[i] = new Dictionary<Tuple<uint, int>, byte[]>();
+            {
+                _hotfixBlob[i] = new Dictionary<(uint tableHas, int recordId), byte[]>();
+                _hotfixOptionalData[i] = new MultiMap<(uint tableHas, int recordId), HotfixOptionalData>();
+            }
         }
 
         public void LoadStores()
@@ -748,7 +751,7 @@ namespace Game.DataStorage
                 var storeItr = _storage.LookupByKey(tableHash);
                 if (storeItr != null)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {nameof(storeItr)}, fill related table instead of hotfix_blob");
+                    Log.outError(LogFilter.Sql, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {nameof(storeItr)}, fill related table instead of hotfix_blob");
                     continue;
                 }
 
@@ -758,20 +761,96 @@ namespace Game.DataStorage
                 Locale locale = localeName.ToEnum<Locale>();
                 if (!SharedConst.IsValidLocale(locale))
                 {
-                    Log.outError(LogFilter.ServerLoading, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    Log.outError(LogFilter.Sql, $"`hotfix_blob` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
                     continue;
                 }
 
                 if (!availableDb2Locales[(int)locale])
                     continue;
 
-                _hotfixBlob[(int)locale][Tuple.Create(tableHash, recordId)] = result.Read<byte[]>(3);
+                _hotfixBlob[(int)locale][(tableHash, recordId)] = result.Read<byte[]>(3);
                 hotfixBlobCount++;
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixBlobCount} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        public void LoadHotfixOptionalData(BitSet availableDb2Locales)
+        {
+            // Register allowed optional data keys
+            _allowedHotfixOptionalData.Add(CliDB.BroadcastTextStorage.GetTableHash(), Tuple.Create(CliDB.TactKeyStorage.GetTableHash(), (AllowedHotfixOptionalData)ValidateBroadcastTextTactKeyOptionalData));
+
+            uint oldMSTime = Time.GetMSTime();
+
+            SQLResult result = DB.Hotfix.Query("SELECT TableHash, RecordId, locale, `Key`, `Data` FROM hotfix_optional_data ORDER BY TableHash");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix optional data records.");
+                return;
+            }
+
+            uint hotfixOptionalDataCount = 0;
+            do
+            {
+                uint tableHash = result.Read<uint>(0);
+                var allowedHotfixes = _allowedHotfixOptionalData.LookupByKey(tableHash);
+                if (allowedHotfixes.Empty())
+                {
+                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references DB2 store by hash 0x{tableHash:X} that is not allowed to have optional data");
+                    continue;
+                }
+
+                uint recordId = result.Read<uint>(1);
+                var db2storage = _storage.LookupByKey(tableHash);
+                if (db2storage == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references unknown DB2 store by hash 0x{tableHash:X} with RecordID: {recordId}");
+                    continue;
+                }
+
+                string localeName = result.Read<string>(2);
+                Locale locale = localeName.ToEnum<Locale>();
+
+                if (!SharedConst.IsValidLocale(locale))
+                {
+                    Log.outError(LogFilter.Sql, $"`hotfix_optional_data` contains invalid locale: {localeName} at TableHash: 0x{tableHash:X} and RecordID: {recordId}");
+                    continue;
+                }
+
+                if (!availableDb2Locales[(int)locale])
+                    continue;
+
+                HotfixOptionalData optionalData = new HotfixOptionalData();
+                optionalData.Key = result.Read<uint>(3);
+                var allowedHotfixItr = allowedHotfixes.Find(v =>
+                {
+                    return v.Item1 == optionalData.Key;
+                });
+                if (allowedHotfixItr == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` references non-allowed optional data key 0x{optionalData.Key:X} for DB2 store by hash 0x{tableHash:X} and RecordID: {recordId}");
+                    continue;
+                }
+
+                optionalData.Data = result.Read<byte[]>(4);
+                if (!allowedHotfixItr.Item2(optionalData.Data))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `hotfix_optional_data` contains invalid data for DB2 store 0x{tableHash:X}, RecordID: {recordId} and Key: 0x{optionalData.Key:X}");
+                    continue;
+                }
+
+                _hotfixOptionalData[(int)locale].Add((tableHash, (int)recordId), optionalData);
+                hotfixOptionalDataCount++;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {hotfixOptionalDataCount} hotfix optional data records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public bool ValidateBroadcastTextTactKeyOptionalData(byte[] data)
+        {
+            return data.Length == 8 + 16;
+        }
+        
         public uint GetHotfixCount() { return (uint)_hotfixData.Count; }
         
         public List<HotfixRecord> GetHotfixData() { return _hotfixData; }
@@ -783,6 +862,13 @@ namespace Game.DataStorage
             return _hotfixBlob[(int)locale].LookupByKey(Tuple.Create(tableHash, recordId));
         }
 
+        public List<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, uint recordId, Locale locale)
+        {
+            Cypher.Assert(SharedConst.IsValidLocale(locale), $"Locale {locale} is invalid locale");
+
+            return _hotfixOptionalData[(int)locale].LookupByKey((tableHash, (int)recordId));
+        }
+        
         public uint GetEmptyAnimStateID()
         {
             return (uint)CliDB.AnimationDataStorage.Count;
@@ -2154,9 +2240,13 @@ namespace Game.DataStorage
             _storage[tableHash] = store;
         }
 
+        delegate bool AllowedHotfixOptionalData(byte[] data);
+
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
         List<HotfixRecord> _hotfixData = new List<HotfixRecord>();
-        Dictionary<Tuple<uint, int>, byte[]>[] _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>[(int)Locale.Total];
+        Dictionary<(uint tableHas, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHas, int recordId), byte[]>[(int)Locale.Total];
+        MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>>();
+        MultiMap<(uint tableHas, int recordId), HotfixOptionalData>[]_hotfixOptionalData = new MultiMap<(uint tableHas, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
         MultiMap<uint, uint> _areaGroupMembers = new MultiMap<uint, uint>();
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();
@@ -2408,7 +2498,13 @@ namespace Game.DataStorage
             HotfixID = data.ReadInt32();
         }
     }
-    
+
+    public class HotfixOptionalData
+    {
+        public uint Key;
+        public byte[] Data;
+    }
+
     class ChrClassesXPowerTypesRecordComparer : IComparer<ChrClassesXPowerTypesRecord>
     {
         public int Compare(ChrClassesXPowerTypesRecord left, ChrClassesXPowerTypesRecord right)

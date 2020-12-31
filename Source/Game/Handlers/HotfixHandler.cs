@@ -29,11 +29,6 @@ namespace Game
         void HandleDBQueryBulk(DBQueryBulk dbQuery)
         {
             IDB2Storage store = Global.DB2Mgr.GetStorage(dbQuery.TableHash);
-            if (store == null)
-            {
-                Log.outError(LogFilter.Network, "CMSG_DB_QUERY_BULK: {0} requested unsupported unknown hotfix type: {1}", GetPlayerInfo(), dbQuery.TableHash);
-                return;
-            }
 
             foreach (DBQueryBulk.DBQueryRecord record in dbQuery.Queries)
             {
@@ -41,11 +36,18 @@ namespace Game
                 dbReply.TableHash = dbQuery.TableHash;
                 dbReply.RecordID = record.RecordID;
 
-                if (store.HasRecord(record.RecordID))
+                if (store != null && store.HasRecord(record.RecordID))
                 {
                     dbReply.Status = 1;
                     dbReply.Timestamp = (uint)GameTime.GetGameTime();
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
+
+                    var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(dbQuery.TableHash, record.RecordID, GetSessionDbcLocale());
+                    foreach (HotfixOptionalData optionalData in optionalDataEntries)
+                    {
+                        dbReply.Data.WriteUInt32(optionalData.Key);
+                        dbReply.Data.WriteBytes(optionalData.Data);
+                    }
                 }
                 else
                 {
@@ -80,6 +82,14 @@ namespace Game
                     {
                         uint pos = hotfixQueryResponse.HotfixContent.GetSize();
                         storage.WriteRecord((uint)hotfixRecord.RecordID, GetSessionDbcLocale(), hotfixQueryResponse.HotfixContent);
+
+                        var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(hotfixRecord.TableHash, (uint)hotfixRecord.RecordID, GetSessionDbcLocale());
+                        foreach (HotfixOptionalData optionalData in optionalDataEntries)
+                        {
+                            hotfixQueryResponse.HotfixContent.WriteUInt32(optionalData.Key);
+                            hotfixQueryResponse.HotfixContent.WriteBytes(optionalData.Data);
+                        }                        
+
                         hotfixData.Size.Set(hotfixQueryResponse.HotfixContent.GetSize() - pos);
                     }
                     else

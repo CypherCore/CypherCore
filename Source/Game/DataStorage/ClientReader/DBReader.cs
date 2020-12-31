@@ -58,7 +58,7 @@ namespace Game.DataStorage
             foreach (var b in reader._records)
                 storage.Add((uint)b.Key, b.Value.As<T>());
 
-            storage.LoadData(reader.Header.IdIndex, availableDb2Locales, preparedStatement, preparedStatementLocale);
+            storage.LoadData(reader.Header, availableDb2Locales, preparedStatement, preparedStatementLocale);
 
             Global.DB2Mgr.AddDB2(reader.Header.TableHash, storage);
             loadedFileCount++;

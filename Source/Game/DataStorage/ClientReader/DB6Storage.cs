@@ -39,8 +39,12 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        public void LoadData(int indexField, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
+        uint _tableHash;
+
+        public void LoadData(WDCHeader header, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
+            _tableHash = header.TableHash;
+
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
             {
@@ -183,7 +187,7 @@ namespace Game.DataStorage
                         }
                     }
 
-                    var id = (uint)fields[indexField == -1 ? 0 : indexField].GetValue(obj);
+                    var id = (uint)fields[header.IdIndex == -1 ? 0 : header.IdIndex].GetValue(obj);
                     base[id] = obj;
                 }
                 while (result.NextRow());
@@ -358,5 +362,7 @@ namespace Game.DataStorage
         {
             Remove(id);
         }
+
+        public uint GetTableHash() { return _tableHash; }
     }
 }
