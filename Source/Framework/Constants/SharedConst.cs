@@ -1346,6 +1346,7 @@ namespace Framework.Constants
         SkipCinematics,
         SocketTimeoutTime,
         SocketTimeoutTimeActive,
+        StartAlliedRaceLevel,
         StartAllExplored,
         StartAllRep,
         StartAllSpells,

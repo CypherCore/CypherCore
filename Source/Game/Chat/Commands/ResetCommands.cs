@@ -101,7 +101,7 @@ namespace Game.Chat
             byte oldLevel = (byte)target.GetLevel();
 
             // set starting level
-            uint startLevel = (uint)(target.GetClass() != Class.Deathknight ? WorldConfig.GetIntValue(WorldCfg.StartPlayerLevel) : WorldConfig.GetIntValue(WorldCfg.StartDeathKnightPlayerLevel));
+            uint startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
 
             target._ApplyAllLevelScaleItemMods(false);
             target.SetLevel(startLevel);

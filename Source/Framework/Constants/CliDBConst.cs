@@ -991,6 +991,11 @@ namespace Framework.Constants
         Factional = 0x40
     }
 
+    public enum ChrRacesFlag
+    {
+        AlliedRace = 0x80000
+    }
+
     public enum ChrSpecializationFlag
     {
         Caster = 0x01,

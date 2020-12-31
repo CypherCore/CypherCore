@@ -843,9 +843,9 @@ StartPlayerLevel = 1
 #    StartDeathKnightPlayerLevel
 #        Description: Starting level for death knights after creation.
 #        Range:       1-MaxPlayerLevel
-#        Default:     10
+#        Default:     8
 
-StartDeathKnightPlayerLevel = 10
+StartDeathKnightPlayerLevel = 8
 
 #
 #    StartDemonHunterPlayerLevel
@@ -854,6 +854,14 @@ StartDeathKnightPlayerLevel = 10
 #        Default:     8
 
 StartDemonHunterPlayerLevel = 8
+
+#
+#    StartAlliedRacePlayerLevel
+#        Description: Staring level for allied races after creation.
+#        Range:       1-MaxPlayerLevel
+#        Default:     10
+
+StartAlliedRacePlayerLevel = 10
 
 #
 #    StartPlayerMoney

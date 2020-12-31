@@ -38,6 +38,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -231,35 +232,7 @@ namespace Game.Entities
             SetInventorySlotCount(InventorySlots.DefaultSize);
 
             // set starting level
-            uint start_level = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
-            if (GetClass() == Class.Deathknight)
-                start_level = WorldConfig.GetUIntValue(WorldCfg.StartDeathKnightPlayerLevel);
-            else if (GetClass() == Class.DemonHunter)
-                start_level = WorldConfig.GetUIntValue(WorldCfg.StartDemonHunterPlayerLevel);
-
-            if (createInfo.TemplateSet.HasValue)
-            {
-                if (GetSession().HasPermission(RBACPermissions.UseCharacterTemplates))
-                {
-                    CharacterTemplate charTemplate = Global.CharacterTemplateDataStorage.GetCharacterTemplate(createInfo.TemplateSet.Value);
-                    if (charTemplate != null)
-                    {
-                        if (charTemplate.Level > start_level)
-                            start_level = charTemplate.Level;
-                    }
-                }
-                else
-                    Log.outWarn(LogFilter.Cheat, "Account: {0} (IP: {1}) tried to use a character template without given permission. Possible cheating attempt.", GetSession().GetAccountId(), GetSession().GetRemoteAddress());
-            }
-
-            if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
-            {
-                uint gm_level = WorldConfig.GetUIntValue(WorldCfg.StartGmLevel);
-                if (gm_level > start_level)
-                    start_level = gm_level;
-            }
-
-            SetLevel(start_level);
+            SetLevel((uint)GetStartLevel(createInfo.RaceId, createInfo.ClassId, createInfo.TemplateSet));
 
             InitRunes();
 
@@ -1877,6 +1850,41 @@ namespace Game.Entities
                 mapId = 0;
             return new WorldLocation(mapId, info.PositionX, info.PositionY, info.PositionZ, 0);
         }
+
+        public uint GetStartLevel(Race race, Class playerClass, Optional<uint> characterTemplateId = default)
+        {
+            uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
+            if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasFlag(ChrRacesFlag.AlliedRace))
+                startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
+
+            if (playerClass == Class.Deathknight)
+            {
+                if (race == Race.PandarenAlliance || race == Race.PandarenHorde)
+                    startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel), startLevel);
+                else
+                    startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartDeathKnightPlayerLevel), startLevel);
+            }
+            else if (playerClass == Class.DemonHunter)
+                startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartDemonHunterPlayerLevel), startLevel);
+
+            if (characterTemplateId.HasValue)
+            {
+                if (GetSession().HasPermission(RBACPermissions.UseCharacterTemplates))
+                {
+                    CharacterTemplate charTemplate = Global.CharacterTemplateDataStorage.GetCharacterTemplate(characterTemplateId.Value);
+                    if (charTemplate != null)
+                        startLevel = Math.Max(charTemplate.Level, startLevel);
+                }
+                else
+                    Log.outWarn(LogFilter.Cheat, $"Account: {GetSession().GetAccountId()} (IP: {GetSession().GetRemoteAddress()}) tried to use a character template without given permission. Possible cheating attempt.");
+            }
+
+            if (GetSession().HasPermission(RBACPermissions.UseStartGmLevel))
+                startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartGmLevel), startLevel);
+
+            return startLevel;
+        }
+
         public override bool IsUnderWater()
         {
             return IsInWater() &&

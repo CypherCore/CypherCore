@@ -265,7 +265,9 @@ namespace Game.DataStorage
         public sbyte FemaleTextureFallbackRaceID;
         public sbyte FemaleTextureFallbackSex;
         public sbyte UnalteredVisualCustomizationRaceID;
-    }
+
+        public ChrRacesFlag GetFlags() { return (ChrRacesFlag)Flags; }
+}
 
     public sealed class ChrSpecializationRecord
     {

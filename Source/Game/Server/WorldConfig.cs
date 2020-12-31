@@ -408,12 +408,12 @@ namespace Game
                 Values[WorldCfg.StartPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
-            Values[WorldCfg.StartDeathKnightPlayerLevel] = GetDefaultValue("StartDeathKnightPlayerLevel", 55);
+            Values[WorldCfg.StartDeathKnightPlayerLevel] = GetDefaultValue("StartDeathKnightPlayerLevel", 8);
             if ((int)Values[WorldCfg.StartDeathKnightPlayerLevel] < 1)
             {
-                Log.outError(LogFilter.ServerLoading, "StartDeathKnightPlayerLevel ({0}) must be in range 1..MaxPlayerLevel({1}). Set to 55.",
+                Log.outError(LogFilter.ServerLoading, "StartDeathKnightPlayerLevel ({0}) must be in range 1..MaxPlayerLevel({1}). Set to 1.",
                     Values[WorldCfg.StartDeathKnightPlayerLevel], Values[WorldCfg.MaxPlayerLevel]);
-                Values[WorldCfg.StartDeathKnightPlayerLevel] = 55;
+                Values[WorldCfg.StartDeathKnightPlayerLevel] = 1;
             }
             else if ((int)Values[WorldCfg.StartDeathKnightPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
@@ -422,18 +422,30 @@ namespace Game
                 Values[WorldCfg.StartDeathKnightPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
-            Values[WorldCfg.StartDemonHunterPlayerLevel] = GetDefaultValue("StartDemonHunterPlayerLevel", 98);
-            if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] < 98)
+            Values[WorldCfg.StartDemonHunterPlayerLevel] = GetDefaultValue("StartDemonHunterPlayerLevel", 8);
+            if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] < 1)
             {
-                Log.outError(LogFilter.ServerLoading, "StartDemonHunterPlayerLevel ({0}) must be in range 98..MaxPlayerLevel({1}). Set to 98.",
+                Log.outError(LogFilter.ServerLoading, "StartDemonHunterPlayerLevel ({0}) must be in range 1..MaxPlayerLevel({1}). Set to 1.",
                     Values[WorldCfg.StartDemonHunterPlayerLevel], Values[WorldCfg.MaxPlayerLevel]);
-                Values[WorldCfg.StartDemonHunterPlayerLevel] = 98;
+                Values[WorldCfg.StartDemonHunterPlayerLevel] = 1;
             }
             else if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
                 Log.outError(LogFilter.ServerLoading, "StartDemonHunterPlayerLevel ({0}) must be in range 98..MaxPlayerLevel({1}). Set to {2}.",
                     Values[WorldCfg.StartDemonHunterPlayerLevel], Values[WorldCfg.MaxPlayerLevel], Values[WorldCfg.MaxPlayerLevel]);
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
+            }
+
+            Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
+            if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
+                Values[WorldCfg.StartAlliedRaceLevel] = 1;
+            }
+            else if ((int)Values[WorldCfg.StartAlliedRaceLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
+            {
+                Log.outError(LogFilter.ServerLoading, $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Values[WorldCfg.StartAlliedRaceLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
             Values[WorldCfg.StartPlayerMoney] = GetDefaultValue("StartPlayerMoney", 0);
