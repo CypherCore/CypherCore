@@ -43,7 +43,7 @@ CREATE TABLE `account` (
   `lock_country` varchar(2) NOT NULL DEFAULT '00',
   `last_login` timestamp NULL DEFAULT NULL,
   `online` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `expansion` tinyint(3) unsigned NOT NULL DEFAULT '7',
+  `expansion` tinyint(3) unsigned NOT NULL DEFAULT '8',
   `mutetime` bigint(20) NOT NULL DEFAULT '0',
   `mutereason` varchar(255) NOT NULL DEFAULT '',
   `muteby` varchar(50) NOT NULL DEFAULT '',
@@ -1188,6 +1188,7 @@ INSERT INTO `rbac_linked_permissions` VALUES
 (196,866),
 (196,869),
 (196,872),
+(196,881),
 (197,232),
 (197,236),
 (197,237),
@@ -2115,7 +2116,8 @@ INSERT INTO `rbac_permissions` VALUES
 (866,'Command: list spawnpoints'),
 (868,'Command: modify power'),
 (869,'Command: debug send playerchoice'),
-(872,'Command: server debug');
+(872,'Command: server debug'),
+(881,'Command: reload vehicle_template');
 /*!40000 ALTER TABLE `rbac_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2386,7 +2388,9 @@ INSERT INTO `updates` VALUES
 ('2020_10_20_00_auth.sql','1835C5EFD5816DEF914F27E867C8C8D5E08B3F68','ARCHIVED','2020-10-20 21:36:49',0),
 ('2020_12_06_00_auth.sql','FA254400D3D7D53E9C350EABFEABFF4EC3AD40DA','RELEASED','2020-12-06 20:25:10',0),
 ('2020_12_07_00_auth.sql','23626805735CB9BEEEBD756D4A39AFBCDA6E366C','RELEASED','2020-12-07 21:12:53',0),
-('2020_12_15_00_auth.sql','37DA3C4830ABA30C49370A8647F5B6B3E1821E57','RELEASED','2020-12-15 19:33:15',0);
+('2020_12_15_00_auth.sql','37DA3C4830ABA30C49370A8647F5B6B3E1821E57','RELEASED','2020-12-15 19:33:15',0),
+('2020_12_22_00_auth.sql','1AED5AD7D93C30CF75E62EBEBCC64FFEDC58F00A','RELEASED','2020-12-22 22:00:39',0),
+('2020_12_31_00_auth.sql','05C9C105D55C6588CDA0D75AE3B135B7E6B54C06','RELEASED','2020-12-31 12:58:21',0);
 /*!40000 ALTER TABLE `updates` ENABLE KEYS */;
 UNLOCK TABLES;
 
