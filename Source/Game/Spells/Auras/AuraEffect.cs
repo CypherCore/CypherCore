@@ -2652,7 +2652,7 @@ namespace Game.Spells
                 }
 
                 bool seatChange = mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount)                             // Seat change on the same direct vehicle
-                    || target.HasAuraType(AuraType.ControlVehicle);                                 // Seat change to a proxy vehicle (for example turret mounted on a siege engine)
+                    || target.HasAuraTypeWithCaster(AuraType.ControlVehicle, caster.GetGUID());                                 // Seat change to a proxy vehicle (for example turret mounted on a siege engine)
 
                 if (!seatChange)
                     caster._ExitVehicle();
