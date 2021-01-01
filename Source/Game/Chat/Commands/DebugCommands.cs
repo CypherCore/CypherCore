@@ -1041,10 +1041,12 @@ namespace Game.Chat
                     return false;
                 }
 
+                uint broadcastTextId = args.NextUInt32();
+
                 if (!player.GetTarget().IsEmpty())
                     unit.PlayDistanceSound(soundId, player);
                 else
-                    unit.PlayDirectSound(soundId, player);
+                    unit.PlayDirectSound(soundId, player, broadcastTextId);
 
                 handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
                 return true;
