@@ -652,6 +652,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading NPCSpellClick Data..."); // must be after LoadQuests
             Global.ObjectMgr.LoadNPCSpellClickSpells();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Vehicle Templates...");
+            Global.ObjectMgr.LoadVehicleTemplate();                          // must be after LoadCreatureTemplates()
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Vehicle Template Accessories...");
             Global.ObjectMgr.LoadVehicleTemplateAccessories();                // must be after LoadCreatureTemplates() and LoadNPCSpellClickSpells()
 

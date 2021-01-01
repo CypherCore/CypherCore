@@ -966,7 +966,7 @@ namespace Game.Entities
 
             if (vehicle.GetBase().HasUnitTypeMask(UnitTypeMask.Minion) && vehicle.GetBase().IsTypeId(TypeId.Unit))
                 if (((Minion)vehicle.GetBase()).GetOwner() == this)
-                    vehicle.GetBase().ToCreature().DespawnOrUnsummon();
+                    vehicle.GetBase().ToCreature().DespawnOrUnsummon(vehicle.GetDespawnDelay());
 
             if (HasUnitTypeMask(UnitTypeMask.Accessory))
             {

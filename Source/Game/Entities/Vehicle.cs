@@ -509,6 +509,15 @@ namespace Game.Entities
             }
         }
 
+        public TimeSpan GetDespawnDelay()
+        {
+            VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
+            if (vehicleTemplate != null)
+                return vehicleTemplate.DespawnDelay;
+
+            return TimeSpan.FromMilliseconds(1);
+        }
+
         public Unit GetBase() { return _me; }
         public VehicleRecord GetVehicleInfo() { return _vehicleInfo; }
         public uint GetCreatureEntry() { return _creatureEntry; }
@@ -717,5 +726,10 @@ namespace Game.Entities
         public uint SummonTime;
         public sbyte SeatId;
         public byte SummonedType;
+    }
+
+    public class VehicleTemplate
+    {
+        public TimeSpan DespawnDelay;
     }
 }

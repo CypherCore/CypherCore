@@ -10022,6 +10022,38 @@ namespace Game
         }
 
         //Vehicles
+        public void LoadVehicleTemplate()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _vehicleTemplateStore.Clear();
+
+            //                                         0           1
+            SQLResult result = DB.World.Query("SELECT creatureId, despawnDelayMs FROM vehicle_template");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle template. DB table `vehicle_template` is empty.");
+                return;
+            }
+
+            do
+            {
+                uint creatureId = result.Read<uint>(0);
+
+                if (Global.ObjectMgr.GetCreatureTemplate(creatureId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Vehicle {creatureId} does not exist.");
+                    continue;
+                }
+
+                VehicleTemplate vehicleTemplate = new VehicleTemplate();
+                vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(result.Read<int>(1));
+                _vehicleTemplateStore[creatureId] = vehicleTemplate;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_vehicleTemplateStore.Count} Vehicle Template entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         public void LoadVehicleTemplateAccessories()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10073,6 +10105,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Vehicle Template Accessories in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         public void LoadVehicleAccessories()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10114,6 +10147,10 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Vehicle Accessories in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
+        public VehicleTemplate GetVehicleTemplate(Vehicle veh)
+        {
+            return _vehicleTemplateStore.LookupByKey(veh.GetCreatureEntry());
+        }
         public List<VehicleAccessory> GetVehicleAccessoryList(Vehicle veh)
         {
             Creature cre = veh.GetBase().ToCreature();
@@ -10239,6 +10276,7 @@ namespace Game
         MultiMap<uint, string> _petHalfName1 = new MultiMap<uint, string>();
 
         //Vehicles
+        Dictionary<uint, VehicleTemplate> _vehicleTemplateStore = new Dictionary<uint, VehicleTemplate>();
         MultiMap<uint, VehicleAccessory> _vehicleTemplateAccessoryStore = new MultiMap<uint, VehicleAccessory>();
         MultiMap<ulong, VehicleAccessory> _vehicleAccessoryStore = new MultiMap<ulong, VehicleAccessory>();
 
