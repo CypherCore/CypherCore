@@ -775,7 +775,17 @@ namespace Framework.Constants
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,
         CommandDebugSendPlayerChoice = 869,
-
+        CommandDebugThreatinfo = 870, // reserved
+        CommandDebugInstancespawn = 871, // reserved
+        CommandServerDebug = 872,
+        CommandReloadCreatureMovementOverride = 873,
+        // 874 previously used, do not reuse
+        CommandLookupMapId = 875,
+        CommandLookupItemId = 876,
+        CommandLookupQuestId = 877,
+        // 878-879 previously used, do not reuse
+        CommandPdumpCopy = 880,
+        CommandReloadVehicleTemplate = 881,
         // Custom Permissions 1000+
         Max
     }

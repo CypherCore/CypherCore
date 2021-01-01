@@ -894,6 +894,15 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("vehicle_template", RBACPermissions.CommandReloadVehicleTemplate, true)]
+        static bool HandleReloadVehicleTemplateCommand(StringArguments args, CommandHandler handler)
+        {
+            Log.outInfo(LogFilter.Server, "Reloading vehicle_template table...");
+            Global.ObjectMgr.LoadVehicleTemplate();
+            handler.SendGlobalGMSysMessage("Vehicle templates reloaded.");
+            return true;
+        }
+        
         [Command("vehicle_template_accessory", RBACPermissions.CommandReloadVehicleTemplateAccessory, true)]
         static bool HandleReloadVehicleTemplateAccessoryCommand(StringArguments args, CommandHandler handler)
         {
