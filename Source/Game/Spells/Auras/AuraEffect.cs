@@ -2651,7 +2651,10 @@ namespace Game.Spells
                         caster.ToCreature().DespawnOrUnsummon();
                 }
 
-                if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount))
+                bool seatChange = mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount)                             // Seat change on the same direct vehicle
+                    || target.HasAuraType(AuraType.ControlVehicle);                                 // Seat change to a proxy vehicle (for example turret mounted on a siege engine)
+
+                if (!seatChange)
                     caster._ExitVehicle();
                 else
                     target.GetVehicleKit().RemovePassenger(caster);  // Only remove passenger from vehicle without launching exit movement or despawning the vehicle
