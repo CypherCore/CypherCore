@@ -178,7 +178,7 @@ namespace Game.AI
                         {
                             if (IsUnit(target))
                             {
-                                target.PlayDirectSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null);
+                                target.PlayDirectSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null, e.Action.sound.keyBroadcastTextId);
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SOUND: target: {0} (GuidLow: {1}), sound: {2}, onlyself: {3}",
                                     target.GetName(), target.GetGUID().ToString(), e.Action.sound.soundId, e.Action.sound.onlySelf);
                             }

@@ -567,12 +567,12 @@ namespace Game.BattleGrounds
 
         public void PlaySoundToAll(uint soundID)
         {
-            SendPacketToAll(new PlaySound(ObjectGuid.Empty, soundID));
+            SendPacketToAll(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
         void PlaySoundToTeam(uint soundID, Team team)
         {
-            SendPacketToTeam(team, new PlaySound(ObjectGuid.Empty, soundID));
+            SendPacketToTeam(team, new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
         public void CastSpellOnTeam(uint SpellID, Team team)

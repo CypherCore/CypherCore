@@ -885,22 +885,23 @@ namespace Game.Networking.Packets
 
     class PlaySound : ServerPacket
     {
-        public PlaySound(ObjectGuid sourceObjectGuid, uint soundKitID) : base(ServerOpcodes.PlaySound)
+        public PlaySound(ObjectGuid sourceObjectGuid, uint soundKitID, uint broadcastTextId) : base(ServerOpcodes.PlaySound)
         {
             SourceObjectGuid = sourceObjectGuid;
             SoundKitID = soundKitID;
+            BroadcastTextID = broadcastTextId;
         }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(SoundKitID);
             _worldPacket.WritePackedGuid(SourceObjectGuid);
-            _worldPacket.WriteInt32(BroadcastTextID);
+            _worldPacket.WriteUInt32(BroadcastTextID);
         }
 
         public ObjectGuid SourceObjectGuid;
         public uint SoundKitID;
-        public int BroadcastTextID;
+        public uint BroadcastTextID;
     }
 
     class PlaySpeakerBoxSound : ServerPacket

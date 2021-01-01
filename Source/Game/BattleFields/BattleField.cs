@@ -357,7 +357,7 @@ namespace Game.BattleFields
 
         void DoPlaySoundToAll(uint soundID)
         {
-            BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID));
+            BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
 
         public bool HasPlayer(Player player)

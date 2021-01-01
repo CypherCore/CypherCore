@@ -1618,9 +1618,9 @@ namespace Game.Entities
                 SendMessageToSet(playSpeakerBoxSound, true);
         }
 
-        public void PlayDirectSound(uint soundId, Player target = null)
+        public void PlayDirectSound(uint soundId, Player target = null, uint broadcastTextId = 0)
         {
-            PlaySound sound = new PlaySound(GetGUID(), soundId);
+            PlaySound sound = new PlaySound(GetGUID(), soundId, broadcastTextId);
             if (target)
                 target.SendPacket(sound);
             else

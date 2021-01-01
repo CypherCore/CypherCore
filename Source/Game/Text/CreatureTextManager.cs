@@ -213,7 +213,7 @@ namespace Game
                 range = textEntry.TextRange;
 
             if (finalSound != 0)
-                SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly);
+                SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly, textEntry.BroadcastTextId);
 
             Unit finalSource = source;
             if (srcPlr)
@@ -256,12 +256,12 @@ namespace Game
             return dist;
         }
 
-        public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false)
+        public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, uint keyBroadcastTextId = 0)
         {
             if (sound == 0 || !source)
                 return;
 
-            SendNonChatPacket(source, new PlaySound(source.GetGUID(), sound), msgType, whisperTarget, range, team, gmOnly);
+            SendNonChatPacket(source, new PlaySound(source.GetGUID(), sound, keyBroadcastTextId), msgType, whisperTarget, range, team, gmOnly);
         }
 
         void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)

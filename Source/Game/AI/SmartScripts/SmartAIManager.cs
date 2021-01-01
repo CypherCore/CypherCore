@@ -2416,6 +2416,8 @@ namespace Game.AI
         {
             public uint soundId;
             public uint onlySelf;
+            public uint distance; // NYI: awaiting cherry-pick
+            public uint keyBroadcastTextId;
         }
         public struct Emote
         {

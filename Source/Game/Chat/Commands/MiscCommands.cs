@@ -1834,7 +1834,9 @@ namespace Game.Chat
                 return false;
             }
 
-            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId));
+            uint broadcastTextId = args.NextUInt32();
+
+            Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId, broadcastTextId));
 
             handler.SendSysMessage(CypherStrings.CommandPlayedToAll, soundId);
             return true;
