@@ -230,7 +230,7 @@ namespace Game.Entities
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_corpseData.WriteCreate(buffer, flags, this, target);
 
-            data.WriteUInt32(buffer.GetSize());
+            data.WriteUInt32(buffer.GetSize() + 1);
             data.WriteUInt8((byte)flags);
             data.WriteBytes(buffer);
         }
