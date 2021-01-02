@@ -1406,7 +1406,7 @@ namespace Game.AI
                                     }
 
                                     npc.SetCurrentEquipmentId((byte)equipId);
-                                    Buffer.BlockCopy(eInfo.Items, 0, slot, 0, SharedConst.MaxEquipmentItems);
+                                    Array.Copy(eInfo.Items, slot, SharedConst.MaxEquipmentItems);
                                 }
                                 else
                                 {
