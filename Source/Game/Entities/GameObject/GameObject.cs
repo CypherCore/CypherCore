@@ -1405,12 +1405,12 @@ namespace Game.Entities
                         if (ChairListSlots.Empty())        // this is called once at first chair use to make list of available slots
                         {
                             if (info.Chair.chairslots > 0)     // sometimes chairs in DB have error in fields and we dont know number of slots
-                            {
+                            { 
                                 for (uint i = 0; i < info.Chair.chairslots; ++i)
-                                    ChairListSlots[i].Clear(); // Last user of current slot set to 0 (none sit here yet)
+                                    ChairListSlots[i] = default; // Last user of current slot set to 0 (none sit here yet)
                             }
                             else
-                                ChairListSlots[0].Clear();     // error in DB, make one default slot
+                                ChairListSlots[0] = default;     // error in DB, make one default slot
                         }
 
                         Player player = user.ToPlayer();
@@ -1443,9 +1443,9 @@ namespace Game.Entities
                                     if (ChairUser.IsSitState() && ChairUser.GetStandState() != UnitStandStateType.Sit && ChairUser.GetExactDist2d(x_i, y_i) < 0.1f)
                                         continue;        // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
                                     else
-                                        ChairListSlots[slot.Key].Clear(); // This seat is unoccupied.
+                                        ChairListSlots[slot.Key] = default; // This seat is unoccupied.
                                 else
-                                    ChairListSlots[slot.Key].Clear();     // The seat may of had an occupant, but they're offline.
+                                    ChairListSlots[slot.Key] = default;     // The seat may of had an occupant, but they're offline.
                             }
 
                             found_free_slot = true;
@@ -1465,7 +1465,7 @@ namespace Game.Entities
                         if (found_free_slot)
                         {
                             var guid = ChairListSlots.LookupByKey(nearest_slot);
-                            if (!guid.IsEmpty())
+                            if (guid.IsEmpty())
                             {
                                 ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
                                 player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
