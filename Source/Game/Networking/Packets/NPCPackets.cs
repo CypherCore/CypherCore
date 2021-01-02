@@ -318,7 +318,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    public struct ClientGossipOptions
+    public class ClientGossipOptions
     {
         public int ClientOption;
         public byte OptionNPC;
@@ -327,7 +327,7 @@ namespace Game.Networking.Packets
         public GossipOptionStatus Status;
         public string Text;
         public string Confirm;
-        public TreasureLootList Treasure;
+        public TreasureLootList Treasure = new TreasureLootList();
         public Optional<int> SpellID;
     }
 
