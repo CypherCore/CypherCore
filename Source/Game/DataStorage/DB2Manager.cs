@@ -691,7 +691,7 @@ namespace Game.DataStorage
                 return;
             }
 
-            Dictionary<Tuple<uint, int>, bool> deletedRecords = new Dictionary<Tuple<uint, int>, bool>();
+            Dictionary<(uint tableHash, int recordId), bool> deletedRecords = new Dictionary<(uint tableHash, int recordId), bool>();
 
             uint count = 0;
             do
@@ -702,8 +702,7 @@ namespace Game.DataStorage
                 bool deleted = result.Read<bool>(3);
                 if (!deleted && !_storage.ContainsKey(tableHash))
                 {
-                    var key = Tuple.Create(tableHash, recordId);
-                    if (!_hotfixBlob.Any(p => p.ContainsKey(key)))
+                    if (!_hotfixBlob.Any(p => p.ContainsKey((tableHash, recordId))))
                     {
                         Log.outError(LogFilter.Sql, $"Table `hotfix_data` references unknown DB2 store by hash 0x{tableHash:X} and has no reference to `hotfix_blob` in hotfix id {id} with RecordID: {recordId}");
                         continue;
@@ -715,7 +714,7 @@ namespace Game.DataStorage
                 hotfixRecord.RecordID = recordId;
                 hotfixRecord.HotfixID = id;
                 _hotfixData.Add(hotfixRecord);
-                deletedRecords[Tuple.Create(tableHash, recordId)] = deleted;
+                deletedRecords[(tableHash, recordId)] = deleted;
 
                 ++count;
             } while (result.NextRow());
@@ -724,9 +723,9 @@ namespace Game.DataStorage
             {
                 if (itr.Value)
                 {
-                    var store = _storage.LookupByKey(itr.Key.Item1);
+                    var store = _storage.LookupByKey(itr.Key.tableHash);
                     if (store != null)
-                        store.EraseRecord((uint)itr.Key.Item2);
+                        store.EraseRecord((uint)itr.Key.recordId);
                 }
             }
 
@@ -859,7 +858,7 @@ namespace Game.DataStorage
         {
             Cypher.Assert(SharedConst.IsValidLocale(locale), "Locale {locale} is invalid locale");
 
-            return _hotfixBlob[(int)locale].LookupByKey(Tuple.Create(tableHash, recordId));
+            return _hotfixBlob[(int)locale].LookupByKey((tableHash, recordId));
         }
 
         public List<HotfixOptionalData> GetHotfixOptionalData(uint tableHash, uint recordId, Locale locale)
@@ -2244,9 +2243,9 @@ namespace Game.DataStorage
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
         List<HotfixRecord> _hotfixData = new List<HotfixRecord>();
-        Dictionary<(uint tableHas, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHas, int recordId), byte[]>[(int)Locale.Total];
+        Dictionary<(uint tableHash, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHash, int recordId), byte[]>[(int)Locale.Total];
         MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>>();
-        MultiMap<(uint tableHas, int recordId), HotfixOptionalData>[]_hotfixOptionalData = new MultiMap<(uint tableHas, int recordId), HotfixOptionalData>[(int)Locale.Total];
+        MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[]_hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];
 
         MultiMap<uint, uint> _areaGroupMembers = new MultiMap<uint, uint>();
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();

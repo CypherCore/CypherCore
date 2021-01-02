@@ -431,7 +431,7 @@ namespace Game
             }
             else if ((int)Values[WorldCfg.StartDemonHunterPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
-                Log.outError(LogFilter.ServerLoading, "StartDemonHunterPlayerLevel ({0}) must be in range 98..MaxPlayerLevel({1}). Set to {2}.",
+                Log.outError(LogFilter.ServerLoading, "StartDemonHunterPlayerLevel ({0}) must be in range 1..MaxPlayerLevel({1}). Set to {2}.",
                     Values[WorldCfg.StartDemonHunterPlayerLevel], Values[WorldCfg.MaxPlayerLevel], Values[WorldCfg.MaxPlayerLevel]);
                 Values[WorldCfg.StartDemonHunterPlayerLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
@@ -439,12 +439,12 @@ namespace Game
             Values[WorldCfg.StartAlliedRaceLevel] = GetDefaultValue("StartAlliedRacePlayerLevel", 10);
             if ((int)Values[WorldCfg.StartAlliedRaceLevel] < 1)
             {
-                Log.outError(LogFilter.ServerLoading, $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
+                Log.outError(LogFilter.ServerLoading, $"StartAlliedRaceLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to 1.");
                 Values[WorldCfg.StartAlliedRaceLevel] = 1;
             }
             else if ((int)Values[WorldCfg.StartAlliedRaceLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
-                Log.outError(LogFilter.ServerLoading, $"StartDemonHunterPlayerLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
+                Log.outError(LogFilter.ServerLoading, $"StartAlliedRaceLevel ({Values[WorldCfg.StartAlliedRaceLevel]}) must be in range 1..MaxPlayerLevel({Values[WorldCfg.MaxPlayerLevel]}). Set to {Values[WorldCfg.MaxPlayerLevel]}.");
                 Values[WorldCfg.StartAlliedRaceLevel] = Values[WorldCfg.MaxPlayerLevel];
             }
 
@@ -507,12 +507,12 @@ namespace Game
             }
             Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
 
-            Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 85);
+            Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 60);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
                 Log.outError(LogFilter.ServerLoading, "RecruitAFriend.MaxLevel ({0}) must be in the range 0..MaxLevel({1}). Set to {2}.",
-                    Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel], Values[WorldCfg.MaxPlayerLevel], 85);
-                Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = 85;
+                    Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel], Values[WorldCfg.MaxPlayerLevel], 60);
+                Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = 60;
             }
 
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference] = GetDefaultValue("RecruitAFriend.MaxDifference", 4);
