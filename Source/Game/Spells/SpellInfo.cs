@@ -679,7 +679,8 @@ namespace Game.Spells
                 return true;
 
             // These auras (Cyclone for example) are not dispelable
-            if (auraSpellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            if ((auraSpellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) && auraSpellInfo.Mechanic != Mechanics.None)
+                || auraSpellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
                 return false;
 
             return true;
