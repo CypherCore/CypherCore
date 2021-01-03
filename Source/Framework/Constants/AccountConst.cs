@@ -57,7 +57,7 @@ namespace Framework.Constants
         JoinRandomBg = 4,
         JoinArenas = 5,
         JoinDungeonFinder = 6,
-        //  7 - Reuse
+        IgnoreIdleConnection = 7,
         //  8 - Reuse
         //  9 - Reuse
         UseCharacterTemplates = 10,

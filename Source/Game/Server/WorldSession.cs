@@ -242,7 +242,7 @@ namespace Game
             // Before we process anything:
             /// If necessary, kick the player because the client didn't send anything for too long
             /// (or they've been idling in character select)
-            if (IsConnectionIdle())
+            if (IsConnectionIdle() && !HasPermission(RBACPermissions.IgnoreIdleConnection))
                 m_Socket[(int)ConnectionType.Realm].CloseSocket();
 
             WorldPacket firstDelayedPacket = null;
