@@ -493,32 +493,53 @@ namespace Game.Entities
 
         public bool Satisfy(AccessRequirement ar, uint target_map, bool report = false)
         {
-            if (!IsGameMaster() && ar != null)
+            if (!IsGameMaster())
             {
                 byte LevelMin = 0;
                 byte LevelMax = 0;
+                uint failedMapDifficultyXCondition = 0;
+                uint missingItem = 0;
+                uint missingQuest = 0;
+                uint missingAchievement = 0;
 
                 MapRecord mapEntry = CliDB.MapStorage.LookupByKey(target_map);
                 if (mapEntry == null)
                     return false;
 
+                Difficulty target_difficulty = GetDifficultyID(mapEntry);
+                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
-                    if (ar.levelMin != 0 && GetLevel() < ar.levelMin)
-                        LevelMin = ar.levelMin;
-                    if (ar.levelMax != 0 && GetLevel() > ar.levelMax)
-                        LevelMax = ar.levelMax;
+                    var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions(mapDiff.Id);
+                    foreach (var pair in mapDifficultyConditions)
+                    {
+                        if (!ConditionManager.IsPlayerMeetingCondition(this, pair.Item2))
+                        {
+                            failedMapDifficultyXCondition = pair.Item1;
+                            break;
+                        }
+                    }
                 }
 
-                uint missingItem = 0;
-                if (ar.item != 0)
+                if (ar != null)
                 {
-                    if (!HasItemCount(ar.item) &&
+                    if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
+                    {
+                        if (ar.levelMin != 0 && GetLevel() < ar.levelMin)
+                            LevelMin = ar.levelMin;
+                        if (ar.levelMax != 0 && GetLevel() > ar.levelMax)
+                            LevelMax = ar.levelMax;
+                    }
+
+                    if (ar.item != 0)
+                    {
+                        if (!HasItemCount(ar.item) &&
                         (ar.item2 == 0 || !HasItemCount(ar.item2)))
-                        missingItem = ar.item;
+                            missingItem = ar.item;
+                    }
+                    else if (ar.item2 != 0 && !HasItemCount(ar.item2))
+                        missingItem = ar.item2;
                 }
-                else if (ar.item2 != 0 && !HasItemCount(ar.item2))
-                    missingItem = ar.item2;
 
                 if (Global.DisableMgr.IsDisabledFor(DisableType.Map, target_map, this))
                 {
@@ -526,13 +547,11 @@ namespace Game.Entities
                     return false;
                 }
 
-                uint missingQuest = 0;
                 if (GetTeam() == Team.Alliance && ar.quest_A != 0 && !GetQuestRewardStatus(ar.quest_A))
                     missingQuest = ar.quest_A;
                 else if (GetTeam() == Team.Horde && ar.quest_H != 0 && !GetQuestRewardStatus(ar.quest_H))
                     missingQuest = ar.quest_H;
 
-                uint missingAchievement = 0;
                 Player leader = this;
                 ObjectGuid leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
                 if (leaderGuid != GetGUID())
@@ -542,16 +561,14 @@ namespace Game.Entities
                     if (leader == null || !leader.HasAchieved(ar.achievement))
                         missingAchievement = ar.achievement;
 
-                Difficulty target_difficulty = GetDifficultyID(mapEntry);
-                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
-                if (LevelMin != 0 || LevelMax != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
+                if (LevelMin != 0 || LevelMax != 0 || failedMapDifficultyXCondition != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
                 {
                     if (report)
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
                             SendSysMessage("{0}", ar.questFailedText);
-                        else if (mapDiff.Message.HasString(Global.WorldMgr.GetDefaultDbcLocale())) // if (missingAchievement) covered by this case
-                            SendTransferAborted(target_map, TransferAbortReason.Difficulty, (byte)target_difficulty);
+                        else if (mapDiff.Message[Global.WorldMgr.GetDefaultDbcLocale()][0] != '\0' || failedMapDifficultyXCondition != 0) // if (missingAchievement) covered by this case
+                            SendTransferAborted(target_map, TransferAbortReason.Difficulty, (byte)target_difficulty, failedMapDifficultyXCondition);
                         else if (missingItem != 0)
                             GetSession().SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.LevelMinrequiredAndItem), LevelMin, Global.ObjectMgr.GetItemTemplate(missingItem).GetName());
                         else if (LevelMin != 0)
@@ -722,12 +739,13 @@ namespace Game.Entities
             SendPacket(data);
         }
 
-        public void SendTransferAborted(uint mapid, TransferAbortReason reason, byte arg = 0)
+        public void SendTransferAborted(uint mapid, TransferAbortReason reason, byte arg = 0, uint mapDifficultyXConditionID = 0)
         {
             TransferAborted transferAborted = new TransferAborted();
             transferAborted.MapID = mapid;
             transferAborted.Arg = arg;
             transferAborted.TransfertAbort = reason;
+            transferAborted.MapDifficultyXConditionID = mapDifficultyXConditionID;
             SendPacket(transferAborted);
         }
 

@@ -566,14 +566,14 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8(Arg);
-            _worldPacket.WriteInt32(MapDifficultyXConditionID);
+            _worldPacket.WriteUInt32(MapDifficultyXConditionID);
             _worldPacket.WriteBits(TransfertAbort, 5);
             _worldPacket.FlushBits();
         }
 
         public uint MapID;
         public byte Arg;
-        public int MapDifficultyXConditionID;
+        public uint MapDifficultyXConditionID;
         public TransferAbortReason TransfertAbort;
     }
 

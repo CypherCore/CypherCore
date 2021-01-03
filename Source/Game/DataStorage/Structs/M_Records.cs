@@ -116,6 +116,15 @@ namespace Game.DataStorage
         }
     }
 
+    public sealed class MapDifficultyXConditionRecord
+    {
+        public uint Id;
+        public LocalizedString FailureDescription;
+        public uint PlayerConditionID;
+        public int OrderIndex;
+        public uint MapDifficultyID;
+    }
+
     public sealed class ModifierTreeRecord
     {
         public uint Id;

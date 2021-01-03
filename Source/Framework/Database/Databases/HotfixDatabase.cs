@@ -690,6 +690,11 @@ namespace Framework.Database
                 "ItemContextPickerID, Flags, ContentTuningID, MapID FROM map_difficulty");
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_LOCALE, "SELECT ID, Message_lang FROM map_difficulty_locale WHERE locale = ?");
 
+            // MapDifficultyXCondition.db2
+            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION, "SELECT ID, FailureDescription, PlayerConditionID, OrderIndex, MapDifficultyID" +
+                " FROM map_difficulty_x_condition");
+            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE, "SELECT ID, FailureDescription_lang FROM map_difficulty_x_condition_locale WHERE locale = ?");
+
             // ModifierTree.db2
             PrepareStatement(HotfixStatements.SEL_MODIFIER_TREE, "SELECT ID, Parent, Operator, Amount, Type, Asset, SecondaryAsset, TertiaryAsset FROM modifier_tree");
 
@@ -1486,6 +1491,9 @@ namespace Framework.Database
 
         SEL_MAP_DIFFICULTY,
         SEL_MAP_DIFFICULTY_LOCALE,
+
+        SEL_MAP_DIFFICULTY_X_CONDITION,
+        SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE,
 
         SEL_MODIFIER_TREE,
 

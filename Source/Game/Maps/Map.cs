@@ -2763,6 +2763,10 @@ namespace Game.Maps
         {
             Cypher.Assert(mode == 1);
             Cypher.Assert(obj.GetMap() == this);
+
+            if (IsBattlegroundOrArena())
+                return;
+
             SpawnObjectType type;
             switch (obj.GetTypeId())
             {
@@ -2777,7 +2781,7 @@ namespace Game.Maps
             }
 
             SpawnData data = Global.ObjectMgr.GetSpawnData(type, spawnId);
-            if (data == null || !data.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.DynamicSpawnRate))
+            if (data == null || data.spawnGroupData == null || !!data.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.DynamicSpawnRate))
                 return;
 
             if (!_zonePlayerCountMap.ContainsKey(obj.GetZoneId()))

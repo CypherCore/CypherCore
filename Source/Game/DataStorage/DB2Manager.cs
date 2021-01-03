@@ -376,6 +376,19 @@ namespace Game.DataStorage
 
             CliDB.MapDifficultyStorage.Clear();
 
+            List<MapDifficultyXConditionRecord> mapDifficultyConditions = new List<MapDifficultyXConditionRecord>();
+            foreach (var mapDifficultyCondition in CliDB.MapDifficultyXConditionStorage.Values)
+                mapDifficultyConditions.Add(mapDifficultyCondition);
+
+            mapDifficultyConditions = mapDifficultyConditions.OrderBy(p => p.OrderIndex).ToList();
+
+            foreach (var mapDifficultyCondition in mapDifficultyConditions)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mapDifficultyCondition.PlayerConditionID);
+                if (playerCondition != null)
+                    _mapDifficultyConditions.Add(mapDifficultyCondition.MapDifficultyID, Tuple.Create(mapDifficultyCondition.Id, playerCondition));
+            }
+
             foreach (var mount in CliDB.MountStorage.Values)
                 _mountsBySpellId[mount.SourceSpellID] = mount;
 
@@ -1674,12 +1687,17 @@ namespace Game.DataStorage
             return mapDiff;
         }
 
+        public List<Tuple<uint, PlayerConditionRecord>> GetMapDifficultyConditions(uint mapDifficultyId)
+        {
+            return _mapDifficultyConditions.LookupByKey(mapDifficultyId);
+        }
+        
         public MountRecord GetMount(uint spellId)
         {
             return _mountsBySpellId.LookupByKey(spellId);
         }
 
-        MountRecord GetMountById(uint id)
+        public MountRecord GetMountById(uint id)
         {
             return CliDB.MountStorage.LookupByKey(id);
         }
@@ -2286,6 +2304,7 @@ namespace Game.DataStorage
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new MultiMap<uint, ItemSetSpellRecord>();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new MultiMap<uint, ItemSpecOverrideRecord>();
         Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> _mapDifficulties = new Dictionary<uint, Dictionary<uint, MapDifficultyRecord>>();
+        MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new MultiMap<uint, Tuple<uint, PlayerConditionRecord>>();
         Dictionary<uint, MountRecord> _mountsBySpellId = new Dictionary<uint, MountRecord>();
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new MultiMap<uint, MountTypeXCapabilityRecord>();
         MultiMap<uint, MountXDisplayRecord> _mountDisplays = new MultiMap<uint, MountXDisplayRecord>();
