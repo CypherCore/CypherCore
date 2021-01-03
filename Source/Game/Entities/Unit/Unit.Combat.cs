@@ -821,7 +821,7 @@ namespace Game.Entities
                 return;
             }
 
-            damage *= (uint)GetDamageMultiplierForTarget(victim);
+           damage = (uint)(damage * GetDamageMultiplierForTarget(victim));
         }
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
         {
