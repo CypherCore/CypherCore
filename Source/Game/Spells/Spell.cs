@@ -953,12 +953,9 @@ namespace Game.Spells
                     if (effect != null)
                     {
                         float angle = targetType.CalcDirectionAngle();
-                        float objSize = target.GetCombatReach();
-                        float dist = effect.CalcRadius(m_caster);
-                        if (dist < objSize)
-                            dist = objSize;
-                        else if (targetType.GetTarget() == Targets.DestRandom)
-                            dist = objSize + (dist - objSize) * (float)RandomHelper.NextDouble();
+                        float dist = effect.CalcRadius(null);
+                        if (targetType.GetTarget() == Targets.DestRandom)
+                            dist *= (float)RandomHelper.NextDouble();
 
                         Position pos = dest.Position;
                         target.MovePositionToFirstCollision(ref pos, dist, angle);
