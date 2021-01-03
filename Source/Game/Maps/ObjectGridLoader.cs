@@ -202,10 +202,10 @@ namespace Game.Maps
     class ObjectGridStoper : Notifier
     {
         public override void Visit(IList<Creature> objs)
-        {  
+        {
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
-            {
+            {  
                 Creature creature = objs[i];
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
@@ -240,11 +240,11 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject go = objs[i];
+                GameObject gameObject = objs[i];
                 // gameobject in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
                 // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
-                go.GetMap().GameObjectRespawnRelocation(go, true);
+                gameObject.GetMap().GameObjectRespawnRelocation(gameObject, true);
             }
         }
     }
@@ -254,8 +254,10 @@ namespace Game.Maps
     {
         public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                WorldObject obj = objs[i];
+
                 if (obj.IsTypeId(TypeId.Player))
                     continue;
 
@@ -269,8 +271,10 @@ namespace Game.Maps
     {
         public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                WorldObject obj = objs[i];
+
                 if (obj.IsTypeId(TypeId.Corpse))
                     continue;
 

@@ -596,53 +596,56 @@ namespace Game.Entities
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!IsInRangeHelper(target))
+                Player player = objs[i];
+                if (!IsInRangeHelper(player))
                     continue;
 
                 // Send packet to all who are sharing the player's vision
-                if (target.HasSharedVision())
+                if (player.HasSharedVision())
                 {
-                    foreach (var visionTarget in target.GetSharedVisionList())
-                        if (visionTarget.seerView == target)
+                    foreach (var visionTarget in player.GetSharedVisionList())
+                        if (visionTarget.seerView == player)
                             SendPacket(visionTarget);
                 }
 
-                if (target.seerView == target || target.GetVehicle())
-                    SendPacket(target);
+                if (player.seerView == player || player.GetVehicle())
+                    SendPacket(player);
             }
         }
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!IsInRangeHelper(target))
+                Creature creature = objs[i];
+                if (!IsInRangeHelper(creature))
                     continue;
 
                 // Send packet to all who are sharing the creature's vision
-                if (target.HasSharedVision())
+                if (creature.HasSharedVision())
                 {
-                    foreach (var visionTarget in target.GetSharedVisionList())
-                        if (visionTarget.seerView == target)
+                    foreach (var visionTarget in creature.GetSharedVisionList())
+                        if (visionTarget.seerView == creature)
                             SendPacket(visionTarget);
                 }
             }
         }
         public override void Visit(IList<DynamicObject> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!IsInRangeHelper(target))
+                DynamicObject dynamicObject = objs[i];
+                if (!IsInRangeHelper(dynamicObject))
                     continue;
 
-                Unit caster = target.GetCaster();
+                Unit caster = dynamicObject.GetCaster();
                 if (caster)
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == target)
+                    if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }

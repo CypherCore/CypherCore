@@ -248,8 +248,8 @@ namespace Game.Entities
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
 
-            uint gx = 63 - p.X_coord;
-            uint gy = 63 - p.Y_coord;
+            uint gx = (MapConst.MaxGrids - 1) - p.X_coord;
+            uint gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
             return Map.ExistMap(mapid, gx, gy) && Map.ExistVMap(mapid, gx, gy);
         }

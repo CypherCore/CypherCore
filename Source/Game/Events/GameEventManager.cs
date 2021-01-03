@@ -1663,15 +1663,21 @@ namespace Game
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Creature creature = objs[i];
                 if (creature.IsInWorld && creature.IsAIEnabled)
                     creature.GetAI().OnGameEvent(_activate, _eventId);
+            }
         }
         public override void Visit(IList<GameObject> objs)
         {
-            foreach (var gameobject in objs)
-                if (gameobject.IsInWorld)
-                    gameobject.GetAI().OnGameEvent(_activate, _eventId);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                GameObject gameObject = objs[i];
+                if (gameObject.IsInWorld)
+                    gameObject.GetAI().OnGameEvent(_activate, _eventId);
+            }
         }
 
         ushort _eventId;

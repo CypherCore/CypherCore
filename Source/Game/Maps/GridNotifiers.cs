@@ -89,8 +89,10 @@ namespace Game.Maps
 
         public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                WorldObject obj = objs[i];
+
                 vis_guids.Remove(obj.GetGUID());
                 i_player.UpdateVisibilityOf(obj, i_data, i_visibleNow);
             }
@@ -171,8 +173,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (player.GetGUID() == i_object.GetGUID())
                     return;
 
@@ -191,8 +194,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (creature.HasSharedVision())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
@@ -204,13 +208,14 @@ namespace Game.Maps
 
         public override void Visit(IList<DynamicObject> objs)
         {
-            foreach (var dynamicObj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                Unit caster = dynamicObj.GetCaster();
+                DynamicObject dynamicObject = objs[i];
+                Unit caster = dynamicObject.GetCaster();
                 if (caster)
                 {
                     Player pl = caster.ToPlayer();
-                    if (pl && pl.seerView == dynamicObj)
+                    if (pl && pl.seerView == dynamicObject)
                         pl.UpdateVisibilityOf(i_object);
                 }
             }
@@ -227,8 +232,9 @@ namespace Game.Maps
         {
             base.Visit(objs);
 
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 vis_guids.Remove(player.GetGUID());
 
                 i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
@@ -246,8 +252,9 @@ namespace Game.Maps
 
             bool relocated_for_ai = (i_player == i_player.seerView);
 
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 vis_guids.Remove(creature.GetGUID());
 
                 i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
@@ -267,8 +274,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     player.UpdateVisibilityOf(i_creature);
 
@@ -281,8 +289,9 @@ namespace Game.Maps
             if (!i_creature.IsAlive())
                 return;
 
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 CreatureUnitRelocationWorker(i_creature, creature);
 
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
@@ -305,8 +314,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 WorldObject viewPoint = player.seerView;
 
                 if (!viewPoint.IsNeedNotify(NotifyFlags.VisibilityChanged))
@@ -324,8 +334,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
@@ -355,8 +366,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 CreatureUnitRelocationWorker(creature, i_unit);
                 if (isCreature)
                     CreatureUnitRelocationWorker(i_unit.ToCreature(), creature);
@@ -380,8 +392,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.IsInPhase(i_source))
                     continue;
 
@@ -403,12 +416,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (creature.GetCreatureTemplate().Entry == 1)
-                {
-
-                }
+                Creature creature = objs[i];
                 if (!creature.IsInPhase(i_source))
                     continue;
 
@@ -427,20 +437,21 @@ namespace Game.Maps
 
         public override void Visit(IList<DynamicObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(i_source))
+                DynamicObject dynamicObject = objs[i];
+                if (!dynamicObject.IsInPhase(i_source))
                     continue;
 
-                if (obj.GetExactDist2dSq(i_source.GetPosition()) > i_distSq)
+                if (dynamicObject.GetExactDist2dSq(i_source.GetPosition()) > i_distSq)
                     continue;
 
                 // Send packet back to the caster if the caster has vision of dynamic object
-                Unit caster = obj.GetCaster();
+                Unit caster = dynamicObject.GetCaster();
                 if (caster)
                 {
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == obj)
+                    if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -480,42 +491,44 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!target.IsInPhase(i_source))
+                Player player = objs[i];
+                if (!player.IsInPhase(i_source))
                     continue;
 
-                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                if (player.GetExactDist2dSq(i_source) > i_distSq)
                     continue;
 
                 // Send packet to all who are sharing the player's vision
-                if (target.HasSharedVision())
+                if (player.HasSharedVision())
                 {
-                    foreach (var player in target.GetSharedVisionList())
-                        if (player.seerView == target)
-                            SendPacket(player);
+                    foreach (var visionPlayer in player.GetSharedVisionList())
+                        if (visionPlayer.seerView == player)
+                            SendPacket(visionPlayer);
                 }
 
-                if (target.seerView == target || target.GetVehicle())
-                    SendPacket(target);
+                if (player.seerView == player || player.GetVehicle())
+                    SendPacket(player);
             }
         }
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!target.IsInPhase(i_source))
+                Creature creature = objs[i];
+                if (!creature.IsInPhase(i_source))
                     continue;
 
-                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                if (creature.GetExactDist2dSq(i_source) > i_distSq)
                     continue;
 
                 // Send packet to all who are sharing the creature's vision
-                if (target.HasSharedVision())
+                if (creature.HasSharedVision())
                 {
-                    foreach (var player in target.GetSharedVisionList())
-                        if (player.seerView == target)
+                    foreach (var player in creature.GetSharedVisionList())
+                        if (player.seerView == creature)
                             SendPacket(player);
                 }
             }
@@ -523,20 +536,21 @@ namespace Game.Maps
 
         public override void Visit(IList<DynamicObject> objs)
         {
-            foreach (var target in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!target.IsInPhase(i_source))
+                DynamicObject dynamicObject = objs[i];
+                if (!dynamicObject.IsInPhase(i_source))
                     continue;
 
-                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                if (dynamicObject.GetExactDist2dSq(i_source) > i_distSq)
                     continue;
 
-                Unit caster = target.GetCaster();
+                Unit caster = dynamicObject.GetCaster();
                 if (caster != null)
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
                     Player player = caster.ToPlayer();
-                    if (player && player.seerView == target)
+                    if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
             }
@@ -561,8 +575,10 @@ namespace Game.Maps
 
         public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                WorldObject obj = objs[i];
+
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
                     return;
 
@@ -576,7 +592,7 @@ namespace Game.Maps
 
     public class PlayerWorker : Notifier
     {
-        PlayerWorker(WorldObject searcher, Action<Player> _action)
+        public PlayerWorker(WorldObject searcher, Action<Player> _action)
         {
             _searcher = searcher;
             action = _action;
@@ -584,9 +600,12 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Player player = objs[i];
                 if (player.IsInPhase(_searcher))
                     action.Invoke(player);
+            }
         }
 
         WorldObject _searcher;
@@ -603,8 +622,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     Do.Invoke(creature);
             }
@@ -624,9 +644,12 @@ namespace Game.Maps
 
         public override void Visit(IList<GameObject> objs)
         {
-            foreach (var obj in objs)
-                if (obj.IsInPhase(_searcher))
-                    Do.Invoke(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                GameObject gameObject = objs[i];
+                if (gameObject.IsInPhase(_searcher))
+                    Do.Invoke(gameObject);
+            }
         }
 
         WorldObject _searcher;
@@ -647,10 +670,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                GameObject gameObject = objs[i];
+                if (gameObject.IsInPhase(_searcher))
+                    i_do.Invoke(gameObject);
             }
         }
 
@@ -659,10 +683,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                Player player = objs[i];
+                if (player.IsInPhase(_searcher))
+                    i_do.Invoke(player);
             }
         }
 
@@ -671,10 +696,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                Creature creature = objs[i];
+                if (creature.IsInPhase(_searcher))
+                    i_do.Invoke(creature);
             }
         }
 
@@ -683,10 +709,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                Corpse corpse = objs[i];
+                if (corpse.IsInPhase(_searcher))
+                    i_do.Invoke(corpse);
             }
         }
 
@@ -695,10 +722,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                DynamicObject dynamicObject = objs[i];
+                if (dynamicObject.IsInPhase(_searcher))
+                    i_do.Invoke(dynamicObject);
             }
         }
 
@@ -707,10 +735,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                AreaTrigger areaTrigger = objs[i];
+                if (areaTrigger.IsInPhase(_searcher))
+                    i_do.Invoke(areaTrigger);
             }
         }
 
@@ -719,10 +748,11 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    i_do.Invoke(obj);
+                Conversation conversation = objs[i];
+                if (conversation.IsInPhase(_searcher))
+                    i_do.Invoke(conversation);
             }
         }
 
@@ -735,13 +765,20 @@ namespace Game.Maps
     {
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Player player = objs[i];
                 player.ResetAllNotifies();
+            }
         }
+
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Creature creature = objs[i];
                 creature.ResetAllNotifies();
+            }
         }
     }
 
@@ -755,8 +792,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 BuildPacket(player);
 
                 if (!player.GetSharedVisionList().Empty())
@@ -769,8 +807,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.GetSharedVisionList().Empty())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
@@ -778,18 +817,20 @@ namespace Game.Maps
                 }
             }
         }
+
         public override void Visit(IList<DynamicObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                ObjectGuid guid = obj.GetCasterGUID();
+                DynamicObject dynamicObject = objs[i];
 
+                ObjectGuid guid = dynamicObject.GetCasterGUID();
                 if (guid.IsPlayer())
                 {
                     //Caster may be NULL if DynObj is in removelist
                     Player caster = Global.ObjAccessor.FindPlayer(guid);
                     if (caster != null)
-                        if (caster.m_activePlayerData.FarsightObject == obj.GetGUID())
+                        if (caster.m_activePlayerData.FarsightObject == dynamicObject.GetGUID())
                             BuildPacket(caster);
                 }
             }
@@ -821,8 +862,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (player.IsInPhase(i_searcher) && player.IsWithinDist(i_searcher, i_dist))
                     Do.Invoke(player);
             }
@@ -967,14 +1009,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                GameObject gameObject = objs[i];
+                if (!gameObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(gameObject))
                 {
-                    i_object = obj;
+                    i_object = gameObject;
                     return;
                 }
             }
@@ -989,14 +1032,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Player player = objs[i];
+                if (!player.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(player))
                 {
-                    i_object = obj;
+                    i_object = player;
                     return;
                 }
             }
@@ -1011,14 +1055,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Creature creature = objs[i];
+                if (!creature.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(creature))
                 {
-                    i_object = obj;
+                    i_object = creature;
                     return;
                 }
             }
@@ -1033,14 +1078,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Corpse corpse = objs[i];
+                if (!corpse.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(corpse))
                 {
-                    i_object = obj;
+                    i_object = corpse;
                     return;
                 }
             }
@@ -1055,14 +1101,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                DynamicObject dynamicObject = objs[i];
+                if (!dynamicObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(dynamicObject))
                 {
-                    i_object = obj;
+                    i_object = dynamicObject;
                     return;
                 }
             }
@@ -1077,14 +1124,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                AreaTrigger areaTrigger = objs[i];
+                if (!areaTrigger.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(areaTrigger))
                 {
-                    i_object = obj;
+                    i_object = areaTrigger;
                     return;
                 }
             }
@@ -1099,14 +1147,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Conversation conversation = objs[i];
+                if (!conversation.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
+                if (i_check.Invoke(conversation))
                 {
-                    i_object = obj;
+                    i_object = conversation;
                     return;
                 }
             }
@@ -1133,13 +1182,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                GameObject gameObject = objs[i];
+                if (!gameObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(gameObject))
+                    i_object = gameObject;
             }
         }
 
@@ -1148,13 +1198,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Player player = objs[i];
+                if (!player.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(player))
+                    i_object = player;
             }
         }
 
@@ -1163,13 +1214,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Creature creature = objs[i];
+                if (!creature.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(creature))
+                    i_object = creature;
             }
         }
 
@@ -1178,13 +1230,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Corpse corpse = objs[i];
+                if (!corpse.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(corpse))
+                    i_object = corpse;
             }
         }
 
@@ -1193,13 +1246,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                DynamicObject dynamicObject = objs[i];
+                if (!dynamicObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(dynamicObject))
+                    i_object = dynamicObject;
             }
         }
 
@@ -1208,13 +1262,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                AreaTrigger areaTrigger = objs[i];
+                if (!areaTrigger.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(areaTrigger))
+                    i_object = areaTrigger;
             }
         }
 
@@ -1223,13 +1278,14 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!obj.IsInPhase(_searcher))
+                Conversation conversation = objs[i];
+                if (!conversation.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(obj))
-                    i_object = obj;
+                if (i_check.Invoke(conversation))
+                    i_object = conversation;
             }
         }
 
@@ -1255,9 +1311,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Player player = objs[i];
+                if (i_check.Invoke(player))
+                    i_objects.Add(player);
+            }
         }
 
         public override void Visit(IList<Creature> objs)
@@ -1265,9 +1324,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Creature creature = objs[i];
+                if (i_check.Invoke(creature))
+                    i_objects.Add(creature);
+            }
         }
 
         public override void Visit(IList<Corpse> objs)
@@ -1275,9 +1337,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Corpse corpse = objs[i];
+                if (i_check.Invoke(corpse))
+                    i_objects.Add(corpse);
+            }
         }
 
         public override void Visit(IList<GameObject> objs)
@@ -1285,9 +1350,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                GameObject gameObject = objs[i];
+                if (i_check.Invoke(gameObject))
+                    i_objects.Add(gameObject);
+            }
         }
 
         public override void Visit(IList<DynamicObject> objs)
@@ -1295,9 +1363,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                DynamicObject dynamicObject = objs[i];
+                if (i_check.Invoke(dynamicObject))
+                    i_objects.Add(dynamicObject);
+            }
         }
 
         public override void Visit(IList<AreaTrigger> objs)
@@ -1305,9 +1376,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                AreaTrigger areaTrigger = objs[i];
+                if (i_check.Invoke(areaTrigger))
+                    i_objects.Add(areaTrigger);
+            }
         }
 
         public override void Visit(IList<Conversation> objs)
@@ -1315,9 +1389,12 @@ namespace Game.Maps
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
                 return;
 
-            foreach (var obj in objs)
-                if (i_check.Invoke(obj))
-                    i_objects.Add(obj);
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Conversation conversation = objs[i];
+                if (i_check.Invoke(conversation))
+                    i_objects.Add(conversation);
+            }
         }
 
         GridMapTypeMask i_mapTypeMask;
@@ -1340,14 +1417,15 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var go in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!go.IsInPhase(_searcher))
+                GameObject gameObject = objs[i];
+                if (!gameObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(go))
+                if (i_check.Invoke(gameObject))
                 {
-                    i_object = go;
+                    i_object = gameObject;
                     return;
                 }
             }
@@ -1369,13 +1447,14 @@ namespace Game.Maps
 
         public override void Visit(IList<GameObject> objs)
         {
-            foreach (var go in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (!go.IsInPhase(_searcher))
+                GameObject gameObject = objs[i];
+                if (!gameObject.IsInPhase(_searcher))
                     continue;
 
-                if (i_check.Invoke(go))
-                    i_object = go;
+                if (i_check.Invoke(gameObject))
+                    i_object = gameObject;
             }
         }
 
@@ -1396,11 +1475,12 @@ namespace Game.Maps
 
         public override void Visit(IList<GameObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
-                if (obj.IsInPhase(_searcher))
-                    if (i_check.Invoke(obj))
-                        i_objects.Add(obj);
+                GameObject gameObject = objs[i];
+                if (gameObject.IsInPhase(_searcher))
+                    if (i_check.Invoke(gameObject))
+                        i_objects.Add(gameObject);
             }
         }
 
@@ -1419,8 +1499,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1434,8 +1515,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1463,8 +1545,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1475,8 +1558,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1502,17 +1586,20 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (player.IsInPhase(_searcher))
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
             }
         }
+
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
@@ -1538,8 +1625,9 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1567,8 +1655,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1594,10 +1683,13 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Creature creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
+            }
         }
 
         WorldObject _searcher;
@@ -1619,8 +1711,9 @@ namespace Game.Maps
             if (i_object)
                 return;
 
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1648,8 +1741,9 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Player player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1675,10 +1769,13 @@ namespace Game.Maps
 
         public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs)
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Player player = objs[i];
                 if (player.IsInPhase(_searcher))
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
+            }
         }
 
         WorldObject _searcher;
