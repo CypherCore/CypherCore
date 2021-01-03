@@ -101,7 +101,7 @@ namespace Framework.Database
             }
             catch (MySqlException ex)
             {
-                HandleMySQLException(ex, stmt.CommandText);
+                HandleMySQLException(ex, stmt.CommandText, stmt.Parameters);
                 return false;
             }
         }
@@ -146,7 +146,7 @@ namespace Framework.Database
             }
             catch (MySqlException ex)
             {
-                HandleMySQLException(ex, stmt.CommandText);
+                HandleMySQLException(ex, stmt.CommandText, stmt.Parameters);
                 return new SQLResult();
             }
         }
@@ -296,11 +296,21 @@ namespace Framework.Database
             }
         }
 
-        MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "")
+        MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "", Dictionary<int, object> parameters = null)
         {
             MySqlErrorCode code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException is MySqlException)
                 code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+
+            StringBuilder stringBuilder = new StringBuilder($"SqlException: MySqlErrorCode: {code} Message: {ex.Message} SqlQuery: {query} ");
+            if (parameters != null)
+            {
+                stringBuilder.Append("Parameters: ");
+                foreach (var pair in parameters)
+                    stringBuilder.Append($"{pair.Key} : {pair.Value}");
+            }
+
+            Log.outError(LogFilter.Sql, stringBuilder.ToString());
 
             switch (code)
             {
@@ -313,7 +323,6 @@ namespace Framework.Database
                     break;
             }
 
-            Log.outError(LogFilter.Sql, $"SqlException: {ex.Message} SqlQuery: {query}");
             return code;
         }
 
