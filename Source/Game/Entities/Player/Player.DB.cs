@@ -2707,7 +2707,6 @@ namespace Game.Entities
 
                     //join player to Battlegroundgroup
                     currentBg.EventPlayerLoggedIn(this);
-                    currentBg.AddOrSetPlayerToCorrectBgGroup(this, (Team)m_bgData.bgTeam);
 
                     SetInviteForBattlegroundQueueType(bgQueueTypeId, currentBg.GetInstanceID());
                 }
