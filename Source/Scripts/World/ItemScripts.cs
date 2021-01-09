@@ -318,30 +318,6 @@ namespace Scripts.World
     }
 
     [Script]
-    class item_trident_of_nazjan : ItemScript
-    {
-        public item_trident_of_nazjan() : base("item_Trident_of_Nazjan") { }
-
-        public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
-        {
-            if (player.GetQuestStatus(ItemScriptConst.QuestTheEmissary) == QuestStatus.Incomplete)
-            {
-                Creature pLeviroth = player.FindNearestCreature(ItemScriptConst.NpcLeviroth, 10.0f);
-                if (pLeviroth) // spell range
-                {
-                    pLeviroth.GetAI().AttackStart(player);
-                    return false;
-                }
-                else
-                    player.SendEquipError(InventoryResult.OutOfRange, item, null);
-            }
-            else
-                player.SendEquipError(InventoryResult.ClientLockedOut, item, null);
-            return true;
-        }
-    }
-
-    [Script]
     class item_captured_frog : ItemScript
     {
         public item_captured_frog() : base("item_captured_frog") { }
