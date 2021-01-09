@@ -952,7 +952,7 @@ namespace Framework.Constants
     // Db Scripting Commands
     public enum ScriptCommands
     {
-        Talk = 0,                // Source/Target = Creature, Target = Any, Datalong = Talk Type (0=Say, 1=Whisper, 2=Yell, 3=Emote Text, 4=Boss Emote Text), Datalong2 & 1 = Player Talk (Instead Of Creature), Dataint = StringId
+        Talk = 0,                // Source/Target = Creature, Target = Any, Datalong = Talk Type (see ChatType enum), datalong2 & 1 = player talk (instead of creature), dataint = string_id
         Emote = 1,                // Source/Target = Creature, Datalong = Emote Id, Datalong2 = 0: Set Emote State; > 0: Play Emote State
         FieldSetDeprecated = 2,
         MoveTo = 3,                // Source/Target = Creature, Datalong2 = Time To Reach, X/Y/Z = Destination
@@ -1111,6 +1111,7 @@ namespace Framework.Constants
         ChatYellLevelReq,
         CheckGobjectLos,
         CleanCharacterDb,
+        CleanOldMailTime,
         ClientCacheVersion,
         Compression,
         CorpseDecayElite,

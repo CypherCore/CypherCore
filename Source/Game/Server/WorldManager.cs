@@ -963,7 +963,8 @@ namespace Game
             //one second is 1000 -(tested on win system)
             // @todo Get rid of magic numbers
             var localTime = Time.UnixTimeToDateTime(GameTime.GetGameTime()).ToLocalTime();
-            mail_timer = ((((localTime.Hour + 20) % 24) * Time.Hour * Time.InMilliseconds) / m_timers[WorldTimers.Auctions].GetInterval());
+            byte CleanOldMailsTime = WorldConfig.GetIntValue(WorldCfg.CleanOldMailTime);
+            mail_timer = ((((localTime.Hour + (24 - CleanOldMailsTime)) % 24) * Time.Hour * Time.InMilliseconds) / m_timers[WorldTimers.Auctions].GetInterval());
             //1440
             mail_timer_expires = ((Time.Day * Time.InMilliseconds) / (m_timers[(int)WorldTimers.Auctions].GetInterval()));
             Log.outInfo(LogFilter.ServerLoading, "Mail timer set to: {0}, mail return is called every {1} minutes", mail_timer, mail_timer_expires);

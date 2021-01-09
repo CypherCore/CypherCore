@@ -562,6 +562,12 @@ namespace Game
             Values[WorldCfg.GroupVisibility] = GetDefaultValue("Visibility.GroupMode", 1);
 
             Values[WorldCfg.MailDeliveryDelay] = GetDefaultValue("MailDeliveryDelay", Time.Hour);
+            Values[WorldCfg.CleanOldMailTime] = GetDefaultValue("CleanOldMailTime", 4);
+            if (Values[WorldCfg.CleanOldMailTime] > 23)
+            {
+                Log.outError(LogFilter.ServerLoading, $"CleanOldMailTime ({Values[WorldCfg.CleanOldMailTime]}) must be an hour, between 0 and 23. Set to 4.");
+                Values[WorldCfg.CleanOldMailTime] = 4;
+            }
 
             Values[WorldCfg.UptimeUpdate] = GetDefaultValue("UpdateUptimeInterval", 10);
             if ((int)Values[WorldCfg.UptimeUpdate] <= 0)
