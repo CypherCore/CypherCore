@@ -151,7 +151,7 @@ namespace Game.Networking.Packets
         {
             uint size = _worldPacket.ReadUInt32();
             for (int i = 0; i < size; ++i)
-                Talents[i].Read(_worldPacket);
+                Talents[i] = new PvPTalent(_worldPacket);
         }
 
         public Array<PvPTalent> Talents = new Array<PvPTalent>(4);
@@ -182,7 +182,7 @@ namespace Game.Networking.Packets
         public ushort PvPTalentID;
         public byte Slot;
 
-        public void Read(WorldPacket data)
+        public PvPTalent(WorldPacket data)
         {
             PvPTalentID = data.ReadUInt16();
             Slot = data.ReadUInt8();

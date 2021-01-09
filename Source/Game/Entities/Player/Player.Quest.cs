@@ -2627,7 +2627,6 @@ namespace Game.Entities
                 Log.outError(LogFilter.Player, "GetQuestObjectiveData: called for quest {0} with invalid StorageIndex {1} (objective data is not tracked)", quest.Id, storageIndex);
 
             var status = m_QuestStatus.LookupByKey(quest.Id);
-
             if (status == null)
             {
                 Log.outError(LogFilter.Player, "GetQuestObjectiveData: player {0} ({1}) doesn't have quest status data for quest {2}", GetName(), GetGUID().ToString(), quest.Id);

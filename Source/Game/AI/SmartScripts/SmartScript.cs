@@ -938,11 +938,11 @@ namespace Game.AI
                             Creature creature = target.ToCreature();
                             if (creature != null)
                             {
-                                SmartAI smartAI = (SmartAI)creature.GetAI();
-                                if (smartAI != null)
+                                CreatureAI smartAI = creature.GetAI();
+                                if (smartAI != null && smartAI is SmartAI)
                                 {
-                                    smartAI.SetDespawnTime(respawnDelay);
-                                    smartAI.StartDespawn();
+                                    ((SmartAI)smartAI).SetDespawnTime(respawnDelay);
+                                    ((SmartAI)smartAI).StartDespawn();
                                 }
                                 else
                                     creature.DespawnOrUnsummon(respawnDelay);

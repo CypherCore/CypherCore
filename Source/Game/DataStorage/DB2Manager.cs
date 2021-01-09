@@ -75,8 +75,12 @@ namespace Game.DataStorage
             foreach (AzeriteEmpoweredItemRecord azeriteEmpoweredItem in CliDB.AzeriteEmpoweredItemStorage.Values)
                 _azeriteEmpoweredItems[azeriteEmpoweredItem.ItemID] = azeriteEmpoweredItem;
 
+            CliDB.AzeriteEmpoweredItemStorage.Clear();
+
             foreach (AzeriteEssencePowerRecord azeriteEssencePower in CliDB.AzeriteEssencePowerStorage.Values)
                 _azeriteEssencePowersByIdAndRank[((uint)azeriteEssencePower.AzeriteEssenceID, (uint)azeriteEssencePower.Tier)] = azeriteEssencePower;
+
+            CliDB.AzeriteEssencePowerStorage.Clear();
 
             foreach (AzeriteItemMilestonePowerRecord azeriteItemMilestonePower in CliDB.AzeriteItemMilestonePowerStorage.Values)
                 _azeriteItemMilestonePowers.Add(azeriteItemMilestonePower);
@@ -98,6 +102,8 @@ namespace Game.DataStorage
             foreach (AzeritePowerSetMemberRecord azeritePowerSetMember in CliDB.AzeritePowerSetMemberStorage.Values)
                 if (CliDB.AzeritePowerStorage.ContainsKey(azeritePowerSetMember.AzeritePowerID))
                     _azeritePowers.Add(azeritePowerSetMember.AzeritePowerSetID, azeritePowerSetMember);
+
+            CliDB.AzeritePowerSetMemberStorage.Clear();
 
             foreach (AzeriteTierUnlockRecord azeriteTierUnlock in CliDB.AzeriteTierUnlockStorage.Values)
             {
@@ -2295,7 +2301,7 @@ namespace Game.DataStorage
         Dictionary<short, uint> _itemLevelDeltaToBonusListContainer = new Dictionary<short, uint>();
         MultiMap<uint, ItemBonusTreeNodeRecord> _itemBonusTrees = new MultiMap<uint, ItemBonusTreeNodeRecord>();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new Dictionary<uint, ItemChildEquipmentRecord>();
-        Array<ItemClassRecord> _itemClassByOldEnum = new Array<ItemClassRecord>(19);
+        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[19];
         List<uint> _itemsWithCurrencyCost = new List<uint>();
         MultiMap<uint, ItemLimitCategoryConditionRecord>  _itemCategoryConditions = new MultiMap<uint, ItemLimitCategoryConditionRecord>();
         MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new MultiMap<uint, ItemLevelSelectorQualityRecord>();

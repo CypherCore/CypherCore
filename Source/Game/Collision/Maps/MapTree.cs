@@ -114,79 +114,84 @@ namespace Game.Collision
                 return LoadResult.ReadFromFileFailed;
             }
 
+            LoadResult result = LoadResult.FileNotFound;
+
             TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
             if (fileResult.File != null)
             {
+                result = LoadResult.Success;
                 using (BinaryReader reader = new BinaryReader(fileResult.File))
                 {
                     if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                        return LoadResult.VersionMismatch;
+                        result = LoadResult.VersionMismatch;
 
-                    uint numSpawns = reader.ReadUInt32();
-                    for (uint i = 0; i < numSpawns; ++i)
+                    if (result == LoadResult.Success)
                     {
-                        // read model spawns
-                        if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
+                        uint numSpawns = reader.ReadUInt32();
+                        for (uint i = 0; i < numSpawns && result == LoadResult.Success; ++i)
                         {
-                            // acquire model instance
-                            WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
-                            if (model == null)
-                                Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
-
-                            // update tree
-                            if (iSpawnIndices.ContainsKey(spawn.Id))
+                            // read model spawns
+                            if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
                             {
-                                uint referencedVal = iSpawnIndices[spawn.Id];
-                                if (!iLoadedSpawns.ContainsKey(referencedVal))
+                                // acquire model instance
+                                WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
+                                if (model == null)
+                                    Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
+
+                                // update tree
+                                if (iSpawnIndices.ContainsKey(spawn.Id))
                                 {
-                                    if (referencedVal >= iNTreeValues)
+                                    uint referencedVal = iSpawnIndices[spawn.Id];
+                                    if (!iLoadedSpawns.ContainsKey(referencedVal))
                                     {
-                                        Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, fileResult.Name);
-                                        continue;
-                                    }
+                                        if (referencedVal >= iNTreeValues)
+                                        {
+                                            Log.outError(LogFilter.Maps, "StaticMapTree.LoadMapTile() : invalid tree element ({0}/{1}) referenced in tile {2}", referencedVal, iNTreeValues, fileResult.Name);
+                                            continue;
+                                        }
 
-                                    iTreeValues[referencedVal] = new ModelInstance(spawn, model);
-                                    iLoadedSpawns[referencedVal] = 1;
+                                        iTreeValues[referencedVal] = new ModelInstance(spawn, model);
+                                        iLoadedSpawns[referencedVal] = 1;
+                                    }
+                                    else
+                                        ++iLoadedSpawns[referencedVal];
                                 }
-                                else
-                                    ++iLoadedSpawns[referencedVal];
-                            }
-                            else if (iMapID == fileResult.UsedMapId)
-                            {
-                                // unknown parent spawn might appear in because it overlaps multiple tiles
-                                // in case the original tile is swapped but its neighbour is now (adding this spawn)
-                                // we want to not mark it as loading error and just skip that model
-                                Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {iMapID}");
-                                return LoadResult.ReadFromFileFailed;
+                                else if (iMapID == fileResult.UsedMapId)
+                                {
+                                    // unknown parent spawn might appear in because it overlaps multiple tiles
+                                    // in case the original tile is swapped but its neighbour is now (adding this spawn)
+                                    // we want to not mark it as loading error and just skip that model
+                                    Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : invalid tree element (spawn {spawn.Id}) referenced in tile fileResult.Name{fileResult.Name} by map {iMapID}");
+                                    result = LoadResult.ReadFromFileFailed;
+                                }
                             }
                             else
                             {
                                 Log.outError(LogFilter.Maps, $"StaticMapTree.LoadMapTile() : cannot read model from file (spawn index {i}) referenced in tile {fileResult.Name} by map {iMapID}");
-                                return LoadResult.ReadFromFileFailed;
+                                result = LoadResult.ReadFromFileFailed;
                             }
                         }
                     }
+                    iLoadedTiles[PackTileID(tileX, tileY)] = true;
                 }
-                iLoadedTiles[PackTileID(tileX, tileY)] = true;
             }
             else
             {
                 iLoadedTiles[PackTileID(tileX, tileY)] = false;
             }
 
-            return LoadResult.Success;
+            return result;
         }
 
         public void UnloadMapTile(uint tileX, uint tileY, VMapManager vm)
         {
             uint tileID = PackTileID(tileX, tileY);
-            var tile = iLoadedTiles.LookupByKey(tileID);
             if (!iLoadedTiles.ContainsKey(tileID))
             {
                 Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", iMapID, tileX, tileY);
                 return;
             }
-            if (tile) // file associated with tile
+            if (iLoadedTiles[tileID]) // file associated with tile
             {
                 TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
                 if (fileResult.File != null)

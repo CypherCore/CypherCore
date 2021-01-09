@@ -111,12 +111,12 @@ namespace Game.Networking.Packets
             uint Count = _worldPacket.ReadUInt32();
             Target = _worldPacket.ReadPackedGuid();
 
-            for (uint i = 0; i < Count; ++i)
+            for (int i = 0; i < Count; ++i)
             {
                 LootRequest lootRequest = new LootRequest();
                 lootRequest.Object = _worldPacket.ReadPackedGuid();
                 lootRequest.LootListID = _worldPacket.ReadUInt8();
-                Loot.Add(lootRequest);
+                Loot[i] = lootRequest;
             }
         }
 

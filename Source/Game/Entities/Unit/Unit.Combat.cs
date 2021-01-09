@@ -2196,7 +2196,6 @@ namespace Game.Entities
             minDamage = Math.Max(0.0f, minDamage);
             maxDamage = Math.Max(0.0f, maxDamage);
 
-
             if (minDamage > maxDamage)
             {
                 minDamage = minDamage + maxDamage;
