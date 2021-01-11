@@ -563,7 +563,7 @@ namespace Game
 
             Values[WorldCfg.MailDeliveryDelay] = GetDefaultValue("MailDeliveryDelay", Time.Hour);
             Values[WorldCfg.CleanOldMailTime] = GetDefaultValue("CleanOldMailTime", 4);
-            if (Values[WorldCfg.CleanOldMailTime] > 23)
+            if ((int)Values[WorldCfg.CleanOldMailTime] > 23)
             {
                 Log.outError(LogFilter.ServerLoading, $"CleanOldMailTime ({Values[WorldCfg.CleanOldMailTime]}) must be an hour, between 0 and 23. Set to 4.");
                 Values[WorldCfg.CleanOldMailTime] = 4;
