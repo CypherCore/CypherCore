@@ -950,7 +950,7 @@ namespace Game.Entities
             Cypher.Assert(data.spawnId == m_spawnId);
 
             data.Id = GetEntry();
-            data.spawnPoint.WorldRelocate(this);
+            data.spawnPoint = new WorldLocation(this);
             data.rotation = m_worldRotation;
             data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();

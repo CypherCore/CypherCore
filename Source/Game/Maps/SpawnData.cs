@@ -45,7 +45,6 @@ namespace Game.Maps
         public uint ScriptId;
         public bool dbData = true;
 
-
         public SpawnData(SpawnObjectType t)
         {
             type = t;

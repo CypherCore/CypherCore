@@ -4401,6 +4401,7 @@ namespace Game
         {
             if (!gameObjectDataStorage.ContainsKey(guid))
                 gameObjectDataStorage[guid] = new GameObjectData();
+
             return gameObjectDataStorage[guid];
         }
         public GameObjectTemplate GetGameObjectTemplate(uint entry)

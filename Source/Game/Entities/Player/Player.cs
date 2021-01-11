@@ -3481,7 +3481,7 @@ namespace Game.Entities
             Cypher.Assert(!IsResurrectRequested());
             _resurrectionData = new ResurrectionData();
             _resurrectionData.GUID = caster.GetGUID();
-            _resurrectionData.Location.WorldRelocate(caster);
+            _resurrectionData.Location = new WorldLocation(caster);
             _resurrectionData.Health = health;
             _resurrectionData.Mana = mana;
             _resurrectionData.Aura = appliedAura;
