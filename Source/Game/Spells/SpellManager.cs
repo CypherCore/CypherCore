@@ -849,7 +849,7 @@ namespace Game.Entities
 
                 foreach (SpellEffectInfo effect in entry.GetEffects())
                 {
-                    if (effect != null)
+                    if (effect == null)
                         continue;
 
                     SpellLearnSkillNode dbc_node = new SpellLearnSkillNode();
