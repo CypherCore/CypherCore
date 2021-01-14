@@ -863,7 +863,7 @@ namespace Game.Chat
         [CommandGroup("delete", RBACPermissions.CommandNpcDelete)]
         class DeleteCommands
         {
-            [Command("delete", RBACPermissions.CommandNpcDelete)]
+            [Command("", RBACPermissions.CommandNpcDelete)]
             static bool HandleNpcDeleteCommand(StringArguments args, CommandHandler handler)
             {
                 Creature creature;

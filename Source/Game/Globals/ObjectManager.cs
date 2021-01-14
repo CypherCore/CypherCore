@@ -4976,6 +4976,8 @@ namespace Game
                 gt.mapId = result.Read<uint>(5);
                 gt.name = result.Read<string>(6);
 
+                gt.nameLow = gt.name.ToLowerInvariant();
+
                 if (!GridDefines.IsValidMapCoord(gt.mapId, gt.posX, gt.posY, gt.posZ, gt.orientation))
                 {
                     Log.outError(LogFilter.Sql, "Wrong position for id {0} (name: {1}) in `game_tele` table, ignoring.", id, gt.name);
@@ -5438,7 +5440,53 @@ namespace Game
         }
         public GameTele GetGameTele(string name)
         {
-            return gameTeleStorage.Values.FirstOrDefault(p => p.name.ToLower() == name.ToLower());
+            return gameTeleStorage.Values.FirstOrDefault(p => p.nameLow == name.ToLower());
+        }
+        public bool AddGameTele(GameTele tele)
+        {
+            // find max id
+            uint newId = 0;
+            foreach (var itr in gameTeleStorage)
+                if (itr.Key > newId)
+                    newId = itr.Key;
+
+            // use next
+            ++newId;
+
+            gameTeleStorage[newId] = tele;
+
+            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.INS_GAME_TELE);
+
+            stmt.AddValue(0, newId);
+            stmt.AddValue(1, tele.posX);
+            stmt.AddValue(2, tele.posY);
+            stmt.AddValue(3, tele.posZ);
+            stmt.AddValue(4, tele.orientation);
+            stmt.AddValue(5, tele.mapId);
+            stmt.AddValue(6, tele.name);
+
+            DB.World.Execute(stmt);
+
+            return true;
+        }
+        public bool DeleteGameTele(string name)
+        {
+            name = name.ToLowerInvariant();
+
+            foreach (var pair in gameTeleStorage.ToList())
+            {
+                if (pair.Value.nameLow == name)
+                {
+                    PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAME_TELE);
+                    stmt.AddValue(0, pair.Value.name);
+                    DB.World.Execute(stmt);
+
+                    gameTeleStorage.Remove(pair.Key);
+                    return true;
+                }
+            }
+
+            return false;
         }
         public List<DungeonEncounter> GetDungeonEncounterList(uint mapId, Difficulty difficulty)
         {

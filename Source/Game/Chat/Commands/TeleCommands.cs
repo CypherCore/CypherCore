@@ -16,10 +16,12 @@
  */
 
 using Framework.Constants;
+using Framework.Database;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat
@@ -73,13 +75,60 @@ namespace Game.Chat
         [Command("add", RBACPermissions.CommandTeleAdd)]
         static bool HandleTeleAddCommand(StringArguments args, CommandHandler handler)
         {
-            return false;
+            if (args.Empty())
+                return false;
+
+            Player player = handler.GetSession().GetPlayer();
+            if (player == null)
+                return false;
+
+            string name = args.NextString();
+
+            if (Global.ObjectMgr.GetGameTele(name) != null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandTpAlreadyexist);
+                return false;
+            }
+
+            GameTele tele = new GameTele();
+            tele.posX = player.GetPositionX();
+            tele.posY = player.GetPositionY();
+            tele.posZ = player.GetPositionZ();
+            tele.orientation = player.GetOrientation();
+            tele.mapId = player.GetMapId();
+            tele.name = name;
+            tele.nameLow = name.ToLowerInvariant();
+
+            if (Global.ObjectMgr.AddGameTele(tele))
+            {
+                handler.SendSysMessage(CypherStrings.CommandTpAdded);
+            }
+            else
+            {
+                handler.SendSysMessage(CypherStrings.CommandTpAddedError);
+                return false;
+            }
+
+            return true;
         }
 
         [Command("del", RBACPermissions.CommandTeleDel, true)]
         static bool HandleTeleDelCommand(StringArguments args, CommandHandler handler)
         {
-            return false;
+            if (args.Empty())
+                return false;
+
+            // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+            GameTele tele = handler.ExtractGameTeleFromLink(args);
+            if (tele == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
+                return false;
+            }
+
+            Global.ObjectMgr.DeleteGameTele(tele.name);
+            handler.SendSysMessage(CypherStrings.CommandTpDeleted);
+            return true;
         }
 
         [Command("group", RBACPermissions.CommandTeleGroup)]
@@ -164,7 +213,88 @@ namespace Game.Chat
         [Command("name", RBACPermissions.CommandTeleName, true)]
         static bool HandleTeleNameCommand(StringArguments args, CommandHandler handler)
         {
-            return false;
+            handler.ExtractOptFirstArg(args, out string nameStr, out string teleStr);
+            if (teleStr.IsEmpty())
+                return false;
+
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out Player target, out ObjectGuid targetGuid, out string targetName))
+                return false;
+
+            if (teleStr.Equals("$home"))    // References target's homebind
+            {
+                if (target)
+                    target.TeleportTo(target.GetHomebind());
+                else
+                {
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                    stmt.AddValue(0, targetGuid.GetCounter());
+                    SQLResult result = DB.Characters.Query(stmt);
+
+                    if (!result.IsEmpty())
+                    {
+                        WorldLocation loc = new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
+                        uint zoneId = result.Read<ushort>(1);
+
+                        Player.SavePositionInDB(loc, zoneId, targetGuid, null);
+                    }
+                }
+
+                return true;
+            }
+
+            // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+            GameTele tele = handler.ExtractGameTeleFromLink(new StringArguments(teleStr));
+            if (tele == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
+                return false;
+            }
+
+            if (target)
+            {
+                // check online security
+                if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                    return false;
+
+                string chrNameLink = handler.PlayerLink(targetName);
+
+                if (target.IsBeingTeleported() == true)
+                {
+                    handler.SendSysMessage(CypherStrings.IsTeleported, chrNameLink);
+                    return false;
+                }
+
+                handler.SendSysMessage(CypherStrings.TeleportingTo, chrNameLink, "", tele.name);
+                if (handler.NeedReportToTarget(target))
+                    target.SendSysMessage(CypherStrings.TeleportedToBy, handler.GetNameLink());
+
+                // stop flight if need
+                if (target.IsInFlight())
+                {
+                    target.GetMotionMaster().MovementExpired();
+                    target.CleanupAfterTaxiFlight();
+                }
+                // save only in non-flight case
+                else
+                    target.SaveRecallPosition();
+
+                target.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
+            }
+            else
+            {
+                // check offline security
+                if (handler.HasLowerSecurity(null, targetGuid))
+                    return false;
+
+                string nameLink = handler.PlayerLink(targetName);
+
+                handler.SendSysMessage(CypherStrings.TeleportingTo, nameLink, handler.GetCypherString(CypherStrings.Offline), tele.name);
+
+                Player.SavePositionInDB(new WorldLocation(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation),
+                    Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, tele.mapId, tele.posX, tele.posY, tele.posZ), targetGuid, null);
+            }
+
+            return true;
         }
     }
 }

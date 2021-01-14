@@ -503,7 +503,7 @@ namespace Framework.Constants
         CommandZonenografaction = 461,
         CommandTpAlreadyexist = 462,
         CommandTpAdded = 463,
-        CommandTpAddederr = 464,
+        CommandTpAddedError = 464,
         CommandTpDeleted = 465,
         CommandNotaxinodefound = 466,
         CommandTargetListauras = 467,
