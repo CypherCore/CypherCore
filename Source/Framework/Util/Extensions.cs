@@ -128,30 +128,6 @@ namespace System
             return combined;
         }
 
-        public static BigInteger ToBigInteger<T>(this T value, bool isBigEndian = false)
-        {
-            BigInteger ret;
-
-            switch (typeof(T).Name)
-            {
-                case "Byte[]":
-                    var data = value as byte[];
-
-                    if (isBigEndian)
-                        Array.Reverse(data);
-
-                    ret = new BigInteger(data.Combine(new byte[] { 0 }));
-                    break;
-                case "BigInteger":
-                    ret = (BigInteger)Convert.ChangeType(value, typeof(BigInteger));
-                    break;
-                default:
-                    throw new NotSupportedException($"'{typeof(T).Name}' conversion to 'BigInteger' not supported.");
-            }
-
-            return ret;
-        }
-
         public static void Swap<T>(ref T left, ref T right)
         {
             T temp = left;

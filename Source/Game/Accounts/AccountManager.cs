@@ -37,13 +37,13 @@ namespace Game
         public AccountOpResult CreateAccount(string username, string password, string email = "", uint bnetAccountId = 0, byte bnetIndex = 0)
         {
             if (username.Length > MaxAccountLength)
-                return AccountOpResult.NameTooLong;                           // username's too long
+                return AccountOpResult.NameTooLong;
 
             if (password.Length > MaxAccountLength)
-                return AccountOpResult.PassTooLong;                           // password's too long
+                return AccountOpResult.PassTooLong;
 
             if (GetId(username) != 0)
-                return AccountOpResult.NameAlreadyExist;                       // username does already exist
+                return AccountOpResult.NameAlreadyExist;
 
             (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationData(username, password);
 
@@ -68,7 +68,7 @@ namespace Game
             stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_REALM_CHARACTERS_INIT);
             DB.Login.Execute(stmt);
 
-            return AccountOpResult.Ok;                                          // everything's fine
+            return AccountOpResult.Ok;
         }
 
         public AccountOpResult DeleteAccount(uint accountId)
