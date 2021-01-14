@@ -443,7 +443,7 @@ namespace Game.Misc
             if (spellInfo != null)
             {
                 foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                    if (effect.IsEffect(SpellEffectName.LearnSpell))
+                    if (effect != null && effect.IsEffect(SpellEffectName.LearnSpell))
                         packet.LearnSpells.Add(effect.TriggerSpell);
             }
 

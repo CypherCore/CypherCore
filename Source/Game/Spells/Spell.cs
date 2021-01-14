@@ -3410,8 +3410,9 @@ namespace Game.Spells
                         {
                             uint item = 0;
                             foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                                if (effect.ItemType != 0)
+                                if (effect != null && effect.ItemType != 0)
                                     item = effect.ItemType;
+
                             ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
                             if (proto != null && proto.GetItemLimitCategory() != 0)
                                 packet.FailedArg1 = (int)proto.GetItemLimitCategory();

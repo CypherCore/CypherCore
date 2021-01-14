@@ -1248,7 +1248,7 @@ namespace Game.Entities
                         SpellInfo spellInfo = GetSpellInfo(spellId, Difficulty.None);
                         foreach (SpellEffectInfo effectInfo in spellInfo.GetEffects())
                         {
-                            if (!effectInfo.IsAura())
+                            if (effectInfo == null || !effectInfo.IsAura())
                                 continue;
 
                             AuraType auraName = effectInfo.ApplyAuraName;
