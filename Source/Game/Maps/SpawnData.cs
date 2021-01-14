@@ -38,16 +38,20 @@ namespace Game.Maps
         public PhaseUseFlagsValues phaseUseFlags;
         public uint phaseId;
         public uint phaseGroup;
-        public int terrainSwapMap = -1;
+        public int terrainSwapMap;
         public int spawntimesecs;
         public List<Difficulty> spawnDifficulties;
         public SpawnGroupTemplateData spawnGroupData;
         public uint ScriptId;
-        public bool dbData = true;
+        public bool dbData;
 
         public SpawnData(SpawnObjectType t)
         {
             type = t;
+            spawnPoint = new WorldLocation();
+            terrainSwapMap = -1;
+            spawnDifficulties = new List<Difficulty>();
+            dbData = true;
         }
     }
 }
