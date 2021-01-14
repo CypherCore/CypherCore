@@ -786,15 +786,10 @@ namespace Game.Entities
 
         public void BuildFieldsUpdate(Player player, Dictionary<Player, UpdateData> data_map)
         {
-            var data = data_map.LookupByKey(player);
-
-            if (data == null)
-            {
+            if (!data_map.ContainsKey(player))
                 data_map.Add(player, new UpdateData(player.GetMapId()));
-                data = data_map.LookupByKey(player);
-            }
 
-            BuildValuesUpdateBlockForPlayer(data, player);
+            BuildValuesUpdateBlockForPlayer(data_map[player], player);
         }
 
         public abstract void BuildValuesCreate(WorldPacket data, Player target);
@@ -802,8 +797,7 @@ namespace Game.Entities
 
         public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue) where T : new()
         {
-            Type type = typeof(T);
-            if (type.IsGenericType || (dynamic)newValue != updateField.GetValue())
+            if (!newValue.Equals(updateField.GetValue()))
             {
                 updateField.SetValue(newValue);
                 AddToObjectUpdateIfNeeded();
@@ -812,8 +806,7 @@ namespace Game.Entities
 
         public void SetUpdateFieldValue<T>(ref T value, T newValue) where T : new()
         {
-            Type type = typeof(T);
-            if (type.IsGenericType || (dynamic)newValue != value)
+            if (!newValue.Equals(value))
             {
                 value = newValue;
                 AddToObjectUpdateIfNeeded();
@@ -822,7 +815,7 @@ namespace Game.Entities
 
         public void SetUpdateFieldValue<T>(DynamicUpdateField<T> updateField, int index, T newValue) where T : new()
         {
-            if ((dynamic)newValue != updateField[index])
+            if (!newValue.Equals(updateField[index]))
             {
                 updateField[index] = newValue;
                 AddToObjectUpdateIfNeeded();
@@ -921,8 +914,6 @@ namespace Game.Entities
 
             dynamic value = updateField.GetValue();
 
-            // don't want to include Util.h here
-            //ApplyPercentModFloatVar(value, percent, apply);
             if (percent == -100.0f)
                 percent = -99.99f;
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
@@ -936,8 +927,6 @@ namespace Game.Entities
 
             dynamic value = oldValue;
 
-            // don't want to include Util.h here
-            //ApplyPercentModFloatVar(value, percent, apply);
             if (percent == -100.0f)
                 percent = -99.99f;
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));

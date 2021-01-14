@@ -988,7 +988,7 @@ namespace Game.Entities
         public uint SpellXSpellVisualID;
         public uint ScriptVisualID;
 
-        public void WriteCreate(WorldPacket data, Object owner, Player receiver)
+        public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt32(ScriptVisualID);
@@ -2287,7 +2287,7 @@ namespace Game.Entities
             ChrCustomizationChoiceID = chrCustomizationChoiceID;
         }
 
-        public void WriteCreate(WorldPacket data, Object owner, Player receiver)
+        public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
             data.WriteUInt32(ChrCustomizationOptionID);
             data.WriteUInt32(ChrCustomizationChoiceID);
