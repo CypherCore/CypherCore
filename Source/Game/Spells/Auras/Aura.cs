@@ -342,7 +342,7 @@ namespace Game.Spells
         public void _InitEffects(uint effMask, Unit caster, int[] baseAmount)
         {
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
-            _effects = new AuraEffect[GetSpellInfo().GetEffects().Count];
+            _effects = new AuraEffect[SpellConst.MaxEffects];
 
             foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
