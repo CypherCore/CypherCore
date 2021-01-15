@@ -9557,7 +9557,7 @@ namespace Game
                     var response = choice.Responses.Find(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
                     if (response == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `playerchoice_response_maw_power` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_maw_power` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
                         continue;
                     }
 

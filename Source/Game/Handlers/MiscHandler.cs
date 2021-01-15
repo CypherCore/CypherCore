@@ -170,7 +170,7 @@ namespace Game
             Player player = GetPlayer();
             if (player.IsInFlight())
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTriggerOpcode: Player '{0}' (GUID: {1}) in flight, ignore Area Trigger ID:{2}",
+                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' (GUID: {1}) in flight, ignore Area Trigger ID:{2}",
                     player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
                 return;
             }
@@ -178,14 +178,14 @@ namespace Game
             AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(packet.AreaTriggerID);
             if (atEntry == null)
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTriggerOpcode: Player '{0}' (GUID: {1}) send unknown (by DBC) Area Trigger ID:{2}",
+                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' (GUID: {1}) send unknown (by DBC) Area Trigger ID:{2}",
                     player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
                 return;
             }
 
             if (packet.Entered && !player.IsInAreaTriggerRadius(atEntry))
             {
-                Log.outDebug(LogFilter.Network, "HandleAreaTriggerOpcode: Player '{0}' ({1}) too far, ignore Area Trigger ID: {2}",
+                Log.outDebug(LogFilter.Network, "HandleAreaTrigger: Player '{0}' ({1}) too far, ignore Area Trigger ID: {2}",
                     player.GetName(), player.GetGUID().ToString(), packet.AreaTriggerID);
                 return;
             }

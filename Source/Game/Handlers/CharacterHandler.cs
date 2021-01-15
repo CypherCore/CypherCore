@@ -315,7 +315,7 @@ namespace Game
             RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
             if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Player, "Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                Log.outError(LogFilter.Player, $"Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
                 SendCharCreate(ResponseCodes.AccountCreateFailed);
                 return;
             }

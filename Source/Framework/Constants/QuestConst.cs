@@ -306,7 +306,7 @@ namespace Framework.Constants
         DisallowPlayerAsQuestgiver = 0x08,
         DisplayClassChoiceRewards = 0x10,
         DisplaySpecChoiceRewards = 0x20,
-        RemoveFromLogOnPeridoicReset = 0x40,
+        RemoveFromLogOnPeriodicReset = 0x40,
         AccountLevelQuest = 0x80,
         LegendaryQuest = 0x100,
         NoGuildXp = 0x200,

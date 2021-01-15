@@ -674,7 +674,7 @@ namespace Game
             // prevent tampered movement data
             if (setModMovementForceMagnitudeAck.Ack.Status.Guid != mover.GetGUID())
             {
-                Log.outError(LogFilter.Network, "HandleSetModMovementForceMagnitudeAck: guid error, expected {mover.GetGUID().ToString()}, got {setModMovementForceMagnitudeAck.Ack.Status.guid.ToString()}");
+                Log.outError(LogFilter.Network, $"HandleSetModMovementForceMagnitudeAck: guid error, expected {mover.GetGUID()}, got {setModMovementForceMagnitudeAck.Ack.Status.Guid}");
                 return;
             }
 

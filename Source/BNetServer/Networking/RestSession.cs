@@ -118,7 +118,7 @@ namespace BNetServer.Networking
 
                         ++failedLogins;
 
-                        Log.outDebug(LogFilter.Network, "MaxWrongPass : {maxWrongPassword}, failed_login : {accountId}");
+                        Log.outDebug(LogFilter.Network, $"MaxWrongPass : {maxWrongPassword}, failed_login : {accountId}");
 
                         if (failedLogins >= maxWrongPassword)
                         {

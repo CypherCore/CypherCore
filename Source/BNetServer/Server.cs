@@ -42,7 +42,7 @@ namespace BNetServer
             int restPort = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
             if (restPort < 0 || restPort > 0xFFFF)
             {
-                Log.outError(LogFilter.Network, "Specified login service port ({restPort}) out of allowed range (1-65535), defaulting to 8081");
+                Log.outError(LogFilter.Network, $"Specified login service port ({restPort}) out of allowed range (1-65535), defaulting to 8081");
                 restPort = 8081;
             }
 

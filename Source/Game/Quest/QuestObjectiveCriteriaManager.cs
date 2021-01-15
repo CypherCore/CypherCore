@@ -97,7 +97,7 @@ namespace Game
                     if (criteria == null)
                     {
                         // Removing non-existing criteria data for all characters
-                        Log.outError(LogFilter.Player, "Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
+                        Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                         stmt.AddValue(0, criteriaId);
@@ -234,7 +234,7 @@ namespace Game
 
             referencePlayer.KillCreditCriteriaTreeObjective(questObjective);
 
-            Log.outInfo(LogFilter.Player, "QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.ID}). {GetOwnerInfo()}");
+            Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
 
             _completedObjectives.Add(questObjective.Id);
         }
@@ -277,7 +277,7 @@ namespace Game
 
             if (HasCompletedObjective(objective))
             {
-                Log.outTrace(LogFilter.Player, "QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.ID} Type {criteria.Entry.Type} Quest Objective {objective.ID}) Objective already completed");
+                Log.outTrace(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective already completed");
                 return false;
             }
 

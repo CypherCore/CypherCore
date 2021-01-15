@@ -479,7 +479,7 @@ namespace Game.AI
 
         public virtual void OnCharmed(bool apply) { }
 
-        public virtual bool ShouldSparWith(Unit target) { return false;   }
+        public virtual bool ShouldSparWith(Unit target) { return false; }
         
         public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }

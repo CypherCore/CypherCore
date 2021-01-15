@@ -1328,7 +1328,7 @@ namespace Game.Achievements
 
                 if (!_achievementRewards.ContainsKey(id))
                 {
-                    Log.outError(LogFilter.Sql, "Table `achievement_reward_locale` (ID: {id}) contains locale strings for a non-existing achievement reward.");
+                    Log.outError(LogFilter.Sql, $"Table `achievement_reward_locale` (ID: {id}) contains locale strings for a non-existing achievement reward.");
                     continue;
                 }
 
