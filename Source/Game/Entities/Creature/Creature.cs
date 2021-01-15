@@ -1521,7 +1521,7 @@ namespace Game.Entities
 
             // then delete any active instances of the creature
             var spawnMap = GetMap().GetCreatureBySpawnIdStore().LookupByKey(m_spawnId);
-            foreach (var creature in spawnMap)
+            foreach (var creature in spawnMap.ToList())
                 creature.AddObjectToRemoveList();
         }
 
