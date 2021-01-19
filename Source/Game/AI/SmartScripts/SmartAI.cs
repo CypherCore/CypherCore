@@ -133,9 +133,6 @@ namespace Game.AI
 
         public void PausePath(uint delay, bool forced)
         {
-            if (!HasEscortState(SmartEscortState.Escorting))
-                return;
-
             if (HasEscortState(SmartEscortState.Paused))
             {
                 Log.outError(LogFilter.Server, $"SmartAI.PausePath: Creature entry {me.GetEntry()} wanted to pause waypoint movement while already paused, ignoring.");
@@ -160,9 +157,6 @@ namespace Game.AI
 
         public void StopPath(uint despawnTime = 0, uint quest = 0, bool fail = false)
         {
-            if (!HasEscortState(SmartEscortState.Escorting))
-                return;
-
             if (quest != 0)
                 mEscortQuestID = quest;
 
@@ -275,9 +269,6 @@ namespace Game.AI
 
         void UpdatePath(uint diff)
         {
-            if (!HasEscortState(SmartEscortState.Escorting))
-                return;
-
             if (_escortInvokerCheckTimer < diff)
             {
                 if (!IsEscortInvokerInRange())
