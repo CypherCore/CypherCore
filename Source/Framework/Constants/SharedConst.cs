@@ -574,11 +574,11 @@ namespace Framework.Constants
             | (1 << (Race.Tauren - 1)) | (1 << (Race.Gnome - 1)) | (1 << (Race.Troll - 1)) | (1 << (Race.BloodElf - 1)) | (1 << (Race.Draenei - 1))
             | (1 << (Race.Goblin - 1)) | (1 << (Race.Worgen - 1)) | (1 << (Race.PandarenNeutral - 1)) | (1 << (Race.PandarenAlliance - 1)) | (1 << (Race.PandarenHorde - 1))
             | (1 << (Race.Nightborne - 1)) | (1 << (Race.HighmountainTauren - 1)) | (1 << (Race.VoidElf - 1)) | (1 << (Race.LightforgedDraenei - 1)) | (1 << (Race.ZandalariTroll - 1))
-            | (1ul << (Race.KulTiran - 1)) | (1 << (Race.DarkIronDwarf - 1)) | (1 << (Race.Vulpera - 1)) | (1 << (Race.MagharOrc - 1)) | (1 << (Race.MechaGnome - 1))),
+            | (1ul << (Race.KulTiran - 1)) | (1ul << (Race.DarkIronDwarf - 1)) | (1ul << (Race.Vulpera - 1)) | (1ul << (Race.MagharOrc - 1)) | (1ul << (Race.MechaGnome - 1))),
 
         Alliance = ((1 << (Race.Human - 1)) | (1 << (Race.Dwarf - 1)) | (1 << (Race.NightElf - 1)) | (1 << (Race.Gnome - 1))
             | (1 << (Race.Draenei - 1)) | (1 << (Race.Worgen - 1)) | (1 << (Race.PandarenAlliance - 1)) | (1 << (Race.VoidElf - 1)) | (1 << (Race.LightforgedDraenei - 1))
-            | (1ul << (Race.KulTiran - 1)) | (1 << (Race.DarkIronDwarf - 1)) | (1 << (Race.MechaGnome - 1))),
+            | (1ul << (Race.KulTiran - 1)) | (1ul << (Race.DarkIronDwarf - 1)) | (1ul << (Race.MechaGnome - 1))),
 
         Horde = AllPlayable & ~Alliance
     }
