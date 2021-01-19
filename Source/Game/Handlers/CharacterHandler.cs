@@ -1019,8 +1019,7 @@ namespace Game
                 SendNotification(CypherStrings.GmOn);
 
             string IP_str = GetRemoteAddress();
-            Log.outDebug(LogFilter.Network, "Account: {0} (IP: {1}) Login Character:[{2}] ({3}) Level: {4}",
-                GetAccountId(), IP_str, pCurrChar.GetName(), pCurrChar.GetGUID().ToString(), pCurrChar.GetLevel());
+            Log.outDebug(LogFilter.Network, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Login Character: [{pCurrChar.GetName()}] ({pCurrChar.GetGUID()}) Level: {pCurrChar.GetLevel()}, XP: { _player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);

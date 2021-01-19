@@ -202,8 +202,7 @@ namespace Game
                 // e.g if he got disconnected during a transfer to another map
                 // calls to GetMap in this case may cause crashes
                 GetPlayer().CleanupsBeforeDelete();
-                Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Logout Character:[{2}] (GUID: {3}) Level: {4}",
-                    GetAccountId(), GetRemoteAddress(), _player.GetName(), _player.GetGUID().ToString(), _player.GetLevel());
+                Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
                 Map map = GetPlayer().GetMap();
                 if (map != null)

@@ -6363,6 +6363,9 @@ namespace Game.Entities
                 SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()));
         }
 
+        public uint GetXP() { return m_activePlayerData.XP; }
+        public uint GetXPForNextLevel() { return m_activePlayerData.NextLevelXP; }
+
         public void SetXP(uint xp)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.XP), xp);
