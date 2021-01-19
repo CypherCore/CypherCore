@@ -2120,9 +2120,6 @@ namespace Game.Entities
 
         public bool CanAssistTo(Unit u, Unit enemy, bool checkfaction = true)
         {
-            if (IsInEvadeMode())
-                return false;
-
             // is it true?
             if (!HasReactState(ReactStates.Aggressive))
                 return false;
