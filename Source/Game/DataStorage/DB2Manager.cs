@@ -728,6 +728,7 @@ namespace Game.DataStorage
                     }
                 }
 
+                
                 HotfixRecord hotfixRecord = new HotfixRecord();
                 hotfixRecord.TableHash = tableHash;
                 hotfixRecord.RecordID = recordId;

@@ -2031,7 +2031,7 @@ namespace Game.AI
                     {
                         List<uint> sounds = new List<uint>();
                         var randomSound = e.Action.randomSound;
-                        foreach (var id in new[] { randomSound.sound1, randomSound.sound2, randomSound.sound3, randomSound.sound4, randomSound.sound5 })
+                        foreach (var id in new[] { randomSound.sound1, randomSound.sound2, randomSound.sound3, randomSound.sound4 })
                             if (id != 0)
                                 sounds.Add(id);
 
