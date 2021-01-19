@@ -6147,79 +6147,78 @@ namespace Game
 
             if (level <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 return pInfo.levelInfo[level - 1];
-            //else
-            //return BuildPlayerLevelInfo(race, _class, level, info);
-            return null;
+            else
+                return BuildPlayerLevelInfo(race, _class, level);
         }
-        /*
-        void BuildPlayerLevelInfo(byte race, Class _class, byte level, PlayerLevelInfo info)
+
+        PlayerLevelInfo BuildPlayerLevelInfo(Race race, Class _class, uint level)
         {
             // base data (last known level)
-            info = _playerInfo[race][_class].levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
+            var info = _playerInfo[(byte)race][(int)_class].levelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1];
 
-            // if conversion from uint32 to uint8 causes unexpected behaviour, change lvl to uint32
             for (int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) - 1; lvl < level; ++lvl)
             {
                 switch (_class)
                 {
                     case Class.Warrior:
-                        info.stats[STAT_STRENGTH] += (lvl > 23 ? 2 : (lvl > 1 ? 1 : 0));
-                        info.stats[STAT_STAMINA] += (lvl > 23 ? 2 : (lvl > 1 ? 1 : 0));
-                        info.stats[STAT_AGILITY] += (lvl > 36 ? 1 : (lvl > 6 && (lvl % 2) ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
+                        info.stats[0] += (lvl > 23 ? 2 : (lvl > 1 ? 1 : 0));
+                        info.stats[1] += (lvl > 23 ? 2 : (lvl > 1 ? 1 : 0));
+                        info.stats[2] += (lvl > 36 ? 1 : (lvl > 6 && (lvl % 2) != 0 ? 1 : 0));
+                        info.stats[3] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
                         break;
-                    case CLASS_PALADIN:
-                        info.stats[STAT_STRENGTH] += (lvl > 3 ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
-                        info.stats[STAT_AGILITY] += (lvl > 38 ? 1 : (lvl > 7 && !(lvl % 2) ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 6 && (lvl % 2) ? 1 : 0);
+                    case Class.Paladin:
+                        info.stats[0] += (lvl > 3 ? 1 : 0);
+                        info.stats[1] += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
+                        info.stats[2] += (lvl > 38 ? 1 : (lvl > 7 && (lvl % 2) == 0 ? 1 : 0));
+                        info.stats[3] += (lvl > 6 && (lvl % 2) != 0 ? 1 : 0);
                         break;
-                    case CLASS_HUNTER:
-                        info.stats[STAT_STRENGTH] += (lvl > 4 ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 4 ? 1 : 0);
-                        info.stats[STAT_AGILITY] += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 8 && (lvl % 2) ? 1 : 0);
+                    case Class.Hunter:
+                        info.stats[0] += (lvl > 4 ? 1 : 0);
+                        info.stats[1] += (lvl > 4 ? 1 : 0);
+                        info.stats[2] += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
+                        info.stats[3] += (lvl > 8 && (lvl % 2) != 0 ? 1 : 0);
                         break;
-                    case CLASS_ROGUE:
-                        info.stats[STAT_STRENGTH] += (lvl > 5 ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 4 ? 1 : 0);
-                        info.stats[STAT_AGILITY] += (lvl > 16 ? 2 : (lvl > 1 ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 8 && !(lvl % 2) ? 1 : 0);
+                    case Class.Rogue:
+                        info.stats[0] += (lvl > 5 ? 1 : 0);
+                        info.stats[1] += (lvl > 4 ? 1 : 0);
+                        info.stats[2] += (lvl > 16 ? 2 : (lvl > 1 ? 1 : 0));
+                        info.stats[3] += (lvl > 8 && (lvl % 2) == 0 ? 1 : 0);
                         break;
-                    case CLASS_PRIEST:
-                        info.stats[STAT_STRENGTH] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 5 ? 1 : 0);
-                        info.stats[STAT_AGILITY] += (lvl > 38 ? 1 : (lvl > 8 && (lvl % 2) ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 22 ? 2 : (lvl > 1 ? 1 : 0));
+                    case Class.Priest:
+                        info.stats[0] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[1] += (lvl > 5 ? 1 : 0);
+                        info.stats[2] += (lvl > 38 ? 1 : (lvl > 8 && (lvl % 2) != 0 ? 1 : 0));
+                        info.stats[3] += (lvl > 22 ? 2 : (lvl > 1 ? 1 : 0));
                         break;
-                    case CLASS_SHAMAN:
-                        info.stats[STAT_STRENGTH] += (lvl > 34 ? 1 : (lvl > 6 && (lvl % 2) ? 1 : 0));
-                        info.stats[STAT_STAMINA] += (lvl > 4 ? 1 : 0);
-                        info.stats[STAT_AGILITY] += (lvl > 7 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_INTELLECT] += (lvl > 5 ? 1 : 0);
+                    case Class.Shaman:
+                        info.stats[0] += (lvl > 34 ? 1 : (lvl > 6 && (lvl % 2) != 0 ? 1 : 0));
+                        info.stats[1] += (lvl > 4 ? 1 : 0);
+                        info.stats[2] += (lvl > 7 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[3] += (lvl > 5 ? 1 : 0);
                         break;
-                    case CLASS_MAGE:
-                        info.stats[STAT_STRENGTH] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 5 ? 1 : 0);
-                        info.stats[STAT_AGILITY] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_INTELLECT] += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
+                    case Class.Mage:
+                        info.stats[0] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[1] += (lvl > 5 ? 1 : 0);
+                        info.stats[2] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[3] += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
                         break;
-                    case CLASS_WARLOCK:
-                        info.stats[STAT_STRENGTH] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_STAMINA] += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
-                        info.stats[STAT_AGILITY] += (lvl > 9 && !(lvl % 2) ? 1 : 0);
-                        info.stats[STAT_INTELLECT] += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+                    case Class.Warlock:
+                        info.stats[0] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[1] += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+                        info.stats[2] += (lvl > 9 && (lvl % 2) == 0 ? 1 : 0);
+                        info.stats[3] += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
                         break;
-                    case CLASS_DRUID:
-                        info.stats[STAT_STRENGTH] += (lvl > 38 ? 2 : (lvl > 6 && (lvl % 2) ? 1 : 0));
-                        info.stats[STAT_STAMINA] += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
-                        info.stats[STAT_AGILITY] += (lvl > 38 ? 2 : (lvl > 8 && (lvl % 2) ? 1 : 0));
-                        info.stats[STAT_INTELLECT] += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
+                    case Class.Druid:
+                        info.stats[0] += (lvl > 38 ? 2 : (lvl > 6 && (lvl % 2) != 0 ? 1 : 0));
+                        info.stats[1] += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
+                        info.stats[2] += (lvl > 38 ? 2 : (lvl > 8 && (lvl % 2) != 0 ? 1 : 0));
+                        info.stats[3] += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
                         break;
                 }
             }
+
+            return info;
         }
-        */
 
         //Pets
         public void LoadPetLevelInfo()
