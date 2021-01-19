@@ -150,6 +150,9 @@ namespace Game.Entities
 
         public void UpdateZone(uint newZone, uint newArea)
         {
+            if (!IsInWorld)
+                return;
+
             uint oldZone = m_zoneUpdateId;
             m_zoneUpdateId = newZone;
             m_zoneUpdateTimer = 1 * Time.InMilliseconds;
