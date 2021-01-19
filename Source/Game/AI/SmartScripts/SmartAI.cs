@@ -699,10 +699,7 @@ namespace Game.AI
             mScript.OnInitialize(me);
 
             if (!me.IsDead())
-            {
                 GetScript().OnReset();
-                GetScript().ProcessEventsFor(SmartEvents.Respawn);
-            }
         }
 
         public override void OnCharmed(bool apply)
@@ -1021,9 +1018,6 @@ namespace Game.AI
         public override void InitializeAI()
         {
             GetScript().OnInitialize(me);
-            // do not call respawn event if go is not spawned
-            if (me.IsSpawned())
-                GetScript().ProcessEventsFor(SmartEvents.Respawn);
         }
 
         public override void Reset()
