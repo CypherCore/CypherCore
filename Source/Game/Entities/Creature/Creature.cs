@@ -2215,7 +2215,7 @@ namespace Game.Entities
             }
 
             uint thisRespawnTime = (uint)(forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime);
-            GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId(), m_creatureData.dbData && saveToDb);
+            GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId(), saveToDb && m_creatureData != null && m_creatureData.dbData);
         }
 
         public bool CanCreatureAttack(Unit victim, bool force = true)
