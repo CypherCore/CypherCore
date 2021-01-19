@@ -346,10 +346,10 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(cId))
                 return null;
 
-            if (!uint.TryParse(cId, out uint id))
-                return null;
+            if (uint.TryParse(cId, out uint id))
+                return Global.ObjectMgr.GetGameTele(id);
 
-            return Global.ObjectMgr.GetGameTele(id);
+            return Global.ObjectMgr.GetGameTele(cId);
         }
 
         public string ExtractQuotedArg(string str)
