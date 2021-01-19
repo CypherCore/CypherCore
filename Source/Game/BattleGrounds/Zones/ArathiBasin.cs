@@ -762,11 +762,11 @@ namespace Game.BattleGrounds.Zones
 
         public static Position[] NodePositions =
         {
-            new Position(1166.785f, 1200.132f, -56.70859f, 0.9075713f),         // stables
-            new Position(977.0156f, 1046.616f, -44.80923f, -2.600541f),         // blacksmith
-            new Position(806.1821f, 874.2723f, -55.99371f, -2.303835f),         // farm
-            new Position(856.1419f, 1148.902f, 11.18469f, -2.303835f),          // lumber mill
-            new Position(1146.923f, 848.1782f, -110.917f, -0.7330382f)          // gold mine
+            new Position(1185.566f, 1184.629f, -56.36329f, 2.303831f),         // stables
+            new Position(990.1131f, 1008.73f, -42.60328f, 0.8203033f),         // blacksmith
+            new Position(818.0089f, 842.3543f, -56.54062f, 3.176533f),         // farm
+            new Position(808.8463f, 1185.417f,  11.92161f, 5.619962f),         // lumber mill
+            new Position(1147.091f, 816.8362f, -98.39896f, 6.056293f)          // gold mine
         };
 
         // x, y, z, o, rot0, rot1, rot2, rot3
