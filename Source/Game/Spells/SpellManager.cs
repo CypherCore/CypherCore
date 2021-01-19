@@ -2100,7 +2100,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (spellArea.raceMask != 0 && (spellArea.raceMask & (uint)Race.RaceMaskAllPlayable) == 0)
+                if (spellArea.raceMask != 0 && (spellArea.raceMask & (ulong)RaceMask.AllPlayable) == 0)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;

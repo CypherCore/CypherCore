@@ -3902,7 +3902,7 @@ namespace Game.Entities
 
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
-        public static bool IsValidRace(Race _race) { return Convert.ToBoolean((1 << ((int)_race - 1)) & (int)Race.RaceMaskAllPlayable); }
+        public static bool IsValidRace(Race _race) { return Convert.ToBoolean((1ul << ((int)_race - 1)) & (ulong)RaceMask.AllPlayable); }
 
         public void OnCombatExit()
         {

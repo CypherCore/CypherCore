@@ -5766,7 +5766,7 @@ namespace Game
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
-                        if (raceMask != 0 && !Convert.ToBoolean(raceMask & (int)Race.RaceMaskAllPlayable))
+                        if (raceMask != 0 && !Convert.ToBoolean(raceMask & (ulong)RaceMask.AllPlayable))
                         {
                             Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
                             continue;
@@ -5824,7 +5824,7 @@ namespace Game
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
-                        if (raceMask != 0 && !raceMask.HasAnyFlag((ulong)Race.RaceMaskAllPlayable))
+                        if (raceMask != 0 && !raceMask.HasAnyFlag((ulong)RaceMask.AllPlayable))
                         {
                             Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_cast_spell` table, ignoring.", raceMask);
                             continue;
@@ -6960,7 +6960,7 @@ namespace Game
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
                 if (qinfo.AllowableRaces != -1)
                 {
-                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)Race.RaceMaskAllPlayable))
+                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)RaceMask.AllPlayable))
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
                         qinfo.AllowableRaces = -1;
@@ -8860,7 +8860,7 @@ namespace Game
                     continue;
                 }
 
-                if (!Convert.ToBoolean(raceMask & (uint)Race.RaceMaskAllPlayable))
+                if (!Convert.ToBoolean(raceMask & (ulong)RaceMask.AllPlayable))
                 {
                     Log.outError(LogFilter.Sql, "Table `mail_level_reward` have raceMask ({0}) for level {1} that not include any player races, ignoring.", raceMask, level);
                     continue;

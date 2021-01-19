@@ -3146,7 +3146,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)Race.RaceMaskAllPlayable) == 0)
+                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)RaceMask.AllPlayable) == 0)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
@@ -3291,7 +3291,7 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)Race.RaceMaskAllPlayable) == 0)
+                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)RaceMask.AllPlayable) == 0)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);

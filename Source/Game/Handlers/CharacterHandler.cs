@@ -129,6 +129,7 @@ namespace Game
                 EnumCharactersResult.RaceUnlock raceUnlock = new EnumCharactersResult.RaceUnlock();
                 raceUnlock.RaceID = requirement.Key;
                 raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 /*|| HasAchievement(requirement.Value.AchievementId)*/;
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
 
@@ -2013,7 +2014,7 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? Race.RaceMaskAlliance : Race.RaceMaskHorde);
+                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde);
                             if (quest.AllowableRaces != -1 && !Convert.ToBoolean(quest.AllowableRaces & newRaceMask))
                             {
                                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);

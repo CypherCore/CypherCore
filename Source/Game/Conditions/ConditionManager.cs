@@ -1242,9 +1242,9 @@ namespace Game
                     }
                 case ConditionTypes.Race:
                     {
-                        if (Convert.ToBoolean(cond.ConditionValue1 & ~(uint)Race.RaceMaskAllPlayable))
+                        if (Convert.ToBoolean(cond.ConditionValue1 & ~(ulong)RaceMask.AllPlayable))
                         {
-                            Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(uint)Race.RaceMaskAllPlayable);
+                            Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(ulong)RaceMask.AllPlayable);
                             return false;
                         }
                         break;

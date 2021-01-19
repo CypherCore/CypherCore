@@ -558,24 +558,29 @@ namespace Framework.Constants
         HighmountainTauren = 28,
         VoidElf = 29,
         LightforgedDraenei = 30,
-        //RACE_ZANDALARI_TROLL    = 31,
-        //RACE_KUL_TIRAN          = 32,
+        ZandalariTroll = 31,
+        KulTiran = 32,
         //RACE_THIN_HUMAN         = 33,
         DarkIronDwarf = 34,
-        //RACE_VULPERA            = 35,
+        Vulpera = 35,
         MagharOrc = 36,
         MechaGnome = 37,
         Max,
+    }
 
-        RaceMaskAllPlayable = ((1 << (Human - 1)) | (1 << (Orc - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Undead - 1))
-            | (1 << (Tauren - 1)) | (1 << (Gnome - 1)) | (1 << (Troll - 1)) | (1 << (BloodElf - 1)) | (1 << (Draenei - 1))
-            | (1 << (Goblin - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenNeutral - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (PandarenHorde - 1))
-            | (1 << (Nightborne - 1)) | (1 << (HighmountainTauren - 1)) | (1 << (VoidElf - 1)) | (1 << (LightforgedDraenei - 1)) | (1 << (DarkIronDwarf - 1)) | (1 << (MagharOrc - 1)) | (1 << (MechaGnome - 1))),
+    public enum RaceMask : ulong
+    {
+        AllPlayable = ((1 << (Race.Human - 1)) | (1 << (Race.Orc - 1)) | (1 << (Race.Dwarf - 1)) | (1 << (Race.NightElf - 1)) | (1 << (Race.Undead - 1))
+            | (1 << (Race.Tauren - 1)) | (1 << (Race.Gnome - 1)) | (1 << (Race.Troll - 1)) | (1 << (Race.BloodElf - 1)) | (1 << (Race.Draenei - 1))
+            | (1 << (Race.Goblin - 1)) | (1 << (Race.Worgen - 1)) | (1 << (Race.PandarenNeutral - 1)) | (1 << (Race.PandarenAlliance - 1)) | (1 << (Race.PandarenHorde - 1))
+            | (1 << (Race.Nightborne - 1)) | (1 << (Race.HighmountainTauren - 1)) | (1 << (Race.VoidElf - 1)) | (1 << (Race.LightforgedDraenei - 1)) | (1 << (Race.ZandalariTroll - 1))
+            | (1ul << (Race.KulTiran - 1)) | (1 << (Race.DarkIronDwarf - 1)) | (1 << (Race.Vulpera - 1)) | (1 << (Race.MagharOrc - 1)) | (1 << (Race.MechaGnome - 1))),
 
-        RaceMaskAlliance = ((1 << (Human - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Gnome - 1))
-            | (1 << (Draenei - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (VoidElf - 1)) | (1 << (LightforgedDraenei - 1)) | (1 << (DarkIronDwarf - 1)) | (1 << (MechaGnome - 1))),
+        Alliance = ((1 << (Race.Human - 1)) | (1 << (Race.Dwarf - 1)) | (1 << (Race.NightElf - 1)) | (1 << (Race.Gnome - 1))
+            | (1 << (Race.Draenei - 1)) | (1 << (Race.Worgen - 1)) | (1 << (Race.PandarenAlliance - 1)) | (1 << (Race.VoidElf - 1)) | (1 << (Race.LightforgedDraenei - 1))
+            | (1ul << (Race.KulTiran - 1)) | (1 << (Race.DarkIronDwarf - 1)) | (1 << (Race.MechaGnome - 1))),
 
-        RaceMaskHorde = RaceMaskAllPlayable & ~RaceMaskAlliance
+        Horde = AllPlayable & ~Alliance
     }
     public enum Expansion
     {
