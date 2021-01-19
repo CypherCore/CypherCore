@@ -1537,7 +1537,7 @@ namespace Framework.Constants
         CantTargetInCombat = 0x100, //  8 Can Target Only Out Of Combat Units
         MeleeCombatStart = 0x200, //  9 Player Starts Melee Combat After This Spell Is Cast
         NoThreat = 0x400, // 10 No Generates Threat On Cast 100% (Old NoInitialAggro)
-        Unk11 = 0x800, // 11 Aura
+        DontRefreshDurationOnRecast = 0x800, // 11 aura will not refresh its duration when recast
         IsPickpocket = 0x1000, // 12 Pickpocket
         Farsight = 0x2000, // 13 Client Removes Farsight On Aura Loss
         ChannelTrackTarget = 0x4000, // 14 Client Automatically Forces Player To Face Target When Channeling
@@ -1652,7 +1652,7 @@ namespace Framework.Constants
         AreaTargetChain = 0x40000, // 18 (Nyi)Hits Area Targets One After Another Instead Of All At Once
         Unk19 = 0x80000, // 19 Proc Dalayed, After Damage Or Don'T Proc On Absorb?
         NotCheckSelfcastPower = 0x100000, // 20 Supersedes Message "More Powerful Spell Applied" For Self Casts.
-        Unk21 = 0x200000, // 21 Pally Aura, Dk Presence, Dudu Form, Warrior Stance, Shadowform, Hunter Track
+        DontRemoveInArena = 0x200000, // 21 Pally Aura, Dk Presence, Dudu Form, Warrior Stance, Shadowform, Hunter Track
         Unk22 = 0x400000, // 22 Seal Of Command (42058,57770) And Gymer'S Smash 55426
         Unk23 = 0x800000, // 23
         Unk24 = 0x1000000, // 24 Some Shoot Spell
@@ -1674,13 +1674,13 @@ namespace Framework.Constants
         SingleTargetSpell = 0x20, //  5 Only One Target Can Be Apply At A Time
         Unk6 = 0x40, //  6
         Unk7 = 0x80, //  7
-        Unk8 = 0x100, //  8
+        CantTargetPlayerControlled = 0x100, //  8 cannot target player controlled units but can target players
         StartPeriodicAtApply = 0x200, //  9 Begin Periodic Tick At Aura Apply
         HideDuration = 0x400, // 10 Do Not Send Duration To Client
         AllowTargetOfTargetAsTarget = 0x800, // 11 (Nyi) Uses Target'S Target As Target If Original Target Not Valid (Intervene For Example)
         Unk12 = 0x1000, // 12 Cleave Related?
         HasteAffectDuration = 0x2000, // 13 Haste Effects Decrease Duration Of This
-        Unk14 = 0x4000, // 14
+        NotUsableWhileCharmed = 0x4000, // 14 Charmed units cannot cast this spell
         Unk15 = 0x8000, // 15 Inflits On Multiple Targets?
         Unk16 = 0x10000, // 16
         UsableWhileFeared = 0x20000, // 17 Usable While Feared
@@ -1854,11 +1854,11 @@ namespace Framework.Constants
         Unk10 = 0x400, // 10
         HerbGatheringMining = 0x800, // 11
         UseSpellBaseLevelForScaling = 0x1000, // 12
-        Unk13 = 0x2000, // 13
+        ResetColldownOnEncounterEnd = 0x2000, // 13
         Unk14 = 0x4000, // 14
         Unk15 = 0x8000, // 15
         Unk16 = 0x10000, // 16
-        Unk17 = 0x20000, // 17
+        CanDodgeParryWhileCasting = 0x20000, // 17
         Unk18 = 0x40000, // 18
         Unk19 = 0x80000, // 19
         Unk20 = 0x100000, // 20
@@ -1887,7 +1887,7 @@ namespace Framework.Constants
         Unk8 = 0x100, //  8
         Unk9 = 0x200, //  9
         Unk10 = 0x400, // 10
-        Unk11 = 0x800, // 11
+        NotUsableInInstances = 0x800, // 11
         Unk12 = 0x1000, // 12
         Unk13 = 0x2000, // 13
         Unk14 = 0x4000, // 14
@@ -1934,7 +1934,7 @@ namespace Framework.Constants
         Unk20 = 0x100000, // 20
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22
-        Unk23 = 0x800000, // 23
+        StartCooldownOnCastStart = 0x800000, // 23
         IsGarrisonBuff = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
         Unk26 = 0x4000000, // 26

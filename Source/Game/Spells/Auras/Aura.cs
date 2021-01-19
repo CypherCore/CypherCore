@@ -881,7 +881,7 @@ namespace Game.Spells
                 return true;
             }
 
-            bool refresh = stackAmount >= GetStackAmount();
+            bool refresh = stackAmount >= GetStackAmount() && (m_spellInfo.StackAmount != 0 || !m_spellInfo.HasAttribute(SpellAttr1.DontRefreshDurationOnRecast));
 
             // Update stack amount
             SetStackAmount((byte)stackAmount);

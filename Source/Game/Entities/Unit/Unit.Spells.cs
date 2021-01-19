@@ -3744,7 +3744,7 @@ namespace Game.Entities
             RemoveAppliedAuras(aurApp =>
             {
                 Aura aura = aurApp.GetBase();
-                return !aura.GetSpellInfo().HasAttribute(SpellAttr4.Unk21) // don't remove stances, shadowform, pally/hunter auras
+                return !aura.GetSpellInfo().HasAttribute(SpellAttr4.DontRemoveInArena) // don't remove stances, shadowform, pally/hunter auras
                     && !aura.IsPassive()                               // don't remove passive auras
                     && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.DeathPersistent)); // not negative death persistent auras
             });

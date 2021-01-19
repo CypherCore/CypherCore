@@ -2539,6 +2539,9 @@ namespace Game.Spells
 
             Log.outDebug(LogFilter.Spells, "Spell.prepare: spell id {0} source {1} caster {2} customCastFlags {3} mask {4}", m_spellInfo.Id, m_caster.GetEntry(), m_originalCaster != null ? (int)m_originalCaster.GetEntry() : -1, _triggeredCastFlags, m_targets.GetTargetMask());
 
+            if (m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
+                SendSpellCooldown();
+
             //Containers for channeled spells have to be set
             // @todoApply this to all casted spells if needed
             // Why check duration? 29350: channelled triggers channelled
@@ -2823,7 +2826,8 @@ namespace Game.Spells
             }
 
             // CAST SPELL
-            SendSpellCooldown();
+            if (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
+                SendSpellCooldown();
 
             PrepareScriptHitHandlers();
 
