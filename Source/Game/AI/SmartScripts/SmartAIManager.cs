@@ -941,8 +941,6 @@ namespace Game.AI
                         return false;
                     if (e.Action.randomSound.sound4 != 0 && !IsSoundValid(e, e.Action.randomSound.sound4))
                         return false;
-                    if (e.Action.randomSound.sound5 != 0 && !IsSoundValid(e, e.Action.randomSound.sound5))
-                        return false;
                     break;
                 case SmartActions.Cast:
                     {
@@ -2416,7 +2414,7 @@ namespace Game.AI
         {
             public uint soundId;
             public uint onlySelf;
-            public uint distance; // NYI: awaiting cherry-pick
+            public uint distance;
             public uint keyBroadcastTextId;
         }
         public struct Emote
@@ -2700,7 +2698,6 @@ namespace Game.AI
         {
             public uint entry;
         }
-
         public struct Equip
         {
             public uint entry;
@@ -2843,8 +2840,8 @@ namespace Game.AI
             public uint sound2;
             public uint sound3;
             public uint sound4;
-            public uint sound5;
             public uint onlySelf;
+            public uint distance;
         }
         public struct CorpseDelay
         {

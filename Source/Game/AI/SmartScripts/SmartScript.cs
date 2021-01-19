@@ -178,7 +178,11 @@ namespace Game.AI
                         {
                             if (IsUnit(target))
                             {
-                                target.PlayDirectSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null, e.Action.sound.keyBroadcastTextId);
+                                if (e.Action.sound.distance == 1)
+                                    target.PlayDistanceSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null);
+                                else
+                                    target.PlayDirectSound(e.Action.sound.soundId, e.Action.sound.onlySelf != 0 ? target.ToPlayer() : null, e.Action.sound.keyBroadcastTextId);
+
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SOUND: target: {0} (GuidLow: {1}), sound: {2}, onlyself: {3}",
                                     target.GetName(), target.GetGUID().ToString(), e.Action.sound.soundId, e.Action.sound.onlySelf);
                             }
@@ -2038,7 +2042,11 @@ namespace Game.AI
                             if (IsUnit(target))
                             {
                                 uint sound = sounds.SelectRandom();
-                                target.PlayDirectSound(sound, onlySelf ? target.ToPlayer() : null);
+                                if (e.Action.randomSound.distance == 1)
+                                    target.PlayDistanceSound(sound, onlySelf ? target.ToPlayer() : null);
+                                else
+                                    target.PlayDirectSound(sound, onlySelf ? target.ToPlayer() : null);
+
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_RANDOM_SOUND: target: {0} ({1}), sound: {2}, onlyself: {3}",
                                     target.GetName(), target.GetGUID().ToString(), sound, onlySelf);
                             }
