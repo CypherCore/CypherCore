@@ -39,11 +39,11 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        uint _tableHash;
+        WDCHeader _header;
 
         public void LoadData(WDCHeader header, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
-            _tableHash = header.TableHash;
+            _header = header;
 
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
@@ -246,7 +246,7 @@ namespace Game.DataStorage
 
             foreach (var fieldInfo in entry.GetType().GetFields())
             {
-                if (fieldInfo.Name == "Id")
+                if (fieldInfo.Name == "Id" && _header.HasIndexTable())
                     continue;
 
                 var type = fieldInfo.FieldType;
@@ -288,6 +288,9 @@ namespace Game.DataStorage
                     case TypeCode.Single:
                         buffer.WriteFloat((float)fieldInfo.GetValue(entry));
                         break;
+                    case TypeCode.String:
+                        buffer.WriteCString((string)fieldInfo.GetValue(entry));
+                        break;
                     case TypeCode.Object:
                         switch (type.Name)
                         {
@@ -306,6 +309,23 @@ namespace Game.DataStorage
                                 string str = locStr[locale];
                                 buffer.WriteCString(str);
                                 break;
+                            case "Vector2":
+                                Vector2 vector2 = (Vector2)fieldInfo.GetValue(entry);
+                                buffer.WriteVector2(vector2);
+                                break;
+                            case "Vector3":
+                                Vector3 vector3 = (Vector3)fieldInfo.GetValue(entry);
+                                buffer.WriteVector3(vector3);
+                                break;
+                            case "FlagArray128":
+                                FlagArray128 flagArray128 = (FlagArray128)fieldInfo.GetValue(entry);
+                                buffer.WriteUInt32(flagArray128[0]);
+                                buffer.WriteUInt32(flagArray128[1]);
+                                buffer.WriteUInt32(flagArray128[2]);
+                                buffer.WriteUInt32(flagArray128[3]);
+                                break;
+                            default:
+                                throw new Exception($"Unhandled Custom type: {type.Name}");
                         }
                         break;
                 }
@@ -363,6 +383,6 @@ namespace Game.DataStorage
             Remove(id);
         }
 
-        public uint GetTableHash() { return _tableHash; }
+        public uint GetTableHash() { return _header.TableHash; }
     }
 }
