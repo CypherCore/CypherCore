@@ -79,7 +79,7 @@ namespace Framework.Networking
         {
             try
             {
-                await _stream.AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls, false);
+                await _stream.AuthenticateAsServerAsync(certificate, false, SslProtocols.Tls12, false);
             }
             catch(Exception ex)
             {

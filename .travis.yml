@@ -2,7 +2,7 @@ language: csharp
 dist: xenial
 sudo: required
 mono: none
-dotnet: 3.1
+dotnet: 5.0
 script:
   - dotnet restore
   - dotnet build
