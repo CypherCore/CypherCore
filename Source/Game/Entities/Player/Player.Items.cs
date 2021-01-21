@@ -4482,11 +4482,10 @@ namespace Game.Entities
 
         public ObjectGuid GetLootWorldObjectGUID(ObjectGuid lootObjectGuid)
         {
-            var guid = m_AELootView.LookupByKey(lootObjectGuid);
-            if (guid != null)
-                return guid;
+            if (!m_AELootView.ContainsKey(lootObjectGuid))
+                return ObjectGuid.Empty;
 
-            return ObjectGuid.Empty;
+            return m_AELootView[lootObjectGuid];
         }
 
         public void RemoveAELootedObject(ObjectGuid lootObjectGuid)

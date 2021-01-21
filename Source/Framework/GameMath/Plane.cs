@@ -174,7 +174,7 @@ namespace Framework.GameMath
         /// </summary>
         /// <param name="info">The <see cref="SerializationInfo"/> to populate with data. </param>
         /// <param name="context">The destination (see <see cref="StreamingContext"/>) for this serialization.</param>
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        //[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Normal", _normal, typeof(Vector3));
