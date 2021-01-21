@@ -45,7 +45,7 @@ public static class Global
     public static ObjectManager ObjectMgr { get { return ObjectManager.Instance; } }
     public static WorldManager WorldMgr { get { return WorldManager.Instance; } }
     public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
-    public static ServiceDispatcher ServiceMgr { get { return ServiceDispatcher.Instance; } }
+    public static WorldServiceManager ServiceMgr { get { return WorldServiceManager.Instance; } }
 
     //Guild
     public static PetitionManager PetitionMgr { get { return PetitionManager.Instance; } }

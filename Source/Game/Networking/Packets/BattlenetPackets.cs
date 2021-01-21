@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
         public Array<byte> Secret = new Array<byte>(32);
     }
 
-    struct MethodCall
+    public struct MethodCall
     {
         public uint GetServiceHash() { return (uint)(Type >> 32); }
         public uint GetMethodId() { return (uint)(Type & 0xFFFFFFFF); }

@@ -28,7 +28,14 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlenetRequest, Status = SessionStatus.Authed)]
         void HandleBattlenetRequest(BattlenetRequest request)
         {
-            Global.ServiceMgr.Dispatch(this, request.Method.GetServiceHash(), request.Method.Token, request.Method.GetMethodId(), new CodedInputStream(request.Data));
+            var handler = Global.ServiceMgr.GetHandler(request.Method.GetServiceHash(), request.Method.GetMethodId());
+            if (handler != null)
+                handler.Invoke(this, request.Method, new CodedInputStream(request.Data));
+            else
+            {
+                SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), request.Method.Token, BattlenetRpcErrorCode.RpcNotImplemented);
+                Log.outDebug(LogFilter.SessionRpc, "{0} tried to call invalid service {1}", GetPlayerInfo(), request.Method.GetServiceHash());
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.ChangeRealmTicket, Status = SessionStatus.Authed)]

@@ -181,7 +181,7 @@ namespace BNetServer
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class ServiceAttribute : System.Attribute
+    public sealed class ServiceAttribute : Attribute
     {
         public uint ServiceHash { get; set; }
         public uint MethodId { get; set; }
