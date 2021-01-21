@@ -83,7 +83,7 @@ namespace Game.Networking.Packets
         public List<ushort> Talents = new List<ushort>();
         public List<ushort> PvpTalents = new List<ushort>();
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
-        public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6);
+        public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
