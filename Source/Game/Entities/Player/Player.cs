@@ -3902,7 +3902,7 @@ namespace Game.Entities
 
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
-        public static bool IsValidRace(Race _race) { return Convert.ToBoolean((1ul << ((int)_race - 1)) & (ulong)RaceMask.AllPlayable); }
+        public static bool IsValidRace(Race _race) { return Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(_race) & SharedConst.RaceMaskAllPlayable); }
 
         public void OnCombatExit()
         {
@@ -5225,7 +5225,7 @@ namespace Game.Entities
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)GetRaceMask());
+            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)SharedConst.GetMaskForRace(GetRace()));
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -7034,7 +7034,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            long racemask = GetRaceMask();
+            long racemask = SharedConst.GetMaskForRace(GetRace());
             uint classmask = GetClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);

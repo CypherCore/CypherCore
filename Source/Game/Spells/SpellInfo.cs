@@ -2969,7 +2969,7 @@ namespace Game.Spells
                         }
                     case SpellProcsPerMinuteModType.Race:
                         {
-                            if (caster.GetRaceMask().HasAnyFlag(mod.Param))
+                            if (SharedConst.GetMaskForRace(caster.GetRace()).HasAnyFlag((int)mod.Param))
                                 ppm *= 1.0f + mod.Coeff;
                             break;
                         }

@@ -95,7 +95,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(unit.GetRaceMask() & ConditionValue1);
+                        condMeets = Convert.ToBoolean(SharedConst.GetMaskForRace(unit.GetRace()) & ConditionValue1);
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)

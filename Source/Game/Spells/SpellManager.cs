@@ -2100,7 +2100,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (spellArea.raceMask != 0 && (spellArea.raceMask & (ulong)RaceMask.AllPlayable) == 0)
+                if (spellArea.raceMask != 0 && (spellArea.raceMask & SharedConst.RaceMaskAllPlayable) == 0)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_area` have wrong race mask ({1}) requirement", spell, spellArea.raceMask);
                     continue;
@@ -3781,7 +3781,7 @@ namespace Game.Entities
                     return false;
 
             if (raceMask != 0)                                // not in expected race
-                if (player == null || !Convert.ToBoolean(raceMask & (ulong)player.GetRaceMask()))
+                if (player == null || !Convert.ToBoolean(raceMask & (ulong)SharedConst.GetMaskForRace(player.GetRace())))
                     return false;
 
             if (areaId != 0)                                  // not in expected zone

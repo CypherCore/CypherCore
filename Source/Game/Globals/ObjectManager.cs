@@ -5727,15 +5727,15 @@ namespace Game
                 {
                     if (rcInfo.Availability == 1)
                     {
-                        for (int raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
+                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean((1L << (raceIndex - 1)) & rcInfo.RaceMask))
+                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean(SharedConst.GetMaskForRace(raceIndex) & rcInfo.RaceMask))
                             {
                                 for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
                                 {
                                     if (rcInfo.ClassMask == -1 || Convert.ToBoolean((1 << (classIndex - 1)) & rcInfo.ClassMask))
                                     {
-                                        PlayerInfo info = _playerInfo[raceIndex][classIndex];
+                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
                                         if (info != null)
                                             info.skills.Add(rcInfo);
                                     }
@@ -5766,7 +5766,7 @@ namespace Game
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
-                        if (raceMask != 0 && !Convert.ToBoolean(raceMask & (ulong)RaceMask.AllPlayable))
+                        if (raceMask != 0 && !Convert.ToBoolean(raceMask & SharedConst.RaceMaskAllPlayable))
                         {
                             Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
                             continue;
@@ -5778,15 +5778,15 @@ namespace Game
                             continue;
                         }
 
-                        for (int raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
+                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == 0 || Convert.ToBoolean((1ul << (raceIndex - 1)) & raceMask))
+                            if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
                             {
                                 for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
                                 {
                                     if (classMask == 0 || Convert.ToBoolean((1 << (classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo info = _playerInfo[raceIndex][classIndex];
+                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
                                         if (info != null)
                                         {
                                             info.customSpells.Add(spellId);
@@ -5824,7 +5824,7 @@ namespace Game
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
-                        if (raceMask != 0 && !raceMask.HasAnyFlag((ulong)RaceMask.AllPlayable))
+                        if (raceMask != 0 && (raceMask & SharedConst.RaceMaskAllPlayable) == 0)
                         {
                             Log.outError(LogFilter.Sql, "Wrong race mask {0} in `playercreateinfo_cast_spell` table, ignoring.", raceMask);
                             continue;
@@ -5836,15 +5836,15 @@ namespace Game
                             continue;
                         }
 
-                        for (int raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
+                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                         {
-                            if (raceMask == 0 || Convert.ToBoolean((1ul << (raceIndex - 1)) & raceMask))
+                            if (raceMask == 0 || Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(raceIndex) & raceMask))
                             {
                                 for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
                                 {
                                     if (classMask == 0 || Convert.ToBoolean((1 << (classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo info = _playerInfo[raceIndex][classIndex];
+                                        PlayerInfo info = _playerInfo[(int)raceIndex][classIndex];
                                         if (info != null)
                                         {
                                             info.castSpells.Add(spellId);
@@ -6960,7 +6960,7 @@ namespace Game
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
                 if (qinfo.AllowableRaces != -1)
                 {
-                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)RaceMask.AllPlayable))
+                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)SharedConst.RaceMaskAllPlayable))
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
                         qinfo.AllowableRaces = -1;
@@ -8860,7 +8860,7 @@ namespace Game
                     continue;
                 }
 
-                if (!Convert.ToBoolean(raceMask & (ulong)RaceMask.AllPlayable))
+                if (!Convert.ToBoolean(raceMask & SharedConst.RaceMaskAllPlayable))
                 {
                     Log.outError(LogFilter.Sql, "Table `mail_level_reward` have raceMask ({0}) for level {1} that not include any player races, ignoring.", raceMask, level);
                     continue;

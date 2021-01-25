@@ -1450,7 +1450,7 @@ namespace Game.Entities
             if (reqraces == -1)
                 return true;
 
-            if ((reqraces & (long)GetRaceMask()) == 0)
+            if ((reqraces & (long)SharedConst.GetMaskForRace(GetRace())) == 0)
             {
                 if (msg)
                 {

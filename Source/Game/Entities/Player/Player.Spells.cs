@@ -1567,7 +1567,7 @@ namespace Game.Entities
 
         void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
-            long raceMask = GetRaceMask();
+            long raceMask = SharedConst.GetMaskForRace(GetRace());
             uint classMask = GetClassMask();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
