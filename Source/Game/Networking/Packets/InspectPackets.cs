@@ -81,7 +81,7 @@ namespace Game.Networking.Packets
         public PlayerModelDisplayInfo DisplayInfo;
         public List<ushort> Glyphs = new List<ushort>();
         public List<ushort> Talents = new List<ushort>();
-        public List<ushort> PvpTalents = new List<ushort>();
+        public Array<ushort> PvpTalents = new Array<ushort>(PlayerConst.MaxPvpTalentSlots, 0);
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
         public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6, default);
         public uint? AzeriteLevel;
