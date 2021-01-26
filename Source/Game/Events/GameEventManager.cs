@@ -212,8 +212,8 @@ namespace Game
         {
             {
                 uint oldMSTime = Time.GetMSTime();
-                //                                                0           1                           2                         3          4       5        6            7            8
-                SQLResult result = DB.World.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, description, world_event, announce FROM game_event");
+                //                                         0           1                           2                         3          4       5        6            7            8             9
+                SQLResult result = DB.World.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, holidayStage, description, world_event, announce FROM game_event");
                 if (result.IsEmpty())
                 {
                     mGameEvent.Clear();
@@ -231,7 +231,7 @@ namespace Game
                         continue;
                     }
 
-                    GameEventData pGameEvent = mGameEvent[event_id];
+                    GameEventData pGameEvent = new GameEventData();
                     ulong starttime = result.Read<ulong>(1);
                     pGameEvent.start = (long)starttime;
                     ulong endtime = result.Read<ulong>(2);
@@ -240,13 +240,17 @@ namespace Game
                     pGameEvent.length = result.Read<uint>(4);
                     pGameEvent.holiday_id = (HolidayIds)result.Read<uint>(5);
 
-                    pGameEvent.state = (GameEventState)result.Read<byte>(7);
+                    pGameEvent.holidayStage = result.Read<byte>(6);
+                    pGameEvent.description = result.Read<string>(7);
+                    pGameEvent.state = (GameEventState)result.Read<byte>(8);
+                    pGameEvent.announce = result.Read<byte>(9);
                     pGameEvent.nextstart = 0;
-                    pGameEvent.announce = result.Read<byte>(8);
+
+                    ++count;
 
                     if (pGameEvent.length == 0 && pGameEvent.state == GameEventState.Normal)                            // length>0 is validity check
                     {
-                        Log.outError(LogFilter.Sql, "`game_event` game event id ({0}) isn't a world event and has length = 0, thus it can't be used.", event_id);
+                        Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) isn't a world event and has length = 0, thus it can't be used.");
                         continue;
                     }
 
@@ -254,16 +258,19 @@ namespace Game
                     {
                         if (!CliDB.HolidaysStorage.ContainsKey((uint)pGameEvent.holiday_id))
                         {
-                            Log.outError(LogFilter.Sql, "`game_event` game event id ({0}) have not existed holiday id {1}.", event_id, pGameEvent.holiday_id);
+                            Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) contains nonexisting holiday id {pGameEvent.holiday_id}.");
                             pGameEvent.holiday_id = HolidayIds.None;
+                        }
+                        if (pGameEvent.holidayStage > SharedConst.MaxHolidayDurations)
+                        {
+                            Log.outError(LogFilter.Sql, "`game_event` game event id ({event_id}) has out of range holidayStage {pGameEvent.holidayStage}.");
+                            pGameEvent.holidayStage = 0;
+                            continue;
                         }
                     }
 
-                    pGameEvent.description = result.Read<string>(6);
-
-                    //mGameEvent[event_id] = pGameEvent;
-
-                    ++count;
+                    mGameEvent[event_id] = pGameEvent;
+                    SetHolidayEventTime(pGameEvent);
                 }
                 while (result.NextRow());
 
@@ -307,7 +314,6 @@ namespace Game
                     while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game event saves in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
                 }
             }
 
@@ -1564,6 +1570,83 @@ namespace Game
             });
         }
 
+        void SetHolidayEventTime(GameEventData gameEvent)
+        {
+            if (gameEvent.holidayStage == 0) // Ignore holiday
+                return;
+
+            var holiday = CliDB.HolidaysStorage.LookupByKey(gameEvent.holiday_id);
+
+            if (holiday.Date[0] == 0 || holiday.Duration[0] == 0) // Invalid definitions
+            {
+                Log.outError(LogFilter.Sql, "Missing date or duration for holiday {gameEvent.holiday_id}.");
+                return;
+            }
+
+            byte stageIndex = (byte)(gameEvent.holidayStage - 1);
+            gameEvent.length = (uint)(holiday.Duration[stageIndex] * Time.Hour / Time.Minute);
+
+            long stageOffset = 0;
+            for (int i = 0; i < stageIndex; ++i)
+                stageOffset += holiday.Duration[i] * Time.Hour;
+
+            switch (holiday.CalendarFilterType)
+            {
+                case -1: // Yearly
+                    gameEvent.occurence = Time.Year / Time.Minute; // Not all too useful
+                    break;
+                case 0: // Weekly
+                    gameEvent.occurence = Time.Week / Time.Minute;
+                    break;
+                case 1: // Defined dates only (Darkmoon Faire)
+                    break;
+                case 2: // Only used for looping events (Call to Arms)
+                    break;
+            }
+
+            if (holiday.Looping != 0)
+            {
+                gameEvent.occurence = 0;
+                for (int i = 0; i < SharedConst.MaxHolidayDurations && holiday.Duration[i] != 0; ++i)
+                    gameEvent.occurence += (uint)(holiday.Duration[i] * Time.Hour / Time.Minute);
+            }
+
+            bool singleDate = ((holiday.Date[0] >> 24) & 0x1F) == 31; // Events with fixed date within year have - 1
+
+            long curTime = Time.UnixTime;
+            for (int i = 0; i < SharedConst.MaxHolidayDates && holiday.Date[i] != 0; ++i)
+            {
+                uint date = holiday.Date[i];
+
+                DateTime timeInfo = new DateTime();
+                if (singleDate)
+                    timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year - 1); // First try last year (event active through New Year)
+                else
+                    timeInfo.AddYears((int)((date >> 24) & 0x1F) + 100);
+
+                timeInfo.AddMonths((int)(date >> 20) & 0xF);
+                timeInfo.AddDays(((date >> 14) & 0x3F) + 1);
+                timeInfo.AddHours((date >> 6) & 0x1F);
+                timeInfo.AddMinutes(date & 0x3F);
+                timeInfo.AddSeconds(0);
+                DateTime tmCopy = timeInfo;
+
+                long startTime = Time.DateTimeToUnixTime(timeInfo);
+                if (curTime < startTime + gameEvent.length * Time.Minute)
+                {
+                    gameEvent.start = startTime + stageOffset;
+                    return;
+                }
+                else if (singleDate)
+                {
+                    tmCopy.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
+                    gameEvent.start = Time.DateTimeToUnixTime(tmCopy) + stageOffset;
+                    return;
+                }
+            }
+            Log.outError(LogFilter.Sql, "No suitable start date found for holiday {gameEvent.holiday_id}.");
+        }
+
         public bool IsHolidayActive(HolidayIds id)
         {
             if (id == HolidayIds.None)
@@ -1636,6 +1719,7 @@ namespace Game
         public uint occurence;       // time between end and start
         public uint length;          // length of the event (Time.Minutes) after finishing all conditions
         public HolidayIds holiday_id;
+        public byte holidayStage;
         public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
         public Dictionary<uint, GameEventFinishCondition> conditions = new Dictionary<uint, GameEventFinishCondition>();  // conditions to finish
         public List<ushort> prerequisite_events = new List<ushort>();  // events that must be completed before starting this event
