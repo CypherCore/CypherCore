@@ -34,7 +34,6 @@ namespace Framework.IO
 
         public void Reset()
         {
-            Resize(0);
             _wpos = 0;
         }
     }

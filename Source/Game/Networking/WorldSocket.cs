@@ -175,6 +175,7 @@ namespace Game.Networking
                         return;
                     }
 
+                    _packetBuffer.Resize(0);
                     _packetBuffer.Reset();
                     HandleSendAuthSession();
                     AsyncRead();
