@@ -480,8 +480,19 @@ namespace Game.Spells
 
         public bool IsAllowingDeadTarget()
         {
-            return HasAttribute(SpellAttr2.CanTargetDead)
-                || Convert.ToBoolean(targets & (SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead));
+            if (HasAttribute(SpellAttr2.CanTargetDead) || targets.HasAnyFlag(SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead))
+                return true;
+
+            foreach (SpellEffectInfo effect in _effects)
+            {
+                if (effect == null)
+                    continue;
+
+                if (effect.TargetA.GetObjectType() == SpellTargetObjectTypes.Corpse || effect.TargetB.GetObjectType() == SpellTargetObjectTypes.Corpse)
+                    return true;
+            }
+
+            return false;
         }
 
         public bool IsGroupBuff()
@@ -3164,7 +3175,11 @@ namespace Game.Spells
                     {
                         case 29214: // Wrath of the Plaguebringer
                         case 34700: // Allergic Reaction
+                        case 41914: // Parasitic Shadowfiend (Illidan)
+                        case 41917: // Parasitic Shadowfiend (Illidan)
                         case 54836: // Wrath of the Plaguebringer
+                        case 61987: // Avenging Wrath Marker
+                        case 61988: // Divine Shield exclude aura
                             return false;
                         case 30877: // Tag Murloc
                         case 61716: // Rabbit Costume
