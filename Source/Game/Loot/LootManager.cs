@@ -100,7 +100,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature loot templates. DB table `creature_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Disenchant()
@@ -130,7 +130,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} disenchanting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 disenchanting loot templates. DB table `disenchant_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Fishing()
@@ -153,7 +153,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} fishing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 fishing loot templates. DB table `fishing_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Gameobject()
@@ -188,7 +188,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
+                Log.outoutInfoError(LogFilter.ServerLoading, "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Item()
@@ -212,7 +212,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 item loot templates. DB table `item_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 item loot templates. DB table `item_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Milling()
@@ -241,7 +241,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} milling loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 milling loot templates. DB table `milling_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Pickpocketing()
@@ -277,7 +277,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} pickpocketing loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 pickpocketing loot templates. DB table `pickpocketing_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Prospecting()
@@ -306,7 +306,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} prospecting loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 prospecting loot templates. DB table `prospecting_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Mail()
@@ -329,7 +329,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mail loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 mail loot templates. DB table `mail_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Skinning()
@@ -365,7 +365,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skinning loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 skinning loot templates. DB table `skinning_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Spell()
@@ -408,7 +408,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell loot templates. DB table `spell_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Reference()

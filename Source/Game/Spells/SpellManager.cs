@@ -892,7 +892,7 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT entry, SpellID, Active FROM spell_learn_spell");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spell learn spells. DB table `spell_learn_spell` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell learn spells. DB table `spell_learn_spell` is empty.");
                 return;
             }
             uint count = 0;

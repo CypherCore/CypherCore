@@ -117,7 +117,7 @@ namespace Game.DungeonFinding
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 lfg dungeon rewards. DB table `lfg_dungeon_rewards` is empty!");
                 return;
             }
 
@@ -191,7 +191,7 @@ namespace Game.DungeonFinding
             SQLResult result = DB.World.Query("SELECT dungeonId, position_x, position_y, position_z, orientation, requiredItemLevel FROM lfg_dungeon_template");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 lfg dungeon templates. DB table `lfg_dungeon_template` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 lfg dungeon templates. DB table `lfg_dungeon_template` is empty!");
                 return;
             }
 

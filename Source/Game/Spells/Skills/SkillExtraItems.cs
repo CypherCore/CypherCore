@@ -35,7 +35,7 @@ namespace Game.Spells
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell specialization definitions. DB table `skill_extra_item_template` is empty.");
                 return;
             }
 
@@ -136,7 +136,7 @@ namespace Game.Spells
             SQLResult result = DB.World.Query("SELECT spellId, requiredSpecialization, perfectCreateChance, perfectItemType FROM skill_perfect_item_template");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");
                 return;
             }
 

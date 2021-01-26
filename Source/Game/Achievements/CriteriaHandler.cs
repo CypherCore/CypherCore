@@ -2606,7 +2606,7 @@ namespace Game.Achievements
 
             if (CliDB.ModifierTreeStorage.Empty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
                 return;
             }
 

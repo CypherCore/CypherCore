@@ -314,7 +314,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 conditions. DB table `conditions` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 conditions. DB table `conditions` is empty!");
                 return;
             }
 

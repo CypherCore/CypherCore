@@ -38,7 +38,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 weather definitions. DB table `game_weather` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 weather definitions. DB table `game_weather` is empty.");
                 return;
             }
 

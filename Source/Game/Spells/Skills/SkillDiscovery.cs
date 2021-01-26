@@ -38,7 +38,7 @@ namespace Game.Spells
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty.");
                 return;
             }
 

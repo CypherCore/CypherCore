@@ -34,7 +34,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 waypoints. DB table `waypoint_data` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoints. DB table `waypoint_data` is empty!");
                 return;
             }
 

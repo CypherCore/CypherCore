@@ -35,7 +35,7 @@ namespace Game.Entities
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.Player, "Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+                Log.outInfo(LogFilter.Player, "Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
                 return;
             }
             uint count = 0;

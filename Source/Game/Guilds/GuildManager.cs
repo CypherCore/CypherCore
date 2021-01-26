@@ -116,7 +116,7 @@ namespace Game
 
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.Guild, "Loaded 0 guild definitions. DB table `guild` is empty.");
+                    Log.outInfo(LogFilter.Guild, "Loaded 0 guild definitions. DB table `guild` is empty.");
                     return;
                 }
 
@@ -440,7 +440,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 guild reward definitions. DB table `guild_rewards` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 guild reward definitions. DB table `guild_rewards` is empty.");
                 return;
             }
 

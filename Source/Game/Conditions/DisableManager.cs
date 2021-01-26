@@ -48,7 +48,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 disables. DB table `disables` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 disables. DB table `disables` is empty!");
                 return;
             }
 

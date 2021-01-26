@@ -365,7 +365,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT entry, content_default, content_loc1, content_loc2, content_loc3, content_loc4, content_loc5, content_loc6, content_loc7, content_loc8 FROM trinity_string");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 CypherStrings. DB table `trinity_string` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 CypherStrings. DB table `trinity_string` is empty.");
                 Global.WorldMgr.StopNow();
                 return;
             }
@@ -611,7 +611,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT MenuId, TextId FROM gossip_menu");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 gossip_menu entries. DB table `gossip_menu` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu entries. DB table `gossip_menu` is empty!");
                 return;
             }
 
@@ -651,7 +651,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 gossip_menu_option Ids. DB table `gossip_menu_option` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_option Ids. DB table `gossip_menu_option` is empty!");
                 return;
             }
 
@@ -722,7 +722,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
                 return;
             }
 
@@ -1178,7 +1178,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT id, delay, command, datalong, datalong2, dataint, x, y, z, o{0} FROM {1}", isSpellScriptTable ? ", effIndex" : "", tableName);
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 script definitions. DB table `{0}` is empty!", tableName);
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 script definitions. DB table `{0}` is empty!", tableName);
                 return;
             }
 
@@ -1776,7 +1776,7 @@ namespace Game
             SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creatures. DB table `creature_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures. DB table `creature_template` is empty.");
                 return;
             }
 
@@ -1930,7 +1930,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature template addon definitions. DB table `creature_template_addon` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template addon definitions. DB table `creature_template_addon` is empty.");
                 return;
             }
 
@@ -2037,7 +2037,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature addon definitions. DB table `creature_addon` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature addon definitions. DB table `creature_addon` is empty.");
                 return;
             }
 
@@ -2194,7 +2194,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature equipment templates. DB table `creature_equip_template` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature equipment templates. DB table `creature_equip_template` is empty!");
                 return;
             }
 
@@ -2277,7 +2277,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT level, class, basemana, attackpower, rangedattackpower FROM creature_classlevelstats");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature base stats. DB table `creature_classlevelstats` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature base stats. DB table `creature_classlevelstats` is empty.");
                 return;
             }
 
@@ -2319,7 +2319,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creature model definitions. DB table `creaturemodelinfo` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature model definitions. DB table `creaturemodelinfo` is empty.");
                 return;
             }
 
@@ -2725,7 +2725,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT guid, linkedGuid, linkType FROM linked_respawn ORDER BY guid ASC");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 linked respawns. DB table `linked_respawn` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 linked respawns. DB table `linked_respawn` is empty.");
                 return;
             }
 
@@ -3124,7 +3124,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 Vendors. DB table `npc_vendor` is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Vendors. DB table `npc_vendor` is empty!");
                 return;
             }
 
@@ -3239,7 +3239,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 creatures. DB table `creature` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures. DB table `creature` is empty.");
                 return;
             }
 
@@ -3700,7 +3700,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 gameobject definitions. DB table `gameobject_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject definitions. DB table `gameobject_template` is empty.");
             }
             else
             {
@@ -3936,7 +3936,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 gameobjects. DB table `gameobject` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobjects. DB table `gameobject` is empty.");
 
                 return;
             }
@@ -5143,7 +5143,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT entry, creditType, creditEntry, lastEncounterDungeon FROM instance_encounters");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 instance encounters, table is empty!");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 instance encounters, table is empty!");
                 return;
             }
 
@@ -5255,12 +5255,12 @@ namespace Game
                     if (flags.HasAnyFlag(~SpawnGroupFlags.All))
                     {
                         flags &= SpawnGroupFlags.All;
-                        Log.outError(LogFilter.ServerLoading, $"Invalid spawn group flag {flags} on group ID {groupId} ({group.name}), reduced to valid flag {group.flags}.");
+                        Log.outError(LogFilter.Sql, $"Invalid spawn group flag {flags} on group ID {groupId} ({group.name}), reduced to valid flag {group.flags}.");
                     }
                     if (flags.HasAnyFlag(SpawnGroupFlags.System) && flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn))
                     {
                         flags &= ~SpawnGroupFlags.ManualSpawn;
-                        Log.outError(LogFilter.ServerLoading, $"System spawn group {groupId} ({group.name}) has invalid manual spawn flag. Ignored.");
+                        Log.outError(LogFilter.Sql, $"System spawn group {groupId} ({group.name}) has invalid manual spawn flag. Ignored.");
                     }
                     group.flags = flags;
 
@@ -5270,7 +5270,7 @@ namespace Game
 
             if (!_spawnGroupDataStorage.ContainsKey(0))
             {
-                Log.outError(LogFilter.ServerLoading, "Default spawn group (index 0) is missing from DB! Manually inserted.");
+                Log.outError(LogFilter.Sql, "Default spawn group (index 0) is missing from DB! Manually inserted.");
                 SpawnGroupTemplateData data = new SpawnGroupTemplateData();
                 data.groupId = 0;
                 data.name = "Default Group";
@@ -5282,7 +5282,7 @@ namespace Game
             if (!_spawnGroupDataStorage.ContainsKey(1))
             {
 
-                Log.outError(LogFilter.ServerLoading, "Default legacy spawn group (index 1) is missing from DB! Manually inserted.");
+                Log.outError(LogFilter.Sql, "Default legacy spawn group (index 1) is missing from DB! Manually inserted.");
                 SpawnGroupTemplateData data = new SpawnGroupTemplateData();
                 data.groupId = 1;
                 data.name = "Legacy Group";
@@ -5294,7 +5294,7 @@ namespace Game
             if (!result.IsEmpty())
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {_spawnGroupDataStorage.Count} spawn group templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             else
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spawn group templates. DB table `spawn_group_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spawn group templates. DB table `spawn_group_template` is empty.");
         }
         public void LoadSpawnGroups()
         {
@@ -5304,7 +5304,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT groupId, spawnType, spawnId FROM spawn_group");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spawn group members. DB table `spawn_group` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spawn group members. DB table `spawn_group` is empty.");
                 return;
             }
 
@@ -5315,7 +5315,7 @@ namespace Game
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
                 if (spawnType >= SpawnObjectType.Max)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
+                    Log.outError(LogFilter.Sql, $"Spawn data with invalid type {spawnType} listed for spawn group {groupId}. Skipped.");
                     continue;
                 }
                 ulong spawnId = result.Read<ulong>(2);
@@ -5323,18 +5323,18 @@ namespace Game
                 SpawnData data = GetSpawnData(spawnType, spawnId);
                 if (data == null)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Spawn data with ID ({spawnType},{spawnId}) not found, but is listed as a member of spawn group {groupId}!");
+                    Log.outError(LogFilter.Sql, $"Spawn data with ID ({spawnType},{spawnId}) not found, but is listed as a member of spawn group {groupId}!");
                     continue;
                 }
                 else if (data.spawnGroupData.groupId != 0)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
+                    Log.outError(LogFilter.Sql, $"Spawn with ID ({spawnType},{spawnId}) is listed as a member of spawn group {groupId}, but is already a member of spawn group {data.spawnGroupData.groupId}. Skipping.");
                     continue;
                 }
                 var groupTemplate = _spawnGroupDataStorage.LookupByKey(groupId);
                 if (groupTemplate == null)
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Spawn group {groupId} assigned to spawn ID ({spawnType},{spawnId}), but group is found!");
+                    Log.outError(LogFilter.Sql, $"Spawn group {groupId} assigned to spawn ID ({spawnType},{spawnId}), but group is found!");
                     continue;
                 }
                 else
@@ -5343,7 +5343,7 @@ namespace Game
                         groupTemplate.mapId = data.spawnPoint.GetMapId();
                     else if (groupTemplate.mapId != data.spawnPoint.GetMapId() && !groupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                     {
-                        Log.outError(LogFilter.ServerLoading, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.spawnPoint.GetMapId()} - spawn NOT added to group!");
+                        Log.outError(LogFilter.Sql, $"Spawn group {groupId} has map ID {groupTemplate.mapId}, but spawn ({spawnType},{spawnId}) has map id {data.spawnPoint.GetMapId()} - spawn NOT added to group!");
                         continue;
                     }
                     data.spawnGroupData = groupTemplate;
@@ -5363,7 +5363,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT instanceMapId, bossStateId, bossStates, spawnGroupId, flags FROM instance_spawn_groups");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 instance spawn groups. DB table `instance_spawn_groups` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 instance spawn groups. DB table `instance_spawn_groups` is empty.");
                 return;
             }
 
@@ -5376,7 +5376,7 @@ namespace Game
                 var spawnGroupTemplate = _spawnGroupDataStorage.LookupByKey(spawnGroupId);
                 if (spawnGroupTemplate == null || spawnGroupTemplate.flags.HasAnyFlag(SpawnGroupFlags.System))
                 {
-                    Log.outError(LogFilter.ServerLoading, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
+                    Log.outError(LogFilter.Sql, $"Invalid spawn group {spawnGroupId} specified for instance {instanceMapId}. Skipped.");
                     continue;
                 }
 
@@ -5389,7 +5389,7 @@ namespace Game
                 if ((states & ~ALL_STATES) != 0)
                 {
                     info.BossStates = (byte)(states & ALL_STATES);
-                    Log.outError(LogFilter.ServerLoading, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid boss state mask {states} - truncated to {info.BossStates}.");
+                    Log.outError(LogFilter.Sql, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid boss state mask {states} - truncated to {info.BossStates}.");
                 }
                 else
                     info.BossStates = states;
@@ -5398,7 +5398,7 @@ namespace Game
                 if ((flags & ~InstanceSpawnGroupFlags.All) != 0)
                 {
                     info.Flags = flags & InstanceSpawnGroupFlags.All;
-                    Log.outError(LogFilter.ServerLoading, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid flags {flags} - truncated to {info.Flags}.");
+                    Log.outError(LogFilter.Sql, $"Instance spawn group ({instanceMapId},{spawnGroupId}) had invalid flags {flags} - truncated to {info.Flags}.");
                 }
                 else
                     info.Flags = flags;
@@ -5524,7 +5524,7 @@ namespace Game
 
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 player create definitions. DB table `playercreateinfo` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create definitions. DB table `playercreateinfo` is empty.");
                     return;
                 }
 
@@ -5662,7 +5662,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT race, class, itemid, amount FROM playercreateinfo_item");
 
                 if (result.IsEmpty())
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 custom player create items. DB table `playercreateinfo_item` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 custom player create items. DB table `playercreateinfo_item` is empty.");
                 else
                 {
                     uint count = 0;
@@ -5755,7 +5755,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell_custom");
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 player create custom spells. DB table `playercreateinfo_spell_custom` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create custom spells. DB table `playercreateinfo_spell_custom` is empty.");
                 }
                 else
                 {
@@ -5813,7 +5813,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT raceMask, classMask, spell FROM playercreateinfo_cast_spell");
 
                 if (result.IsEmpty())
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 player create cast spells. DB table `playercreateinfo_cast_spell` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create cast spells. DB table `playercreateinfo_cast_spell` is empty.");
                 else
                 {
                     uint count = 0;
@@ -5868,7 +5868,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT race, class, button, action, type FROM playercreateinfo_action");
 
                 if (result.IsEmpty())
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 player create actions. DB table `playercreateinfo_action` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create actions. DB table `playercreateinfo_action` is empty.");
                 else
                 {
                     uint count = 0;
@@ -5910,7 +5910,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte FROM player_racestats");
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_racestats` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_racestats` is empty.");
                     Global.WorldMgr.StopNow();
                     return;
                 }
@@ -5933,7 +5933,7 @@ namespace Game
                 result = DB.World.Query("SELECT class, level, str, agi, sta, inte FROM player_classlevelstats");
                 if (result.IsEmpty())
                 {
-                    Log.outError(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_classlevelstats` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_classlevelstats` is empty.");
                     Global.WorldMgr.StopNow();
                     return;
                 }
@@ -6230,7 +6230,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 level pet stats definitions. DB table `pet_levelstats` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level pet stats definitions. DB table `pet_levelstats` is empty.");
                 return;
             }
 
@@ -6398,7 +6398,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT alliance_id, horde_id FROM player_factionchange_achievement");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 faction change achievement pairs. DB table `player_factionchange_achievement` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 faction change achievement pairs. DB table `player_factionchange_achievement` is empty.");
                 return;
             }
 
@@ -6459,7 +6459,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT alliance_id, horde_id FROM player_factionchange_quests");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 faction change quest pairs. DB table `player_factionchange_quests` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 faction change quest pairs. DB table `player_factionchange_quests` is empty.");
                 return;
             }
 
@@ -6519,7 +6519,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT alliance_id, horde_id FROM player_factionchange_spells");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 faction change spell pairs. DB table `player_factionchange_spells` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 faction change spell pairs. DB table `player_factionchange_spells` is empty.");
                 return;
             }
 
@@ -6618,7 +6618,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quests definitions. DB table `quest_template` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quests definitions. DB table `quest_template` is empty.");
                 return;
             }
 
@@ -6638,7 +6638,7 @@ namespace Game
             result = DB.World.Query("SELECT QuestID, Type1, Type2, Type3, Type4, Type5, Type6 FROM quest_reward_choice_items");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest reward choice items. DB table `quest_reward_choice_items` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest reward choice items. DB table `quest_reward_choice_items` is empty.");
             }
             else
             {
@@ -6660,7 +6660,7 @@ namespace Game
             result = DB.World.Query("SELECT QuestID, SpellID, PlayerConditionID FROM quest_reward_display_spell ORDER BY QuestID ASC, Idx ASC");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest reward display spells. DB table `quest_reward_display_spell` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest reward display spells. DB table `quest_reward_display_spell` is empty.");
             }
             else
             {
@@ -6682,7 +6682,7 @@ namespace Game
             result = DB.World.Query("SELECT ID, Emote1, Emote2, Emote3, Emote4, EmoteDelay1, EmoteDelay2, EmoteDelay3, EmoteDelay4 FROM quest_details");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest details. DB table `quest_details` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest details. DB table `quest_details` is empty.");
             }
             else
             {
@@ -6703,7 +6703,7 @@ namespace Game
             result = DB.World.Query("SELECT ID, EmoteOnComplete, EmoteOnIncomplete, EmoteOnCompleteDelay, EmoteOnIncompleteDelay, CompletionText FROM quest_request_items");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest request items. DB table `quest_request_items` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest request items. DB table `quest_request_items` is empty.");
             }
             else
             {
@@ -6724,7 +6724,7 @@ namespace Game
             result = DB.World.Query("SELECT ID, Emote1, Emote2, Emote3, Emote4, EmoteDelay1, EmoteDelay2, EmoteDelay3, EmoteDelay4, RewardText FROM quest_offer_reward");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest reward emotes. DB table `quest_offer_reward` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest reward emotes. DB table `quest_offer_reward` is empty.");
             }
             else
             {
@@ -6750,7 +6750,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest template addons. DB table `quest_template_addon` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest template addons. DB table `quest_template_addon` is empty.");
             }
             else
             {
@@ -6771,7 +6771,7 @@ namespace Game
             result = DB.World.Query("SELECT QuestId, RewardMailSenderEntry FROM quest_mail_sender");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest mail senders. DB table `quest_mail_sender` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest mail senders. DB table `quest_mail_sender` is empty.");
             }
             else
             {
@@ -6792,7 +6792,7 @@ namespace Game
             result = DB.World.Query("SELECT QuestID, ID, Type, StorageIndex, ObjectID, Amount, Flags, Flags2, ProgressBarWeight, Description FROM quest_objectives ORDER BY `Order` ASC, StorageIndex ASC");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
             }
             else
             {
@@ -6812,7 +6812,7 @@ namespace Game
             result = DB.World.Query("SELECT v.ID, o.ID, o.QuestID, v.Index, v.VisualEffect FROM quest_visual_effect AS v LEFT JOIN quest_objectives AS o ON v.ID = o.ID ORDER BY v.Index DESC");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest visual effects. DB table `quest_visual_effect` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest visual effects. DB table `quest_visual_effect` is empty.");
             }
             else
             {
@@ -7557,7 +7557,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest relations from `{0}`, table is empty.", table);
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest relations from `{0}`, table is empty.", table);
                 return;
             }
 
@@ -7603,7 +7603,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID, SpawnTrackingID, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
                 return;
             }
 
@@ -8051,7 +8051,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 spellclick spells. DB table `npc_spellclick_spells` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spellclick spells. DB table `npc_spellclick_spells` is empty.");
                 return;
             }
 
@@ -8114,7 +8114,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 areas for fishing base skill level. DB table `skill_fishing_base_level` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 areas for fishing base skill level. DB table `skill_fishing_base_level` is empty.");
                 return;
             }
 
@@ -8149,7 +8149,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 skill max values. DB table `skill_tiers` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 skill max values. DB table `skill_tiers` is empty.");
                 return;
             }
 
@@ -8842,7 +8842,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 level dependent mail rewards. DB table `mail_level_reward` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level dependent mail rewards. DB table `mail_level_reward` is empty.");
                 return;
             }
 
@@ -8894,7 +8894,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 BaseXP definitions. DB table `exploration_basexp` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 BaseXP definitions. DB table `exploration_basexp` is empty.");
                 return;
             }
 
@@ -10114,7 +10114,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT `entry`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer` FROM `vehicle_template_accessory`");
             if (result.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 vehicle template accessories. DB table `vehicle_template_accessory` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle template accessories. DB table `vehicle_template_accessory` is empty.");
                 return;
             }
 
