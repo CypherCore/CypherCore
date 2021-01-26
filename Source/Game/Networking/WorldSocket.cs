@@ -181,32 +181,25 @@ namespace Game.Networking
                     return;
                 }
             }
-
-            AsyncReadWithCallback(InitializeHandler);
         }
 
         public override void ReadHandler(SocketAsyncEventArgs args)
         {
             if (!IsOpen())
                 return;
-            Log.outError(LogFilter.Network, $"Raw socket data: {args.Buffer.ToHexString()}");
+
             int currentReadIndex = 0;
             while (currentReadIndex < args.BytesTransferred)
             {
                 if (_headerBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    Log.outError(LogFilter.Network, $"_headerBuffer: {_headerBuffer.GetRemainingSpace()} bytesTransferred: {args.BytesTransferred} ReadIndex: {currentReadIndex}");
                     int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
                     _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
-                    Log.outError(LogFilter.Network, $"_headerBuffer Data: {_headerBuffer.GetData().ToHexString()}");
                     currentReadIndex += readHeaderSize;
 
                     if (_headerBuffer.GetRemainingSpace() > 0)
-                    {
-                        Log.outError(LogFilter.Network, $"Couldn't receive the whole header, _headerBuffer: {_headerBuffer.GetRemainingSpace()} bytesTransferred: {args.BytesTransferred}");
                         break; // Couldn't receive the whole header this time.
-                    }
 
                     // We just received nice new header
                     if (!ReadHeader())
@@ -220,17 +213,12 @@ namespace Game.Networking
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need more data in the payload
-                    Log.outError(LogFilter.Network, $"_packetBuffer: {_packetBuffer.GetRemainingSpace()} bytesTransferred: {args.BytesTransferred} ReadIndex: {currentReadIndex}");
                     int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
                     _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
-                    Log.outError(LogFilter.Network, $"_packetBuffer Data: {_packetBuffer.GetData().ToHexString()}");
                     currentReadIndex += readDataSize;
 
                     if (_packetBuffer.GetRemainingSpace() > 0)
-                    {
-                        Log.outError(LogFilter.Network, $"Couldn't receive the whole data, _packetBuffer: {_headerBuffer.GetRemainingSpace()} bytesTransferred: {args.BytesTransferred}");
                         break; // Couldn't receive the whole data this time.
-                    }
                 }
 
                 // just received fresh new payload
