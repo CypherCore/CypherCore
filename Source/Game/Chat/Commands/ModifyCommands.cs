@@ -597,6 +597,39 @@ namespace Game.Chat
             // Change display ID
             target.InitDisplayIds();
 
+            target.RestoreDisplayId(false);
+            Global.CharacterCacheStorage.UpdateCharacterGender(target.GetGUID(), (byte)gender);
+
+            // Generate random customizations
+            List<ChrCustomizationChoice> customizations = new List<ChrCustomizationChoice>();
+
+            var options = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
+            WorldSession worldSession = target.GetSession();
+            foreach (ChrCustomizationOptionRecord option in options)
+            {
+                ChrCustomizationReqRecord optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
+                if (optionReq != null && !worldSession.MeetsChrCustomizationReq(optionReq, target.GetClass(), false, customizations))
+                    continue;
+
+                // Loop over the options until the first one fits
+                var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(option.Id);
+                foreach (ChrCustomizationChoiceRecord choiceForOption in choicesForOption)
+                {
+                    var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(choiceForOption.ChrCustomizationReqID);
+                    if (choiceReq != null && !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetClass(), false, customizations))
+                        continue;
+
+                    ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];
+                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    choice.ChrCustomizationOptionID = option.Id;
+                    choice.ChrCustomizationChoiceID = choiceEntry.Id;
+                    customizations.Add(choice);
+                    break;
+                }
+            }
+
+            target.SetCustomizations(customizations);
+
             handler.SendSysMessage(CypherStrings.YouChangeGender, handler.GetNameLink(target), gender);
 
             if (handler.NeedReportToTarget(target))
