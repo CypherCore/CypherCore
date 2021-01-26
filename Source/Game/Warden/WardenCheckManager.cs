@@ -29,6 +29,8 @@ namespace Game
 
         public void LoadWardenChecks()
         {
+            uint oldMSTime = Time.GetMSTime();
+
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
             {
@@ -98,11 +100,13 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} warden checks.", count);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden checks in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadWardenOverrides()
         {
+            uint oldMSTime = Time.GetMSTime();
+
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
             {
@@ -138,7 +142,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} warden action overrides.", count);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} warden action overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public WardenCheck GetWardenDataById(ushort Id)

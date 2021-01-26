@@ -38,6 +38,8 @@ namespace Game
 
         public void LoadFromDB()
         {
+            uint oldMSTime = Time.GetMSTime();
+
             uint count = 0;
             _maxEventId = 0;
             _maxInviteId = 0;
@@ -72,8 +74,9 @@ namespace Game
                 while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} calendar events", count);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar events in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             count = 0;
+            oldMSTime = Time.GetMSTime();
 
             //                                    0         1        2        3       4       5             6               7
             result = DB.Characters.Query("SELECT InviteID, EventID, Invitee, Sender, Status, ResponseTime, ModerationRank, Note FROM calendar_invites");
@@ -100,7 +103,7 @@ namespace Game
                 while (result.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} calendar invites", count);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} calendar invites in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 
             for (ulong i = 1; i < _maxEventId; ++i)
                 if (GetEvent(i) == null)
