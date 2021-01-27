@@ -1619,18 +1619,13 @@ namespace Game
             {
                 uint date = holiday.Date[i];
 
-                DateTime timeInfo = new DateTime();
+                int year;
                 if (singleDate)
-                    timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year - 1); // First try last year (event active through New Year)
+                    year = Time.UnixTimeToDateTime(curTime).ToLocalTime().Year - 1; // First try last year (event active through New Year)
                 else
-                    timeInfo.AddYears((int)((date >> 24) & 0x1F) + 100);
+                    year = (int)((date >> 24) & 0x1F) + 100 + 1900;
 
-                timeInfo.AddMonths((int)(date >> 20) & 0xF);
-                timeInfo.AddDays(((date >> 14) & 0x3F) + 1);
-                timeInfo.AddHours((date >> 6) & 0x1F);
-                timeInfo.AddMinutes(date & 0x3F);
-                timeInfo.AddSeconds(0);
-                DateTime tmCopy = timeInfo;
+                var timeInfo = new DateTime(year, (int)((date >> 20) & 0xF) + 1, (int)((date >> 14) & 0x3F) + 1, (int)((date >> 6) & 0x1F), (int)(date & 0x3F), 0);
 
                 long startTime = Time.DateTimeToUnixTime(timeInfo);
                 if (curTime < startTime + gameEvent.length * Time.Minute)
@@ -1640,7 +1635,7 @@ namespace Game
                 }
                 else if (singleDate)
                 {
-                    tmCopy.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
+                    var tmCopy = timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
                     gameEvent.start = Time.DateTimeToUnixTime(tmCopy) + stageOffset;
                     return;
                 }
