@@ -329,13 +329,13 @@ namespace Game.Entities
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
                 Talents[i] = new Dictionary<uint, PlayerSpellState>();
-                PvpTalents[i] = new Array<uint>(PlayerConst.MaxPvpTalentSlots, 0);
+                PvpTalents[i] = new uint[PlayerConst.MaxPvpTalentSlots];
                 Glyphs[i] = new List<uint>();
             }
         }
 
         public Dictionary<uint, PlayerSpellState>[] Talents = new Dictionary<uint, PlayerSpellState>[PlayerConst.MaxSpecializations];
-        public Array<uint>[] PvpTalents = new Array<uint>[PlayerConst.MaxSpecializations];
+        public uint[][] PvpTalents = new uint[PlayerConst.MaxSpecializations][];
         public List<uint>[] Glyphs = new List<uint>[PlayerConst.MaxSpecializations];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;

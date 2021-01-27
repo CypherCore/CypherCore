@@ -27,6 +27,7 @@ using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -416,9 +417,13 @@ namespace Game.Entities
             if (talent.OverridesSpellID != 0)
                 RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
 
-            //todo check this
             // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-            GetPvpTalentMap(GetActiveTalentGroup()).Remove(talent.Id);
+            var talents = GetPvpTalentMap(GetActiveTalentGroup());
+            for (var i = 0; i < PlayerConst.MaxPvpTalentSlots; ++i)
+            {
+                if (talents[i] == talent.Id)
+                    talents[i] = 0;
+            }
         }
 
         public void TogglePvpTalents(bool enable)
@@ -520,7 +525,7 @@ namespace Game.Entities
             return false;
         }
 
-        public Array<uint> GetPvpTalentMap(byte spec) { return _specializationInfo.PvpTalents[spec]; }
+        public uint[] GetPvpTalentMap(byte spec) { return _specializationInfo.PvpTalents[spec]; }
 
         //BGs
         public Battleground GetBattleground()

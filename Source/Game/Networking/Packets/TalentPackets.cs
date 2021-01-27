@@ -35,13 +35,13 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteUInt32(talentGroupInfo.SpecID);
                 _worldPacket.WriteInt32(talentGroupInfo.TalentIDs.Count);
-                _worldPacket.WriteInt32(talentGroupInfo.PvPTalentIDs.Count);
+                _worldPacket.WriteInt32(talentGroupInfo.PvPTalents.Count);
 
                 foreach (var talentID in talentGroupInfo.TalentIDs)
                     _worldPacket.WriteUInt16(talentID);
 
-                foreach (ushort talentID in talentGroupInfo.PvPTalentIDs)
-                    _worldPacket.WriteUInt16(talentID);
+                foreach (PvPTalent talent in talentGroupInfo.PvPTalents)
+                    talent.Write(_worldPacket);
             }
         }
 
@@ -51,7 +51,7 @@ namespace Game.Networking.Packets
         {
             public uint SpecID;
             public List<ushort> TalentIDs = new List<ushort>();
-            public List<ushort> PvPTalentIDs = new List<ushort>();
+            public List<PvPTalent> PvPTalents = new List<PvPTalent>();
         }
 
         public class TalentInfoUpdate

@@ -603,13 +603,16 @@ namespace Game.Entities
                         continue;
                     }
 
-                    groupInfoPkt.PvPTalentIDs.Add((ushort)pvpTalents[slot]);
+                    PvPTalent pvpTalent = new PvPTalent();
+                    pvpTalent.PvPTalentID = (ushort)pvpTalents[slot];
+                    pvpTalent.Slot = slot;
+                    groupInfoPkt.PvPTalents.Add(pvpTalent);
                 }
 
                 if (i == GetActiveTalentGroup())
                     packet.Info.ActiveGroup = (byte)packet.Info.TalentGroups.Count;
 
-                if (!groupInfoPkt.TalentIDs.Empty() || !groupInfoPkt.PvPTalentIDs.Empty() || i == GetActiveTalentGroup())
+                if (!groupInfoPkt.TalentIDs.Empty() || !groupInfoPkt.PvPTalents.Empty() || i == GetActiveTalentGroup())
                     packet.Info.TalentGroups.Add(groupInfoPkt);
             }
 
