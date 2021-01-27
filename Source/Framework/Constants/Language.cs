@@ -49,7 +49,8 @@ namespace Framework.Constants
         Shalassian = 181,
         Thalassian2 = 182,
         Addon = 183,
-        AddonLogged = 184
+        AddonLogged = 184,
+        Vulpera = 285
     }
 
     public enum CypherStrings
