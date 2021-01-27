@@ -188,7 +188,7 @@ namespace Game.Loots
             if (count != 0)
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject loot templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
             else
-                Log.outoutInfoError(LogFilter.ServerLoading, "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject loot templates. DB table `gameobject_loot_template` is empty");
         }
 
         public static void LoadLootTemplates_Item()
