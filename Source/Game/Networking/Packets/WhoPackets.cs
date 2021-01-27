@@ -74,10 +74,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
+            _worldPacket.WriteUInt32(RequestID);
             _worldPacket.WriteBits(Response.Count, 6);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteUInt32(RequestID);
             Response.ForEach(p => p.Write(_worldPacket));
         }
 
