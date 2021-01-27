@@ -1081,6 +1081,7 @@ namespace Game
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
             features.IsMuted = !CanSpeak();
+            features.WarModeFeatureEnabled = true;
 
             SendPacket(features);
         }
