@@ -2223,10 +2223,10 @@ namespace Game.DataStorage
                 if (assignment.MapID >= 0 && assignment.MapID != areaEntry.ContinentID)
                     continue;
 
-                float tmpY = 1.0f - ((y - assignment.UiMin.Y) / (assignment.UiMax.Y - assignment.UiMin.Y));
-                float tmpX = 1.0f - ((x - assignment.UiMin.X) / (assignment.UiMax.X - assignment.UiMin.X));
-                y = ((1.0f - tmpY) * assignment.Region[0].X) + (tmpY * assignment.Region[1].X);
-                x = ((1.0f - tmpX) * assignment.Region[0].Y) + (tmpX * assignment.Region[1].Y);
+                float tmpY = (y - assignment.UiMax.Y) / (assignment.UiMin.Y - assignment.UiMax.Y);
+                float tmpX = (x - assignment.UiMax.X) / (assignment.UiMin.X - assignment.UiMax.X);
+                x = assignment.Region[0].X + tmpY * (assignment.Region[1].X - assignment.Region[0].X);
+                y = assignment.Region[0].Y + tmpX * (assignment.Region[1].Y - assignment.Region[0].Y);
                 break;
             }
         }

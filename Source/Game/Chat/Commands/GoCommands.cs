@@ -417,6 +417,9 @@ namespace Game.Chat.Commands
                 return false;
             }
 
+            x /= 100.0f;
+            y /= 100.0f;
+
             Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y);
 
             if (!GridDefines.IsValidMapCoord(zoneEntry.ContinentID, x, y))
