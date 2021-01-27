@@ -2800,6 +2800,10 @@ namespace Game.Entities
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
+        public void SetVisibleByUnitOnly(ObjectGuid unit) { m_visibleByUnitOnly = unit; }
+        public bool IsVisibleByUnitOnly() { return !m_visibleByUnitOnly.IsEmpty(); }
+        public ObjectGuid GetVisibleByUnitOnly() { return m_visibleByUnitOnly; }
+        
         #region Fields
         protected GameObjectFieldData m_gameObjectData;
         protected GameObjectValue m_goValue;
@@ -2834,6 +2838,7 @@ namespace Game.Entities
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
+        ObjectGuid m_visibleByUnitOnly;
 
         GameObjectState m_prevGoState;                          // What state to set whenever resetting
 

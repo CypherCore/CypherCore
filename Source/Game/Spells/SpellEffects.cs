@@ -42,7 +42,6 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.Portal)]
         [SpellEffectHandler(SpellEffectName.BindSight)]
         [SpellEffectHandler(SpellEffectName.CallPet)]
-        [SpellEffectHandler(SpellEffectName.Effect171)]
         [SpellEffectHandler(SpellEffectName.Effect177)]
         [SpellEffectHandler(SpellEffectName.PortalTeleport)]
         [SpellEffectHandler(SpellEffectName.RitualBase)]
@@ -117,6 +116,7 @@ namespace Game.Spells
             m_caster.DealDamage(unitTarget, (uint)unitTarget.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
         }
 
+        [SpellEffectHandler(SpellEffectName.EnvironmentalDamage)]
         void EffectEnvironmentalDMG(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -5251,6 +5251,57 @@ namespace Game.Spells
             Guild guild = caster.GetGuild();
             if (guild != null)
                 guild.HandleBuyBankTab(caster.GetSession(), (byte)(damage - 1)); // Bank tabs start at zero internally
+        }
+
+        [SpellEffectHandler(SpellEffectName.SummonPersonalGameobject)]
+        void EffectSummonPersonalGameObject(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            uint goId = (uint)effectInfo.MiscValue;
+            if (goId == 0)
+                return;
+
+            float x, y, z;
+            if (m_targets.HasDst())
+                destTarget.GetPosition(out x, out y, out z);
+            else
+                m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
+
+            Map map = m_caster.GetMap();
+            Position pos = new Position(x, y, z, m_caster.GetOrientation());
+            Quaternion rot = Quaternion.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f);
+            GameObject go = GameObject.CreateGameObject(goId, map, pos, rot, 255, GameObjectState.Ready);
+
+            if (!go)
+            {
+                Log.outWarn(LogFilter.Spells, $"SpellEffect Failed to summon personal gameobject. SpellId {m_spellInfo.Id}, effect {effIndex}");
+                return;
+            }
+
+            PhasingHandler.InheritPhaseShift(go, m_caster);
+
+            int duration = m_spellInfo.CalcDuration(m_caster);
+
+            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetSpellId(m_spellInfo.Id);
+            go.SetVisibleByUnitOnly(m_caster.GetGUID());
+
+            ExecuteLogEffectSummonObject(effIndex, go);
+
+            map.AddToMap(go);
+
+            GameObject linkedTrap = go.GetLinkedTrap();
+            if (linkedTrap != null)
+            {
+                PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
+
+                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetSpellId(m_spellInfo.Id);
+
+                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
+            }
         }
 
         [SpellEffectHandler(SpellEffectName.ResurrectWithAura)]

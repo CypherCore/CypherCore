@@ -2177,7 +2177,7 @@ namespace Framework.Constants
         AllowControlPet = 168,
         DestroyItem = 169,
         UpdateZoneAurasPhases = 170,
-        Effect171 = 171, // Summons Gamebject
+        SummonPersonalGameobject = 171, // Summons Gameobject
         ResurrectWithAura = 172, // Aoe Ressurection
         UnlockGuildVaultTab = 173, // Guild Tab Unlocked (Guild Perk)
         ApplyAuraOnPet = 174,

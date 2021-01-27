@@ -4266,7 +4266,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 168 SPELL_EFFECT_168
             new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 169 SPELL_EFFECT_DESTROY_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 170 SPELL_EFFECT_170
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 171 SPELL_EFFECT_171
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 171 SPELL_EFFECT_SUMMON_PERSONAL_GAMEOBJECT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 172 SPELL_EFFECT_172
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 174 SPELL_EFFECT_174

@@ -1147,6 +1147,11 @@ namespace Game.Entities
                     }
                 }
 
+                GameObject go = obj.ToGameObject();
+                if ( go != null)
+                    if (go.IsVisibleByUnitOnly() && GetGUID() != go.GetVisibleByUnitOnly())
+                        return false;
+
                 if (viewpoint == null)
                     viewpoint = this;
 
