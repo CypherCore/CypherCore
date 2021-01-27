@@ -260,6 +260,7 @@ namespace Game
                         {
                             Log.outError(LogFilter.Sql, $"`game_event` game event id ({event_id}) contains nonexisting holiday id {pGameEvent.holiday_id}.");
                             pGameEvent.holiday_id = HolidayIds.None;
+                            continue;
                         }
                         if (pGameEvent.holidayStage > SharedConst.MaxHolidayDurations)
                         {
@@ -267,10 +268,11 @@ namespace Game
                             pGameEvent.holidayStage = 0;
                             continue;
                         }
+
+                        SetHolidayEventTime(pGameEvent);
                     }
 
                     mGameEvent[event_id] = pGameEvent;
-                    SetHolidayEventTime(pGameEvent);
                 }
                 while (result.NextRow());
 
@@ -1576,10 +1578,9 @@ namespace Game
                 return;
 
             var holiday = CliDB.HolidaysStorage.LookupByKey(gameEvent.holiday_id);
-
             if (holiday.Date[0] == 0 || holiday.Duration[0] == 0) // Invalid definitions
             {
-                Log.outError(LogFilter.Sql, "Missing date or duration for holiday {gameEvent.holiday_id}.");
+                Log.outError(LogFilter.Sql, $"Missing date or duration for holiday {gameEvent.holiday_id}.");
                 return;
             }
 
@@ -1644,7 +1645,7 @@ namespace Game
                     return;
                 }
             }
-            Log.outError(LogFilter.Sql, "No suitable start date found for holiday {gameEvent.holiday_id}.");
+            Log.outError(LogFilter.Sql, $"No suitable start date found for holiday {gameEvent.holiday_id}.");
         }
 
         public bool IsHolidayActive(HolidayIds id)
