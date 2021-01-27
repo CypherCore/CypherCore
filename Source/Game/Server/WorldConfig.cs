@@ -871,6 +871,7 @@ namespace Game
             Values[WorldCfg.FeatureSystemBpayStoreEnabled] = GetDefaultValue("FeatureSystem.BpayStore.Enabled", false);
             Values[WorldCfg.FeatureSystemCharacterUndeleteEnabled] = GetDefaultValue("FeatureSystem.CharacterUndelete.Enabled", false);
             Values[WorldCfg.FeatureSystemCharacterUndeleteCooldown] = GetDefaultValue("FeatureSystem.CharacterUndelete.Cooldown", 2592000);
+            Values[WorldCfg.FeatureSystemWarModeEnabled] = GetDefaultValue("FeatureSystem.WarMode.Enabled", false);
 
             // Dungeon finder
             Values[WorldCfg.LfgOptionsmask] = GetDefaultValue("DungeonFinder.OptionsMask", 1);

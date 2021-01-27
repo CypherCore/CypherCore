@@ -1169,6 +1169,7 @@ namespace Framework.Constants
         FeatureSystemBpayStoreEnabled,
         FeatureSystemCharacterUndeleteCooldown,
         FeatureSystemCharacterUndeleteEnabled,
+        FeatureSystemWarModeEnabled,
         ForceShutdownThreshold,
         GameobjectCheckInvalidPostion,
         GameType,

@@ -1269,6 +1269,14 @@ FeatureSystem.CharacterUndelete.Enabled = 0
 FeatureSystem.CharacterUndelete.Cooldown = 2592000
 
 #
+#   FeatureSystem.WarMode.Enabled
+#        Description: Enables Warmode with access to PvpTalents.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled, Experimental)
+
+FeatureSystem.WarMode.Enabled = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################
