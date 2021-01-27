@@ -2447,7 +2447,7 @@ namespace Game.Entities
 
             // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
             if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
-                victimResistance += Math.Max((victim.GetLevelForTarget(this) - GetLevelForTarget(victim)) * 5.0f, 0.0f);
+                victimResistance += Math.Max(((float)victim.GetLevelForTarget(this) - (float)GetLevelForTarget(victim)) * 5.0f, 0.0f);
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;
