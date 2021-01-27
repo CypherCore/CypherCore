@@ -2991,7 +2991,7 @@ namespace Game
 
                     if (spell.ReqSkillLine != 0 && !CliDB.SkillLineStorage.ContainsKey(spell.ReqSkillLine))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing skill (ReqSkillLine: {spell.ReqSkillLine}) for TrainerId {spell.SpellId} and SpellId {trainerId}, ignoring");
+                        Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing skill (ReqSkillLine: {spell.ReqSkillLine}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring");
                         continue;
                     }
 
@@ -3001,7 +3001,7 @@ namespace Game
                         uint requiredSpell = spell.ReqAbility[i];
                         if (requiredSpell != 0 && !Global.SpellMgr.HasSpellInfo(requiredSpell, Difficulty.None))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {spell.SpellId} and SpellId {trainerId}, ignoring");
+                            Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {trainerId} and SpellId {spell.SpellId}, ignoring");
                             allReqValid = false;
                         }
                     }
@@ -3864,9 +3864,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0       1       2      3        4        5
-            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold, WorldEffectID FROM gameobject_template_addon");
-
+            //                                         0       1       2      3        4        5              6
+            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold, WorldEffectID, AIAnimKitID FROM gameobject_template_addon");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject template addon definitions. DB table `gameobject_template_addon` is empty.");
@@ -3891,6 +3890,7 @@ namespace Game
                 gameObjectAddon.mingold = result.Read<uint>(3);
                 gameObjectAddon.maxgold = result.Read<uint>(4);
                 gameObjectAddon.WorldEffectID = result.Read<uint>(5);
+                gameObjectAddon.AIAnimKitID = result.Read<uint>(6);
 
                 // checks
                 if (gameObjectAddon.faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectAddon.faction))
@@ -3913,6 +3913,12 @@ namespace Game
                 {
                     Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) defined in `gameobject_template_addon`, set to 0.");
                     gameObjectAddon.WorldEffectID = 0;
+                }
+
+                if (gameObjectAddon.AIAnimKitID != 0 && !CliDB.AnimKitStorage.ContainsKey(gameObjectAddon.AIAnimKitID))
+                {
+                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid AIAnimKitID ({gameObjectAddon.AIAnimKitID}) defined in `gameobject_template_addon`, set to 0.");
+                    gameObjectAddon.AIAnimKitID = 0;
                 }
 
                 _gameObjectTemplateAddonStorage[entry] = gameObjectAddon;
@@ -4150,8 +4156,8 @@ namespace Game
 
             _gameObjectAddonStorage.Clear();
 
-            //                                         0     1                 2                 3                 4                 5                 6                  7
-            SQLResult result = DB.World.Query("SELECT guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue, WorldEffectID FROM gameobject_addon");
+            //                                         0     1                 2                 3                 4                 5                 6                  7              8
+            SQLResult result = DB.World.Query("SELECT guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue, WorldEffectID, AIAnimKitID FROM gameobject_addon");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject addon definitions. DB table `gameobject_addon` is empty.");
@@ -4175,6 +4181,7 @@ namespace Game
                 gameObjectAddon.invisibilityType = (InvisibilityType)result.Read<byte>(5);
                 gameObjectAddon.invisibilityValue = result.Read<uint>(6);
                 gameObjectAddon.WorldEffectID = result.Read<uint>(7);
+                gameObjectAddon.AIAnimKitID = result.Read<uint>(8);
 
                 if (gameObjectAddon.invisibilityType >= InvisibilityType.Max)
                 {
@@ -4199,6 +4206,12 @@ namespace Game
                 {
                     Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) in `gameobject_addon`, set to 0.");
                     gameObjectAddon.WorldEffectID = 0;
+                }
+
+                if (gameObjectAddon.AIAnimKitID != 0 && !CliDB.AnimKitStorage.ContainsKey(gameObjectAddon.AIAnimKitID))
+                {
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid AIAnimKitID ({gameObjectAddon.AIAnimKitID}) in `gameobject_addon`, set to 0.");
+                    gameObjectAddon.AIAnimKitID = 0;
                 }
 
                 _gameObjectAddonStorage[guid] = gameObjectAddon;

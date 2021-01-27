@@ -263,6 +263,9 @@ namespace Game.Entities
                     m_updateFlag.GameObject = true;
                     SetWorldEffectID(m_goTemplateAddon.WorldEffectID);
                 }
+
+                if (m_goTemplateAddon.AIAnimKitID != 0)
+                    _animKitId = (ushort)m_goTemplateAddon.AIAnimKitID;
             }
 
             SetEntry(goInfo.entry);
@@ -358,16 +361,22 @@ namespace Game.Entities
                     break;
             }
 
-            if (gameObjectAddon != null && gameObjectAddon.invisibilityValue != 0)
+            if (gameObjectAddon != null)
             {
-                m_invisibility.AddFlag(gameObjectAddon.invisibilityType);
-                m_invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
-            }
+                if (gameObjectAddon.invisibilityValue != 0)
+                {
+                    m_invisibility.AddFlag(gameObjectAddon.invisibilityType);
+                    m_invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
+                }
 
-            if (gameObjectAddon != null && gameObjectAddon.WorldEffectID != 0)
-            {
-                m_updateFlag.GameObject = true;
-                SetWorldEffectID(gameObjectAddon.WorldEffectID);
+                if (gameObjectAddon.WorldEffectID != 0)
+                {
+                    m_updateFlag.GameObject = true;
+                    SetWorldEffectID(gameObjectAddon.WorldEffectID);
+                }
+
+                if (gameObjectAddon.AIAnimKitID != 0)
+                    _animKitId = (ushort)gameObjectAddon.AIAnimKitID;
             }
 
             LastUsedScriptID = GetGoInfo().ScriptId;

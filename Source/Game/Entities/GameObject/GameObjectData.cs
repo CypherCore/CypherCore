@@ -1360,6 +1360,7 @@ namespace Game.Entities
         public uint mingold;
         public uint maxgold;
         public uint WorldEffectID;
+        public uint AIAnimKitID;
     }
 
     public class GameObjectLocale
@@ -1375,6 +1376,7 @@ namespace Game.Entities
         public InvisibilityType invisibilityType;
         public uint invisibilityValue;
         public uint WorldEffectID;
+        public uint AIAnimKitID;
     }
 
     public class GameObjectData : SpawnData
