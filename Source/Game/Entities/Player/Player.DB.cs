@@ -763,7 +763,7 @@ namespace Game.Entities
                             if (!objectiveItr.IsStoringFlag())
                                 SetQuestSlotCounter(slot, objectiveIndex, (ushort)data);
                             else if (data != 0)
-                                SetQuestSlotState(slot, (QuestSlotStateMask)(256 << objectiveIndex));
+                                SetQuestSlotObjectiveFlag(slot, (sbyte)objectiveIndex);
                         }
                         else
                             Log.outError(LogFilter.Player, "Player {0} ({1}) has quest {2} out of range objective index {3}.", GetName(), GetGUID().ToString(), questID, objectiveIndex);

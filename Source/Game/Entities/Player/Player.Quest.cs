@@ -2060,6 +2060,18 @@ namespace Game.Entities
             SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), timer);
         }
 
+        void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
+        {
+            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            SetUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
+        }
+
+        void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
+        {
+            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
+        }
+
         void SetQuestCompletedBit(uint questBit, bool completed)
         {
             if (questBit == 0)
@@ -2756,9 +2768,9 @@ namespace Game.Entities
                 if (!objective.IsStoringFlag())
                     SetQuestSlotCounter(log_slot, (byte)objective.StorageIndex, (ushort)status.ObjectiveData[objective.StorageIndex]);
                 else if (data != 0)
-                    SetQuestSlotState(log_slot, (QuestSlotStateMask)(256 << objective.StorageIndex));
+                    SetQuestSlotObjectiveFlag(log_slot, objective.StorageIndex);
                 else
-                    RemoveQuestSlotState(log_slot, (QuestSlotStateMask)(256 << objective.StorageIndex));
+                    RemoveQuestSlotObjectiveFlag(log_slot, objective.StorageIndex);
             }
         }
 

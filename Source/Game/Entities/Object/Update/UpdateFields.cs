@@ -2311,7 +2311,7 @@ namespace Game.Entities
         public UpdateField<uint> StateFlags = new UpdateField<uint>(0, 2);
         public UpdateField<uint> EndTime = new UpdateField<uint>(0, 3);
         public UpdateField<uint> AcceptTime = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> Field_10 = new UpdateField<uint>(0, 5);
+        public UpdateField<uint> ObjectiveFlags = new UpdateField<uint>(0, 5);
         public UpdateFieldArray<ushort> ObjectiveProgress = new UpdateFieldArray<ushort>(24, 6, 7);
 
         public QuestLog() : base(31) { }
@@ -2322,7 +2322,7 @@ namespace Game.Entities
             data.WriteUInt32(StateFlags);
             data.WriteUInt32(EndTime);
             data.WriteUInt32(AcceptTime);
-            data.WriteUInt32(Field_10);
+            data.WriteUInt32(ObjectiveFlags);
             for (int i = 0; i < 24; ++i)
             {
                 data.WriteUInt16(ObjectiveProgress[i]);
@@ -2360,7 +2360,7 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(Field_10);
+                    data.WriteUInt32(ObjectiveFlags);
                 }
             }
             if (changesMask[6])
@@ -2381,7 +2381,7 @@ namespace Game.Entities
             ClearChangesMask(StateFlags);
             ClearChangesMask(EndTime);
             ClearChangesMask(AcceptTime);
-            ClearChangesMask(Field_10);
+            ClearChangesMask(ObjectiveFlags);
             ClearChangesMask(ObjectiveProgress);
             _changesMask.ResetAll();
         }
