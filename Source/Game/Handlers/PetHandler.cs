@@ -201,9 +201,8 @@ namespace Game
                                         charmInfo.SetIsReturning(false);
 
                                         CreatureAI AI = pet.ToCreature().GetAI();
-                                        PetAI petAI = (PetAI)AI;
-                                        if (petAI != null)
-                                            petAI._AttackStart(TargetUnit); // force target switch
+                                        if (AI is PetAI)
+                                            ((PetAI)AI)._AttackStart(TargetUnit); // force target switch
                                         else
                                             AI.AttackStart(TargetUnit);
 
