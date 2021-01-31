@@ -298,7 +298,7 @@ namespace Game.Entities
                 if (status == QuestStatus.Complete)
                     qm.AddMenuItem(quest_id, 4);
                 else if (status == QuestStatus.Incomplete)
-                    qm.AddMenuItem(quest_id, 4);
+                    qm.AddMenuItem(quest_id, 2);
             }
 
             foreach (var quest_id in objectQR)
@@ -1774,10 +1774,10 @@ namespace Game.Entities
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
             if (quest != null)
             {
-                QuestStatus oldStatus = m_QuestStatus[questId].Status;
                 if (!m_QuestStatus.ContainsKey(questId))
                     m_QuestStatus[questId] = new QuestStatusData();
 
+                QuestStatus oldStatus = m_QuestStatus[questId].Status;
                 m_QuestStatus[questId].Status = status;
                 if (!quest.IsAutoComplete())
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
