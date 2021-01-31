@@ -5357,7 +5357,7 @@ namespace Game.Entities
             }
             data.WriteUInt32(ParameterCurve);
             data.FlushBits();
-            data.WriteBit(OverrideActive);
+            data.WriteBit((bool)OverrideActive);
             data.FlushBits();
         }
 
