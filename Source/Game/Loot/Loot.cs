@@ -448,11 +448,11 @@ namespace Game.Loots
             bool is_looted = true;
             if (lootSlot >= items.Count)
             {
-                uint questSlot = (uint)(lootSlot - items.Count);
+                int questSlot = (int)(lootSlot - items.Count);
                 var questItems = PlayerQuestItems.LookupByKey(player.GetGUID());
                 if (!questItems.Empty())
                 {
-                    NotNormalLootItem qitem2 = questItems.Find(p => p.index == questSlot);
+                    NotNormalLootItem qitem2 = questItems[questSlot];
                     if (qitem2 != null)
                     {
                         qitem = qitem2;
