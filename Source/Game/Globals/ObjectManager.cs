@@ -2639,8 +2639,7 @@ namespace Game
                 cInfo.CreatureType = CreatureType.Humanoid;
             }
 
-            // must exist or used hidden but used in data horse case
-            if (cInfo.Family != 0 && !CliDB.CreatureFamilyStorage.ContainsKey(cInfo.Family) && cInfo.Family != CreatureFamily.HorseCustom)
+            if (cInfo.Family != 0 && !CliDB.CreatureFamilyStorage.ContainsKey(cInfo.Family))
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid creature family ({1}) in `family`.", cInfo.Entry, cInfo.Family);
                 cInfo.Family = CreatureFamily.None;

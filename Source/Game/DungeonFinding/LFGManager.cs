@@ -1902,17 +1902,17 @@ namespace Game.DungeonFinding
                 case 285: // The Headless Horseman
                     return Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd);
                 case 286: // The Frost Lord Ahune
-                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.FireFestival);
+                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.MidsummerFireFestival);
                 case 287: // Coren Direbrew
                     return Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest);
                 case 288: // The Crown Chemical Co.
                     return Global.GameEventMgr.IsHolidayActive(HolidayIds.LoveIsInTheAir);
                 case 744: // Random Timewalking Dungeon (Burning Crusade)
-                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingOutlands);
+                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventBcDefault);
                 case 995: // Random Timewalking Dungeon (Wrath of the Lich King)
-                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingNorthrend);
+                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventLkDefault);
                 case 1146: // Random Timewalking Dungeon (Cataclysm)
-                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingCataclysm);
+                    return Global.GameEventMgr.IsHolidayActive(HolidayIds.TimewalkingDungeonEventCataDefault);
             }
             return false;
         }

@@ -647,9 +647,9 @@ namespace Game.BattleGrounds
                 case BattlegroundTypeId.AV:
                     return HolidayIds.CallToArmsAv;
                 case BattlegroundTypeId.EY:
-                    return HolidayIds.CallToArmsEy;
+                    return HolidayIds.CallToArmsEs;
                 case BattlegroundTypeId.WS:
-                    return HolidayIds.CallToArmsWs;
+                    return HolidayIds.CallToArmsWg;
                 case BattlegroundTypeId.SA:
                     return HolidayIds.CallToArmsSa;
                 case BattlegroundTypeId.AB:
@@ -659,7 +659,7 @@ namespace Game.BattleGrounds
                 case BattlegroundTypeId.TP:
                     return HolidayIds.CallToArmsTp;
                 case BattlegroundTypeId.BFG:
-                    return HolidayIds.CallToArmsBfg;
+                    return HolidayIds.CallToArmsBg;
                 default:
                     return HolidayIds.None;
             }
@@ -671,9 +671,9 @@ namespace Game.BattleGrounds
             {
                 case HolidayIds.CallToArmsAv:
                     return BattlegroundTypeId.AV;
-                case HolidayIds.CallToArmsEy:
+                case HolidayIds.CallToArmsEs:
                     return BattlegroundTypeId.EY;
-                case HolidayIds.CallToArmsWs:
+                case HolidayIds.CallToArmsWg:
                     return BattlegroundTypeId.WS;
                 case HolidayIds.CallToArmsSa:
                     return BattlegroundTypeId.SA;
@@ -683,7 +683,7 @@ namespace Game.BattleGrounds
                     return BattlegroundTypeId.IC;
                 case HolidayIds.CallToArmsTp:
                     return BattlegroundTypeId.TP;
-                case HolidayIds.CallToArmsBfg:
+                case HolidayIds.CallToArmsBg:
                     return BattlegroundTypeId.BFG;
                 default:
                     return BattlegroundTypeId.None;

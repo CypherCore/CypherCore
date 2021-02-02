@@ -1543,7 +1543,17 @@ namespace Framework.Constants
         DraenorMining = 45,
         LegionMining = 46,
         KulTiranMining = 47,
-        Skinning2 = 48
+        Skinning2 = 48,
+        Open2 = 149,
+        Foraging = 150,
+        JellyDeposit = 152,
+        ShadowlandHerbalism = 153,
+        ShadowlandMining = 155,
+        CovenantNightFae = 157,
+        CovenantVenthyr = 158,
+        CovenantKyrian = 159,
+        CovenantNecrolord = 160,
+        ProfessionEngineering = 161
     }
 
     public enum MapTypes : byte
