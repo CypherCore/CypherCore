@@ -5236,6 +5236,8 @@ namespace Game.Entities
 
             UpdateCriteria(CriteriaTypes.ReachLevel);
 
+            PushQuests();
+
             Global.ScriptMgr.OnPlayerLevelChanged(this, (byte)oldLevel);
         }
 

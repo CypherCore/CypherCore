@@ -498,7 +498,7 @@ namespace Game.Chat
             bool found = false;
             uint count = 0;
 
-            var qTemplates = Global.ObjectMgr.GetQuestStorage();
+            var qTemplates = Global.ObjectMgr.GetQuestTemplates();
             foreach (var qInfo in qTemplates.Values)
             {
                 int localeIndex = handler.GetSessionDbLocaleIndex();

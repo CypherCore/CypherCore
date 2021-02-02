@@ -37,7 +37,7 @@ namespace Game.Entities
         public ObjectGuid GetPlayerSharingQuest() { return m_playerSharingQuest; }
         public void SetQuestSharingInfo(ObjectGuid guid, uint id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
         public void ClearQuestSharingInfo() { m_playerSharingQuest = ObjectGuid.Empty; m_sharedQuestId = 0; }
-        
+
         uint GetInGameTime() { return m_ingametime; }
         public void SetInGameTime(uint time) { m_ingametime = time; }
 
@@ -768,8 +768,7 @@ namespace Game.Entities
                             GetReputationMgr().SetVisible(factionEntry);
                         break;
                     case QuestObjectiveType.CriteriaTree:
-                        if (quest.HasFlagEx(QuestFlagsEx.IsWorldQuest))
-                            m_questObjectiveCriteriaMgr.ResetCriteriaTree((uint)obj.ObjectID);
+                        m_questObjectiveCriteriaMgr.ResetCriteriaTree((uint)obj.ObjectID);
                         break;
                     default:
                         break;
@@ -3121,6 +3120,18 @@ namespace Game.Entities
         {
             m_monthlyquests.Add(quest_id);
             m_MonthlyQuestChanged = true;
+        }
+
+        void PushQuests()
+        {
+            foreach (Quest quest in Global.ObjectMgr.GetQuestTemplatesAutoPush())
+            {
+                if (quest.GetQuestTag() != 0 && quest.GetQuestTag() != QuestTagType.Tag)
+                    continue;
+
+                if (!quest.IsUnavailable() && CanTakeQuest(quest, false))
+                    AddQuestAndCheckCompletion(quest, null);
+            }
         }
     }
 }

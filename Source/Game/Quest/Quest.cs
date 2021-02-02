@@ -564,6 +564,12 @@ namespace Game
 
         public bool HasSpecialFlag(QuestSpecialFlags flag) { return (SpecialFlags & flag) != 0; }
         public void SetSpecialFlag(QuestSpecialFlags flag) { SpecialFlags |= flag; }
+        
+        public bool IsAutoPush() { return HasFlagEx(QuestFlagsEx.AutoPush);    }
+        public bool IsWorldQuest() { return HasFlagEx(QuestFlagsEx.IsWorldQuest);}
+
+        // Possibly deprecated flag
+        public bool IsUnavailable() { return HasFlag(QuestFlags.Unavailable); }
 
         // table data accessors:
         public bool IsRepeatable() { return SpecialFlags.HasAnyFlag(QuestSpecialFlags.Repeatable); }

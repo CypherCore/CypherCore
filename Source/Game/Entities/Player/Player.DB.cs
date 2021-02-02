@@ -3222,6 +3222,8 @@ namespace Game.Entities
 
             m_achievementSys.CheckAllAchievementCriteria(this);
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
+
+            PushQuests();
             return true;
         }
 

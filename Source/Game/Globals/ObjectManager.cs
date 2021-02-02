@@ -6592,6 +6592,7 @@ namespace Game
 
             // For reload case
             _questTemplates.Clear();
+            _questTemplatesAutoPush.Clear();
             _questObjectives.Clear();
             _exclusiveQuestGroups.Clear();
 
@@ -6641,6 +6642,8 @@ namespace Game
             {
                 Quest newQuest = new Quest(result.GetFields());
                 _questTemplates[newQuest.Id] = newQuest;
+                if (newQuest.IsAutoPush())
+                    _questTemplatesAutoPush.Add(newQuest);
             }
             while (result.NextRow());
 
@@ -7805,9 +7808,9 @@ namespace Game
         {
             return _questTemplates;
         }
-        public Dictionary<uint, Quest> GetQuestStorage()
+        public List<Quest> GetQuestTemplatesAutoPush()
         {
-            return _questTemplates;
+            return _questTemplatesAutoPush;
         }
         public MultiMap<uint, uint> GetGOQuestRelationMap()
         {
@@ -10246,6 +10249,7 @@ namespace Game
 
         //Quest
         Dictionary<uint, Quest> _questTemplates = new Dictionary<uint, Quest>();
+        List<Quest> _questTemplatesAutoPush = new List<Quest>();
         MultiMap<uint, uint> _goQuestRelations = new MultiMap<uint, uint>();
         MultiMap<uint, uint> _goQuestInvolvedRelations = new MultiMap<uint, uint>();
         MultiMap<uint, uint> _goQuestInvolvedRelationsReverse = new MultiMap<uint, uint>();

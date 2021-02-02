@@ -145,6 +145,8 @@ namespace Game.Entities
             else
                 _restMgr.RemoveRestFlag(RestFlag.FactionArea);
 
+            PushQuests();
+
             UpdateCriteria(CriteriaTypes.TravelledToArea, newArea);
         }
 
