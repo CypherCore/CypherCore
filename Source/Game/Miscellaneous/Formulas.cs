@@ -136,6 +136,13 @@ namespace Game
                     baseGain = 0;
             }
 
+            if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0 && pl_level != mob_level)
+            {
+                // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
+                uint baseGainMin = BaseGain(pl_level, pl_level) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
+                baseGain = Math.Max(baseGainMin, baseGain);
+            }
+
             Global.ScriptMgr.OnBaseGainCalculation(baseGain, pl_level, mob_level);
             return baseGain;
         }

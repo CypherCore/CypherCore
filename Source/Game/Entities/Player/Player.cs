@@ -5007,7 +5007,7 @@ namespace Game.Entities
             uint k_grey = Formulas.GetGrayLevel(GetLevel());
 
             // Victim level less gray level
-            if (v_level < k_grey)
+            if (v_level < k_grey && WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) == 0)
                 return false;
 
             Creature creature = victim.ToCreature();
@@ -6170,6 +6170,12 @@ namespace Game.Entities
                         else
                         {
                             XP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                        }
+
+                        if (WorldConfig.GetIntValue(WorldCfg.MinDiscoveredScaledXpRatio) != 0)
+                        {
+                            uint minScaledXP = (uint)(Global.ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
+                            XP = Math.Max(minScaledXP, XP);
                         }
 
                         GiveXP(XP, null);

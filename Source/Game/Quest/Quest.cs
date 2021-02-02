@@ -294,14 +294,13 @@ namespace Game
                 if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && Expansion < (int)PlayerConst.CurrentExpansion)
                     xp = (uint)(xp / 9.0f);
 
-                if (xp <= 100)
-                    xp = 5 * ((xp + 2) / 5);
-                else if (xp <= 500)
-                    xp = 10 * ((xp + 5) / 10);
-                else if (xp <= 1000)
-                    xp = 25 * ((xp + 12) / 25);
-                else
-                    xp = 50 * ((xp + 25) / 50);
+                xp = RoundXPValue(xp);
+
+                if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
+                {
+                    uint minScaledXP = RoundXPValue((uint)(questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
+                    xp = Math.Max(minScaledXP, xp);
+                }
 
                 return xp;
             }
@@ -556,6 +555,18 @@ namespace Game
             QueryData.Info.CompleteSoundKitID = SoundTurnIn;
             QueryData.Info.AreaGroupID = AreaGroupID;
             QueryData.Info.TimeAllowed = LimitTime;
+        }
+
+        public static uint RoundXPValue(uint xp)
+        {
+            if (xp <= 100)
+                return 5 * ((xp + 2) / 5);
+            else if (xp <= 500)
+                return 10 * ((xp + 5) / 10);
+            else if (xp <= 1000)
+                return 25 * ((xp + 12) / 25);
+            else
+                return 50 * ((xp + 25) / 50);
         }
 
         public bool HasFlag(QuestFlags flag) { return (Flags & flag) != 0; }

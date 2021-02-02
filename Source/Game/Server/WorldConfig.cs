@@ -295,6 +295,28 @@ namespace Game
 
             Values[WorldCfg.GroupXpDistance] = GetDefaultValue("MaxGroupXPDistance", 74.0f);
             Values[WorldCfg.MaxRecruitAFriendDistance] = GetDefaultValue("MaxRecruitAFriendBonusDistance", 100.0f);
+            Values[WorldCfg.MinQuestScaledXpRatio] = GetDefaultValue("MinQuestScaledXPRatio", 0);
+            if ((int)Values[WorldCfg.MinQuestScaledXpRatio] > 100)
+            {
+                Log.outError(LogFilter.ServerLoading, $"MinQuestScaledXPRatio ({Values[WorldCfg.MinQuestScaledXpRatio]}) must be in range 0..100. Set to 0.");
+                Values[WorldCfg.MinQuestScaledXpRatio] = 0;
+            }
+
+            Values[WorldCfg.MinCreatureScaledXpRatio] = GetDefaultValue("MinCreatureScaledXPRatio", 0);
+            if ((int)Values[WorldCfg.MinCreatureScaledXpRatio] > 100)
+            {
+                Log.outError(LogFilter.ServerLoading, $"MinCreatureScaledXPRatio ({Values[WorldCfg.MinCreatureScaledXpRatio]}) must be in range 0..100. Set to 0.");
+                Values[WorldCfg.MinCreatureScaledXpRatio] = 0;
+            }
+
+            Values[WorldCfg.MinDiscoveredScaledXpRatio] = GetDefaultValue("MinDiscoveredScaledXPRatio", 0);
+            if ((int)Values[WorldCfg.MinDiscoveredScaledXpRatio] > 100)
+            {
+                Log.outError(LogFilter.ServerLoading, $"MinDiscoveredScaledXPRatio ({Values[WorldCfg.MinDiscoveredScaledXpRatio]}) must be in range 0..100. Set to 0.");
+                Values[WorldCfg.MinDiscoveredScaledXpRatio] = 0;
+            }
+
+            /// @todo Add MonsterSight (with meaning) in worldserver.conf or put them as define
             Values[WorldCfg.SightMonster] = GetDefaultValue("MonsterSight", 50.0f);
 
             if (reload)
