@@ -2176,13 +2176,10 @@ namespace Game.Entities
 
             crit_bonus -= (int)damage;
 
-            if (damage > crit_bonus)
-            {
-                // adds additional damage to critBonus (from talents)
-                Player modOwner = GetSpellModOwner();
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.CritDamageBonus, ref crit_bonus);
-            }
+            // adds additional damage to critBonus (from talents)
+            Player modOwner = GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.ApplySpellMod(spellProto.Id, SpellModOp.CritDamageBonus, ref crit_bonus);
 
             crit_bonus += (int)damage;
 
