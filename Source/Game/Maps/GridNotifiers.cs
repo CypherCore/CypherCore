@@ -1760,7 +1760,7 @@ namespace Game.Maps
     }
     public class PlayerListSearcher : Notifier
     {
-        public PlayerListSearcher(WorldObject searcher, List<Player> objects, ICheck<Player> check)
+        public PlayerListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Player> check)
         {
             _searcher = searcher;
             i_objects = objects;
@@ -1779,7 +1779,7 @@ namespace Game.Maps
         }
 
         WorldObject _searcher;
-        List<Player> i_objects;
+        List<Unit> i_objects;
         ICheck<Player> i_check;
     }
 

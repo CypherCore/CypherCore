@@ -1578,9 +1578,9 @@ namespace Game.Entities
             Cell.VisitGridObjects(this, searcher, maxSearchRange);
         }
 
-        public List<Player> GetPlayerListInGrid(float maxSearchRange)
+        public List<Unit> GetPlayerListInGrid(float maxSearchRange)
         {
-            List<Player> playerList = new List<Player>();
+            List<Unit> playerList = new List<Unit>();
             var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
@@ -1633,12 +1633,13 @@ namespace Game.Entities
         {
             if (!IsInWorld)
                 return;
-            List<Player> targets = new List<Player>();
+
+            List<Unit> targets = new List<Unit>();
             var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
             var searcher = new PlayerListSearcher(this, targets, check);
 
             Cell.VisitWorldObjects(this, searcher, GetVisibilityRange());
-            foreach (var player in targets)
+            foreach (Player player in targets)
             {
                 if (player == this)
                     continue;

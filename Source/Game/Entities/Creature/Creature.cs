@@ -2899,8 +2899,8 @@ namespace Game.Entities
                 if (spellInfo.GetSpellVisual() != 0 && (focusSpell.GetCastTime() == 0 || // if the spell is instant cast
                    spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))) // client gets confused if we attempt to turn at the regularly scheduled update packet
                 {
-                    List<Player> playersNearby = GetPlayerListInGrid(GetVisibilityRange());
-                    foreach (var player in playersNearby)
+                    List<Unit> playersNearby = GetPlayerListInGrid(GetVisibilityRange());
+                    foreach (Player player in playersNearby)
                     {
                         // only update players that are known to the client (have already been created)
                         if (player.HaveAtClient(this))

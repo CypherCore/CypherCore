@@ -1240,11 +1240,11 @@ namespace Scripts.Spells.Quest
         {
             Unit caster = GetCaster();
             // Check for player that is in 65 y range
-            List<Player> playerList = new List<Player>();
+            List<Unit> playerList = new List<Unit>();
             AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
             PlayerListSearcher searcher = new PlayerListSearcher(caster, playerList, checker);
             Cell.VisitWorldObjects(caster, searcher, 65.0f);
-            foreach (var player in playerList)
+            foreach (Player player in playerList)
             {
                 // Check if found player target is on fly mount or using flying form
                 if (player.HasAuraType(AuraType.Fly) || player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))

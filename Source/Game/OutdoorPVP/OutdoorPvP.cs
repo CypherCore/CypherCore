@@ -521,12 +521,12 @@ namespace Game.PvP
                 }
             }
 
-            List<Player> players = new List<Player>();
+            List<Unit> players = new List<Unit>();
             var checker = new AnyPlayerInObjectRangeCheck(m_capturePoint, radius);
             var searcher = new PlayerListSearcher(m_capturePoint, players, checker);
             Cell.VisitWorldObjects(m_capturePoint, searcher, radius);
 
-            foreach (var player in players)
+            foreach (Player player in players)
             {
                 if (player.IsOutdoorPvPActive())
                 {

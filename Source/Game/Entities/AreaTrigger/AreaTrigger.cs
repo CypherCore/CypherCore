@@ -347,6 +347,21 @@ namespace Game.Entities
             HandleUnitEnterExit(targetList);
         }
 
+        void SearchUnits(List<Unit> targetList, float radius, bool check3D)
+        {
+            var check = new AnyUnitInObjectRangeCheck(this, radius, check3D);
+            if (IsServerSide())
+            {
+                var searcher = new PlayerListSearcher(this, targetList, check);
+                Cell.VisitWorldObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            }
+            else
+            {
+                var searcher = new UnitListSearcher(this, targetList, check);
+                Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            }
+        }
+
         void SearchUnitInSphere(List<Unit> targetList)
         {
             float radius = GetTemplate().SphereDatas.Radius;
@@ -358,9 +373,7 @@ namespace Game.Entities
                 }
             }
 
-            var check = new AnyUnitInObjectRangeCheck(this, radius);
-            var searcher = new UnitListSearcher(this, targetList, check);
-            Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            SearchUnits(targetList, radius, true);
         }
 
         void SearchUnitInBox(List<Unit> targetList)
@@ -374,9 +387,7 @@ namespace Game.Entities
                 extentsZ = GetTemplate().BoxDatas.Extents[2];
             }
 
-            var check = new AnyUnitInObjectRangeCheck(this, GetTemplate().MaxSearchRadius, false);
-            var searcher = new UnitListSearcher(this, targetList, check);
-            Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
             float halfExtentsX = extentsX / 2.0f;
             float halfExtentsY = extentsY / 2.0f;
@@ -398,30 +409,24 @@ namespace Game.Entities
 
         void SearchUnitInPolygon(List<Unit> targetList)
         {
-            var check = new AnyUnitInObjectRangeCheck(this, GetTemplate().MaxSearchRadius, false);
-            var searcher = new UnitListSearcher(this, targetList, check);
-            Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
             float height = GetTemplate().PolygonDatas.Height;
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
 
-            targetList.RemoveAll(unit =>
-                !CheckIsInPolygon2D(unit) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
+            targetList.RemoveAll(unit => !CheckIsInPolygon2D(unit) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
         void SearchUnitInCylinder(List<Unit> targetList)
         {
-            var check = new AnyUnitInObjectRangeCheck(this, GetTemplate().MaxSearchRadius, false);
-            var searcher = new UnitListSearcher(this, targetList, check);
-            Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
             float height = GetTemplate().CylinderDatas.Height;
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
 
-            targetList.RemoveAll(unit => unit.GetPositionZ() < minZ
-                                         || unit.GetPositionZ() > maxZ);
+            targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
         void HandleUnitEnterExit(List<Unit> newTargetList)
