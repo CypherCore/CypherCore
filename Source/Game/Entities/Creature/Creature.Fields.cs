@@ -67,9 +67,9 @@ namespace Game.Entities
 
         LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
-        //WaypointMovementGenerator vars
-        uint m_waypointID;
-        uint m_path_id;
+        // Waypoint path
+        uint _waypointPathId;
+        (uint nodeId, uint pathId) _currentWaypointNodeInfo;
 
         //Formation var
         CreatureGroup m_formation;

@@ -998,7 +998,7 @@ namespace Game.Chat.Commands
             stmt.AddValue(0, guidLow);
             DB.World.Execute(stmt);
 
-            target.UpdateWaypointID(0);
+            target.UpdateCurrentWaypointInfo(0, 0);
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
             stmt.AddValue(0, (byte)MovementGeneratorType.Idle);

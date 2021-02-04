@@ -235,7 +235,7 @@ namespace Game.Entities
                     continue;
 
                 if (pair.Value.point_1 != 0)
-                    if (m_leader.GetCurrentWaypointID() == pair.Value.point_1 - 1 || m_leader.GetCurrentWaypointID() == pair.Value.point_2 - 1)
+                    if (m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_1 - 1 || m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_2 - 1)
                         pair.Value.follow_angle = (float)Math.PI * 2 - pair.Value.follow_angle;
 
                 float angle = pair.Value.follow_angle;

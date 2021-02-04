@@ -137,15 +137,17 @@ namespace Game.Movement
 
         public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
         {
-            if (_slot[(int)slot] == null)
+            if (Empty() || slot >= MovementSlot.Max || _slot[(int)slot] == null)
                 return MovementGeneratorType.Max;
-            else
-                return _slot[(int)slot].GetMovementGeneratorType();
+            
+            return _slot[(int)slot].GetMovementGeneratorType();
         }
 
         public IMovementGenerator GetMotionSlot(MovementSlot slot)
         {
-            Cypher.Assert((int)slot >= 0);
+            if (Empty() || slot >= MovementSlot.Max || _slot[(int)slot] == null)
+                return null;
+
             return _slot[(int)slot];
         }
 

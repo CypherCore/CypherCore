@@ -159,7 +159,7 @@ namespace Game.Entities
             init.Stop();
         }
 
-        public void PauseMovement(uint timer = 0, MovementSlot slot = 0)
+        public void PauseMovement(uint timer = 0, MovementSlot slot = 0, bool forced = true)
         {
             if (slot >= MovementSlot.Max)
                 return;
@@ -168,7 +168,8 @@ namespace Game.Entities
             if (movementGenerator != null)
                 movementGenerator.Pause(timer);
 
-            StopMoving();
+            if (forced)
+                StopMoving();
         }
 
         public void ResumeMovement(uint timer = 0, MovementSlot slot = 0)

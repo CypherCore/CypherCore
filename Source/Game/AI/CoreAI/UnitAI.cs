@@ -531,9 +531,13 @@ namespace Game.AI
         // Called when the dialog status between a player and the creature is requested.
         public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
 
+        public virtual void WaypointPathStarted(uint nodeId, uint pathId) { }
+
         public virtual void WaypointStarted(uint nodeId, uint pathId) { }
 
         public virtual void WaypointReached(uint nodeId, uint pathId) { }
+
+        public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
 
         public AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {

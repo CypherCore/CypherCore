@@ -53,6 +53,8 @@ namespace Game.Entities
             ResetLootMode(); // restore default loot mode
 
             m_homePosition = new WorldLocation();
+
+            _currentWaypointNodeInfo = new();
         }
 
         public override void Dispose()
@@ -2334,7 +2336,7 @@ namespace Game.Entities
 
             //Load Path
             if (cainfo.path_id != 0)
-                m_path_id = cainfo.path_id;
+                _waypointPathId = cainfo.path_id;
 
             if (cainfo.auras != null)
             {
@@ -3200,12 +3202,12 @@ namespace Game.Entities
         public void GetTransportHomePosition(out float x, out float y, out float z, out float ori) { m_transportHomePosition.GetPosition(out x, out y, out z, out ori); }
         public Position GetTransportHomePosition() { return m_transportHomePosition; }
 
-        public uint GetWaypointPath() { return m_path_id; }
-        public void LoadPath(uint pathid) { m_path_id = pathid; }
+        public uint GetWaypointPath() { return _waypointPathId; }
+        public void LoadPath(uint pathid) { _waypointPathId = pathid; }
 
-        public uint GetCurrentWaypointID() { return m_waypointID; }
-        public void UpdateWaypointID(uint wpID) { m_waypointID = wpID; }
-
+        public (uint nodeId, uint pathId) GetCurrentWaypointInfo() { return _currentWaypointNodeInfo; }
+        public void UpdateCurrentWaypointInfo(uint nodeId, uint pathId) { _currentWaypointNodeInfo = (nodeId, pathId); }
+        
         public CreatureGroup GetFormation() { return m_formation; }
         public void SetFormation(CreatureGroup formation) { m_formation = formation; }
 

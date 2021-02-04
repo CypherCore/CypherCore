@@ -133,6 +133,17 @@ namespace Game.AI
 
         public void PausePath(uint delay, bool forced)
         {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                me.PauseMovement(delay, MovementSlot.Idle, forced);
+                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
+                {
+                    var waypointInfo = me.GetCurrentWaypointInfo();
+                    GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, waypointInfo.nodeId, waypointInfo.pathId);
+                }
+                return;
+            }
+
             if (HasEscortState(SmartEscortState.Paused))
             {
                 Log.outError(LogFilter.Server, $"SmartAI.PausePath: Creature entry {me.GetEntry()} wanted to pause waypoint movement while already paused, ignoring.");
@@ -157,6 +168,30 @@ namespace Game.AI
 
         public void StopPath(uint despawnTime = 0, uint quest = 0, bool fail = false)
         {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                (uint nodeId, uint pathId) waypointInfo = new ();
+                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
+                    waypointInfo = me.GetCurrentWaypointInfo();
+
+                if (mDespawnState != 2)
+                    SetDespawnTime(despawnTime);
+
+                me.GetMotionMaster().MoveIdle();
+
+                if (waypointInfo.Item1 != 0)
+                    GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, waypointInfo.Item1, waypointInfo.Item2);
+
+                if (!fail)
+                {
+                    if (waypointInfo.Item1 != 0)
+                        GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, waypointInfo.Item1, waypointInfo.Item2);
+                    if (mDespawnState == 1)
+                        StartDespawn();
+                }
+                return;
+            }
+
             if (quest != 0)
                 mEscortQuestID = quest;
 
@@ -269,6 +304,9 @@ namespace Game.AI
 
         void UpdatePath(uint diff)
         {
+            if (!HasEscortState(SmartEscortState.Escorting))
+                return;
+
             if (_escortInvokerCheckTimer < diff)
             {
                 if (!IsEscortInvokerInRange())
@@ -391,6 +429,15 @@ namespace Game.AI
             return true;
         }
 
+        public override void WaypointPathStarted(uint nodeId, uint pathId)
+        {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, nodeId, pathId);
+                return;
+            }
+        }
+
         public override void WaypointStarted(uint nodeId, uint pathId)
         {
 
@@ -398,6 +445,12 @@ namespace Game.AI
 
         public override void WaypointReached(uint nodeId, uint pathId)
         {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, nodeId, pathId);
+                return;
+            }
+
             _currentWaypointNode = nodeId;
 
             GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, _currentWaypointNode, pathId);
@@ -414,6 +467,15 @@ namespace Game.AI
                     _waypointPathEnded = true;
                 else
                     SetRun(mRun);
+            }
+        }
+
+        public override void WaypointPathEnded(uint nodeId, uint pathId)
+        {
+            if (!HasEscortState(SmartEscortState.Escorting))
+            {
+                GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, nodeId, pathId);
+                return;
             }
         }
 
@@ -450,10 +512,17 @@ namespace Game.AI
 
             me.AddUnitState(UnitState.Evade);
 
-            GetScript().ProcessEventsFor(SmartEvents.Evade);//must be after aura clear so we can cast spells from db
+            GetScript().ProcessEventsFor(SmartEvents.Evade); // must be after _EnterEvadeMode (spells, auras, ...)
 
             SetRun(mRun);
-            if (HasEscortState(SmartEscortState.Escorting))
+
+            Unit owner = me.GetCharmerOrOwner();
+            if (owner != null)
+            {
+                me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
+                me.ClearUnitState(UnitState.Evade);
+            }
+            else if (HasEscortState(SmartEscortState.Escorting))
             {
                 AddEscortState(SmartEscortState.Returning);
                 ReturnToLastOOCPos();
@@ -461,17 +530,10 @@ namespace Game.AI
             else
             {
                 Unit target = !mFollowGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, mFollowGuid) : null;
-                Unit owner = me.GetCharmerOrOwner();
-
                 if (target)
                 {
                     me.GetMotionMaster().MoveFollow(target, mFollowDist, mFollowAngle);
                     // evade is not cleared in MoveFollow, so we can't keep it
-                    me.ClearUnitState(UnitState.Evade);
-                }
-                else if (owner)
-                {
-                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
                     me.ClearUnitState(UnitState.Evade);
                 }
                 else
@@ -552,12 +614,15 @@ namespace Game.AI
             mRespawnTime = 0;
             mDespawnState = 0;
             _escortState = SmartEscortState.None;
+
             me.SetVisible(true);
+
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
-            mJustReset = true;
-            JustReachedHome();
+
+            GetScript().OnReset();
             GetScript().ProcessEventsFor(SmartEvents.Respawn);
+
             mFollowGuid.Clear();//do not reset follower on Reset(), we need it after combat evade
             mFollowDist = 0;
             mFollowAngle = 0;
@@ -570,23 +635,18 @@ namespace Game.AI
         public override void JustReachedHome()
         {
             GetScript().OnReset();
-            if (!mJustReset)
+            GetScript().ProcessEventsFor(SmartEvents.ReachedHome);
+
+            CreatureGroup formation = me.GetFormation();
+            if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
-                GetScript().ProcessEventsFor(SmartEvents.ReachedHome);
-
-                CreatureGroup formation = me.GetFormation();
-                if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
-                {
-                    if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Idle && me.GetWaypointPath() != 0)
-                        me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
-                    else
-                        me.ResumeMovement();
-                }
-                else if (formation.IsFormed())
-                    me.GetMotionMaster().MoveIdle(); // wait the order of leader
+                if (me.GetMotionMaster().GetMotionSlotType(MovementSlot.Idle) != MovementGeneratorType.Waypoint && me.GetWaypointPath() != 0)
+                    me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
+                else
+                    me.ResumeMovement();
             }
-
-            mJustReset = false;
+            else if (formation.IsFormed())
+                me.GetMotionMaster().MoveIdle(); // wait the order of leader
         }
 
         public override void EnterCombat(Unit victim)
@@ -993,7 +1053,6 @@ namespace Game.AI
         uint mDespawnTime;
         uint mRespawnTime;
         uint mDespawnState;
-        bool mJustReset;
 
         // Vehicle conditions
         bool mHasConditions;
