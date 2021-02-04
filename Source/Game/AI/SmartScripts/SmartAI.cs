@@ -46,26 +46,6 @@ namespace Game.AI
             return !mIsCharmed;
         }
 
-        void UpdateDespawn(uint diff)
-        {
-            if (mDespawnState <= 1 || mDespawnState > 3)
-                return;
-
-            if (mDespawnTime < diff)
-            {
-                if (mDespawnState == 2)
-                {
-                    me.SetVisible(false);
-                    mDespawnTime = 5000;
-                    mDespawnState++;
-                }
-                else
-                    me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(mRespawnTime));
-            }
-            else
-                mDespawnTime -= diff;
-        }
-
         public void StartPath(bool run = false, uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 1)
         {
             if (me.IsInCombat())// no wp movement in combat
@@ -302,79 +282,15 @@ namespace Game.AI
             me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, me.GetHomePosition());
         }
 
-        void UpdatePath(uint diff)
-        {
-            if (!HasEscortState(SmartEscortState.Escorting))
-                return;
-
-            if (_escortInvokerCheckTimer < diff)
-            {
-                if (!IsEscortInvokerInRange())
-                {
-                    StopPath(0, mEscortQuestID, true);
-
-                    // allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
-                    GetScript().ProcessEventsFor(SmartEvents.Death, me);
-                    me.DespawnOrUnsummon();
-                    return;
-                }
-                _escortInvokerCheckTimer = 1000;
-            }
-            else
-                _escortInvokerCheckTimer -= diff;
-
-            // handle pause
-            if (HasEscortState(SmartEscortState.Paused) && (_waypointReached || _waypointPauseForced))
-            {
-                if (_waypointPauseTimer < diff)
-                {
-                    if (!me.IsInCombat() && !HasEscortState(SmartEscortState.Returning))
-                        ResumePath();
-                }
-                else
-                    _waypointPauseTimer -= diff;
-            }
-            else if (_waypointPathEnded) // end path
-            {
-                _waypointPathEnded = false;
-                StopPath();
-                return;
-            }
-
-            if (HasEscortState(SmartEscortState.Returning))
-            {
-                if (_OOCReached)//reached OOC WP
-                {
-                    _OOCReached = false;
-                    RemoveEscortState(SmartEscortState.Returning);
-                    if (!HasEscortState(SmartEscortState.Paused))
-                        ResumePath();
-                }
-            }
-        }
-
         public override void UpdateAI(uint diff)
         {
             CheckConditions(diff);
+
             GetScript().OnUpdate(diff);
+
             UpdatePath(diff);
+            UpdateFollow(diff);
             UpdateDespawn(diff);
-
-            if (!mFollowGuid.IsEmpty())
-            {
-                if (mFollowArrivedTimer < diff)
-                {
-                    if (me.FindNearestCreature(mFollowArrivedEntry, SharedConst.InteractionDistance, true))
-                    {
-                        StopFollow(true);
-                        return;
-                    }
-
-                    mFollowArrivedTimer = 1000;
-                }
-                else
-                    mFollowArrivedTimer -= diff;
-            }
 
             if (!IsAIControlled())
                 return;
@@ -986,6 +902,96 @@ namespace Game.AI
             }
             else
                 mConditionsTimer -= diff;
+        }
+
+        void UpdatePath(uint diff)
+        {
+            if (!HasEscortState(SmartEscortState.Escorting))
+                return;
+
+            if (_escortInvokerCheckTimer < diff)
+            {
+                if (!IsEscortInvokerInRange())
+                {
+                    StopPath(0, mEscortQuestID, true);
+
+                    // allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
+                    GetScript().ProcessEventsFor(SmartEvents.Death, me);
+                    me.DespawnOrUnsummon();
+                    return;
+                }
+                _escortInvokerCheckTimer = 1000;
+            }
+            else
+                _escortInvokerCheckTimer -= diff;
+
+            // handle pause
+            if (HasEscortState(SmartEscortState.Paused) && (_waypointReached || _waypointPauseForced))
+            {
+                if (_waypointPauseTimer < diff)
+                {
+                    if (!me.IsInCombat() && !HasEscortState(SmartEscortState.Returning))
+                        ResumePath();
+                }
+                else
+                    _waypointPauseTimer -= diff;
+            }
+            else if (_waypointPathEnded) // end path
+            {
+                _waypointPathEnded = false;
+                StopPath();
+                return;
+            }
+
+            if (HasEscortState(SmartEscortState.Returning))
+            {
+                if (_OOCReached)//reached OOC WP
+                {
+                    _OOCReached = false;
+                    RemoveEscortState(SmartEscortState.Returning);
+                    if (!HasEscortState(SmartEscortState.Paused))
+                        ResumePath();
+                }
+            }
+        }
+
+        void UpdateFollow(uint diff)
+        {
+            if (mFollowGuid.IsEmpty())
+            {
+                if (mFollowArrivedTimer < diff)
+                {
+                    if (me.FindNearestCreature(mFollowArrivedEntry, SharedConst.InteractionDistance, true))
+                    {
+                        StopFollow(true);
+                        return;
+                    }
+
+                    mFollowArrivedTimer = 1000;
+                }
+                else
+                    mFollowArrivedTimer -= diff;
+            }
+        }
+
+        void UpdateDespawn(uint diff)
+        {
+            if (mDespawnState <= 1 || mDespawnState > 3)
+                return;
+
+            if (mDespawnTime < diff)
+            {
+                if (mDespawnState == 2)
+                {
+                    me.SetVisible(false);
+                    mDespawnTime = 5000;
+                    mDespawnState++;
+                }
+                else
+                    me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(mRespawnTime));
+            }
+            else
+                mDespawnTime -= diff;
         }
 
         public override void Reset()
