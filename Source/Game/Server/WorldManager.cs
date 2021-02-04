@@ -718,6 +718,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading AreaTrigger Templates...");
             Global.AreaTriggerDataStorage.LoadAreaTriggerTemplates();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading AreaTrigger Spawns...");
+            Global.AreaTriggerDataStorage.LoadAreaTriggerSpawns();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Conversation Templates...");
             Global.ConversationDataStorage.LoadConversationTemplates();
 

@@ -28,64 +28,45 @@ namespace Game.DataStorage
     {
         AreaTriggerDataStorage() { }
 
-        public AreaTriggerTemplate GetAreaTriggerServerTemplate(uint areaTriggerId)
-        {
-            return _areaTriggerTemplateMap.LookupByKey(new AreaTriggerTemplateKey(areaTriggerId, true));
-        }
-
-        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, uint cellId)
-        {
-            if (!_areaTriggersGrid.ContainsKey(mapId))
-                return null;
-
-            return _areaTriggersGrid[mapId].LookupByKey(cellId);
-        }
-
-        public AreaTriggerServerPosition GetAreaTriggerServerPosition(uint spawnId)
-        {
-            return _areaTriggerSpawnMap.LookupByKey(spawnId);
-        }
-
         public void LoadAreaTriggerTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
             MultiMap<uint, Vector2> verticesByAreaTrigger = new MultiMap<uint, Vector2>();
             MultiMap<uint, Vector2> verticesTargetByAreaTrigger = new MultiMap<uint, Vector2>();
             MultiMap<uint, Vector3> splinesBySpellMisc = new MultiMap<uint, Vector3>();
-            MultiMap<uint, AreaTriggerAction> actionsByAreaTrigger = new MultiMap<uint, AreaTriggerAction>();
+            MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new MultiMap<AreaTriggerId, AreaTriggerAction>();
 
-            //                                                       0              1           2            3
-            SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
+            //                                                       0         1             2            3           4
+            SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, IsServerSide, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
             if (!templateActions.IsEmpty())
             {
                 do
                 {
-                    uint areaTriggerId = templateActions.Read<uint>(0);
+                    AreaTriggerId areaTriggerId = new() { Id = templateActions.Read<uint>(0), IsServerSide = templateActions.Read<byte>(1) == 1 };
 
                     AreaTriggerAction action;
-                    action.Param = templateActions.Read<uint>(2);
-                    action.ActionType = (AreaTriggerActionTypes)templateActions.Read<uint>(1);
-                    action.TargetType = (AreaTriggerActionUserTypes)templateActions.Read<uint>(3);
+                    action.Param = templateActions.Read<uint>(3);
+                    action.ActionType = (AreaTriggerActionTypes)templateActions.Read<uint>(2);
+                    action.TargetType = (AreaTriggerActionUserTypes)templateActions.Read<uint>(4);
 
                     if (action.ActionType >= AreaTriggerActionTypes.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `areatrigger_template_actions` has invalid ActionType ({0}) for AreaTriggerId {1} and Param {2}", action.ActionType, areaTriggerId, action.Param);
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid ActionType ({action.ActionType}, IsServerSide: {areaTriggerId.IsServerSide}) for AreaTriggerId {areaTriggerId.Id} and Param {action.Param}");
                         continue;
                     }
 
                     if (action.TargetType >= AreaTriggerActionUserTypes.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `areatrigger_template_actions` has invalid TargetType ({0}) for AreaTriggerId {1} and Param {2}", action.TargetType, areaTriggerId, action.Param);
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid TargetType ({action.TargetType}, IsServerSide: {areaTriggerId.IsServerSide}) for AreaTriggerId {areaTriggerId} and Param {action.Param}");
                         continue;
                     }
 
 
                     if (action.ActionType == AreaTriggerActionTypes.Teleport)
                     {
-                        WorldSafeLocsEntry safeLoc = Global.ObjectMgr.GetWorldSafeLoc(action.Param);
-                        if (safeLoc == null)
+                        if (Global.ObjectMgr.GetWorldSafeLoc(action.Param) == null)
                         {
-                            Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid entry ({areaTriggerId}) with TargetType=Teleport and Param ({action.Param}) not a valid world safe loc entry");
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_template_actions` has invalid (Id: {areaTriggerId}, IsServerSide: {areaTriggerId.IsServerSide}) with TargetType=Teleport and Param ({action.Param}) not a valid world safe loc entry");
                             continue;
                         }
                     }
@@ -140,29 +121,28 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
             }
 
-            //                                            0   1         2     3      4      5      6      7      8      9      10
-            SQLResult templates = DB.World.Query("SELECT Id, IsServer, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
+            //                                            0   1             2     3      4      5      6      7      8      9      10
+            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {
                 do
                 {
                     AreaTriggerTemplate areaTriggerTemplate = new AreaTriggerTemplate();
-                    areaTriggerTemplate.Id = templates.Read<uint>(0);
-                    bool isServer = templates.Read<byte>(1) == 1;
+                    areaTriggerTemplate.Id = new() { Id = templates.Read<uint>(0), IsServerSide = templates.Read<byte>(1) == 1 };
                     AreaTriggerTypes type = (AreaTriggerTypes)templates.Read<byte>(2);
 
                     if (type >= AreaTriggerTypes.Max)
                     {
-                        Log.outError(LogFilter.Sql, "Table `areatrigger_template` has listed areatrigger (Id: {0}) with invalid type {1}.", areaTriggerTemplate.Id, type);
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with invalid type {type}.");
                         continue;
                     }
 
                     areaTriggerTemplate.TriggerType = type;
                     areaTriggerTemplate.Flags = (AreaTriggerFlags)templates.Read<uint>(3);
 
-                    if (isServer && areaTriggerTemplate.Flags != 0)
+                    if (areaTriggerTemplate.Id.IsServerSide && areaTriggerTemplate.Flags != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id}) with none-zero flags");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed server-side areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with none-zero flags");
                         continue;
                     }
 
@@ -173,65 +153,17 @@ namespace Game.DataStorage
                     }
 
                     areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(10));
-                    areaTriggerTemplate.PolygonVertices = verticesByAreaTrigger[areaTriggerTemplate.Id];
-                    areaTriggerTemplate.PolygonVerticesTarget = verticesTargetByAreaTrigger[areaTriggerTemplate.Id];
+                    if (!areaTriggerTemplate.Id.IsServerSide)
+                    {
+                        areaTriggerTemplate.PolygonVertices = verticesByAreaTrigger[areaTriggerTemplate.Id.Id];
+                        areaTriggerTemplate.PolygonVerticesTarget = verticesTargetByAreaTrigger[areaTriggerTemplate.Id.Id];
+                    }
                     areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
-                    areaTriggerTemplate.IsServerSide = isServer;
 
                     areaTriggerTemplate.InitMaxSearchRadius();
-                    _areaTriggerTemplateMap[new AreaTriggerTemplateKey(areaTriggerTemplate.Id, isServer)] = areaTriggerTemplate;
+                    _areaTriggerTemplateStore[areaTriggerTemplate.Id] = areaTriggerTemplate;
                 }
                 while (templates.NextRow());
-            }
-
-            // Load area trigger positions (to put them on the server)
-            //                                            0        1   2         3      4     5     6     7        8           9              10
-            SQLResult templatePos = DB.World.Query("SELECT SpawnId, Id, IsServer, MapId, PosX, PosY, PosZ, PhaseId, PhaseGroup, PhaseUseFlags, Comment FROM `areatrigger_positions`");
-            if (!templatePos.IsEmpty())
-    {
-                do
-                {
-                    AreaTriggerServerPosition position = new AreaTriggerServerPosition();
-                    position.SpawnId = templatePos.Read<ulong>(0);
-                    position.Id = templatePos.Read<uint>(1);
-                    position.IsServer = templatePos.Read<byte>(2) == 1;
-                    uint mapId = templatePos.Read<uint>(3);
-
-                    float posX = templatePos.Read<float>(4);
-                    float posY = templatePos.Read<float>(5);
-                    float posZ = templatePos.Read<float>(6);
-                    position.Location = new WorldLocation(mapId, posX, posY, posZ);
-
-                    if (!GridDefines.IsValidMapCoord(position.Location))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_srv_position` has listed an invalid position: Id: {position.Id}, IsServer: {position.IsServer}. MapId ({mapId}), Position ({posX}, {posY}, {posZ})");
-                        continue;
-                    }
-
-                    position.PhaseId = templatePos.Read<uint>(7);
-                    position.PhaseGroup = templatePos.Read<uint>(8);
-                    position.PhaseUseFlags = templatePos.Read<byte>(9);
-
-                    var template = _areaTriggerTemplateMap.LookupByKey(new AreaTriggerTemplateKey(position.Id, position.IsServer));
-                    if (template == null)
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_srv_position` has listed areatrigger that doesn't exist: Id: {position.Id}, IsServer: {position.IsServer}");
-                        continue;
-                    }
-
-                    // Add the trigger to a map::cell map, which is later used by GridLoader to query
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(position.Location.GetPositionX(), position.Location.GetPositionY());
-                    if (!_areaTriggersGrid.ContainsKey(mapId))
-                        _areaTriggersGrid[mapId] = new Dictionary<uint, SortedSet<ulong>>();
-
-                    if (!_areaTriggersGrid[mapId].ContainsKey(cellCoord.GetId()))
-                        _areaTriggersGrid[mapId][cellCoord.GetId()] = new SortedSet<ulong>();
-
-                    _areaTriggersGrid[mapId][cellCoord.GetId()].Add(position.SpawnId);
-
-                    // add  the position to the map
-                    _areaTriggerSpawnMap[(uint)position.SpawnId] = position;
-                } while (templates.NextRow());
             }
 
             //                                                        0            1              2            3             4             5              6       7          8                  9             10
@@ -244,7 +176,7 @@ namespace Game.DataStorage
                     miscTemplate.MiscId = areatriggerSpellMiscs.Read<uint>(0);
 
                     uint areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
-                    miscTemplate.Template = GetAreaTriggerTemplate(areatriggerId);
+                    miscTemplate.Template = GetAreaTriggerTemplate(new AreaTriggerId() { Id = areatriggerId, IsServerSide = false });
 
                     if (miscTemplate.Template == null)
                     {
@@ -344,12 +276,62 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell areatrigger templates in {1} ms.", _areaTriggerTemplateMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerTemplateStore.Count} spell areatrigger templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        public AreaTriggerTemplate GetAreaTriggerTemplate(uint areaTriggerId)
+        public void LoadAreaTriggerSpawns()
         {
-           return _areaTriggerTemplateMap.LookupByKey(new AreaTriggerTemplateKey(areaTriggerId, false));
+            uint oldMSTime = Time.GetMSTime();
+            // Load area trigger positions (to put them on the server)
+            //                                            0        1              2             3      4     5     6     7            8              9        10
+            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup FROM `areatrigger`");
+            if (!templates.IsEmpty())
+            {
+                do
+                {
+                    ulong spawnId = templates.Read<ulong>(0);
+                    AreaTriggerId areaTriggerId = new() { Id = templates.Read<uint>(1), IsServerSide = templates.Read<byte>(2) == 1 };
+                    WorldLocation location = new(templates.Read<uint>(3), templates.Read<float>(4), templates.Read<float>(5), templates.Read<float>(6), templates.Read<float>(7));
+
+                    if (GetAreaTriggerTemplate(areaTriggerId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed areatrigger that doesn't exist: Id: {areaTriggerId.Id}, IsServerSide: {areaTriggerId.IsServerSide} for SpawnId {spawnId}");
+                        continue;
+                    }
+
+                    if (!GridDefines.IsValidMapCoord(location))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed an invalid position: SpawnId: {spawnId}, MapId: {location.GetMapId()}, Position: {location}");
+                        continue;
+                    }
+
+                    AreaTriggerSpawn spawn = new AreaTriggerSpawn();
+                    spawn.SpawnId = spawnId;
+                    spawn.Id = areaTriggerId;
+                    spawn.Location.WorldRelocate(location);
+
+                    spawn.PhaseUseFlags = templates.Read<byte>(8);
+                    spawn.PhaseId = templates.Read<uint>(9);
+                    spawn.PhaseGroup = templates.Read<uint>(10);
+
+                    // Add the trigger to a map::cell map, which is later used by GridLoader to query
+                    CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());
+                    if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.Location.GetMapId(), cellCoord.GetId())))
+                        _areaTriggerSpawnsByLocation[(spawn.Location.GetMapId(), cellCoord.GetId())] = new SortedSet<ulong>();
+
+                    _areaTriggerSpawnsByLocation[(spawn.Location.GetMapId(), cellCoord.GetId())].Add(spawnId);
+
+                    // add the position to the map
+                    _areaTriggerSpawnsBySpawnId[spawnId] = spawn;
+                } while (templates.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerSpawnsBySpawnId.Count} areatrigger spawns in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+        }
+
+        public AreaTriggerTemplate GetAreaTriggerTemplate(AreaTriggerId areaTriggerId)
+        {
+           return _areaTriggerTemplateStore.LookupByKey(areaTriggerId);
         }
 
         public AreaTriggerMiscTemplate GetAreaTriggerMiscTemplate(uint spellMiscValue)
@@ -357,9 +339,19 @@ namespace Game.DataStorage
             return _areaTriggerTemplateSpellMisc.LookupByKey(spellMiscValue);
         }
 
-        Dictionary<uint, Dictionary<uint, SortedSet<ulong>>> _areaTriggersGrid = new Dictionary<uint, Dictionary<uint, SortedSet<ulong>>>();
-        Dictionary<uint, AreaTriggerServerPosition> _areaTriggerSpawnMap = new Dictionary<uint, AreaTriggerServerPosition>();
-        Dictionary<AreaTriggerTemplateKey, AreaTriggerTemplate> _areaTriggerTemplateMap = new Dictionary<AreaTriggerTemplateKey, AreaTriggerTemplate>();
+        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, uint cellId)
+        {
+            return _areaTriggerSpawnsByLocation.LookupByKey((mapId, cellId));
+        }
+
+        public AreaTriggerSpawn GetAreaTriggerSpawn(ulong spawnId)
+        {
+            return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
+        }
+
+        Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new Dictionary<(uint mapId, uint cellId), SortedSet<ulong>>();
+        Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new Dictionary<ulong, AreaTriggerSpawn>();
+        Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new Dictionary<AreaTriggerId, AreaTriggerTemplate>();
         Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new Dictionary<uint, AreaTriggerMiscTemplate>();
     }
 }

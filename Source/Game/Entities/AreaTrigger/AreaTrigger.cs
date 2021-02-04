@@ -100,9 +100,9 @@ namespace Game.Entities
 
             _areaTriggerTemplate = _areaTriggerMiscTemplate.Template;
 
-            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), GetTemplate().Id, caster.GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
+            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), GetTemplate().Id.Id, caster.GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
 
-            SetEntry(GetTemplate().Id);
+            SetEntry(GetTemplate().Id.Id);
             SetDuration(duration);
 
             SetObjectScale(1.0f);
@@ -212,20 +212,20 @@ namespace Game.Entities
             return at;
         }
 
-        bool LoadFromDB(uint spawnId, Map map, bool addToMap, bool allowDuplicate)
+        public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
-            AreaTriggerServerPosition position = Global.AreaTriggerDataStorage.GetAreaTriggerServerPosition(spawnId);
+            AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
             if (position == null)
                 return false;
 
-            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerServerTemplate(position.Id);
+            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.Id);
             if (areaTriggerTemplate == null)
                 return false;
 
             return CreateServer(map, areaTriggerTemplate, position);
         }
 
-        bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerServerPosition position)
+        bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
         {
             SetMap(map);
             Relocate(position.Location);
@@ -237,18 +237,20 @@ namespace Game.Entities
 
             _areaTriggerTemplate = areaTriggerTemplate;
 
-            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), areaTriggerTemplate.Id, GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
+            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), areaTriggerTemplate.Id.Id, GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
 
-            SetEntry(areaTriggerTemplate.Id);
+            SetEntry(areaTriggerTemplate.Id.Id);
 
             SetObjectScale(1.0f);
 
-            if (position.PhaseId != 0 || position.PhaseGroup != 0 || position.PhaseUseFlags != 0)
+            if (position.PhaseUseFlags != 0 || position.PhaseId != 0 || position.PhaseGroup != 0)
                 PhasingHandler.InitDbPhaseShift(GetPhaseShift(), (PhaseUseFlagsValues)position.PhaseUseFlags, position.PhaseId, position.PhaseGroup);
 
             UpdateShape();
 
             AI_Initialize();
+
+            _ai.OnCreate();
 
             return true;
         }
@@ -258,34 +260,31 @@ namespace Game.Entities
             base.Update(diff);
             _timeSinceCreated += diff;
 
-            if (IsServerSide())
+            if (!IsServerSide())
             {
-                UpdateTargetList();
-                return;
-            }
-
-            // "If" order matter here, Orbit > Attached > Splines
-            if (HasOrbit())
-            {
-                UpdateOrbitPosition(diff);
-            }
-            else if(GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
-            {
-                Unit target = GetTarget();
-                if (target)
-                    GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
-            }
-            else
-                UpdateSplinePosition(diff);
-
-            if (GetDuration() != -1)
-            {
-                if (GetDuration() > diff)
-                    _UpdateDuration((int)(_duration - diff));
-                else
+                // "If" order matter here, Orbit > Attached > Splines
+                if (HasOrbit())
                 {
-                    Remove(); // expired
-                    return;
+                    UpdateOrbitPosition(diff);
+                }
+                else if (GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
+                {
+                    Unit target = GetTarget();
+                    if (target)
+                        GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
+                }
+                else
+                    UpdateSplinePosition(diff);
+
+                if (GetDuration() != -1)
+                {
+                    if (GetDuration() > diff)
+                        _UpdateDuration((int)(_duration - diff));
+                    else
+                    {
+                        Remove(); // expired
+                        return;
+                    }
                 }
             }
 
@@ -967,7 +966,7 @@ namespace Game.Entities
 
         AreaTriggerAI GetAI() { return _ai; }
 
-        public bool IsServerSide() { return _areaTriggerTemplate.IsServerSide; }
+        public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
 
         public override bool IsNeverVisibleFor(WorldObject seer) { return IsServerSide(); }
         
@@ -1034,10 +1033,9 @@ namespace Game.Entities
         Optional<AreaTriggerOrbitInfo> _orbitInfo;
 
         AreaTriggerMiscTemplate _areaTriggerMiscTemplate;
+        AreaTriggerTemplate _areaTriggerTemplate;
         List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
 
         AreaTriggerAI _ai;
-
-        AreaTriggerTemplate _areaTriggerTemplate;
     }
 }

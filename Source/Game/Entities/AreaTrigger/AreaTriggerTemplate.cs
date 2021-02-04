@@ -187,24 +187,28 @@ namespace Game.Entities
         }
     }
 
-    struct AreaTriggerTemplateKey
+    public struct AreaTriggerId
     {
         public uint Id;
-        public bool IsServer;
+        public bool IsServerSide;
 
-        public AreaTriggerTemplateKey(uint id, bool isServer)
+        public override int GetHashCode()
         {
-            Id = id;
-            IsServer = isServer;
+            return Id.GetHashCode() ^ IsServerSide.GetHashCode();
         }
 
-        public static bool operator ==(AreaTriggerTemplateKey A, AreaTriggerTemplateKey B)
+        public override bool Equals(object obj)
         {
-            return A.Id == B.Id && A.IsServer == B.IsServer;
+            return Equals((AreaTriggerId)obj);
         }
-        public static bool operator !=(AreaTriggerTemplateKey A, AreaTriggerTemplateKey B)
+
+        public static bool operator ==(AreaTriggerId left, AreaTriggerId right)
         {
-            return A.Id != B.Id && A.IsServer != B.IsServer;
+            return left.Id == right.Id && left.IsServerSide == right.IsServerSide;
+        }
+        public static bool operator !=(AreaTriggerId left, AreaTriggerId right)
+        {
+            return !(left == right);
         }
     }
 
@@ -256,7 +260,7 @@ namespace Game.Entities
         public bool IsPolygon() { return TriggerType == AreaTriggerTypes.Polygon; }
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
 
-        public uint Id;
+        public AreaTriggerId Id;
         public AreaTriggerTypes TriggerType;
         public AreaTriggerFlags Flags;
         public uint ScriptId;
@@ -265,7 +269,6 @@ namespace Game.Entities
         public List<Vector2> PolygonVertices = new List<Vector2>();
         public List<Vector2> PolygonVerticesTarget = new List<Vector2>();
         public List<AreaTriggerAction> Actions = new List<AreaTriggerAction>();
-        public bool IsServerSide;
     }
 
     public unsafe class AreaTriggerMiscTemplate
@@ -305,11 +308,10 @@ namespace Game.Entities
         public List<Vector3> SplinePoints = new List<Vector3>();
     }
 
-    public class AreaTriggerServerPosition
+    public class AreaTriggerSpawn
     {
         public ulong SpawnId;
-        public uint Id;
-        public bool IsServer;
+        public AreaTriggerId Id;
         public WorldLocation Location;
         public uint PhaseId;
         public uint PhaseGroup;
