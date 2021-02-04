@@ -301,7 +301,7 @@ namespace Framework.Constants
         Unk277 = 277,  // Old ModMaxAffectedTargets. Unused 4.3.4
         ModDisarmRanged = 278,
         InitializeImages = 279,
-        Unk280 = 280,  // Old ModArmorPenetrationPct Unused 4.3.4
+        ProvideSpellFocus = 280,
         ModGuildReputationGainPct = 281, // NYI
         ModBaseHealthPct = 282,
         ModHealingReceived = 283,  // Possibly Only For Some Spell Family Class Spells
@@ -328,8 +328,8 @@ namespace Framework.Constants
         ModFakeInebriate = 304,
         ModMinimumSpeed = 305,
         Unk306 = 306,
-        HealAbsorbTest = 307,
-        ModCritChanceForCaster = 308,
+        CastWhileWalkingBySpellLabel = 307, //NYI
+        ModCritChanceForCasterWithAbilities = 308,
         ModResilience = 309,  // NYI
         ModCreatureAoeDamageAvoidance = 310,
         Unk311 = 311,
@@ -337,7 +337,7 @@ namespace Framework.Constants
         Unk313 = 313,  // Not Used In 4.3.4 - Related To Mounts
         PreventResurrection = 314,
         UnderwaterWalking = 315,
-        PeriodicHaste = 316,  // Not Used In 4.3.4 (Name From 3.3.5a)
+        SchoolAbsorbOverkill = 316, // NYI - absorbs overkill damage
         ModSpellPowerPct = 317,
         Mastery = 318,
         ModMeleeHaste3 = 319,
@@ -348,7 +348,7 @@ namespace Framework.Constants
         OverrideUnlockedAzeriteEssenceRank = 324,  // testing aura
         LearnPvpTalent = 325,  // NYI
         PhaseGroup = 326,  // Phase Related
-        Unk327 = 327,  // Not Used In 4.3.4
+        PhaseAlwaysVisible = 327,  // NYI - sets PhaseShiftFlags::AlwaysVisible
         TriggerSpellOnPowerPct = 328,
         ModPowerGainPct = 329,  // Nyi
         CastWhileWalking = 330,
@@ -360,7 +360,7 @@ namespace Framework.Constants
         MountRestrictions = 336,
         ModVendorItemsPrices = 337,
         ModDurabilityLoss = 338,
-        IncreaseSkillGainChance = 339,  // Nyi
+        ModCritChanceForCaster = 339,  // Nyi
         ModResurrectedHealthByGuildMember = 340,  // Increases Health Gained When Resurrected By A Guild Member By X
         ModSpellCategoryCooldown = 341,
         ModMeleeRangedHaste2 = 342,
@@ -377,10 +377,10 @@ namespace Framework.Constants
         ModCamouflage = 353,  // Nyi
         Unk354 = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
         ModCastingSpeed = 355,  // NYI
-        Unk356 = 356,  // Arcane Mage Mastery - Mod Damage Based On Current Mana
+        ProvideTotemCategory = 356,
         EnableBoss1UnitFrame = 357,
         WorgenAlteredForm = 358,
-        Unk359 = 359,
+        ModHealingDoneVersusAurastate = 359,
         ProcTriggerSpellCopy = 360,  // Procs The Same Spell That Caused This Proc (Dragonwrath, Tarecgosa'S Rest)
         OverrideAutoattackWithMeleeSpell = 361, // NYI
         Unk362 = 362,  // Not Used In 4.3.4
@@ -391,7 +391,7 @@ namespace Framework.Constants
         OverrideAutoattackWithRangedSpell = 367, // NYI
         Unk368 = 368,  // Not Used In 4.3.4
         EnablePowerBarTimer = 369,
-        SetFairFarClip = 370,  // Overrides Client'S View Distance Setting To Max("Fair", CurrentSetting)
+        SpellOverrideNameGroup = 370, // picks a random SpellOverrideName id from a group (group id in miscValue)
         Unk371 = 371,
         Unk372 = 372,
         ModSpeedNoControl = 373, // NYI
@@ -402,7 +402,7 @@ namespace Framework.Constants
         Unk378 = 378,
         ModManaRegenPct = 379,
         ModGlobalCooldownByHaste = 380, // Allows melee abilities to benefit from haste GCD reduction
-        Unk381 = 381,
+        ModDamageTakenFromCasterPet = 381, // NYI
         ModPetStatPct = 382, // NYI
         IgnoreSpellCooldown = 383,
         Unk384 = 384,
@@ -420,7 +420,7 @@ namespace Framework.Constants
         TriggerSpellOnPowerAmount = 396,
         Unk397 = 397,
         Unk398 = 398,
-        Unk399 = 399,
+        ModTimeRate = 399,
         ModSkill2 = 400,
         Unk401 = 401,
         ModOverridePowerDisplay = 402,
@@ -429,7 +429,7 @@ namespace Framework.Constants
         ModRatingPct = 405, // NYI
         KeyboundOverride = 406,  // NYI
         ModFear2 = 407,
-        Unk408 = 408,
+        SetActionButtonSpellCount = 408,
         CanTurnWhileFalling = 409,
         Unk410 = 410,
         ModMaxCharges = 411,
@@ -445,12 +445,12 @@ namespace Framework.Constants
         ModAbsorbEffectsDonePct = 421, // NYI
         ModAbsorbEffectsTakenPct = 422, //NYI
         Unk423 = 423,
-        Unk424 = 424,
+        CasterIgnoreLos = 424, //NYI
         Unk425 = 425,
         Unk426 = 426,
         ScalePlayerLevel = 427, // NYI
         LinkedSummon = 428,
-        Unk429 = 429,
+        ModSummonDamage = 429, // NYI - increases damage done by all summons, not just controlled pets
         PlayScene = 430,
         ModOverrideZonePvpType = 431, // NYI
         Unk432 = 432,
@@ -491,11 +491,11 @@ namespace Framework.Constants
         ModStatBonusPct = 467,
         TriggerSpellOnHealthPct = 468,
         ShowConfirmationPromptWithDifficulty = 469,
-        Unk470 = 470,
+        ModAuraTimeRateBySpellLabel = 470, // NYI
         ModVersatility = 471,
         Unk472 = 472,
         PreventDurabilityLossFromCombat = 473,
-        Unk474 = 474,
+        ReplaceItemBonusTree = 474, // NYI
         AllowUsingGameobjectsWhileMounted = 475,
         ModCurrencyGainLooted = 476,
         Unk477 = 477,

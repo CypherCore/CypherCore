@@ -983,7 +983,6 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModBlind)]
         [AuraEffectHandler(AuraType.Unk335)]
         [AuraEffectHandler(AuraType.MountRestrictions)]
-        [AuraEffectHandler(AuraType.IncreaseSkillGainChance)]
         [AuraEffectHandler(AuraType.ModResurrectedHealthByGuildMember)]
         [AuraEffectHandler(AuraType.ModAutoattackDamage)]
         [AuraEffectHandler(AuraType.ModSpellCooldownByHaste)]
@@ -992,16 +991,13 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Unk352)]
         [AuraEffectHandler(AuraType.ModCamouflage)]
         [AuraEffectHandler(AuraType.Unk354)]
-        [AuraEffectHandler(AuraType.Unk356)]
         [AuraEffectHandler(AuraType.EnableBoss1UnitFrame)]
         [AuraEffectHandler(AuraType.WorgenAlteredForm)]
-        [AuraEffectHandler(AuraType.Unk359)]
         [AuraEffectHandler(AuraType.ProcTriggerSpellCopy)]
         [AuraEffectHandler(AuraType.OverrideAutoattackWithMeleeSpell)]
         [AuraEffectHandler(AuraType.ModNextSpell)]
         [AuraEffectHandler(AuraType.MaxFarClipPlane)]
         [AuraEffectHandler(AuraType.EnablePowerBarTimer)]
-        [AuraEffectHandler(AuraType.SetFairFarClip)]
         void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply) { }
 
         /**************************************/

@@ -781,10 +781,7 @@ namespace Game.Entities
 
             chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
             {
-                if (aurEff.GetCasterGUID() == GetGUID())
-                    return true;
-
-                return false;
+                return aurEff.GetCasterGUID() == GetGUID();
             });
 
             chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);

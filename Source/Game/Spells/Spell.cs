@@ -4737,9 +4737,12 @@ namespace Game.Spells
             // check spell focus object
             if (m_spellInfo.RequiresSpellFocus != 0)
             {
-                focusObject = SearchSpellFocus();
-                if (!focusObject)
-                    return SpellCastResult.RequiresSpellFocus;
+                if (!m_caster.HasAuraTypeWithMiscvalue(AuraType.ProvideSpellFocus, (int)m_spellInfo.RequiresSpellFocus))
+                {
+                    focusObject = SearchSpellFocus();
+                    if (!focusObject)
+                        return SpellCastResult.RequiresSpellFocus;
+                }
             }
 
             castResult = SpellCastResult.SpellCastOk;

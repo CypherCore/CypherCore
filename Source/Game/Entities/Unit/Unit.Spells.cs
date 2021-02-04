@@ -527,6 +527,12 @@ namespace Game.Entities
 
             float DoneTotalMod = 1.0f;
 
+            // bonus against aurastate
+            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>
+            {
+                return victim.HasAuraState((AuraStateType)aurEff.GetMiscValue());
+            });
+
             // Healing done percent
             DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
@@ -742,11 +748,13 @@ namespace Game.Entities
             // for this types the bonus was already added in GetUnitCriticalChance, do not add twice
             if (spellProto.DmgClass != SpellDmgClass.Melee && spellProto.DmgClass != SpellDmgClass.Ranged)
             {
+                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterWithAbilities, aurEff =>
+                {
+                    return aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto);
+                });
                 crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
                 {
-                    if (aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto))
-                        return true;
-                    return false;
+                    return aurEff.GetCasterGUID() != GetGUID();
                 });
             }
 
