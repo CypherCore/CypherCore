@@ -76,13 +76,23 @@ namespace Game.Maps
             LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
         }
 
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            CellCoord cellCoord = i_cell.GetCellCoord();
+            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
+            if (areaTriggers.Empty())
+                return;
+
+            LoadHelper<AreaTrigger>(areaTriggers, cellCoord, ref i_areaTriggers, i_map);
+        }
+
         void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map) where T : WorldObject, new()
         {
             foreach (var guid in guid_set)
             {
                 T obj = new T();
                 // Don't spawn at all if there's a respawn time
-                if ((obj.IsTypeId(TypeId.Unit) && map.GetCreatureRespawnTime(guid) == 0) || (obj.IsTypeId(TypeId.GameObject) && map.GetGORespawnTime(guid) == 0))
+                if ((obj.IsTypeId(TypeId.Unit) && map.GetCreatureRespawnTime(guid) == 0) || (obj.IsTypeId(TypeId.GameObject) && map.GetGORespawnTime(guid) == 0) || obj.IsTypeId(TypeId.AreaTrigger))
                 {
                     //TC_LOG_INFO("misc", "DEBUG: LoadHelper from table: %s for (guid: %u) Loading", table, guid);
                     if (obj.IsTypeId(TypeId.Unit))
@@ -156,6 +166,7 @@ namespace Game.Maps
         uint i_gameObjects;
         uint i_creatures;
         public uint i_corpses;
+        uint i_areaTriggers;
     }
 
     class ObjectWorldLoader : Notifier

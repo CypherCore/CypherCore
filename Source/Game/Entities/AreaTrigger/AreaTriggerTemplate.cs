@@ -16,12 +16,12 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Framework.GameMath;
+using Game.Networking;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Framework.Dynamic;
-using Game.Networking;
 
 namespace Game.Entities
 {
@@ -187,6 +187,27 @@ namespace Game.Entities
         }
     }
 
+    struct AreaTriggerTemplateKey
+    {
+        public uint Id;
+        public bool IsServer;
+
+        public AreaTriggerTemplateKey(uint id, bool isServer)
+        {
+            Id = id;
+            IsServer = isServer;
+        }
+
+        public static bool operator ==(AreaTriggerTemplateKey A, AreaTriggerTemplateKey B)
+        {
+            return A.Id == B.Id && A.IsServer == B.IsServer;
+        }
+        public static bool operator !=(AreaTriggerTemplateKey A, AreaTriggerTemplateKey B)
+        {
+            return A.Id != B.Id && A.IsServer != B.IsServer;
+        }
+    }
+
     public class AreaTriggerTemplate : AreaTriggerData
     {
         public unsafe void InitMaxSearchRadius()
@@ -244,6 +265,7 @@ namespace Game.Entities
         public List<Vector2> PolygonVertices = new List<Vector2>();
         public List<Vector2> PolygonVerticesTarget = new List<Vector2>();
         public List<AreaTriggerAction> Actions = new List<AreaTriggerAction>();
+        public bool IsServerSide;
     }
 
     public unsafe class AreaTriggerMiscTemplate
@@ -281,6 +303,17 @@ namespace Game.Entities
 
         public AreaTriggerTemplate Template;
         public List<Vector3> SplinePoints = new List<Vector3>();
+    }
+
+    public class AreaTriggerServerPosition
+    {
+        public ulong SpawnId;
+        public uint Id;
+        public bool IsServer;
+        public WorldLocation Location;
+        public uint PhaseId;
+        public uint PhaseGroup;
+        public byte PhaseUseFlags;
     }
 
     public struct AreaTriggerAction

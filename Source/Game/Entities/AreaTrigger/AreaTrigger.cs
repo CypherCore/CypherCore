@@ -16,16 +16,16 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Framework.GameMath;
 using Game.AI;
 using Game.Maps;
 using Game.Movement;
+using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Framework.Dynamic;
-using Game.Networking;
 
 namespace Game.Entities
 {
@@ -97,6 +97,8 @@ namespace Game.Entities
                 Log.outError(LogFilter.AreaTrigger, "AreaTrigger (spellMiscId {0}) not created. Invalid areatrigger miscid ({1})", spellMiscId, spellMiscId);
                 return false;
             }
+
+            _areaTriggerTemplate = _areaTriggerMiscTemplate.Template;
 
             _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), GetTemplate().Id, caster.GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
 
@@ -210,10 +212,57 @@ namespace Game.Entities
             return at;
         }
 
+        bool LoadFromDB(uint spawnId, Map map, bool addToMap, bool allowDuplicate)
+        {
+            AreaTriggerServerPosition position = Global.AreaTriggerDataStorage.GetAreaTriggerServerPosition(spawnId);
+            if (position == null)
+                return false;
+
+            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerServerTemplate(position.Id);
+            if (areaTriggerTemplate == null)
+                return false;
+
+            return CreateServer(map, areaTriggerTemplate, position);
+        }
+
+        bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerServerPosition position)
+        {
+            SetMap(map);
+            Relocate(position.Location);
+            if (!IsPositionValid())
+            {
+                Log.outError(LogFilter.AreaTrigger, $"AreaTriggerServer (id {areaTriggerTemplate.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
+                return false;
+            }
+
+            _areaTriggerTemplate = areaTriggerTemplate;
+
+            _Create(ObjectGuid.Create(HighGuid.AreaTrigger, GetMapId(), areaTriggerTemplate.Id, GetMap().GenerateLowGuid(HighGuid.AreaTrigger)));
+
+            SetEntry(areaTriggerTemplate.Id);
+
+            SetObjectScale(1.0f);
+
+            if (position.PhaseId != 0 || position.PhaseGroup != 0 || position.PhaseUseFlags != 0)
+                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), (PhaseUseFlagsValues)position.PhaseUseFlags, position.PhaseId, position.PhaseGroup);
+
+            UpdateShape();
+
+            AI_Initialize();
+
+            return true;
+        }
+        
         public override void Update(uint diff)
         {
             base.Update(diff);
             _timeSinceCreated += diff;
+
+            if (IsServerSide())
+            {
+                UpdateTargetList();
+                return;
+            }
 
             // "If" order matter here, Orbit > Attached > Splines
             if (HasOrbit())
@@ -423,7 +472,7 @@ namespace Game.Entities
 
         public AreaTriggerTemplate GetTemplate()
         {
-            return _areaTriggerMiscTemplate.Template;
+            return _areaTriggerTemplate;
         }
 
         public uint GetScriptId()
@@ -565,12 +614,12 @@ namespace Game.Entities
 
         void DoActions(Unit unit)
         {
-            Unit caster = GetCaster();
+            Unit caster = IsServerSide() ? unit : GetCaster();
             if (caster)
             {
                 foreach (AreaTriggerAction action in GetTemplate().Actions)
-        {
-                    if (UnitFitToActionRequirement(unit, caster, action))
+                {
+                    if (IsServerSide() || UnitFitToActionRequirement(unit, caster, action))
                     {
                         switch (action.ActionType)
                         {
@@ -579,6 +628,15 @@ namespace Game.Entities
                                 break;
                             case AreaTriggerActionTypes.AddAura:
                                 caster.AddAura(action.Param, unit);
+                                break;
+                            case AreaTriggerActionTypes.Teleport:
+                                WorldSafeLocsEntry safeLoc = Global.ObjectMgr.GetWorldSafeLoc(action.Param);
+                                if (safeLoc != null)
+                                {
+                                    Player player = caster.ToPlayer();
+                                    if (player != null)
+                                        player.TeleportTo(safeLoc.Loc);
+                                }
                                 break;
                             default:
                                 break;
@@ -909,6 +967,10 @@ namespace Game.Entities
 
         AreaTriggerAI GetAI() { return _ai; }
 
+        public bool IsServerSide() { return _areaTriggerTemplate.IsServerSide; }
+
+        public override bool IsNeverVisibleFor(WorldObject seer) { return IsServerSide(); }
+        
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()
         {
@@ -975,5 +1037,7 @@ namespace Game.Entities
         List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
 
         AreaTriggerAI _ai;
+
+        AreaTriggerTemplate _areaTriggerTemplate;
     }
 }

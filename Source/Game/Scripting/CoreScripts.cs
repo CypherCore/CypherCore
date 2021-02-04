@@ -364,6 +364,7 @@ namespace Game.Scripting
 
         // Called when the area trigger is activated by a player.
         public virtual bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered) { return false; }
+        public virtual bool OnTriggerServer(Player player, AreaTriggerTemplate triggerTemplate, bool entered) { return false; }
     }
 
     public class OnlyOnceAreaTriggerScript : AreaTriggerScript

@@ -47,7 +47,8 @@ namespace Framework.Constants
     {
         Cast = 0,
         AddAura = 1,
-        Max = 2
+        Teleport = 2,
+        Max = 3
     }
 
     public enum AreaTriggerActionUserTypes
