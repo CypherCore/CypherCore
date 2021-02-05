@@ -80,7 +80,7 @@ namespace Game.Maps
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
-            if (areaTriggers.Empty())
+            if (areaTriggers == null)
                 return;
 
             LoadHelper<AreaTrigger>(areaTriggers, cellCoord, ref i_areaTriggers, i_map);

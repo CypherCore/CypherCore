@@ -199,7 +199,7 @@ namespace Game.Entities
 
         public override bool Equals(object obj)
         {
-            return Equals((AreaTriggerId)obj);
+            return this == (AreaTriggerId)obj;
         }
 
         public static bool operator ==(AreaTriggerId left, AreaTriggerId right)

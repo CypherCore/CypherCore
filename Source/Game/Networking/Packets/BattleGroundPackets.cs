@@ -515,7 +515,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    class BracketInfo
+    struct BracketInfo
     {
         public int PersonalRating;
         public int Ranking;

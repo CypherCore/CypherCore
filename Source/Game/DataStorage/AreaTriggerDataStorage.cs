@@ -308,7 +308,7 @@ namespace Game.DataStorage
                     AreaTriggerSpawn spawn = new AreaTriggerSpawn();
                     spawn.SpawnId = spawnId;
                     spawn.Id = areaTriggerId;
-                    spawn.Location.WorldRelocate(location);
+                    spawn.Location = new WorldLocation(location);
 
                     spawn.PhaseUseFlags = templates.Read<byte>(8);
                     spawn.PhaseId = templates.Read<uint>(9);
