@@ -1374,7 +1374,7 @@ namespace Game.Networking.Packets
         }
 
         public bool OnLevelUp;
-        public List<AdventureJournalDataInfo> AdventureJournalDatas;
+        public List<AdventureJournalDataInfo> AdventureJournalDatas = new List<AdventureJournalDataInfo>();
     }
     
     //Structs
