@@ -1321,6 +1321,62 @@ namespace Game.Networking.Packets
         public ObjectGuid SourceGuid;
     }
 
+    class AdventureJournalOpenQuest : ClientPacket
+    {
+        public AdventureJournalOpenQuest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            AdventureJournalID = _worldPacket.ReadUInt32();
+        }
+
+        public uint AdventureJournalID;
+    }
+
+    class AdventureJournalStartQuest : ClientPacket
+    {
+        public AdventureJournalStartQuest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestID = _worldPacket.ReadUInt32();
+        }
+
+        public uint QuestID;
+    }
+
+    class AdventureJournalUpdateSuggestions : ClientPacket
+    {
+        public AdventureJournalUpdateSuggestions(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            OnLevelUp = _worldPacket.HasBit();
+        }
+
+        public bool OnLevelUp;
+    }
+
+    class AdventureJournalDataResponse : ServerPacket
+    {
+        public AdventureJournalDataResponse() : base(ServerOpcodes.AdventureJournalDataResponse) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(OnLevelUp);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteInt32(AdventureJournalDatas.Count);
+            foreach (var dataInfo in AdventureJournalDatas)
+            {
+                _worldPacket.WriteInt32(dataInfo.AdventureJournalID);
+                _worldPacket.WriteInt32(dataInfo.Priority);
+            }
+        }
+
+        public bool OnLevelUp;
+        public List<AdventureJournalDataInfo> AdventureJournalDatas;
+    }
+    
     //Structs
     struct PhaseShiftDataPhase
     {
@@ -1354,5 +1410,11 @@ namespace Game.Networking.Packets
         public uint PhaseShiftFlags;
         public List<PhaseShiftDataPhase> Phases = new List<PhaseShiftDataPhase>();
         public ObjectGuid PersonalGUID;
+    }
+
+    struct AdventureJournalDataInfo
+    {
+        public int AdventureJournalID;
+        public int Priority;
     }
 }

@@ -23,6 +23,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
+using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
@@ -135,14 +136,14 @@ namespace Game
 
         [WorldPacketHandler(ClientOpcodes.CompleteCinematic)]
         void HandleCompleteCinematic(CompleteCinematic packet)
-        {    
+        {
             // If player has sight bound to visual waypoint NPC we should remove it
             GetPlayer().GetCinematicMgr().EndCinematic();
         }
 
         [WorldPacketHandler(ClientOpcodes.NextCinematicCamera)]
         void HandleNextCinematicCamera(NextCinematicCamera packet)
-        {    
+        {
             // Sent by client when cinematic actually begun. So we begin the server side process
             GetPlayer().GetCinematicMgr().NextCinematicCamera();
         }
@@ -738,7 +739,7 @@ namespace Game
             if (_warden == null || packet.Data.GetSize() == 0)
                 return;
 
-            _warden.DecryptData(packet.Data.GetData());            
+            _warden.DecryptData(packet.Data.GetData());
             WardenOpcodes opcode = (WardenOpcodes)packet.Data.ReadUInt8();
 
             switch (opcode)
@@ -766,6 +767,75 @@ namespace Game
                     Log.outDebug(LogFilter.Warden, "Got unknown warden opcode {0} of size {1}.", opcode, packet.Data.GetSize() - 1);
                     break;
             }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.AdventureJournalOpenQuest)]
+        void HandleAdventureJournalOpenQuest(AdventureJournalOpenQuest adventureJournalOpenQuest)
+        {
+            var adventureJournalEntry = CliDB.AdventureJournalStorage.LookupByKey(adventureJournalOpenQuest.AdventureJournalID);
+            if (adventureJournalEntry == null)
+                return;
+
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(adventureJournalEntry.QuestID);
+            if (quest == null)
+                return;
+
+            if (_player.CanTakeQuest(quest, true))
+            {
+                PlayerMenu menu = new PlayerMenu(_player.GetSession());
+                menu.SendQuestGiverQuestDetails(quest, _player.GetGUID(), true, false);
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.AdventureJournalStartQuest)]
+        void HandleAdventureJournalStartQuest(AdventureJournalStartQuest adventureJournalStartQuest)
+        {
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(adventureJournalStartQuest.QuestID);
+            if (quest == null)
+                return;
+
+            AdventureJournalRecord adventureJournalEntry = null;
+            foreach (var adventureJournal in CliDB.AdventureJournalStorage.Values)
+            {
+                if (quest.Id == adventureJournal.QuestID)
+                {
+                    adventureJournalEntry = adventureJournal;
+                    break;
+                }
+            }
+
+            if (adventureJournalEntry == null)
+                return;
+
+            if (_player.MeetPlayerCondition(adventureJournalEntry.PlayerConditionID) && _player.CanTakeQuest(quest, true))
+                _player.AddQuestAndCheckCompletion(quest, null);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.AdventureJournalUpdateSuggestions)]
+        void HandleAdventureJournalUpdateSuggestions(AdventureJournalUpdateSuggestions adventureJournalUpdateSuggestions)
+        {
+            if (adventureJournalUpdateSuggestions.OnLevelUp && _player.GetLevel() < 10)
+                return;
+
+            AdventureJournalDataResponse response = new AdventureJournalDataResponse();
+            response.OnLevelUp = adventureJournalUpdateSuggestions.OnLevelUp;
+            int count = 0;
+            foreach (var adventureJournal in CliDB.AdventureJournalStorage.Values)
+            {
+                if (count >= 7)
+                    break;
+
+                if (_player.MeetPlayerCondition(adventureJournal.PlayerConditionID))
+                {
+                    AdventureJournalDataInfo dataInfo;
+                    dataInfo.AdventureJournalID = (int)adventureJournal.Id;
+                    dataInfo.Priority = (int)adventureJournal.PriorityMax;
+                    response.AdventureJournalDatas.Add(dataInfo);
+                    count++;
+                }
+            }
+
+            SendPacket(response);
         }
     }
 }
