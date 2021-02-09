@@ -222,6 +222,13 @@ namespace Game.DataStorage
         public SocketColor Type;
     }
 
+    public sealed class GlobalCurveRecord
+    {
+        public uint Id;
+        public uint CurveID;
+        public GlobalCurve Type;
+    }
+
     public sealed class GlyphBindableSpellRecord
     {
         public uint Id;

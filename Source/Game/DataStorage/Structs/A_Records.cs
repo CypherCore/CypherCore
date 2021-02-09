@@ -21,7 +21,7 @@ using System;
 
 namespace Game.DataStorage
 {
-    public class AchievementRecord
+    public sealed class AchievementRecord
     {
         public string Description;
         public string Title;

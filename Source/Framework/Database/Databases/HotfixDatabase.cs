@@ -461,6 +461,9 @@ namespace Framework.Database
             // GemProperties.db2
             PrepareStatement(HotfixStatements.SEL_GEM_PROPERTIES, "SELECT ID, EnchantId, Type FROM gem_properties");
 
+            // GlobalCurve.db2
+            PrepareStatement(HotfixStatements.SEL_GLOBAL_CURVE, "SELECT ID, CurveID, Type FROM global_curve");
+
             // GlyphBindableSpell.db2
             PrepareStatement(HotfixStatements.SEL_GLYPH_BINDABLE_SPELL, "SELECT ID, SpellID, GlyphPropertiesID FROM glyph_bindable_spell");
 
@@ -1378,6 +1381,8 @@ namespace Framework.Database
         SEL_GARR_SITE_LEVEL_PLOT_INST,
 
         SEL_GEM_PROPERTIES,
+
+        SEL_GLOBAL_CURVE,
 
         SEL_GLYPH_BINDABLE_SPELL,
 

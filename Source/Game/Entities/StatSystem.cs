@@ -1368,8 +1368,8 @@ namespace Game.Entities
                     {
                         // explicit affected values
                         float multiplier = GetRatingMultiplier(cr);
-                        float oldVal = oldRating * multiplier;
-                        float newVal = amount * multiplier;
+                        float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
+                        float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
                         switch (cr)
                         {
                             case CombatRating.HasteMelee:

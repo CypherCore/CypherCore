@@ -107,7 +107,7 @@ namespace Game.Entities
         }
         public float GetRatingBonusValue(CombatRating cr)
         {
-            float baseResult = m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr);
+            float baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
             if (cr != CombatRating.ResiliencePlayerDamage)
                 return baseResult;
             return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
@@ -167,6 +167,59 @@ namespace Game.Entities
             */
         }
 
+        float ApplyRatingDiminishing(CombatRating cr, float bonusValue)
+        {
+            uint diminishingCurveId = 0;
+            switch (cr)
+            {
+                case CombatRating.Dodge:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.DodgeDiminishing);
+                    break;
+                case CombatRating.Parry:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.ParryDiminishing);
+                    break;
+                case CombatRating.Block:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.BlockDiminishing);
+                    break;
+                case CombatRating.CritMelee:
+                case CombatRating.CritRanged:
+                case CombatRating.CritSpell:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.CritDiminishing);
+                    break;
+                case CombatRating.Speed:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.SpeedDiminishing);
+                    break;
+                case CombatRating.Lifesteal:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.LifestealDiminishing);
+                    break;
+                case CombatRating.HasteMelee:
+                case CombatRating.HasteRanged:
+                case CombatRating.HasteSpell:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.HasteDiminishing);
+                    break;
+                case CombatRating.Avoidance:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.AvoidanceDiminishing);
+                    break;
+                case CombatRating.Mastery:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.MasteryDiminishing);
+                    break;
+                case CombatRating.VersatilityDamageDone:
+                case CombatRating.VersatilityHealingDone:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.VersatilityDoneDiminishing);
+                    break;
+                case CombatRating.VersatilityDamageTaken:
+                    diminishingCurveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.VersatilityTakenDiminishing);
+                    break;
+                default:
+                    break;
+            }
+
+            if (diminishingCurveId != 0)
+                return Global.DB2Mgr.GetCurveValueAt(diminishingCurveId, bonusValue);
+
+            return bonusValue;
+        }
+        
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
         {
             float baseExpertise = 7.5f;

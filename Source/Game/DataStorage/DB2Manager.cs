@@ -1370,11 +1370,15 @@ namespace Game.DataStorage
             return _factionTeams.LookupByKey(faction);
         }
 
-        public HeirloomRecord GetHeirloomByItemId(uint itemId)
+        public uint GetGlobalCurveId(GlobalCurve globalCurveType)
         {
-            return _heirlooms.LookupByKey(itemId);
-        }
+            foreach (var globalCurveEntry in CliDB.GlobalCurveStorage.Values)
+                if (globalCurveEntry.Type == globalCurveType)
+                    return globalCurveEntry.CurveID;
 
+            return 0;
+        }
+        
         public List<uint> GetGlyphBindableSpells(uint glyphPropertiesId)
         {
             return _glyphBindableSpells.LookupByKey(glyphPropertiesId);
@@ -1383,6 +1387,11 @@ namespace Game.DataStorage
         public List<uint> GetGlyphRequiredSpecs(uint glyphPropertiesId)
         {
             return _glyphRequiredSpecs.LookupByKey(glyphPropertiesId);
+        }
+
+        public HeirloomRecord GetHeirloomByItemId(uint itemId)
+        {
+            return _heirlooms.LookupByKey(itemId);
         }
 
         public List<ItemBonusRecord> GetItemBonusList(uint bonusListId)

@@ -150,6 +150,7 @@ namespace Game.DataStorage
             GarrSiteLevelStorage = ReadDB2<GarrSiteLevelRecord>("GarrSiteLevel.db2", HotfixStatements.SEL_GARR_SITE_LEVEL);
             GarrSiteLevelPlotInstStorage = ReadDB2<GarrSiteLevelPlotInstRecord>("GarrSiteLevelPlotInst.db2", HotfixStatements.SEL_GARR_SITE_LEVEL_PLOT_INST);
             GemPropertiesStorage = ReadDB2<GemPropertiesRecord>("GemProperties.db2", HotfixStatements.SEL_GEM_PROPERTIES);
+            GlobalCurveStorage = ReadDB2<GlobalCurveRecord>("GlobalCurve.db2", HotfixStatements.SEL_GLOBAL_CURVE);
             GlyphBindableSpellStorage = ReadDB2<GlyphBindableSpellRecord>("GlyphBindableSpell.db2", HotfixStatements.SEL_GLYPH_BINDABLE_SPELL);
             GlyphPropertiesStorage = ReadDB2<GlyphPropertiesRecord>("GlyphProperties.db2", HotfixStatements.SEL_GLYPH_PROPERTIES);
             GlyphRequiredSpecStorage = ReadDB2<GlyphRequiredSpecRecord>("GlyphRequiredSpec.db2", HotfixStatements.SEL_GLYPH_REQUIRED_SPEC);
@@ -508,6 +509,7 @@ namespace Game.DataStorage
         public static DB6Storage<GarrSiteLevelRecord> GarrSiteLevelStorage;
         public static DB6Storage<GarrSiteLevelPlotInstRecord> GarrSiteLevelPlotInstStorage;
         public static DB6Storage<GemPropertiesRecord> GemPropertiesStorage;
+        public static DB6Storage<GlobalCurveRecord> GlobalCurveStorage;
         public static DB6Storage<GlyphBindableSpellRecord> GlyphBindableSpellStorage;
         public static DB6Storage<GlyphPropertiesRecord> GlyphPropertiesStorage;
         public static DB6Storage<GlyphRequiredSpecRecord> GlyphRequiredSpecStorage;
