@@ -1148,7 +1148,7 @@ namespace Game.Entities
                     return;
                 }
 
-                uint thisRespawnTime = (uint)(forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime);
+                long thisRespawnTime = forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime;
                 GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData ? savetodb : false);
             }
         }

@@ -2536,7 +2536,9 @@ namespace Game.Maps
             {
                 long now = Time.UnixTime;
                 long respawnTime;
-                if (Global.ObjectMgr.GetLinkedRespawnGuid(thisGUID) == thisGUID) // never respawn, save "something" in DB
+                if (linkedTime == long.MaxValue)
+                    respawnTime = linkedTime;
+                else if (Global.ObjectMgr.GetLinkedRespawnGuid(thisGUID) == thisGUID) // never respawn, save "something" in DB
                     respawnTime = now + Time.Week;
                 else // set us to check again shortly after linked unit
                     respawnTime = Math.Max(now, linkedTime) + RandomHelper.URand(5, 15);

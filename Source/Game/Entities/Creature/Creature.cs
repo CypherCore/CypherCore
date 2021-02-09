@@ -2213,7 +2213,7 @@ namespace Game.Entities
                 return;
             }
 
-            uint thisRespawnTime = (uint)(forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime);
+            long thisRespawnTime = forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime;
             GetMap().SaveRespawnTime(SpawnObjectType.Creature, m_spawnId, GetEntry(), thisRespawnTime, GetMap().GetZoneId(GetPhaseShift(), GetHomePosition()), GridDefines.ComputeGridCoord(GetHomePosition().GetPositionX(), GetHomePosition().GetPositionY()).GetId(), saveToDb && m_creatureData != null && m_creatureData.dbData);
         }
 
