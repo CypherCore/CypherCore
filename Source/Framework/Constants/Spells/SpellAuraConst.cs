@@ -291,7 +291,7 @@ namespace Framework.Constants
         ModImmuneAuraApplySchool = 267,
         Unk268 = 268,  // Old ModAttackPowerOfStatPercent. Unused 4.3.4
         ModIgnoreTargetResist = 269,
-        ModSchoolMaskDamageFromCaster = 270,  // NYI
+        ModSchoolMaskDamageFromCaster = 270,
         ModSpellDamageFromCaster = 271,
         IgnoreMeleeReset = 272,
         XRay = 273,

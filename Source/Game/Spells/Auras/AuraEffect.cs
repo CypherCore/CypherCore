@@ -649,6 +649,7 @@ namespace Game.Spells
                     if (!eventInfo.GetProcSpell() || eventInfo.GetProcSpell().GetCastTime() == 0)
                         return false;
                     break;
+                case AuraType.ModSchoolMaskDamageFromCaster:
                 case AuraType.ModSpellDamageFromCaster:
                     // Compare casters
                     if (GetCasterGUID() != eventInfo.GetActor().GetGUID())

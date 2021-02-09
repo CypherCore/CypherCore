@@ -3480,6 +3480,7 @@ namespace Game.Entities
                 case AuraType.ModMeleeHaste3:
                 case AuraType.ModAttackerMeleeHitChance:
                 case AuraType.ProcTriggerSpellWithValue:
+                case AuraType.ModSchoolMaskDamageFromCaster:
                 case AuraType.ModSpellDamageFromCaster:
                 case AuraType.AbilityIgnoreAurastate:
                 case AuraType.ModInvisibility:
