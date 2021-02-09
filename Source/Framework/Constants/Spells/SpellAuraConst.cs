@@ -164,7 +164,7 @@ namespace Framework.Constants
         ModRangedHaste = 140,
         Unk141 = 141,  // Old ModRangedAmmoHaste, Unused Now
         ModBaseResistancePct = 142,
-        ModRecoveryRate = 143,  // NYI
+        ModRecoveryRateBySpellLabel = 143,  // NYI
         SafeFall = 144,
         ModPetTalentPoints = 145,
         AllowTamePetType = 146,
@@ -307,7 +307,7 @@ namespace Framework.Constants
         ModHealingReceived = 283,  // Possibly Only For Some Spell Family Class Spells
         Linked = 284,
         Linked2 = 285,
-        AbilityPeriodicCrit = 286,
+        ModRecoveryRate = 286,
         DeflectSpells = 287,
         IgnoreHitDirection = 288,
         PreventDurabilityLoss = 289,
