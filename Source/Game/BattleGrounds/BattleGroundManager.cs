@@ -38,7 +38,7 @@ namespace Game.BattleGrounds
         public void DeleteAllBattlegrounds()
         {
             foreach (var data in bgDataStore.Values.ToList())
-                while(data.m_Battlegrounds.Empty())
+                while(!data.m_Battlegrounds.Empty())
                     data.m_Battlegrounds.First().Value.Dispose();
 
             bgDataStore.Clear();

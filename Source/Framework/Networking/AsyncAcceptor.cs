@@ -64,8 +64,10 @@ namespace Framework.Networking
                         AsyncAcceptSocket(mgrHandler);
                 }
             }
-            catch (ObjectDisposedException)
-            { }
+            catch (ObjectDisposedException ex)
+            {
+                Log.outException(ex);
+            }
         }
 
         public void Close()
@@ -74,7 +76,6 @@ namespace Framework.Networking
                 return;
 
             _closed = true;
-            _listener.Stop();
         }
     }
 }

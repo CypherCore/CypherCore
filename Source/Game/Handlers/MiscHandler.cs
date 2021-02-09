@@ -829,7 +829,7 @@ namespace Game
                 {
                     AdventureJournalDataInfo dataInfo;
                     dataInfo.AdventureJournalID = (int)adventureJournal.Id;
-                    dataInfo.Priority = (int)adventureJournal.PriorityMax;
+                    dataInfo.Priority = adventureJournal.PriorityMax;
                     response.AdventureJournalDatas.Add(dataInfo);
                     count++;
                 }

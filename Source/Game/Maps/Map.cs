@@ -115,6 +115,27 @@ namespace Game.Maps
 
         public void DiscoverGridMapFiles()
         {
+            string tileListName = $"{Global.WorldMgr.GetDataPath()}/maps/{GetId():D4}.tilelist";
+            // tile list is optional
+            if (File.Exists(tileListName))
+            {
+                using (var reader = new BinaryReader(new FileStream(tileListName, FileMode.Open, FileAccess.Read)))
+                {
+                    var mapMagic = reader.ReadUInt32();
+                    var versionMagic = reader.ReadUInt32();
+                    if (mapMagic == MapConst.MapMagic && versionMagic == MapConst.MapVersionMagic)
+                    {
+                        var build = reader.ReadUInt32();
+                        byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
+                        for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
+                            for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
+                                i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = tilesData[(int)(gx * MapConst.MaxGrids + gy)] == 49; // char of 1
+
+                        return;
+                    }
+                }
+            }
+
             for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
                 for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
                     i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = ExistMap(GetId(), gx, gy);
