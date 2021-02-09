@@ -807,7 +807,7 @@ namespace Scripts.Spells.Generic
             Unit caster = GetCaster();
             float max_range = GetSpellInfo().GetMaxRange(false);
             // search for nearby enemy corpse in range
-            var check = new AnyDeadUnitSpellTargetInRangeCheck<Unit>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy);
+            var check = new AnyDeadUnitSpellTargetInRangeCheck<Unit>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy, SpellTargetObjectTypes.CorpseEnemy);
             var searcher = new UnitSearcher(caster, check);
             Cell.VisitWorldObjects(caster, searcher, max_range);
             if (!searcher.GetTarget())

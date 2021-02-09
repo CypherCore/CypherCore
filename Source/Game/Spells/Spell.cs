@@ -661,7 +661,7 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
-                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList);
+                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
                 SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
 
@@ -1134,7 +1134,7 @@ namespace Game.Spells
 
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             List<WorldObject> targets = new List<WorldObject>();
-            var spellTraj = new WorldObjectSpellTrajTargetCheck(dist2d, srcPos, m_caster, m_spellInfo, targetType.GetCheckType(), effect.ImplicitTargetConditions);
+            var spellTraj = new WorldObjectSpellTrajTargetCheck(dist2d, srcPos, m_caster, m_spellInfo, targetType.GetCheckType(), effect.ImplicitTargetConditions, SpellTargetObjectTypes.None);
             var searcher = new WorldObjectListSearcher(m_caster, targets, spellTraj);
             SearchTargets(searcher, GridMapTypeMask.All, m_caster, srcPos, dist2d);
             if (targets.Empty())
@@ -1364,7 +1364,7 @@ namespace Game.Spells
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask == 0)
                 return null;
-            var check = new WorldObjectSpellNearbyTargetCheck(range, m_caster, m_spellInfo, selectionType, condList);
+            var check = new WorldObjectSpellNearbyTargetCheck(range, m_caster, m_spellInfo, selectionType, condList, objectType);
             var searcher = new WorldObjectLastSearcher(m_caster, check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), range);
             return searcher.GetTarget();
@@ -1375,7 +1375,7 @@ namespace Game.Spells
             var containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask == 0)
                 return;
-            var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList);
+            var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType);
             var searcher = new WorldObjectListSearcher(m_caster, targets, check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, position, range);
         }
@@ -7732,13 +7732,14 @@ namespace Game.Spells
 
     public class WorldObjectSpellTargetCheck : ICheck<WorldObject>
     {
-        public WorldObjectSpellTargetCheck(Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
+        public WorldObjectSpellTargetCheck(Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
         {
             _caster = caster;
             _referer = referer;
             _spellInfo = spellInfo;
             _targetSelectionType = selectionType;
             _condList = condList;
+            _objectType = objectType;
 
             if (condList != null)
                 _condSrcInfo = new ConditionSourceInfo(null, caster);
@@ -7817,9 +7818,22 @@ namespace Game.Spells
                     default:
                         break;
                 }
+
+                switch (_objectType)
+                {
+                    case SpellTargetObjectTypes.Corpse:
+                    case SpellTargetObjectTypes.CorpseAlly:
+                    case SpellTargetObjectTypes.CorpseEnemy:
+                        if (unitTarget.IsAlive())
+                            return false;
+                        break;
+                    default:
+                        break;
+                }
             }
             if (_condSrcInfo == null)
                 return true;
+
             _condSrcInfo.mConditionTargets[0] = obj;
             return Global.ConditionMgr.IsObjectMeetToConditions(_condSrcInfo, _condList);
         }
@@ -7830,14 +7844,15 @@ namespace Game.Spells
         SpellTargetCheckTypes _targetSelectionType;
         ConditionSourceInfo _condSrcInfo;
         List<Condition> _condList;
+        SpellTargetObjectTypes _objectType;
     }
 
     public class WorldObjectSpellNearbyTargetCheck : WorldObjectSpellTargetCheck
     {
         float _range;
         Position _position;
-        public WorldObjectSpellNearbyTargetCheck(float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
-            : base(caster, caster, spellInfo, selectionType, condList)
+        public WorldObjectSpellNearbyTargetCheck(float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+            : base(caster, caster, spellInfo, selectionType, condList, objectType)
         {
             _range = range;
             _position = caster.GetPosition();
@@ -7859,8 +7874,8 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
-        public WorldObjectSpellAreaTargetCheck(float range, Position position, Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
-            : base(caster, referer, spellInfo, selectionType, condList)
+        public WorldObjectSpellAreaTargetCheck(float range, Position position, Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+            : base(caster, referer, spellInfo, selectionType, condList, objectType)
         {
             _range = range;
             _position = position;
@@ -7889,8 +7904,8 @@ namespace Game.Spells
 
     public class WorldObjectSpellConeTargetCheck : WorldObjectSpellAreaTargetCheck
     {
-        public WorldObjectSpellConeTargetCheck(float coneAngle, float lineWidth, float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
-            : base(range, caster.GetPosition(), caster, caster, spellInfo, selectionType, condList)
+        public WorldObjectSpellConeTargetCheck(float coneAngle, float lineWidth, float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+            : base(range, caster.GetPosition(), caster, caster, spellInfo, selectionType, condList, objectType)
         {
             _coneAngle = coneAngle;
             _lineWidth = lineWidth;
@@ -7928,8 +7943,8 @@ namespace Game.Spells
         float _range;
         Position _position;
 
-        public WorldObjectSpellTrajTargetCheck(float range, Position position, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
-            : base(caster, caster, spellInfo, selectionType, condList)
+        public WorldObjectSpellTrajTargetCheck(float range, Position position, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+            : base(caster, caster, spellInfo, selectionType, condList, objectType)
         {
             _range = range;
             _position = position;

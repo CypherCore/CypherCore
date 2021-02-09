@@ -2742,11 +2742,11 @@ namespace Game.Maps
 
     public class AnyDeadUnitSpellTargetInRangeCheck<T> : AnyDeadUnitObjectInRangeCheck<T> where T : WorldObject
     {
-        public AnyDeadUnitSpellTargetInRangeCheck(Unit searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check)
+        public AnyDeadUnitSpellTargetInRangeCheck(Unit searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check, SpellTargetObjectTypes objectType)
             : base(searchObj, range)
         {
             i_spellInfo = spellInfo;
-            i_check = new WorldObjectSpellTargetCheck(searchObj, searchObj, spellInfo, check, null);
+            i_check = new WorldObjectSpellTargetCheck(searchObj, searchObj, spellInfo, check, null, objectType);
         }
 
         public override bool Invoke(T obj)

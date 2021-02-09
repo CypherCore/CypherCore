@@ -339,51 +339,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    // 54044 - Pet Carrion Feeder
-    [Script]
-    class spell_hun_pet_carrion_feeder : SpellScript
-    {
-        public override bool Load()
-        {
-            if (!GetCaster().IsPet())
-                return false;
-            return true;
-        }
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.PetCarrionFeederTriggered);
-        }
-
-        SpellCastResult CheckIfCorpseNear()
-        {
-            Unit caster = GetCaster();
-            float max_range = GetSpellInfo().GetMaxRange(false);
-
-            // search for nearby enemy corpse in range
-            var check = new AnyDeadUnitSpellTargetInRangeCheck<WorldObject>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy);
-            var searcher = new WorldObjectSearcher(caster, check);
-            Cell.VisitWorldObjects(caster, searcher, max_range);
-            if (!searcher.GetTarget())
-                Cell.VisitGridObjects(caster, searcher, max_range);
-            if (!searcher.GetTarget())
-                return SpellCastResult.NoEdibleCorpses;
-            return SpellCastResult.SpellCastOk;
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            caster.CastSpell(caster, SpellIds.PetCarrionFeederTriggered, false);
-        }
-
-        public override void Register()
-        {
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            OnCheckCast.Add(new CheckCastHandler(CheckIfCorpseNear));
-        }
-    }
-
     // 55709 - Pet Heart of the Phoenix
     [Script]
     class spell_hun_pet_heart_of_the_phoenix : SpellScript
