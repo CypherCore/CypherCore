@@ -43,6 +43,17 @@ namespace Scripts.Smart
     }
 
     [Script]
+    class SmartAreaTriggerEntityScript : AreaTriggerEntityScript
+    {
+        public SmartAreaTriggerEntityScript() : base("SmartAreaTriggerAI") { }
+
+        public override AreaTriggerAI GetAI(AreaTrigger areaTrigger)
+        {
+            return new SmartAreaTriggerAI(areaTrigger);
+        }
+    }
+
+    [Script]
     class SmartScene : SceneScript
     {
         public SmartScene() : base("SmartScene") { }

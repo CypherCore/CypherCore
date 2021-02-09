@@ -969,7 +969,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        AreaTriggerAI GetAI() { return _ai; }
+        public T GetAI<T>() where T : AreaTriggerAI { return (T)_ai; }
 
         public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
 

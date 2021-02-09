@@ -1532,7 +1532,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    ((SmartAI)creature.GetAI()).SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
                             }
                             else
                             {  
@@ -1540,7 +1540,17 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        ((SmartGameObjectAI)go.GetAI()).SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                }
+                                else
+                                {
+                                    AreaTrigger areaTriggerTarget = target.ToAreaTrigger();
+                                    if (areaTriggerTarget != null)
+                                    {
+                                        SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
+                                        if (atSAI != null)
+                                            atSAI.SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                    }
                                 }
                             }
                         }
@@ -1623,7 +1633,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    ((SmartAI)creature.GetAI()).SetScript9(e, randomId, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetScript9(e, randomId, GetLastInvoker());
                             }
                             else
                             {    
@@ -1631,7 +1641,17 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        ((SmartGameObjectAI)go.GetAI()).SetScript9(e, randomId, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, randomId, GetLastInvoker());
+                                }
+                                else
+                                {
+                                    AreaTrigger areaTriggerTarget = target.ToAreaTrigger();
+                                    if (areaTriggerTarget != null)
+                                    {
+                                        SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
+                                        if (atSAI != null)
+                                            atSAI.SetScript9(e, randomId, GetLastInvoker());
+                                    }
                                 }
                             }
                         }
@@ -1652,7 +1672,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    ((SmartAI)creature.GetAI()).SetScript9(e, id, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetScript9(e, id, GetLastInvoker());
                             }
                             else
                             {
@@ -1660,7 +1680,17 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        ((SmartGameObjectAI)go.GetAI()).SetScript9(e, id, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, id, GetLastInvoker());
+                                }
+                                else
+                                {
+                                    AreaTrigger areaTriggerTarget = target.ToAreaTrigger();
+                                    if (areaTriggerTarget != null)
+                                    {
+                                        SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
+                                        if (atSAI != null)
+                                            atSAI.SetScript9(e, id, GetLastInvoker());
+                                    }
                                 }
                             }
                         }
@@ -3584,7 +3614,9 @@ namespace Game.AI
 
         public void OnUpdate(uint diff)
         {
-            if ((mScriptType == SmartScriptType.Creature || mScriptType == SmartScriptType.GameObject) && GetBaseObject() == null)
+            if ((mScriptType == SmartScriptType.Creature || mScriptType == SmartScriptType.GameObject
+                || mScriptType == SmartScriptType.AreaTriggerEntity || mScriptType == SmartScriptType.AreaTriggerEntityServerside)
+                && !GetBaseObject())
                 return;
 
             InstallEvents();//before UpdateTimers
@@ -3707,6 +3739,11 @@ namespace Game.AI
                 e = Global.SmartAIMgr.GetScript((int)trigger.Id, mScriptType);
                 FillScript(e, null, trigger, null);
             }
+            else if (areaTrigger != null)
+            {
+                e = Global.SmartAIMgr.GetScript((int)areaTrigger.GetEntry(), mScriptType);
+                FillScript(e, areaTrigger, null, null);
+            }
             else if (sceneTemplate != null)
             {
                 e = Global.SmartAIMgr.GetScript((int)sceneTemplate.SceneId, mScriptType);
@@ -3734,6 +3771,11 @@ namespace Game.AI
                         mScriptType = SmartScriptType.GameObject;
                         go = obj.ToGameObject();
                         Log.outDebug(LogFilter.Scripts, "SmartScript.OnInitialize: source is GameObject {0}", go.GetEntry());
+                        break;
+                    case TypeId.AreaTrigger:
+                        areaTrigger = obj.ToAreaTrigger();
+                        mScriptType = areaTrigger.IsServerSide() ? SmartScriptType.AreaTriggerEntityServerside : SmartScriptType.AreaTriggerEntity;
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is AreaTrigger {areaTrigger.GetEntry()}, IsServerSide {areaTrigger.IsServerSide()}");
                         break;
                     default:
                         Log.outError(LogFilter.Scripts, "SmartScript.OnInitialize: Unhandled TypeID !WARNING!");
@@ -4056,6 +4098,7 @@ namespace Game.AI
                     {
                         me = m;
                         go = null;
+                        areaTrigger = null;
                     }
                 }
 
@@ -4066,6 +4109,7 @@ namespace Game.AI
                     {
                         me = null;
                         go = o;
+                        areaTrigger = null;
                     }
                 }
             }
@@ -4130,6 +4174,7 @@ namespace Game.AI
         GameObject go;
         ObjectGuid goOrigGUID;
         AreaTriggerRecord trigger;
+        AreaTrigger areaTrigger;
         SceneTemplate sceneTemplate;
         Spell spellTemplate;
         SmartScriptType mScriptType;

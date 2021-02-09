@@ -31,7 +31,9 @@ namespace Framework.Constants
         Transport = 7,
         Instance = 8,
         TimedActionlist = 9,
-        Scene = 10, // done
+        Scene = 10,
+        AreaTriggerEntity = 11,
+        AreaTriggerEntityServerside = 12,
         Max = 11
     }
 
@@ -49,6 +51,7 @@ namespace Framework.Constants
         public const uint Instance = 256;
         public const uint TimedActionlist = 512;
         public const uint Scene = 1024;
+        public const uint AreatrigggerEntity = 2048;
     }
 
     public enum SmartPhase

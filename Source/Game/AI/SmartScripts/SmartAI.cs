@@ -1176,6 +1176,37 @@ namespace Game.AI
         bool _gossipReturn;
     }
 
+    public class SmartAreaTriggerAI : AreaTriggerAI
+    {
+        public SmartAreaTriggerAI(AreaTrigger areaTrigger) : base(areaTrigger) { }
+
+        public override void OnInitialize()
+        {
+            GetScript().OnInitialize(at);
+        }
+
+        public override void OnUpdate(uint diff)
+        {
+            GetScript().OnUpdate(diff);
+        }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.AreatriggerOntrigger, unit);
+        }
+
+        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
+        {
+            if (invoker)
+                GetScript().mLastInvoker = invoker.GetGUID();
+            GetScript().SetScript9(e, entry);
+        }
+
+        SmartScript GetScript() { return mScript; }
+
+        SmartScript mScript;
+    }
+
     public enum SmartEscortState
     {
         None = 0x00,                        //nothing in progress

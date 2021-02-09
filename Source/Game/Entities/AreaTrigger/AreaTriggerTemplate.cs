@@ -192,6 +192,12 @@ namespace Game.Entities
         public uint Id;
         public bool IsServerSide;
 
+        public AreaTriggerId(uint id, bool isServerSide)
+        {
+            Id = id;
+            IsServerSide = isServerSide;
+        }
+
         public override int GetHashCode()
         {
             return Id.GetHashCode() ^ IsServerSide.GetHashCode();

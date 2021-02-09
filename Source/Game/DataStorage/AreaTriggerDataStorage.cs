@@ -42,7 +42,7 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    AreaTriggerId areaTriggerId = new() { Id = templateActions.Read<uint>(0), IsServerSide = templateActions.Read<byte>(1) == 1 };
+                    AreaTriggerId areaTriggerId = new(templateActions.Read<uint>(0), templateActions.Read<byte>(1) == 1);
 
                     AreaTriggerAction action;
                     action.Param = templateActions.Read<uint>(3);
@@ -128,7 +128,7 @@ namespace Game.DataStorage
                 do
                 {
                     AreaTriggerTemplate areaTriggerTemplate = new AreaTriggerTemplate();
-                    areaTriggerTemplate.Id = new() { Id = templates.Read<uint>(0), IsServerSide = templates.Read<byte>(1) == 1 };
+                    areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<byte>(1) == 1);
                     AreaTriggerTypes type = (AreaTriggerTypes)templates.Read<byte>(2);
 
                     if (type >= AreaTriggerTypes.Max)
@@ -176,7 +176,7 @@ namespace Game.DataStorage
                     miscTemplate.MiscId = areatriggerSpellMiscs.Read<uint>(0);
 
                     uint areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
-                    miscTemplate.Template = GetAreaTriggerTemplate(new AreaTriggerId() { Id = areatriggerId, IsServerSide = false });
+                    miscTemplate.Template = GetAreaTriggerTemplate(new AreaTriggerId(areatriggerId, false));
 
                     if (miscTemplate.Template == null)
                     {
@@ -290,7 +290,7 @@ namespace Game.DataStorage
                 do
                 {
                     ulong spawnId = templates.Read<ulong>(0);
-                    AreaTriggerId areaTriggerId = new() { Id = templates.Read<uint>(1), IsServerSide = templates.Read<byte>(2) == 1 };
+                    AreaTriggerId areaTriggerId = new(templates.Read<uint>(1), templates.Read<byte>(2) == 1);
                     WorldLocation location = new(templates.Read<uint>(3), templates.Read<float>(4), templates.Read<float>(5), templates.Read<float>(6), templates.Read<float>(7));
 
                     if (GetAreaTriggerTemplate(areaTriggerId) == null)

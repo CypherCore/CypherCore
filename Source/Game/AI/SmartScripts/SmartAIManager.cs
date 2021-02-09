@@ -112,6 +112,24 @@ namespace Game.AI
                             }
                         case SmartScriptType.TimedActionlist:
                             break;//nothing to check, really
+                        case SmartScriptType.AreaTriggerEntity:
+                            {
+                                if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.entryOrGuid, false)) == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: AreaTrigger entry ({temp.entryOrGuid} IsServerSide false) does not exist, skipped loading.");
+                                    continue;
+                                }
+                                break;
+                            }
+                        case SmartScriptType.AreaTriggerEntityServerside:
+                            {
+                                if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.entryOrGuid, true)) == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: AreaTrigger entry ({temp.entryOrGuid} IsServerSide true) does not exist, skipped loading.");
+                                    continue;
+                                }
+                                break;
+                            }
                         default:
                             Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: not yet implemented source_type {0}", source_type);
                             continue;
@@ -647,6 +665,12 @@ namespace Game.AI
                         }
                     case SmartEvents.AreatriggerOntrigger:
                         {
+                            if (e.Event.areatrigger.id != 0 && (e.GetScriptType() == SmartScriptType.AreaTriggerEntity || e.GetScriptType() == SmartScriptType.AreaTriggerEntityServerside))
+                            {
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} areatrigger param not supported for SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY and SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY_SERVERSIDE, skipped.");
+                                return false;
+                            }
+
                             if (e.Event.areatrigger.id != 0 && !IsAreaTriggerValid(e, e.Event.areatrigger.id))
                                 return false;
                             break;
@@ -1593,23 +1617,25 @@ namespace Game.AI
 
         Dictionary<SmartScriptType, uint> SmartAITypeMask = new Dictionary<SmartScriptType, uint>
         {
-            { SmartScriptType.Creature,         SmartScriptTypeMaskId.Creature },
-            { SmartScriptType.GameObject,       SmartScriptTypeMaskId.Gameobject },
-            { SmartScriptType.AreaTrigger,      SmartScriptTypeMaskId.Areatrigger },
-            { SmartScriptType.Event,            SmartScriptTypeMaskId.Event },
-            { SmartScriptType.Gossip,           SmartScriptTypeMaskId.Gossip },
-            { SmartScriptType.Quest,            SmartScriptTypeMaskId.Quest },
-            { SmartScriptType.Spell,            SmartScriptTypeMaskId.Spell },
-            { SmartScriptType.Transport,        SmartScriptTypeMaskId.Transport },
-            { SmartScriptType.Instance,         SmartScriptTypeMaskId.Instance },
-            { SmartScriptType.TimedActionlist,  SmartScriptTypeMaskId.TimedActionlist },
-            { SmartScriptType.Scene,            SmartScriptTypeMaskId.Scene }
+            { SmartScriptType.Creature,                     SmartScriptTypeMaskId.Creature },
+            { SmartScriptType.GameObject,                   SmartScriptTypeMaskId.Gameobject },
+            { SmartScriptType.AreaTrigger,                  SmartScriptTypeMaskId.Areatrigger },
+            { SmartScriptType.Event,                        SmartScriptTypeMaskId.Event },
+            { SmartScriptType.Gossip,                       SmartScriptTypeMaskId.Gossip },
+            { SmartScriptType.Quest,                        SmartScriptTypeMaskId.Quest },
+            { SmartScriptType.Spell,                        SmartScriptTypeMaskId.Spell },
+            { SmartScriptType.Transport,                    SmartScriptTypeMaskId.Transport },
+            { SmartScriptType.Instance,                     SmartScriptTypeMaskId.Instance },
+            { SmartScriptType.TimedActionlist,              SmartScriptTypeMaskId.TimedActionlist },
+            { SmartScriptType.Scene,                        SmartScriptTypeMaskId.Scene },
+            { SmartScriptType.AreaTriggerEntity,            SmartScriptTypeMaskId.AreatrigggerEntity },
+            { SmartScriptType.AreaTriggerEntityServerside,  SmartScriptTypeMaskId.AreatrigggerEntity }
         };
 
         Dictionary<SmartEvents, uint> SmartAIEventMask = new Dictionary<SmartEvents, uint>
         {
             { SmartEvents.UpdateIc,                 SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist },
-            { SmartEvents.UpdateOoc,                SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance },
+            { SmartEvents.UpdateOoc,                SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity },
             { SmartEvents.HealthPct,                SmartScriptTypeMaskId.Creature },
             { SmartEvents.ManaPct,                  SmartScriptTypeMaskId.Creature },
             { SmartEvents.Aggro,                    SmartScriptTypeMaskId.Creature },
@@ -1654,7 +1680,7 @@ namespace Game.AI
             { SmartEvents.TransportRemovePlayer,    SmartScriptTypeMaskId.Transport },
             { SmartEvents.TransportRelocate,        SmartScriptTypeMaskId.Transport },
             { SmartEvents.InstancePlayerEnter,      SmartScriptTypeMaskId.Instance },
-            { SmartEvents.AreatriggerOntrigger,     SmartScriptTypeMaskId.Areatrigger },
+            { SmartEvents.AreatriggerOntrigger,     SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity },
             { SmartEvents.QuestAccepted,            SmartScriptTypeMaskId.Quest },
             { SmartEvents.QuestObjCompletion,       SmartScriptTypeMaskId.Quest },
             { SmartEvents.QuestRewarded,            SmartScriptTypeMaskId.Quest },
@@ -1668,8 +1694,8 @@ namespace Game.AI
             { SmartEvents.WaypointStopped,          SmartScriptTypeMaskId.Creature },
             { SmartEvents.WaypointEnded,            SmartScriptTypeMaskId.Creature },
             { SmartEvents.TimedEventTriggered,      SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
-            { SmartEvents.Update,                   SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
-            { SmartEvents.Link,                     SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.Event + SmartScriptTypeMaskId.Gossip + SmartScriptTypeMaskId.Quest + SmartScriptTypeMaskId.Spell + SmartScriptTypeMaskId.Transport + SmartScriptTypeMaskId.Instance },
+            { SmartEvents.Update,                   SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.AreatrigggerEntity },
+            { SmartEvents.Link,                     SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.Event + SmartScriptTypeMaskId.Gossip + SmartScriptTypeMaskId.Quest + SmartScriptTypeMaskId.Spell + SmartScriptTypeMaskId.Transport + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity },
             { SmartEvents.GossipSelect,             SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.JustCreated,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },
             { SmartEvents.GossipHello,              SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject },

@@ -1112,7 +1112,7 @@ namespace Game.Entities
             return m_vehicle != null && m_vehicle == vehicle.GetVehicleKit();
         }
 
-        public UnitAI GetAI() { return i_AI; }
+        public virtual UnitAI GetAI() { return i_AI; }
         public void SetAI(UnitAI newAI) { i_AI = newAI; }
 
         public bool IsPossessing()

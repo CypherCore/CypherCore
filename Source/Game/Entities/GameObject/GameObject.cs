@@ -2779,6 +2779,8 @@ namespace Game.Entities
 
         public GameObjectAI GetAI() { return m_AI; }
 
+        public T GetAI<T>() where T : GameObjectAI { return (T)m_AI; }
+
         public uint GetDisplayId() { return m_gameObjectData.DisplayID; }
 
         public uint GetFaction() { return m_gameObjectData.FactionTemplate; }

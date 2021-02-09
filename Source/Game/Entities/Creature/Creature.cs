@@ -1540,7 +1540,7 @@ namespace Game.Entities
 
         public override bool CanAlwaysSee(WorldObject obj)
         {
-            if (IsAIEnabled && GetAI().CanSeeAlways(obj))
+            if (IsAIEnabled && GetAI<CreatureAI>().CanSeeAlways(obj))
                 return true;
 
             return false;
@@ -3038,12 +3038,12 @@ namespace Game.Entities
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }
 
-        public new CreatureAI GetAI()
+        public override CreatureAI GetAI()
         {
             return (CreatureAI)i_AI;
         }
 
-        public T GetAI<T>() where T : UnitAI
+        public T GetAI<T>() where T : CreatureAI
         {
             return (T)i_AI;
         }
