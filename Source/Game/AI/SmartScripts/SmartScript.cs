@@ -3968,6 +3968,9 @@ namespace Game.AI
                 obj = me;
             else if (go != null)
                 obj = go;
+            else if (areaTrigger != null)
+                obj = areaTrigger;
+
             return obj;
         }
         WorldObject GetBaseObjectOrUnit(Unit unit)
