@@ -908,7 +908,8 @@ namespace Framework.Constants
 
     public enum AreaFlags2
     {
-        DontShowSanctuary = 0x00000200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
+        DontShowSanctuary = 0x200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)
+        CanEnableWarMode = 0x1000,                // Allows enabling war mode
     }
 
     public enum ArtifactCategory
