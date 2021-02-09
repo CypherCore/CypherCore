@@ -2830,11 +2830,12 @@ namespace Game.Entities
             // Done total percent damage auras
             float DoneTotalMod = 1.0f;
 
-            // Some spells don't benefit from pct done mods
-            if (spellProto != null && !spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods))
+
+            if (spellProto != null)
             {
+                // Some spells don't benefit from pct done mods
                 // mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation
-                if (!spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
+                if (!spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
                 {
                     float maxModDamagePercentSchool = 0.0f;
                     Player thisPlayer = ToPlayer();
@@ -2851,9 +2852,15 @@ namespace Game.Entities
 
                     DoneTotalMod *= maxModDamagePercentSchool;
                 }
+                else
+                {
+                    // melee attack
+                    foreach (AuraEffect autoAttackDamage in GetAuraEffectsByType(AuraType.ModAutoAttackDamage))
+                        MathFunctions.AddPct(ref DoneTotalMod, autoAttackDamage.GetAmount());
+                }
             }
 
-            DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, (uint)creatureTypeMask);
+            DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, creatureTypeMask);
 
             // bonus against aurastate
             DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>

@@ -979,7 +979,6 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Unk335)]
         [AuraEffectHandler(AuraType.MountRestrictions)]
         [AuraEffectHandler(AuraType.ModResurrectedHealthByGuildMember)]
-        [AuraEffectHandler(AuraType.ModAutoattackDamage)]
         [AuraEffectHandler(AuraType.ModSpellCooldownByHaste)]
         [AuraEffectHandler(AuraType.ModGatheringItemsGainedPercent)]
         [AuraEffectHandler(AuraType.Unk351)]

@@ -365,7 +365,7 @@ namespace Framework.Constants
         ModSpellCategoryCooldown = 341,
         ModMeleeRangedHaste2 = 342,
         ModMeleeDamageFromCaster = 343,
-        ModAutoattackDamage = 344,
+        ModAutoAttackDamage = 344,
         BypassArmorForCaster = 345,
         EnableAltPower = 346,  // Nyi
         ModSpellCooldownByHaste = 347,
