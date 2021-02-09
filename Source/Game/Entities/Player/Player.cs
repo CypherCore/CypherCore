@@ -4004,6 +4004,20 @@ namespace Game.Entities
 
             return false;
         }
+
+        public override bool IsAlwaysDetectableFor(WorldObject seer)
+        {
+            if (base.IsAlwaysDetectableFor(seer))
+                return true;
+
+            Player seerPlayer = seer.ToPlayer();
+            if (seerPlayer != null)
+                if (IsGroupVisibleFor(seerPlayer))
+                    return !(seerPlayer.duel != null && seerPlayer.duel.startTime != 0 && seerPlayer.duel.opponent == this);
+
+            return false;
+        }
+        
         public override bool IsNeverVisibleFor(WorldObject seer)
         {
             if (base.IsNeverVisibleFor(seer))
