@@ -160,7 +160,7 @@ namespace Game.BattleGrounds.Zones
 
                         if (team == TeamId.Alliance)
                             UpdateWorldState(ABWorldStates.ResourcesAlly, m_TeamScores[team]);
-                        else if (team == TeamId.Horde)
+                        else
                             UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
@@ -387,12 +387,12 @@ namespace Game.BattleGrounds.Zones
 
         void _NodeDeOccupied(byte node)
         {
+            //only dynamic nodes, no start points
             if (node >= ABBattlegroundNodes.DynamicNodesCount)
                 return;
 
             //remove bonus honor aura trigger creature when node is lost
-            if (node < ABBattlegroundNodes.DynamicNodesCount)//only dynamic nodes, no start points
-                DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
+            DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
 
             RelocateDeadPlayers(BgCreatures[node]);
 

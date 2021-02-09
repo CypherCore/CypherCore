@@ -7598,7 +7598,7 @@ namespace Game
                     if (reverseMap != null)
                         reverseMap.Add(quest, id);
                 }
-                else if (starter)
+                else
                     poolRelationMap.Add(quest, id);
 
                 ++count;

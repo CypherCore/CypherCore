@@ -2203,11 +2203,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            if (itemTarget == null)
-                return;
-
             uint enchant_id = (uint)effectInfo.MiscValue;
-
             if (enchant_id == 0)
             {
                 Log.outError(LogFilter.Spells, "Spell {0} Effect {1} (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have 0 as enchanting id", m_spellInfo.Id, effIndex);
