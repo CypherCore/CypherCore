@@ -1460,6 +1460,9 @@ namespace Game.DungeonFinding
 
         public uint GetDungeonMapId(ObjectGuid guid)
         {
+            if (!GroupsStore.ContainsKey(guid))
+                return 0;
+
             uint dungeonId = GroupsStore[guid].GetDungeon(true);
             uint mapId = 0;
             if (dungeonId != 0)
