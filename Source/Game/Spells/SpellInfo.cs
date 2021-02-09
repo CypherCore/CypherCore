@@ -3666,6 +3666,7 @@ namespace Game.Spells
             Scaling.Coefficient = effect.Coefficient;
             Scaling.Variance = effect.Variance;
             Scaling.ResourceCoefficient = effect.ResourceCoefficient;
+            EffectAttributes = effect.EffectAttributes;
 
             ImplicitTargetConditions = null;
 
@@ -4408,6 +4409,7 @@ namespace Game.Spells
         public FlagArray128 SpellClassMask;
         public float BonusCoefficientFromAP;
         public List<Condition> ImplicitTargetConditions;
+        public SpellEffectAttributes EffectAttributes;
         public ScalingInfo Scaling;
 
         ImmunityInfo _immunityInfo;

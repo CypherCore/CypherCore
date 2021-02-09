@@ -122,7 +122,8 @@ namespace Game.Spells
             }
 
             GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref m_canBeRecalculated);
-            amount *= GetBase().GetStackAmount();
+            if (!GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack))
+                amount *= GetBase().GetStackAmount();
             return amount;
         }
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)

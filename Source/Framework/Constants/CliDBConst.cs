@@ -1672,6 +1672,16 @@ namespace Framework.Constants
         CooldownExpiresAtDailyReset = 0x08
     }
 
+    public enum SpellEffectAttributes
+    {
+        None = 0,
+        UnaffectedByInvulnerability = 0x01, // not cancelled by immunities
+        NoScaleWithStack = 0x40,
+        StackAuraAmountOnRecast = 0x8000, // refreshing periodic auras with this attribute will add remaining damage to new aura
+        AllowAnyExplicitTarget = 0x100000,
+        IgnoreDuringCooldownTimeRateCalculation = 0x800000
+    }
+
     public enum SpellProcsPerMinuteModType : byte
     {
         Haste = 1,

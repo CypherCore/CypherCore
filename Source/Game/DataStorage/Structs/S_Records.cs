@@ -271,7 +271,7 @@ namespace Game.DataStorage
         public uint EffectIndex;
         public uint Effect;
         public float EffectAmplitude;
-        public int EffectAttributes;
+        public SpellEffectAttributes EffectAttributes;
         public uint EffectAuraPeriod;
         public float EffectBonusCoefficient;
         public float EffectChainAmplitude;
