@@ -137,27 +137,10 @@ namespace Game.Entities
                 hasLearnSpellEffect = true;
                 if (!player.HasSpell(spellEffect.TriggerSpell))
                     knowsAllLearnedSpells = false;
-
-                uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(spellEffect.TriggerSpell);
-                if (previousRankSpellId != 0)
-                    if (!player.HasSpell(previousRankSpellId))
-                        return TrainerSpellState.Unavailable;
             }
 
-            if (!hasLearnSpellEffect)
-            {
-                uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(trainerSpell.SpellId);
-                if (previousRankSpellId != 0)
-                    if (!player.HasSpell(previousRankSpellId))
-                        return TrainerSpellState.Unavailable;
-            }
-            else if (knowsAllLearnedSpells)
+            if (hasLearnSpellEffect && knowsAllLearnedSpells)
                 return TrainerSpellState.Known;
-
-            // check additional spell requirement
-            foreach (var spellId in Global.SpellMgr.GetSpellsRequiredForSpellBounds(trainerSpell.SpellId))
-                if (!player.HasSpell(spellId))
-                    return TrainerSpellState.Unavailable;
 
             return TrainerSpellState.Available;
         }
