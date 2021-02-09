@@ -1920,7 +1920,7 @@ namespace Game.DataStorage
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var record in bounds)
             {
-                if (record.RaceMask != 0 && !Convert.ToBoolean(record.RaceMask & (1 << ((byte)race - 1))))
+                if (record.RaceMask != 0 && !Convert.ToBoolean(record.RaceMask & SharedConst.GetMaskForRace(race)))
                     continue;
                 if (record.ClassMask != 0 && !Convert.ToBoolean(record.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;

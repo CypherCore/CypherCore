@@ -5630,12 +5630,12 @@ namespace Game
                     if (items.Empty())
                         continue;
 
-                    for (uint raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
+                    for (var raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
                     {
-                        if (!characterLoadout.RaceMask.HasAnyFlag(raceIndex))
+                        if (!characterLoadout.RaceMask.HasAnyFlag(SharedConst.GetMaskForRace(raceIndex)))
                             continue;
 
-                        PlayerInfo playerInfo = _playerInfo[raceIndex][characterLoadout.ChrClassID];
+                        PlayerInfo playerInfo = _playerInfo[(int)raceIndex][characterLoadout.ChrClassID];
                         if (playerInfo != null)
                         {
                             foreach (ItemTemplate itemTemplate in items)
