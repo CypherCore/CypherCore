@@ -225,14 +225,10 @@ namespace Game
 
         void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
         {
-            // disable for gamemasters with GM-mode enabled
-            if (_owner.IsGameMaster())
-                return;
-
             if (HasCompletedObjective(questObjective))
                 return;
 
-            referencePlayer.KillCreditCriteriaTreeObjective(questObjective);
+            _owner.KillCreditCriteriaTreeObjective(questObjective);
 
             Log.outInfo(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CompletedObjective({questObjective.Id}). {GetOwnerInfo()}");
 
@@ -278,6 +274,19 @@ namespace Game
             if (HasCompletedObjective(objective))
             {
                 Log.outTrace(LogFilter.Player, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective already completed");
+                return false;
+            }
+
+            if (_owner.GetQuestStatus(objective.QuestID) != QuestStatus.Incomplete)
+            {
+                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Not on quest");
+                return false;
+            }
+
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
+            if (_owner.GetGroup() && _owner.GetGroup().IsRaidGroup() && !quest.IsAllowedInRaid(referencePlayer.GetMap().GetDifficultyID()))
+            {
+                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Quest cannot be completed in raid group");
                 return false;
             }
 
