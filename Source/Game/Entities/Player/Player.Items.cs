@@ -878,7 +878,7 @@ namespace Game.Entities
                 (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
                 searchSlotStart = InventorySlots.BagStart;
 
-            res = CanStoreItem_InInventorySlots(searchSlotStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
+            res = CanStoreItem_InInventorySlots(searchSlotStart, inventoryEnd, dest, pProto, ref count, false, pItem, bag, slot);
             if (res != InventoryResult.Ok)
             {
                 no_space_count = count + no_similar_count;
