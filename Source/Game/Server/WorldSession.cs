@@ -86,6 +86,9 @@ namespace Game
 
         public void LogoutPlayer(bool save)
         {
+            if (m_playerLogout)
+                return;
+
             // finish pending transfers before starting the logout
             while (_player && _player.IsBeingTeleportedFar())
                 HandleMoveWorldportAck();

@@ -52,6 +52,7 @@ namespace Game.Networking
         long _LastPingTime;
         uint _OverSpeedPings;
 
+        object _worldSessionLock = new object();
         WorldSession _worldSession;
 
         ZLib.z_stream _compressionStream;
@@ -324,23 +325,26 @@ namespace Game.Networking
                     HandleEnterEncryptedModeAck();
                     break;
                 default:
-                    if (_worldSession == null)
+                    lock (_worldSessionLock)
                     {
-                        Log.outError(LogFilter.Network, $"ProcessIncoming: Client not authed opcode = {opcode}");
-                        return ReadDataHandlerResult.Error;
+                        if (_worldSession == null)
+                        {
+                            Log.outError(LogFilter.Network, $"ProcessIncoming: Client not authed opcode = {opcode}");
+                            return ReadDataHandlerResult.Error;
+                        }
+
+                        if (!PacketManager.ContainsHandler(opcode))
+                        {
+                            Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
+                            break;
+                        }
+
+                        // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
+                        _worldSession.ResetTimeOutTime(false);
+
+                        // Copy the packet to the heap before enqueuing
+                        _worldSession.QueuePacket(packet);
                     }
-
-                    if (!PacketManager.ContainsHandler(opcode))
-                    {
-                        Log.outError(LogFilter.Network, $"No defined handler for opcode {opcode} sent by {_worldSession.GetPlayerInfo()}");
-                        break;
-                    }
-
-                    // Our Idle timer will reset on any non PING opcodes on login screen, allowing us to catch people idling.
-                    _worldSession.ResetTimeOutTime(false);
-
-                    // Copy the packet to the heap before enqueuing
-                    _worldSession.QueuePacket(packet);
                     break;
             }
 
@@ -398,7 +402,8 @@ namespace Game.Networking
 
         public void SetWorldSession(WorldSession session)
         {
-            _worldSession = session;
+            lock (_worldSessionLock)
+                _worldSession = session;
         }
 
         public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
@@ -434,6 +439,16 @@ namespace Game.Networking
             _queryProcessor.ProcessReadyCallbacks();
 
             return true;
+        }
+
+        public override void OnClose()
+        {
+            lock (_worldSessionLock)
+            {
+                _worldSession.Dispose();
+                _worldSession = null;
+            }
+            base.OnClose();
         }
 
         void HandleSendAuthSession()
@@ -781,10 +796,13 @@ namespace Game.Networking
                     uint maxAllowed = WorldConfig.GetUIntValue(WorldCfg.MaxOverspeedPings);
                     if (maxAllowed != 0 && _OverSpeedPings > maxAllowed)
                     {
-                        if (_worldSession != null && !_worldSession.HasPermission(RBACPermissions.SkipCheckOverspeedPing))
+                        lock (_worldSessionLock)
                         {
-                            Log.outError(LogFilter.Network, "WorldSocket:HandlePing: {0} kicked for over-speed pings (address: {1})", _worldSession.GetPlayerInfo(), GetRemoteIpAddress());
-                            //return ReadDataHandlerResult.Error;
+                            if (_worldSession != null && !_worldSession.HasPermission(RBACPermissions.SkipCheckOverspeedPing))
+                            {
+                                Log.outError(LogFilter.Network, "WorldSocket:HandlePing: {0} kicked for over-speed pings (address: {1})", _worldSession.GetPlayerInfo(), GetRemoteIpAddress());
+                                //return ReadDataHandlerResult.Error;
+                            }
                         }
                     }
                 }
@@ -792,15 +810,18 @@ namespace Game.Networking
                     _OverSpeedPings = 0;
             }
 
-            if (_worldSession != null)
+            lock (_worldSessionLock)
             {
-                _worldSession.SetLatency(ping.Latency);
-                _worldSession.ResetClientTimeDelay();
-            }
-            else
-            {
-                Log.outError(LogFilter.Network, "WorldSocket:HandlePing: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = {0}", GetRemoteIpAddress());
-                return false;
+                if (_worldSession != null)
+                {
+                    _worldSession.SetLatency(ping.Latency);
+                    _worldSession.ResetClientTimeDelay();
+                }
+                else
+                {
+                    Log.outError(LogFilter.Network, "WorldSocket:HandlePing: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = {0}", GetRemoteIpAddress());
+                    return false;
+                }
             }
 
             SendPacket(new Pong(ping.Serial));

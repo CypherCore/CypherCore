@@ -87,7 +87,6 @@ namespace System.Collections.Generic
                 return false;
 
             bool val = _interalStorage[key].Remove(value);
-
             if (!val)
                 return false;
 
