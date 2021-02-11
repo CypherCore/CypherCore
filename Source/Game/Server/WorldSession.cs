@@ -74,7 +74,10 @@ namespace Game
             for (byte i = 0; i < 2; ++i)
             {
                 if (m_Socket[i] != null)
+                {
                     m_Socket[i].CloseSocket();
+                    m_Socket[i] = null;
+                }
             }
 
             // empty incoming packet queue
