@@ -444,10 +444,8 @@ namespace Game.Networking
         public override void OnClose()
         {
             lock (_worldSessionLock)
-            {
-                _worldSession.Dispose();
                 _worldSession = null;
-            }
+
             base.OnClose();
         }
 

@@ -1855,7 +1855,7 @@ namespace Game
                         m_disconnects[session.GetAccountId()] = Time.UnixTime;
 
                     RemoveQueuedPlayer(session);
-                    m_sessions.TryRemove(pair.Key, out WorldSession tempSession);
+                    m_sessions.TryRemove(pair.Key, out _);
                     session.Dispose();
                 }
             }
