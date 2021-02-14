@@ -79,23 +79,18 @@ namespace Framework.Constants
         FullSpeedPitching                   = 0x8,
         AlwaysAllowPitching                 = 0x10,
         IsVehicleExitVoluntary              = 0x20,
-        JumpSplineInAir                     = 0x40,
-        AnimTierInTrans                     = 0x80,
-        WaterwalkingFullPitch               = 0x100, // will always waterwalk, even if facing the camera directly down
-        VehiclePassengerIsTransitionAllowed = 0x200,
-        CanSwimToFlyTrans                   = 0x400,
-        Unk11                               = 0x800, // terrain normal calculation is disabled if this flag is not present, client automatically handles setting this flag
-        CanTurnWhileFalling                 = 0x1000,
-        Unk13                               = 0x2000, // will always waterwalk, even if facing the camera directly down
-        IgnoreMovementForces                = 0x4000,
-        Unk15                               = 0x8000,
-        CanDoubleJump                       = 0x10000,
-        DoubleJump                          = 0x20000,
-        // these flags cannot be sent (18 bits in packet)
-        Unk18                               = 0x40000,
-        AwaitingLoad                        = 0x80000,
-        InterpolatedMovement                = 0x100000,
-        InterpolatedTurning                 = 0x200000,
-        InterpolatedPitching                = 0x400000
+        WaterwalkingFullPitch = 0x40, // Will Always Waterwalk, Even If Facing The Camera Directly Down
+        VehiclePassengerIsTransitionAllowed = 0x80,
+        CanSwimToFlyTrans = 0x100,
+        Unk9 = 0x200, // Terrain Normal Calculation Is Disabled If This Flag Is Not Present, Client Automatically Handles Setting This Flag
+        CanTurnWhileFalling = 0x400,
+        IgnoreMovementForces = 0x800,
+        CanDoubleJump = 0x1000,
+        DoubleJump = 0x2000,
+        // These Flags Are Not Sent
+        AwaitingLoad = 0x10000,
+        InterpolatedMovement = 0x20000,
+        InterpolatedTurning = 0x40000,
+        InterpolatedPitching = 0x80000
     }
 }
