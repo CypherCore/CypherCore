@@ -805,6 +805,9 @@ namespace Scripts.Spells.Druid
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
+            if (triggeredSpellId == m_scriptSpellId)
+                return;
+
             Player player = GetTarget().ToPlayer();
 
             if (triggeredSpellId != 0) // Apply new form
