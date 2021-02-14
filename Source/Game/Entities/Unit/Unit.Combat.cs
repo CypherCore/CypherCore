@@ -1106,7 +1106,10 @@ namespace Game.Entities
             {
                 victim.ToPlayer().UpdateCriteria(CriteriaTypes.HighestHitReceived, damage);
             }
-            else if (!victim.IsControlledByPlayer() || victim.IsVehicle())
+
+            damage /= (uint)victim.GetHealthMultiplierForTarget(this);
+
+            if (victim.GetTypeId() != TypeId.Player && !victim.IsControlledByPlayer() || victim.IsVehicle())
             {
                 if (!victim.ToCreature().HasLootRecipient())
                     victim.ToCreature().SetLootRecipient(this);
@@ -1114,8 +1117,6 @@ namespace Game.Entities
                 if (IsControlledByPlayer())
                     victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);
             }
-
-            damage = (uint)(damage / victim.GetHealthMultiplierForTarget(this));
 
             if (health <= damage)
             {
