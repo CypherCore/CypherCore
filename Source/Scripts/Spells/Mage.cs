@@ -59,6 +59,8 @@ namespace Scripts.Spells.Mage
         public const uint IcyVeins = 12472;
         public const uint ChainReactionDummy = 278309;
         public const uint ChainReaction = 278310;
+        public const uint TouchOfTheMagiAura = 210824;
+        public const uint TouchOfTheMagiExplode = 210833;
 
         //Misc
         public const uint HunterInsanity = 95809;
@@ -682,6 +684,46 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 210824 - Touch of the Magi (Aura)
+    class spell_mage_touch_of_the_magi_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.TouchOfTheMagiExplode);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo != null)
+            {
+                if (damageInfo.GetAttacker() == GetCaster() && damageInfo.GetVictim() == GetTarget())
+                {
+                    uint extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
+                    if (extra > 0)
+                        aurEff.ChangeAmount(aurEff.GetAmount() + (int)extra);
+                }
+            }
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            int amount = aurEff.GetAmount();
+            if (amount == 0 || GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastCustomSpell(SpellIds.TouchOfTheMagiExplode, SpellValueMod.BasePoint0, amount, GetTarget(), TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] //228597 - Frostbolt   84721  - Frozen Orb   190357 - Blizzard
     class spell_mage_trigger_chilled : SpellScript
     {
