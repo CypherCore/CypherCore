@@ -2492,6 +2492,7 @@ namespace Game.AI
             public uint duration;
             public uint storageID;
             public uint attackInvoker;
+            public uint flags; // SmartActionSummonCreatureFlags
         }
         public struct ThreatPCT
         {

@@ -151,6 +151,15 @@ namespace Framework.Constants
         CombatMove = 0x40                      //Prevents combat movement if cast successful. Allows movement on range, OOM, LOS
     }
 
+    public enum SmartActionSummonCreatureFlags
+    {
+        None = 0,
+        PersonalSpawn = 1,
+        PreferUnit = 2,
+
+        All = PersonalSpawn | PreferUnit,
+    }
+
     public enum SmartEvents
     {
         UpdateIc = 0,       // Initialmin, Initialmax, Repeatmin, Repeatmax
@@ -257,7 +266,7 @@ namespace Framework.Constants
         ActivateGobject = 9,      //
         RandomEmote = 10,     // Emoteid1, Emoteid2, Emoteid3...
         Cast = 11,     // Spellid, Castflags, TriggeredFlags
-        SummonCreature = 12,     // Creatureid, Summontype, Duration In Ms, Storageid, Attackinvoker,
+        SummonCreature = 12,     // Creatureid, Summontype, Duration In Ms, Storageid, Attackinvoker, flags(SmartActionSummonCreatureFlags)
         ThreatSinglePct = 13,     // Threat%
         ThreatAllPct = 14,     // Threat%
         CallAreaexploredoreventhappens = 15,     // Questid

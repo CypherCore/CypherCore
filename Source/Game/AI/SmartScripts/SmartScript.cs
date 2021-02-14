@@ -678,10 +678,10 @@ namespace Game.AI
                             break;
 
                         // If invoker was pet or charm
-                        Player player = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
-                        if (player && GetBaseObject() != null)
+                        Player playerCharmed = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
+                        if (playerCharmed && GetBaseObject() != null)
                         {
-                            player.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
+                            playerCharmed.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
                             Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_GROUPEVENTHAPPENS: Player {0}, group credit for quest {1}",
                                 unit.GetGUID().ToString(), e.Action.quest.questId);
                         }
@@ -1086,10 +1086,14 @@ namespace Game.AI
                     }
                 case SmartActions.SummonCreature:
                     {
-                        WorldObject summoner = GetBaseObjectOrUnit(unit);
+                        SmartActionSummonCreatureFlags flags = (SmartActionSummonCreatureFlags)e.Action.summonCreature.flags;
+                        bool preferUnit = flags.HasAnyFlag(SmartActionSummonCreatureFlags.PreferUnit);
+                        WorldObject summoner = preferUnit ? unit : GetBaseObjectOrUnit(unit);
                         if (summoner == null)
                             break;
-                        
+
+                        bool personalSpawn = flags.HasAnyFlag(SmartActionSummonCreatureFlags.PersonalSpawn);
+
                         float x, y, z, o;
                         foreach (var target in targets)
                         {
@@ -1098,7 +1102,7 @@ namespace Game.AI
                             y += e.Target.y;
                             z += e.Target.z;
                             o += e.Target.o;
-                            Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration);
+                            Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration, personalSpawn);
                             if (summon != null)
                                 if (e.Action.summonCreature.attackInvoker != 0)
                                     summon.GetAI().AttackStart(target.ToUnit());
@@ -1107,7 +1111,7 @@ namespace Game.AI
                         if (e.GetTargetType() != SmartTargets.Position)
                             break;
 
-                        Creature summon1 = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration);
+                        Creature summon1 = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, e.Action.summonCreature.duration, personalSpawn);
                         if (summon1 != null)
                             if (unit != null && e.Action.summonCreature.attackInvoker != 0)
                                 summon1.GetAI().AttackStart(unit);
