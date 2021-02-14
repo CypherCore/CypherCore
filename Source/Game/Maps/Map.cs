@@ -3253,7 +3253,7 @@ namespace Game.Maps
             {
                 do
                 {
-                    var loguid = result.Read<uint>(0);
+                    var loguid = result.Read<ulong>(0);
                     var respawnTime = result.Read<long>(1);
 
                     CreatureData cdata = Global.ObjectMgr.GetCreatureData(loguid);
