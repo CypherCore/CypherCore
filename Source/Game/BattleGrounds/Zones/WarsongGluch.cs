@@ -165,33 +165,6 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void GetPlayerPositionData(List<BattlegroundPlayerPosition> positions)
-        {
-            Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), m_FlagKeepers[TeamId.Alliance]);
-            if (player)
-            {
-                BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-                position.Guid = player.GetGUID();
-                position.Pos.X = player.GetPositionX();
-                position.Pos.Y = player.GetPositionY();
-                position.IconID = BattlegroundConst.PlayerPositionIconAllianceFlag;
-                position.ArenaSlot = BattlegroundConst.PlayerPositionArenaSlotNone;
-                positions.Add(position);
-            }
-
-            player = Global.ObjAccessor.GetPlayer(GetBgMap(), m_FlagKeepers[TeamId.Horde]);
-            if (player)
-            {
-                BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-                position.Guid = player.GetGUID();
-                position.Pos.X = player.GetPositionX();
-                position.Pos.Y = player.GetPositionY();
-                position.IconID = BattlegroundConst.PlayerPositionIconHordeFlag;
-                position.ArenaSlot = BattlegroundConst.PlayerPositionArenaSlotNone;
-                positions.Add(position);
-            }
-        }
-
         public override void StartingEventCloseDoors()
         {
             for (int i = WSGObjectTypes.DoorA1; i <= WSGObjectTypes.DoorH4; ++i)

@@ -188,12 +188,20 @@ namespace Game.BattleGrounds
                 m_LastPlayerPositionBroadcast = 0;
 
                 BattlegroundPlayerPositions playerPositions = new BattlegroundPlayerPositions();
-                GetPlayerPositionData(playerPositions.FlagCarriers);
+                for (var i =0; i < _playerPositions.Count; ++i)
+                {
+                    var playerPosition = _playerPositions[i];
+                    // Update position data if we found player.
+                    Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerPosition.Guid);
+                    if (player != null)
+                        playerPosition.Pos = player.GetPosition();
+
+                    playerPositions.FlagCarriers.Add(playerPosition);
+                }
+
                 SendPacketToAll(playerPositions);
             }
         }
-
-        public virtual void GetPlayerPositionData(List<BattlegroundPlayerPosition> positions) { }
 
         void _ProcessOfflineQueue()
         {
@@ -943,6 +951,8 @@ namespace Game.BattleGrounds
             PlayerScores.Clear();
 
             ResetBGSubclass();
+
+            _playerPositions.Clear();
         }
 
         public void StartBattleground()
@@ -1586,6 +1596,16 @@ namespace Game.BattleGrounds
             BroadcastWorker(localizer);
         }
 
+        public void AddPlayerPosition(BattlegroundPlayerPosition position)
+        {
+            _playerPositions.Add(position);
+        }
+
+        public void RemovePlayerPosition(ObjectGuid guid)
+        {
+            _playerPositions.RemoveAll(playerPosition => playerPosition.Guid == guid);
+        }
+        
         void EndNow()
         {
             RemoveFromBGFreeSlotQueue();
@@ -2078,6 +2098,8 @@ namespace Game.BattleGrounds
 
         BattlegroundTemplate _battlegroundTemplate;
         PvpDifficultyRecord _pvpDifficultyEntry;
+
+        List<BattlegroundPlayerPosition> _playerPositions = new List<BattlegroundPlayerPosition>();
         #endregion
     }
 

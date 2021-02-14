@@ -107,21 +107,6 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void GetPlayerPositionData(List<BattlegroundPlayerPosition> positions)
-        {
-            Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), m_FlagKeeper);
-            if (player)
-            {
-                BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-                position.Guid = player.GetGUID();
-                position.Pos.X = player.GetPositionX();
-                position.Pos.Y = player.GetPositionY();
-                position.IconID = player.GetTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconAllianceFlag : BattlegroundConst.PlayerPositionIconHordeFlag;
-                position.ArenaSlot = BattlegroundConst.PlayerPositionArenaSlotNone;
-                positions.Add(position);
-            }
-        }
-
         public override void StartingEventCloseDoors()
         {
             SpawnBGObject(EotSObjectTypes.DoorA, BattlegroundConst.RespawnImmediately);

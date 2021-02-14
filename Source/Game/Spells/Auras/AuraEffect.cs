@@ -6172,6 +6172,45 @@ namespace Game.Spells
             target.UpdateHostileAreaState(CliDB.AreaTableStorage.LookupByKey(target.GetZoneId()));
             target.UpdatePvPState();
         }
+
+        [AuraEffectHandler(AuraType.BattleGroundPlayerPositionFactional)]
+        [AuraEffectHandler(AuraType.BattleGroundPlayerPosition)]
+        void HandleBattlegroundPlayerPosition(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            BattlegroundMap battlegroundMap = target.GetMap().ToBattlegroundMap();
+            if (battlegroundMap == null)
+                return;
+
+            Battleground bg = battlegroundMap.GetBG();
+            if (bg == null)
+                return;
+
+            if (apply)
+            {
+                BattlegroundPlayerPosition playerPosition = new BattlegroundPlayerPosition();
+                playerPosition.Guid = target.GetGUID();
+                playerPosition.ArenaSlot = (sbyte)GetMiscValue();
+                playerPosition.Pos = target.GetPosition();
+
+                if (GetAuraType() == AuraType.BattleGroundPlayerPositionFactional)
+                    playerPosition.IconID = target.GetTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconHordeFlag : BattlegroundConst.PlayerPositionIconAllianceFlag;
+                else if (GetAuraType() == AuraType.BattleGroundPlayerPosition)
+                    playerPosition.IconID = target.GetTeam() == Team.Alliance ? BattlegroundConst.PlayerPositionIconAllianceFlag : BattlegroundConst.PlayerPositionIconHordeFlag;
+                else
+                    Log.outWarn(LogFilter.Spells, $"Unknown aura effect {GetAuraType()} handled by HandleBattlegroundPlayerPosition.");
+
+                bg.AddPlayerPosition(playerPosition);
+            }
+            else
+                bg.RemovePlayerPosition(target.GetGUID());
+        }
         #endregion
     }
 

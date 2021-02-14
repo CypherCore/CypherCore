@@ -418,8 +418,8 @@ namespace Framework.Constants
         ShowConfirmationPrompt = 394,
         AreaTrigger = 395, // NYI
         TriggerSpellOnPowerAmount = 396,
-        Unk397 = 397,
-        Unk398 = 398,
+        BattleGroundPlayerPositionFactional = 397,
+        BattleGroundPlayerPosition = 398,
         ModTimeRate = 399,
         ModSkill2 = 400,
         Unk401 = 401,
