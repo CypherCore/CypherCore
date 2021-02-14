@@ -220,7 +220,10 @@ namespace Framework.Database
         {
             try
             {
-                string query = File.ReadAllText(path);                
+                string query = File.ReadAllText(path);
+                if (query.IsEmpty())
+                    return false;
+
                 if (Encoding.UTF8.GetByteCount(query) > 1048576) //Default size limit of querys
                     Apply("SET GLOBAL max_allowed_packet=1073741824;");
 
