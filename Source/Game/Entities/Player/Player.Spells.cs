@@ -1580,8 +1580,19 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
-                if (ability.AcquireMethod != AbilityLearnType.OnSkillValue && ability.AcquireMethod != AbilityLearnType.OnSkillLearn)
-                    continue;
+                switch (ability.AcquireMethod)
+                {
+                    case AbilityLearnType.OnSkillValue:
+                    case AbilityLearnType.OnSkillLearn:
+                        break;
+                    case AbilityLearnType.RewardedFromQuest:
+                        if (!ability.Flags.HasAnyFlag(SkillLineAbilityFlags.CanFallbackToLearnedOnSkillLearn) ||
+                            !spellInfo.MeetsFutureSpellPlayerCondition(this))
+                            continue;
+                        break;
+                    default:
+                        continue;
+                }
 
                 // AcquireMethod == 2 && NumSkillUps == 1 -. automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
                 if (skillId == (uint)SkillType.Riding && (ability.AcquireMethod != AbilityLearnType.OnSkillLearn || ability.NumSkillUps != 1))

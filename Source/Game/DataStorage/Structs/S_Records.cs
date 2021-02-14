@@ -109,7 +109,7 @@ namespace Game.DataStorage
         public AbilityLearnType AcquireMethod;
         public ushort TrivialSkillLineRankHigh;
         public ushort TrivialSkillLineRankLow;
-        public int Flags;
+        public SkillLineAbilityFlags Flags;
         public byte NumSkillUps;
         public short UniqueBit;
         public short TradeSkillCategoryID;

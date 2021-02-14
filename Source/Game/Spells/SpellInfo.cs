@@ -76,6 +76,7 @@ namespace Game.Spells
                 IconFileDataId = _misc.SpellIconFileDataID;
                 ActiveIconFileDataId = _misc.ActiveIconFileDataID;
                 ContentTuningId = _misc.ContentTuningID;
+                ShowFutureSpellPlayerConditionID = (uint)_misc.ShowFutureSpellPlayerConditionID;
             }
 
             if (visuals != null)
@@ -3458,6 +3459,15 @@ namespace Game.Spells
             }
         }
 
+        public bool MeetsFutureSpellPlayerCondition(Player player)
+        {
+            if (ShowFutureSpellPlayerConditionID == 0)
+                return false;
+
+            var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(ShowFutureSpellPlayerConditionID);
+            return playerCondition == null || ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
+        }
+        
         public static SpellCastTargetFlags GetTargetFlagMask(SpellTargetObjectTypes objType)
         {
             switch (objType)
@@ -3600,6 +3610,7 @@ namespace Game.Spells
         public uint IconFileDataId { get; set; }
         public uint ActiveIconFileDataId { get; set; }
         public uint ContentTuningId { get; set; }
+        public uint ShowFutureSpellPlayerConditionID { get; set; }
         public LocalizedString SpellName { get; set; }
         public float ConeAngle { get; set; }
         public float Width { get; set; }

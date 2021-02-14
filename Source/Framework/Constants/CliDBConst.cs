@@ -46,6 +46,11 @@ namespace Framework.Constants
         RewardedFromQuest = 4 // Learned as quest reward, also re-learned if missing
     }
 
+    public enum SkillLineAbilityFlags
+    {
+        CanFallbackToLearnedOnSkillLearn = 0x80, // The skill is rewarded from a quest if player started on exile's reach
+    }
+
     public enum Anim
     {
         Stand = 0,
