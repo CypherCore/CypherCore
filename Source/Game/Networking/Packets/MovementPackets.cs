@@ -924,7 +924,7 @@ namespace Game.Networking.Packets
         public float Scale = 1.0f;
         public ObjectGuid MoverGUID;
         public uint MountDisplayID;
-        public UpdateCollisionHeightReason Reason = UpdateCollisionHeightReason.Mount;
+        public UpdateCollisionHeightReason Reason;
         public uint SequenceIndex;
         public int ScaleDuration;
         public float Height = 1.0f;
@@ -959,7 +959,7 @@ namespace Game.Networking.Packets
         }
 
         public MovementAck Data;
-        public UpdateCollisionHeightReason Reason = UpdateCollisionHeightReason.Mount;
+        public UpdateCollisionHeightReason Reason;
         public uint MountDisplayID;
         public float Height = 1.0f;
     }

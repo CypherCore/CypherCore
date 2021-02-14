@@ -1406,8 +1406,12 @@ namespace Game.Spells
                 HandleShapeshiftBoosts(target, apply);
             }
 
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().InitDataForForm();
+            Player playerTarget = target.ToPlayer();
+            if (playerTarget != null)
+            {
+                playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(false), UpdateCollisionHeightReason.Force);
+                playerTarget.InitDataForForm();
+            }
             else
                 target.UpdateDisplayPower();
 

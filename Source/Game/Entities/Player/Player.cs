@@ -4815,7 +4815,7 @@ namespace Game.Entities
             SendPacket(new OnCancelExpectedRideVehicleAura());
         }
 
-        public void SendMovementSetCollisionHeight(float height)
+        public void SendMovementSetCollisionHeight(float height, UpdateCollisionHeightReason reason)
         {
             MoveSetCollisionHeight setCollisionHeight = new MoveSetCollisionHeight();
             setCollisionHeight.MoverGUID = GetGUID();
@@ -4824,7 +4824,7 @@ namespace Game.Entities
             setCollisionHeight.Scale = GetObjectScale();
             setCollisionHeight.MountDisplayID = GetMountDisplayId();
             setCollisionHeight.ScaleDuration = m_unitData.ScaleDuration;
-            setCollisionHeight.Reason = UpdateCollisionHeightReason.Mount;
+            setCollisionHeight.Reason = reason;
             SendPacket(setCollisionHeight);
 
             MoveUpdateCollisionHeight updateCollisionHeight = new MoveUpdateCollisionHeight();
@@ -6382,7 +6382,7 @@ namespace Game.Entities
             SetBoundingRadius(scale * SharedConst.DefaultPlayerBoundingRadius);
             SetCombatReach(scale * SharedConst.DefaultPlayerCombatReach);
             if (IsInWorld)
-                SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()));
+                SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()), UpdateCollisionHeightReason.Scale);
         }
 
         public uint GetXP() { return m_activePlayerData.XP; }
