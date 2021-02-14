@@ -83,7 +83,7 @@ namespace Game.Chat
             }
 
             ObjectGuid ownerGuid = obj.GetOwnerGUID();
-            if (ownerGuid.IsEmpty())
+            if (!ownerGuid.IsEmpty())
             {
                 Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
                 if (!owner || !ownerGuid.IsPlayer())
