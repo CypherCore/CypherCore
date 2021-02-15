@@ -76,9 +76,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Size);
             _worldPacket.WriteBits(DataType, 3);
 
-            var bytes = CompressedData.GetData();
-            _worldPacket.WriteInt32(bytes.Length);
-            _worldPacket.WriteBytes(bytes);
+            if (CompressedData == null)
+                _worldPacket.WriteUInt32(0);
+            else
+            {
+                var bytes = CompressedData.GetData();
+                _worldPacket.WriteInt32(bytes.Length);
+                _worldPacket.WriteBytes(bytes);
+            }
         }
 
         public ObjectGuid Player;

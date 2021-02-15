@@ -42,15 +42,17 @@ namespace Game
                 return;
 
             AccountData adata = GetAccountData(request.DataType);
-            if (adata.Data == null)
-                return;
 
             UpdateAccountData data = new UpdateAccountData();
             data.Player = GetPlayer() ? GetPlayer().GetGUID() : ObjectGuid.Empty;
             data.Time = (uint)adata.Time;
-            data.Size = (uint)adata.Data.Length;
             data.DataType = request.DataType;
-            data.CompressedData = new ByteBuffer(ZLib.Compress(Encoding.UTF8.GetBytes(adata.Data)));
+
+            if (!adata.Data.IsEmpty())
+            {
+                data.Size = (uint)adata.Data.Length;
+                data.CompressedData = new ByteBuffer(ZLib.Compress(Encoding.UTF8.GetBytes(adata.Data)));
+            }
 
             SendPacket(data);
         }
