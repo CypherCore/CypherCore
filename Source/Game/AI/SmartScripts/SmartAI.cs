@@ -99,7 +99,7 @@ namespace Game.AI
 
             _path = new WaypointPath();
             _path.id = path.id;
-            _path.nodes = path.nodes;
+            _path.nodes.AddRange(path.nodes);
             foreach (WaypointNode waypoint in _path.nodes)
             {
                 GridDefines.NormalizeMapCoord(ref waypoint.x);
