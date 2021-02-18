@@ -2851,9 +2851,6 @@ namespace Game.Entities
                     case 37408: // Oscillation Field
                         spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
                         break;
-                    case 51852: // The Eye of Acherus (no spawn in phase 2 in db)
-                        spellInfo.GetEffect(0).MiscValue |= 1;
-                        break;
                     case 51912: // Crafty's Ultra-Advanced Proto-Typical Shortening Blaster
                         spellInfo.GetEffect(0).ApplyAuraPeriod = 3000;
                         break;
