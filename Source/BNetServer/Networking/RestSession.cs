@@ -26,6 +26,12 @@ namespace BNetServer.Networking
 
         public async override void ReadHandler(byte[] data, int receivedLength)
         {
+            if (receivedLength == 0)
+            {
+                CloseSocket();
+                return;
+            }
+
             var httpRequest = HttpHelper.ParseRequest(data, receivedLength);
             if (httpRequest == null)
                 return;

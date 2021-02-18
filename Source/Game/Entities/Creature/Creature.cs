@@ -2603,7 +2603,7 @@ namespace Game.Entities
 
         public float GetPetChaseDistance()
         {
-            float range = SharedConst.MeleeRange;
+            float range = 0f;
 
             for (byte i = 0; i < GetPetAutoSpellSize(); ++i)
             {
@@ -2614,10 +2614,8 @@ namespace Game.Entities
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, GetMap().GetDifficultyID());
                 if (spellInfo != null)
                 {
-                    if (spellInfo.GetRecoveryTime() == 0  // No cooldown
-                        && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/
-                        && spellInfo.GetMinRange() > range)
-                        range = spellInfo.GetMinRange();
+                    if (spellInfo.GetRecoveryTime() == 0 && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/ && spellInfo.GetMaxRange() > range)
+                        range = spellInfo.GetMaxRange();
                 }
             }
 
