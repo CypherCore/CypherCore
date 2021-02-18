@@ -4141,11 +4141,15 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
 
+            // handled in SpellInfo::CalcPowerCost, this is only for client UI
+            if ((GetMiscValueB() & (1 << (int)PowerType.Mana)) == 0)
+                return;
+
             Unit target = aurApp.GetTarget();
 
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                    target.ApplyModPowerCostModifier((SpellSchools)i, GetAmount(), apply);
+                    target.ApplyModManaCostModifier((SpellSchools)i, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ArenaPreparation)]

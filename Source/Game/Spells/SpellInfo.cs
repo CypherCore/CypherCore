@@ -2774,7 +2774,7 @@ namespace Game.Spells
                     }
 
                     if (power.PowerType == PowerType.Mana)
-                        flatMod *= (int)(1.0f + caster.m_unitData.ManaCostModifierModifier);
+                        flatMod *= (int)(1.0f + caster.m_unitData.ManaCostMultiplier); // this is wrong
 
                     powerCost += flatMod;
                 }

@@ -452,13 +452,13 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(40, new uint[] { 0x03FB1B00u, 0x00000000u });
+                allowedMaskForTarget.OR(new UpdateMask(40, new uint[] { 0x03FB1B00u, 0x00000000u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0xFFFFFFFFu });
+                changesMask.AND(new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0xFFFFFFFFu }));
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Item owner, Player receiver)
@@ -852,7 +852,10 @@ namespace Game.Entities
                 data.WriteUInt32(UnlockedEssenceMilestones[i]);
             }
             data.FlushBits();
-            data.WriteBit(Enabled);
+            if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
+            {
+                data.WriteBit(Enabled);
+            }
             for (int i = 0; i < SelectedEssences.Size(); ++i)
             {
                 SelectedEssences[i].WriteCreate(data, owner, receiver);
@@ -862,7 +865,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Fu });
+            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Du });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -870,13 +873,13 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(9, new[] { 0x000003E0u });
+                allowedMaskForTarget.OR(new UpdateMask(9, new[] { 0x000003E2u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(9, new[] { 0xFFFFFC1Fu });
+                changesMask.AND(new UpdateMask(9, new[] { 0xFFFFFC1Du }));
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteItem owner, Player receiver)
@@ -1194,7 +1197,7 @@ namespace Game.Entities
         public UpdateField<float> Lifesteal = new UpdateField<float>(96, 98);
         public UpdateField<float> MinRangedDamage = new UpdateField<float>(96, 99);
         public UpdateField<float> MaxRangedDamage = new UpdateField<float>(96, 100);
-        public UpdateField<float> ManaCostModifierModifier = new UpdateField<float>(96, 101);
+        public UpdateField<float> ManaCostMultiplier = new UpdateField<float>(96, 101);
         public UpdateField<float> MaxHealthModifier = new UpdateField<float>(96, 102);
         public UpdateField<float> HoverHeight = new UpdateField<float>(96, 103);
         public UpdateField<uint> MinItemLevelCutoff = new UpdateField<uint>(96, 104);
@@ -1224,7 +1227,7 @@ namespace Game.Entities
         public UpdateFieldArray<int> StatNegBuff = new UpdateFieldArray<int>(4, 154, 163);
         public UpdateFieldArray<int> Resistances = new UpdateFieldArray<int>(7, 167, 168);
         public UpdateFieldArray<int> BonusResistanceMods = new UpdateFieldArray<int>(7, 167, 175);
-        public UpdateFieldArray<int> PowerCostModifier = new UpdateFieldArray<int>(7, 167, 182);
+        public UpdateFieldArray<int> ManaCostModifier = new UpdateFieldArray<int>(7, 167, 182);
 
         public UnitData() : base(0, TypeId.Unit, 189) { }
 
@@ -1356,7 +1359,7 @@ namespace Game.Entities
                 for (int i = 0; i < 7; ++i)
                 {
                     data.WriteInt32(BonusResistanceMods[i]);
-                    data.WriteInt32(PowerCostModifier[i]);
+                    data.WriteInt32(ManaCostModifier[i]);
                 }
             }
             data.WriteUInt32(BaseMana);
@@ -1384,7 +1387,7 @@ namespace Game.Entities
                 data.WriteFloat(Lifesteal);
                 data.WriteFloat(MinRangedDamage);
                 data.WriteFloat(MaxRangedDamage);
-                data.WriteFloat(ManaCostModifierModifier);
+                data.WriteFloat(ManaCostMultiplier);
                 data.WriteFloat(MaxHealthModifier);
             }
             data.WriteFloat(HoverHeight);
@@ -1427,21 +1430,21 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00002000u, 0x1E008000u, 0xFFE10000u, 0x0400007Eu, 0xFC07FF80u, 0x1FFFFFFFu });
+                allowedMaskForTarget.OR(new UpdateMask(192, new uint[] { 0x00002000u, 0x1E008000u, 0xFFE10000u, 0x0400007Eu, 0xFC07FF80u, 0x1FFFFFFFu }));
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x04000000u, 0x0007FF80u, 0x00000000u });
+                allowedMaskForTarget.OR(new UpdateMask(192, new uint[] { 0x00000000u, 0x00000000u, 0x00000000u, 0x04000000u, 0x0007FF80u, 0x00000000u }));
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                allowedMaskForTarget |= new UpdateMask(192, new uint[] { 0x00000000u, 0x1E000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00007F80u });
+                allowedMaskForTarget.OR(new UpdateMask(192, new uint[] { 0x00000000u, 0x1E000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00007F80u }));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFBFFFF81u, 0x03F8007Fu, 0xE0000000u });
+                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFBFFFF81u, 0x03F8007Fu, 0xE0000000u }));
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFBFFFFFFu, 0xFFF8007Fu, 0xFFFFFFFFu });
+                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFBFFFFFFu, 0xFFF8007Fu, 0xFFFFFFFFu }));
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                changesMask &= new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xE1FFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFF807Fu });
+                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xE1FFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFF807Fu }));
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Unit owner, Player receiver)
@@ -1903,7 +1906,7 @@ namespace Game.Entities
                 }
                 if (changesMask[101])
                 {
-                    data.WriteFloat(ManaCostModifierModifier);
+                    data.WriteFloat(ManaCostMultiplier);
                 }
                 if (changesMask[102])
                 {
@@ -2058,7 +2061,7 @@ namespace Game.Entities
                     }
                     if (changesMask[182 + i])
                     {
-                        data.WriteInt32(PowerCostModifier[i]);
+                        data.WriteInt32(ManaCostModifier[i]);
                     }
                 }
             }
@@ -2163,7 +2166,7 @@ namespace Game.Entities
             ClearChangesMask(Lifesteal);
             ClearChangesMask(MinRangedDamage);
             ClearChangesMask(MaxRangedDamage);
-            ClearChangesMask(ManaCostModifierModifier);
+            ClearChangesMask(ManaCostMultiplier);
             ClearChangesMask(MaxHealthModifier);
             ClearChangesMask(HoverHeight);
             ClearChangesMask(MinItemLevelCutoff);
@@ -2193,7 +2196,7 @@ namespace Game.Entities
             ClearChangesMask(StatNegBuff);
             ClearChangesMask(Resistances);
             ClearChangesMask(BonusResistanceMods);
-            ClearChangesMask(PowerCostModifier);
+            ClearChangesMask(ManaCostModifier);
             _changesMask.ResetAll();
         }
 
@@ -2607,13 +2610,13 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                allowedMaskForTarget |= new UpdateMask(185, new[] { 0x00000012u, 0xFFFFFFFCu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000000u });
+                allowedMaskForTarget.OR(new UpdateMask(185, new[] { 0x00000012u, 0xFFFFFFFCu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000000u }));
         }
 
         void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                changesMask &= new UpdateMask(185, new uint[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu });
+                changesMask.AND(new UpdateMask(185, new uint[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu }));
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)

@@ -929,7 +929,7 @@ namespace Game.Entities
             return Math.Max(resistMech, 0);
         }
 
-        public void ApplyModPowerCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerCostModifier, (int)school), mod, apply); }
+        public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, (int)school), mod, apply); }
     }
 
     public partial class Player
