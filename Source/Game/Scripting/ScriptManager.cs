@@ -79,21 +79,7 @@ namespace Game.Scripting
             foreach (var type in assembly.GetTypes())
             {
                 var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();
-                if (attributes.Empty())
-                {
-                    var baseType = type.BaseType;
-                    while (baseType != null)
-                    {
-                        if (baseType == typeof(ScriptObject))
-                        {
-                            Log.outWarn(LogFilter.Server, "Script {0} does not have ScriptAttribute", type.Name);
-                            continue;
-                        }
-
-                        baseType = baseType.BaseType;
-                    }
-                }
-                else
+                if (!attributes.Empty())
                 {
                     var constructors = type.GetConstructors();
                     if (constructors.Length == 0)
@@ -136,13 +122,16 @@ namespace Game.Scripting
 
                         switch (type.BaseType.Name)
                         {
-                            case "SpellScript":
+                            case nameof(SpellScript):
                                 genericType = typeof(GenericSpellScriptLoader<>).MakeGenericType(type);
                                 name = name.Replace("_SpellScript", "");
                                 break;
-                            case "AuraScript":
+                            case nameof(AuraScript):
                                 genericType = typeof(GenericAuraScriptLoader<>).MakeGenericType(type);
                                 name = name.Replace("_AuraScript", "");
+                                break;
+                            case nameof(GameObjectAI):
+                                genericType = typeof(GenericGameObjectScript<>).MakeGenericType(type);
                                 break;
                             case "SpellScriptLoader":
                             case "AuraScriptLoader":
@@ -177,7 +166,6 @@ namespace Game.Scripting
                                     Activator.CreateInstance(genericType);
                                 else
                                     Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
-
                                 continue;
                             default:
                                 genericType = typeof(GenericCreatureScript<>).MakeGenericType(type);

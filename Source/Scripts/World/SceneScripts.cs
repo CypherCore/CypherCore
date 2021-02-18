@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -19,9 +19,9 @@ using Game;
 using Game.Entities;
 using Game.Scripting;
 
-namespace Scripts.World
+namespace Scripts.World.SceneScripts
 {
-    struct SceneSpells
+    struct SpellIds
     {
         public const uint DeathwingSimulator = 201184;
     }
@@ -34,8 +34,8 @@ namespace Scripts.World
         // Called when a player receive trigger from scene
         public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
-            if (triggerName == "BURN PLAYER")
-                player.CastSpell(player, SceneSpells.DeathwingSimulator, true); // Deathwing Simulator Burn player
+            if (triggerName == "Burn Player")
+                player.CastSpell(player, SpellIds.DeathwingSimulator, true); // Deathwing Simulator Burn player
         }
     }
 }

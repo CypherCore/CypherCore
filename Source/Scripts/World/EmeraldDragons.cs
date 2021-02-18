@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 
-namespace Scripts.World.BossEmeraldDragons
+namespace Scripts.World.EmeraldDragons
 {
     struct CreatureIds
     {
@@ -75,23 +75,23 @@ namespace Scripts.World.BossEmeraldDragons
         public static uint[] TaerarShadeSpells = new uint[] { 24841, 24842, 24843 };
     }
 
-    struct Texts
+    struct TextIds
     {
         //Ysondre
-        public const uint YsondreAggro = 0;
-        public const uint YsondreSummonDruids = 1;
+        public const uint SayYsondreAggro = 0;
+        public const uint SayYsondreSummonDruids = 1;
 
         //Lethon
-        public const uint LethonAggro = 0;
-        public const uint LethonDrawSpirit = 1;
+        public const uint SayLethonAggro = 0;
+        public const uint SayLethonDrawSpirit = 1;
 
         //Emeriss
-        public const uint EmerissAggro = 0;
-        public const uint EmerissCastCorruption = 1;
+        public const uint SayEmerissAggro = 0;
+        public const uint SayEmerissCastCorruption = 1;
 
         //Taerar
-        public const uint TaerarAggro = 0;
-        public const uint TaerarSummonShades = 1;
+        public const uint SayTaerarAggro = 0;
+        public const uint SayTaerarSummonShades = 1;
     }
 
     class emerald_dragonAI : WorldBossAI
@@ -157,6 +157,8 @@ namespace Scripts.World.BossEmeraldDragons
     [Script]
     class npc_dream_fog : ScriptedAI
     {
+        uint _roamTimer;
+
         public npc_dream_fog(Creature creature) : base(creature)
         {
             Initialize();
@@ -200,13 +202,13 @@ namespace Scripts.World.BossEmeraldDragons
             else
                 _roamTimer -= diff;
         }
-
-        uint _roamTimer;
     }
 
     [Script]
     class boss_ysondre : emerald_dragonAI
     {
+        byte _stage;
+
         public boss_ysondre(Creature creature) : base(creature)
         {
             Initialize();
@@ -221,6 +223,7 @@ namespace Scripts.World.BossEmeraldDragons
         {
             Initialize();
             base.Reset();
+
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
                 DoCastVictim(SpellIds.LightningWave);
@@ -230,7 +233,7 @@ namespace Scripts.World.BossEmeraldDragons
 
         public override void EnterCombat(Unit who)
         {
-            Talk(Texts.YsondreAggro);
+            Talk(TextIds.SayYsondreAggro);
             base.EnterCombat(who);
         }
 
@@ -239,20 +242,20 @@ namespace Scripts.World.BossEmeraldDragons
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
-                Talk(Texts.YsondreSummonDruids);
+                Talk(TextIds.SayYsondreSummonDruids);
 
                 for (byte i = 0; i < 10; ++i)
                     DoCast(me, SpellIds.SummonDruidSpirits, true);
                 ++_stage;
             }
         }
-
-        byte _stage;
     }
 
     [Script]
     class boss_lethon : emerald_dragonAI
     {
+        byte _stage;
+
         public boss_lethon(Creature creature) : base(creature)
         {
             Initialize();
@@ -277,7 +280,7 @@ namespace Scripts.World.BossEmeraldDragons
 
         public override void EnterCombat(Unit who)
         {
-            Talk(Texts.LethonAggro);
+            Talk(TextIds.SayLethonAggro);
             base.EnterCombat(who);
         }
 
@@ -285,7 +288,7 @@ namespace Scripts.World.BossEmeraldDragons
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
-                Talk(Texts.LethonDrawSpirit);
+                Talk(TextIds.SayLethonDrawSpirit);
                 DoCast(me, SpellIds.DrawSpirit);
                 ++_stage;
             }
@@ -296,16 +299,16 @@ namespace Scripts.World.BossEmeraldDragons
             if (spell.Id == SpellIds.DrawSpirit && target.IsTypeId(TypeId.Player))
             {
                 Position targetPos = target.GetPosition();
-                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOOC, 50000);
+                me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, 50000);
             }
         }
-
-        byte _stage;
     }
 
     [Script]
     class npc_spirit_shade : PassiveAI
     {
+        ObjectGuid _summonerGuid;
+
         public npc_spirit_shade(Creature creature) : base(creature) { }
 
         public override void IsSummonedBy(Unit summoner)
@@ -322,13 +325,13 @@ namespace Scripts.World.BossEmeraldDragons
                 me.DespawnOrUnsummon(1000);
             }
         }
-
-        ObjectGuid _summonerGuid;
     }
 
     [Script]
     class boss_emeriss : emerald_dragonAI
     {
+        byte _stage;
+
         public boss_emeriss(Creature creature) : base(creature)
         {
             Initialize();
@@ -360,7 +363,7 @@ namespace Scripts.World.BossEmeraldDragons
 
         public override void EnterCombat(Unit who)
         {
-            Talk(Texts.EmerissAggro);
+            Talk(TextIds.SayEmerissAggro);
             base.EnterCombat(who);
         }
 
@@ -368,18 +371,21 @@ namespace Scripts.World.BossEmeraldDragons
         {
             if (!HealthAbovePct(100 - 25 * _stage))
             {
-                Talk(Texts.EmerissCastCorruption);
+                Talk(TextIds.SayEmerissCastCorruption);
                 DoCast(me, SpellIds.CorruptionOfEarth, true);
                 ++_stage;
             }
         }
-
-        byte _stage;
     }
 
     [Script]
     class boss_taerar : emerald_dragonAI
     {
+        bool _banished;                              // used for shades activation testing
+        uint _banishedTimer;                         // counter for banishment timeout
+        byte _shades;                                // keep track of how many shades are dead
+        byte _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
+
         public boss_taerar(Creature creature) : base(creature)
         {
             Initialize();
@@ -398,7 +404,6 @@ namespace Scripts.World.BossEmeraldDragons
             me.RemoveAurasDueToSpell(SpellIds.Shade);
 
             Initialize();
-
             base.Reset();
 
             _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
@@ -416,7 +421,7 @@ namespace Scripts.World.BossEmeraldDragons
 
         public override void EnterCombat(Unit who)
         {
-            Talk(Texts.TaerarAggro);
+            Talk(TextIds.SayTaerarAggro);
             base.EnterCombat(who);
         }
 
@@ -437,7 +442,7 @@ namespace Scripts.World.BossEmeraldDragons
                 me.InterruptNonMeleeSpells(false);
                 DoStopAttack();
 
-                Talk(Texts.TaerarSummonShades);
+                Talk(TextIds.SayTaerarSummonShades);
 
                 foreach (var spell in SpellIds.TaerarShadeSpells)
                     DoCastVictim(spell, true);
@@ -458,7 +463,7 @@ namespace Scripts.World.BossEmeraldDragons
 
             if (_banished)
             {
-                // If all three shades are dead, OR it has taken too long, end the current event and get Taerar back into business
+                // If all three shades are dead, Or it has taken too long, end the current event and get Taerar back into business
                 if (_banishedTimer <= diff || _shades == 0)
                 {
                     _banished = false;
@@ -471,7 +476,7 @@ namespace Scripts.World.BossEmeraldDragons
                 else
                     _banishedTimer -= diff;
 
-                // Update the scheduler before we return (handled under emerald_dragonAI.UpdateAI(diff); if we're not inside this check)
+                // Update the _scheduler before we return (handled under emerald_dragonAI.UpdateAI(diff); if we're not inside this check)
                 _scheduler.Update(diff);
 
                 return;
@@ -479,15 +484,10 @@ namespace Scripts.World.BossEmeraldDragons
 
             base.UpdateAI(diff);
         }
-
-        bool _banished;                              // used for shades activation testing
-        uint _banishedTimer;                         // counter for banishment timeout
-        byte _shades;                                // keep track of how many shades are dead
-        byte _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
     }
 
     [Script]
-    class spell_dream_fog_sleep : SpellScript
+    class spell_dream_fog_sleep_SpellScript : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
         {
@@ -507,7 +507,7 @@ namespace Scripts.World.BossEmeraldDragons
     }
 
     [Script]
-    class spell_mark_of_nature : SpellScript
+    class spell_mark_of_nature_SpellScript : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -522,6 +522,7 @@ namespace Scripts.World.BossEmeraldDragons
                 Unit unit = obj.ToUnit();
                 if (unit)
                     return !(unit.HasAura(SpellIds.MarkOfNature) && !unit.HasAura(SpellIds.AuraOfNature));
+
                 return true;
             });
         }

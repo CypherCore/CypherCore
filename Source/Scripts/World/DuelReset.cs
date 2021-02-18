@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -22,17 +22,21 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 
-namespace Scripts.World
+namespace Scripts.World.DuelReset
 {
     [Script]
     class DuelResetScript : PlayerScript
     {
+        bool _resetCooldowns;
+        bool _resetHealthMana;
+
         public DuelResetScript() : base("DuelResetScript")
         {
             _resetCooldowns = WorldConfig.GetBoolValue(WorldCfg.ResetDuelCooldowns);
             _resetHealthMana = WorldConfig.GetBoolValue(WorldCfg.ResetDuelHealthMana);
         }
 
+        // Called when a duel starts (after 3s countdown)
         public override void OnDuelStart(Player player1, Player player2)
         {
             // Cooldowns reset
@@ -58,9 +62,10 @@ namespace Scripts.World
             }
         }
 
+        // Called when a duel ends
         public override void OnDuelEnd(Player winner, Player loser, DuelCompleteType type)
         {
-            // do not reset anything if DUEL_INTERRUPTED or DUEL_FLED
+            // do not reset anything if DuelInterrupted or DuelFled
             if (type == DuelCompleteType.Won)
             {
                 // Cooldown restore
@@ -90,17 +95,18 @@ namespace Scripts.World
             }
         }
 
-        void ResetSpellCooldowns(Player player, bool onStartDuel)
+        static void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
-            // Remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
-            player.GetSpellHistory().ResetCooldowns(itr =>
+            // remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
+            player.GetSpellHistory().ResetCooldowns(pair =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itr.Key, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
                 uint remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
                 uint totalCooldown = spellInfo.RecoveryTime;
                 uint categoryCooldown = spellInfo.CategoryRecoveryTime;
 
                 player.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref totalCooldown, null);
+
                 int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
                     totalCooldown += (uint)(cooldownMod * Time.InMilliseconds);
@@ -109,12 +115,12 @@ namespace Scripts.World
                     player.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref categoryCooldown, null);
 
                 return remainingCooldown > 0
-                        && !itr.Value.OnHold
-                        && TimeSpan.FromMilliseconds(totalCooldown) < TimeSpan.FromMinutes(10)
-                        && TimeSpan.FromMilliseconds(categoryCooldown) < TimeSpan.FromMinutes(10)
-                        && TimeSpan.FromMilliseconds(remainingCooldown) < TimeSpan.FromMinutes(10)
-                        && (onStartDuel ? TimeSpan.FromMilliseconds(totalCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true)
-                        && (onStartDuel ? TimeSpan.FromMilliseconds(categoryCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true);
+                    && !pair.Value.OnHold
+                    && TimeSpan.FromMilliseconds(totalCooldown) < TimeSpan.FromMinutes(10)
+                    && TimeSpan.FromMilliseconds(categoryCooldown) < TimeSpan.FromMinutes(10)
+                    && TimeSpan.FromMilliseconds(remainingCooldown) < TimeSpan.FromMinutes(10)
+                    && (onStartDuel ? TimeSpan.FromMilliseconds(totalCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true)
+                    && (onStartDuel ? TimeSpan.FromMilliseconds(categoryCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true);
             }, true);
 
             // pet cooldowns
@@ -122,8 +128,5 @@ namespace Scripts.World
             if (pet)
                 pet.GetSpellHistory().ResetAllCooldowns();
         }
-
-        bool _resetCooldowns;
-        bool _resetHealthMana;
     }
 }

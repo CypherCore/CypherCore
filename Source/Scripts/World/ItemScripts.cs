@@ -1,19 +1,19 @@
-﻿/*
-* Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 using Framework.Constants;
 using Framework.GameMath;
@@ -22,86 +22,71 @@ using Game.Scripting;
 using Game.Spells;
 using System.Collections.Generic;
 
-namespace Scripts.World
+namespace Scripts.World.ItemScripts
 {
-    struct ItemScriptConst
-    {
+    struct  SpellIds
+    {  
         //Onlyforflight
-        public const uint SpellArcaneCharges = 45072;
-
-        //Pilefakefur
-        public const uint GoCaribouTrap1 = 187982;
-        public const uint GoCaribouTrap2 = 187995;
-        public const uint GoCaribouTrap3 = 187996;
-        public const uint GoCaribouTrap4 = 187997;
-        public const uint GoCaribouTrap5 = 187998;
-        public const uint GoCaribouTrap6 = 187999;
-        public const uint GoCaribouTrap7 = 188000;
-        public const uint GoCaribouTrap8 = 188001;
-        public const uint GoCaribouTrap9 = 188002;
-        public const uint GoCaribouTrap10 = 188003;
-        public const uint GoCaribouTrap11 = 188004;
-        public const uint GoCaribouTrap12 = 188005;
-        public const uint GoCaribouTrap13 = 188006;
-        public const uint GoCaribouTrap14 = 188007;
-        public const uint GoCaribouTrap15 = 188008;
-        public const uint GoHighQualityFur = 187983;
-        public const uint NpcNesingwaryTrapper = 25835;
-
-        public static uint[] CaribouTraps =
-        {
-            GoCaribouTrap1, GoCaribouTrap2, GoCaribouTrap3, GoCaribouTrap4, GoCaribouTrap5,
-            GoCaribouTrap6, GoCaribouTrap7, GoCaribouTrap8, GoCaribouTrap9, GoCaribouTrap10,
-            GoCaribouTrap11, GoCaribouTrap12, GoCaribouTrap13, GoCaribouTrap14, GoCaribouTrap15,
-        };
+        public const uint ArcaneCharges = 45072;
 
         //Petrovclusterbombs
-        public const uint SpellPetrovBomb = 42406;
-        public const uint AreaIdShatteredStraits = 4064;
-        public const uint ZoneIdHowling = 495;
+        public const uint PetrovBomb = 42406;
+    }
+
+    struct CreatureIds
+    {
+        //Pilefakefur
+        public const uint NesingwaryTrapper = 25835;
 
         //Helpthemselves
-        public const uint QuestCannotHelpThemselves = 11876;
-        public const uint NpcTrappedMammothCalf = 25850;
-        public const uint GoMammothTrap1 = 188022;
-        public const uint GoMammothTrap2 = 188024;
-        public const uint GoMammothTrap3 = 188025;
-        public const uint GoMammothTrap4 = 188026;
-        public const uint GoMammothTrap5 = 188027;
-        public const uint GoMammothTrap6 = 188028;
-        public const uint GoMammothTrap7 = 188029;
-        public const uint GoMammothTrap8 = 188030;
-        public const uint GoMammothTrap9 = 188031;
-        public const uint GoMammothTrap10 = 188032;
-        public const uint GoMammothTrap11 = 188033;
-        public const uint GoMammothTrap12 = 188034;
-        public const uint GoMammothTrap13 = 188035;
-        public const uint GoMammothTrap14 = 188036;
-        public const uint GoMammothTrap15 = 188037;
-        public const uint GoMammothTrap16 = 188038;
-        public const uint GoMammothTrap17 = 188039;
-        public const uint GoMammothTrap18 = 188040;
-        public const uint GoMammothTrap19 = 188041;
-        public const uint GoMammothTrap20 = 188042;
-        public const uint GoMammothTrap21 = 188043;
-        public const uint GoMammothTrap22 = 188044;
-
-        public static uint[] MammothTraps =
-        {
-            GoMammothTrap1, GoMammothTrap2, GoMammothTrap3, GoMammothTrap4, GoMammothTrap5,
-            GoMammothTrap6, GoMammothTrap7, GoMammothTrap8, GoMammothTrap9, GoMammothTrap10,
-            GoMammothTrap11, GoMammothTrap12, GoMammothTrap13, GoMammothTrap14, GoMammothTrap15,
-            GoMammothTrap16, GoMammothTrap17, GoMammothTrap18, GoMammothTrap19, GoMammothTrap20,
-            GoMammothTrap21, GoMammothTrap22
-        };
+        public const uint TrappedMammothCalf = 25850;
 
         //Theemissary
-        public const uint QuestTheEmissary = 11626;
-        public const uint NpcLeviroth = 26452;
+        public const uint Leviroth = 26452;
 
         //Capturedfrog
-        public const uint QuestThePerfectSpies = 25444;
-        public const uint NpcVanirasSentryTotem = 40187;
+        public const uint VanirasSentryTotem = 40187;
+    }
+
+    struct GameObjectIds
+    {
+        //Pilefakefur
+        public const uint HighQualityFur = 187983;
+        public static uint[] CaribouTraps =
+        {
+            187982, 187995, 187996, 187997, 187998,
+            187999, 188000, 188001, 188002, 188003,
+            188004, 188005, 188006, 188007, 188008,
+        };
+
+        //Helpthemselves
+        public static uint[] MammothTraps =
+        {
+            188022, 188024, 188025, 188026, 188027,
+            188028, 188029, 188030, 188031, 188032,
+            188033, 188034, 188035, 188036, 188037,
+            188038, 188039, 188040, 188041, 188042,
+            188043, 188044
+        };
+    }
+
+    struct QuestIds
+    {
+        //Helpthemselves
+        public const uint CannotHelpThemselves = 11876;
+
+        //Theemissary
+        public const uint TheEmissary = 11626;
+
+        //Capturedfrog
+        public const uint ThePerfectSpies = 25444;
+    }
+
+    struct Misc
+    {
+        //Petrovclusterbombs
+        public const uint AreaIdShatteredStraits = 4064;
+        public const uint ZoneIdHowling = 495;
     }
 
     [Script]
@@ -126,7 +111,7 @@ namespace Scripts.World
                         disabled = true;
                     break;
                 case 34475:
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellArcaneCharges, player.GetMap().GetDifficultyID());
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ArcaneCharges, player.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                         Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotOnGround);
                     break;
@@ -142,7 +127,7 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_nether_wraith_beacon
+    [Script]
     class item_nether_wraith_beacon : ItemScript
     {
         public item_nether_wraith_beacon() : base("item_nether_wraith_beacon") { }
@@ -155,15 +140,15 @@ namespace Scripts.World
                 if (nether)
                     nether.GetAI().AttackStart(player);
 
-                Creature nether1 = player.SummonCreature(22408, player.GetPositionX(), player.GetPositionY() - 20, player.GetPositionZ(), 0, TempSummonType.TimedDespawn, 180000);
-                if (nether1)
-                    nether1.GetAI().AttackStart(player);
+                nether = player.SummonCreature(22408, player.GetPositionX(), player.GetPositionY() - 20, player.GetPositionZ(), 0, TempSummonType.TimedDespawn, 180000);
+                if (nether)
+                    nether.GetAI().AttackStart(player);
             }
             return false;
         }
     }
 
-    [Script] //item_gor_dreks_ointment
+    [Script]
     class item_gor_dreks_ointment : ItemScript
     {
         public item_gor_dreks_ointment() : base("item_gor_dreks_ointment") { }
@@ -179,7 +164,7 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_incendiary_explosives
+    [Script]
     class item_incendiary_explosives : ItemScript
     {
         public item_incendiary_explosives() : base("item_incendiary_explosives") { }
@@ -196,7 +181,7 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_mysterious_egg
+    [Script]
     class item_mysterious_egg : ItemScript
     {
         public item_mysterious_egg() : base("item_mysterious_egg") { }
@@ -212,7 +197,7 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_disgusting_jar
+    [Script]
     class item_disgusting_jar : ItemScript
     {
         public item_disgusting_jar() : base("item_disgusting_jar") { }
@@ -228,7 +213,7 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_pile_fake_furs
+    [Script]
     class item_pile_fake_furs : ItemScript
     {
         public item_pile_fake_furs() : base("item_pile_fake_furs") { }
@@ -236,9 +221,9 @@ namespace Scripts.World
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
             GameObject go = null;
-            for (byte i = 0; i < ItemScriptConst.CaribouTraps.Length; ++i)
+            foreach (var id in GameObjectIds.CaribouTraps)
             {
-                go = player.FindNearestGameObject(ItemScriptConst.CaribouTraps[i], 5.0f);
+                go = player.FindNearestGameObject(id, 5.0f);
                 if (go)
                     break;
             }
@@ -246,13 +231,12 @@ namespace Scripts.World
             if (!go)
                 return false;
 
-            if (go.FindNearestCreature(ItemScriptConst.NpcNesingwaryTrapper, 10.0f, true) || go.FindNearestCreature(ItemScriptConst.NpcNesingwaryTrapper, 10.0f, false) || go.FindNearestGameObject(ItemScriptConst.GoHighQualityFur, 2.0f))
+            if (go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, true) || go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, false) || go.FindNearestGameObject(GameObjectIds.HighQualityFur, 2.0f))
                 return true;
 
-            float x, y, z;
-            go.GetClosePoint(out x, out y, out z, go.GetCombatReach() / 3, 7.0f);
-            go.SummonGameObject(ItemScriptConst.GoHighQualityFur, go, Quaternion.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f), 1);
-            TempSummon summon = player.SummonCreature(ItemScriptConst.NpcNesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
+            go.GetClosePoint(out float x, out float y, out float z, go.GetCombatReach() / 3, 7.0f);
+            go.SummonGameObject(GameObjectIds.HighQualityFur, go, Quaternion.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f), 1);
+            TempSummon summon = player.SummonCreature(CreatureIds.NesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
             if (summon)
             {
                 summon.SetVisible(false);
@@ -263,19 +247,19 @@ namespace Scripts.World
         }
     }
 
-    [Script] //item_petrov_cluster_bombs
+    [Script]
     class item_petrov_cluster_bombs : ItemScript
     {
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (player.GetZoneId() != ItemScriptConst.ZoneIdHowling)
+            if (player.GetZoneId() != Misc.ZoneIdHowling)
                 return false;
 
-            if (!player.GetTransport() || player.GetAreaId() != ItemScriptConst.AreaIdShatteredStraits)
+            if (!player.GetTransport() || player.GetAreaId() != Misc.AreaIdShatteredStraits)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ItemScriptConst.SpellPetrovBomb, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PetrovBomb, Difficulty.None);
                 if (spellInfo != null)
                     Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotHere);
 
@@ -286,30 +270,28 @@ namespace Scripts.World
         }
     }
 
-    //item_dehta_trap_smasher
-    [Script] //For quest 11876, Help Those That Cannot Help Themselves
+    [Script]
     class item_dehta_trap_smasher : ItemScript
     {
         public item_dehta_trap_smasher() : base("item_dehta_trap_smasher") { }
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (player.GetQuestStatus(ItemScriptConst.QuestCannotHelpThemselves) != QuestStatus.Incomplete)
+            if (player.GetQuestStatus(QuestIds.CannotHelpThemselves) != QuestStatus.Incomplete)
                 return false;
 
-            Creature pMammoth = player.FindNearestCreature(ItemScriptConst.NpcTrappedMammothCalf, 5.0f);
+            Creature pMammoth = player.FindNearestCreature(CreatureIds.TrappedMammothCalf, 5.0f);
             if (!pMammoth)
                 return false;
 
-            GameObject pTrap = null;
-            for (byte i = 0; i < ItemScriptConst.MammothTraps.Length; ++i)
+            foreach (var id in GameObjectIds.MammothTraps)
             {
-                pTrap = player.FindNearestGameObject(ItemScriptConst.MammothTraps[i], 11.0f);
+                GameObject pTrap = player.FindNearestGameObject(id, 11.0f);
                 if (pTrap)
                 {
                     pMammoth.GetAI().DoAction(1);
                     pTrap.SetGoState(GameObjectState.Ready);
-                    player.KilledMonsterCredit(ItemScriptConst.NpcTrappedMammothCalf);
+                    player.KilledMonsterCredit(CreatureIds.TrappedMammothCalf);
                     return true;
                 }
             }
@@ -324,9 +306,9 @@ namespace Scripts.World
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            if (player.GetQuestStatus(ItemScriptConst.QuestThePerfectSpies) == QuestStatus.Incomplete)
+            if (player.GetQuestStatus(QuestIds.ThePerfectSpies) == QuestStatus.Incomplete)
             {
-                if (player.FindNearestCreature(ItemScriptConst.NpcVanirasSentryTotem, 10.0f))
+                if (player.FindNearestCreature(CreatureIds.VanirasSentryTotem, 10.0f))
                     return false;
                 else
                     player.SendEquipError(InventoryResult.OutOfRange, item, null);
@@ -337,8 +319,8 @@ namespace Scripts.World
         }
     }
 
-    // Only used currently for
-    [Script]// 19169: Nightfall
+    [Script] // Only used currently for
+    // 19169: Nightfall
     class item_generic_limit_chance_above_60 : ItemScript
     {
         public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
@@ -360,3 +342,4 @@ namespace Scripts.World
         }
     }
 }
+

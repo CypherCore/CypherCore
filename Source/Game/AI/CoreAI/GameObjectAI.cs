@@ -99,11 +99,4 @@ namespace Game.AI
 
         public GameObject me;
     }
-
-    public class NullGameObjectAI : GameObjectAI
-    {
-        public NullGameObjectAI(GameObject g) : base(g) { }
-
-        public override void UpdateAI(uint diff) { }
-    }
 }

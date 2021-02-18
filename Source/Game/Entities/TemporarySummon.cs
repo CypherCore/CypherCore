@@ -69,7 +69,7 @@ namespace Game.Entities
                         m_timer -= diff;
                         break;
                     }
-                case TempSummonType.TimedDespawnOOC:
+                case TempSummonType.TimedDespawnOutOfCombat:
                     {
                         if (!IsInCombat())
                         {

@@ -2812,7 +2812,7 @@ namespace Game.Entities
             stmt.AddValue(5, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }
-        void SetBindPoint(ObjectGuid guid)
+        public void SetBindPoint(ObjectGuid guid)
         {
             BinderConfirm packet = new BinderConfirm(guid);
             SendPacket(packet);

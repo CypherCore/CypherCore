@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -21,9 +21,9 @@ using Game.BattleGrounds.Zones;
 using Game.Entities;
 using Game.Scripting;
 
-namespace Scripts.World
+namespace Scripts.World.Achievements
 {
-    struct AchievementConst
+    struct AreaIds
     {
         //Tilted
         public const uint AreaArgentTournamentFields = 4658;
@@ -32,12 +32,18 @@ namespace Scripts.World
         public const uint AreaRingOfAllianceValiants = 4672;
         public const uint AreaRingOfHordeValiants = 4673;
         public const uint AreaRingOfChampions = 4669;
+    }
 
+    struct AuraIds
+    {
         //Flirt With Disaster
         public const uint AuraPerfumeForever = 70235;
         public const uint AuraPerfumeEnchantress = 70234;
         public const uint AuraPerfumeVictory = 70233;
+    }
 
+    struct VehicleIds
+    { 
         //BgSA Artillery
         public const uint AntiPersonnalCannon = 27894;
     }
@@ -147,7 +153,7 @@ namespace Scripts.World
             Creature vehicle = source.GetVehicleCreatureBase();
             if (vehicle)
             {
-                if (vehicle.GetEntry() == AchievementConst.AntiPersonnalCannon)
+                if (vehicle.GetEntry() == VehicleIds.AntiPersonnalCannon)
                     return true;
             }
 
@@ -160,6 +166,8 @@ namespace Scripts.World
     [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
     class achievement_arena_kills : AchievementCriteriaScript
     {
+        ArenaTypes _arenaType;
+
         public achievement_arena_kills(string name, ArenaTypes arenaType) : base(name)
         {
             _arenaType = arenaType;
@@ -167,14 +175,12 @@ namespace Scripts.World
 
         public override bool OnCheck(Player source, Unit target)
         {
-            // this checks GetBattleground() for NULL already
+            // this checks GetBattleground() for Null already
             if (!source.InArena())
                 return false;
 
             return source.GetBattleground().GetArenaType() == _arenaType;
         }
-
-        ArenaTypes _arenaType;
     }
 
     [Script]
@@ -251,12 +257,12 @@ namespace Scripts.World
             if (!player)
                 return false;
 
-            bool checkArea = player.GetAreaId() == AchievementConst.AreaArgentTournamentFields ||
-                                player.GetAreaId() == AchievementConst.AreaRingOfAspirants ||
-                                player.GetAreaId() == AchievementConst.AreaRingOfArgentValiants ||
-                                player.GetAreaId() == AchievementConst.AreaRingOfAllianceValiants ||
-                                player.GetAreaId() == AchievementConst.AreaRingOfHordeValiants ||
-                                player.GetAreaId() == AchievementConst.AreaRingOfChampions;
+            bool checkArea = player.GetAreaId() == AreaIds.AreaArgentTournamentFields ||
+                                player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
+                                player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
+                                player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
+                                player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
+                                player.GetAreaId() == AreaIds.AreaRingOfChampions;
 
             return checkArea && player.duel != null && player.duel.isMounted;
         }
@@ -287,7 +293,7 @@ namespace Scripts.World
             if (!player)
                 return false;
 
-            if (player.HasAura(AchievementConst.AuraPerfumeForever) || player.HasAura(AchievementConst.AuraPerfumeEnchantress) || player.HasAura(AchievementConst.AuraPerfumeVictory))
+            if (player.HasAura(AuraIds.AuraPerfumeForever) || player.HasAura(AuraIds.AuraPerfumeEnchantress) || player.HasAura(AuraIds.AuraPerfumeVictory))
                 return true;
 
             return false;

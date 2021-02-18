@@ -340,6 +340,24 @@ namespace Game.Scripting
         public virtual CreatureAI GetAI(Creature creature) { return null; }
     }
 
+    public class GenericGameObjectScript<AI> : GameObjectScript where AI : GameObjectAI
+    {
+        public GenericGameObjectScript(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
+
+        public override GameObjectAI GetAI(GameObject me)
+        {
+            if (me.GetInstanceScript() != null)
+                return GetInstanceAI<AI>(me);
+            else
+                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
+        }
+
+        object[] _args;
+    }
+
     public class GameObjectScript : ScriptObject
     {
         public GameObjectScript(string name) : base(name)

@@ -1872,7 +1872,7 @@ namespace Game
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(75);
             creature.ScriptID = GetScriptId(fields.Read<string>(76));
 
-            _creatureTemplateStorage.Add(entry, creature);
+            _creatureTemplateStorage[entry] = creature;
         }
 
         void LoadCreatureTemplateModels()

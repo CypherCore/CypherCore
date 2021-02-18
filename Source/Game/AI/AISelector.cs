@@ -119,11 +119,11 @@ namespace Game.AI
             switch (go.GetAIName())
             {
                 case "GameObjectAI":
+                default:
                     return new GameObjectAI(go);
                 case "SmartGameObjectAI":
                     return new SmartGameObjectAI(go);
             }
-            return new NullGameObjectAI(go);
         }
     }
 }
