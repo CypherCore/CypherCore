@@ -604,33 +604,6 @@ namespace Game
             return true;
         }
 
-        PoolObject RollOne(ActivePoolData spawns, ulong triggerFrom)
-        {
-            if (!ExplicitlyChanced.Empty())
-            {
-                float roll = (float)RandomHelper.randChance();
-
-                for (int i = 0; i < ExplicitlyChanced.Count; ++i)
-                {
-                    roll -= ExplicitlyChanced[i].chance;
-                    // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-                    // so this need explicit check for this case
-                    if (roll < 0 && (ExplicitlyChanced[i].guid == triggerFrom || !spawns.IsActiveObject<T>(ExplicitlyChanced[i].guid)))
-                        return ExplicitlyChanced[i];
-                }
-            }
-            if (!EqualChanced.Empty())
-            {
-                int index = RandomHelper.IRand(0, EqualChanced.Count - 1);
-                // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-                // so this need explicit check for this case
-                if (EqualChanced[index].guid == triggerFrom || !spawns.IsActiveObject<T>(EqualChanced[index].guid))
-                    return EqualChanced[index];
-            }
-
-            return null;
-        }
-
         public void DespawnObject(ActivePoolData spawns, ulong guid = 0)
         {
             for (int i = 0; i < EqualChanced.Count; ++i)
@@ -776,7 +749,6 @@ namespace Game
                 return;
             }
 
-            ulong lastDespawned = 0;
             int count = (int)(limit - spawns.GetActiveObjectCount(poolId));
 
             // If triggered from some object respawn this object is still marked as spawned
@@ -786,31 +758,68 @@ namespace Game
                 ++count;
 
             // This will try to spawn the rest of pool, not guaranteed
-            for (int i = 0; i < count; ++i)
+            if (count > 0)
             {
-                PoolObject obj = RollOne(spawns, triggerFrom);
-                if (obj == null)
-                    continue;
-                if (obj.guid == lastDespawned)
-                    continue;
+                List<PoolObject> rolledObjects = new List<PoolObject>();
 
-                if (obj.guid == triggerFrom)
+                // roll objects to be spawned
+                if (!ExplicitlyChanced.Empty())
                 {
-                    ReSpawn1Object(obj);
-                    triggerFrom = 0;
-                    continue;
+                    while (count != 0 && ExplicitlyChanced.Count > rolledObjects.Count)
+                    {
+                        --count;
+                        float roll = (float)RandomHelper.randChance();
+
+                        foreach (PoolObject obj in ExplicitlyChanced)
+                        {
+                            roll -= obj.chance;
+                            // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
+                            // so this need explicit check for this case
+                            if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)))
+                            {
+                                rolledObjects.Add(obj);
+                                break;
+                            }
+                        }
+                    }
                 }
-                spawns.ActivateObject<T>(obj.guid, poolId);
-                Spawn1Object(obj);
-
-                if (triggerFrom != 0)
+                else if (!EqualChanced.Empty())
                 {
-                    // One spawn one despawn no count increase
-                    DespawnObject(spawns, triggerFrom);
-                    lastDespawned = triggerFrom;
-                    triggerFrom = 0;
+                    rolledObjects = EqualChanced;
+
+                    for (var i =0; i < rolledObjects.Count; ++i)
+                    {
+                        var obj = rolledObjects[i];
+                        // remove most of the active objects so there is higher chance inactive ones are spawned
+                        if (spawns.IsActiveObject<T>(obj.guid) && RandomHelper.URand(1, 4) != 1)
+                            rolledObjects.Remove(obj);
+                    }
+
+                    rolledObjects.RandomResize((uint)count);
+                }
+
+                // try to spawn rolled objects
+                foreach (PoolObject obj in rolledObjects)
+                {
+                    if (spawns.IsActiveObject<T>(obj.guid))
+                        continue;
+
+                    if (obj.guid == triggerFrom)
+                    {
+                        ReSpawn1Object(obj);
+                        triggerFrom = 0;
+                    }
+                    else
+                    {
+                        spawns.ActivateObject<T>(obj.guid, poolId);
+                        Spawn1Object(obj);
+                    }
                 }
             }
+
+            // One spawn one despawn no count increase
+            if (triggerFrom != 0)
+                DespawnObject(spawns, triggerFrom);
         }
 
         void SpawnQuestObject(ActivePoolData spawns, uint limit, ulong triggerFrom)
