@@ -252,16 +252,15 @@ namespace Game.Movement
 
             if (!_nextMoveTime.Passed())
             {
-                _nextMoveTime.Update((int)diff);
-                if (_nextMoveTime.Passed())
-                    return StartMoveNow(creature);
+                if (creature.MoveSpline.Finalized())
+                {
+                    _nextMoveTime.Update((int)diff);
+                    if (_nextMoveTime.Passed())
+                        return StartMoveNow(creature);
+                }
             }
             else
             {
-                // Set home position at place on waypoint movement.
-                if (creature.GetTransGUID().IsEmpty())
-                    creature.SetHomePosition(creature.GetPosition());
-
                 if (creature.MoveSpline.Finalized())
                 {
                     OnArrived(creature);
@@ -270,10 +269,17 @@ namespace Game.Movement
                     if (_nextMoveTime.Passed())
                         return StartMove(creature);
                 }
-                else if (_recalculateSpeed)
+                else
                 {
-                    if (_nextMoveTime.Passed())
-                        StartMove(creature);
+                    // Set home position at place on waypoint movement.
+                    if (creature.GetTransGUID().IsEmpty())
+                        creature.SetHomePosition(creature.GetPosition());
+
+                    if (_recalculateSpeed)
+                    {
+                        if (_nextMoveTime.Passed())
+                            StartMove(creature);
+                    }
                 }
             }
 
