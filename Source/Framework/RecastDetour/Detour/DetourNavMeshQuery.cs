@@ -709,7 +709,7 @@ public static partial class Detour
                     }
                 }
                 float h = .0f;
-                if (dtClosestHeightPointTriangle(pos, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
+                if (dtClosestHeightPointTriangle(closest, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
                 {
                     closest[1] = h;
                     break;
@@ -864,7 +864,7 @@ public static partial class Detour
 
         /// Finds the polygon nearest to the specified center point.
         ///  @param[in]		center		The center of the search box. [(x, y, z)]
-        ///  @param[in]		extents		The search distance along each axis. [(x, y, z)]
+        ///  @param[in]		halfExtents	The search distance along each axis. [(x, y, z)]
         ///  @param[in]		filter		The polygon filter to apply to the query.
         ///  @param[out]	nearestRef	The reference id of the nearest polygon.
         ///  @param[out]	nearestPt	The nearest point on the polygon. [opt] [(x, y, z)]
@@ -878,7 +878,7 @@ public static partial class Detour
         // @warning This function is not suitable for large area searches.  If the search
         /// extents overlaps more than 128 polygons it may return an invalid result.
         ///
-		public dtStatus findNearestPoly(float[] center, float[] extents, dtQueryFilter filter, ref dtPolyRef nearestRef, ref float[] nearestPt)
+		public dtStatus findNearestPoly(float[] center, float[] halfExtents, dtQueryFilter filter, ref dtPolyRef nearestRef, ref float[] nearestPt)
         {
             Debug.Assert(m_nav != null);
 
@@ -886,7 +886,7 @@ public static partial class Detour
 
             dtFindNearestPolyQuery query = new dtFindNearestPolyQuery(this, center);
 
-            dtStatus status = queryPolygons(center, extents, filter, query);
+            dtStatus status = queryPolygons(center, halfExtents, filter, query);
             if (dtStatusFailed(status))
                 return status;
 
@@ -1030,7 +1030,7 @@ public static partial class Detour
 
         /// Finds polygons that overlap the search box.
         ///  @param[in]		center		The center of the search box. [(x, y, z)]
-        ///  @param[in]		extents		The search distance along each axis. [(x, y, z)]
+        ///  @param[in]		halfExtents The search distance along each axis. [(x, y, z)]
         ///  @param[in]		filter		The polygon filter to apply to the query.
         ///  @param[out]	polys		The reference ids of the polygons that overlap the query box.
         ///  @param[out]	polyCount	The number of polygons in the search result.
@@ -1045,14 +1045,14 @@ public static partial class Detour
         /// be filled to capacity. The method of choosing which polygons from the 
         /// full set are included in the partial result set is undefined.
         ///
-		public dtStatus queryPolygons(float[] center, float[] extents, dtQueryFilter filter, dtFindNearestPolyQuery query)
+		public dtStatus queryPolygons(float[] center, float[] halfExtents, dtQueryFilter filter, dtFindNearestPolyQuery query)
         {
             Debug.Assert(m_nav != null);
 
             float[] bmin = new float[3];
             float[] bmax = new float[3];
-            dtVsub(bmin, center, extents);
-            dtVadd(bmax, center, extents);
+            dtVsub(bmin, center, halfExtents);
+            dtVadd(bmax, center, halfExtents);
 
             // Find tiles the query touches.
             int minx = 0, miny = 0, maxx = 0, maxy = 0;

@@ -906,44 +906,73 @@ public static partial class Detour
         }
     }
 
-    public static int createBVTree(ushort[] verts, int nverts, ushort[] polys, int npolys, int nvp, float cs, float ch, int nnodes, dtBVNode[] nodes)
+    public static int createBVTree(dtNavMeshCreateParams createParams, dtBVNode[] nodes, int nnodes)
     {
         // Build tree
-        BVItem[] items = new BVItem[npolys];//(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
+        float quantFactor = 1 / createParams.cs;
+        BVItem[] items = new BVItem[createParams.polyCount];//(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
         dtcsArrayItemsCreate(items);
-        for (int i = 0; i < npolys; i++)
+        for (int i = 0; i < createParams.polyCount; i++)
         {
             BVItem it = items[i];
             it.i = i;
-            // Calc polygon bounds.
-            //const ushort* p = &polys[i*nvp*2];
-            int pIndex = i * nvp * 2;
-            it.bmin[0] = it.bmax[0] = verts[polys[pIndex + 0] * 3 + 0];
-            it.bmin[1] = it.bmax[1] = verts[polys[pIndex + 0] * 3 + 1];
-            it.bmin[2] = it.bmax[2] = verts[polys[pIndex + 0] * 3 + 2];
-
-            for (int j = 1; j < nvp; ++j)
+            // Calc polygon bounds. Use detail meshes if available.
+            if (createParams.detailMeshes != null)
             {
-                if (polys[pIndex + j] == MESH_NULL_IDX) break;
-                ushort x = verts[polys[pIndex + j] * 3 + 0];
-                ushort y = verts[polys[pIndex + j] * 3 + 1];
-                ushort z = verts[polys[pIndex + j] * 3 + 2];
+                int vb = (int)createParams.detailMeshes[i * 4 + 0];
+                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                float[] bmin = new float[3];
+                float[] bmax = new float[3];
 
-                if (x < it.bmin[0]) it.bmin[0] = x;
-                if (y < it.bmin[1]) it.bmin[1] = y;
-                if (z < it.bmin[2]) it.bmin[2] = z;
+                float[] dv = createParams.detailVerts[(vb * 3)..];
+                dtVcopy(bmin, dv);
+                dtVcopy(bmax, dv);
 
-                if (x > it.bmax[0]) it.bmax[0] = x;
-                if (y > it.bmax[1]) it.bmax[1] = y;
-                if (z > it.bmax[2]) it.bmax[2] = z;
+                for (int j = 1; j < ndv; j++)
+                {
+                    dtVmin(bmin, dv[(j * 3)..]);
+                    dtVmax(bmax, dv[(j * 3)..]);
+                }
+
+                // BV-tree uses cs for all dimensions
+                it.bmin[0] = (ushort)dtClamp((int)((bmin[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
+                it.bmin[1] = (ushort)dtClamp((int)((bmin[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
+                it.bmin[2] = (ushort)dtClamp((int)((bmin[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
+
+                it.bmax[0] = (ushort)dtClamp((int)((bmax[0] - createParams.bmin[0]) * quantFactor), 0, 0xffff);
+                it.bmax[1] = (ushort)dtClamp((int)((bmax[1] - createParams.bmin[1]) * quantFactor), 0, 0xffff);
+                it.bmax[2] = (ushort)dtClamp((int)((bmax[2] - createParams.bmin[2]) * quantFactor), 0, 0xffff);
             }
-            // Remap y
-            it.bmin[1] = (ushort)Math.Floor((float)it.bmin[1] * ch / cs);
-            it.bmax[1] = (ushort)Math.Ceiling((float)it.bmax[1] * ch / cs);
+            else
+            {
+                ushort[] p = createParams.polys[(i * createParams.nvp * 2)..];
+                it.bmin[0] = it.bmax[0] = createParams.verts[p[0] * 3 + 0];
+                it.bmin[1] = it.bmax[1] = createParams.verts[p[0] * 3 + 1];
+                it.bmin[2] = it.bmax[2] = createParams.verts[p[0] * 3 + 2];
+
+                for (int j = 1; j < createParams.nvp; ++j)
+                {
+                    if (p[j] == MESH_NULL_IDX) break;
+                    ushort x = createParams.verts[p[j] * 3 + 0];
+                    ushort y = createParams.verts[p[j] * 3 + 1];
+                    ushort z = createParams.verts[p[j] * 3 + 2];
+
+                    if (x < it.bmin[0]) it.bmin[0] = x;
+                    if (y < it.bmin[1]) it.bmin[1] = y;
+                    if (z < it.bmin[2]) it.bmin[2] = z;
+
+                    if (x > it.bmax[0]) it.bmax[0] = x;
+                    if (y > it.bmax[1]) it.bmax[1] = y;
+                    if (z > it.bmax[2]) it.bmax[2] = z;
+                }
+                // Remap y
+                it.bmin[1] = (ushort)MathF.Floor((float)it.bmin[1] * createParams.ch / createParams.cs);
+                it.bmax[1] = (ushort)MathF.Ceiling((float)it.bmax[1] * createParams.ch / createParams.cs);
+            }
         }
 
         int curNode = 0;
-        subdivide(items, npolys, 0, npolys, ref curNode, nodes);
+        subdivide(items, createParams.polyCount, 0, createParams.polyCount, ref curNode, nodes);
 
         //dtFree(items);
 
@@ -1412,8 +1441,7 @@ public static partial class Detour
         // TODO: take detail mesh into account! use byte per bbox extent?
         if (createParams.buildBvTree)
         {
-            createBVTree(createParams.verts, createParams.vertCount, createParams.polys, createParams.polyCount,
-                         nvp, createParams.cs, createParams.ch, createParams.polyCount * 2, navBvtree);
+            createBVTree(createParams, navBvtree, createParams.polyCount * 2);
         }
 
         // Store Off-Mesh connections.

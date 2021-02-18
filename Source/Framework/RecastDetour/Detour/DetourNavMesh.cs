@@ -570,13 +570,13 @@ public static partial class Detour
                 if (targetPoly.firstLink == DT_NULL_LINK)
                     continue;
 
-                float[] ext = new float[] { targetCon.rad, target.header.walkableClimb, targetCon.rad };
+                float[] halfExtents = new float[] { targetCon.rad, target.header.walkableClimb, targetCon.rad };
 
                 // Find polygon to connect to.
                 //const float* p = &targetCon.pos[3];
                 int pIndex = 3;
                 float[] nearestPt = new float[3];
-                dtPolyRef polyRef = findNearestPolyInTile(tile, targetCon.pos, pIndex, ext, nearestPt);
+                dtPolyRef polyRef = findNearestPolyInTile(tile, targetCon.pos, pIndex, halfExtents, nearestPt);
                 if (polyRef == 0)
                     continue;
                 // findNearestPoly may return too optimistic results, further check to make sure. 
@@ -676,13 +676,13 @@ public static partial class Detour
                 dtOffMeshConnection con = tile.offMeshCons[i];
                 dtPoly poly = tile.polys[con.poly];
 
-                float[] ext = new float[] { con.rad, tile.header.walkableClimb, con.rad };
+                float[] halfExtents = new float[] { con.rad, tile.header.walkableClimb, con.rad };
 
                 // Find polygon to connect to.
                 //const float* p = &con.pos[0]; // First vertex
 
                 float[] nearestPt = new float[3];
-                dtPolyRef polyRef = findNearestPolyInTile(tile, con.pos, 0, ext, nearestPt);
+                dtPolyRef polyRef = findNearestPolyInTile(tile, con.pos, 0, halfExtents, nearestPt);
                 if (polyRef == 0)
                     continue;
                 // findNearestPoly may return too optimistic results, further check to make sure. 
@@ -812,7 +812,7 @@ public static partial class Detour
                     }
                 }
                 float h = .0f;
-                if (dtClosestHeightPointTriangle(pos, posStart, vArrays[0], vIndices[0], vArrays[1], vIndices[1], vArrays[2], vIndices[2], ref h))
+                if (dtClosestHeightPointTriangle(closest, posStart, vArrays[0], vIndices[0], vArrays[1], vIndices[1], vArrays[2], vIndices[2], ref h))
                 {
                     closest[1] = h;
                     break;
@@ -820,12 +820,12 @@ public static partial class Detour
             }
         }
 
-        public dtPolyRef findNearestPolyInTile(dtMeshTile tile, float[] center, int centerStart, float[] extents, float[] nearestPt)
+        public dtPolyRef findNearestPolyInTile(dtMeshTile tile, float[] center, int centerStart, float[] halfExtents, float[] nearestPt)
         {
             float[] bmin = new float[3];//, bmax[3];
             float[] bmax = new float[3];
-            dtVsub(bmin, 0, center, centerStart, extents, 0);
-            dtVadd(bmax, 0, center, centerStart, extents, 0);
+            dtVsub(bmin, 0, center, centerStart, halfExtents, 0);
+            dtVadd(bmax, 0, center, centerStart, halfExtents, 0);
 
             // Get nearby polygons from proximity grid.
             dtPolyRef[] polys = new dtPolyRef[128];
