@@ -58,9 +58,7 @@ namespace Game.AI
             me.GetThreatManager().ClearAllThreat();
             me.CombatStop(true);
 
-            // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-            if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Chase)
-                me.GetMotionMaster().MoveTargetedHome();
+            me.GetMotionMaster().MoveTargetedHome();
         }
 
         public override void JustDied(Unit killer)
