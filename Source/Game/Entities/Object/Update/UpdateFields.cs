@@ -457,8 +457,9 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask.AND(new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0xFFFFFFFFu }));
+            UpdateMask allowedMaskForTarget = new UpdateMask(40, new[] { 0xFC04E4FFu, 0x000000FFu });
+            AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
+            changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Item owner, Player receiver)
@@ -878,8 +879,9 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask.AND(new UpdateMask(9, new[] { 0xFFFFFC1Du }));
+            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Du });
+            AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
+            changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteItem owner, Player receiver)
@@ -1439,12 +1441,9 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
-                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFBFFFF81u, 0x03F8007Fu, 0xE0000000u }));
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.UnitAll))
-                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFBFFFFFFu, 0xFFF8007Fu, 0xFFFFFFFFu }));
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
-                changesMask.AND(new UpdateMask(192, new uint[] { 0xFFFFFFFFu, 0xE1FFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFF807Fu }));
+            UpdateMask allowedMaskForTarget = new UpdateMask(192, new[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x03F8007Fu, 0x00000000u });
+            AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
+            changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Unit owner, Player receiver)
@@ -2613,10 +2612,11 @@ namespace Game.Entities
                 allowedMaskForTarget.OR(new UpdateMask(185, new[] { 0x00000012u, 0xFFFFFFFCu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000000u }));
         }
 
-        void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
+        public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            if (!fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                changesMask.AND(new UpdateMask(185, new uint[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFFu }));
+            UpdateMask allowedMaskForTarget = new UpdateMask(185, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
+            AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
+            changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)

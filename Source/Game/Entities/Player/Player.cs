@@ -7551,6 +7551,7 @@ namespace Game.Entities
             if (requestedUnitMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Unit);
 
+            m_playerData.FilterDisallowedFieldsMaskForFlag(requestedPlayerMask, flags);
             if (requestedPlayerMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Player);
 
