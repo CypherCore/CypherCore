@@ -43,6 +43,16 @@ namespace Game.Entities
             return !m_summonerGUID.IsEmpty() ? ObjectAccessor.GetCreature(this, m_summonerGUID) : null;
         }
 
+        public static bool IsPersonalSummonOfAnotherPlayer(Creature summon, ObjectGuid playerToCheck)
+        {
+            TempSummon tempSummon = summon.ToTempSummon();
+            if (tempSummon != null)
+                if (tempSummon.IsVisibleBySummonerOnly() && playerToCheck != tempSummon.GetSummonerGUID())
+                    return true;
+
+            return false;
+        }
+        
         public override void Update(uint diff)
         {
             base.Update(diff);

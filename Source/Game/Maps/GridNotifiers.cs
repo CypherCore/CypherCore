@@ -2300,7 +2300,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
+            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range) && !TempSummon.IsPersonalSummonOfAnotherPlayer(u, i_obj.GetGUID()))
             {
                 i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                 return true;

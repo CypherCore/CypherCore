@@ -1139,12 +1139,8 @@ namespace Game.Entities
 
                     Creature creature = obj.ToCreature();
                     if (creature)
-                    {
-                        TempSummon tempSummon = creature.ToTempSummon();
-                        if (tempSummon)
-                            if (tempSummon.IsVisibleBySummonerOnly() && GetGUID() != tempSummon.GetSummonerGUID())
-                                return false;
-                    }
+                        if (TempSummon.IsPersonalSummonOfAnotherPlayer(creature, GetGUID()))
+                            return false;
                 }
 
                 GameObject go = obj.ToGameObject();
