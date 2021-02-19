@@ -735,6 +735,9 @@ namespace Game.Spells
 
                     player.SendPacket(setSpellCharges);
                 }
+
+                if (chargeList.Empty())
+                    _categoryCharges.Remove(chargeCategoryId);
             }
         }
 
@@ -962,11 +965,6 @@ namespace Game.Spells
             {
                 RechargeStart = startTime;
                 RechargeEnd = startTime + rechargeTime;
-            }
-            public ChargeEntry(DateTime startTime, DateTime endTime)
-            {
-                RechargeStart = startTime;
-                RechargeEnd = endTime;
             }
 
             public DateTime RechargeStart;
