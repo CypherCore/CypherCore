@@ -657,8 +657,9 @@ namespace Game.Entities
             if (m_gameObj.Empty())
                 return;
 
-            foreach (var obj in m_gameObj)
+            for (var i =0; i < m_gameObj.Count; ++i)
             {
+                var obj = m_gameObj[i];
                 if (spellid == 0 || obj.GetSpellId() == spellid)
                 {
                     obj.SetOwnerGUID(ObjectGuid.Empty);
@@ -667,6 +668,8 @@ namespace Game.Entities
                         obj.SetRespawnTime(0);
                         obj.Delete();
                     }
+
+                    m_gameObj.Remove(obj);
                 }
             }
         }
