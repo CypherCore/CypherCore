@@ -988,7 +988,7 @@ namespace Game.Entities
         }
     }
 
-    public struct SpellCastVisualField
+    public class SpellCastVisualField
     {
         public uint SpellXSpellVisualID;
         public uint ScriptVisualID;
@@ -1010,7 +1010,7 @@ namespace Game.Entities
     {
         public uint SpellID;
         public uint SpellXSpellVisualID;
-        public SpellCastVisualField SpellVisual;
+        public SpellCastVisualField SpellVisual = new SpellCastVisualField();
 
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
@@ -2278,16 +2278,10 @@ namespace Game.Entities
         }
     }
 
-    public struct ChrCustomizationChoice : IComparable<ChrCustomizationChoice>
+    public class ChrCustomizationChoice : IComparable<ChrCustomizationChoice>
     {
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationChoiceID;
-
-        public ChrCustomizationChoice(uint chrCustomizationOptionID, uint chrCustomizationChoiceID)
-        {
-            ChrCustomizationOptionID = chrCustomizationOptionID;
-            ChrCustomizationChoiceID = chrCustomizationChoiceID;
-        }
 
         public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
@@ -2467,7 +2461,7 @@ namespace Game.Entities
         }
     }
 
-    public struct CTROptions
+    public class CTROptions
     {
         public uint ContentTuningConditionMask;
         public uint Field_4;
@@ -3195,7 +3189,7 @@ namespace Game.Entities
         }
     }
 
-    public struct MawPower
+    public class MawPower
     {
         public int Field_0;
         public int Field_4;
@@ -3240,7 +3234,7 @@ namespace Game.Entities
         }
     }
 
-    public struct RecipeProgressionInfo
+    public class RecipeProgressionInfo
     {
         public ushort RecipeProgressionGroupID;
         public ushort Experience;

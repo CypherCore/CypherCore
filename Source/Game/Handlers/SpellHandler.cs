@@ -530,7 +530,12 @@ namespace Game
                 mirrorImageComponentedData.ClassID = (byte)creator.GetClass();
 
                 foreach (var customization in player.m_playerData.Customizations)
-                    mirrorImageComponentedData.Customizations.Add(new ChrCustomizationChoice(customization.ChrCustomizationOptionID, customization.ChrCustomizationChoiceID));
+                {
+                    var chrCustomizationChoice = new ChrCustomizationChoice();
+                    chrCustomizationChoice.ChrCustomizationOptionID = customization.ChrCustomizationOptionID;
+                    chrCustomizationChoice.ChrCustomizationChoiceID = customization.ChrCustomizationChoiceID;
+                    mirrorImageComponentedData.Customizations.Add(chrCustomizationChoice);
+                }
 
                 Guild guild = player.GetGuild();
                 mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);

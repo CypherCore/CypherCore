@@ -282,8 +282,7 @@ namespace Game.Entities
         public AreaTriggerMiscTemplate()
         {
             // legacy code from before it was known what each curve field does
-            // wtf? thats not how you pack curve data
-            ExtraScale.Raw.Data[5] = (uint)1.0000001f;
+            ExtraScale.Raw.Data[5] = 1065353217;
             // also OverrideActive does nothing on ExtraScale
             ExtraScale.Structured.OverrideActive = 1;
         }

@@ -4040,7 +4040,7 @@ namespace Game.Spells
             {
                 m_caster.ClearChannelObjects();
                 m_caster.SetChannelSpellId(0);
-                m_caster.SetChannelVisual(default);
+                m_caster.SetChannelVisual(new SpellCastVisualField());
             }
 
             SpellChannelUpdate spellChannelUpdate = new SpellChannelUpdate();

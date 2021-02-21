@@ -1384,7 +1384,7 @@ namespace Game.Networking.Packets
 
         public static implicit operator SpellCastVisualField(SpellCastVisual spellCastVisual)
         {
-            SpellCastVisualField visual;
+            SpellCastVisualField visual = new SpellCastVisualField();
             visual.SpellXSpellVisualID = spellCastVisual.SpellXSpellVisualID;
             visual.ScriptVisualID = spellCastVisual.ScriptVisualID;
             return visual;
