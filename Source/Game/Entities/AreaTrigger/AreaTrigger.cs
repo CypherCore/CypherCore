@@ -973,7 +973,13 @@ namespace Game.Entities
 
         public bool IsServerSide() { return _areaTriggerTemplate.Id.IsServerSide; }
 
-        public override bool IsNeverVisibleFor(WorldObject seer) { return IsServerSide(); }
+        public override bool IsNeverVisibleFor(WorldObject seer)
+        {
+            if (IsServerSide())
+                return true;
+
+            return base.IsNeverVisibleFor(seer);
+        }
         
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()
