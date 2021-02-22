@@ -4239,7 +4239,11 @@ namespace Game.Entities
 
             uint armor = proto.GetArmor(itemLevel);
             if (armor != 0)
+            {
                 HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)armor, apply);
+                if (proto.GetClass() == ItemClass.Armor && (ItemSubClassArmor)proto.GetSubClass() == ItemSubClassArmor.Shield)
+                    SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? (uint)(armor * 2.5f) : 0);
+            }
 
             WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
             if (attType != WeaponAttackType.Max && CanUseAttackType(attType))

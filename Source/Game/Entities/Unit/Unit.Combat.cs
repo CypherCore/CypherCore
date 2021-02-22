@@ -1710,7 +1710,7 @@ namespace Game.Entities
 
         public void KillSelf(bool durabilityLoss = true) { Kill(this, durabilityLoss); }
 
-        public virtual uint GetBlockPercent() { return 30; }
+        public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 
         void UpdateReactives(uint p_time)
         {
@@ -1981,7 +1981,7 @@ namespace Game.Entities
                     damageInfo.HitInfo |= HitInfo.Block;
                     damageInfo.originalDamage = damageInfo.damage;
                     // 30% damage blocked, double blocked amount if block is critical
-                    damageInfo.blocked_amount = MathFunctions.CalculatePct(damageInfo.damage, damageInfo.target.IsBlockCritical() ? damageInfo.target.GetBlockPercent() * 2 : damageInfo.target.GetBlockPercent());
+                    damageInfo.blocked_amount = MathFunctions.CalculatePct(damageInfo.damage, damageInfo.target.IsBlockCritical() ? damageInfo.target.GetBlockPercent(GetLevel()) * 2 : damageInfo.target.GetBlockPercent(GetLevel()));
                     damageInfo.damage -= damageInfo.blocked_amount;
                     damageInfo.cleanDamage += damageInfo.blocked_amount;
                     break;
@@ -2780,8 +2780,7 @@ namespace Game.Entities
             uint attackerLevel = attacker.GetLevelForTarget(victim);
             // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
             float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attacker.GetClass());
-
-            if (armorConstant == 0)
+            if ((armor + armorConstant) == 0)
                 return damage;
 
             float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);

@@ -2418,7 +2418,7 @@ namespace Game.Entities
                         if (blocked)
                         {
                             // double blocked amount if block is critical
-                            uint value = victim.GetBlockPercent();
+                            float value = victim.GetBlockPercent(GetLevel());
                             if (victim.IsBlockCritical())
                                 value *= 2; // double blocked percent
                             damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);

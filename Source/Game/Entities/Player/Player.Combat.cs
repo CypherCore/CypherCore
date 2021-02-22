@@ -89,8 +89,6 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public override uint GetBlockPercent() { return m_activePlayerData.ShieldBlock; }
-
         bool CanTitanGrip() { return m_canTitanGrip; }
 
         float GetRatingMultiplier(CombatRating cr)
@@ -344,6 +342,17 @@ namespace Game.Entities
                 UpdateDamagePhysical(attType);
         }
 
+        public override float GetBlockPercent(uint attackerLevel)
+        {
+            float blockArmor = (float)m_activePlayerData.ShieldBlock;
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
+
+            if ((blockArmor + armorConstant) == 0)
+                return 0;
+
+            return Math.Min(blockArmor / (blockArmor + armorConstant), 0.85f);
+        }
+        
         public void SetCanParry(bool value)
         {
             if (m_canParry == value)
