@@ -2714,6 +2714,7 @@ namespace Game.Spells
 
                 // Base powerCost
                 int powerCost = power.ManaCost;
+                bool initiallyNegative = powerCost < 0;
                 // PCT cost from total amount
                 if (power.PowerCostPct != 0)
                 {
@@ -2846,6 +2847,10 @@ namespace Game.Spells
                     healthCost += powerCost;
                     continue;
                 }
+
+                // power cost cannot become negative if initially positive
+                if (initiallyNegative != (powerCost < 0))
+                    powerCost = 0;
 
                 bool found = false;
                 for (var i = 0; i < costs.Count; ++i)
