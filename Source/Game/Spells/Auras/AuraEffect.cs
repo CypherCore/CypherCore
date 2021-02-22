@@ -3427,7 +3427,7 @@ namespace Game.Spells
                 target.ApplyStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, GetAmount());
             else
             {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent);
+                float amount = target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent) * target.GetTotalAuraMultiplier(AuraType.ModIncreaseHealthPercent2);
                 target.SetStatPctModifier(UnitMods.Health, UnitModifierPctType.Total, amount);
             }
 
