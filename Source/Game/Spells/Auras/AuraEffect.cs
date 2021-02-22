@@ -4581,6 +4581,22 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.LearnSpell)]
+        void HandleLearnSpell(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (player == null)
+                return;
+
+            if (apply)
+                player.LearnSpell((uint)GetMiscValue(), true, 0, true);
+            else
+                player.RemoveSpell((uint)GetMiscValue(), false, false, true);
+        }
+        
         [AuraEffectHandler(AuraType.ComprehendLanguage)]
         void HandleComprehendLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
