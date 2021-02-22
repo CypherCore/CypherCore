@@ -262,7 +262,7 @@ namespace Game.Spells
                 HandleEffect(aurApp, handleMask, true);
             }
 
-            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount))
+            if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
                 GetBase().SetNeedClientUpdateForTargets();
         }
 

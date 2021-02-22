@@ -154,13 +154,9 @@ namespace Game.Spells
                 _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
             }
 
-            if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) ||
-                GetBase().HasEffectType(AuraType.OverrideActionbarSpells) ||
-                GetBase().HasEffectType(AuraType.OverrideActionbarSpellsTriggered) ||
-                GetBase().HasEffectType(AuraType.ModSpellCategoryCooldown) ||
-                GetBase().HasEffectType(AuraType.ModMaxCharges) ||
-                GetBase().HasEffectType(AuraType.ChargeRecoveryMod) ||
-                GetBase().HasEffectType(AuraType.ChargeRecoveryMultiplier))
+            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
+
+            if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
         }
 
@@ -1092,6 +1088,24 @@ namespace Game.Spells
             foreach (var eff in GetAuraEffects())
                 if (eff != null && HasEffect(eff.GetEffIndex()) && eff.GetAuraType() == type)
                     return true;
+
+            return false;
+        }
+
+        public static bool EffectTypeNeedsSendingAmount(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.OverrideActionbarSpells:
+                case AuraType.OverrideActionbarSpellsTriggered:
+                case AuraType.ModSpellCategoryCooldown:
+                case AuraType.ModMaxCharges:
+                case AuraType.ChargeRecoveryMod:
+                case AuraType.ChargeRecoveryMultiplier:
+                    return true;
+                default:
+                    break;
+            }
 
             return false;
         }
