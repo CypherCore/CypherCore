@@ -2442,7 +2442,7 @@ namespace Game.Entities
                     {
                         case SpellEffectName.SchoolDamage:
                         case SpellEffectName.WeaponDamage:
-                        case SpellEffectName.WeaponDamageNoschool:
+                        case SpellEffectName.WeaponDamageNoSchool:
                         case SpellEffectName.NormalizedWeaponDmg:
                         case SpellEffectName.WeaponPercentDamage:
                         case SpellEffectName.Heal:
@@ -2519,7 +2519,7 @@ namespace Game.Entities
                             {
                                 case SpellEffectName.SchoolDamage:
                                 case SpellEffectName.WeaponDamage:
-                                case SpellEffectName.WeaponDamageNoschool:
+                                case SpellEffectName.WeaponDamageNoSchool:
                                 case SpellEffectName.NormalizedWeaponDmg:
                                 case SpellEffectName.WeaponPercentDamage:
                                 case SpellEffectName.TriggerSpell:

@@ -1425,6 +1425,14 @@ namespace Game.Entities
             return true;
         }
 
+        public bool HasAuraTypeWithFamilyFlags(AuraType auraType, uint familyName, FlagArray128 familyFlags)
+        {
+            foreach (AuraEffect aura in GetAuraEffectsByType(auraType))
+                if (aura.GetSpellInfo().SpellFamilyName == (SpellFamilyNames)familyName && aura.GetSpellInfo().SpellFamilyFlags & familyFlags)
+                    return true;
+            return false;
+        }
+        
         bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura)
         {
             var auras = GetAuraEffectsByType(type);

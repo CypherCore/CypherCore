@@ -4448,8 +4448,33 @@ namespace Game.Spells
                 if (m_caster.IsTypeId(TypeId.Player))
                 {
                     //can cast triggered (by aura only?) spells while have this flag
-                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAurastate) && m_caster.ToPlayer().HasPlayerFlag(PlayerFlags.AllowOnlyAbility))
-                        return SpellCastResult.SpellInProgress;
+                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAurastate))
+                    {
+                        // These two auras check SpellFamilyName defined by db2 class data instead of current spell SpellFamilyName
+                        if (m_caster.HasAuraType(AuraType.DisableCastingExceptAbilities)
+                            && !m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo)
+                            && !m_spellInfo.HasEffect(SpellEffectName.Attack)
+                            && !m_spellInfo.HasAttribute(SpellAttr12.IgnoreCastingDisabled)
+                            && !m_caster.HasAuraTypeWithFamilyFlags(AuraType.DisableCastingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(m_caster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
+                            return SpellCastResult.CantDoThatRightNow;
+
+                        if (m_caster.HasAuraType(AuraType.DisableAttackingExceptAbilities))
+                        {
+                            if (!m_caster.HasAuraTypeWithFamilyFlags(AuraType.DisableAttackingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(m_caster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
+                            {
+                                if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo)
+                                    || m_spellInfo.IsNextMeleeSwingSpell()
+                                    || m_spellInfo.HasAttribute(SpellAttr1.MeleeCombatStart)
+                                    || m_spellInfo.HasAttribute(SpellAttr2.Unk20)
+                                    || m_spellInfo.HasEffect(SpellEffectName.Attack)
+                                    || m_spellInfo.HasEffect(SpellEffectName.NormalizedWeaponDmg)
+                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponDamageNoSchool)
+                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponPercentDamage)
+                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponDamage))
+                                    return SpellCastResult.CantDoThatRightNow;
+                            }
+                        }
+                    }
 
                     // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
                     if (!IsIgnoringCooldowns() && m_caster.ToPlayer().GetLastPotionId() != 0 && m_CastItem && (m_CastItem.IsPotion() || m_spellInfo.IsCooldownStartedOnEvent()))
@@ -6306,7 +6331,7 @@ namespace Game.Spells
                             break;
                         }
                     case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.WeaponDamageNoSchool:
                         {
                             if (!m_caster.IsTypeId(TypeId.Player))
                                 return SpellCastResult.TargetNotPlayer;

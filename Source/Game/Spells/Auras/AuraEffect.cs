@@ -579,6 +579,7 @@ namespace Game.Spells
                     HandlePeriodicTriggerSpellWithValueAuraTick(target, caster);
                     break;
                 case AuraType.PeriodicDamage:
+                case AuraType.PeriodicWeaponPercentDamage:
                 case AuraType.PeriodicDamagePercent:
                     HandlePeriodicDamageAurasTick(target, caster);
                     break;
@@ -5299,43 +5300,63 @@ namespace Game.Spells
             if (isAreaAura)
                 Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
 
-            if (GetAuraType() == AuraType.PeriodicDamage)
+            switch (GetAuraType())
             {
-                if (isAreaAura)
-                    damage = (uint)(caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()) * caster.SpellDamagePctDone(target, m_spellInfo, DamageEffectType.DOT));
-                damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount());
-
-                // Calculate armor mitigation
-                if (caster.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
-                {
-                    uint damageReductedArmor = caster.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo());
-                    cleanDamage.mitigated_damage += damage - damageReductedArmor;
-                    damage = damageReductedArmor;
-                }
-
-                // There is a Chance to make a Soul Shard when Drain soul does damage
-                if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
-                {
-                    if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
-                        caster.CastSpell(caster, 95810, true, null, this);
-                }
-                if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
-                {
-                    switch (GetId())
+                case AuraType.PeriodicDamage:
                     {
-                        case 70911: // Unbound Plague
-                        case 72854: // Unbound Plague
-                        case 72855: // Unbound Plague
-                        case 72856: // Unbound Plague
-                            damage *= (uint)Math.Pow(1.25f, m_tickNumber);
-                            break;
-                        default:
-                            break;
+                        if (isAreaAura)
+                            damage = (uint)(caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()) * caster.SpellDamagePctDone(target, m_spellInfo, DamageEffectType.DOT));
+                        damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount());
+
+                    // Calculate armor mitigation
+                    if (caster.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
+                    {
+                            uint damageReductedArmor = caster.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo());
+                            cleanDamage.mitigated_damage += damage - damageReductedArmor;
+                            damage = damageReductedArmor;
+                        }
+                        // There is a Chance to make a Soul Shard when Drain soul does damage
+                        if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
+                        {
+                            if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
+                                caster.CastSpell(caster, 95810, true, null, this);
+                        }
+
+                        if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
+                        {
+                            switch (GetId())
+                            {
+                                case 70911: // Unbound Plague
+                                case 72854: // Unbound Plague
+                                case 72855: // Unbound Plague
+                                case 72856: // Unbound Plague
+                                    damage *= (uint)Math.Pow(1.25f, m_tickNumber);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
                     }
-                }
+                case AuraType.PeriodicWeaponPercentDamage:
+                    {
+                        WeaponAttackType attackType = GetSpellInfo().GetAttackType();
+
+                        uint weaponDamage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
+
+                        // Add melee damage bonuses (also check for negative)
+                        uint damageBonusDone = caster.MeleeDamageBonusDone(target, Math.Max(weaponDamage, 0), attackType, GetSpellInfo());
+
+                        damage = target.MeleeDamageBonusTaken(caster, damageBonusDone, attackType, DamageEffectType.DOT, GetSpellInfo());
+                        break;
+                    }
+                case AuraType.PeriodicDamagePercent:
+                    // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
+                    damage = (uint)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), (float)damage));
+                    break;
+                default:
+                    break;
             }
-            else // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
-                damage = (uint)Math.Ceiling((float)MathFunctions.CalculatePct(target.GetMaxHealth(), damage));
 
             if (!m_spellInfo.HasAttribute(SpellAttr4.FixedDamage))
             {

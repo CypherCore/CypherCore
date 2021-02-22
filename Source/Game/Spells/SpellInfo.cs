@@ -273,7 +273,7 @@ namespace Game.Spells
                 switch (effect.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.WeaponDamageNoSchool:
                     case SpellEffectName.NormalizedWeaponDmg:
                     case SpellEffectName.WeaponPercentDamage:
                     case SpellEffectName.SchoolDamage:
@@ -4008,7 +4008,7 @@ namespace Game.Spells
                 case SpellEffectName.SchoolDamage:
                 case SpellEffectName.EnvironmentalDamage:
                 case SpellEffectName.HealthLeech:
-                case SpellEffectName.WeaponDamageNoschool:
+                case SpellEffectName.WeaponDamageNoSchool:
                 case SpellEffectName.WeaponDamage:
                     return ExpectedStatType.CreatureSpellDamage;
                 case SpellEffectName.Heal:

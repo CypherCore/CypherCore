@@ -1920,7 +1920,7 @@ namespace Framework.Constants
         Unk6 = 0x40, //  6
         Unk7 = 0x80, //  7
         Unk8 = 0x100, //  8
-        Unk9 = 0x200, //  9
+        IgnoreCastingDisabled = 0x200, //  9
         Unk10 = 0x400, // 10
         Unk11 = 0x800, // 11
         Unk12 = 0x1000, // 12
@@ -2023,7 +2023,7 @@ namespace Framework.Constants
         IncreseCurrencyCap = 14,
         RitualActivatePortal = 15, // Unused (4.3.4)
         QuestComplete = 16,
-        WeaponDamageNoschool = 17,
+        WeaponDamageNoSchool = 17,
         Resurrect = 18,
         AddExtraAttacks = 19,
         Dodge = 20,

@@ -2454,7 +2454,7 @@ namespace Game.Spells
                 unitTarget.ToCreature().GetAI().AttackStart(m_caster);
         }
 
-        [SpellEffectHandler(SpellEffectName.WeaponDamageNoschool)]
+        [SpellEffectHandler(SpellEffectName.WeaponDamageNoSchool)]
         [SpellEffectHandler(SpellEffectName.WeaponPercentDamage)]
         [SpellEffectHandler(SpellEffectName.WeaponDamage)]
         [SpellEffectHandler(SpellEffectName.NormalizedWeaponDmg)]
@@ -2478,7 +2478,7 @@ namespace Game.Spells
                 switch (effect.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.WeaponDamageNoSchool:
                     case SpellEffectName.NormalizedWeaponDmg:
                     case SpellEffectName.WeaponPercentDamage:
                         return;     // we must calculate only at last weapon effect
@@ -2588,7 +2588,7 @@ namespace Game.Spells
                 switch (effect.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.WeaponDamageNoSchool:
                         fixed_bonus += CalculateDamage(effect.EffectIndex, unitTarget);
                         break;
                     case SpellEffectName.NormalizedWeaponDmg:
@@ -2643,7 +2643,7 @@ namespace Game.Spells
                 switch (effect.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoschool:
+                    case SpellEffectName.WeaponDamageNoSchool:
                     case SpellEffectName.NormalizedWeaponDmg:
                         weaponDamage += (uint)fixed_bonus;
                         break;
