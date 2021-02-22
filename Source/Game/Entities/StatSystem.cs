@@ -1299,8 +1299,21 @@ namespace Game.Entities
         {
             int amount = baseRatingValue[(int)cr];
 
-            var modRatingPct = GetAuraEffectsByType(AuraType.ModRatingPct);
-            foreach (var aurEff in modRatingPct)
+            foreach (AuraEffect aurEff in GetAuraEffectsByType(AuraType.ModCombatRatingFromCombatRating))
+            {
+                if ((aurEff.GetMiscValueB() & (1 << (int)cr)) != 0)
+                {
+                    short? highestRating = null;
+                    for (byte dependentRating = 0; dependentRating < (int)CombatRating.Max; ++dependentRating)
+                        if ((aurEff.GetMiscValue() & (1 << dependentRating)) != 0)
+                            highestRating = (short)Math.Max(highestRating.HasValue ? highestRating.Value : baseRatingValue[dependentRating], baseRatingValue[dependentRating]);
+
+                    if (highestRating != 0)
+                        amount += MathFunctions.CalculatePct(highestRating.Value, aurEff.GetAmount());
+                }
+            }
+
+            foreach (var aurEff in GetAuraEffectsByType(AuraType.ModRatingPct))
                 if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
                     amount += MathFunctions.CalculatePct(amount, aurEff.GetAmount());
 
