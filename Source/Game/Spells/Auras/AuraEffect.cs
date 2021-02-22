@@ -6065,6 +6065,19 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.SetFFAPvp)]
+        void HandleSetFFAPvP(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (!target)
+                return;
+
+            target.UpdatePvPState(true);
+        }
+        
         [AuraEffectHandler(AuraType.ModOverrideZonePvpType)]
         void HandleModOverrideZonePVPType(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

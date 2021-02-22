@@ -631,7 +631,7 @@ namespace Game.Entities
             // @todo should we always synchronize UNIT_FIELD_BYTES_2, 1 of controller and controlled?
             // no, we shouldn't, those are checked for affecting player by client
             if (!pvpInfo.IsInNoPvPArea && !IsGameMaster()
-                && (pvpInfo.IsInFFAPvPArea || Global.WorldMgr.IsFFAPvPRealm()))
+                && (pvpInfo.IsInFFAPvPArea || Global.WorldMgr.IsFFAPvPRealm() || HasAuraType(AuraType.SetFFAPvp)))
             {
                 if (!IsFFAPvP())
                 {
