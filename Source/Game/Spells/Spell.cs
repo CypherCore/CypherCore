@@ -66,6 +66,10 @@ namespace Game.Spells
                 }
             }
 
+            Player modOwner = caster.GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.ApplySpellMod(info.Id, SpellModOp.StackAmount, ref m_spellValue.AuraStackAmount, this);
+
             if (!originalCasterGUID.IsEmpty())
                 m_originalCasterGUID = originalCasterGUID;
             else
@@ -2160,7 +2164,7 @@ namespace Game.Spells
                         if (m_spellValue.AuraStackAmount > 1)
                         {
                             if (!refresh)
-                                m_spellAura.SetStackAmount(m_spellValue.AuraStackAmount);
+                                m_spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
                             else
                                 m_spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
                         }
@@ -7718,7 +7722,7 @@ namespace Game.Spells
         public uint CustomBasePointsMask;
         public uint MaxAffectedTargets;
         public float RadiusMod;
-        public byte AuraStackAmount;
+        public int AuraStackAmount;
     }
 
     // Spell modifier (used for modify other spells)

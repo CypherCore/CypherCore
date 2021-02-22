@@ -348,12 +348,13 @@ namespace Framework.Constants
         ResistDispelChance = 28,
         CritDamageBonus2 = 29, //One Not Used Spell
         SpellCostRefundOnFail = 30,
+        StackAmount = 31,
         Effect4 = 32,
         Effect5 = 33,
         SpellCost2 = 34, // Used when SpellPowerEntry.PowerIndex == 1
         JumpDistance = 35,
         // spellmod 36
-        StackAmount2 = 37,  // same as SPELLMOD_STACK_AMOUNT but affects tooltips
+        MaxStackAmount = 37,
         // spellmod 38
         SpellCost3 = 39,
 

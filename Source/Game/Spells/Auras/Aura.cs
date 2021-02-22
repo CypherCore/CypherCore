@@ -870,7 +870,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.StackAmount2, ref maxStackAmount);
+                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.MaxStackAmount, ref maxStackAmount);
             }
             return maxStackAmount;
         }
