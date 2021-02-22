@@ -544,27 +544,27 @@ namespace Game.Entities
                     }
                     else if (ar.item2 != 0 && !HasItemCount(ar.item2))
                         missingItem = ar.item2;
+
+                    if (Global.DisableMgr.IsDisabledFor(DisableType.Map, target_map, this))
+                    {
+                        GetSession().SendNotification("{0}", Global.ObjectMgr.GetCypherString(CypherStrings.InstanceClosed));
+                        return false;
+                    }
+
+                    if (GetTeam() == Team.Alliance && ar.quest_A != 0 && !GetQuestRewardStatus(ar.quest_A))
+                        missingQuest = ar.quest_A;
+                    else if (GetTeam() == Team.Horde && ar.quest_H != 0 && !GetQuestRewardStatus(ar.quest_H))
+                        missingQuest = ar.quest_H;
+
+                    Player leader = this;
+                    ObjectGuid leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
+                    if (leaderGuid != GetGUID())
+                        leader = Global.ObjAccessor.FindPlayer(leaderGuid);
+
+                    if (ar.achievement != 0)
+                        if (leader == null || !leader.HasAchieved(ar.achievement))
+                            missingAchievement = ar.achievement;
                 }
-
-                if (Global.DisableMgr.IsDisabledFor(DisableType.Map, target_map, this))
-                {
-                    GetSession().SendNotification("{0}", Global.ObjectMgr.GetCypherString(CypherStrings.InstanceClosed));
-                    return false;
-                }
-
-                if (GetTeam() == Team.Alliance && ar.quest_A != 0 && !GetQuestRewardStatus(ar.quest_A))
-                    missingQuest = ar.quest_A;
-                else if (GetTeam() == Team.Horde && ar.quest_H != 0 && !GetQuestRewardStatus(ar.quest_H))
-                    missingQuest = ar.quest_H;
-
-                Player leader = this;
-                ObjectGuid leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
-                if (leaderGuid != GetGUID())
-                    leader = Global.ObjAccessor.FindPlayer(leaderGuid);
-
-                if (ar.achievement != 0)
-                    if (leader == null || !leader.HasAchieved(ar.achievement))
-                        missingAchievement = ar.achievement;
 
                 if (LevelMin != 0 || LevelMax != 0 || failedMapDifficultyXCondition != 0 || missingItem != 0 || missingQuest != 0 || missingAchievement != 0)
                 {
