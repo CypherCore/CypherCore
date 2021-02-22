@@ -6824,6 +6824,9 @@ namespace Game.Entities
 
             ulong setGuid = (newEqSet.Guid != 0) ? newEqSet.Guid : Global.ObjectMgr.GenerateEquipmentSetGuid();
 
+            if (!_equipmentSets.ContainsKey(setGuid))
+                _equipmentSets[setGuid] = new EquipmentSetInfo();
+
             EquipmentSetInfo eqSlot = _equipmentSets[setGuid];
             eqSlot.Data = newEqSet;
 
