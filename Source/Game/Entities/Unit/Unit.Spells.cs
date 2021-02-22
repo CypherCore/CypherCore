@@ -595,6 +595,18 @@ namespace Game.Entities
                 TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
             }
 
+            if (damagetype == DamageEffectType.DOT)
+            {
+                // Healing over time taken percent
+                float minval_hot = (float)GetMaxNegativeAuraModifier(AuraType.ModHotPct);
+                if (minval_hot != 0)
+                    MathFunctions.AddPct(ref TakenTotalMod, minval_hot);
+
+                float maxval_hot = (float)GetMaxPositiveAuraModifier(AuraType.ModHotPct);
+                if (maxval_hot != 0)
+                    MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
+            }
+
             TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingReceived, aurEff =>
             {
                 if (caster.GetGUID() == aurEff.GetCasterGUID() && aurEff.IsAffectingSpell(spellProto))
@@ -745,14 +757,15 @@ namespace Game.Entities
             // for this types the bonus was already added in GetUnitCriticalChance, do not add twice
             if (spellProto.DmgClass != SpellDmgClass.Melee && spellProto.DmgClass != SpellDmgClass.Ranged)
             {
-                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterWithAbilities, aurEff =>
-                {
-                    return aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto);
-                });
-                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
-                {
-                    return aurEff.GetCasterGUID() != GetGUID();
-                });
+                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterWithAbilities, aurEff => aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto));
+
+                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() != GetGUID());
+
+                crit_chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !victim.HealthBelowPct(aurEff.GetMiscValueB()));
+
+                TempSummon tempSummon = ToTempSummon();
+                if (tempSummon != null)
+                    crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
             }
 
             return Math.Max(crit_chance, 0.0f);

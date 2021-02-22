@@ -779,10 +779,13 @@ namespace Game.Entities
             else
                 chance += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
-            chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
-            {
-                return aurEff.GetCasterGUID() == GetGUID();
-            });
+            chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !victim.HealthBelowPct(aurEff.GetMiscValueB()));
+
+            chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() == GetGUID());
+
+            TempSummon tempSummon = ToTempSummon();
+            if (tempSummon)
+                chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
 
             chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
