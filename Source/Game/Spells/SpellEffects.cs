@@ -2664,7 +2664,7 @@ namespace Game.Spells
             // Add melee damage bonuses (also check for negative)
             uint damage = m_caster.MeleeDamageBonusDone(unitTarget, eff_damage, m_attackType, m_spellInfo);
 
-            m_damage += (int)unitTarget.MeleeDamageBonusTaken(m_caster, damage, m_attackType, m_spellInfo);
+            m_damage += (int)unitTarget.MeleeDamageBonusTaken(m_caster, damage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.Threat)]

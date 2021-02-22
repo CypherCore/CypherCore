@@ -1914,7 +1914,7 @@ namespace Game.Entities
             damage += CalculateDamage(damageInfo.attackType, false, true);
             // Add melee damage bonus
             damage = MeleeDamageBonusDone(damageInfo.target, damage, damageInfo.attackType);
-            damage = damageInfo.target.MeleeDamageBonusTaken(this, damage, damageInfo.attackType);
+            damage = damageInfo.target.MeleeDamageBonusTaken(this, damage, damageInfo.attackType, DamageEffectType.Direct);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
             Global.ScriptMgr.ModifyMeleeDamage(damageInfo.target, damageInfo.attacker, ref damage);
@@ -2876,7 +2876,7 @@ namespace Game.Entities
             // bonus result can be negative
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
-        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, SpellInfo spellProto = null)
+        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null)
         {
             if (pdamage == 0)
                 return 0;
@@ -2932,6 +2932,9 @@ namespace Game.Entities
                         return false;
                     });
                 }
+
+                if (damagetype == DamageEffectType.DOT)
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken, aurEff => (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
             }
 
             AuraEffect cheatDeath = GetAuraEffect(45182, 0);
