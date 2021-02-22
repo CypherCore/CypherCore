@@ -398,7 +398,7 @@ namespace Framework.Constants
         Unk20 = 0x100000,
         Unk21 = 0x200000,
         Commentator2 = 0x400000,
-        AllowOnlyAbility = 0x800000,
+        HidAccountAchievements = 0x800000,
         PetBattlesUnlocked = 0x1000000,
         NoXPGain = 0x2000000,
         Unk26 = 0x4000000,
