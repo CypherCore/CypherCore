@@ -931,6 +931,8 @@ namespace Game.Entities
             }
             return Math.Max(resistMech, 0);
         }
+        
+        public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostMultiplier), manaCostMultiplier, apply); }
 
         public void ApplyModManaCostModifier(SpellSchools school, int mod, bool apply) { ApplyModUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostModifier, (int)school), mod, apply); }
     }

@@ -444,7 +444,7 @@ namespace Framework.Constants
         ModBattlePetXpPct = 420,
         ModAbsorbEffectsDonePct = 421, // NYI
         ModAbsorbEffectsTakenPct = 422, //NYI
-        Unk423 = 423,
+        ModManaCostPct = 423,
         CasterIgnoreLos = 424, //NYI
         Unk425 = 425,
         Unk426 = 426,

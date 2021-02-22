@@ -2773,9 +2773,6 @@ namespace Game.Spells
                         flatMod += eff.GetAmount();
                     }
 
-                    if (power.PowerType == PowerType.Mana)
-                        flatMod *= (int)(1.0f + caster.m_unitData.ManaCostMultiplier); // this is wrong
-
                     powerCost += flatMod;
                 }
 
@@ -2842,7 +2839,9 @@ namespace Game.Spells
                     powerCost += MathFunctions.CalculatePct(powerCost, eff.GetAmount());
                 }
 
-                if (power.PowerType == PowerType.Health)
+                if (power.PowerType == PowerType.Mana)
+                    powerCost = (int)((float)powerCost * (1.0f + caster.m_unitData.ManaCostMultiplier));
+                else if (power.PowerType == PowerType.Health)
                 {
                     healthCost += powerCost;
                     continue;

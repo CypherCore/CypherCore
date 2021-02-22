@@ -3461,6 +3461,15 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.ModManaCostPct)]
+        void HandleModManaCostPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            aurApp.GetTarget().ApplyModManaCostMultiplier(GetAmount() / 100.0f, apply);
+        }
+        
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
         void HandleAuraModPowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
