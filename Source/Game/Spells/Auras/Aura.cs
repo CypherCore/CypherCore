@@ -225,7 +225,7 @@ namespace Game.Spells
 
             // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
             // stack amount has priority over charges (checked on retail with spell 50262)
-            auraData.Applications = aura.GetSpellInfo().StackAmount != 0 ? aura.GetStackAmount() : aura.GetCharges();
+            auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
             if (!auraData.Flags.HasAnyFlag(AuraFlags.NoCaster))
                 auraData.CastUnit.Set(aura.GetCasterGUID());
 
@@ -857,12 +857,31 @@ namespace Game.Spells
             SetNeedClientUpdateForTargets();
         }
 
+        public bool IsUsingStacks()
+        {
+            return m_spellInfo.StackAmount > 0;
+        }
+
+        public uint CalcMaxStackAmount()
+        {
+            uint maxStackAmount = m_spellInfo.StackAmount;
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.StackAmount2, ref maxStackAmount);
+            }
+            return maxStackAmount;
+        }
+        
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
         {
             int stackAmount = m_stackAmount + num;
+            uint maxStackAmount = CalcMaxStackAmount();
 
             // limit the stack amount (only on stack increase, stack amount may be changed manually)
-            if ((num > 0) && (stackAmount > (int)m_spellInfo.StackAmount))
+            if ((num > 0) && (stackAmount > maxStackAmount))
             {
                 // not stackable aura - set stack amount to 1
                 if (m_spellInfo.StackAmount == 0)
