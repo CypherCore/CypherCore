@@ -1034,11 +1034,6 @@ namespace Game.Spells
                     modOwner.ApplySpellMod(GetId(), SpellModOp.ResistDispelChance, ref resistChance);
             }
 
-            // Dispel resistance from target SPELL_AURA_MOD_DISPEL_RESIST
-            // Only affects offensive dispels
-            if (offensive && auraTarget != null)
-                resistChance += auraTarget.GetTotalAuraModifier(AuraType.ModDispelResist);
-
             resistChance = resistChance < 0 ? 0 : resistChance;
             resistChance = resistChance > 100 ? 100 : resistChance;
             return 100 - resistChance;

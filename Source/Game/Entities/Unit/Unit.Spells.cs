@@ -78,9 +78,6 @@ namespace Game.Entities
                         DoneAdvertisedBenefit += (int)MathFunctions.CalculatePct(GetStat(usedStat), eff.GetAmount());
                     }
                 }
-                // ... and attack power
-                DoneAdvertisedBenefit += (int)MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), GetTotalAuraModifierByMiscMask(AuraType.ModSpellDamageOfAttackPower, (int)schoolMask));
-
             }
             return DoneAdvertisedBenefit;
         }
@@ -383,12 +380,6 @@ namespace Game.Entities
                     Stats usedStat = (Stats)(i.GetSpellEffectInfo().MiscValue);
                     advertisedBenefit += (uint)MathFunctions.CalculatePct(GetStat(usedStat), i.GetAmount());
                 }
-
-                // ... and attack power
-                var mHealingDonebyAP = GetAuraEffectsByType(AuraType.ModSpellHealingOfAttackPower);
-                foreach (var i in mHealingDonebyAP)
-                    if (Convert.ToBoolean(i.GetMiscValue() & (int)schoolMask))
-                        advertisedBenefit += (uint)MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), i.GetAmount());
             }
             return advertisedBenefit;
         }

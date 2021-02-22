@@ -3286,17 +3286,7 @@ namespace Game.Spells
 
             if (IsAutoActionResetSpell())
             {
-                bool found = false;
-                var vIgnoreReset = m_caster.GetAuraEffectsByType(AuraType.IgnoreMeleeReset);
-                foreach (var i in vIgnoreReset)
-                {
-                    if (i.IsAffectingSpell(m_spellInfo))
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found && !m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
+                if (!m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
                 {
                     m_caster.ResetAttackTimer(WeaponAttackType.BaseAttack);
                     if (m_caster.HaveOffhandWeapon())
@@ -4533,9 +4523,6 @@ namespace Game.Spells
                 }
             }
 
-            if (m_caster.HasAuraTypeWithMiscvalue(AuraType.BlockSpellFamily, (int)m_spellInfo.SpellFamilyName))
-                return SpellCastResult.SpellUnavailable;
-
             bool reqCombat = true;
             var stateAuras = m_caster.GetAuraEffectsByType(AuraType.AbilityIgnoreAurastate);
             foreach (var aura in stateAuras)
@@ -5645,7 +5632,7 @@ namespace Game.Spells
         bool CheckSpellCancelsStun(ref uint param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModStun, ref param1) &&
-                 CheckSpellCancelsAuraEffect(AuraType.Strangulate, ref param1);
+                 CheckSpellCancelsAuraEffect(AuraType.ModStunDisableGravity, ref param1);
         }
 
         bool CheckSpellCancelsSilence(ref uint param1)
@@ -7232,7 +7219,7 @@ namespace Game.Spells
                     m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr0.Ability);
 
                 // Apply haste rating
-                if (gcd > 750 && ((m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell) || m_caster.HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHaste, m_spellInfo)))
+                if (gcd > 750 && (m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell))
                 {
                     gcd = (int)(gcd * m_caster.m_unitData.ModSpellHaste);
                     MathFunctions.RoundToInterval(ref gcd, 750, 1500);

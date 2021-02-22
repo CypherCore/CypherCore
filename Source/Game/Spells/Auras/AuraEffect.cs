@@ -957,43 +957,6 @@ namespace Game.Spells
         #endregion
 
         #region AuraEffect Handlers
-        [AuraEffectHandler(AuraType.None)]
-        [AuraEffectHandler(AuraType.Unk46)]
-        [AuraEffectHandler(AuraType.Unk48)]
-        [AuraEffectHandler(AuraType.PetDamageMulti)]
-        [AuraEffectHandler(AuraType.ModCriticalThreat)]
-        [AuraEffectHandler(AuraType.ModCooldown)]
-        [AuraEffectHandler(AuraType.Unk214)]
-        [AuraEffectHandler(AuraType.ModDetaunt)]
-        [AuraEffectHandler(AuraType.ModSpellDamageFromHealing)]
-        [AuraEffectHandler(AuraType.ModTargetResistBySpellClass)]
-        [AuraEffectHandler(AuraType.ModDamageDoneForMechanic)]
-        [AuraEffectHandler(AuraType.BlockSpellFamily)]
-        [AuraEffectHandler(AuraType.Strangulate)]
-        [AuraEffectHandler(AuraType.ModCritChanceForCaster)]
-        [AuraEffectHandler(AuraType.Unk311)]
-        [AuraEffectHandler(AuraType.AnimReplacementSet)]
-        [AuraEffectHandler(AuraType.ModSpellPowerPct)]
-        [AuraEffectHandler(AuraType.OverrideUnlockedAzeriteEssenceRank)]
-        [AuraEffectHandler(AuraType.ModBlind)]
-        [AuraEffectHandler(AuraType.Unk335)]
-        [AuraEffectHandler(AuraType.MountRestrictions)]
-        [AuraEffectHandler(AuraType.ModResurrectedHealthByGuildMember)]
-        [AuraEffectHandler(AuraType.ModSpellCooldownByHaste)]
-        [AuraEffectHandler(AuraType.ModGatheringItemsGainedPercent)]
-        [AuraEffectHandler(AuraType.Unk351)]
-        [AuraEffectHandler(AuraType.Unk352)]
-        [AuraEffectHandler(AuraType.ModCamouflage)]
-        [AuraEffectHandler(AuraType.Unk354)]
-        [AuraEffectHandler(AuraType.EnableBoss1UnitFrame)]
-        [AuraEffectHandler(AuraType.WorgenAlteredForm)]
-        [AuraEffectHandler(AuraType.ProcTriggerSpellCopy)]
-        [AuraEffectHandler(AuraType.OverrideAutoattackWithMeleeSpell)]
-        [AuraEffectHandler(AuraType.ModNextSpell)]
-        [AuraEffectHandler(AuraType.MaxFarClipPlane)]
-        [AuraEffectHandler(AuraType.EnablePowerBarTimer)]
-        void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply) { }
-
         /**************************************/
         /***       VISIBILITY & PHASES      ***/
         /**************************************/
@@ -1949,7 +1912,7 @@ namespace Game.Spells
             HandleAuraModSilence(aurApp, mode, apply);
         }
 
-        [AuraEffectHandler(AuraType.AllowOnlyAbility)]
+        [AuraEffectHandler(AuraType.DisableCastingExceptAbilities)]
         void HandleAuraAllowOnlyAbility(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
@@ -1963,7 +1926,7 @@ namespace Game.Spells
                 else
                 {
                     // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                    if (target.HasAuraType(AuraType.AllowOnlyAbility))
+                    if (target.HasAuraType(AuraType.DisableCastingExceptAbilities))
                         return;
                     target.RemovePlayerFlag(PlayerFlags.AllowOnlyAbility);
                 }
@@ -3135,38 +3098,6 @@ namespace Game.Spells
             target.ToPlayer().UpdateSpellDamageAndHealingBonus();
         }
 
-        [AuraEffectHandler(AuraType.ModSpellDamageOfAttackPower)]
-        void HandleModSpellDamagePercentFromAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            // Magic damage modifiers implemented in Unit.SpellDamageBonus
-            // This information for client side use only
-            // Recalculate bonus
-            target.ToPlayer().UpdateSpellDamageAndHealingBonus();
-        }
-
-        [AuraEffectHandler(AuraType.ModSpellHealingOfAttackPower)]
-        void HandleModSpellHealingPercentFromAttackPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            // Recalculate bonus
-            target.ToPlayer().UpdateSpellDamageAndHealingBonus();
-        }
-
         [AuraEffectHandler(AuraType.ModHealingDone)]
         void HandleModHealingDone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -3235,29 +3166,6 @@ namespace Game.Spells
             // this check is total bullshit i think
             if ((Convert.ToBoolean(GetMiscValueB() & 1 << (int)Stats.Stamina) || GetMiscValueB() == 0) && m_spellInfo.HasAttribute(SpellAttr0.Ability))
                 target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1ul)));
-        }
-
-        [AuraEffectHandler(AuraType.ModResistanceOfStatPercent)]
-        void HandleAuraModResistenceOfStatPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            if (GetMiscValue() != (int)SpellSchoolMask.Normal)
-            {
-                // support required adding replace UpdateArmor by loop by UpdateResistence at intellect update
-                // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
-                Log.outError(LogFilter.Spells, "Aura SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT(182) does not work for non-armor type resistances!");
-                return;
-            }
-
-            // Recalculate Armor
-            target.UpdateArmor();
         }
 
         [AuraEffectHandler(AuraType.ModExpertise)]
@@ -3387,21 +3295,6 @@ namespace Game.Spells
         void HandleModPowerRegenPCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             HandleModPowerRegen(aurApp, mode, apply);
-        }
-
-        [AuraEffectHandler(AuraType.ModManaRegenFromStat)]
-        void HandleModManaRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            //Note: an increase in regen does NOT cause threat.
-            target.ToPlayer().UpdateManaRegen();
         }
 
         [AuraEffectHandler(AuraType.ModManaRegenPct)]
@@ -3709,7 +3602,15 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.InterruptRegen)]
         void HandleAuraModRegenInterrupt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            HandleModManaRegen(aurApp, mode, apply);
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (!target.IsPlayer())
+                return;
+
+            target.ToPlayer().UpdateManaRegen();
         }
 
         [AuraEffectHandler(AuraType.ModWeaponCritPercent)]
@@ -4192,23 +4093,6 @@ namespace Game.Spells
             }
 
             target.ToPlayer().SetNoRegentCostMask(mask);
-        }
-
-        [AuraEffectHandler(AuraType.RetainComboPoints)]
-        void HandleAuraRetainComboPoints(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
-            // remove only if aura expire by time (in case combo points amount change aura removed without combo points lost)
-            if (!apply && aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
-                target.ToPlayer().AddComboPoints((sbyte)-GetAmount());
         }
 
         /*********************************************************/

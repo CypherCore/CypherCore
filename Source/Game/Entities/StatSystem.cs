@@ -1232,9 +1232,7 @@ namespace Game.Entities
                     if (CanDualWield() || offhand.GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.AlwaysAllowDualWield))
                         UpdateDamagePhysical(WeaponAttackType.OffAttack);
 
-                if (HasAuraType(AuraType.ModSpellDamageOfAttackPower) ||
-                    HasAuraType(AuraType.ModSpellHealingOfAttackPower) ||
-                    HasAuraType(AuraType.OverrideSpellPowerByApPct))
+                if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                     UpdateSpellDamageAndHealingBonus();
 
                 if (pet != null && pet.IsPetGhoul()) // At melee attack power change for DK pet
@@ -1253,15 +1251,6 @@ namespace Game.Entities
             float baseValue = value;
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);           // armor percent from items
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-
-            //add dynamic flat mods
-            var mResbyIntellect = GetAuraEffectsByType(AuraType.ModResistanceOfStatPercent);
-            foreach (var i in mResbyIntellect)
-            {
-                if (Convert.ToBoolean(i.GetMiscValue() & (int)SpellSchoolMask.Normal))
-                    value += MathFunctions.CalculatePct(GetStat((Stats)i.GetMiscValueB()), i.GetAmount());
-            }
-
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
             SetArmor((int)baseValue, (int)(value - baseValue));

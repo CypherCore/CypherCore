@@ -2474,17 +2474,6 @@ namespace Game.Entities
             // Ignore Absorption Auras
             float auraAbsorbMod = GetMaxPositiveAuraModifierByMiscMask(AuraType.ModTargetAbsorbSchool, (uint)damageInfo.GetSchoolMask());
 
-            auraAbsorbMod = Math.Max(auraAbsorbMod, (float)GetMaxPositiveAuraModifier(AuraType.ModTargetAbilityAbsorbSchool, aurEff =>
-            {
-                if (!Convert.ToBoolean(aurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
-                    return false;
-
-                if (!aurEff.IsAffectingSpell(damageInfo.GetSpellInfo()))
-                    return false;
-
-                return true;
-            }));
-
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
             int absorbIgnoringDamage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), auraAbsorbMod);

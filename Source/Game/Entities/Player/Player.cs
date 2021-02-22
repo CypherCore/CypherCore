@@ -6592,10 +6592,7 @@ namespace Game.Entities
 
             sbyte comboPoints = spell != null ? spell.m_comboPointGain : (sbyte)GetPower(PowerType.ComboPoints);
 
-            // without combo points lost (duration checked in aura)
-            RemoveAurasByType(AuraType.RetainComboPoints);
-
-            comboPoints += (sbyte)count;
+            comboPoints += count;
 
             if (comboPoints > 5)
                 comboPoints = 5;
@@ -6624,9 +6621,6 @@ namespace Game.Entities
         }
         public void ClearComboPoints()
         {
-            // without combopoints lost (duration checked in aura)
-            RemoveAurasByType(AuraType.RetainComboPoints);
-
             SetPower(PowerType.ComboPoints, 0);
         }
         public byte GetComboPoints() { return (byte)GetPower(PowerType.ComboPoints); }
