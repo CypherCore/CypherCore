@@ -2049,7 +2049,7 @@ namespace Game.Entities
             int miss_chance = (int)(MeleeSpellMissChance(victim, attType, 0) * 100.0f);
 
             // Critical hit chance
-            int crit_chance = (int)(GetUnitCriticalChance(attType, victim) * 100.0f);
+            int crit_chance = (int)(GetUnitCriticalChance(attType, victim) + GetTotalAuraModifier(AuraType.ModAutoAttackCritChance) * 100.0f);
 
             int dodge_chance = (int)(GetUnitDodgeChance(attType, victim) * 100.0f);
             int block_chance = (int)(GetUnitBlockChance(attType, victim) * 100.0f);
@@ -2292,7 +2292,7 @@ namespace Game.Entities
             float dz = GetPositionZMinusOffset() - obj.GetPositionZMinusOffset();
             float distsq = (dx * dx) + (dy * dy) + (dz * dz);
 
-            float maxdist = GetMeleeRange(obj);
+            float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
 
             return distsq <= maxdist * maxdist;
         }

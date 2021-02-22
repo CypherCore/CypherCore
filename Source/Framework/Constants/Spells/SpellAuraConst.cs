@@ -355,7 +355,7 @@ namespace Framework.Constants
         ForceWeather = 331,
         OverrideActionbarSpells = 332,
         OverrideActionbarSpellsTriggered = 333, // Spells cast with this override have no cast time or power cost
-        AutoAttackCritChance = 334,
+        ModAutoAttackCritChance = 334,
         Unk335 = 335,
         MountRestrictions = 336,
         ModVendorItemsPrices = 337,
