@@ -172,7 +172,7 @@ namespace Game
                     resetIllusionItems.Add(itemTransmogrified);
             }
 
-            if (cost != 0) // 0 cost if reverting look
+            if (!player.HasAuraType(AuraType.RemoveTransmogCost) && cost != 0) // 0 cost if reverting look
             {
                 if (!player.HasEnoughMoney(cost))
                     return;

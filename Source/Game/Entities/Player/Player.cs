@@ -3443,6 +3443,9 @@ namespace Game.Entities
 
         public long GetBarberShopCost(List<ChrCustomizationChoice> newCustomizations)
         {
+            if (HasAuraType(AuraType.RemoveBarberShopCost))
+                return 0;
+
             GtBarberShopCostBaseRecord bsc = CliDB.BarberShopCostBaseGameTable.GetRow(GetLevel());
             if (bsc == null)                                                // shouldn't happen
                 return 0;
