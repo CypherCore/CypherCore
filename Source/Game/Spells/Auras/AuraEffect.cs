@@ -1913,6 +1913,16 @@ namespace Game.Spells
             HandleAuraModSilence(aurApp, mode, apply);
         }
 
+        [AuraEffectHandler(AuraType.DisableAttackingExceptAbilities)]
+        void HandleAuraDisableAttackingExceptAbilities(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            if (apply)
+                aurApp.GetTarget().AttackStop();
+        }
+        
         [AuraEffectHandler(AuraType.ModNoActions)]
         void HandleAuraModNoActions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

@@ -382,6 +382,9 @@ namespace Game.Entities
             if (HasUnitFlag(UnitFlags.Pacified))
                 return false;
 
+            if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
+                return false;
+
             // nobody can attack GM in GM-mode
             if (victim.IsTypeId(TypeId.Player))
             {
