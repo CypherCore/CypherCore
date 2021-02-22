@@ -5900,11 +5900,11 @@ namespace Game.Spells
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
-                Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {0} from aura {1} proc", triggeredSpellInfo.Id, GetId());
+                Log.outDebug(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {triggeredSpellInfo.Id} from aura {GetId()} proc");
                 triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo, true, null, this);
             }
-            else
-                Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellAuraProc: Could not trigger spell {0} from aura {1} proc, because the spell does not have an entry in Spell.dbc.", triggerSpellId, GetId());
+            else if (triggerSpellId != 0 && GetAuraType() != AuraType.Dummy)
+                Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Could not trigger spell {triggerSpellId} from aura {GetId()} proc, because the spell does not have an entry in Spell.dbc.");
         }
 
         void HandleProcTriggerSpellWithValueAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
