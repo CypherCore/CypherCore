@@ -1834,8 +1834,13 @@ namespace Game.Spells
             }
 
             // Remove aura if we've used last charge to proc
-            if (IsUsingCharges() && GetCharges() == 0)
-                Remove();
+            if (IsUsingCharges())
+            {
+                if (GetCharges() == 0)
+                    Remove();
+            }
+            else if (Global.SpellMgr.GetSpellProcEntry(m_spellInfo).AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges))
+                ModStackAmount(-1);
         }
 
         public float CalcPPMProcChance(Unit actor)
