@@ -5811,7 +5811,7 @@ namespace Game.Entities
             AddUnitFlag2(UnitFlags2.RegeneratePower);// must be set
 
             // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
-            RemovePlayerFlag(PlayerFlags.AFK | PlayerFlags.DND | PlayerFlags.GM | PlayerFlags.Ghost | PlayerFlags.AllowOnlyAbility);
+            RemovePlayerFlag(PlayerFlags.AFK | PlayerFlags.DND | PlayerFlags.GM | PlayerFlags.Ghost);
 
             RemoveVisFlags(UnitVisFlags.All);                 // one form stealth modified bytes
             RemovePvpFlag(UnitPVPStateFlags.FFAPvp | UnitPVPStateFlags.Sanctuary);

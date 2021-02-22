@@ -1913,27 +1913,6 @@ namespace Game.Spells
             HandleAuraModSilence(aurApp, mode, apply);
         }
 
-        [AuraEffectHandler(AuraType.DisableCastingExceptAbilities)]
-        void HandleAuraAllowOnlyAbility(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
-                return;
-
-            Player target = aurApp.GetTarget().ToPlayer();
-            if (target != null)
-            {
-                if (apply)
-                    target.AddPlayerFlag(PlayerFlags.AllowOnlyAbility);
-                else
-                {
-                    // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
-                    if (target.HasAuraType(AuraType.DisableCastingExceptAbilities))
-                        return;
-                    target.RemovePlayerFlag(PlayerFlags.AllowOnlyAbility);
-                }
-            }
-        }
-
         [AuraEffectHandler(AuraType.ModNoActions)]
         void HandleAuraModNoActions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
