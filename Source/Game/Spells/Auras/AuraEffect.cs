@@ -961,6 +961,11 @@ namespace Game.Spells
         /**************************************/
         /***       VISIBILITY & PHASES      ***/
         /**************************************/
+        [AuraEffectHandler(AuraType.None)]
+        void HandleUnsued(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+        }
+        
         [AuraEffectHandler(AuraType.ModInvisibilityDetect)]
         void HandleModInvisibilityDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
