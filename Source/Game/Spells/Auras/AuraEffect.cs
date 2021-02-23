@@ -962,7 +962,7 @@ namespace Game.Spells
         /***       VISIBILITY & PHASES      ***/
         /**************************************/
         [AuraEffectHandler(AuraType.None)]
-        void HandleUnsued(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
         }
         
