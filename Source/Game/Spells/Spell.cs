@@ -4960,19 +4960,6 @@ namespace Game.Spells
 
                             break;
                         }
-                    case SpellEffectName.PowerBurn:
-                    case SpellEffectName.PowerDrain:
-                        {
-                            // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
-                            if (m_caster.IsTypeId(TypeId.Player))
-                            {
-                                Unit target = m_targets.GetUnitTarget();
-                                if (target != null)
-                                    if (target != m_caster && unitTarget.GetPowerType() != (PowerType)effect.MiscValue)
-                                        return SpellCastResult.BadTargets;
-                            }
-                            break;
-                        }
                     case SpellEffectName.Charge:
                         {
                             if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAuras) && m_caster.HasUnitState(UnitState.Root))
