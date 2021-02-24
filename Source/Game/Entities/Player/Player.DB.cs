@@ -638,8 +638,7 @@ namespace Game.Entities
         }
         void LoadActions(SQLResult result)
         {
-            if (!result.IsEmpty())
-                _LoadActions(result);
+            _LoadActions(result);
 
             SendActionButtons(1);
         }
