@@ -1666,16 +1666,15 @@ namespace Game.Spells
             if (!prepare)
                 return;
 
+            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
+            Cypher.Assert(procEntry != null);
+
             // take one charge, aura expiration will be handled in Aura.TriggerProcOnEvent (if needed)
-            if (IsUsingCharges())
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges) && IsUsingCharges())
             {
                 --m_procCharges;
                 SetNeedClientUpdateForTargets();
             }
-
-            SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
-
-            Cypher.Assert(procEntry != null);
 
             // cooldowns should be added to the whole aura (see 51698 area aura)
             AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
@@ -1862,13 +1861,15 @@ namespace Game.Spells
             }
 
             // Remove aura if we've used last charge to proc
-            if (IsUsingCharges())
+            if (Global.SpellMgr.GetSpellProcEntry(m_spellInfo).AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges))
+            {
+                ModStackAmount(-1);
+            }
+            else if (IsUsingCharges())
             {
                 if (GetCharges() == 0)
                     Remove();
             }
-            else if (Global.SpellMgr.GetSpellProcEntry(m_spellInfo).AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges))
-                ModStackAmount(-1);
         }
 
         public float CalcPPMProcChance(Unit actor)
