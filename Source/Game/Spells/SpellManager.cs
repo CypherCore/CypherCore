@@ -979,16 +979,16 @@ namespace Game.Entities
 
             foreach (var spellLearnSpell in CliDB.SpellLearnSpellStorage.Values)
             {
-                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None))
+                if (!HasSpellInfo(spellLearnSpell.SpellID, Difficulty.None) || !HasSpellInfo(spellLearnSpell.LearnSpellID, Difficulty.None))
                     continue;
 
-                var db_node_bounds = mSpellLearnSpells.LookupByKey(spellLearnSpell.LearnSpellID);
+                var db_node_bounds = mSpellLearnSpells.LookupByKey(spellLearnSpell.SpellID);
                 bool found = false;
                 foreach (var spellNode in db_node_bounds)
                 {
-                    if (spellNode.Spell == spellLearnSpell.SpellID)
+                    if (spellNode.Spell == spellLearnSpell.LearnSpellID)
                     {
-                        Log.outError(LogFilter.Sql, "Found redundant record (entry: {0}, SpellID: {1}) in `spell_learn_spell`, spell added automatically from SpellLearnSpell.db2", spellLearnSpell.LearnSpellID, spellLearnSpell.SpellID);
+                        Log.outError(LogFilter.Sql, $"Found redundant record (entry: {spellLearnSpell.SpellID}, SpellID: {spellLearnSpell.LearnSpellID}) in `spell_learn_spell`, spell added automatically from SpellLearnSpell.db2");
                         found = true;
                         break;
                     }
@@ -998,11 +998,11 @@ namespace Game.Entities
                     continue;
 
                 // Check if it is already found in Spell.dbc, ignore silently if yes
-                var dbc_node_bounds = GetSpellLearnSpellMapBounds(spellLearnSpell.LearnSpellID);
+                var dbc_node_bounds = GetSpellLearnSpellMapBounds(spellLearnSpell.SpellID);
                 found = false;
                 foreach (var spellNode in dbc_node_bounds)
                 {
-                    if (spellNode.Spell == spellLearnSpell.SpellID)
+                    if (spellNode.Spell == spellLearnSpell.LearnSpellID)
                     {
                         found = true;
                         break;
@@ -1013,12 +1013,12 @@ namespace Game.Entities
                     continue;
 
                 SpellLearnSpellNode dbcLearnNode = new SpellLearnSpellNode();
-                dbcLearnNode.Spell = spellLearnSpell.SpellID;
+                dbcLearnNode.Spell = spellLearnSpell.LearnSpellID;
                 dbcLearnNode.OverridesSpell = spellLearnSpell.OverridesSpellID;
                 dbcLearnNode.Active = true;
                 dbcLearnNode.AutoLearned = false;
 
-                mSpellLearnSpells.Add(spellLearnSpell.LearnSpellID, dbcLearnNode);
+                mSpellLearnSpells.Add(spellLearnSpell.SpellID, dbcLearnNode);
                 ++dbc_count;
             }
 
