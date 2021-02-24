@@ -755,7 +755,6 @@ namespace Game.Entities
             questStatusData.ObjectiveData = new int[maxStorageIndex + 1];
 
             GiveQuestSourceItem(quest);
-            AdjustQuestReqItemCount(quest);
 
             foreach (QuestObjective obj in quest.Objectives)
             {
@@ -812,6 +811,8 @@ namespace Game.Entities
             }
 
             SetQuestSlot(log_slot, quest_id, qtime);
+
+            AdjustQuestReqItemCount(quest);
 
             m_QuestStatusSave[quest_id] = QuestSaveType.Default;
 
