@@ -2348,8 +2348,6 @@ namespace Game.Entities
                 mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value, visuals));
             }
 
-            CliDB.SpellNameStorage.Clear();
-
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
