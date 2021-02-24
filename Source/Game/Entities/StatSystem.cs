@@ -194,6 +194,9 @@ namespace Game.Entities
             if (dVal == 0)
                 return 0;
 
+            if (dVal > 0)
+                dVal *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerGainPct, (int)power);
+
             int curPower = GetPower(power);
 
             int val = (dVal + curPower);
