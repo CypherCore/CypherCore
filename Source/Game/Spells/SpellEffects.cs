@@ -214,26 +214,6 @@ namespace Game.Spells
                             }
                             break;
                         }
-                    case SpellFamilyNames.Warlock:
-                        {
-                            break;
-                        }
-                    case SpellFamilyNames.Priest:
-                        {
-                            break;
-                        }
-                    case SpellFamilyNames.Druid:
-                        {
-                            // Ferocious Bite
-                            if (m_caster.IsTypeId(TypeId.Player) && m_spellInfo.SpellFamilyFlags[3].HasAnyFlag(0x1000u))
-                            {
-                                // converts each extra point of energy ( up to 25 energy ) into additional damage
-                                int energy = -(m_caster.ModifyPower(PowerType.Energy, -25));
-                                // 25 energy = 100% more damage
-                                MathFunctions.AddPct(ref damage, energy * 4);
-                            }
-                            break;
-                        }
                     case SpellFamilyNames.Deathknight:
                         {
                             // Blood Boil - bonus for diseased targets

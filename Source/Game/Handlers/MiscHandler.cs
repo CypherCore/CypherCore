@@ -821,19 +821,15 @@ namespace Game
 
             AdventureJournalDataResponse response = new AdventureJournalDataResponse();
             response.OnLevelUp = adventureJournalUpdateSuggestions.OnLevelUp;
-            int count = 0;
+
             foreach (var adventureJournal in CliDB.AdventureJournalStorage.Values)
             {
-                if (count >= 7)
-                    break;
-
                 if (_player.MeetPlayerCondition(adventureJournal.PlayerConditionID))
                 {
-                    AdventureJournalDataInfo dataInfo;
-                    dataInfo.AdventureJournalID = (int)adventureJournal.Id;
-                    dataInfo.Priority = adventureJournal.PriorityMax;
-                    response.AdventureJournalDatas.Add(dataInfo);
-                    count++;
+                    AdventureJournalData adventureJournalData;
+                    adventureJournalData.AdventureJournalID = (int)adventureJournal.Id;
+                    adventureJournalData.Priority = adventureJournal.PriorityMax;
+                    response.AdventureJournalDatas.Add(adventureJournalData);
                 }
             }
 

@@ -1366,15 +1366,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(OnLevelUp);
             _worldPacket.FlushBits();
             _worldPacket.WriteInt32(AdventureJournalDatas.Count);
-            foreach (var dataInfo in AdventureJournalDatas)
+            foreach (var adventureJournal in AdventureJournalDatas)
             {
-                _worldPacket.WriteInt32(dataInfo.AdventureJournalID);
-                _worldPacket.WriteInt32(dataInfo.Priority);
+                _worldPacket.WriteInt32(adventureJournal.AdventureJournalID);
+                _worldPacket.WriteInt32(adventureJournal.Priority);
             }
         }
 
         public bool OnLevelUp;
-        public List<AdventureJournalDataInfo> AdventureJournalDatas = new List<AdventureJournalDataInfo>();
+        public List<AdventureJournalData> AdventureJournalDatas = new List<AdventureJournalData>();
     }
     
     //Structs
@@ -1412,7 +1412,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PersonalGUID;
     }
 
-    struct AdventureJournalDataInfo
+    struct AdventureJournalData
     {
         public int AdventureJournalID;
         public int Priority;

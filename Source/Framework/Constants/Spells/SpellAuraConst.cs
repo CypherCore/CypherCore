@@ -350,7 +350,7 @@ namespace Framework.Constants
         PhaseGroup = 326,  // Phase Related
         PhaseAlwaysVisible = 327,  // NYI - sets PhaseShiftFlags::AlwaysVisible
         TriggerSpellOnPowerPct = 328,
-        ModPowerGainPct = 329,  // Nyi
+        ModPowerGainPct = 329,
         CastWhileWalking = 330,
         ForceWeather = 331,
         OverrideActionbarSpells = 332,
