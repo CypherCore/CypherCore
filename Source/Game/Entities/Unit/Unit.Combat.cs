@@ -2666,8 +2666,9 @@ namespace Game.Entities
 
             // absorb without mana cost
             var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
-            foreach (var eff in vHealAbsorb)
+            for (var i = 0; i < vHealAbsorb.Count; ++i)
             {
+                var eff = vHealAbsorb[i];
                 if (healInfo.GetHeal() <= 0)
                     break;
 
