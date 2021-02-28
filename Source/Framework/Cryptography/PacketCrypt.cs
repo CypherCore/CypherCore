@@ -22,9 +22,6 @@ namespace Framework.Cryptography
 {
     public sealed class WorldCrypt : IDisposable
     {
-        static readonly byte[] ServerEncryptionKey = { 0x08, 0xF1, 0x95, 0x9F, 0x47, 0xE5, 0xD2, 0xDB, 0xA1, 0x3D, 0x77, 0x8F, 0x3F, 0x3E, 0xE7, 0x00 };
-        static readonly byte[] ServerDecryptionKey = { 0x40, 0xAA, 0xD3, 0x92, 0x26, 0x71, 0x43, 0x47, 0x3A, 0x31, 0x08, 0xA6, 0xE7, 0xDC, 0x98, 0x2A };
-
         public void Initialize(byte[] key)
         {
             if (IsInitialized)
@@ -38,20 +35,34 @@ namespace Framework.Cryptography
 
         public bool Encrypt(ref byte[] data, ref byte[] tag)
         {
-            if (IsInitialized)
-                _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
+            try
+            {
+                if (IsInitialized)
+                    _serverEncrypt.Encrypt(BitConverter.GetBytes(_serverCounter).Combine(BitConverter.GetBytes(0x52565253)), data, data, tag);
 
-            ++_serverCounter;
-            return true;
+                ++_serverCounter;
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
         }
 
         public bool Decrypt(byte[] data, byte[] tag)
         {
-            if (IsInitialized)
-                _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
+            try
+            {
+                if (IsInitialized)
+                    _clientDecrypt.Decrypt(BitConverter.GetBytes(_clientCounter).Combine(BitConverter.GetBytes(0x544E4C43)), data, tag, data);
 
-            ++_clientCounter;
-            return true;
+                ++_clientCounter;
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
         }
 
         public void Dispose()
@@ -66,5 +77,4 @@ namespace Framework.Cryptography
         ulong _clientCounter;
         ulong _serverCounter;
     }
-
 }
