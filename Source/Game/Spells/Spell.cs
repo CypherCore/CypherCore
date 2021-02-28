@@ -1097,7 +1097,7 @@ namespace Game.Spells
                 foreach (SpellEffectInfo eff in m_spellInfo.GetEffects())
                     if (eff != null && Convert.ToBoolean(effMask & (1 << (int)eff.EffectIndex)))
                         m_damageMultipliers[eff.EffectIndex] = 1.0f;
-                m_applyMultiplierMask |= (byte)effMask;
+                m_applyMultiplierMask |= effMask;
 
                 List<WorldObject> targets = new List<WorldObject>();
                 SearchChainTargets(targets, (uint)maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions, targetType.GetTarget() == Targets.UnitChainhealAlly);
@@ -2156,7 +2156,7 @@ namespace Game.Spells
 
                     bool refresh = false;
                     bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
-                    m_spellAura = Aura.TryRefreshStackOrCreate(m_spellInfo, m_castId, (byte)effectMask, unit,
+                    m_spellAura = Aura.TryRefreshStackOrCreate(m_spellInfo, m_castId, effectMask, unit,
                         m_originalCaster, GetCastDifficulty(), out refresh, basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
                     if (m_spellAura != null)
                     {
@@ -2400,7 +2400,7 @@ namespace Game.Spells
                                 continue;
                         }
 
-                        channelTargetEffectMask &= (byte)~ihit.effectMask;   // remove from need alive mask effect that have alive target
+                        channelTargetEffectMask &= ~ihit.effectMask;   // remove from need alive mask effect that have alive target
                     }
                 }
             }
@@ -5517,7 +5517,7 @@ namespace Game.Spells
             // Check whether the cast should be prevented by any state you might have.
             SpellCastResult result = SpellCastResult.SpellCastOk;
             // Get unit state
-            UnitFlags unitflag = (UnitFlags)(byte)m_caster.m_unitData.Flags;
+            UnitFlags unitflag = (UnitFlags)(uint)m_caster.m_unitData.Flags;
 
             // this check should only be done when player does cast directly
             // (ie not when it's called from a script) Breaks for example PlayerAI when charmed
@@ -6908,7 +6908,7 @@ namespace Game.Spells
                     m_spellValue.MaxAffectedTargets = (uint)value;
                     break;
                 case SpellValueMod.AuraStack:
-                    m_spellValue.AuraStackAmount = (byte)value;
+                    m_spellValue.AuraStackAmount = value;
                     break;
             }
         }

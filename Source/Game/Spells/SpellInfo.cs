@@ -1272,11 +1272,11 @@ namespace Game.Spells
             return mask;
         }
 
-        public uint GetEffectMechanicMask(byte effIndex)
+        public uint GetEffectMechanicMask(uint effIndex)
         {
             uint mask = 0;
             if (Mechanic != 0)
-                mask |= (uint)(1 << (int)Mechanic);
+                mask |= 1u << (int)Mechanic;
 
             var effect = _effects[effIndex];
             if (effect != null && effect.IsEffect() && effect.Mechanic != 0)

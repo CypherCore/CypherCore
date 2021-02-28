@@ -495,7 +495,7 @@ namespace Game.Spells
                 for (byte effIndex = 0; effIndex < SpellConst.MaxEffects; ++effIndex)
                 {
                     if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, caster))
-                        value &= (byte)~(1 << effIndex);
+                        value &= ~(1u << effIndex);
                 }
                 if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster)
                     || !CanBeAppliedOn(unit))
@@ -2660,9 +2660,9 @@ namespace Game.Spells
                 foreach (var unit in targetList)
                 {
                     if (targets.ContainsKey(unit))
-                        targets[unit] |= (byte)(1 << (int)effect.EffectIndex);
+                        targets[unit] |= (1u << (int)effect.EffectIndex);
                     else
-                        targets[unit] = (byte)(1 << (int)effect.EffectIndex);
+                        targets[unit] = (1u << (int)effect.EffectIndex);
                 }
             }
         }
@@ -2722,9 +2722,9 @@ namespace Game.Spells
                 foreach (var unit in targetList)
                 {
                     if (targets.ContainsKey(unit))
-                        targets[unit] |= (byte)(1 << (int)effect.EffectIndex);
+                        targets[unit] |= (1u << (int)effect.EffectIndex);
                     else
-                        targets[unit] = (byte)(1 << (int)effect.EffectIndex);
+                        targets[unit] = (1u << (int)effect.EffectIndex);
                 }
             }
         }
