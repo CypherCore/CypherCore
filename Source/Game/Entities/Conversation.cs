@@ -121,30 +121,36 @@ namespace Game.Entities
             _duration = conversationTemplate.LastLineEndTime;
             _textureKitId = conversationTemplate.TextureKitId;
 
-            for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
+            if (conversationTemplate.Actors != null)
             {
-                ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
-                if (actor != null)
+                for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
                 {
-                    ConversationActor actorField = new ConversationActor();
-                    actorField.CreatureID = actor.CreatureId;
-                    actorField.CreatureDisplayInfoID = actor.CreatureModelId;
-                    actorField.Type = ConversationActorType.CreatureActor;
+                    ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
+                    if (actor != null)
+                    {
+                        ConversationActor actorField = new ConversationActor();
+                        actorField.CreatureID = actor.CreatureId;
+                        actorField.CreatureDisplayInfoID = actor.CreatureModelId;
+                        actorField.Type = ConversationActorType.CreatureActor;
 
-                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
+                        AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
+                    }
                 }
             }
 
-            for (ushort actorIndex = 0; actorIndex < conversationTemplate.ActorGuids.Count; ++actorIndex)
+            if (conversationTemplate.ActorGuids != null)
             {
-                ulong actorGuid = conversationTemplate.ActorGuids[actorIndex];
-                if (actorGuid == 0)
-                    continue;
-
-                foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(actorGuid))
+                for (ushort actorIndex = 0; actorIndex < conversationTemplate.ActorGuids.Count; ++actorIndex)
                 {
-                    // we just need the last one, overriding is legit
-                    AddActor(creature.GetGUID(), actorIndex);
+                    ulong actorGuid = conversationTemplate.ActorGuids[actorIndex];
+                    if (actorGuid == 0)
+                        continue;
+
+                    foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(actorGuid))
+                    {
+                        // we just need the last one, overriding is legit
+                        AddActor(creature.GetGUID(), actorIndex);
+                    }
                 }
             }
 
