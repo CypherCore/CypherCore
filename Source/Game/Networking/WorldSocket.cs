@@ -491,7 +491,7 @@ namespace Game.Networking
             AccountInfo account = new AccountInfo(result.GetFields());
 
             // For hook purposes, we get Remoteaddress at this point.
-            string address = GetRemoteIpAddress().ToString();
+            var address = GetRemoteIpAddress();
 
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
@@ -541,7 +541,7 @@ namespace Game.Networking
 
             // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
-            stmt.AddValue(0, address);
+            stmt.AddValue(0, address.Address.ToString());
             stmt.AddValue(1, authSession.RealmJoinTicket);
 
             DB.Login.Execute(stmt);
@@ -583,7 +583,7 @@ namespace Game.Networking
             //Re-check ip locking (same check as in auth).
             if (account.battleNet.IsLockedToIP) // if ip is locked
             {
-                if (account.battleNet.LastIP != address)
+                if (account.battleNet.LastIP != address.Address.ToString())
                 {
                     SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
