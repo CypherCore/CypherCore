@@ -3754,7 +3754,7 @@ namespace Game.Spells
             float basePointsPerLevel = RealPointsPerLevel;
             // TODO: this needs to be a float, not rounded
             int basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
-            float value = bp.HasValue ? bp.Value : BasePoints;
+            float value = bp.HasValue ? bp.Value : basePoints;
             float comboDamage = PointsPerResource;
 
             if (Scaling.Variance != 0)
