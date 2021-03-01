@@ -636,7 +636,7 @@ namespace Game.Networking
 
             // Update the last_ip in the database
             stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
-            stmt.AddValue(0, address);
+            stmt.AddValue(0, address.Address.ToString());
             stmt.AddValue(1, authSession.RealmJoinTicket);
             DB.Login.Execute(stmt);
 
