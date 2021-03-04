@@ -470,7 +470,7 @@ namespace Scripts.Spells.Priest
     }
 
     // Base class used by various prayer of mending spells
-    class spell_pri_prayer_of_mending_SpellScriptBase : SpellScript
+    class spell_pri_prayer_of_mending_SpellScriptBasefdgdfgdf : SpellScript
     {
         SpellInfo _spellInfoHeal;
         SpellEffectInfo _healEffectDummy;
@@ -499,11 +499,31 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 33076 - Prayer of Mending
-    class spell_pri_prayer_of_mending : spell_pri_prayer_of_mending_SpellScriptBase
+    class spell_pri_prayer_of_mending : SpellScript
     {
+        SpellInfo _spellInfoHeal;
+        SpellEffectInfo _healEffectDummy;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingAura)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
+        }
+
+        public override bool Load()
+        {
+            _spellInfoHeal = Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None);
+            _healEffectDummy = _spellInfoHeal.GetEffect(0);
+            return true;
+        }
+
         void HandleEffectDummy(uint effIndex)
         {
-            CastPrayerOfMendingAura(GetCaster(), GetHitUnit(), (byte)GetEffectValue());
+            uint basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
+            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            values.Add(SpellValueMod.AuraStack, (byte)GetEffectValue());
+            values.Add(SpellValueMod.BasePoint0, (int)basePoints);
+            GetCaster().CastCustomSpell(SpellIds.PrayerOfMendingAura, values, GetHitUnit(), TriggerCastFlags.FullMask);
         }
 
         public override void Register()
@@ -547,8 +567,24 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 155793 - prayer of mending (Jump) - SPELL_PRIEST_PRAYER_OF_MENDING_JUMP
-    class spell_pri_prayer_of_mending_jump : spell_pri_prayer_of_mending_SpellScriptBase
+    class spell_pri_prayer_of_mending_jump : SpellScript
     {
+        SpellInfo _spellInfoHeal;
+        SpellEffectInfo _healEffectDummy;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingAura)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
+        }
+
+        public override bool Load()
+        {
+            _spellInfoHeal = Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None);
+            _healEffectDummy = _spellInfoHeal.GetEffect(0);
+            return true;
+        }
+
         void OnTargetSelect(List<WorldObject> targets)
         {
             // Find the best target - prefer players over pets
@@ -580,7 +616,13 @@ namespace Scripts.Spells.Priest
             Unit target = GetHitUnit(); // the target we decided the aura should jump to
 
             if (origCaster)
-                CastPrayerOfMendingAura(origCaster, target, (byte)GetEffectValue());
+            {
+                uint basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
+                Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+                values.Add(SpellValueMod.AuraStack, (byte)GetEffectValue());
+                values.Add(SpellValueMod.BasePoint0, (int)basePoints);
+                origCaster.CastCustomSpell(SpellIds.PrayerOfMendingAura, values, target, TriggerCastFlags.FullMask);
+            }
         }
 
         public override void Register()
