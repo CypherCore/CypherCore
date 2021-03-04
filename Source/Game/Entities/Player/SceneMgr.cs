@@ -68,6 +68,7 @@ namespace Game.Entities
             playScene.SceneScriptPackageID = sceneTemplate.ScenePackageId;
             playScene.Location = position;
             playScene.TransportGUID = GetPlayer().GetTransGUID();
+            playScene.Encrypted = sceneTemplate.Encrypted;
 
             GetPlayer().SendPacket(playScene);
 
@@ -84,6 +85,7 @@ namespace Game.Entities
             sceneTemplate.SceneId = 0;
             sceneTemplate.ScenePackageId = sceneScriptPackageId;
             sceneTemplate.PlaybackFlags = playbackflags;
+            sceneTemplate.Encrypted = false;
             sceneTemplate.ScriptId = 0;
 
             return PlaySceneByTemplate(sceneTemplate, position);

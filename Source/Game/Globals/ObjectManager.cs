@@ -9212,7 +9212,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _sceneTemplateStorage.Clear();
 
-            SQLResult result = DB.World.Query("SELECT SceneId, Flags, ScriptPackageID, ScriptName FROM scene_template");
+            SQLResult result = DB.World.Query("SELECT SceneId, Flags, ScriptPackageID, Encrypted, ScriptName FROM scene_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scene templates. DB table `scene_template` is empty.");
@@ -9227,7 +9227,8 @@ namespace Game
                 sceneTemplate.SceneId = sceneId;
                 sceneTemplate.PlaybackFlags = (SceneFlags)result.Read<uint>(1);
                 sceneTemplate.ScenePackageId = result.Read<uint>(2);
-                sceneTemplate.ScriptId = GetScriptId(result.Read<string>(3));
+                sceneTemplate.Encrypted = result.Read<byte>(3) != 0;
+                sceneTemplate.ScriptId = GetScriptId(result.Read<string>(4));
 
                 _sceneTemplateStorage[sceneId] = sceneTemplate;
 
@@ -11195,6 +11196,7 @@ namespace Game
         public uint SceneId;
         public SceneFlags PlaybackFlags;
         public uint ScenePackageId;
+        public bool Encrypted;
         public uint ScriptId;
     }
 
