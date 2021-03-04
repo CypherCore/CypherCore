@@ -234,9 +234,9 @@ namespace Game.Entities
             }
 
             // get difficulty 1 mode entry
-            CreatureTemplate cinfo = null;
+            CreatureTemplate cInfo = null;
             DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(GetMap().GetDifficultyID());
-            while (cinfo == null && difficultyEntry != null)
+            while (cInfo == null && difficultyEntry != null)
             {
                 int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
                 if (idx == -1)
@@ -244,7 +244,7 @@ namespace Game.Entities
 
                 if (normalInfo.DifficultyEntry[idx] != 0)
                 {
-                    cinfo = Global.ObjectMgr.GetCreatureTemplate(normalInfo.DifficultyEntry[idx]);
+                    cInfo = Global.ObjectMgr.GetCreatureTemplate(normalInfo.DifficultyEntry[idx]);
                     break;
                 }
 
@@ -254,29 +254,29 @@ namespace Game.Entities
                 difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
             }
 
-            if (cinfo == null)
-                cinfo = normalInfo;
+            if (cInfo == null)
+                cInfo = normalInfo;
 
             // Initialize loot duplicate count depending on raid difficulty
             if (GetMap().Is25ManRaid())
                 loot.maxDuplicates = 3;
 
             SetEntry(entry);                                        // normal entry always
-            m_creatureInfo = cinfo;                                 // map mode related always
+            m_creatureInfo = cInfo;                                 // map mode related always
 
             // equal to player Race field, but creature does not have race
             SetRace(0);
-            SetClass((Class)cinfo.UnitClass);
+            SetClass((Class)cInfo.UnitClass);
 
             // Cancel load if no model defined
-            if (cinfo.GetFirstValidModel() == null)
+            if (cInfo.GetFirstValidModel() == null)
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
                 return false;
             }
 
-            CreatureModel model = ObjectManager.ChooseDisplayId(cinfo, data);
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, cinfo);
+            CreatureModel model = ObjectManager.ChooseDisplayId(cInfo, data);
+            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, cInfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
@@ -289,9 +289,9 @@ namespace Game.Entities
             // Load creature equipment
             if (data == null || data.equipmentId == 0)
                 LoadEquipment(); // use default equipment (if available)
-            else if(data != null && data.equipmentId != 0)                // override, 0 means no equipment
+            else
             {
-                m_originalEquipmentId = (sbyte)data.equipmentId;
+                m_originalEquipmentId = data.equipmentId;
                 LoadEquipment(data.equipmentId);
             }
 
@@ -304,17 +304,19 @@ namespace Game.Entities
             SetModHasteRegen(1.0f);
             SetModTimeRate(1.0f);
 
-            SetSpeedRate(UnitMoveType.Walk, cinfo.SpeedWalk);
-            SetSpeedRate(UnitMoveType.Run, cinfo.SpeedRun);
+            SetSpeedRate(UnitMoveType.Walk, cInfo.SpeedWalk);
+            SetSpeedRate(UnitMoveType.Run, cInfo.SpeedRun);
             SetSpeedRate(UnitMoveType.Swim, 1.0f);      // using 1.0 rate
             SetSpeedRate(UnitMoveType.Flight, 1.0f);    // using 1.0 rate
 
-            SetObjectScale(cinfo.Scale);
+            SetObjectScale(cInfo.Scale);
 
-            SetHoverHeight(cinfo.HoverHeight);
+            SetHoverHeight(cInfo.HoverHeight);
+
+            SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
             // checked at loading
-            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cinfo.MovementType);
+            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cInfo.MovementType);
             if (m_respawnradius == 0 && DefaultMovementType == MovementGeneratorType.Random)
                 DefaultMovementType = MovementGeneratorType.Idle;
 
@@ -361,6 +363,8 @@ namespace Game.Entities
             SetDynamicFlags((UnitDynFlags)dynamicFlags);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+
+            SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, cInfo.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, cInfo.BaseAttackTime);

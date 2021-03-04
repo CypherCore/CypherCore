@@ -467,9 +467,9 @@ namespace Game.Entities
                 SetEmoteState(Emote.OneshotNone);
             }
 
-            // delay offhand weapon attack to next attack time
+            // delay offhand weapon attack by 50% of the base attack time
             if (HaveOffhandWeapon() && GetTypeId() != TypeId.Player)
-                ResetAttackTimer(WeaponAttackType.OffAttack);
+                SetAttackTimer(WeaponAttackType.OffAttack, Math.Max(GetAttackTimer(WeaponAttackType.OffAttack), GetAttackTimer(WeaponAttackType.BaseAttack) + MathFunctions.CalculatePct(GetBaseAttackTime(WeaponAttackType.BaseAttack), 50)));
 
             if (meleeAttack)
                 SendMeleeAttackStart(victim);
