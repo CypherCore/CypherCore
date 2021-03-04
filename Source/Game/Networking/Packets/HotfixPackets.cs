@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(TableHash);
             _worldPacket.WriteUInt32(RecordID);
             _worldPacket.WriteUInt32(Timestamp);
-            _worldPacket.WriteBits(Status, 2);
+            _worldPacket.WriteBits((byte)Status, 2);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data.GetData());
         }
@@ -71,7 +71,7 @@ namespace Game.Networking.Packets
         public uint TableHash;
         public uint Timestamp;
         public uint RecordID;
-        public byte Status = 3;
+        public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
 
         public ByteBuffer Data = new ByteBuffer();
     }
