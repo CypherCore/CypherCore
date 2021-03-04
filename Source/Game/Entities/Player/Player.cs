@@ -2165,7 +2165,7 @@ namespace Game.Entities
             }
             else
             {
-                PhasingHandler.SetAlwaysVisible(this, !HasAuraType(AuraType.PhaseAlwaysVisible), false);
+                PhasingHandler.SetAlwaysVisible(this, HasAuraType(AuraType.PhaseAlwaysVisible), false);
 
                 m_ExtraFlags &= ~PlayerExtraFlags.GMOn;
                 SetFactionForRace(GetRace());

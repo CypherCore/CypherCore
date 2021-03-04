@@ -128,7 +128,6 @@ namespace Game
         public void Clear()
         {
             ClearPhases();
-            PersonalGuid.Clear();
             VisibleMapIds.Clear();
             UiMapPhaseIds.Clear();
         }
@@ -136,9 +135,11 @@ namespace Game
         public void ClearPhases()
         {
             Flags &= PhaseShiftFlags.AlwaysVisible | PhaseShiftFlags.Inverse;
+            PersonalGuid.Clear();
             Phases.Clear();
             NonCosmeticReferences = 0;
             CosmeticReferences = 0;
+            PersonalReferences = 0;
             DefaultReferences = 0;
             UpdateUnphasedFlag();
         }
@@ -168,7 +169,6 @@ namespace Game
                 if (phaseShift.Flags.HasFlag(PhaseShiftFlags.Unphased) && !excludedPhaseShift.Flags.HasFlag(PhaseShiftFlags.InverseUnphased))
                     return true;
 
-                var list = excludedPhaseShift.Phases.ToList();
                 foreach (var pair in phaseShift.Phases)
                 {
                     if (pair.Value.Flags.HasAnyFlag(excludePhasesWithFlag))
@@ -201,12 +201,16 @@ namespace Game
                 else
                     DefaultReferences += references;
 
+                if (phaseRef.Flags.HasFlag(PhaseFlags.Personal))
+                    PersonalReferences += references;
+
                 if (CosmeticReferences != 0)
                     Flags |= PhaseShiftFlags.NoCosmetic;
                 else
                     Flags &= ~PhaseShiftFlags.NoCosmetic;
 
                 UpdateUnphasedFlag();
+                UpdatePersonalGuid();
             }
         }
 
@@ -220,6 +224,12 @@ namespace Game
                 Flags |= unphasedFlag;
         }
 
+        void UpdatePersonalGuid()
+        {
+            if (PersonalReferences == 0)
+                PersonalGuid.Clear();
+        }
+
         public bool HasPhase(uint phaseId) { return Phases.ContainsKey(phaseId); }
         public Dictionary<uint, PhaseRef> GetPhases() { return Phases; }
 
@@ -227,9 +237,9 @@ namespace Game
         public Dictionary<uint, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
 
         public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
-        public Dictionary<uint, UiMapPhaseIdRef> GetUiWorldMapAreaIdSwaps() { return UiMapPhaseIds; }
+        public Dictionary<uint, UiMapPhaseIdRef> GetUiMapPhaseIds() { return UiMapPhaseIds; }
 
-        public PhaseShiftFlags Flags;
+        public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public ObjectGuid PersonalGuid;
         public Dictionary<uint, PhaseRef> Phases = new Dictionary<uint, PhaseRef>();
         public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>();
@@ -237,6 +247,7 @@ namespace Game
 
         int NonCosmeticReferences;
         int CosmeticReferences;
+        public int PersonalReferences;
         int DefaultReferences;
         public bool IsDbPhaseShift;
     }

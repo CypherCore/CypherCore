@@ -54,7 +54,15 @@ namespace Game
 
         public static void AddPhase(WorldObject obj, uint phaseId, bool updateVisibility)
         {
+            AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility);
+        }
+        
+        static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility)
+        {
             bool changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
+
+            if (obj.GetPhaseShift().PersonalReferences != 0)
+                obj.GetPhaseShift().PersonalGuid = personalGuid;
 
             Unit unit = obj.ToUnit();
             if (unit)
@@ -62,7 +70,7 @@ namespace Game
                 unit.OnPhaseChange();
                 ForAllControlled(unit, controlled =>
                 {
-                    AddPhase(controlled, phaseId, updateVisibility);
+                    AddPhase(controlled, phaseId, personalGuid, updateVisibility);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -90,6 +98,11 @@ namespace Game
 
         public static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, bool updateVisibility)
         {
+            AddPhaseGroup(obj, phaseGroupId, obj.GetGUID(), updateVisibility);
+        }
+        
+        static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, ObjectGuid personalGuid, bool updateVisibility)
+        {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
             if (phasesInGroup.Empty())
                 return;
@@ -98,13 +111,16 @@ namespace Game
             foreach (uint phaseId in phasesInGroup)
                 changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
 
+            if (obj.GetPhaseShift().PersonalReferences != 0)
+                obj.GetPhaseShift().PersonalGuid = personalGuid;
+
             Unit unit = obj.ToUnit();
             if (unit)
             {
                 unit.OnPhaseChange();
                 ForAllControlled(unit, controlled =>
                 {
-                    AddPhaseGroup(controlled, phaseGroupId, updateVisibility);
+                    AddPhaseGroup(controlled, phaseGroupId, personalGuid, updateVisibility);
                 });
                 unit.RemoveNotOwnSingleTargetAuras(true);
             }
@@ -266,6 +282,9 @@ namespace Game
                         changed = phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null) || changed;
                 }
 
+                if (phaseShift.PersonalReferences != 0)
+                    phaseShift.PersonalGuid = unit.GetGUID();
+
                 if (changed)
                     unit.OnPhaseChange();
 
@@ -276,6 +295,11 @@ namespace Game
 
                 if (changed)
                     unit.RemoveNotOwnSingleTargetAuras(true);
+            }
+            else
+            {
+                if (phaseShift.PersonalReferences != 0)
+                    phaseShift.PersonalGuid = obj.GetGUID();
             }
 
             UpdateVisibilityIfNeeded(obj, true, changed);
@@ -359,6 +383,9 @@ namespace Game
                     }
                 }
             }
+
+            if (phaseShift.PersonalReferences != 0)
+                phaseShift.PersonalGuid = obj.GetGUID();
 
             changed = changed || !newSuppressions.Phases.Empty() || !newSuppressions.VisibleMapIds.Empty();
             foreach (var pair in newSuppressions.Phases)
