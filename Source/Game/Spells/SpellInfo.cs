@@ -99,7 +99,7 @@ namespace Game.Spells
                 SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
                 ProcFlags = (ProcFlags)_options.ProcTypeMask[0];
                 ProcChance = _options.ProcChance;
-                ProcCharges = _options.ProcCharges;
+                ProcCharges = (uint)_options.ProcCharges;
                 ProcCooldown = _options.ProcCategoryRecovery;
                 ProcBasePPM = _ppm != null ? _ppm.BaseProcRate : 0.0f;
                 ProcPPMMods = Global.DB2Mgr.GetSpellProcsPerMinuteMods(_options.SpellProcsPerMinuteID);

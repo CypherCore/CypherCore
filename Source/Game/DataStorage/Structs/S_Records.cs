@@ -172,7 +172,7 @@ namespace Game.DataStorage
         public ushort CumulativeAura;
         public uint ProcCategoryRecovery;
         public byte ProcChance;
-        public uint ProcCharges;
+        public int ProcCharges;
         public ushort SpellProcsPerMinuteID;
         public int[] ProcTypeMask = new int[2];
         public uint SpellID;
