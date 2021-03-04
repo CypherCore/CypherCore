@@ -168,7 +168,7 @@ namespace Game.Spells
             {
                 // Apply periodic time mod
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetId(), SpellModOp.ActivationTime, ref m_period);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ActivationTime, ref m_period);
 
                 if (caster != null)
                 {

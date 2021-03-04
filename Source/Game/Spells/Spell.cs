@@ -68,7 +68,7 @@ namespace Game.Spells
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(info.Id, SpellModOp.StackAmount, ref m_spellValue.AuraStackAmount, this);
+                modOwner.ApplySpellMod(info, SpellModOp.StackAmount, ref m_spellValue.AuraStackAmount, this);
 
             if (!originalCasterGUID.IsEmpty())
                 m_originalCasterGUID = originalCasterGUID;
@@ -1089,7 +1089,7 @@ namespace Game.Spells
             int maxTargets = effect.ChainTargets;
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.JumpTargets, ref maxTargets, this);
+                modOwner.ApplySpellMod(m_spellInfo, SpellModOp.JumpTargets, ref maxTargets, this);
 
             if (maxTargets > 1)
             {
@@ -1411,7 +1411,7 @@ namespace Game.Spells
 
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.JumpDistance, ref jumpRadius, this);
+                modOwner.ApplySpellMod(m_spellInfo, SpellModOp.JumpDistance, ref jumpRadius, this);
 
             // chain lightning/heal spells and similar - allow to jump at larger distance and go out of los
             bool isBouncingFar = (m_spellInfo.HasAttribute(SpellAttr4.AreaTargetChain)
@@ -2367,7 +2367,7 @@ namespace Game.Spells
                 range = m_spellInfo.GetMaxRange(m_spellInfo.IsPositive());
                 Player modOwner = m_caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.Range, ref range, this);
+                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Range, ref range, this);
 
                 // add little tolerance level
                 range += Math.Min(3.0f, range * 0.1f); // 10% but no more than 3.0f
@@ -2938,7 +2938,7 @@ namespace Game.Spells
                     // Apply duration mod
                     Player modOwner = m_caster.GetSpellModOwner();
                     if (modOwner != null)
-                        modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.Duration, ref duration);
+                        modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Duration, ref duration);
                     // Apply haste mods
                     m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
 
@@ -4213,7 +4213,7 @@ namespace Game.Spells
                                         //lower spell cost on fail (by talent aura)
                                         Player modOwner = m_caster.ToPlayer().GetSpellModOwner();
                                         if (modOwner)
-                                            modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.SpellCostRefundOnFail, ref cost.Amount);
+                                            modOwner.ApplySpellMod(m_spellInfo, SpellModOp.SpellCostRefundOnFail, ref cost.Amount);
                                     }
                                     break;
                                 }
@@ -5862,7 +5862,7 @@ namespace Game.Spells
 
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.Range, ref maxRange, this);
+                modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Range, ref maxRange, this);
 
             maxRange += rangeMod;
 
@@ -6437,7 +6437,7 @@ namespace Game.Spells
             //check pushback reduce
             int delaytime = 500;                                  // spellcasting delay is normally 500ms
             int delayReduce = 100;                                // must be initialized to 100 for percent modifiers
-            m_caster.ToPlayer().ApplySpellMod(m_spellInfo.Id, SpellModOp.NotLoseCastingTime, ref delayReduce, this);
+            m_caster.ToPlayer().ApplySpellMod(m_spellInfo, SpellModOp.NotLoseCastingTime, ref delayReduce, this);
             delayReduce += m_caster.GetTotalAuraModifier(AuraType.ReducePushback) - 100;
             if (delayReduce >= 100)
                 return;
@@ -6472,7 +6472,7 @@ namespace Game.Spells
             //check pushback reduce
             int delaytime = MathFunctions.CalculatePct(m_spellInfo.GetDuration(), 25); // channeling delay is normally 25% of its time per hit
             int delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
-            m_caster.ToPlayer().ApplySpellMod(m_spellInfo.Id, SpellModOp.NotLoseCastingTime, ref delayReduce, this);
+            m_caster.ToPlayer().ApplySpellMod(m_spellInfo, SpellModOp.NotLoseCastingTime, ref delayReduce, this);
             delayReduce += m_caster.GetTotalAuraModifier(AuraType.ReducePushback) - 100;
             if (delayReduce >= 100)
                 return;
@@ -7229,7 +7229,7 @@ namespace Game.Spells
                 // gcd modifier auras are applied only to own spells and only players have such mods
                 Player modOwner = m_caster.GetSpellModOwner();
                 if (modOwner)
-                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.GlobalCooldown, ref gcd, this);
+                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.GlobalCooldown, ref gcd, this);
 
                 bool isMeleeOrRangedSpell = m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged ||
                     m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr0.Ability);

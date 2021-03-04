@@ -121,7 +121,7 @@ namespace Game.Entities
                 if (modOwner)
                 {
                     ApCoeffMod *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref ApCoeffMod);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusMultiplier, ref ApCoeffMod);
                     ApCoeffMod /= 100.0f;
                 }
 
@@ -145,7 +145,7 @@ namespace Game.Entities
                 if (modOwner)
                 {
                     coeff *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusMultiplier, ref coeff);
                     coeff /= 100.0f;
                 }
                 DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
@@ -158,9 +158,9 @@ namespace Game.Entities
             if (_modOwner)
             {
                 if (damagetype == DamageEffectType.DOT)
-                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Dot, ref tmpDamage);
+                    _modOwner.ApplySpellMod(spellProto, SpellModOp.Dot, ref tmpDamage);
                 else
-                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Damage, ref tmpDamage);
+                    _modOwner.ApplySpellMod(spellProto, SpellModOp.Damage, ref tmpDamage);
             }
 
             return (uint)Math.Max(tmpDamage, 0.0f);
@@ -321,7 +321,7 @@ namespace Game.Entities
                     if (modOwner)
                     {
                         coeff *= 100.0f;
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.BonusMultiplier, ref coeff);
                         coeff /= 100.0f;
                     }
                     TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
@@ -462,7 +462,7 @@ namespace Game.Entities
                 if (modOwner)
                 {
                     coeff *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusMultiplier, ref coeff);
                     coeff /= 100.0f;
                 }
 
@@ -493,9 +493,9 @@ namespace Game.Entities
             if (_modOwner)
             {
                 if (damagetype == DamageEffectType.DOT)
-                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Dot, ref heal);
+                    _modOwner.ApplySpellMod(spellProto, SpellModOp.Dot, ref heal);
                 else
-                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Damage, ref heal);
+                    _modOwner.ApplySpellMod(spellProto, SpellModOp.Damage, ref heal);
             }
 
             return (uint)Math.Max(heal, 0.0f);
@@ -594,7 +594,7 @@ namespace Game.Entities
                 if (modOwner)
                 {
                     coeff *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusMultiplier, ref coeff);
                     coeff /= 100.0f;
                 }
 
@@ -758,7 +758,7 @@ namespace Game.Entities
             // only players use intelligence for critical chance computations
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(spellProto.Id, SpellModOp.CriticalChance, ref crit_chance);
+                modOwner.ApplySpellMod(spellProto, SpellModOp.CriticalChance, ref crit_chance);
 
             // for this types the bonus was already added in GetUnitCriticalChance, do not add twice
             if (spellProto.DmgClass != SpellDmgClass.Melee && spellProto.DmgClass != SpellDmgClass.Ranged)
@@ -847,7 +847,7 @@ namespace Game.Entities
 
             int roll = RandomHelper.IRand(0, 9999);
 
-            int missChance = (int)(MeleeSpellMissChance(victim, attType, spellInfo.Id) * 100.0f);
+            int missChance = (int)(MeleeSpellMissChance(victim, attType, spellInfo) * 100.0f);
             // Roll miss
             int tmp = missChance;
             if (roll < tmp)
@@ -1010,7 +1010,7 @@ namespace Game.Entities
             // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(spell.Id, SpellModOp.ResistMissChance, ref modHitChance);
+                modOwner.ApplySpellMod(spell, SpellModOp.ResistMissChance, ref modHitChance);
 
             // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
             if (!spell.HasAttribute(SpellAttr3.IgnoreHitResult))
@@ -2002,7 +2002,7 @@ namespace Game.Entities
             // called from caster
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.CastingTime, ref castTime, spell);
+                modOwner.ApplySpellMod(spellInfo, SpellModOp.CastingTime, ref castTime, spell);
 
             if (!(spellInfo.HasAttribute(SpellAttr0.Ability | SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus))
                 && (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
@@ -2023,7 +2023,7 @@ namespace Game.Entities
             // called from caster
             Player modOwner = GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.CastingTime, ref duration, spell);
+                modOwner.ApplySpellMod(spellInfo, SpellModOp.CastingTime, ref duration, spell);
 
             if (!(spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
@@ -2036,23 +2036,23 @@ namespace Game.Entities
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
             {
-                modOwner.ApplySpellMod(spellProto.Id, SpellModOp.AllEffects, ref value);
+                modOwner.ApplySpellMod(spellProto, SpellModOp.AllEffects, ref value);
                 switch (effect_index)
                 {
                     case 0:
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Effect1, ref value);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.Effect1, ref value);
                         break;
                     case 1:
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Effect2, ref value);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.Effect2, ref value);
                         break;
                     case 2:
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Effect3, ref value);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.Effect3, ref value);
                         break;
                     case 3:
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Effect4, ref value);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.Effect4, ref value);
                         break;
                     case 4:
-                        modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Effect5, ref value);
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.Effect5, ref value);
                         break;
                 }
             }
@@ -2211,7 +2211,7 @@ namespace Game.Entities
             // adds additional damage to critBonus (from talents)
             Player modOwner = GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(spellProto.Id, SpellModOp.CritDamageBonus, ref crit_bonus);
+                modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageBonus, ref crit_bonus);
 
             crit_bonus += (int)damage;
 
@@ -2425,7 +2425,7 @@ namespace Game.Entities
                             // Apply crit_damage bonus for melee spells
                             Player modOwner = GetSpellModOwner();
                             if (modOwner != null)
-                                modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.CritDamageBonus, ref crit_bonus);
+                                modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageBonus, ref crit_bonus);
                             damage += (int)crit_bonus;
 
                             // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS

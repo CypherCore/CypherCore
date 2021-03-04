@@ -2583,7 +2583,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(Id, SpellModOp.Range, ref range, spell);
+                    modOwner.ApplySpellMod(this, SpellModOp.Range, ref range, spell);
             }
             return range;
         }
@@ -2596,7 +2596,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner)
-                    modOwner.ApplySpellMod(Id, SpellModOp.Duration, ref duration);
+                    modOwner.ApplySpellMod(this, SpellModOp.Duration, ref duration);
             }
 
             return duration;
@@ -2803,13 +2803,13 @@ namespace Game.Spells
                     switch (power.OrderIndex)
                     {
                         case 0:
-                            modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
+                            modOwner.ApplySpellMod(this, SpellModOp.Cost, ref powerCost, spell);
                             break;
                         case 1:
-                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
+                            modOwner.ApplySpellMod(this, SpellModOp.SpellCost2, ref powerCost, spell);
                             break;
                         case 2:
-                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost3, ref powerCost, spell);
+                            modOwner.ApplySpellMod(this, SpellModOp.SpellCost3, ref powerCost, spell);
                             break;
                         default:
                             break;
@@ -3917,7 +3917,7 @@ namespace Game.Spells
             float multiplier = Amplitude;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
-                modOwner.ApplySpellMod(_spellInfo.Id, SpellModOp.ValueMultiplier, ref multiplier, spell);
+                modOwner.ApplySpellMod(_spellInfo, SpellModOp.ValueMultiplier, ref multiplier, spell);
             return multiplier;
         }
 
@@ -3926,7 +3926,7 @@ namespace Game.Spells
             float multiplierPercent = ChainAmplitude * 100.0f;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
-                modOwner.ApplySpellMod(_spellInfo.Id, SpellModOp.DamageMultiplier, ref multiplierPercent, spell);
+                modOwner.ApplySpellMod(_spellInfo, SpellModOp.DamageMultiplier, ref multiplierPercent, spell);
             return multiplierPercent / 100.0f;
         }
 
@@ -3961,7 +3961,7 @@ namespace Game.Spells
                 radius = Math.Min(radius, entry.RadiusMax);
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(_spellInfo.Id, SpellModOp.Radius, ref radius, spell);
+                    modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref radius, spell);
             }
 
             return radius;

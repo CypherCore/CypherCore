@@ -2682,12 +2682,8 @@ namespace Game.Entities
             }
         }
 
-        public void ApplySpellMod(uint spellId, SpellModOp op, ref int basevalue, Spell spell = null)
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref int basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return;
-
             float totalmul = 1.0f;
             int totalflat = 0;
 
@@ -2781,12 +2777,8 @@ namespace Game.Entities
             basevalue = (int)((float)(basevalue + totalflat) * totalmul);
         }
 
-        public void ApplySpellMod(uint spellId, SpellModOp op, ref uint basevalue, Spell spell = null)
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref uint basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return;
-
             float totalmul = 1.0f;
             int totalflat = 0;
 
@@ -2880,12 +2872,8 @@ namespace Game.Entities
             basevalue = (uint)((float)(basevalue + totalflat) * totalmul);
         }
 
-        public void ApplySpellMod(uint spellId, SpellModOp op, ref float basevalue, Spell spell = null)
+        public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref float basevalue, Spell spell = null)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return;
-
             float totalmul = 1.0f;
             int totalflat = 0;
 
@@ -2978,7 +2966,7 @@ namespace Game.Entities
 
             basevalue = (basevalue + totalflat) * totalmul;
         }
-
+        
         bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
         {
             if (mod == null || spellInfo == null)
@@ -3382,7 +3370,7 @@ namespace Game.Entities
                     }
 
                     // Apply spell mods
-                    ApplySpellMod(pEnchant.EffectArg[s], SpellModOp.ChanceOfSuccess, ref chance);
+                    ApplySpellMod(spellInfo, SpellModOp.ChanceOfSuccess, ref chance);
 
                     // Shiv has 100% chance to apply the poison
                     if (FindCurrentSpellBySpellId(5938) != null && e_slot == (byte)EnchantmentSlot.Temp)

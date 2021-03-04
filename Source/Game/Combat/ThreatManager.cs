@@ -352,7 +352,7 @@ namespace Game.Combat
 
                 Player modOwner = hatedUnit.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(threatSpell.Id, SpellModOp.Threat, ref threat);
+                    modOwner.ApplySpellMod(threatSpell, SpellModOp.Threat, ref threat);
             }
 
             return hatedUnit.ApplyTotalThreatModifier(threat, schoolMask);

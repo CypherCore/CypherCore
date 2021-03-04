@@ -105,14 +105,14 @@ namespace Scripts.World.DuelReset
                 uint totalCooldown = spellInfo.RecoveryTime;
                 uint categoryCooldown = spellInfo.CategoryRecoveryTime;
 
-                player.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref totalCooldown, null);
+                player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref totalCooldown, null);
 
                 int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
                     totalCooldown += (uint)(cooldownMod * Time.InMilliseconds);
 
                 if (!spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
-                    player.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref categoryCooldown, null);
+                    player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref categoryCooldown, null);
 
                 return remainingCooldown > 0
                     && !pair.Value.OnHold

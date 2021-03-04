@@ -703,7 +703,7 @@ namespace Game.Spells
 
             // IsPermanent() checks max duration (which we are supposed to calculate here)
             if (maxDuration != -1 && modOwner != null)
-                modOwner.ApplySpellMod(GetId(), SpellModOp.Duration, ref maxDuration);
+                modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Duration, ref maxDuration);
             return maxDuration;
         }
 
@@ -716,7 +716,7 @@ namespace Game.Spells
                 {
                     Player modOwner = caster.GetSpellModOwner();
                     if (modOwner)
-                        modOwner.ApplySpellMod(GetId(), SpellModOp.Duration, ref duration);
+                        modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Duration, ref duration);
                 }
             }
 
@@ -870,7 +870,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.MaxStackAmount, ref maxStackAmount);
+                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.MaxStackAmount, ref maxStackAmount);
             }
             return maxStackAmount;
         }
@@ -1054,7 +1054,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetId(), SpellModOp.ResistDispelChance, ref resistChance);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ResistDispelChance, ref resistChance);
             }
 
             resistChance = resistChance < 0 ? 0 : resistChance;
@@ -1836,7 +1836,7 @@ namespace Game.Spells
                 // apply chance modifer aura, applies also to ppm chance (see improved judgement of light spell)
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetId(), SpellModOp.ChanceOfSuccess, ref chance);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ChanceOfSuccess, ref chance);
             }
 
             // proc chance is reduced by an additional 3.333% per level past 60
@@ -2350,7 +2350,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetId(), SpellModOp.Charges, ref maxProcCharges);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Charges, ref maxProcCharges);
             }
             return (byte)maxProcCharges;
         }

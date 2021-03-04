@@ -717,22 +717,22 @@ namespace Game.Entities
         public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
-        float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, uint spellId)
+        float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
             //calculate miss chance
             float missChance = victim.GetUnitMissChance(attType);
 
             // melee attacks while dual wielding have +19% chance to miss
-            if (spellId == 0 && HaveOffhandWeapon() && !IsInFeralForm())
+            if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm())
                 missChance += 19.0f;
 
             // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
             float resistMissChance = 100.0f;
-            if (spellId != 0)
+            if (spellInfo != null)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellId, SpellModOp.ResistMissChance, ref resistMissChance);
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.ResistMissChance, ref resistMissChance);
             }
 
             missChance += resistMissChance - 100.0f;

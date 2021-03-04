@@ -1772,7 +1772,7 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.ProcPerMinute, ref PPM);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.ProcPerMinute, ref PPM);
             }
 
             return (float)Math.Floor((WeaponSpeed * PPM) / 600.0f);   // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
@@ -2049,7 +2049,7 @@ namespace Game.Entities
                 return MeleeHitOutcome.Evade;
 
             // Miss chance based on melee
-            int miss_chance = (int)(MeleeSpellMissChance(victim, attType, 0) * 100.0f);
+            int miss_chance = (int)(MeleeSpellMissChance(victim, attType, null) * 100.0f);
 
             // Critical hit chance
             int crit_chance = (int)(GetUnitCriticalChance(attType, victim) + GetTotalAuraModifier(AuraType.ModAutoAttackCritChance) * 100.0f);
@@ -2737,7 +2737,7 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.IgnoreArmor, ref armor);
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.IgnoreArmor, ref armor);
             }
 
             var resIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
@@ -2874,7 +2874,7 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Damage, ref tmpDamage);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.Damage, ref tmpDamage);
             }
 
             // bonus result can be negative

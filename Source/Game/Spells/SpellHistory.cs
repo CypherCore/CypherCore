@@ -361,10 +361,10 @@ namespace Game.Spells
                 if (modOwner)
                 {
                     if (cooldown >= 0)
-                        modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref cooldown, spell);
+                        modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref cooldown, spell);
 
                     if (categoryCooldown >= 0 && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
-                        modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref categoryCooldown, spell);
+                        modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref categoryCooldown, spell);
                 }
 
                 if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
