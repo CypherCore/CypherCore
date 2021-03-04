@@ -215,8 +215,8 @@ namespace Game.DataStorage
                     foreach (var shapeshiftOptionsForModel in shapeshiftFormByModel.LookupByKey(model.Id))
                     {
                         ShapeshiftFormModelData data = new ShapeshiftFormModelData();
-                        data.OptionID = shapeshiftOptionsForModel.Item2;
-                        data.Choices = _chrCustomizationChoicesByOption.LookupByKey(shapeshiftOptionsForModel.Item2);
+                        data.OptionID = shapeshiftOptionsForModel.Item1;
+                        data.Choices = _chrCustomizationChoicesByOption.LookupByKey(shapeshiftOptionsForModel.Item1);
                         if (!data.Choices.Empty())
                         {
                             for (int i = 0; i < data.Choices.Count; ++i)
