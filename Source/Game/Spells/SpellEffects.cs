@@ -716,7 +716,6 @@ namespace Game.Spells
 
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
         [SpellEffectHandler(SpellEffectName.ApplyAuraOnPet)]
-        [SpellEffectHandler(SpellEffectName.Unk202)]
         void EffectApplyAura(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -736,6 +735,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPet)]
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraRaid)]
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPartyNonrandom)]
+        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraSummons)]
         void EffectApplyAreaAura(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
@@ -2177,6 +2177,9 @@ namespace Game.Spells
         void EffectEnchantItemTmp(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (itemTarget == null)
                 return;
 
             Player player = m_caster.ToPlayer();

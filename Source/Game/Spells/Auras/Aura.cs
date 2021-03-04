@@ -2602,7 +2602,7 @@ namespace Game.Spells
 
                 List<Unit> targetList = new List<Unit>();
                 // non-area aura
-                if (effect.Effect == SpellEffectName.ApplyAura || effect.Effect == SpellEffectName.Unk202)
+                if (effect.Effect == SpellEffectName.ApplyAura)
                 {
                     targetList.Add(GetUnitOwner());
                 }
@@ -2655,6 +2655,14 @@ namespace Game.Spells
                                     Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
                                     if (pet != null)
                                         targetList.Add(pet);
+                                    break;
+                                }
+                            case SpellEffectName.ApplyAreaAuraSummons:
+                                {
+                                    targetList.Add(GetUnitOwner());
+                                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), SpellTargetCheckTypes.Summoned, null, SpellTargetObjectTypes.Unit);
+                                    UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
+                                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
                                     break;
                                 }
                         }

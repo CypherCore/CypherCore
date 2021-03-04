@@ -2209,7 +2209,7 @@ namespace Framework.Constants
         Unk199 = 199,
         HealBattlepetPct = 200, // NYI
         EnableBattlePets = 201, // NYI
-        Unk202 = 202,
+        ApplyAreaAuraSummons = 202,
         Unk203 = 203,
         ChangeBattlepetQuality = 204,
         LaunchQuestChoice = 205,
