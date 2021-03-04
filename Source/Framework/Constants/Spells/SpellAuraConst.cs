@@ -375,7 +375,7 @@ namespace Framework.Constants
         ModCurrencyCategoryGainPct = 351, //NYI
         Unk352 = 352,
         ModCamouflage = 353,  // Nyi
-        ModHealingDonePctVersusTargetHealth = 354,  // NYI Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
+        ModHealingDonePctVersusTargetHealth = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
         ModCastingSpeed = 355,  // NYI
         ProvideTotemCategory = 356,
         EnableBoss1UnitFrame = 357,

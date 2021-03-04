@@ -533,6 +533,12 @@ namespace Game.Entities
             // Healing done percent
             DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
 
+            // bonus from missing health of target
+            float healthPctDiff = 100.0f - victim.GetHealthPct();
+            foreach (AuraEffect healingDonePctVsTargetHealth in GetAuraEffectsByType(AuraType.ModHealingDonePctVersusTargetHealth))
+                if (healingDonePctVsTargetHealth.IsAffectingSpell(spellProto))
+                    MathFunctions.AddPct(ref DoneTotalMod, MathFunctions.CalculatePct((float)healingDonePctVsTargetHealth.GetAmount(), healthPctDiff));
+
             return DoneTotalMod;
         }
 
