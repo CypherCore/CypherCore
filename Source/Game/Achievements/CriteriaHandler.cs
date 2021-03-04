@@ -2221,6 +2221,8 @@ namespace Game.Achievements
                             return false;
                         break;
                     }
+                case CriteriaAdditionalCondition.UsedLevelBoostLessThanTwoHoursAgo: // 188
+                    return false;
                 case CriteriaAdditionalCondition.HonorLevel: // 193
                     if (referencePlayer.GetHonorLevel() != reqValue)
                         return false;

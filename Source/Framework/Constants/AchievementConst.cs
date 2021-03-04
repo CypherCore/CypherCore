@@ -291,7 +291,7 @@ namespace Framework.Constants
         //Unk185                     = 185, // Nyi
         //Unk186                     = 186, // Nyi
         GarrisonFollowerType = 187, // Nyi
-        //Unk188                     = 188, // Nyi
+        UsedLevelBoostLessThanTwoHoursAgo = 188, // Nyi
         //Unk189                     = 189, // Nyi
         //Unk190                     = 190, // Nyi
         //Unk191                     = 191, // Nyi
