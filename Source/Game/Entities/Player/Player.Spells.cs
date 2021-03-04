@@ -2687,94 +2687,9 @@ namespace Game.Entities
             float totalmul = 1.0f;
             int totalflat = 0;
 
-            // Drop charges for triggering spells instead of triggered ones
-            if (m_spellModTakingSpell != null)
-                spell = m_spellModTakingSpell;
+            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            switch (op)
-            {
-                // special case, if a mod makes spell instant, only consume that mod
-                case SpellModOp.CastingTime:
-                    {
-                        SpellModifier modInstantSpell = null;
-                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Pct])
-                        {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                                continue;
-
-                            if (basevalue < 10000 && mod.value <= -100)
-                            {
-                                modInstantSpell = mod;
-                                break;
-                            }
-                        }
-
-                        if (modInstantSpell != null)
-                        {
-                            ApplyModToSpell(modInstantSpell, spell);
-                            basevalue = 0;
-                            return;
-                        }
-                        break;
-                    }
-                // special case if two mods apply 100% critical chance, only consume one
-                case SpellModOp.CriticalChance:
-                    {
-                        SpellModifier modCritical = null;
-                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Flat])
-                        {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                                continue;
-
-                            if (mod.value >= 100)
-                            {
-                                modCritical = mod;
-                                break;
-                            }
-                        }
-
-                        if (modCritical != null)
-                        {
-                            ApplyModToSpell(modCritical, spell);
-                            basevalue = 100;
-                            return;
-                        }
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Flat])
-            {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                    continue;
-
-                totalflat += mod.value;
-                ApplyModToSpell(mod, spell);
-            }
-
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Pct])
-            {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                    continue;
-
-                // skip percent mods for null basevalue (most important for spell mods with charges)
-                if (basevalue + totalflat == 0)
-                    continue;
-
-                // special case (skip > 10sec spell casts for instant cast setting)
-                if (op == SpellModOp.CastingTime)
-                {
-                    if (basevalue >= 10000 && mod.value <= -100)
-                        continue;
-                }
-
-                totalmul *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
-                ApplyModToSpell(mod, spell);
-            }
-
-            basevalue = (int)((float)(basevalue + totalflat) * totalmul);
+            basevalue = (int)(((float)basevalue + totalflat) * totalmul);
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref uint basevalue, Spell spell = null)
@@ -2782,94 +2697,9 @@ namespace Game.Entities
             float totalmul = 1.0f;
             int totalflat = 0;
 
-            // Drop charges for triggering spells instead of triggered ones
-            if (m_spellModTakingSpell != null)
-                spell = m_spellModTakingSpell;
+            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            switch (op)
-            {
-                // special case, if a mod makes spell instant, only consume that mod
-                case SpellModOp.CastingTime:
-                    {
-                        SpellModifier modInstantSpell = null;
-                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Pct])
-                        {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                                continue;
-
-                            if (basevalue < 10000 && mod.value <= -100)
-                            {
-                                modInstantSpell = mod;
-                                break;
-                            }
-                        }
-
-                        if (modInstantSpell != null)
-                        {
-                            ApplyModToSpell(modInstantSpell, spell);
-                            basevalue = 0;
-                            return;
-                        }
-                        break;
-                    }
-                // special case if two mods apply 100% critical chance, only consume one
-                case SpellModOp.CriticalChance:
-                    {
-                        SpellModifier modCritical = null;
-                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Flat])
-                        {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                                continue;
-
-                            if (mod.value >= 100)
-                            {
-                                modCritical = mod;
-                                break;
-                            }
-                        }
-
-                        if (modCritical != null)
-                        {
-                            ApplyModToSpell(modCritical, spell);
-                            basevalue = 100;
-                            return;
-                        }
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Flat])
-            {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                    continue;
-
-                totalflat += mod.value;
-                ApplyModToSpell(mod, spell);
-            }
-
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Pct])
-            {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
-                    continue;
-
-                // skip percent mods for null basevalue (most important for spell mods with charges)
-                if (basevalue + totalflat == 0)
-                    continue;
-
-                // special case (skip > 10sec spell casts for instant cast setting)
-                if (op == SpellModOp.CastingTime)
-                {
-                    if (basevalue >= 10000 && mod.value <= -100)
-                        continue;
-                }
-
-                totalmul *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
-                ApplyModToSpell(mod, spell);
-            }
-
-            basevalue = (uint)((float)(basevalue + totalflat) * totalmul);
+            basevalue = (uint)(((float)basevalue + totalflat) * totalmul);
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref float basevalue, Spell spell = null)
@@ -2877,8 +2707,18 @@ namespace Game.Entities
             float totalmul = 1.0f;
             int totalflat = 0;
 
+            GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
+
+            basevalue = (float)(basevalue + totalflat) * totalmul;
+        }
+        
+        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T : IComparable
+        {
+            flat = 0;
+            pct = 1.0f;
+
             // Drop charges for triggering spells instead of triggered ones
-            if (m_spellModTakingSpell != null)
+            if (m_spellModTakingSpell)
                 spell = m_spellModTakingSpell;
 
             switch (op)
@@ -2892,7 +2732,7 @@ namespace Game.Entities
                             if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                                 continue;
 
-                            if (basevalue < 10000f && mod.value <= -100)
+                            if (baseValue.CompareTo(10000) < 0 && mod.value <= -100)
                             {
                                 modInstantSpell = mod;
                                 break;
@@ -2902,7 +2742,7 @@ namespace Game.Entities
                         if (modInstantSpell != null)
                         {
                             ApplyModToSpell(modInstantSpell, spell);
-                            basevalue = 0f;
+                            pct = 0.0f;
                             return;
                         }
                         break;
@@ -2926,7 +2766,7 @@ namespace Game.Entities
                         if (modCritical != null)
                         {
                             ApplyModToSpell(modCritical, spell);
-                            basevalue = 100f;
+                            flat = 100;
                             return;
                         }
                         break;
@@ -2935,38 +2775,36 @@ namespace Game.Entities
                     break;
             }
 
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Flat])
+            foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Flat])
             {
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
-                totalflat += mod.value;
+                flat += mod.value;
                 ApplyModToSpell(mod, spell);
             }
 
-            foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Pct])
+            foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Pct])
             {
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
                 // skip percent mods for null basevalue (most important for spell mods with charges)
-                if (basevalue + totalflat == 0)
+                if (baseValue + (dynamic)flat == 0)
                     continue;
 
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.CastingTime)
                 {
-                    if (basevalue >= 10000 && mod.value <= -100)
+                    if (baseValue.CompareTo(10000) > 0 && mod.value <= -100)
                         continue;
                 }
 
-                totalmul *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
+                pct *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
                 ApplyModToSpell(mod, spell);
             }
-
-            basevalue = (basevalue + totalflat) * totalmul;
         }
-        
+
         bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
         {
             if (mod == null || spellInfo == null)

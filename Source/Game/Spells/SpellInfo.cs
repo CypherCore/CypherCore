@@ -2675,11 +2675,220 @@ namespace Game.Spells
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
         }
 
+        SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        {
+            var spellPowerRecord = PowerCosts.First(spellPowerEntry =>
+            {
+                return spellPowerEntry.PowerType == powerType;
+            });
+
+            if (spellPowerRecord == null)
+                return null;
+
+            return CalcPowerCost(spellPowerRecord, optionalCost, caster, schoolMask, spell);
+        }
+
+        SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        {
+            SpellPowerCost cost = new();
+
+            // Spell drain all exist power on cast (Only paladin lay of Hands)
+            if (HasAttribute(SpellAttr1.DrainAllPower))
+            {
+                // If power type - health drain all
+                if (power.PowerType == PowerType.Health)
+                {
+                    cost.Power = PowerType.Health;
+                    cost.Amount = (int)caster.GetHealth();
+                    return cost;
+                }
+                // Else drain all power
+                if (power.PowerType < PowerType.Max)
+                {
+                    cost.Power = power.PowerType;
+                    cost.Amount = caster.GetPower(cost.Power);
+                    return cost;
+                }
+
+                Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                return default;
+            }
+
+            // Base powerCost
+            int powerCost = 0;
+            if (!optionalCost)
+            {
+                powerCost = power.ManaCost;
+                // PCT cost from total amount
+                if (power.PowerCostPct != 0)
+                {
+                    switch (power.PowerType)
+                    {
+                        // health as power used
+                        case PowerType.Health:
+                            if (MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f))
+                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
+                            else
+                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
+                            break;
+                        case PowerType.Mana:
+                            powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
+                            break;
+                        case PowerType.AlternatePower:
+                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                            return null;
+                        default:
+                            {
+                                PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
+                                if (powerTypeEntry != null)
+                                {
+                                    powerCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
+                                    break;
+                                }
+
+                                Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                                return default;
+                            }
+                    }
+                }
+            }
+            else
+            {
+                powerCost = (int)power.OptionalCost;
+                powerCost += caster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
+                {
+                    return aurEff.GetMiscValue() == (int)power.PowerType && aurEff.IsAffectingSpell(this);
+                });
+            }
+
+            bool initiallyNegative = powerCost < 0;
+
+            // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
+            if (HasAttribute(SpellAttr4.SpellVsExtendCost))
+            {
+                uint speed = 0;
+                SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(caster.GetShapeshiftForm());
+                if (ss != null)
+                    speed = ss.CombatRoundTime;
+                else
+                {
+                    WeaponAttackType slot = WeaponAttackType.BaseAttack;
+                    if (!HasAttribute(SpellAttr3.MainHand) && HasAttribute(SpellAttr3.ReqOffhand))
+                        slot = WeaponAttackType.OffAttack;
+
+                    speed = caster.GetBaseAttackTime(slot);
+                }
+
+                powerCost += (int)speed / 100;
+            }
+
+            if (power.PowerType != PowerType.Health)
+            {
+                if (!optionalCost)
+                {
+                    // Flat mod from caster auras by spell school and power type
+                    foreach (AuraEffect aura in caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
+                    {
+                        if ((aura.GetMiscValue() & (int)schoolMask) == 0)
+                            continue;
+
+                        if ((aura.GetMiscValueB() & (1 << (int)power.PowerType)) == 0)
+                            continue;
+
+                        powerCost += aura.GetAmount();
+                    }
+                }
+
+                // PCT mod from user auras by spell school and power type
+                foreach (var schoolCostPct in caster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
+                {
+                    if ((schoolCostPct.GetMiscValue() & (int)schoolMask) == 0)
+                        continue;
+
+                    if ((schoolCostPct.GetMiscValueB() & (1 << (int)power.PowerType)) == 0)
+                        continue;
+
+                    powerCost += MathFunctions.CalculatePct(powerCost, schoolCostPct.GetAmount());
+                }
+            }
+
+            // Apply cost mod by spell
+            Player modOwner = caster.GetSpellModOwner();
+            if (modOwner != null)
+            {
+                SpellModOp mod = SpellModOp.Max;
+                switch (power.OrderIndex)
+                {
+                    case 0:
+                        mod = SpellModOp.Cost;
+                        break;
+                    case 1:
+                        mod = SpellModOp.SpellCost2;
+                        break;
+                    case 2:
+                        mod = SpellModOp.SpellCost3;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (mod != SpellModOp.Max)
+                {
+                    if (!optionalCost)
+                        modOwner.ApplySpellMod(this, mod, ref powerCost, spell);
+                    else
+                    {
+                        // optional cost ignores flat modifiers
+                        int flatMod = 0;
+                        float pctMod = 1.0f;
+                        modOwner.GetSpellModValues(this, mod, spell, powerCost, ref flatMod, ref pctMod);
+                        powerCost = (int)(powerCost * pctMod);
+                    }
+                }
+            }
+
+            if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
+            {
+                if (HasAttribute(SpellAttr0.LevelDamageCalculation))
+                {
+                    GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
+                    GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
+                    if (spellScaler != null && casterScaler != null)
+                        powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
+                }
+            }
+
+            if (power.PowerType == PowerType.Mana)
+                powerCost = (int)((float)powerCost * (1.0f + caster.m_unitData.ManaCostMultiplier));
+
+            // power cost cannot become negative if initially positive
+            if (initiallyNegative != (powerCost < 0))
+                powerCost = 0;
+
+            cost.Power = power.PowerType;
+            cost.Amount = powerCost;
+            return cost;
+        }
+
         public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             List<SpellPowerCost> costs = new List<SpellPowerCost>();
+            
+            SpellPowerCost getOrCreatePowerCost(PowerType powerType)
+            {
+                var itr = costs.Find(cost =>
+                {
+                    return cost.Power == powerType;
+                });
+                if (itr != null)
+                    return itr;
 
-            int healthCost = 0;
+                SpellPowerCost cost = new();
+                cost.Power = powerType;
+                cost.Amount = 0;
+                costs.Add(cost);
+                return costs.Last();
+            }
 
             foreach (SpellPowerRecord power in PowerCosts)
             {
@@ -2689,197 +2898,20 @@ namespace Game.Spells
                 if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                     continue;
 
-                // Spell drain all exist power on cast (Only paladin lay of Hands)
-                if (HasAttribute(SpellAttr1.DrainAllPower))
+                SpellPowerCost cost = CalcPowerCost(power, false, caster, schoolMask, spell);
+                if (cost != null)
+                    getOrCreatePowerCost(cost.Power).Amount += cost.Amount;
+
+                SpellPowerCost optionalCost = CalcPowerCost(power, true, caster, schoolMask, spell);
+                if (optionalCost != null)
                 {
-                    // If power type - health drain all
-                    if (power.PowerType == PowerType.Health)
-                    {
-                        healthCost = (int)caster.GetHealth();
-                        continue;
-                    }
-                    // Else drain all power
-                    if (power.PowerType < PowerType.Max)
-                    {
-                        SpellPowerCost cost = new SpellPowerCost();
-                        cost.Power = power.PowerType;
-                        cost.Amount = caster.GetPower(cost.Power);
-                        costs.Add(cost);
-                        continue;
-                    }
-
-                    Log.outError(LogFilter.Spells, "SpellInfo.GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
-                    continue;
-                }
-
-                // Base powerCost
-                int powerCost = power.ManaCost;
-                bool initiallyNegative = powerCost < 0;
-                // PCT cost from total amount
-                if (power.PowerCostPct != 0)
-                {
-                    switch (power.PowerType)
-                    {
-                        // health as power used
-                        case PowerType.Health:
-                            powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
-                            break;
-                        case PowerType.Mana:
-                            powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
-                            break;
-                        case PowerType.Rage:
-                        case PowerType.Focus:
-                        case PowerType.Energy:
-                            powerCost += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerCostPct);
-                            break;
-                        case PowerType.Runes:
-                        case PowerType.RunicPower:
-                            Log.outDebug(LogFilter.Spells, "GetCostDataList: Not implemented yet!");
-                            break;
-                        default:
-                            Log.outError(LogFilter.Spells, "GetCostDataList: Unknown power type '{0}' in spell {1}", power.PowerType, Id);
-                            continue;
-                    }
-                }
-
-                if (power.PowerCostMaxPct != 0)
-                    healthCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
-
-                int optionalCost = (int)power.OptionalCost;
-                optionalCost += caster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
-                {
-                    return aurEff.GetMiscValue() == (int)power.PowerType
-                        && aurEff.IsAffectingSpell(this);
-                });
-
-                if (optionalCost != 0)
-                {
-                    int remainingPower = caster.GetPower(power.PowerType) - powerCost;
-                    powerCost += MathFunctions.RoundToInterval(ref remainingPower, 0, optionalCost);
-                }
-
-                if (power.PowerType != PowerType.Health)
-                {
-                    // Flat mod from caster auras by spell school and power type
-                    int flatMod = 0;
-                    var auras = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool);
-                    foreach (var eff in auras)
-                    {
-                        if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                            continue;
-
-                        if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
-                            continue;
-
-                        flatMod += eff.GetAmount();
-                    }
-
-                    powerCost += flatMod;
-                }
-
-                // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-                if (HasAttribute(SpellAttr4.SpellVsExtendCost))
-                {
-                    uint speed = 0;
-                    SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(caster.GetShapeshiftForm());
-                    if (ss != null)
-                        speed = ss.CombatRoundTime;
-                    else
-                    {
-                        WeaponAttackType slot = WeaponAttackType.BaseAttack;
-                        if (!HasAttribute(SpellAttr3.MainHand) && HasAttribute(SpellAttr3.ReqOffhand))
-                            slot = WeaponAttackType.OffAttack;
-
-                        speed = caster.GetBaseAttackTime(slot);
-                    }
-
-                    powerCost += (int)(speed / 100);
-                }
-
-                // Apply cost mod by spell
-                Player modOwner = caster.GetSpellModOwner();
-                if (modOwner)
-                {
-                    switch (power.OrderIndex)
-                    {
-                        case 0:
-                            modOwner.ApplySpellMod(this, SpellModOp.Cost, ref powerCost, spell);
-                            break;
-                        case 1:
-                            modOwner.ApplySpellMod(this, SpellModOp.SpellCost2, ref powerCost, spell);
-                            break;
-                        case 2:
-                            modOwner.ApplySpellMod(this, SpellModOp.SpellCost3, ref powerCost, spell);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
-                {
-                    if (HasAttribute(SpellAttr0.LevelDamageCalculation))
-                    {
-                        GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
-                        GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
-                        if (spellScaler != null && casterScaler != null)
-                            powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
-                    }
-                }
-
-                // PCT mod from user auras by spell school and power type
-                var aurasPct = caster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct);
-                foreach (var eff in aurasPct)
-                {
-                    if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                        continue;
-
-                    if (!Convert.ToBoolean(eff.GetMiscValueB() & (1 << (int)power.PowerType)))
-                        continue;
-
-                    powerCost += MathFunctions.CalculatePct(powerCost, eff.GetAmount());
-                }
-
-                if (power.PowerType == PowerType.Mana)
-                    powerCost = (int)((float)powerCost * (1.0f + caster.m_unitData.ManaCostMultiplier));
-                else if (power.PowerType == PowerType.Health)
-                {
-                    healthCost += powerCost;
-                    continue;
-                }
-
-                // power cost cannot become negative if initially positive
-                if (initiallyNegative != (powerCost < 0))
-                    powerCost = 0;
-
-                bool found = false;
-                for (var i = 0; i < costs.Count; ++i)
-                {
-                    var cost = costs[i];
-                    if (cost.Power == power.PowerType)
-                    {
-                        cost.Amount += powerCost;
-                        found = true;
-                    }
-                }
-
-                if (!found)
-                {
-                    SpellPowerCost cost = new SpellPowerCost();
-                    cost.Power = power.PowerType;
-                    cost.Amount = powerCost;
-                    costs.Add(cost);
+                    SpellPowerCost cost1 = getOrCreatePowerCost(optionalCost.Power);
+                    int remainingPower = caster.GetPower(optionalCost.Power) - cost1.Amount;
+                    if (remainingPower > 0)
+                        cost1.Amount += Math.Min(optionalCost.Amount, remainingPower);
                 }
             }
-
-            if (healthCost > 0)
-            {
-                SpellPowerCost cost = new SpellPowerCost();
-                cost.Power = PowerType.Health;
-                cost.Amount = healthCost;
-                costs.Add(cost);
-            }
-
+            
             return costs;
         }
 
