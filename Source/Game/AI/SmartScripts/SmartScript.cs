@@ -3162,9 +3162,11 @@ namespace Game.AI
                         if (me.IsWithinDistInMap(unit, range) && me.IsWithinLOSInMap(unit))
                         {
                             //if friendly event&&who is not hostile OR hostile event&&who is hostile
-                            if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) ||
-                                (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
+                            if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) || (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
                             {
+                                if (e.Event.los.playerOnly && !unit.IsTypeId(TypeId.Player))
+                                    return;
+
                                 RecalcTimer(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax);
                                 ProcessAction(e, unit);
                             }
@@ -3182,9 +3184,11 @@ namespace Game.AI
                         if (me.IsWithinDistInMap(unit, range) && me.IsWithinLOSInMap(unit))
                         {
                             //if friendly event&&who is not hostile OR hostile event&&who is hostile
-                            if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) ||
-                                (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
+                            if ((e.Event.los.noHostile != 0 && !me.IsHostileTo(unit)) || (e.Event.los.noHostile == 0 && me.IsHostileTo(unit)))
                             {
+                                if (e.Event.los.playerOnly && !unit.IsTypeId(TypeId.Player))
+                                    return;
+
                                 RecalcTimer(e, e.Event.los.cooldownMin, e.Event.los.cooldownMax);
                                 ProcessAction(e, unit);
                             }

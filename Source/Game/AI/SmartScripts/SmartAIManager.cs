@@ -1938,6 +1938,7 @@ namespace Game.AI
             public uint maxDist;
             public uint cooldownMin;
             public uint cooldownMax;
+            public uint playerOnly;
         }
         public struct Respawn
         {
