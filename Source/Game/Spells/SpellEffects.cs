@@ -4881,7 +4881,7 @@ namespace Game.Spells
             FactionTemplateRecord casterFaction = caster.GetFactionTemplateEntry();
             FactionTemplateRecord targetFaction = CliDB.FactionTemplateStorage.LookupByKey(gameObjTarget.GetFaction());
             // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
-            if (targetFaction == null || (casterFaction != null && targetFaction != null && !casterFaction.IsFriendlyTo(targetFaction)))
+            if (targetFaction == null || (casterFaction != null && !casterFaction.IsFriendlyTo(targetFaction)))
                 gameObjTarget.ModifyHealth(-damage, caster, GetSpellInfo().Id);
         }
 

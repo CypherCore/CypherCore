@@ -898,7 +898,7 @@ namespace Game.Entities
                     break;
                 }
             }
-            if (item != null && duration > 0)
+            if (duration > 0)
             {
                 GetSession().SendItemEnchantTimeUpdate(GetGUID(), item.GetGUID(), (uint)slot, duration / 1000);
                 m_enchantDuration.Add(new EnchantDuration(item, slot, duration));
@@ -2202,7 +2202,7 @@ namespace Game.Entities
                         }
 
                         // now re-learn if need re-activate
-                        if (cur_active && !prevSpell.Active && learnLowRank)
+                        if (!prevSpell.Active && learnLowRank)
                         {
                             if (AddSpell(prev_id, true, false, prevSpell.Dependent, prevSpell.Disabled))
                             {

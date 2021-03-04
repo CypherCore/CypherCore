@@ -2687,7 +2687,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Player, "Player (guidlow {0}) have invalid coordinates (MapId: {1} {2}). Teleport to default race/class locations.", guid.ToString(), mapId, GetPosition());
                 RelocateToHomebind();
             }
-            else if (mapEntry != null && mapEntry.IsBattlegroundOrArena())
+            else if (mapEntry.IsBattlegroundOrArena())
             {
                 Battleground currentBg = null;
                 if (m_bgData.bgInstanceID != 0)                                                //saved in Battleground

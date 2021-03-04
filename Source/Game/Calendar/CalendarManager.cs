@@ -627,7 +627,7 @@ namespace Game
             {
                 Player player = Global.ObjAccessor.FindPlayer(playerCalendarEvent.InviteeGuid);
                 if (player)
-                    if (!calendarEvent.IsGuildEvent() || (calendarEvent.IsGuildEvent() && player.GetGuildId() != calendarEvent.GuildId))
+                    if (!calendarEvent.IsGuildEvent() || player.GetGuildId() != calendarEvent.GuildId)
                         player.SendPacket(packet);
             }
         }

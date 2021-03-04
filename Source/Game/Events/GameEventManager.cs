@@ -420,7 +420,6 @@ namespace Game
                         short event_id = result.Read<byte>(1);
                         int internal_event_id = mGameEvent.Length + event_id - 1;
 
-
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
                         {

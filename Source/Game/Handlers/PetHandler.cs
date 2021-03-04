@@ -187,7 +187,7 @@ namespace Game
 
                                 pet.ClearUnitState(UnitState.Follow);
                                 // This is true if pet has no target or has target but targets differs.
-                                if (pet.GetVictim() != TargetUnit || (pet.GetVictim() == TargetUnit && !pet.GetCharmInfo().IsCommandAttack()))
+                                if (pet.GetVictim() != TargetUnit || !pet.GetCharmInfo().IsCommandAttack())
                                 {
                                     if (pet.GetVictim())
                                         pet.AttackStop();

@@ -2460,7 +2460,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!released && IsBagPos(dst) && pDstItem != null)
+                if (!released && IsBagPos(dst))
                 {
                     Bag bag = pDstItem.ToBag();
                     for (byte i = 0; i < bag.GetBagSize(); ++i)

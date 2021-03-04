@@ -4626,7 +4626,7 @@ namespace Game.Entities
                 if (pet == null)
                     return null;
 
-                if (IsInWorld && pet != null)
+                if (IsInWorld)
                     return pet;
             }
 
