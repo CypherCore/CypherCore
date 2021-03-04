@@ -977,6 +977,10 @@ namespace Game.Spells
             if (HasEffectType(AuraType.ModCharm) || HasEffectType(AuraType.AoeCharm))
                 return false;
 
+            // no battleground player positions
+            if (HasEffectType(AuraType.BattleGroundPlayerPosition) || HasEffectType(AuraType.BattleGroundPlayerPositionFactional))
+                return false;
+
             // Incanter's Absorbtion - considering the minimal duration and problems with aura stacking
             // we skip saving this aura
             // Also for some reason other auras put as MultiSlot crash core on keeping them after restart,
