@@ -42,10 +42,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.Portal)]
         [SpellEffectHandler(SpellEffectName.BindSight)]
         [SpellEffectHandler(SpellEffectName.CallPet)]
-        [SpellEffectHandler(SpellEffectName.Effect177)]
         [SpellEffectHandler(SpellEffectName.PortalTeleport)]
-        [SpellEffectHandler(SpellEffectName.RitualBase)]
-        [SpellEffectHandler(SpellEffectName.RitualActivatePortal)]
         [SpellEffectHandler(SpellEffectName.Dodge)]
         [SpellEffectHandler(SpellEffectName.Evade)]
         [SpellEffectHandler(SpellEffectName.Weapon)]
@@ -1890,13 +1887,6 @@ namespace Game.Spells
                 unitTarget.ToCreature().UpdateDamagePhysical(WeaponAttackType.OffAttack);
         }
 
-        [SpellEffectHandler(SpellEffectName.Pull)]
-        void EffectPull(uint effIndex)
-        {
-            // @todo create a proper pull towards distract spell center for distract
-            EffectUnused(effIndex);
-        }
-
         [SpellEffectHandler(SpellEffectName.Distract)]
         void EffectDistract(uint effIndex)
         {
@@ -3269,24 +3259,6 @@ namespace Game.Spells
                 if (m_caster.ToPlayer().HasSpell(58426))
                     m_caster.CastSpell(m_caster, 58427, true);
             }
-        }
-
-        [SpellEffectHandler(SpellEffectName.AddComboPoints)]
-        void EffectAddComboPoints(uint effIndex)
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (unitTarget == null)
-                return;
-
-            if (m_caster.m_playerMovingMe == null)
-                return;
-
-            if (damage <= 0)
-                return;
-
-            m_caster.m_playerMovingMe.AddComboPoints((sbyte)damage, this);
         }
 
         [SpellEffectHandler(SpellEffectName.Duel)]
@@ -4761,45 +4733,6 @@ namespace Game.Spells
                 }
                 else
                     player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, player.GetGUID(), true, false);
-            }
-        }
-
-        [SpellEffectHandler(SpellEffectName.ActivateRune)]
-        void EffectActivateRune(uint effIndex)
-        {
-            if (effectHandleMode != SpellEffectHandleMode.Launch)
-                return;
-
-            if (!m_caster.IsTypeId(TypeId.Player))
-                return;
-
-            Player player = m_caster.ToPlayer();
-
-            if (player.GetClass() != Class.Deathknight)
-                return;
-
-            // needed later
-            m_runesState = m_caster.ToPlayer().GetRunesState();
-
-            uint count = (uint)damage;
-            if (count == 0)
-                count = 1;
-
-            // first restore fully depleted runes
-            for (byte j = 0; j < player.GetMaxPower(PowerType.Runes) && count > 0; ++j)
-            {
-                if (player.GetRuneCooldown(j) == player.GetRuneBaseCooldown())
-                {
-                    player.SetRuneCooldown(j, 0);
-                    --count;
-                }
-            }
-
-            // then the rest if we still got something left
-            for (byte j = 0; j < player.GetMaxPower(PowerType.Runes) && count > 0; ++j)
-            {
-                player.SetRuneCooldown(j, 0);
-                --count;
             }
         }
 

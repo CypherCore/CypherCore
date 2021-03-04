@@ -3699,9 +3699,6 @@ namespace Game.Spells
                 castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
             }
 
-            if (m_spellInfo.HasEffect(SpellEffectName.ActivateRune))
-                castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
-
             if (m_targets.HasTraj())
                 castFlags |= SpellCastFlags.AdjustMissile;
 

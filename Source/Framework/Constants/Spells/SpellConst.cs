@@ -2012,7 +2012,7 @@ namespace Framework.Constants
         SchoolDamage = 2,
         Dummy = 3,
         PortalTeleport = 4, // Unused (4.3.4)
-        TeleportUnitsOld = 5, // Unused (7.0.3)
+        Effect5 = 5,
         ApplyAura = 6,
         EnvironmentalDamage = 7,
         PowerDrain = 8,
@@ -2020,9 +2020,9 @@ namespace Framework.Constants
         Heal = 10,
         Bind = 11,
         Portal = 12,
-        RitualBase = 13, // Unused (4.3.4)
+        TeleportToReturnPoint = 13, // MiscValueA = spellid of the aura holding destination
         IncreseCurrencyCap = 14,
-        RitualActivatePortal = 15, // Unused (4.3.4)
+        TeleportWithSpellVisualKitLoadingScreen = 15, // MiscValueA = delay, MiscValueB = SpellVisualKitId
         QuestComplete = 16,
         WeaponDamageNoSchool = 17,
         Resurrect = 18,
@@ -2077,7 +2077,7 @@ namespace Framework.Constants
         HealMaxHealth = 67,
         InterruptCast = 68,
         Distract = 69,
-        Pull = 70,
+        CompleteAndRewardWorldQuest = 70,
         Pickpocket = 71,
         AddFarsight = 72,
         UntrainTalents = 73,
@@ -2087,7 +2087,7 @@ namespace Framework.Constants
         ScriptEffect = 77,
         Attack = 78,
         Sanctuary = 79,
-        AddComboPoints = 80,
+        ModifyFollowerItemLevel = 80,
         PushAbilityToActionBar = 81,
         BindSight = 82,
         Duel = 83,
@@ -2120,7 +2120,7 @@ namespace Framework.Constants
         DestroyAllTotems = 110,
         DurabilityDamage = 111,
         Effect112 = 112,
-        Effect113 = 113,
+        CancelConversation = 113,
         AttackMe = 114,
         DurabilityDamagePct = 115,
         SkinPlayerCorpse = 116,
@@ -2129,7 +2129,7 @@ namespace Framework.Constants
         ApplyAreaAuraPet = 119,
         TeleportGraveyard = 120,
         NormalizedWeaponDmg = 121,
-        Effect122 = 122, // Unused (4.3.4)
+        Effect122 = 122,
         SendTaxi = 123,
         PullTowards = 124,
         ModifyThreatPercent = 125,
@@ -2153,7 +2153,7 @@ namespace Framework.Constants
         ApplyAreaAuraOwner = 143,
         KnockBackDest = 144,
         PullTowardsDest = 145,
-        ActivateRune = 146,
+        RestoreGarrisonTroopVitality = 146,
         QuestFail = 147,
         TriggerMissileSpellWithValue = 148,
         ChargeDest = 149,
@@ -2182,10 +2182,10 @@ namespace Framework.Constants
         ResurrectWithAura = 172, // Aoe Ressurection
         UnlockGuildVaultTab = 173, // Guild Tab Unlocked (Guild Perk)
         ApplyAuraOnPet = 174,
-        Effect175 = 175, // Unused (4.3.4)
+        Effect175 = 175,
         Sanctuary2 = 176,
-        Effect177 = 177,
-        Effect178 = 178, // Unused (4.3.4)
+        DespawnPersistentAreaAura = 177,
+        Effect178 = 178,
         CreateAreaTrigger = 179,
         UpdateAreatrigger = 180,
         RemoveTalent = 181,
@@ -2195,32 +2195,32 @@ namespace Framework.Constants
         Unk185 = 185,
         Unk186 = 186,
         RandomizeArchaeologyDigsites = 187,
-        Unk188 = 188,
+        SummonStabledPetAsGuardian = 188,
         Loot = 189, // NYI, lootid in MiscValue ?
-        Unk190 = 190,
+        ChangePartyMembers = 190, // MiscValueA = 1 is join, MiscValueA = 0 is leave - used by NPCs
         TeleportToDigsite = 191,
         UncageBattlepet = 192,
         StartPetBattle = 193,
         Unk194 = 194,
-        Unk195 = 195,
-        Unk196 = 196,
-        Unk197 = 197,
+        PlaySceneScriptPackage = 195,
+        CreateSceneObject = 196, // MiscValueA = SceneId, goes into guid as entry, SceneScriptPackageId goes into ObjectData::Entry
+        CreatePersonalSceneObject = 197, // MiscValueA = SceneId, goes into guid as entry, SceneScriptPackageId goes into ObjectData::Entry
         PlayScene = 198, // NYI
-        Unk199 = 199,
+        DespawnSummon = 199, // MiscValueA is some kind of unknown internal id
         HealBattlepetPct = 200, // NYI
         EnableBattlePets = 201, // NYI
         ApplyAreaAuraSummons = 202,
-        Unk203 = 203,
+        RemoveAura2 = 203,
         ChangeBattlepetQuality = 204,
         LaunchQuestChoice = 205,
         AlterItem = 206,
         Unk207 = 207,
-        Unk208 = 208,
+        SetReputation = 208,
         Unk209 = 209,
         LearnGarrisonBuilding = 210,
         LearnGarrisonSpecialization = 211,
-        Unk212 = 212,
-        Unk213 = 213,
+        RemoveAuraBySApellLabel = 212,
+        JumpDest2 = 213,
         CreateGarrison = 214,
         UpgradeCharacterSpells = 215,
         CreateShipment = 216,
@@ -2228,16 +2228,16 @@ namespace Framework.Constants
         Unk218 = 218,
         CreateConversation = 219,
         AddGarrisonFollower = 220,
-        Unk221 = 221,
+        AddGarrisonMission = 221,
         CreateHeirloomItem = 222,
         ChangeItemBonuses = 223,
         ActivateGarrisonBuilding = 224,
         GrantBattlepetLevel = 225,
-        Unk226 = 226,
+        TriggerActionSet = 226,
         TeleportToLfgDungeon = 227,
         Unk228 = 228,
         SetFollowerQuality = 229,
-        IncreaseFollowerItemLevel = 230,
+        Unk230 = 230,
         IncreaseFollowerExperience = 231,
         RemovePhase = 232,
         RandomizeFollowerAbilities = 233,
@@ -2254,14 +2254,14 @@ namespace Framework.Constants
         LearnFollowerAbility = 244,
         UpgradeHeirloom = 245,
         FinishGarrisonMission = 246,
-        AddGarrisonMission = 247,
+        AddGarrisonMissionSet = 247,
         FinishShipment = 248,
         ForceEquipItem = 249,
         TakeScreenshot = 250, // Serverside marker for selfie screenshot - achievement check
         SetGarrisonCacheSize = 251,
         TeleportUnits = 252,
         GiveHonor = 253,
-        Unk254 = 254,
+        JumpCharge = 254,
         LearnTransmogSet = 255,
         Unk256 = 256,
         Unk257 = 257,
@@ -2273,10 +2273,10 @@ namespace Framework.Constants
         RepairItem = 263,
         RemoveGem = 264,
         LearnAzeriteEssencePower = 265,
-        Unk266 = 266,
-        Unk267 = 267,
+        SetItemBonusListGroupEntry = 266, // Sets item bonuses to specific ItemBonusListGroupEntry id
+        CreatePrivateConversation = 267,
         ApplyMountEquipment = 268,
-        UpgradeItem = 269,
+        IncreaseItemBonusListGroupStep = 269, // Advances ItemBonusListGroup bonuses to next rank
         Unk270 = 270,
         ApplyAreaAuraPartyNonrandom = 271,
         SetCovenant = 272,
@@ -2290,7 +2290,7 @@ namespace Framework.Constants
         Unk280 = 280,
         LearnSoulbindConduit = 281,
         ConvertItemsToCurrency = 282,
-        Unk283 = 283,
+        CompleteCampaign = 283, // Flags all quests as completed that are assigned to campaign (MiscValueA)
         TotalSpellEffects
     }
 

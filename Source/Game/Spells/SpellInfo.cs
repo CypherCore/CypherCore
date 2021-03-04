@@ -3768,7 +3768,7 @@ namespace Game.Spells
 
         bool IsFarDestTargetEffect()
         {
-            return Effect == SpellEffectName.TeleportUnitsOld;
+            return Effect == SpellEffectName.TeleportUnits;
         }
 
         public bool IsUnitOwnedAuraEffect()
@@ -4149,7 +4149,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 2 SPELL_EFFECT_SCHOOL_DAMAGE
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 3 SPELL_EFFECT_DUMMY
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 4 SPELL_EFFECT_PORTAL_TELEPORT
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 5 SPELL_EFFECT_TELEPORT_UNITS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 5 SPELL_EFFECT_5
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 6 SPELL_EFFECT_APPLY_AURA
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 8 SPELL_EFFECT_POWER_DRAIN
@@ -4157,9 +4157,9 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 10 SPELL_EFFECT_HEAL
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 11 SPELL_EFFECT_BIND
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 12 SPELL_EFFECT_PORTAL
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 13 SPELL_EFFECT_RITUAL_BASE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 14 SPELL_EFFECT_RITUAL_SPECIALIZE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 15 SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 13 SPELL_EFFECT_TELEPORT_TO_RETURN_POINT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 14 SPELL_EFFECT_INCREASE_CURRENCY_CAP
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 15 SPELL_EFFECT_TELEPORT_WITH_SPELL_VISUAL_KIT_LOADING_SCREEN
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 16 SPELL_EFFECT_QUEST_COMPLETE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 17 SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.CorpseAlly), // 18 SPELL_EFFECT_RESURRECT
@@ -4196,7 +4196,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 49 SPELL_EFFECT_DETECT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 50 SPELL_EFFECT_TRANS_DOOR
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 51 SPELL_EFFECT_FORCE_CRITICAL_HIT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 52 SPELL_EFFECT_GUARANTEE_HIT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 52 SPELL_EFFECT_SET_MAX_BATTLE_PET_COUNT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 53 SPELL_EFFECT_ENCHANT_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 54 SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 55 SPELL_EFFECT_TAMECREATURE
@@ -4214,7 +4214,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 67 SPELL_EFFECT_HEAL_MAX_HEALTH
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 68 SPELL_EFFECT_INTERRUPT_CAST
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 69 SPELL_EFFECT_DISTRACT
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 70 SPELL_EFFECT_PULL
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 70 SPELL_EFFECT_COMPLETE_AND_REWARD_WORLD_QUEST
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 71 SPELL_EFFECT_PICKPOCKET
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 72 SPELL_EFFECT_ADD_FARSIGHT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 73 SPELL_EFFECT_UNTRAIN_TALENTS
@@ -4224,8 +4224,8 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 77 SPELL_EFFECT_SCRIPT_EFFECT
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 78 SPELL_EFFECT_ATTACK
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 79 SPELL_EFFECT_SANCTUARY
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 80 SPELL_EFFECT_ADD_COMBO_POINTS
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 81 SPELL_EFFECT_CREATE_HOUSE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 80 SPELL_EFFECT_MODIFY_FOLLOWER_ITEM_LEVEL
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 81 SPELL_EFFECT_PUSH_ABILITY_TO_ACTION_BAR
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 82 SPELL_EFFECT_BIND_SIGHT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 83 SPELL_EFFECT_DUEL
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 84 SPELL_EFFECT_STUCK
@@ -4249,15 +4249,15 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 102 SPELL_EFFECT_DISMISS_PET
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 103 SPELL_EFFECT_REPUTATION
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 104 SPELL_EFFECT_SUMMON_OBJECT_SLOT1
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 105 SPELL_EFFECT_SUMMON_OBJECT_SLOT2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 105 SPELL_EFFECT_SURVEY
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 106 SPELL_EFFECT_CHANGE_RAID_MARKER
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 107 SPELL_EFFECT_SUMMON_OBJECT_SLOT4
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 107 SPELL_EFFECT_SHOW_CORPSE_LOOT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 108 SPELL_EFFECT_DISPEL_MECHANIC
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 109 SPELL_EFFECT_SUMMON_DEAD_PET
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 109 SPELL_EFFECT_RESURRECT_PET
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 111 SPELL_EFFECT_DURABILITY_DAMAGE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 112 SPELL_EFFECT_112
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.CorpseAlly), // 113 SPELL_EFFECT_RESURRECT_NEW
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 113 SPELL_EFFECT_CANCEL_CONVERSATION
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 114 SPELL_EFFECT_ATTACK_ME
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.CorpseEnemy), // 116 SPELL_EFFECT_SKIN_PLAYER_CORPSE
@@ -4290,7 +4290,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 144 SPELL_EFFECT_KNOCK_BACK_DEST
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 145 SPELL_EFFECT_PULL_TOWARDS_DEST
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 146 SPELL_EFFECT_ACTIVATE_RUNE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 146 SPELL_EFFECT_RESTORE_GARRISON_TROOP_VITALITY
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 147 SPELL_EFFECT_QUEST_FAIL
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 149 SPELL_EFFECT_CHARGE_DEST
@@ -4301,104 +4301,104 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 154 SPELL_EFFECT_DISCOVER_TAXI
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Unit), // 155 SPELL_EFFECT_TITAN_GRIP
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 156 SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 157 SPELL_EFFECT_CREATE_ITEM_2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 157 SPELL_EFFECT_CREATE_LOOT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 158 SPELL_EFFECT_MILLING
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 159 SPELL_EFFECT_ALLOW_RENAME_PET
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 160 SPELL_EFFECT_160
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 161 SPELL_EFFECT_TALENT_SPEC_COUNT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 162 SPELL_EFFECT_TALENT_SPEC_SELECT
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 163 SPELL_EFFECT_163
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 163 SPELL_EFFECT_OBLITERATE_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 164 SPELL_EFFECT_REMOVE_AURA
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 165 SPELL_EFFECT_165
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT
             new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 166 SPELL_EFFECT_GIVE_CURRENCY
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 167 SPELL_EFFECT_167
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 168 SPELL_EFFECT_168
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 167 SPELL_EFFECT_UPDATE_PLAYER_PHASE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 168 SPELL_EFFECT_ALLOW_CONTROL_PET
             new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 169 SPELL_EFFECT_DESTROY_ITEM
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 170 SPELL_EFFECT_170
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 170 SPELL_EFFECT_UPDATE_ZONE_AURAS_AND_PHASES
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 171 SPELL_EFFECT_SUMMON_PERSONAL_GAMEOBJECT
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 172 SPELL_EFFECT_172
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.CorpseAlly), // 172 SPELL_EFFECT_RESURRECT_WITH_AURA
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 174 SPELL_EFFECT_174
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 174 SPELL_EFFECT_APPLY_AURA_ON_PET
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 175 SPELL_EFFECT_175
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 176 SPELL_EFFECT_176
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 177 SPELL_EFFECT_177
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 176 SPELL_EFFECT_SANCTUARY_2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 177 SPELL_EFFECT_DESPAWN_PERSISTENT_AREA_AURA
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 178 SPELL_EFFECT_178
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 179 SPELL_EFFECT_CREATE_AREATRIGGER
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 180 SPELL_EFFECT_UPDATE_AREATRIGGER
             new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 181 SPELL_EFFECT_REMOVE_TALENT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 182 SPELL_EFFECT_182
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 182 SPELL_EFFECT_DESPAWN_AREATRIGGER
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 183 SPELL_EFFECT_183
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 184 SPELL_EFFECT_REPUTATION_2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 184 SPELL_EFFECT_REPUTATION_2
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 185 SPELL_EFFECT_185
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 186 SPELL_EFFECT_186
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 187 SPELL_EFFECT_RANDOMIZE_ARCHAEOLOGY_DIGSITES
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 188 SPELL_EFFECT_188
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 189 SPELL_EFFECT_LOOT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 190 SPELL_EFFECT_190
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 191 SPELL_EFFECT_TELEPORT_TO_DIGSITE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 192 SPELL_EFFECT_192
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 193 SPELL_EFFECT_193
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 187 SPELL_EFFECT_RANDOMIZE_ARCHAEOLOGY_DIGSITES
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Dest), // 188 SPELL_EFFECT_SUMMON_STABLED_PET_AS_GUARDIAN
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 189 SPELL_EFFECT_LOOT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 190 SPELL_EFFECT_CHANGE_PARTY_MEMBERS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 191 SPELL_EFFECT_TELEPORT_TO_DIGSITE
+            new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 192 SPELL_EFFECT_UNCAGE_BATTLEPET
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 193 SPELL_EFFECT_START_PET_BATTLE
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 194 SPELL_EFFECT_194
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 195 SPELL_EFFECT_195
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 196 SPELL_EFFECT_196
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 197 SPELL_EFFECT_197
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 195 SPELL_EFFECT_PLAY_SCENE_SCRIPT_PACKAGE
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 196 SPELL_EFFECT_CREATE_SCENE_OBJECT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 197 SPELL_EFFECT_CREATE_PERSONAL_SCENE_OBJECT
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 198 SPELL_EFFECT_PLAY_SCENE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 199 SPELL_EFFECT_199
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 199 SPELL_EFFECT_DESPAWN_SUMMON
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 200 SPELL_EFFECT_HEAL_BATTLEPET_PCT
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 201 SPELL_EFFECT_ENABLE_BATTLE_PETS
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 202 SPELL_EFFECT_202
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 203 SPELL_EFFECT_203
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 204 SPELL_EFFECT_CHANGE_BATTLEPET_QUALITY
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 205 SPELL_EFFECT_LAUNCH_QUEST_CHOICE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 202 SPELL_EFFECT_APPLY_AREA_AURA_SUMMONS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 203 SPELL_EFFECT_REMOVE_AURA_2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 204 SPELL_EFFECT_CHANGE_BATTLEPET_QUALITY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 205 SPELL_EFFECT_LAUNCH_QUEST_CHOICE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 206 SPELL_EFFECT_ALTER_ITEM
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 207 SPELL_EFFECT_LAUNCH_QUEST_TASK
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 208 SPELL_EFFECT_208
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 207 SPELL_EFFECT_LAUNCH_QUEST_TASK
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 208 SPELL_EFFECT_SET_REPUTATION
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 209 SPELL_EFFECT_209
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 210 SPELL_EFFECT_LEARN_GARRISON_BUILDING
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 211 SPELL_EFFECT_LEARN_GARRISON_SPECIALIZATION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 212 SPELL_EFFECT_212
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 213 SPELL_EFFECT_213
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 214 SPELL_EFFECT_CREATE_GARRISON
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 215 SPELL_EFFECT_UPGRADE_CHARACTER_SPELLS
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 216 SPELL_EFFECT_CREATE_SHIPMENT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 217 SPELL_EFFECT_UPGRADE_GARRISON
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 210 SPELL_EFFECT_LEARN_GARRISON_BUILDING
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 211 SPELL_EFFECT_LEARN_GARRISON_SPECIALIZATION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 212 SPELL_EFFECT_REMOVE_AURA_BY_SPELL_LABEL
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 213 SPELL_EFFECT_JUMP_DEST_2
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 214 SPELL_EFFECT_CREATE_GARRISON
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 215 SPELL_EFFECT_UPGRADE_CHARACTER_SPELLS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 216 SPELL_EFFECT_CREATE_SHIPMENT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 217 SPELL_EFFECT_UPGRADE_GARRISON
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 218 SPELL_EFFECT_218
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 219 SPELL_EFFECT_CREATE_CONVERSATION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 220 SPELL_EFFECT_ADD_GARRISON_FOLLOWER
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 221 SPELL_EFFECT_221
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 222 SPELL_EFFECT_CREATE_HEIRLOOM_ITEM
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 223 SPELL_EFFECT_CHANGE_ITEM_BONUSES
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 224 SPELL_EFFECT_ACTIVATE_GARRISON_BUILDING
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 225 SPELL_EFFECT_GRANT_BATTLEPET_LEVEL
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 226 SPELL_EFFECT_226
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 227 SPELL_EFFECT_227
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 219 SPELL_EFFECT_CREATE_CONVERSATION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 220 SPELL_EFFECT_ADD_GARRISON_FOLLOWER
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 221 SPELL_EFFECT_ADD_GARRISON_MISSION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 222 SPELL_EFFECT_CREATE_HEIRLOOM_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 223 SPELL_EFFECT_CHANGE_ITEM_BONUSES
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 224 SPELL_EFFECT_ACTIVATE_GARRISON_BUILDING
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 225 SPELL_EFFECT_GRANT_BATTLEPET_LEVEL
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 226 SPELL_EFFECT_TRIGGER_ACTION_SET
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 227 SPELL_EFFECT_TELEPORT_TO_LFG_DUNGEON
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 228 SPELL_EFFECT_228
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 229 SPELL_EFFECT_SET_FOLLOWER_QUALITY
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 230 SPELL_EFFECT_INCREASE_FOLLOWER_ITEM_LEVEL
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 231 SPELL_EFFECT_INCREASE_FOLLOWER_EXPERIENCE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 232 SPELL_EFFECT_REMOVE_PHASE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 230 SPELL_EFFECT_230
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 231 SPELL_EFFECT_INCREASE_FOLLOWER_EXPERIENCE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 232 SPELL_EFFECT_REMOVE_PHASE
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 233 SPELL_EFFECT_RANDOMIZE_FOLLOWER_ABILITIES
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 234 SPELL_EFFECT_234
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 234 SPELL_EFFECT_234
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 235 SPELL_EFFECT_235
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 236 SPELL_EFFECT_GIVE_EXPERIENCE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 237 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 238 SPELL_EFFECT_INCREASE_SKILL
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 239 SPELL_EFFECT_END_GARRISON_BUILDING_CONSTRUCTION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 240 SPELL_EFFECT_240
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 236 SPELL_EFFECT_GIVE_EXPERIENCE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 237 SPELL_EFFECT_GIVE_RESTED_EXPERIENCE_BONUS
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 238 SPELL_EFFECT_INCREASE_SKILL
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 239 SPELL_EFFECT_END_GARRISON_BUILDING_CONSTRUCTION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 240 SPELL_EFFECT_GIVE_ARTIFACT_POWER
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 241 SPELL_EFFECT_241
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 242 SPELL_EFFECT_242
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 242 SPELL_EFFECT_GIVE_ARTIFACT_POWER_NO_BONUS
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 243 SPELL_EFFECT_APPLY_ENCHANT_ILLUSION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 244 SPELL_EFFECT_LEARN_FOLLOWER_ABILITY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 244 SPELL_EFFECT_LEARN_FOLLOWER_ABILITY
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 245 SPELL_EFFECT_UPGRADE_HEIRLOOM
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 246 SPELL_EFFECT_FINISH_GARRISON_MISSION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 247 SPELL_EFFECT_ADD_GARRISON_MISSION
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 247 SPELL_EFFECT_ADD_GARRISON_MISSION_SET
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 248 SPELL_EFFECT_FINISH_SHIPMENT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 249 SPELL_EFFECT_249
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 250 SPELL_EFFECT_TAKE_SCREENSHOT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 251 SPELL_EFFECT_SET_GARRISON_CACHE_SIZE
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 252 SPELL_EFFECT_252
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 249 SPELL_EFFECT_FORCE_EQUIP_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 250 SPELL_EFFECT_TAKE_SCREENSHOT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 251 SPELL_EFFECT_SET_GARRISON_CACHE_SIZE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 252 SPELL_EFFECT_TELEPORT_UNITS
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 253 SPELL_EFFECT_GIVE_HONOR
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 254 SPELL_EFFECT_254
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 254 SPELL_EFFECT_JUMP_CHARGE
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 255 SPELL_EFFECT_LEARN_TRANSMOG_SET
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 256 SPELL_EFFECT_256
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 257 SPELL_EFFECT_257
@@ -4409,25 +4409,25 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 262 SPELL_EFFECT_262
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 263 SPELL_EFFECT_REPAIR_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 264 SPELL_EFFECT_REMOVE_GEM
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 265 SPELL_EFFECT_LEARN_AZERITE_ESSENCE_POWER
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 266 SPELL_EFFECT_266
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 267 SPELL_EFFECT_267
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 268 SPELL_EFFECT_APPLY_MOUNT_EQUIPMENT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 269 SPELL_EFFECT_UPGRADE_ITEM
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 270 SPELL_EFFECT_270
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 271 SPELL_EFFECT_APPLY_AREA_AURA_PARTY_NONRANDOM
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 272 SPELL_EFFECT_SET_COVENANT
-            new StaticData(SpellEffectImplicitTargetTypes.Caster,   SpellTargetObjectTypes.Unit), // 273 SPELL_EFFECT_CRAFT_RUNEFORGE_LEGENDARY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 265 SPELL_EFFECT_LEARN_AZERITE_ESSENCE_POWER
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 266 SPELL_EFFECT_SET_ITEM_BONUS_LIST_GROUP_ENTRY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 267 SPELL_EFFECT_CREATE_PRIVATE_CONVERSATION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 268 SPELL_EFFECT_APPLY_MOUNT_EQUIPMENT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 269 SPELL_EFFECT_INCREASE_ITEM_BONUS_LIST_GROUP_STEP
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 270 SPELL_EFFECT_270
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 271 SPELL_EFFECT_APPLY_AREA_AURA_PARTY_NONRANDOM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 272 SPELL_EFFECT_SET_COVENANT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 273 SPELL_EFFECT_CRAFT_RUNEFORGE_LEGENDARY
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 274 SPELL_EFFECT_274
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 275 SPELL_EFFECT_275
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 276 SPELL_EFFECT_LEARN_TRANSMOG_ILLUSION
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 277 SPELL_EFFECT_SET_CHROMIE_TIME
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 278 SPELL_EFFECT_270
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 279 SPELL_EFFECT_LEARN_GARR_TALENT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 280 SPELL_EFFECT_270
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 281 SPELL_EFFECT_LEARN_SOULBIND_CONDUIT
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 282 SPELL_EFFECT_CONVERT_ITEMS_TO_CURRENCY
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 283 SPELL_EFFECT_283
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 276 SPELL_EFFECT_LEARN_TRANSMOG_ILLUSION
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 277 SPELL_EFFECT_SET_CHROMIE_TIME
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 278 SPELL_EFFECT_278
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 279 SPELL_EFFECT_LEARN_GARR_TALENT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 280 SPELL_EFFECT_280
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 281 SPELL_EFFECT_LEARN_SOULBIND_CONDUIT
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 282 SPELL_EFFECT_CONVERT_ITEMS_TO_CURRENCY
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 283 SPELL_EFFECT_COMPLETE_CAMPAIGN
         };
 
         #region Fields
