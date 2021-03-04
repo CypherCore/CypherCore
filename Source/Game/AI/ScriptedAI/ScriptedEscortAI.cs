@@ -496,8 +496,8 @@ namespace Game.AI
         public void SetDespawnAtEnd(bool despawn) { _despawnAtEnd = despawn; }
         public void SetDespawnAtFar(bool despawn) { _despawnAtFar = despawn; }
 
-        bool GetAttack() { return _activeAttacker; } // used in EnterEvadeMode override
-        void SetCanAttack(bool attack) { _activeAttacker = attack; }
+        public bool IsActiveAttacker() { return _activeAttacker; } // used in EnterEvadeMode override
+        public void SetActiveAttacker(bool attack) { _activeAttacker = attack; }
 
         ObjectGuid GetEventStarterGUID() { return _playerGUID; }
 
