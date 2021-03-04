@@ -481,22 +481,26 @@ namespace Game
             return map.GetId();
         }
 
-        public static void SetAlwaysVisible(PhaseShift phaseShift, bool apply)
+        public static void SetAlwaysVisible(WorldObject obj, bool apply, bool updateVisibility)
         {
             if (apply)
-                phaseShift.Flags |= PhaseShiftFlags.AlwaysVisible;
+                obj.GetPhaseShift().Flags |= PhaseShiftFlags.AlwaysVisible;
             else
-                phaseShift.Flags &= ~PhaseShiftFlags.AlwaysVisible;
+                obj.GetPhaseShift().Flags &= ~PhaseShiftFlags.AlwaysVisible;
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, true);
         }
 
-        public static void SetInversed(PhaseShift phaseShift, bool apply)
+        public static void SetInversed(WorldObject obj, bool apply, bool updateVisibility)
         {
             if (apply)
-                phaseShift.Flags |= PhaseShiftFlags.Inverse;
+                obj.GetPhaseShift().Flags |= PhaseShiftFlags.Inverse;
             else
-                phaseShift.Flags &= ~PhaseShiftFlags.Inverse;
+                obj.GetPhaseShift().Flags &= ~PhaseShiftFlags.Inverse;
 
-            phaseShift.UpdateUnphasedFlag();
+            obj.GetPhaseShift().UpdateUnphasedFlag();
+
+            UpdateVisibilityIfNeeded(obj, updateVisibility, true);
         }
 
         public static void PrintToChat(CommandHandler chat, PhaseShift phaseShift)

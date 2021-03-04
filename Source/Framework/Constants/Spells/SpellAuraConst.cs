@@ -348,7 +348,7 @@ namespace Framework.Constants
         OverrideUnlockedAzeriteEssenceRank = 324,  // testing aura
         LearnPvpTalent = 325,  // NYI
         PhaseGroup = 326,  // Phase Related
-        PhaseAlwaysVisible = 327,  // NYI - sets PhaseShiftFlags::AlwaysVisible
+        PhaseAlwaysVisible = 327,  // Sets PhaseShiftFlags::AlwaysVisible
         TriggerSpellOnPowerPct = 328,
         ModPowerGainPct = 329,
         CastWhileWalking = 330,

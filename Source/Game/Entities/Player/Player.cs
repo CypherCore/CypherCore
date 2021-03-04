@@ -2160,12 +2160,12 @@ namespace Game.Entities
                 GetHostileRefManager().SetOnlineOfflineState(false);
                 CombatStopWithPets();
 
-                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), true);
+                PhasingHandler.SetAlwaysVisible(this, true, false);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, GetSession().GetSecurity());
             }
             else
             {
-                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), false);
+                PhasingHandler.SetAlwaysVisible(this, !HasAuraType(AuraType.PhaseAlwaysVisible), false);
 
                 m_ExtraFlags &= ~PlayerExtraFlags.GMOn;
                 SetFactionForRace(GetRace());

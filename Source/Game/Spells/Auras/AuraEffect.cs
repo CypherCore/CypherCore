@@ -1273,6 +1273,25 @@ namespace Game.Spells
                 PhasingHandler.RemovePhaseGroup(target, (uint)GetMiscValueB(), true);
         }
 
+        [AuraEffectHandler(AuraType.PhaseAlwaysVisible)]
+        void HandlePhaseAlwaysVisible(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (!apply)
+                PhasingHandler.SetAlwaysVisible(target, true, true);
+            else
+            {
+                if (target.HasAuraType(AuraType.PhaseAlwaysVisible) || (target.IsPlayer() && target.ToPlayer().IsGameMaster()))
+                    return;
+
+                PhasingHandler.SetAlwaysVisible(target, false, true);
+            }
+        }
+        
         /**********************/
         /***   UNIT MODEL   ***/
         /**********************/
