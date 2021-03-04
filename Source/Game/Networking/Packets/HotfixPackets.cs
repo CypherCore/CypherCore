@@ -144,21 +144,13 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 Record.Write(data);
-                if (Size.HasValue)
-                {
-                    data.WriteUInt32(Size.Value);
-                    data.WriteBits(1, 2);
-                }
-                else
-                {
-                    data.WriteUInt32(0);
-                    data.WriteBits(3, 2);
-                }
+                data.WriteUInt32(Size);
+                data.WriteBits((byte)Record.HotfixStatus, 2);
                 data.FlushBits();
             }
 
-            public HotfixRecord Record;
-            public Optional<uint> Size;
+            public HotfixRecord Record = new HotfixRecord();
+            public uint Size;
         }
     }
 }

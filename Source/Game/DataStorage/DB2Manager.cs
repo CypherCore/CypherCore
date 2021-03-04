@@ -703,7 +703,7 @@ namespace Game.DataStorage
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Hotfix.Query("SELECT Id, TableHash, RecordId, Deleted FROM hotfix_data ORDER BY Id");
+            SQLResult result = DB.Hotfix.Query("SELECT Id, TableHash, RecordId, Status FROM hotfix_data ORDER BY Id");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 hotfix info entries.");
@@ -718,8 +718,8 @@ namespace Game.DataStorage
                 int id = result.Read<int>(0);
                 uint tableHash = result.Read<uint>(1);
                 int recordId = result.Read<int>(2);
-                bool deleted = result.Read<bool>(3);
-                if (!deleted && !_storage.ContainsKey(tableHash))
+                HotfixRecord.Status status = (HotfixRecord.Status)result.Read<byte>(3);
+                if (status == HotfixRecord.Status.Valid && !_storage.ContainsKey(tableHash))
                 {
                     if (!_hotfixBlob.Any(p => p.ContainsKey((tableHash, recordId))))
                     {
@@ -733,8 +733,9 @@ namespace Game.DataStorage
                 hotfixRecord.TableHash = tableHash;
                 hotfixRecord.RecordID = recordId;
                 hotfixRecord.HotfixID = id;
+                hotfixRecord.HotfixStatus = status;
                 _hotfixData.Add(hotfixRecord);
-                deletedRecords[(tableHash, recordId)] = deleted;
+                deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
                 ++count;
             } while (result.NextRow());
@@ -2512,11 +2513,12 @@ namespace Game.DataStorage
         }
     }
 
-    public struct HotfixRecord
+    public class HotfixRecord
     {
         public uint TableHash;
         public int RecordID;
         public int HotfixID;
+        public Status HotfixStatus = Status.Invalid;
 
         public void Write(WorldPacket data)
         {
@@ -2530,6 +2532,13 @@ namespace Game.DataStorage
             TableHash = data.ReadUInt32();
             RecordID = data.ReadInt32();
             HotfixID = data.ReadInt32();
+        }
+
+        public enum Status
+        {
+            Valid           = 1,
+            RecordRemoved   = 2,
+            Invalid         = 3
         }
     }
 
