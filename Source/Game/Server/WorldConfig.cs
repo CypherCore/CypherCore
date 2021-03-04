@@ -289,8 +289,9 @@ namespace Game
                 Values[WorldCfg.PortInstance] = GetDefaultValue("InstanceServerPort", 8086);
             }
 
-            Values[WorldCfg.SocketTimeoutTime] = GetDefaultValue("SocketTimeOutTime", 900000);
-            Values[WorldCfg.SocketTimeoutTimeActive] = GetDefaultValue("SocketTimeOutTimeActive", 60000);
+            // Config values are in "milliseconds" but we handle SocketTimeOut only as "seconds" so divide by 1000
+            Values[WorldCfg.SocketTimeoutTime] = GetDefaultValue("SocketTimeOutTime", 900000) / 1000;
+            Values[WorldCfg.SocketTimeoutTimeActive] = GetDefaultValue("SocketTimeOutTimeActive", 60000) / 1000;
             Values[WorldCfg.SessionAddDelay] = GetDefaultValue("SessionAddDelay", 10000);
 
             Values[WorldCfg.GroupXpDistance] = GetDefaultValue("MaxGroupXPDistance", 74.0f);

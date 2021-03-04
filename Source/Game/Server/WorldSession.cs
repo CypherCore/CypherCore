@@ -241,9 +241,6 @@ namespace Game
 
         public bool Update(uint diff, PacketFilter updater)
         {
-            // Update Timeout timer.
-            UpdateTimeOutTime(diff);
-
             // Before we process anything:
             /// If necessary, kick the player because the client didn't send anything for too long
             /// (or they've been idling in character select)
@@ -820,21 +817,17 @@ namespace Game
         public uint GetLatency() { return m_latency; }
         public void SetLatency(uint latency) { m_latency = latency; }
         public void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
-        void UpdateTimeOutTime(uint diff)
-        {
-            if (diff > m_timeOutTime)
-                m_timeOutTime = 0;
-            else
-                m_timeOutTime -= diff;
-        }
         public void ResetTimeOutTime(bool onlyActive)
         {
             if (GetPlayer())
-                m_timeOutTime = WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTimeActive);
             else if (!onlyActive)
-                m_timeOutTime = WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
+                m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
         }
-        bool IsConnectionIdle() { return (m_timeOutTime <= 0 && !m_inQueue); }
+        bool IsConnectionIdle()
+        {
+            return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
+        }
 
         public uint GetRecruiterId() { return recruiterId; }
         public bool IsARecruiter() { return isRecruiter; }
