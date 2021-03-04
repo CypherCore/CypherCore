@@ -574,6 +574,19 @@ namespace Game
             }
         }
 
+        [WorldPacketHandler(ClientOpcodes.QuestGiverCloseQuest)]
+        void HandleQuestgiverCloseQuest(QuestGiverCloseQuest questGiverCloseQuest)
+        {
+            if (_player.FindQuestSlot(questGiverCloseQuest.QuestID) >= SharedConst.MaxQuestLogSize)
+                return;
+
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questGiverCloseQuest.QuestID);
+            if (quest == null)
+                return;
+
+            Global.ScriptMgr.OnQuestAcknowledgeAutoAccept(_player, quest);
+        }
+
         [WorldPacketHandler(ClientOpcodes.PushQuestToParty)]
         void HandlePushQuestToParty(PushQuestToParty packet)
         {

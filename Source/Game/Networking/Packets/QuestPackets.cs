@@ -406,6 +406,18 @@ namespace Game.Networking.Packets
         public bool FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
     }
 
+    public class QuestGiverCloseQuest : ClientPacket
+    {
+        public QuestGiverCloseQuest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestID = _worldPacket.ReadUInt32();
+        }
+
+        public uint QuestID;
+    }
+    
     public class QuestGiverQuestDetails : ServerPacket
     {
         public QuestGiverQuestDetails() : base(ServerOpcodes.QuestGiverQuestDetails) { }

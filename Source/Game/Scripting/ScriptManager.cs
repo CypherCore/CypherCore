@@ -1188,6 +1188,13 @@ namespace Game.Scripting
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
+        public void OnQuestAcknowledgeAutoAccept(Player player, Quest quest)
+        {
+            Cypher.Assert(player);
+            Cypher.Assert(quest != null);
+
+            RunScript<QuestScript>(script => script.OnAcknowledgeAutoAccept(player, quest), quest.ScriptId);
+        }
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             Cypher.Assert(player);

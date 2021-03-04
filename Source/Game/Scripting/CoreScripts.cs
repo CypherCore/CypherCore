@@ -792,6 +792,9 @@ namespace Game.Scripting
         // Called when a quest status change
         public virtual void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus) { }
 
+        // Called for auto accept quests when player closes quest UI after seeing initial quest details
+        public virtual void OnAcknowledgeAutoAccept(Player player, Quest quest) { }
+
         // Called when a quest objective data change
         public virtual void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount) { }
     }
