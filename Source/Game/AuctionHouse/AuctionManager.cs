@@ -1735,7 +1735,7 @@ namespace Game
             {
                 for (var i = 0; i < _sortCount; ++i)
                 {
-                    int ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
                     if (ordering != 0)
                         return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
                 }
@@ -1747,7 +1747,7 @@ namespace Game
                 return left.Id.CompareTo(right.Id);
             }
 
-            int CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
+            long CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
             {
                 switch (column)
                 {
@@ -1755,7 +1755,7 @@ namespace Game
                         {
                             ulong leftPrice = left.BuyoutOrUnitPrice != 0 ? left.BuyoutOrUnitPrice : (left.BidAmount != 0 ? left.BidAmount : left.MinBid);
                             ulong rightPrice = right.BuyoutOrUnitPrice != 0 ? right.BuyoutOrUnitPrice : (right.BidAmount != 0 ? right.BidAmount : right.MinBid);
-                            return (int)(leftPrice - rightPrice);
+                            return (long)(leftPrice - rightPrice);
                         }
                     case AuctionHouseSortOrder.Name:
                         return left.Bucket.FullName[(int)_locale].CompareTo(right.Bucket.FullName[(int)_locale]);
@@ -1766,9 +1766,9 @@ namespace Game
                             return leftLevel - rightLevel;
                         }
                     case AuctionHouseSortOrder.Bid:
-                        return (int)(left.BidAmount - right.BidAmount);
+                        return (long)(left.BidAmount - right.BidAmount);
                     case AuctionHouseSortOrder.Buyout:
-                        return (int)(left.BuyoutOrUnitPrice - right.BuyoutOrUnitPrice);
+                        return (long)(left.BuyoutOrUnitPrice - right.BuyoutOrUnitPrice);
                     default:
                         break;
                 }
@@ -1858,7 +1858,7 @@ namespace Game
             {
                 for (var i = 0; i < _sortCount; ++i)
                 {
-                    int ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
                     if (ordering != 0)
                         return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
                 }
@@ -1866,14 +1866,14 @@ namespace Game
                 return left.Key != right.Key ? 1 : 0;
             }
 
-            int CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
+            long CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
             {
                 switch (column)
                 {
                     case AuctionHouseSortOrder.Price:
                     case AuctionHouseSortOrder.Bid:
                     case AuctionHouseSortOrder.Buyout:
-                        return (int)((long)left.MinPrice - (long)right.MinPrice);
+                        return (long)(left.MinPrice - right.MinPrice);
                     case AuctionHouseSortOrder.Name:
                         return left.FullName[(int)_locale].CompareTo(right.FullName[(int)_locale]);
                     case AuctionHouseSortOrder.Level:
