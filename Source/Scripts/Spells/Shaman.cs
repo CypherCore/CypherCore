@@ -43,19 +43,16 @@ namespace Scripts.Spells.Shaman
         public const uint ElementalMastery = 16166;
         public const uint EnergySurge = 40465;
         public const uint Exhaustion = 57723;
-        public const uint FireNovaTriggered = 8349;
         public const uint FlameShock = 8050;
         public const uint FlameShockMaelstrom = 188389;
         public const uint FlametongueAttack = 10444;
         public const uint GatheringStorms = 198299;
         public const uint GatheringStormsBuff = 198300;
-        public const uint HighTide = 157154;
         public const uint ItemLightningShield = 23552;
         public const uint ItemLightningShieldDamage = 27635;
         public const uint ItemManaSurge = 23571;
         public const uint LavaBurst = 51505;
         public const uint LavaBurstBonusDamage = 71824;
-        public const uint LavaLashSpreadFlameShock = 105792;
         public const uint LavaSurge = 77762;
         public const uint PathOfFlamesSpread = 210621;
         public const uint PathOfFlamesTalent = 201909;
@@ -297,23 +294,6 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             AfterCast.Add(new CastHandler(TriggerBuff));
-        }
-    }
-
-    [Script] // 1535 Fire Nova
-    class spell_sha_fire_nova : SpellScript
-    {
-        void HandleDummy(uint effIndex)
-        {
-            Unit target = GetHitUnit();
-            if (target)
-                if (target.HasAura(SpellIds.FlameShock))
-                    GetCaster().CastSpell(target, SpellIds.FireNovaTriggered, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 

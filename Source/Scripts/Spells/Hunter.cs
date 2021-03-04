@@ -28,27 +28,15 @@ namespace Scripts.Spells.Hunter
     struct SpellIds
     {
         public const uint AspectCheetahSlow = 186258;
-        public const uint BestialWrath = 19574;
-        public const uint ChimeraShotHeal = 53353;
         public const uint Exhilaration = 109304;
         public const uint ExhilarationPet = 128594;
         public const uint ExhilarationR2 = 231546;
-        public const uint Fire = 82926;
-        public const uint GenericEnergizeFocus = 91954;
-        public const uint ImprovedMendPet = 24406;
-        public const uint LockAndLoad = 56453;
         public const uint Lonewolf = 155228;
         public const uint MastersCallTriggered = 62305;
         public const uint MisdirectionProc = 35079;
         public const uint PetLastStandTriggered = 53479;
-        public const uint PetHeartOfThePhoenix = 55709;
         public const uint PetHeartOfThePhoenixTriggered = 54114;
         public const uint PetHeartOfThePhoenixDebuff = 55711;
-        public const uint PetCarrionFeederTriggered = 54045;
-        public const uint Readiness = 23989;
-        public const uint SerpentSting = 1978;
-        public const uint SniperTrainingR1 = 53302;
-        public const uint SniperTrainingBuffR1 = 64418;
         public const uint SteadyShotFocus = 77443;
         public const uint T94PGreatness = 68130;
         public const uint DraeneiGiftOfTheNaaru = 59543;
@@ -72,65 +60,6 @@ namespace Scripts.Spells.Hunter
         public override void Register()
         {
             AfterEffectRemove.Add(new EffectApplyHandler(HandleOnRemove, 0, AuraType.ModIncreaseSpeed, AuraEffectHandleModes.Real));
-        }
-    }
-
-    // 53209 - Chimera Shot
-    [Script]
-    class spell_hun_chimera_shot : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ChimeraShotHeal, SpellIds.SerpentSting);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void HandleScriptEffect(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), SpellIds.ChimeraShotHeal, true);
-            Aura aur = GetHitUnit().GetAura(SpellIds.SerpentSting, GetCaster().GetGUID());
-            if (aur != null)
-                aur.SetDuration(aur.GetSpellInfo().GetMaxDuration(), true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    // 77767 - Cobra Shot
-    [Script]
-    class spell_hun_cobra_shot : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GenericEnergizeFocus, SpellIds.SerpentSting);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void HandleScriptEffect(uint effIndex)
-        {
-            GetCaster().CastSpell(GetCaster(), SpellIds.GenericEnergizeFocus, true);
-            Aura aur = GetHitUnit().GetAura(SpellIds.SerpentSting, GetCaster().GetGUID());
-            if (aur != null)
-            {
-                int newDuration = aur.GetDuration() + GetEffectValue() * Time.InMilliseconds;
-                aur.SetDuration(Math.Min(newDuration, aur.GetMaxDuration()), true);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -171,33 +100,6 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // -19572 - Improved Mend Pet
-    [Script]
-    class spell_hun_improved_mend_pet : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ImprovedMendPet);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return RandomHelper.randChance(GetEffect(0).GetAmount());
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.ImprovedMendPet, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
@@ -375,63 +277,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    // 23989 - Readiness
-    [Script]
-    class spell_hun_readiness : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            // immediately finishes the cooldown on your other Hunter abilities except Bestial Wrath
-            GetCaster().GetSpellHistory().ResetCooldowns(p =>
-            {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, GetCastDifficulty());
-
-                //! If spellId in cooldown map isn't valid, the above will return a null pointer.
-                if (spellInfo.SpellFamilyName == SpellFamilyNames.Hunter &&
-                spellInfo.Id != SpellIds.Readiness &&
-                spellInfo.Id != SpellIds.BestialWrath &&
-                spellInfo.Id != SpellIds.DraeneiGiftOfTheNaaru &&
-                spellInfo.GetRecoveryTime() > 0)
-                    return true;
-                return false;
-            }, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // 82925 - Ready, Set, Aim...
-    [Script]
-    class spell_hun_ready_set_aim : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Fire);
-        }
-
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetStackAmount() == 5)
-            {
-                GetTarget().CastSpell(GetTarget(), SpellIds.Fire, true, null, aurEff);
-                GetTarget().RemoveAura(GetId());
-            }
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-        }
-    }
-
     [Script] // 53480 - Roar of Sacrifice
     class spell_hun_roar_of_sacrifice : AuraScript
     {
@@ -488,53 +333,6 @@ namespace Scripts.Spells.Hunter
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // -53302 - Sniper Training
-    [Script]
-    class spell_hun_sniper_training : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.SniperTrainingR1, SpellIds.SniperTrainingBuffR1);
-        }
-
-        void HandlePeriodic(AuraEffect aurEff)
-        {
-            PreventDefaultAction();
-            if (aurEff.GetAmount() <= 0)
-            {
-                uint spellId = SpellIds.SniperTrainingBuffR1 + GetId() - SpellIds.SniperTrainingR1;
-                Unit target = GetTarget();
-                target.CastSpell(target, spellId, true, null, aurEff);
-                Player playerTarget = GetUnitOwner().ToPlayer();
-                if (playerTarget)
-                {
-                    int baseAmount = aurEff.GetBaseAmount();
-                    int amount = playerTarget.CalculateSpellDamage(playerTarget, GetSpellInfo(), aurEff.GetEffIndex(), baseAmount);
-                    GetEffect(0).SetAmount(amount);
-                }
-            }
-        }
-
-        void HandleUpdatePeriodic(AuraEffect aurEff)
-        {
-            Player playerTarget = GetUnitOwner().ToPlayer();
-            if (playerTarget)
-            {
-                int baseAmount = aurEff.GetBaseAmount();
-                int amount = playerTarget.IsMoving() ?
-                playerTarget.CalculateSpellDamage(playerTarget, GetSpellInfo(), aurEff.GetEffIndex(), baseAmount) :
-                aurEff.GetAmount() - 1;
-                aurEff.SetAmount(amount);
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicTriggerSpell));
-            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(HandleUpdatePeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
@@ -604,26 +402,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    //  53434 - Call of the Wild
-    [Script]
-    class spell_hun_target_only_pet_and_owner : SpellScript
-    {
-        void FilterTargets(List<WorldObject> targets)
-        {
-            targets.Clear();
-            targets.Add(GetCaster());
-            Unit owner = GetCaster().GetOwner();
-            if (owner)
-                targets.Add(owner);
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitCasterAreaParty));
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitCasterAreaParty));
-        }
-    }
-
     [Script] // 67151 - Item - Hunter T9 4P Bonus (Steady Shot)
     class spell_hun_t9_4p_bonus : AuraScript
     {
@@ -651,33 +429,6 @@ namespace Scripts.Spells.Hunter
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
-    // -56333 - T.N.T.
-    [Script]
-    class spell_hun_tnt : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.LockAndLoad);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return RandomHelper.randChance(GetEffect(0).GetAmount());
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.LockAndLoad, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 }

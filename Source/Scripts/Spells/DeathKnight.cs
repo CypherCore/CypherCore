@@ -20,6 +20,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System.Collections.Generic;
+using Game.Networking.Packets;
 
 namespace Scripts.Spells.DeathKnight
 {
@@ -45,7 +46,6 @@ namespace Scripts.Spells.DeathKnight
         public const uint DeathStrikeOffhand = 66188;
         public const uint FesteringWound = 194310;
         public const uint Frost = 137006;
-        public const uint FrostFever = 55095;
         public const uint GlyphOfFoulMenagerie = 58642;
         public const uint GlyphOfTheGeist = 58640;
         public const uint GlyphOfTheSkeleton = 146652;
@@ -111,6 +111,10 @@ namespace Scripts.Spells.DeathKnight
     [Script] // 48707 - Anti-Magic Shell
     class spell_dk_anti_magic_shell : AuraScript
     {
+        int absorbPct;
+        ulong maxHealth;
+        uint absorbedAmount;
+
         public spell_dk_anti_magic_shell()
         {
             absorbPct = 0;
@@ -126,14 +130,14 @@ namespace Scripts.Spells.DeathKnight
         public override bool Load()
         {
             absorbPct = GetSpellInfo().GetEffect(1).CalcValue(GetCaster());
-            maxHealth = (int)GetCaster().GetMaxHealth();
+            maxHealth = GetCaster().GetMaxHealth();
             absorbedAmount = 0;
             return true;
         }
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            amount = MathFunctions.CalculatePct(maxHealth, absorbPct);
+            amount = (int)MathFunctions.CalculatePct(maxHealth, absorbPct);
         }
 
         void Trigger(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -163,13 +167,9 @@ namespace Scripts.Spells.DeathKnight
             AfterEffectAbsorb.Add(new EffectAbsorbHandler(Trigger, 0));
             AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
         }
-
-        int absorbPct;
-        int maxHealth;
-        uint absorbedAmount;
     }
 
-    [Script] // 127517 - Army Transform    // 6.x, does this belong here or in spell_generic? where do we cast this? sniffs say this is only cast when caster has glyph of foul menagerie.
+    [Script] // 127517 - Army Transform
     class spell_dk_army_transform : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -223,7 +223,7 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] // 49028 - Dancing Rune Weapon 7.1.5
+    [Script] // 49028 - Dancing Rune Weapon
     class spell_dk_dancing_rune_weapon : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -262,10 +262,10 @@ namespace Scripts.Spells.DeathKnight
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)(damageInfo.GetDamage() / 2);
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(drw, drw.GetVictim(), spellInfo, new Game.Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
+            int amount = (int)damageInfo.GetDamage() / 2;
+            SpellNonMeleeDamage log = new SpellNonMeleeDamage(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
             log.damage = (uint)amount;
-            drw.DealDamage(drw.GetVictim(), (uint)amount, null, DamageEffectType.Direct, spellInfo.GetSchoolMask(), spellInfo, true);
+            drw.DealDamage(drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
         }
 
@@ -276,7 +276,7 @@ namespace Scripts.Spells.DeathKnight
     }
 
     [Script] // 43265 - Death and Decay
-    class spell_dk_death_and_decay : SpellScript
+    class spell_dk_death_and_decay_SpellScript : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -287,7 +287,7 @@ namespace Scripts.Spells.DeathKnight
         {
             if (GetCaster().HasAura(SpellIds.TighteningGrasp))
             {
-                Position pos = GetExplTargetDest();
+                WorldLocation pos = GetExplTargetDest();
                 if (pos != null)
                     GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SpellIds.TighteningGraspSlow, true);
             }
@@ -298,8 +298,7 @@ namespace Scripts.Spells.DeathKnight
             OnCast.Add(new CastHandler(HandleDummy));
         }
     }
-
-    [Script]
+    [Script] // 43265 - Death and Decay
     class spell_dk_death_and_decay_AuraScript : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
@@ -327,9 +326,8 @@ namespace Scripts.Spells.DeathKnight
         {
             Unit caster = GetCaster();
             caster.CastSpell(GetHitUnit(), SpellIds.DeathCoilDamage, true);
-
             AuraEffect unholyAura = caster.GetAuraEffect(SpellIds.Unholy, 6);
-            if (unholyAura != null) // can be any effect, just here to send SPELL_FAILED_DONT_REPORT on failure
+            if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
                 caster.CastSpell(caster, SpellIds.UnholyVigor, true, null, unholyAura);
         }
 
@@ -368,7 +366,7 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] //49576 - Death Grip Initial
+    [Script] // 49576 - Death Grip Initial
     class spell_dk_death_grip_initial : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -422,14 +420,13 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb,
-                SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand);
+            return ValidateSpellInfo(SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand);
         }
 
         void HandleHeal(uint effIndex)
         {
             Unit caster = GetCaster();
-            //TODO: heal = Math.Min(10% health, 20% of all damage taken in last 5 seconds)
+            //Todo: heal = std::min(10% health, 20% of all damage taken in last 5 seconds)
             int heal = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetSpellInfo().GetEffect(4).CalcValue());
             caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
 
@@ -461,14 +458,14 @@ namespace Scripts.Spells.DeathKnight
             return ValidateSpellInfo(SpellIds.FesteringWound);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleScriptEffect(uint effIndex)
         {
             GetCaster().CastCustomSpell(SpellIds.FesteringWound, SpellValueMod.AuraStack, GetEffectValue(), GetHitUnit(), TriggerCastFlags.FullMask);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 2, SpellEffectName.Dummy));
         }
     }
 
@@ -544,7 +541,7 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] // 121916 - Glyph of the Geist (Unholy)    // 6.x, does this belong here or in spell_generic? apply this in creature_template_addon? sniffs say this is always cast on raise dead.
+    [Script] // 121916 - Glyph of the Geist (Unholy)
     class spell_dk_pet_geist_transform : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -573,7 +570,7 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] // 147157 Glyph of the Skeleton (Unholy)    // 6.x, does this belong here or in spell_generic? apply this in creature_template_addon? sniffs say this is always cast on raise dead.
+    [Script] // 147157 Glyph of the Skeleton (Unholy)
     class spell_dk_pet_skeleton_transform : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -597,7 +594,7 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
-    [Script] // 61257 - Runic Power Back on Snare/Root 7.1.5
+    [Script] // 61257 - Runic Power Back on Snare/Root
     class spell_dk_pvp_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -642,26 +639,6 @@ namespace Scripts.Spells.DeathKnight
                 spellId = SpellIds.SludgeBelcherSummon;
 
             GetCaster().CastSpell((Unit)null, spellId, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script] // 115994 - Unholy Blight
-    class spell_dk_unholy_blight : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FrostFever, SpellIds.BloodPlague);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.FrostFever, true);
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.BloodPlague, true);
         }
 
         public override void Register()

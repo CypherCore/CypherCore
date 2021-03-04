@@ -28,7 +28,7 @@ namespace Scripts.Spells.DemonHunter
     }
 
     [Script] // 197125 - Chaos Strike
-    class spell_dh_chaos_strike_AuraScript : AuraScript
+    class spell_dh_chaos_strike : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {

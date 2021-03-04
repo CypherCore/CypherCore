@@ -653,7 +653,7 @@ namespace Scripts.Spells.Items
             uint[][] triggeredSpells =
             {
                     //CLASS_NONE
-                    new uint[] { },
+                    Array.Empty<uint>(),
                     //CLASS_WARRIOR
                     new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.MartyrComplex },
                     //CLASS_PALADIN
@@ -673,7 +673,7 @@ namespace Scripts.Spells.Items
                     //CLASS_WARLOCK
                     new uint[] {SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia },
                     //CLASS_UNK
-                    new uint[]{ },
+                    Array.Empty<uint>(),
                     //CLASS_DRUID
                     new uint[] {SpellIds.Sociopath, SpellIds.Delusional, SpellIds.Kleptomania, SpellIds.Megalomania, SpellIds.Paranoia, SpellIds.Manic, SpellIds.Narcissism, SpellIds.MartyrComplex, SpellIds.Dementia }
                 };
@@ -818,7 +818,7 @@ namespace Scripts.Spells.Items
             uint[][] triggeredSpells =
             {
                     //CLASS_NONE
-                    new uint[] { },
+                     Array.Empty<uint>(),
                     //CLASS_WARRIOR
                     new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
                     //CLASS_PALADIN
@@ -828,17 +828,17 @@ namespace Scripts.Spells.Items
                     //CLASS_ROGUE
                     new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
                     //CLASS_PRIEST
-                    new uint[] { },
+                    Array.Empty<uint>(),
                     //CLASS_DEATH_KNIGHT
                     new uint[] {_strengthSpellId, _criticalSpellId, _hasteSpellId },
                     //CLASS_SHAMAN
                     new uint[] {_agilitySpellId, _hasteSpellId, _apSpellId },
                     //CLASS_MAGE
-                    new uint[] { },
+                    Array.Empty<uint>(),
                     //CLASS_WARLOCK
-                    new uint[] { },
+                    Array.Empty<uint>(),
                     //CLASS_UNK
-                    new uint[] { },
+                    Array.Empty<uint>(),
                     //CLASS_DRUID
                     new uint[] {_strengthSpellId, _agilitySpellId, _hasteSpellId }
                 };
@@ -1781,7 +1781,7 @@ namespace Scripts.Spells.Items
             Unit target = GetHitUnit();
             if (target)
             {
-                uint spellId = 0;
+                uint spellId;
                 uint rand = RandomHelper.URand(0, 99);
                 if (rand < 25)                      // Fireball (25% chance)
                     spellId = SpellIds.Fireball;

@@ -24,57 +24,41 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Maps;
 
 namespace Scripts.Spells.Priest
 {
     struct SpellIds
     {
-        public const uint Absolution = 33167;
         public const uint AngelicFeatherAreatrigger = 158624;
         public const uint AngelicFeatherAura = 121557;
-        public const uint AngelicFeatherTrigger = 121536;
         public const uint ArmorOfFaith = 28810;
         public const uint Atonement = 81749;
         public const uint AtonementHeal = 81751;
         public const uint AtonementTriggered = 194384;
         public const uint BlessedHealing = 70772;
         public const uint BodyAndSoul = 64129;
-        public const uint BodyAndSoulDispel = 64136;
         public const uint BodyAndSoulSpeed = 65081;
-        public const uint CureDisease = 528;
-        public const uint DispelMagicFriendly = 97690;
-        public const uint DispelMagicHostile = 97691;
-        public const uint DivineAegis = 47753;
         public const uint DivineBlessing = 40440;
         public const uint DivineWrath = 40441;
-        public const uint GlyphOfCircleOfHealing = 55675;
-        public const uint GlyphOfDispelMagic = 55677;
-        public const uint GlyphOfDispelMagicHeal = 56131;
-        public const uint GlyphOfLightwell = 55673;
-        public const uint GlyphOfPrayerOfHealingHeal = 56161;
-        public const uint GlyphOfShadow = 107906;
         public const uint GuardianSpiritHeal = 48153;
         public const uint ItemEfficiency = 37595;
-        public const uint LeapOfFaith = 73325;
         public const uint LeapOfFaithEffect = 92832;
-        public const uint LeapOfFaithEffectTrigger = 92833;
-        public const uint LeapOfFaithTriggered = 92572;
         public const uint LevitateEffect = 111759;
-        public const uint ManaLeechProc = 34650;
         public const uint OracularHeal = 26170;
         public const uint PenanceR1 = 47540;
         public const uint PenanceR1Damage = 47758;
         public const uint PenanceR1Heal = 47757;
+        public const uint PrayerOfMendingAura = 41635;
+        public const uint PrayerOfMendingHeal = 33110;
+        public const uint PrayerOfMendingJump = 155793;
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
-        public const uint ShadowformVisualWithGlyph = 107904;
-        public const uint ShadowformVisualWithoutGlyph = 107903;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
         public const uint SpiritOfRedemption = 27827;
         public const uint StrengthOfSoul = 197535;
         public const uint StrengthOfSoulEffect = 197548;
-        public const uint T9Healing2p = 67201;
         public const uint ThePenitentAura = 200347;
         public const uint VampiricEmbraceHeal = 15290;
         public const uint VampiricTouchDispel = 64085;
@@ -116,6 +100,8 @@ namespace Scripts.Spells.Priest
     [Script] // 81749 - Atonement
     public class spell_pri_atonement : AuraScript
     {
+        List<ObjectGuid> _appliedAtonements = new List<ObjectGuid>();
+
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AtonementHeal);
@@ -149,8 +135,6 @@ namespace Scripts.Spells.Priest
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
-
-        List<ObjectGuid> _appliedAtonements = new List<ObjectGuid>();
 
         public void AddAtonementTarget(ObjectGuid target)
         {
@@ -208,160 +192,6 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 64129 - Body and Soul
-    class spell_pri_body_and_soul : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.CureDisease, SpellIds.BodyAndSoulDispel);
-        }
-
-        void HandleEffectSpeedProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            // Proc only with Power Word: Shield or Leap of Faith
-            if (!(eventInfo.GetDamageInfo().GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x1u) || eventInfo.GetDamageInfo().GetSpellInfo().SpellFamilyFlags[2].HasAnyFlag(0x80000u)))
-                return;
-
-            GetTarget().CastCustomSpell(SpellIds.BodyAndSoulSpeed, SpellValueMod.BasePoint0, aurEff.GetAmount(), eventInfo.GetProcTarget(), true, null, aurEff);
-        }
-
-        void HandleEffectDispelProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            // Proc only with Cure Disease
-            if (eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.CureDisease || eventInfo.GetProcTarget() != GetTarget())
-                return;
-
-            if (RandomHelper.randChance(aurEff.GetAmount()))
-                GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.BodyAndSoulDispel, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectSpeedProc, 0, AuraType.Dummy));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectDispelProc, 1, AuraType.Dummy));
-        }
-    }
-
-    // 34861 - Circle of Healing
-    [Script]
-    class spell_pri_circle_of_healing : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GlyphOfCircleOfHealing);
-        }
-
-        void FilterTargets(List<WorldObject> targets)
-        {
-            targets.RemoveAll(obj =>
-            {
-                Unit target = obj.ToUnit();
-                if (target)
-                    return !GetCaster().IsInRaidWith(target);
-
-                return true;
-            });
-
-            uint maxTargets = (uint)(GetCaster().HasAura(SpellIds.GlyphOfCircleOfHealing) ? 6 : 5); // Glyph of Circle of Healing
-
-            if (targets.Count > maxTargets)
-            {
-                targets.Sort(new HealthPctOrderPred());
-                targets.Resize(maxTargets);
-            }
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-        }
-    }
-
-    // 527 - Dispel magic
-    [Script]
-    class spell_pri_dispel_magic : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Absolution, SpellIds.GlyphOfDispelMagicHeal, SpellIds.GlyphOfDispelMagic);
-        }
-
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            Unit target = GetExplTargetUnit();
-
-            if (!target || (!caster.HasAura(SpellIds.Absolution) && caster != target && target.IsFriendlyTo(caster)))
-                return SpellCastResult.BadTargets;
-            return SpellCastResult.SpellCastOk;
-        }
-
-        void AfterEffectHit(uint effIndex)
-        {
-            if (GetHitUnit().IsFriendlyTo(GetCaster()))
-            {
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.DispelMagicFriendly, true);
-                AuraEffect aurEff = GetHitUnit().GetAuraEffect(SpellIds.GlyphOfDispelMagic, 0);
-                if (aurEff != null)
-                {
-                    int heal = (int)GetHitUnit().CountPctFromMaxHealth(aurEff.GetAmount());
-                    GetCaster().CastCustomSpell(SpellIds.GlyphOfDispelMagicHeal, SpellValueMod.BasePoint0, heal, GetHitUnit());
-                }
-            }
-            else
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.DispelMagicHostile, true);
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            OnEffectHitTarget.Add(new EffectHandler(AfterEffectHit, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // -47509 - Divine Aegis
-    [Script]
-    class spell_pri_divine_aegis : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.DivineAegis);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetProcTarget();
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo == null || healInfo.GetHeal() == 0)
-                return;
-
-            int absorb = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
-
-            // Multiple effects stack, so let's try to find this aura.
-            AuraEffect aegis = eventInfo.GetProcTarget().GetAuraEffect(SpellIds.DivineAegis, 0);
-            if (aegis != null)
-                absorb += aegis.GetAmount();
-
-            absorb = (int)Math.Min(absorb, eventInfo.GetProcTarget().GetLevel() * 125);
-
-            GetTarget().CastCustomSpell(SpellIds.DivineAegis, SpellValueMod.BasePoint0, absorb, eventInfo.GetProcTarget(), true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
     // 64844 - Divine Hymn
     [Script]
     class spell_pri_divine_hymn : SpellScript
@@ -389,57 +219,6 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
-        }
-    }
-
-    // 55680 - Glyph of Prayer of Healing
-    [Script]
-    class spell_pri_glyph_of_prayer_of_healing : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GlyphOfPrayerOfHealingHeal);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo == null || healInfo.GetHeal() == 0)
-                return;
-
-            SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.GlyphOfPrayerOfHealingHeal, GetCastDifficulty());
-            int heal = (int)(MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()) / triggeredSpellInfo.GetMaxTicks());
-            GetTarget().CastCustomSpell(SpellIds.GlyphOfPrayerOfHealingHeal, SpellValueMod.BasePoint0, heal, eventInfo.GetProcTarget(), true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 24191 - Improved Power Word Shield
-    class spell_pri_improved_power_word_shield : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                spellMod = new SpellModifier(GetAura());
-                spellMod.op = (SpellModOp)aurEff.GetMiscValue();
-                spellMod.type = SpellModType.Pct;
-                spellMod.spellId = GetId();
-                spellMod.mask = GetSpellInfo().GetEffect(aurEff.GetEffIndex()).SpellClassMask;
-            }
-
-            spellMod.value = aurEff.GetAmount();
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
         }
     }
 
@@ -483,45 +262,6 @@ namespace Scripts.Spells.Priest
         {
             DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.SchoolAbsorb));
             OnEffectAbsorb.Add(new EffectAbsorbHandler(Absorb, 1));
-        }
-    }
-
-    // 64904 - Hymn of Hope
-    [Script]
-    class spell_pri_hymn_of_hope : SpellScript
-    {
-        void FilterTargets(List<WorldObject> targets)
-        {
-            targets.RemoveAll(obj =>
-            {
-                Unit target = obj.ToUnit();
-                if (target)
-                    return target.GetPowerType() != PowerType.Mana;
-
-                return true;
-            });
-
-            targets.RemoveAll(obj =>
-            {
-                Unit target = obj.ToUnit();
-                if (target)
-                    return !GetCaster().IsInRaidWith(target);
-
-                return true;
-            });
-
-            uint maxTargets = 3;
-
-            if (targets.Count > maxTargets)
-            {
-                targets.Sort(new PowerPctOrderPred(PowerType.Mana));
-                targets.Resize(maxTargets);
-            }
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, SpellConst.EffectAll, Targets.UnitSrcAreaAlly));
         }
     }
 
@@ -591,103 +331,6 @@ namespace Scripts.Spells.Priest
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // 7001 - Lightwell Renew
-    [Script]
-    class spell_pri_lightwell_renew : AuraScript
-    {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                // Bonus from Glyph of Lightwell
-                AuraEffect modHealing = caster.GetAuraEffect(SpellIds.GlyphOfLightwell, 0);
-                if (modHealing != null)
-                    MathFunctions.AddPct(ref amount, modHealing.GetAmount());
-            }
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicHeal));
-        }
-    }
-
-    // 8129 - Mana Burn
-    [Script]
-    class spell_pri_mana_burn : SpellScript
-    {
-        void HandleAfterHit()
-        {
-            Unit unitTarget = GetHitUnit();
-            if (unitTarget)
-                unitTarget.RemoveAurasWithMechanic((1 << (int)Mechanics.Fear) | (1 << (int)Mechanics.Polymorph));
-        }
-
-        public override void Register()
-        {
-            AfterHit.Add(new HitHandler(HandleAfterHit));
-        }
-    }
-
-    // 28305 - Mana Leech (Passive) (Priest Pet Aura)
-    [Script]
-    class spell_pri_mana_leech : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ManaLeechProc);
-        }
-
-        public override bool Load()
-        {
-            _procTarget = null;
-            return true;
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            _procTarget = GetTarget().GetOwner();
-            return _procTarget;
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(_procTarget, SpellIds.ManaLeechProc, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-
-        Unit _procTarget;
-    }
-
-    // 47948 - Pain and Suffering (Proc)
-    [Script]
-    class spell_pri_pain_and_suffering_proc : SpellScript
-    {
-        void HandleEffectScriptEffect(uint effIndex)
-        {
-            // Refresh Shadow Word: Pain on target
-            Unit unitTarget = GetHitUnit();
-            if (unitTarget)
-            {
-                AuraEffect aur = unitTarget.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Priest, new FlagArray128(0x8000, 0, 0), GetCaster().GetGUID());
-                if (aur != null)
-                    aur.GetBase().RefreshDuration();
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffectScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -771,28 +414,6 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // -47569 - Phantasm
-    [Script]
-    class spell_pri_phantasm : AuraScript
-    {
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return RandomHelper.randChance(GetEffect(0).GetAmount());
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().RemoveMovementImpairingAuras(true);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] // 17 - Power Word: Shield
     class spell_pri_power_word_shield : AuraScript
     {
@@ -848,53 +469,124 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 33110 - Prayer of Mending Heal
-    class spell_pri_prayer_of_mending_heal : SpellScript
+    // Base class used by various prayer of mending spells
+    class spell_pri_prayer_of_mending_SpellScriptBase : SpellScript
     {
-        void HandleHeal(uint effIndex)
+        SpellInfo _spellInfoHeal;
+        SpellEffectInfo _healEffectDummy;
+
+        public override bool Validate(SpellInfo spellInfo)
         {
-            Unit caster = GetOriginalCaster();
-            if (caster)
+            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingAura)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
+        }
+
+        public override bool Load()
+        {
+            _spellInfoHeal = Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None);
+            _healEffectDummy = _spellInfoHeal.GetEffect(0);
+            return true;
+        }
+
+        public void CastPrayerOfMendingAura(Unit caster, Unit target, byte stack)
+        {
+            uint basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(caster), DamageEffectType.Heal, _healEffectDummy);
+            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            values.Add(SpellValueMod.AuraStack, stack);
+            values.Add(SpellValueMod.BasePoint0, (int)basePoints);
+            caster.CastCustomSpell(SpellIds.PrayerOfMendingAura, values, target, TriggerCastFlags.FullMask);
+        }
+    }
+
+    [Script] // 33076 - Prayer of Mending
+    class spell_pri_prayer_of_mending : spell_pri_prayer_of_mending_SpellScriptBase
+    {
+        void HandleEffectDummy(uint effIndex)
+        {
+            CastPrayerOfMendingAura(GetCaster(), GetHitUnit(), (byte)GetEffectValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHit .Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 41635 - Prayer of Mending (Aura) - SPELL_PRIEST_PRAYER_OF_MENDING_AURA
+    class spell_pri_prayer_of_mending_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingJump);
+        }
+
+        void HandleHeal(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            // Caster: player (priest) that cast the Prayer of Mending
+            // Target: player that currently has Prayer of Mending aura on him
+            Unit target = GetTarget();
+            Unit caster = GetCaster();
+            if (caster != null)
             {
-                AuraEffect aurEff = caster.GetAuraEffect(SpellIds.T9Healing2p, 0);
-                if (aurEff != null)
-                {
-                    int heal = GetHitHeal();
-                    MathFunctions.AddPct(ref heal, aurEff.GetAmount());
-                    SetHitHeal(heal);
-                }
+                // Cast the spell to heal the owner
+                caster.CastSpell(target, SpellIds.PrayerOfMendingHeal, true, null, aurEff);
+
+                // Only cast jump if stack is higher than 0
+                int stackAmount = GetStackAmount();
+                if (stackAmount > 1)
+                    target.CastCustomSpell(SpellIds.PrayerOfMendingJump, SpellValueMod.BasePoint0, stackAmount - 1, target, true, null, aurEff, caster.GetGUID());
+
+                Remove();
             }
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHeal, 0, SpellEffectName.Heal));
+            OnEffectProc.Add(new EffectProcHandler(HandleHeal, 0, AuraType.Dummy));
         }
     }
 
-    // 15473 - Shadowform
-    [Script]
-    class spell_pri_shadowform : AuraScript
+    [Script] // 155793 - prayer of mending (Jump) - SPELL_PRIEST_PRAYER_OF_MENDING_JUMP
+    class spell_pri_prayer_of_mending_jump : spell_pri_prayer_of_mending_SpellScriptBase
     {
-        public override bool Validate(SpellInfo spellInfo)
+        void OnTargetSelect(List<WorldObject> targets)
         {
-            return ValidateSpellInfo(SpellIds.ShadowformVisualWithoutGlyph, SpellIds.ShadowformVisualWithGlyph);
+            // Find the best target - prefer players over pets
+            bool foundPlayer = false;
+            foreach (WorldObject worldObject in targets)
+            {
+                if (worldObject.IsPlayer())
+                {
+                    foundPlayer = true;
+                    break;
+                }
+            }
+
+            if (foundPlayer)
+                targets.RemoveAll(new ObjectTypeIdCheck(TypeId.Player, false));
+
+            // choose one random target from targets
+            if (targets.Count > 1)
+            {
+                WorldObject selected = targets.SelectRandom();
+                targets.Clear();
+                targets.Add(selected);
+            }
         }
 
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        void HandleJump(uint effIndex)
         {
-            GetTarget().CastSpell(GetTarget(), GetTarget().HasAura(SpellIds.GlyphOfShadow) ? SpellIds.ShadowformVisualWithGlyph : SpellIds.ShadowformVisualWithoutGlyph, true);
-        }
+            Unit origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
+            Unit target = GetHitUnit(); // the target we decided the aura should jump to
 
-        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(GetTarget().HasAura(SpellIds.GlyphOfShadow) ? SpellIds.ShadowformVisualWithGlyph : SpellIds.ShadowformVisualWithoutGlyph);
+            if (origCaster)
+                CastPrayerOfMendingAura(origCaster, target, (byte)GetEffectValue());
         }
 
         public override void Register()
         {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModShapeshift, AuraEffectHandleModes.RealOrReapplyMask));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.RealOrReapplyMask));
+            OnObjectAreaTargetSelect .Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
+            OnEffectHitTarget.Add(new EffectHandler(HandleJump, 0, SpellEffectName.Dummy));
         }
     }
 

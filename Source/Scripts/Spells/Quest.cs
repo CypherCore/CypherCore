@@ -461,7 +461,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit target = GetExplTargetUnit();
+            Unit target = GetHitUnit();
             if (target)
                 if (target.IsTypeId(TypeId.Unit) && target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
                     // Make sure nobody else is channeling the same target
@@ -553,7 +553,7 @@ namespace Scripts.Spells.Quest
             Creature target = GetHitCreature();
             if (target)
             {
-                uint spellId = 0;
+                uint spellId;
                 switch (target.GetEntry())
                 {
                     case CreatureIds.Scavengebot004a8:
@@ -841,11 +841,10 @@ namespace Scripts.Spells.Quest
         void HandleDummy(uint effIndex)
         {
             Player caster = GetCaster().ToPlayer();
-
             Creature target = GetHitCreature();
-            if (target)
+            if (target != null)
             {
-                if (target && !target.HasAura(SpellIds.Flames))
+                if (!target.HasAura(SpellIds.Flames))
                 {
                     caster.KilledMonsterCredit(CreatureIds.VillagerKillCredit);
                     target.CastSpell(target, SpellIds.Flames, true);
@@ -1559,7 +1558,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            uint spellId = 0;
+            uint spellId;
 
             switch (GetHitCreature().GetEntry())
             {

@@ -46,33 +46,17 @@ namespace Scripts.Spells.Warrior
         public const uint ImpendingVictory = 202168;
         public const uint ImpendingVictoryHeal = 202166;
         public const uint ImprovedHeroicLeap = 157449;
-        public const uint JuggernautCritBonusBuff = 65156;
-        public const uint JuggernautCritBonusTalent = 64976;
-        public const uint LastStandTriggered = 12976;
         public const uint MortalStrike = 12294;
         public const uint MortalWounds = 213667;
         public const uint RallyingCry = 97463;
-        public const uint Rend = 94009;
-        public const uint RetaliationDamage = 22858;
-        public const uint SecoundWindProcRank1 = 29834;
-        public const uint SecoundWindProcRank2 = 29838;
-        public const uint SecoundWindTriggerRank1 = 29841;
-        public const uint SecoundWindTriggerRank2 = 29842;
-        public const uint ShieldSlam = 23922;
         public const uint Shockwave = 46968;
         public const uint ShockwaveStun = 132168;
-        public const uint Slam = 50782;
         public const uint Stoicism = 70845;
         public const uint StormBoltStun = 132169;
         public const uint SweepingStrikesExtraAttack1 = 12723;
         public const uint SweepingStrikesExtraAttack2 = 26654;
         public const uint Taunt = 355;
         public const uint TraumaEffect = 215537;
-        public const uint UnrelentingAssaultRank1 = 46859;
-        public const uint UnrelentingAssaultRank2 = 46860;
-        public const uint UnrelentingAssaultTrigger1 = 64849;
-        public const uint UnrelentingAssaultTrigger2 = 64850;
-        public const uint Vengeance = 76691;
         public const uint Victorious = 32216;
         public const uint VictoriousRushHeal = 118779;
     }
@@ -192,61 +176,7 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    // Updated 4.3.4
-    [Script]
-    class spell_warr_concussion_blow : SpellScript
-    {
-        void HandleDummy(uint effIndex)
-        {
-            SetHitDamage((int)MathFunctions.CalculatePct(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), GetEffectValue()));
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 2, SpellEffectName.Dummy));
-        }
-    }
-
-    // Updated 4.3.4
-    [Script] // 5308 - Execute
-    class spell_warr_execute : SpellScript
-    {
-        void HandleEffect(uint effIndex)
-        {
-            /*
-            Unit caster = GetCaster();
-            if (GetHitUnit())
-            {
-                SpellInfo spellInfo = GetSpellInfo();
-                int rageUsed = Math.Min(200 - spellInfo.CalcPowerCost(caster, spellInfo.SchoolMask), caster.GetPower(PowerType.Rage));
-                int newRage = Math.Max(0, caster.GetPower(PowerType.Rage) - rageUsed);
-
-                // Sudden Death rage save
-                AuraEffect aurEff = caster.GetAuraEffect(AuraType.ProcTriggerSpell, SpellFamilyNames.Generic, 1989, 0); // Icon SuddenDeath
-                if (aurEff != null)
-                {
-                    int ragesave = aurEff.GetSpellInfo().GetEffect(0).CalcValue() * 10;
-                    newRage = Math.Max(newRage, ragesave);
-                }
-
-                caster.SetPower(PowerType.Rage, newRage);
-
-                // Formula taken from the DBC: "${10+$AP*0.437*$m1/100}"
-                int baseDamage = (int)(10 + caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.437f * GetEffectValue() / 100.0f);
-                // Formula taken from the DBC: "${$ap*0.874*$m1/100-1} = 20 rage"
-                int moreDamage = (int)(rageUsed * (caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.874f * GetEffectValue() / 100.0f - 1) / 200);
-                SetHitDamage(baseDamage + moreDamage);
-            }
-            */
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.SchoolDamage));
-        }
-    }
-
-    [Script] // Heroic leap - 6544
+    [Script] // 6544 Heroic leap
     class spell_warr_heroic_leap : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -390,55 +320,8 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    // -84583 Lambs to the Slaughter
-    [Script]
-    class spell_warr_lambs_to_the_slaughter : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.MortalStrike, SpellIds.Rend);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            Aura aur = eventInfo.GetProcTarget().GetAura(SpellIds.Rend, GetTarget().GetGUID());
-            if (aur != null)
-                aur.SetDuration(aur.GetSpellInfo().GetMaxDuration(), true);
-
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
-    // Updated 4.3.4
-    // 12975 - Last Stand
-    [Script]
-    class spell_warr_last_stand : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.LastStandTriggered);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            int healthModSpellBasePoints0 = (int)(caster.CountPctFromMaxHealth(GetEffectValue()));
-            caster.CastCustomSpell(caster, SpellIds.LastStandTriggered, healthModSpellBasePoints0, 0, 0, true, null);
-        }
-
-        public override void Register()
-        {
-            // add dummy effect spell handler to Last Stand
-            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
     [Script] // 12294 - Mortal Strike 7.1.5
-    class spell_warr_mortal_strike_SpellScript : SpellScript
+    class spell_warr_mortal_strike : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -458,31 +341,6 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    [Script] // 7384 - Overpower
-    class spell_warr_overpower : SpellScript
-    {
-        void HandleEffect(uint effIndex)
-        {
-            uint spellId = 0;
-            if (GetCaster().HasAura(SpellIds.UnrelentingAssaultRank1))
-                spellId = SpellIds.UnrelentingAssaultTrigger1;
-            else if (GetCaster().HasAura(SpellIds.UnrelentingAssaultRank2))
-                spellId = SpellIds.UnrelentingAssaultTrigger2;
-
-            if (spellId == 0)
-                return;
-
-            Player target = GetHitPlayer();
-            if (target)
-                if (target.IsNonMeleeSpellCast(false, false, true)) // UNIT_STATE_CASTING should not be used here, it's present during a tick for instant casts
-                    target.CastSpell(target, spellId, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.Any));
-        }
-    }
     [Script] // 97462 - Rallying Cry
     class spell_warr_rallying_cry : SpellScript
     {
@@ -506,157 +364,6 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // 94009 - Rend
-    [Script]
-    class spell_warr_rend : AuraScript
-    {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                canBeRecalculated = false;
-
-                // $0.25 * (($MWB + $mwb) / 2 + $AP / 14 * $MWS) bonus per tick
-                float ap = caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
-                int mws = (int)caster.GetBaseAttackTime(WeaponAttackType.BaseAttack);
-                float mwbMin = caster.GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage);
-                float mwbMax = caster.GetWeaponDamageRange(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage);
-                float mwb = ((mwbMin + mwbMax) / 2 + ap * mws / 14000) * 0.25f;
-                amount += (int)(caster.ApplyEffectModifiers(GetSpellInfo(), aurEff.GetEffIndex(), mwb));
-            }
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.PeriodicDamage));
-        }
-    }
-
-    // 20230 - Retaliation
-    [Script]
-    class spell_warr_retaliation : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.RetaliationDamage);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            // check attack comes not from behind and warrior is not stunned
-            return GetTarget().IsInFront(eventInfo.GetProcTarget(), MathFunctions.PI) && !GetTarget().HasUnitState(UnitState.Stunned);
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.RetaliationDamage, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // 64380, 65941 - Shattering Throw
-    [Script]
-    class spell_warr_shattering_throw : SpellScript
-    {
-        void HandleScript(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-
-            // Remove shields, will still display immune to damage part
-            Unit target = GetHitUnit();
-            if (target)
-                target.RemoveAurasWithMechanic(1 << (int)Mechanics.ImmuneShield, AuraRemoveMode.EnemySpell);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    // Updated 4.3.4
-    [Script]
-    class spell_warr_slam : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Slam);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            if (GetHitUnit())
-                GetCaster().CastCustomSpell(SpellIds.Slam, SpellValueMod.BasePoint0, GetEffectValue(), GetHitUnit(), TriggerCastFlags.FullMask);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
-    class spell_warr_second_wind_proc : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.SecoundWindProcRank1, SpellIds.SecoundWindProcRank2, SpellIds.SecoundWindTriggerRank1, SpellIds.SecoundWindTriggerRank2);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            if (eventInfo.GetProcTarget() == GetTarget())
-                return false;
-            if (eventInfo.GetDamageInfo().GetSpellInfo() == null ||
-                (eventInfo.GetDamageInfo().GetSpellInfo().GetAllEffectsMechanicMask() & ((1 << (int)Mechanics.Root) | (1 << (int)Mechanics.Stun))) == 0)
-                return false;
-            return true;
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            uint spellId = 0;
-
-            if (GetSpellInfo().Id == SpellIds.SecoundWindProcRank1)
-                spellId = SpellIds.SecoundWindTriggerRank1;
-            else if (GetSpellInfo().Id == SpellIds.SecoundWindProcRank2)
-                spellId = SpellIds.SecoundWindTriggerRank2;
-            if (spellId == 0)
-                return;
-
-            GetTarget().CastSpell(GetTarget(), spellId, true, null, aurEff);
-
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script]
-    class spell_warr_second_wind_trigger : AuraScript
-    {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            amount = (int)(GetUnitOwner().CountPctFromMaxHealth(amount));
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 1, AuraType.PeriodicHeal));
         }
     }
 
@@ -784,29 +491,6 @@ namespace Scripts.Spells.Warrior
         Unit _procTarget;
     }
 
-    // -46951 - Sword and Board
-    [Script]
-    class spell_warr_sword_and_board : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ShieldSlam);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            // Remove cooldown on Shield Slam
-            Player player = GetTarget().ToPlayer();
-            if (player)
-                player.GetSpellHistory().ResetCooldown(SpellIds.ShieldSlam, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
     [Script] // 215538 - Trauma
     class spell_warr_trauma : AuraScript
     {
@@ -894,76 +578,6 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             AfterCast.Add(new CastHandler(HandleHeal));
-        }
-    }
-
-    // 50720 - Vigilance
-    [Script]
-    class spell_warr_vigilance : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Vengeance);
-        }
-
-        public override bool Load()
-        {
-            //_procTarget = null;
-            return true;
-        }
-
-        /*bool CheckProc(ProcEventInfo eventInfo)
-        {
-            _procTarget = GetCaster();
-            return _procTarget && eventInfo.GetDamageInfo() != null;
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetSpellInfo().GetEffect(1).CalcValue()));
-
-            GetTarget().CastSpell(_procTarget, SpellIds.VigilanceProc, true, null, aurEff);
-            _procTarget.CastCustomSpell(_procTarget, SpellIds.Vengeance, damage, damage, damage, true, null, aurEff);
-        }*/
-
-        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                if (caster.HasAura(SpellIds.Vengeance))
-                    caster.RemoveAurasDueToSpell(SpellIds.Vengeance);
-            }
-        }
-
-        public override void Register()
-        {
-            //DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            //OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real));
-        }
-
-        //Unit _procTarget;
-    }
-
-    // 50725 Vigilance
-    [Script]
-    class spell_warr_vigilance_trigger : SpellScript
-    {
-        void HandleScript(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-
-            // Remove Taunt cooldown
-            Player target = GetHitPlayer();
-            if (target)
-                target.GetSpellHistory().ResetCooldown(SpellIds.Taunt, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 }

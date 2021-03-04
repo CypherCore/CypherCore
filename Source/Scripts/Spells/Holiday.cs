@@ -326,7 +326,7 @@ namespace Scripts.Spells.Holiday
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
 
-            uint spellId = 0;
+            uint spellId;
             bool female = target.GetGender() == Gender.Female;
 
             switch (GetSpellInfo().Id)
@@ -386,7 +386,7 @@ namespace Scripts.Spells.Holiday
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
-        uint _triggeredSpellId;
+        readonly uint _triggeredSpellId;
 
         bool _handled;
     }

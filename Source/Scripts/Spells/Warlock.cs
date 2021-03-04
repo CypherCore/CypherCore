@@ -27,43 +27,22 @@ namespace Scripts.Spells.Warlock
 {
     struct SpellIds
     {
-        public const uint BaneOfDoomEffect = 18662;
         public const uint CreateHealthstone = 23517;
         public const uint DemonicCircleAllowCast = 62388;
         public const uint DemonicCircleSummon = 48018;
         public const uint DemonicCircleTeleport = 48020;
-        public const uint DemonicEmpowermentFelguard = 54508;
-        public const uint DemonicEmpowermentFelhunter = 54509;
-        public const uint DemonicEmpowermentImp = 54444;
-        public const uint DemonicEmpowermentSuccubus = 54435;
-        public const uint DemonicEmpowermentVoidwalker = 54443;
-        public const uint DemonSoulImp = 79459;
-        public const uint DemonSoulFelhunter = 79460;
-        public const uint DemonSoulFelguard = 79452;
-        public const uint DemonSoulSuccubus = 79453;
-        public const uint DemonSoulVoidwalker = 79454;
         public const uint DevourMagicHeal = 19658;
-        public const uint FelSynergyHeal = 54181;
         public const uint GlyphOfDemonTraining = 56249;
-        public const uint GlyphOfShadowflame = 63311;
         public const uint GlyphOfSoulSwap = 56226;
         public const uint GlyphOfSuccubus = 56250;
-        public const uint HauntHeal = 48210;
-        public const uint Immolate = 348;
         public const uint ImprovedHealthFunnelBuffR1 = 60955;
         public const uint ImprovedHealthFunnelBuffR2 = 60956;
         public const uint ImprovedHealthFunnelR1 = 18703;
         public const uint ImprovedHealthFunnelR2 = 18704;
-        public const uint ImprovedSoulFirePct = 85383;
-        public const uint ImprovedSoulFireState = 85385;
-        public const uint NetherWard = 91711;
-        public const uint NetherTalent = 91713;
         public const uint RainOfFire = 5740;
         public const uint RainOfFireDamage = 42223;
         public const uint SeedOfCorruptionDamage = 27285;
         public const uint SeedOfCorruptionGeneric = 32865;
-        public const uint ShadowTrance = 17941;
-        public const uint ShadowWard = 6229;
         public const uint Soulshatter = 32835;
         public const uint SoulSwapCdMarker = 94229;
         public const uint SoulSwapOverride = 86211;
@@ -99,27 +78,6 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             BeforeHit.Add(new BeforeHitHandler(HandleBanish));
-        }
-    }
-
-    [Script] // 17962 - Conflagrate - Updated to 4.3.4
-    class spell_warl_conflagrate : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Immolate);
-        }
-
-        // 6.x dmg formula in tooltip
-        // void HandleHit(uint effIndex)
-        // {
-        //     if (AuraEffect aurEff = GetHitUnit().GetAuraEffect(SPELL_WARLOCK_IMMOLATE, 2, GetCaster().GetGUID()))
-        //         SetHitDamage(CalculatePct(aurEff.GetAmount(), HasSpellInfo().Effects[1].CalcValue(GetCaster())));
-        // }
-
-        public override void Register()
-        {
-            //OnEffectHitTarget.Add(new EffectHandler(spell_warl_conflagrate_SpellScript::HandleHit, 0, SpellIds._EFFECT_SCHOOL_DAMAGE);
         }
     }
 
@@ -170,38 +128,6 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // 603 - Bane of Doom
-    class spell_warl_bane_of_doom : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BaneOfDoomEffect);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (!GetCaster())
-                return;
-
-            AuraRemoveMode removeMode = GetTargetApplication().GetRemoveMode();
-            if (removeMode != AuraRemoveMode.Death || !IsExpired())
-                return;
-
-            if (GetCaster().ToPlayer().IsHonorOrXPTarget(GetTarget()))
-                GetCaster().CastSpell(GetTarget(), SpellIds.BaneOfDoomEffect, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
         }
     }
 
@@ -268,103 +194,6 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 77801 - Demon Soul - Updated to 4.3.4
-    class spell_warl_demon_soul : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.DemonSoulImp, SpellIds.DemonSoulFelhunter, SpellIds.DemonSoulFelguard, SpellIds.DemonSoulSuccubus, SpellIds.DemonSoulVoidwalker);
-        }
-
-        void OnHitTarget(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            Creature targetCreature = GetHitCreature();
-            if (targetCreature)
-            {
-                if (targetCreature.IsPet())
-                {
-                    CreatureTemplate ci = targetCreature.GetCreatureTemplate();
-                    switch (ci.Family)
-                    {
-                        case CreatureFamily.Succubus:
-                            caster.CastSpell(caster, SpellIds.DemonSoulSuccubus);
-                            break;
-                        case CreatureFamily.Voidwalker:
-                            caster.CastSpell(caster, SpellIds.DemonSoulVoidwalker);
-                            break;
-                        case CreatureFamily.Felguard:
-                            caster.CastSpell(caster, SpellIds.DemonSoulFelguard);
-                            break;
-                        case CreatureFamily.Felhunter:
-                            caster.CastSpell(caster, SpellIds.DemonSoulFelhunter);
-                            break;
-                        case CreatureFamily.Imp:
-                            caster.CastSpell(caster, SpellIds.DemonSoulImp);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(OnHitTarget, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // 47193 - Demonic Empowerment
-    class spell_warl_demonic_empowerment : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.DemonicEmpowermentSuccubus, SpellIds.DemonicEmpowermentVoidwalker, SpellIds.DemonicEmpowermentFelguard, SpellIds.DemonicEmpowermentFelhunter, SpellIds.DemonicEmpowermentImp);
-        }
-
-        void HandleScriptEffect(uint effIndex)
-        {
-            Creature targetCreature = GetHitCreature();
-            if (targetCreature)
-            {
-                if (targetCreature.IsPet())
-                {
-                    CreatureTemplate ci = targetCreature.GetCreatureTemplate();
-                    switch (ci.Family)
-                    {
-                        case CreatureFamily.Succubus:
-                            targetCreature.CastSpell(targetCreature, SpellIds.DemonicEmpowermentSuccubus, true);
-                            break;
-                        case CreatureFamily.Voidwalker:
-                            {
-                                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicEmpowermentVoidwalker, GetCastDifficulty());
-                                int hp = (int)targetCreature.CountPctFromMaxHealth(GetCaster().CalculateSpellDamage(targetCreature, spellInfo, 0));
-                                targetCreature.CastCustomSpell(targetCreature, SpellIds.DemonicEmpowermentVoidwalker, hp, 0, 0, true);
-                                break;
-                            }
-                        case CreatureFamily.Felguard:
-                            targetCreature.CastSpell(targetCreature, SpellIds.DemonicEmpowermentFelguard, true);
-                            break;
-                        case CreatureFamily.Felhunter:
-                            targetCreature.CastSpell(targetCreature, SpellIds.DemonicEmpowermentFelhunter, true);
-                            break;
-                        case CreatureFamily.Imp:
-                            targetCreature.CastSpell(targetCreature, SpellIds.DemonicEmpowermentImp, true);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
     [Script] // 67518, 19505 - Devour Magic
     class spell_warl_devour_magic : SpellScript
     {
@@ -397,86 +226,6 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 47422 - Everlasting Affliction
-    class spell_warl_everlasting_affliction : SpellScript
-    {
-        void HandleScriptEffect(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
-            if (target)
-            {
-                // Refresh corruption on target
-                AuraEffect aurEff = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Warlock, new FlagArray128(0x2, 0, 0), caster.GetGUID());
-                if (aurEff != null)
-                {
-                    uint damage = (uint)Math.Max(aurEff.GetAmount(), 0);
-                    Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
-                    aurEff.SetDamage((int)(caster.SpellDamageBonusDone(target, aurEff.GetSpellInfo(), damage, DamageEffectType.DOT, GetEffectInfo(effIndex)) * aurEff.GetDonePct()));
-                    aurEff.CalculatePeriodic(caster, false, false);
-                    aurEff.GetBase().RefreshDuration(true);
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script] // -47230 - Fel Synergy
-    class spell_warl_fel_synergy : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FelSynergyHeal);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null || damageInfo.GetDamage() == 0)
-                return false;
-
-            return GetTarget().GetGuardianPet();
-        }
-
-        void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            int heal = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
-            GetTarget().CastCustomSpell(SpellIds.FelSynergyHeal, SpellValueMod.BasePoint0, heal, (Unit)null, true, null, aurEff); // TARGET_UNIT_PET
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 63310 - Glyph of Shadowflame
-    class spell_warl_glyph_of_shadowflame : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GlyphOfShadowflame);
-        }
-
-        void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.GlyphOfShadowflame, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] // 48181 - Haunt
     class spell_warl_haunt : SpellScript
     {
@@ -494,30 +243,6 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             AfterHit.Add(new HitHandler(HandleAfterHit));
-        }
-    }
-
-    [Script]
-    class spell_warl_haunt_AuraScript : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.HauntHeal);
-        }
-
-        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                int amount = aurEff.GetAmount();
-                GetTarget().CastCustomSpell(caster, SpellIds.HauntHeal, amount, 0, 0, true, null, aurEff, GetCasterGUID());
-            }
-        }
-
-        public override void Register()
-        {
-            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
         }
     }
 
@@ -554,7 +279,7 @@ namespace Scripts.Spells.Warlock
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(GetId(), SpellModOp.Cost, ref damage);
+                modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Cost, ref damage);
 
             SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
             damageInfo.periodicLog = true;
@@ -583,50 +308,6 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             OnHit.Add(new HitHandler(HandleOnHit));
-        }
-    }
-
-    [Script] // -18119 - Improved Soul Fire
-    class spell_warl_improved_soul_fire : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ImprovedSoulFirePct, SpellIds.ImprovedSoulFireState);
-        }
-
-        void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            GetTarget().CastCustomSpell(SpellIds.ImprovedSoulFirePct, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);
-            GetTarget().CastSpell(GetTarget(), SpellIds.ImprovedSoulFireState, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // 687 - Demon Armor
-    [Script] // 28176 - Fel Armor
-    class spell_warl_nether_ward_overrride : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.NetherTalent, SpellIds.NetherWard, SpellIds.ShadowWard);
-        }
-
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            if (GetUnitOwner().HasAura(SpellIds.NetherTalent))
-                amount = (int)SpellIds.NetherWard;
-            else
-                amount = (int)SpellIds.ShadowWard;
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 2, AuraType.OverrideActionbarSpells));
         }
     }
 
@@ -752,49 +433,6 @@ namespace Scripts.Spells.Warlock
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
-        }
-    }
-
-    [Script] // -7235 - Shadow Ward
-    class spell_warl_shadow_ward : AuraScript
-    {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-        {
-            canBeRecalculated = false;
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                // +80.68% from sp bonus
-                float bonus = 0.8068f;
-
-                bonus *= caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask());
-
-                amount += (int)bonus;
-            }
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.SchoolAbsorb));
-        }
-    }
-
-    [Script] // -30293 - Soul Leech
-    class spell_warl_soul_leech : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.GenReplenishment);
-        }
-
-        void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            GetTarget().CastSpell((Unit)null, SpellIds.GenReplenishment, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.ProcTriggerSpellWithValue));
         }
     }
 

@@ -150,6 +150,9 @@ namespace Scripts.Spells.Generic
 
         public const uint MissEffect = 62977;
 
+        //MossCoveredFeet
+        public const uint FallDown = 6869;
+
         //Netherbloom
         public const uint NetherBloomPollen1 = 28703;
 
@@ -363,6 +366,8 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_absorb0_hitlimit1 : AuraScript
     {
+        int limit;
+
         public override bool Load()
         {
             // Max absorb stored in 1 dummy effect
@@ -379,8 +384,6 @@ namespace Scripts.Spells.Generic
         {
             OnEffectAbsorb.Add(new EffectAbsorbHandler(Absorb, 0));
         }
-
-        int limit;
     }
 
     [Script] // 28764 - Adaptive Warding (Frostfire Regalia Set)
@@ -415,7 +418,7 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            uint spellId = 0;
+            uint spellId;
             switch (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()))
             {
                 case SpellSchools.Fire:
@@ -501,7 +504,7 @@ namespace Scripts.Spells.Generic
             AuraEffect aurEff1 = aurEff.GetBase().GetEffect(1);
             if (aurEff1 != null)
                 aurEff1.ChangeAmount(aurEff1.GetAmount() + 5);
-            aurEff.SetAmount((int)(100 * aurEff.GetTickNumber()));
+            aurEff.SetAmount(100 * (int)aurEff.GetTickNumber());
         }
 
         public override void Register()
@@ -550,24 +553,13 @@ namespace Scripts.Spells.Generic
     {
         bool CheckAreaTarget(Unit target)
         {
-            switch (target.GetEntry())
+            return (target.GetEntry()) switch
             {
                 // alliance
-                case 14762: // Dun Baldar North Marshal
-                case 14763: // Dun Baldar South Marshal
-                case 14764: // Icewing Marshal
-                case 14765: // Stonehearth Marshal
-                case 11948: // Vandar Stormspike
-                            // horde
-                case 14772: // East Frostwolf Warmaster
-                case 14776: // Tower Point Warmaster
-                case 14773: // Iceblood Warmaster
-                case 14777: // West Frostwolf Warmaster
-                case 11946: // Drek'thar
-                    return true;
-                default:
-                    return false;
-            }
+                // Dun Baldar North Marshal
+                14762 or 14763 or 14764 or 14765 or 11948 or 14772 or 14776 or 14773 or 14777 or 11946 => true,
+                _ => false,
+            };
         }
 
         public override void Register()
@@ -1003,6 +995,8 @@ namespace Scripts.Spells.Generic
     [Script("spell_gen_50pct_count_pct_from_max_hp", 50)]
     class spell_gen_count_pct_from_max_hp : SpellScript
     {
+        int _damagePct;
+
         public spell_gen_count_pct_from_max_hp(int damagePct)
         {
             _damagePct = damagePct;
@@ -1020,8 +1014,6 @@ namespace Scripts.Spells.Generic
         {
             OnHit.Add(new HitHandler(RecalculateDamage));
         }
-
-        int _damagePct;
     }
 
     [Script] // 63845 - Create Lance
@@ -1085,14 +1077,12 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            switch (spellInfo.Id)
+            return spellInfo.Id switch
             {
-                case SpellIds.SunreaverTrigger:
-                    return ValidateSpellInfo(SpellIds.SunreaverFemale, SpellIds.SunreaverMale);
-                case SpellIds.SilverCovenantTrigger:
-                    return ValidateSpellInfo(SpellIds.SilverCovenantFemale, SpellIds.SilverCovenantMale);
-            }
-            return false;
+                SpellIds.SunreaverTrigger => ValidateSpellInfo(SpellIds.SunreaverFemale, SpellIds.SunreaverMale),
+                SpellIds.SilverCovenantTrigger => ValidateSpellInfo(SpellIds.SilverCovenantFemale, SpellIds.SilverCovenantMale),
+                _ => false,
+            };
         }
 
         void HandleScript(uint effIndex)
@@ -1122,74 +1112,6 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-        }
-    }
-
-    [Script]
-    class spell_gen_defend : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.VisualShield1, SpellIds.VisualShield2, SpellIds.VisualShield3);
-        }
-
-        void RefreshVisualShields(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (GetCaster())
-            {
-                Unit target = GetTarget();
-
-                for (byte i = 0; i < GetSpellInfo().StackAmount; ++i)
-                    target.RemoveAurasDueToSpell(SpellIds.VisualShield1 + i);
-
-                target.CastSpell(target, SpellIds.VisualShield1 + GetAura().GetStackAmount() - 1, true, null, aurEff);
-            }
-            else
-                GetTarget().RemoveAurasDueToSpell(GetId());
-        }
-
-        void RemoveVisualShields(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            for (byte i = 0; i < GetSpellInfo().StackAmount; ++i)
-                GetTarget().RemoveAurasDueToSpell(SpellIds.VisualShield1 + i);
-        }
-
-        void RemoveDummyFromDriver(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            Unit caster = GetCaster();
-            if (caster)
-            {
-                TempSummon vehicle = caster.ToTempSummon();
-                if (vehicle)
-                {
-                    Unit rider = vehicle.GetSummoner();
-                    if (rider)
-                        rider.RemoveAurasDueToSpell(GetId());
-                }
-            }
-        }
-
-        public override void Register()
-        {
-            /*SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId);
-
-            // Defend spells cast by NPCs (add visuals)
-            if (spell.GetEffect(0).ApplyAuraName == AuraType.ModDamagePercentTaken)
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(RefreshVisualShields, 0, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.RealOrReapplyMask));
-                OnEffectRemove.Add(new EffectApplyHandler(RemoveVisualShields, 0, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.ChangeAmountMask));
-            }
-
-            // Remove Defend spell from player when he dismounts
-            if (spell.GetEffect(2).ApplyAuraName == AuraType.ModDamagePercentTaken)
-                OnEffectRemove.Add(new EffectApplyHandler(RemoveDummyFromDriver, 2, AuraType.ModDamagePercentTaken, AuraEffectHandleModes.Real));
-
-            // Defend spells cast by players (add/Remove visuals)
-            if (spell.GetEffect(1).ApplyAuraName == AuraType.Dummy)
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(RefreshVisualShields, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
-                OnEffectRemove.Add(new EffectApplyHandler(RemoveVisualShields, 1, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
-            }*/
         }
     }
 
@@ -1501,6 +1423,8 @@ namespace Scripts.Spells.Generic
     [Script("spell_faction_champion_dru_lifebloom", SpellIds.FactionChampionsDru)]
     class spell_gen_lifebloom : AuraScript
     {
+        readonly uint _spellId;
+
         public spell_gen_lifebloom(uint spellId)
         {
             _spellId = spellId;
@@ -1525,8 +1449,6 @@ namespace Scripts.Spells.Generic
         {
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
         }
-
-        uint _spellId;
     }
 
     [Script]
@@ -1638,6 +1560,27 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 6870 Moss Covered Feet
+    [Script] // 31399 Moss Covered Feet
+    class spell_gen_moss_covered_feet : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FallDown);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            eventInfo.GetActionTarget().CastSpell((Unit)null, SpellIds.FallDown, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
     [Script] // 28702 - Netherbloom
     class spell_gen_netherbloom : SpellScript
     {
@@ -1724,11 +1667,11 @@ namespace Scripts.Spells.Generic
             return true;
         }
 
-        void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        void OnProcEffect(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
-            uint spellId = 0;
+            uint spellId;
             switch (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()))
             {
                 case SpellSchools.Holy:
@@ -1758,7 +1701,7 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(onProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(OnProcEffect, 0, AuraType.Dummy));
         }
     }
 
@@ -1824,7 +1767,7 @@ namespace Scripts.Spells.Generic
     }
 
     // 35201 - Paralytic Poison
-    class spell_gen_paralytic_poison_AuraScript : AuraScript
+    class spell_gen_paralytic_poison : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2232,7 +2175,9 @@ namespace Scripts.Spells.Generic
 
     [Script]
     class spell_gen_spectator_cheer_trigger : SpellScript
-    {
+    {  
+        readonly static Emote[] EmoteArray = { Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud };
+
         void HandleDummy(uint effIndex)
         {
             GetCaster().HandleEmoteCommand(EmoteArray[RandomHelper.URand(0, 2)]);
@@ -2242,8 +2187,6 @@ namespace Scripts.Spells.Generic
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
-
-        static Emote[] EmoteArray = { Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud };
     }
 
     [Script]
@@ -2276,6 +2219,8 @@ namespace Scripts.Spells.Generic
     [Script("spell_gen_summon_earth_elemental", SpellIds.SummonEarthElemental)]
     class spell_gen_summon_elemental : AuraScript
     {
+        readonly uint _spellId;
+
         public spell_gen_summon_elemental(uint spellId)
         {
             _spellId = spellId;
@@ -2312,8 +2257,6 @@ namespace Scripts.Spells.Generic
             AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
-
-        uint _spellId;
     }
 
     [Script]
@@ -2418,7 +2361,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_trigger_exclude_caster_aura_spell_SpellScript : SpellScript
+    class spell_gen_trigger_exclude_caster_aura_spell : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2438,7 +2381,7 @@ namespace Scripts.Spells.Generic
     }
 
     [Script]
-    class spell_gen_trigger_exclude_target_aura_spell_SpellScript : SpellScript
+    class spell_gen_trigger_exclude_target_aura_spell : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -2463,6 +2406,8 @@ namespace Scripts.Spells.Generic
     [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
     class spell_pvp_trinket_wotf_shared_cd : SpellScript
     {
+        readonly uint _triggered;
+
         public spell_pvp_trinket_wotf_shared_cd(uint triggered)
         {
             _triggered = triggered;
@@ -2502,13 +2447,13 @@ namespace Scripts.Spells.Generic
         {
             AfterCast.Add(new CastHandler(HandleScript));
         }
-
-        uint _triggered;
     }
 
     [Script]
     class spell_gen_turkey_marker : AuraScript
     {
+        readonly List<uint> _applyTimes = new List<uint>();
+
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // store stack apply times, so we can pop them while they expire
@@ -2535,13 +2480,14 @@ namespace Scripts.Spells.Generic
             AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
             OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
-
-        List<uint> _applyTimes = new List<uint>();
     }
 
     [Script]
     class spell_gen_upper_deck_create_foam_sword : SpellScript
     {
+        //                       green  pink   blue   red    yellow
+        readonly static uint[] itemId = { 45061, 45176, 45177, 45178, 45179 };
+
         void HandleScript(uint effIndex)
         {
             Player player = GetHitPlayer();
@@ -2562,9 +2508,6 @@ namespace Scripts.Spells.Generic
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
-
-        //                       green  pink   blue   red    yellow
-        static uint[] itemId = { 45061, 45176, 45177, 45178, 45179 };
     }
 
     // 52723 - Vampiric Touch
@@ -2702,6 +2645,34 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             AfterHit.Add(new HitHandler(RemoveVehicleAuras));
+        }
+    }
+
+    [Script]
+    class spell_gen_eject_passenger : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            SpellEffectInfo effect = spellInfo.GetEffect(0);
+            if (effect == null || effect.CalcValue() < 1)
+                return false;
+            return true;
+        }
+
+        void EjectPassenger(uint effIndex)
+        {
+            Vehicle vehicle = GetHitUnit().GetVehicleKit();
+            if (vehicle != null)
+            {
+                Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
+                if (passenger)
+                    passenger.ExitVehicle();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(EjectPassenger, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -2867,15 +2838,12 @@ namespace Scripts.Spells.Generic
         WeakTrollsBloodElixir = 3219,
         ElixirOfLionsStrength = 2367,
         ElixirOfMinorDefense = 673
-    };
+    }
 
     [Script]
     class spell_gen_mixology_bonus : AuraScript
     {
-        public spell_gen_mixology_bonus()
-        {
-            bonus = 0;
-        }
+        int bonus;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -3064,8 +3032,6 @@ namespace Scripts.Spells.Generic
                 amount += bonus;
             }
         }
-
-        int bonus;
 
         public override void Register()
         {

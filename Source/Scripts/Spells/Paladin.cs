@@ -67,52 +67,6 @@ namespace Scripts.Spells.Paladin
         public const uint SealOfRighteousness = 25742;
     }
 
-    // 31821 - Aura Mastery
-    [Script]
-    class spell_pal_aura_mastery : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.AuraMasteryImmune);
-        }
-
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().CastSpell(GetTarget(), SpellIds.AuraMasteryImmune, true);
-        }
-
-        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveOwnedAura(SpellIds.AuraMasteryImmune, GetCasterGUID());
-        }
-
-        public override void Register()
-        {
-            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
-        }
-    }
-
-    // 64364 - Aura Mastery Immune
-    [Script]
-    class spell_pal_aura_mastery_immune : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.ConcentractionAura);
-        }
-
-        bool CheckAreaTarget(Unit target)
-        {
-            return target.HasAura(SpellIds.ConcentractionAura, GetCasterGUID());
-        }
-
-        public override void Register()
-        {
-            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
-        }
-    }
-
     // 37877 - Blessing of Faith
     [Script]
     class spell_pal_blessing_of_faith : SpellScript
@@ -127,7 +81,7 @@ namespace Scripts.Spells.Paladin
             Unit unitTarget = GetHitUnit();
             if (unitTarget)
             {
-                uint spell_id = 0;
+                uint spell_id;
                 switch (unitTarget.GetClass())
                 {
                     case Class.Druid:
@@ -317,56 +271,6 @@ namespace Scripts.Spells.Paladin
         {
             OnCast.Add(new CastHandler(HandleOnCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    // 33695 - Exorcism and Holy Wrath Damage
-    [Script]
-    class spell_pal_exorcism_and_holy_wrath_damage : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                spellMod = new SpellModifier(aurEff.GetBase());
-                spellMod.op = SpellModOp.Damage;
-                spellMod.type = SpellModType.Flat;
-                spellMod.spellId = GetId();
-                spellMod.mask[1] = 0x200002;
-            }
-
-            spellMod.value = aurEff.GetAmount();
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
-        }
-    }
-
-    // -9799 - Eye for an Eye
-    [Script]
-    class spell_pal_eye_for_an_eye : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.EyeForAnEyeDamage);
-        }
-
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null || damageInfo.GetDamage() == 0)
-                return;
-
-            int damage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            GetTarget().CastCustomSpell(SpellIds.EyeForAnEyeDamage, SpellValueMod.BasePoint0, damage, eventInfo.GetProcTarget(), true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, m_scriptSpellId == SpellIds.EyeForAnEyeRank1 ? AuraType.Dummy : AuraType.ProcTriggerSpell));
         }
     }
 
@@ -697,80 +601,6 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 31789 - Righteous Defense
-    [Script]
-    class spell_pal_righteous_defense : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.RighteousDefenseTaunt);
-        }
-
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (!caster.IsTypeId(TypeId.Player))
-                return SpellCastResult.DontReport;
-
-            Unit target = GetExplTargetUnit();
-            if (target)
-            {
-                if (!target.IsFriendlyTo(caster) || target.GetAttackers().Empty())
-                    return SpellCastResult.BadTargets;
-            }
-            else
-                return SpellCastResult.BadTargets;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        void HandleTriggerSpellLaunch(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-        }
-
-        void HandleTriggerSpellHit(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            Unit target = GetHitUnit();
-            if (target)
-                GetCaster().CastSpell(target, SpellIds.RighteousDefenseTaunt, true);
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            //! WORKAROUND
-            //! target select will be executed in hitphase of effect 0
-            //! so we must handle trigger spell also in hit phase (default execution in launch phase)
-            //! see issue #3718
-            OnEffectLaunchTarget.Add(new EffectHandler(HandleTriggerSpellLaunch, 1, SpellEffectName.TriggerSpell));
-            OnEffectHitTarget.Add(new EffectHandler(HandleTriggerSpellHit, 1, SpellEffectName.TriggerSpell));
-        }
-    }
-
-    // 85285 - Sacred Shield
-    [Script]
-    class spell_pal_sacred_shield : SpellScript
-    {
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (!caster.IsTypeId(TypeId.Player))
-                return SpellCastResult.DontReport;
-
-            if (!caster.HealthBelowPct(30))
-                return SpellCastResult.CantDoThatRightNow;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
-    };
-
     // 85256 - Templar's Verdict
     // Updated 4.3.4
     [Script]
@@ -821,38 +651,6 @@ namespace Scripts.Spells.Paladin
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(ChangeDamage, 0, SpellEffectName.WeaponPercentDamage));
-        }
-    }
-
-    // 20154, 21084 - Seal of Righteousness - melee proc dummy (addition ${$MWS*(0.022*$AP+0.044*$SPH)} damage)
-    [Script]
-    class spell_pal_seal_of_righteousness : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.SealOfCommand);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetProcTarget();
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            float ap = GetTarget().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack);
-            int holy = GetTarget().SpellBaseDamageBonusDone(SpellSchoolMask.Holy);
-            holy += eventInfo.GetProcTarget().SpellBaseDamageBonusTaken(SpellSchoolMask.Holy);
-            int bp = (int)((ap * 0.022f + 0.044f * holy) * GetTarget().GetBaseAttackTime(WeaponAttackType.BaseAttack) / 1000);
-            GetTarget().CastCustomSpell(SpellIds.SealOfCommand, SpellValueMod.BasePoint0, bp, eventInfo.GetProcTarget(), true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 

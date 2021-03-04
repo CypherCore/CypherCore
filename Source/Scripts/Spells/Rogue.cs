@@ -26,18 +26,11 @@ namespace Scripts.Spells.Rogue
     public struct SpellIds
     {
         public const uint BladeFlurryExtraAttack = 22482;
-        public const uint CheatDeathCooldown = 31231;
-        public const uint GlyphOfPreparation = 56819;
         public const uint KillingSpree = 51690;
         public const uint KillingSpreeTeleport = 57840;
         public const uint KillingSpreeWeaponDmg = 57841;
         public const uint KillingSpreeDmgBuff = 61851;
-        public const uint PreyOnTheWeak = 58670;
-        public const uint ShivTriggered = 5940;
-        public const uint TricksOfTheTradeDmgBoost = 57933;
         public const uint TricksOfTheTradeProc = 59628;
-        public const uint SerratedBladesR1 = 14171;
-        public const uint Rupture = 1943;
         public const uint HonorAmongThievesEnergize = 51699;
         public const uint T52pSetBonus = 37169;
     }

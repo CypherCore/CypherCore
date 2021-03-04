@@ -30,9 +30,10 @@ namespace Scripts.Spells.Druid
         public const uint BalanceT10Bonus = 70718;
         public const uint BalanceT10BonusProc = 70721;
         public const uint BlessingOfTheClaw = 28750;
-        public const uint BlessingOfTheRemulos = 40445;
-        public const uint BlessingOfTheElune = 40446;
-        public const uint BlessingOfTheCenarius = 40452;
+        public const uint BlessingOfRemulos = 40445;
+        public const uint BlessingOfElune = 40446;
+        public const uint BlessingOfCenarius = 40452;
+        public const uint CatForm = 768;
         public const uint Exhilarate = 28742;
         public const uint FeralChargeBear = 16979;
         public const uint FeralChargeCat = 49376;
@@ -45,18 +46,23 @@ namespace Scripts.Spells.Druid
         public const uint FormsTrinketMoonkin = 37343;
         public const uint FormsTrinketNone = 37344;
         public const uint FormsTrinketTree = 37342;
+        public const uint GoreProc = 93622;
         public const uint IdolOfFeralShadows = 34241;
         public const uint IdolOfWorship = 60774;
+        public const uint IncarnationKingOfTheJungle = 102543;
         public const uint Infusion = 37238;
         public const uint Languish = 71023;
         public const uint LifebloomEnergize = 64372;
         public const uint LifebloomFinalHeal = 33778;
         public const uint LivingSeedHeal = 48503;
         public const uint LivingSeedProc = 48504;
+        public const uint Mangle = 33917;
         public const uint MoonfireDamage = 164812;
         public const uint RejuvenationT10Proc = 70691;
         public const uint RestorationT102PBonus = 70658;
         public const uint SavageRoar = 62071;
+        public const uint SkullBashCharge = 221514;
+        public const uint SkullBashInterrupt = 93985;
         public const uint StampedeBearRank1 = 81016;
         public const uint StampedeCatRank1 = 81021;
         public const uint StampedeCatState = 109881;
@@ -78,6 +84,54 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseSpeed));
+        }
+    }
+
+    [Script] // 22568 - Ferocious Bite
+    class spell_dru_ferocious_bite : SpellScript
+    {
+        float _damageMultiplier = 0.0f;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IncarnationKingOfTheJungle)
+            && Global.SpellMgr.GetSpellInfo(SpellIds.IncarnationKingOfTheJungle, Difficulty.None).GetEffect(1) != null;
+        }
+
+        void HandleHitTargetBurn(uint effIndex)
+        {
+            int newValue = (int)((float)GetEffectValue() * _damageMultiplier);
+            SetEffectValue(newValue);
+        }
+
+        void HandleHitTargetDmg(uint effIndex)
+        {
+            int newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
+            SetHitDamage(newValue);
+        }
+
+        void HandleLaunchTarget(uint effIndex)
+        {
+            Unit caster = GetCaster();
+
+            int maxExtraConsumedPower = GetEffectValue();
+
+            AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.IncarnationKingOfTheJungle, 1);
+            if (auraEffect != null)
+            {
+                float multiplier = 1.0f + (float)auraEffect.GetAmount() / 100.0f;
+                maxExtraConsumedPower = (int)((float)maxExtraConsumedPower * multiplier);
+                SetEffectValue(maxExtraConsumedPower);
+            }
+
+            _damageMultiplier = Math.Min(caster.GetPower(PowerType.Energy), maxExtraConsumedPower) / maxExtraConsumedPower;
+        }
+
+        public override void Register()
+        {
+            OnEffectLaunchTarget .Add(new EffectHandler(HandleLaunchTarget, 1, SpellEffectName.PowerBurn));
+            OnEffectHitTarget .Add(new EffectHandler(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn));
+            OnEffectHitTarget .Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -131,7 +185,7 @@ namespace Scripts.Spells.Druid
         {
             PreventDefaultAction();
             Unit target = eventInfo.GetActor();
-            uint triggerspell = 0;
+            uint triggerspell;
 
             switch (target.GetShapeshiftForm())
             {
@@ -165,7 +219,34 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 34246 - Idol of the Emerald Queen
+    [Script] // 210706 - Gore
+    class spell_dru_gore : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GoreProc, SpellIds.Mangle);
+        }
+
+        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        {
+            Unit owner = GetTarget();
+            owner.CastSpell(owner, SpellIds.GoreProc);
+            owner.GetSpellHistory().ResetCooldown(SpellIds.Mangle, true);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+             // 34246 - Idol of the Emerald Queen
     [Script] // 60779 - Idol of Lush Moss
     class spell_dru_idol_lifebloom : AuraScript
     {
@@ -188,8 +269,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 29166 - Innervate
-    [Script]
+    [Script] // 29166 - Innervate
     class spell_dru_innervate : AuraScript
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -207,8 +287,56 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 33763 - Lifebloom
-    [Script]
+    [Script] // 40442 - Druid Tier 6 Trinket
+    class spell_dru_item_t6_trinket : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlessingOfRemulos, SpellIds.BlessingOfElune, SpellIds.BlessingOfCenarius);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null)
+                return;
+
+            uint spellId;
+            int chance;
+
+            // Starfire
+            if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000004u))
+            {
+                spellId = SpellIds.BlessingOfRemulos;
+                chance = 25;
+            }
+            // Rejuvenation
+            else if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000010u))
+            {
+                spellId = SpellIds.BlessingOfElune;
+                chance = 25;
+            }
+            // Mangle (Bear) and Mangle (Cat)
+            else if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00000440u))
+            {
+                spellId = SpellIds.BlessingOfCenarius;
+                chance = 40;
+            }
+            else
+                return;
+
+            if (RandomHelper.randChance(chance))
+                eventInfo.GetActor().CastSpell((Unit)null, spellId, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 33763 - Lifebloom
     class spell_dru_lifebloom : AuraScript
     {
         public override bool Validate(SpellInfo spell)
@@ -234,11 +362,11 @@ namespace Scripts.Spells.Druid
                 GetTarget().CastCustomSpell(GetTarget(), SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, aurEff, GetCasterGUID());
 
                 // restore mana
-                var costs = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
-                var m = costs.Find(cost => cost.Power == PowerType.Mana);
-                if (m != null)
+                var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
+                var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
+                if (spellPowerCost != null)
                 {
-                    int returnMana = m.Amount * (int)stack / 2;
+                    int returnMana = spellPowerCost.Amount * (int)stack / 2;
                     caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, aurEff, GetCasterGUID());
                 }
                 return;
@@ -265,11 +393,11 @@ namespace Scripts.Spells.Druid
                         target.CastCustomSpell(target, SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, null, GetCasterGUID());
 
                         // restore mana
-                        var costs = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
-                        var m = costs.Find(cost => cost.Power == PowerType.Mana);
-                        if (m != null)
+                        var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
+                        var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
+                        if (spellPowerCost != null)
                         {
-                            int returnMana = m.Amount * dispelInfo.GetRemovedCharges() / 2;
+                            int returnMana = spellPowerCost.Amount * dispelInfo.GetRemovedCharges() / 2;
                             caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, null, GetCasterGUID());
                         }
                         return;
@@ -287,8 +415,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 48496 - Living Seed
-    [Script]
+    [Script] // 48496 - Living Seed
     class spell_dru_living_seed : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -309,8 +436,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 48504 - Living Seed (Proc)
-    [Script]
+    [Script] // 48504 - Living Seed (Proc)
     class spell_dru_living_seed_proc : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -344,8 +470,28 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 16972 - Predatory Strikes
-    [Script]
+    [Script] // 16864 - Omen of Clarity
+    class spell_dru_omen_of_clarity : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BalanceT10Bonus, SpellIds.BalanceT10BonusProc);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(SpellIds.BalanceT10Bonus))
+                target.CastSpell((Unit)null, SpellIds.BalanceT10BonusProc, true, null);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 16972 - Predatory Strikes
     class spell_dru_predatory_strikes : AuraScript
     {
         void UpdateAmount(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -362,8 +508,28 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 1079 - Rip
-    [Script]
+    [Script] // 5215 - Prowl
+    class spell_dru_prowl : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CatForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.CatForm);
+        }
+
+        public override void Register()
+        {
+            BeforeCast .Add(new CastHandler(HandleOnCast));
+        }
+    }
+
+    [Script] // 1079 - Rip
     class spell_dru_rip : AuraScript
     {
         public override bool Load()
@@ -400,29 +566,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    [Script] // 16864 - Omen of Clarity
-    class spell_dru_omen_of_clarity : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BalanceT10Bonus, SpellIds.BalanceT10BonusProc);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            Unit target = GetTarget();
-            if (target.HasAura(SpellIds.BalanceT10Bonus))
-                target.CastSpell((Unit)null, SpellIds.BalanceT10BonusProc, true, null);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
-        }
-    }
-
-    // 52610 - Savage Roar
-    [Script]
+    [Script] // 52610 - Savage Roar
     class spell_dru_savage_roar : SpellScript
     {
         SpellCastResult CheckCast()
@@ -466,6 +610,26 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    [Script] // 106839 - Skull Bash
+    class spell_dru_skull_bash : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SkullBashCharge, SpellIds.SkullBashInterrupt);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashCharge, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashInterrupt, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget .Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
     [Script] // 78892 - Stampede
     class spell_dru_stampede : AuraScript
     {
@@ -500,8 +664,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 50286 - Starfall (Dummy)
-    [Script]
+    [Script] // 50286 - Starfall (Dummy)
     class spell_dru_starfall_dummy : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
@@ -549,8 +712,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 61336 - Survival Instincts
-    [Script]
+    [Script] // 61336 - Survival Instincts
     class spell_dru_survival_instincts : SpellScript
     {
         SpellCastResult CheckCast()
@@ -579,24 +741,16 @@ namespace Scripts.Spells.Druid
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            int bp0 = (int)target.CountPctFromMaxHealth(aurEff.GetAmount());
-            target.CastCustomSpell(target, SpellIds.SurvivalInstincts, bp0, 0, 0, true);
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            GetTarget().RemoveAurasDueToSpell(SpellIds.SurvivalInstincts);
+            target.CastSpell(target, SpellIds.SurvivalInstincts, true);
         }
 
         public override void Register()
         {
             AfterEffectApply.Add(new EffectApplyHandler(AfterApply, 0, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.ChangeAmountMask));
         }
     }
 
-    // 40121 - Swift Flight Form (Passive)
-    [Script]
+    [Script] // 40121 - Swift Flight Form (Passive)
     class spell_dru_swift_flight_passive : AuraScript
     {
         public override bool Load()
@@ -654,12 +808,12 @@ namespace Scripts.Spells.Druid
                 return;
 
             Unit caster = eventInfo.GetActor();
-            var costs = spell.GetPowerCost();
-            var m = costs.First(cost => cost.Power == PowerType.Mana);
-            if (m == null)
+            var spellPowerCostList = spell.GetPowerCost();
+            var spellPowerCost = spellPowerCostList.First(cost => cost.Power == PowerType.Mana);
+            if (spellPowerCost == null)
                 return;
 
-            int amount = MathFunctions.CalculatePct(m.Amount, aurEff.GetAmount());
+            int amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
             caster.CastCustomSpell(SpellIds.Exhilarate, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
@@ -669,7 +823,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 37288 - Mana Restore
+             // 37288 - Mana Restore
     [Script] // 37295 - Mana Restore
     class spell_dru_t4_2p_bonus : AuraScript
     {
@@ -687,6 +841,194 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 70723 - Item - Druid T10 Balance 4P Bonus
+    class spell_dru_t10_balance_4p_bonus : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Languish);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
+                return;
+
+            Unit caster = eventInfo.GetActor();
+            Unit target = eventInfo.GetProcTarget();
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
+            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            amount /= (int)spellInfo.GetMaxTicks();
+            // Add remaining ticks to damage done
+            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
+
+            caster.CastCustomSpell(SpellIds.Languish, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 70691 - Item T10 Restoration 4P Bonus
+    class spell_dru_t10_restoration_4p_bonus : SpellScript
+    {
+        public override bool Load()
+        {
+            return GetCaster().IsTypeId(TypeId.Player);
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            if (!GetCaster().ToPlayer().GetGroup())
+            {
+                targets.Clear();
+                targets.Add(GetCaster());
+            }
+            else
+            {
+                targets.Remove(GetExplTargetUnit());
+                List<Unit> tempTargets = new List<Unit>();
+                foreach (var obj in targets)
+                    if (obj.IsTypeId(TypeId.Player) && GetCaster().IsInRaidWith(obj.ToUnit()))
+                        tempTargets.Add(obj.ToUnit());
+
+                if (tempTargets.Empty())
+                {
+                    targets.Clear();
+                    FinishCast(SpellCastResult.DontReport);
+                    return;
+                }
+
+                Unit target = tempTargets.SelectRandom();
+                targets.Clear();
+                targets.Add(target);
+            }
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect .Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+        }
+    }
+
+    [Script] // 70664 - Druid T10 Restoration 4P Bonus (Rejuvenation)
+    class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RejuvenationT10Proc);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null || spellInfo.Id == SpellIds.RejuvenationT10Proc)
+                return false;
+
+            HealInfo healInfo = eventInfo.GetHealInfo();
+            if (healInfo == null || healInfo.GetHeal() == 0)
+                return false;
+
+            Player caster = eventInfo.GetActor().ToPlayer();
+            if (!caster)
+                return false;
+
+            return caster.GetGroup() || caster != eventInfo.GetProcTarget();
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            int amount = (int)eventInfo.GetHealInfo().GetHeal();
+            eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc .Add(new CheckProcHandler(CheckProc));
+            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+             // 1066 - Aquatic Form
+             // 33943 - Flight Form
+             // 40120 - Swift Flight Form
+    [Script] // 165961 - Stag Form
+    class spell_dru_travel_form_AuraScript : AuraScript
+    {
+        uint triggeredSpellId;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().GetTypeId() == TypeId.Player;
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
+            triggeredSpellId = 0;
+
+            // We should only handle aura interrupts.
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
+                return;
+
+            // Check what form is appropriate
+            Player player = GetTarget().ToPlayer();
+            if (player.IsInWater()) // Aquatic form
+                triggeredSpellId = SpellIds.FormAquatic;
+            else if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
+                triggeredSpellId = player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
+            else if (CheckLocationForForm(SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
+                triggeredSpellId = SpellIds.FormStag;
+
+            // If chosen form is current aura, just don't Remove it.
+            if (triggeredSpellId == m_scriptSpellId)
+                PreventDefaultAction();
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (triggeredSpellId == m_scriptSpellId)
+                return;
+
+            Player player = GetTarget().ToPlayer();
+
+            if (triggeredSpellId != 0) // Apply new form
+                player.AddAura(triggeredSpellId, player);
+            else // If not set, simply Remove Travel Form dummy
+                player.RemoveAura(SpellIds.TravelForm);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+        }
+
+        SpellCastResult CheckLocationForForm(uint spellId)
+        {
+            Player player = GetTarget().ToPlayer();
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
+
+            if (!player.GetMap().IsOutdoors(player.GetPhaseShift(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()))
+                return SpellCastResult.OnlyOutdoors;
+
+            return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
         }
     }
 
@@ -764,247 +1106,11 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    // 1066 - Aquatic Form
-    // 33943 - Flight Form
-    // 40120 - Swift Flight Form
-    [Script]  // 165961 - Stag Form
-    class spell_dru_travel_form_AuraScript : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().GetTypeId() == TypeId.Player;
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
-            triggeredSpellId = 0;
-
-            // We should only handle aura interrupts.
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
-                return;
-
-            // Check what form is appropriate
-            Player player = GetTarget().ToPlayer();
-            if (player.IsInWater()) // Aquatic form
-                triggeredSpellId = SpellIds.FormAquatic;
-            else if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
-                triggeredSpellId = player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
-            else if (CheckLocationForForm(SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
-                triggeredSpellId = SpellIds.FormStag;
-
-            // If chosen form is current aura, just don't Remove it.
-            if (triggeredSpellId == m_scriptSpellId)
-                PreventDefaultAction();
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (triggeredSpellId == m_scriptSpellId)
-                return;
-
-            Player player = GetTarget().ToPlayer();
-
-            if (triggeredSpellId != 0) // Apply new form
-                player.AddAura(triggeredSpellId, player);
-            else // If not set, simply Remove Travel Form dummy
-                player.RemoveAura(SpellIds.TravelForm);
-        }
-
-        public override void Register()
-        {
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-        }
-
-        SpellCastResult CheckLocationForForm(uint spell_id)
-        {
-            Player player = GetTarget().ToPlayer();
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, GetCastDifficulty());
-
-            if (!player.GetMap().IsOutdoors(player.GetPhaseShift(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()))
-                return SpellCastResult.OnlyOutdoors;
-
-            return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
-        }
-
-        uint triggeredSpellId;
-    }
-
-    [Script] // 40442 - Druid Tier 6 Trinket
-    class spell_dru_item_t6_trinket : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.BlessingOfTheRemulos, SpellIds.BlessingOfTheElune, SpellIds.BlessingOfTheCenarius);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
-            if (spellInfo == null)
-                return;
-
-            uint spellId;
-            int chance;
-
-            // Starfire
-            if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000004u))
-            {
-                spellId = SpellIds.BlessingOfTheRemulos;
-                chance = 25;
-            }
-            // Rejuvenation
-            else if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000010u))
-            {
-                spellId = SpellIds.BlessingOfTheElune;
-                chance = 25;
-            }
-            // Mangle (Bear) and Mangle (Cat)
-            else if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00000440u))
-            {
-                spellId = SpellIds.BlessingOfTheCenarius;
-                chance = 40;
-            }
-            else
-                return;
-
-            if (RandomHelper.randChance(chance))
-                eventInfo.GetActor().CastSpell((Unit)null, spellId, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    [Script] // 70723 - Item - Druid T10 Balance 4P Bonus
-    class spell_dru_t10_balance_4p_bonus : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.Languish);
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null || damageInfo.GetDamage() == 0)
-                return;
-
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            amount /= (int)spellInfo.GetMaxTicks();
-            // Add remaining ticks to damage done
-            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
-
-            caster.CastCustomSpell(SpellIds.Languish, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // 70691 - Item T10 Restoration 4P Bonus
-    [Script]
-    class spell_dru_t10_restoration_4p_bonus : SpellScript
-    {
-        public override bool Load()
-        {
-            return GetCaster().IsTypeId(TypeId.Player);
-        }
-
-        void FilterTargets(List<WorldObject> targets)
-        {
-            if (GetCaster().ToPlayer().GetGroup() == null)
-            {
-                targets.Clear();
-                targets.Add(GetCaster());
-            }
-            else
-            {
-                targets.Remove(GetExplTargetUnit());
-                List<Unit> tempTargets = new List<Unit>();
-                foreach (var obj in targets)
-                    if (obj.IsTypeId(TypeId.Player) && GetCaster().IsInRaidWith(obj.ToUnit()))
-                        tempTargets.Add(obj.ToUnit());
-
-                if (tempTargets.Empty())
-                {
-                    targets.Clear();
-                    FinishCast(SpellCastResult.DontReport);
-                    return;
-                }
-
-                Unit target = tempTargets.SelectRandom();
-                targets.Clear();
-                targets.Add(target);
-            }
-        }
-
-        public override void Register()
-        {
-            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
-        }
-    }
-
-    [Script] // 70664 - Druid T10 Restoration 4P Bonus (Rejuvenation)
-    class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.RejuvenationT10Proc);
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
-            if (spellInfo == null || spellInfo.Id == SpellIds.RejuvenationT10Proc)
-                return false;
-
-            HealInfo healInfo = eventInfo.GetHealInfo();
-            if (healInfo == null || healInfo.GetHeal() == 0)
-                return false;
-
-            Player caster = eventInfo.GetActor().ToPlayer();
-            if (!caster)
-                return false;
-
-            return caster.GetGroup() || caster != eventInfo.GetProcTarget();
-        }
-
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-        {
-            PreventDefaultAction();
-
-            int amount = (int)eventInfo.GetHealInfo().GetHeal();
-            eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] // 48438 - Wild Growth
     class spell_dru_wild_growth : SpellScript
     {
+        List<WorldObject> _targets;
+
         public override bool Validate(SpellInfo spellInfo)
         {
             SpellEffectInfo effectInfo = spellInfo.GetEffect(2);
@@ -1046,8 +1152,6 @@ namespace Scripts.Spells.Druid
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SetTargets, 1, Targets.UnitDestAreaAlly));
         }
-
-        List<WorldObject> _targets;
     }
 
     [Script]
