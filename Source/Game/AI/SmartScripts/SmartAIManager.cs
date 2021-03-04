@@ -1330,6 +1330,16 @@ namespace Game.AI
 
                         break;
                     }
+                case SmartActions.CreateConversation:
+                    {
+                        if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.conversation.id) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: SMART_ACTION_CREATE_CONVERSATION Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses invalid entry {e.Action.conversation.id}, skipped.");
+                            return false;
+                        }
+
+                        break;
+                    }
                 case SmartActions.StartClosestWaypoint:
                 case SmartActions.Follow:
                 case SmartActions.SetOrientation:
@@ -2418,6 +2428,9 @@ namespace Game.AI
         public SpellVisualKit spellVisualKit;
 
         [FieldOffset(4)]
+        public Conversation conversation;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -2928,6 +2941,10 @@ namespace Game.AI
             public uint spellVisualKitId;
             public uint kitType;
             public uint duration;
+        }
+        public struct Conversation
+        {
+            public uint id;
         }
         public struct Raw
         {

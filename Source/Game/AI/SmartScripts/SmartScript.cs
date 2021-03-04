@@ -125,7 +125,7 @@ namespace Game.AI
                                 talkTarget = target.ToPlayer();
                                 break;
                             }
-                        }                        
+                        }
 
                         if (talkTarget == null)
                             talkTarget = GetLastInvoker();
@@ -1532,14 +1532,14 @@ namespace Game.AI
 
                         foreach (var target in targets)
                         {
-                            Creature creature = target.ToCreature(); 
+                            Creature creature = target.ToCreature();
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
                                     creature.GetAI<SmartAI>().SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
                             }
                             else
-                            {  
+                            {
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
                                 {
@@ -1620,7 +1620,7 @@ namespace Game.AI
                     {
                         List<uint> actionLists = new List<uint>();
                         var randTimedActionList = e.Action.randTimedActionList;
-                        foreach (var id in new[] { randTimedActionList.actionList1, randTimedActionList.actionList2, randTimedActionList.actionList3, randTimedActionList.actionList4, randTimedActionList.actionList5, randTimedActionList.actionList6})
+                        foreach (var id in new[] { randTimedActionList.actionList1, randTimedActionList.actionList2, randTimedActionList.actionList3, randTimedActionList.actionList4, randTimedActionList.actionList5, randTimedActionList.actionList6 })
                             if (id != 0)
                                 actionLists.Add(id);
 
@@ -1640,7 +1640,7 @@ namespace Game.AI
                                     creature.GetAI<SmartAI>().SetScript9(e, randomId, GetLastInvoker());
                             }
                             else
-                            {    
+                            {
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
                                 {
@@ -2327,6 +2327,26 @@ namespace Game.AI
                                 Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: target: {target.GetName()} ({target.GetGUID()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
                             }
                         }
+                        break;
+                    }
+                case SmartActions.CreateConversation:
+                    {
+                        WorldObject baseObject = GetBaseObject();
+                        if (baseObject != null)
+                        {
+                            foreach (WorldObject target in targets)
+                            {
+                                Player playerTarget = target.ToPlayer();
+                                if (playerTarget != null)
+                                {
+                                    Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
+                                        playerTarget, new List<ObjectGuid>() { playerTarget.GetGUID() }, null);
+                                    if (!conversation)
+                                        Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject.GetName()}, target {playerTarget.GetName()} - failed to create");
+                                }
+                            }
+                        }
+
                         break;
                     }
                 default:
