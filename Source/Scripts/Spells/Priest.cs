@@ -469,35 +469,6 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    // Base class used by various prayer of mending spells
-    class spell_pri_prayer_of_mending_SpellScriptBasefdgdfgdf : SpellScript
-    {
-        SpellInfo _spellInfoHeal;
-        SpellEffectInfo _healEffectDummy;
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingAura)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
-        }
-
-        public override bool Load()
-        {
-            _spellInfoHeal = Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None);
-            _healEffectDummy = _spellInfoHeal.GetEffect(0);
-            return true;
-        }
-
-        public void CastPrayerOfMendingAura(Unit caster, Unit target, byte stack)
-        {
-            uint basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(caster), DamageEffectType.Heal, _healEffectDummy);
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
-            values.Add(SpellValueMod.AuraStack, stack);
-            values.Add(SpellValueMod.BasePoint0, (int)basePoints);
-            caster.CastCustomSpell(SpellIds.PrayerOfMendingAura, values, target, TriggerCastFlags.FullMask);
-        }
-    }
-
     [Script] // 33076 - Prayer of Mending
     class spell_pri_prayer_of_mending : SpellScript
     {
