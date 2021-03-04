@@ -5573,6 +5573,18 @@ namespace Game.Spells
             }
         }
 
+        [SpellEffectHandler(SpellEffectName.PlaySceneScriptPackage)]
+        void EffectPlaySceneScriptPackage(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            if (!m_caster.IsTypeId(TypeId.Player))
+                return;
+
+            m_caster.ToPlayer().GetSceneMgr().PlaySceneByPackageId((uint)effectInfo.MiscValue, SceneFlags.Unk1, destTarget);
+        }
+
         [SpellEffectHandler(SpellEffectName.PlayScene)]
         void EffectPlayScene(uint effIndex)
         {
@@ -5654,6 +5666,18 @@ namespace Game.Spells
 
             azeriteItem.SetEssenceRank((uint)effectInfo.MiscValue, (uint)effectInfo.MiscValueB);
             azeriteItem.SetState(ItemUpdateState.Changed, playerTarget);
+        }
+
+        [SpellEffectHandler(SpellEffectName.CreatePrivateConversation)]
+        void EffectCreatePrivateConversation(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
+                return;
+
+            Conversation.CreateConversation((uint)effectInfo.MiscValue, GetCaster(), unitTarget.GetPosition(), new List<ObjectGuid>() { unitTarget.GetGUID() }, GetSpellInfo());
         }
     }
 
