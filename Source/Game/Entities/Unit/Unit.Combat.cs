@@ -1112,7 +1112,7 @@ namespace Game.Entities
 
             damage /= (uint)victim.GetHealthMultiplierForTarget(this);
 
-            if (victim.GetTypeId() != TypeId.Player && !victim.IsControlledByPlayer() || victim.IsVehicle())
+            if (victim.GetTypeId() != TypeId.Player && (!victim.IsControlledByPlayer() || victim.IsVehicle()))
             {
                 if (!victim.ToCreature().HasLootRecipient())
                     victim.ToCreature().SetLootRecipient(this);

@@ -3543,14 +3543,14 @@ namespace Game.Spells
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
-        public static void SendCastResult(Player caster, SpellInfo spellInfo, Networking.Packets.SpellCastVisual spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
+        public static void SendCastResult(Player caster, SpellInfo spellInfo, SpellCastVisual spellVisual, ObjectGuid castCount, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
 
             CastFailed packet = new CastFailed();
             packet.Visual = spellVisual;
-            FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, param1, param2, caster);
+            FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
         }
 

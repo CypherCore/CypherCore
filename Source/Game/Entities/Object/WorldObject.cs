@@ -1412,27 +1412,26 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TempSummonType.ManualDespawn, uint despwtime = 0, bool visibleBySummonerOnly = false)
+        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, bool visibleBySummonerOnly = false)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
-            {
                 GetClosePoint(out x, out y, out z, GetCombatReach());
-                ang = GetOrientation();
-            }
-            Position pos = new Position();
-            pos.Relocate(x, y, z, ang);
-            return SummonCreature(id, pos, spwtype, despwtime, 0, visibleBySummonerOnly);
+
+            if (o == 0.0f)
+                o = GetOrientation();
+
+            return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, visibleBySummonerOnly);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType spwtype = TempSummonType.ManualDespawn, uint duration = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
+        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, duration, ToUnit(), 0, vehId, visibleBySummonerOnly);
+                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, visibleBySummonerOnly);
                 if (summon != null)
                 {
-                    summon.SetTempSummonType(spwtype);
+                    summon.SetTempSummonType(despawnType);
                     return summon;
                 }
             }

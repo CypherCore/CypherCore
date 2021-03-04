@@ -1954,9 +1954,11 @@ namespace Game.Entities
             uint oldMSTime = Time.GetMSTime();
 
             mSpellAreaMap.Clear();                                  // need for reload case
+            mSpellAreaForAreaMap.Clear();
             mSpellAreaForQuestMap.Clear();
             mSpellAreaForQuestEndMap.Clear();
             mSpellAreaForAuraMap.Clear();
+            mSpellAreaForQuestAreaMap.Clear();
 
             //                                            0     1         2              3               4                 5          6          7       8      9
             SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
