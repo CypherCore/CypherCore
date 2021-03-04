@@ -3815,8 +3815,11 @@ namespace Game.Entities
             else
             {
                 // throttle packet sending
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), curValue);
-                m_unitData.ClearChanged(m_unitData.Power, (int)powerIndex);
+                DoWithSuppressingObjectUpdates(() =>
+                {
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), curValue);
+                    m_unitData.ClearChanged(m_unitData.Power, (int)powerIndex);
+                });
             }
         }
         void RegenerateHealth()

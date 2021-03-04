@@ -751,6 +751,17 @@ namespace Game.Entities
             }
         }
 
+        public void DoWithSuppressingObjectUpdates(Action action)
+        {
+            bool wasUpdatedBeforeAction = m_objectUpdated;
+            action();
+            if (m_objectUpdated && !wasUpdatedBeforeAction)
+            {
+                RemoveFromObjectUpdate();
+                m_objectUpdated = false;
+            }
+        }
+
         public virtual UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
         {
             return UpdateFieldFlag.None;

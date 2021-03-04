@@ -313,8 +313,11 @@ namespace Game.Entities
             _duration = newDuration;
 
             // should be sent in object create packets only
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), (uint)_duration);
-            m_areaTriggerData.ClearChanged(m_areaTriggerData.Duration);
+            DoWithSuppressingObjectUpdates(() =>
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), (uint)_duration);
+                m_areaTriggerData.ClearChanged(m_areaTriggerData.Duration);
+            });
         }
 
         float GetProgress()
@@ -702,8 +705,11 @@ namespace Game.Entities
             _spline.InitLengths();
 
             // should be sent in object create packets only
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
-            m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
+            DoWithSuppressingObjectUpdates(() =>
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
+                m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
+            });
 
             if (IsInWorld)
             {
@@ -732,8 +738,11 @@ namespace Game.Entities
             Cypher.Assert(cmi.Center.HasValue || cmi.PathTarget.HasValue);
 
             // should be sent in object create packets only
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
-            m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
+            DoWithSuppressingObjectUpdates(() =>
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
+                m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
+            });
 
             _orbitInfo.Set(cmi);
 
