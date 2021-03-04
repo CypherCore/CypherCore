@@ -1127,10 +1127,11 @@ namespace Game.Scripting
             ForEach<UnitScript>(p => p.ModifyMeleeDamage(target, attacker, ref dmg));
             damage = dmg;
         }
-        public void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage)
+        public void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo)
         {
             int dmg = damage;
-            ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg));
+            ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
+            ForEach<PlayerScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             damage = dmg;
         }
 

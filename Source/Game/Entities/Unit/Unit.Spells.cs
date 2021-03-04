@@ -2475,7 +2475,7 @@ namespace Game.Entities
             }
 
             // Script Hook For CalculateSpellDamageTaken -- Allow scripts to change the Damage post class mitigation calculations
-            Global.ScriptMgr.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage);
+            Global.ScriptMgr.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage, spellInfo);
 
             // Calculate absorb resist
             if (damage < 0)

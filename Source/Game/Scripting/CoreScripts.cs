@@ -303,7 +303,7 @@ namespace Game.Scripting
         public virtual void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage) { }
 
         // Called when Spell Damage is being Dealt
-        public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage) { }
+        public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo) { }
     }
 
     public class GenericCreatureScript<AI> : CreatureScript where AI : CreatureAI
