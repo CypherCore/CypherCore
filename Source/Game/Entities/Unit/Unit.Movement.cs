@@ -797,7 +797,7 @@ namespace Game.Entities
             if (IsFlying() || !IsControlledByPlayer())
                 return;
 
-            SetInWater(status & ZLiquidStatus.Swimming);
+            SetInWater(status.HasAnyFlag(ZLiquidStatus.Swimming));
 
             // liquid aura handling
             LiquidTypeRecord curLiquid = null;

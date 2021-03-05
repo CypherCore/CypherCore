@@ -181,7 +181,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 196926 - Crusader Might
     class spell_pal_crusader_might : AuraScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HolyShockR1);
         }
@@ -191,7 +191,7 @@ namespace Scripts.Spells.Paladin
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShockR1, aurEff.GetAmount());
         }
 
-        void Register()
+        public override void Register()
         {
             OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
@@ -295,7 +295,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 234299 - Fist of Justice
     class spell_pal_fist_of_justice : AuraScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HammerOfJustice);
         }
@@ -316,7 +316,7 @@ namespace Scripts.Spells.Paladin
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, -value);
         }
 
-        void Register()
+        public override void Register()
         {
             DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
             OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
@@ -406,7 +406,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 327193 - Moment of Glory
     class spell_pal_moment_of_glory : SpellScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AvengersShield);
         }
@@ -416,7 +416,7 @@ namespace Scripts.Spells.Paladin
             GetCaster().GetSpellHistory().ResetCooldown(SpellIds.AvengersShield);
         }
 
-        void Register()
+        public override void Register()
         {
             OnHit .Add(new HitHandler(HandleOnHit));
         }
@@ -425,7 +425,7 @@ namespace Scripts.Spells.Paladin
     [Script] // 20271/275779 - Judgement Ret/Prot
     class spell_pal_judgement : SpellScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.JudgementProtRetR3, SpellIds.JudementGainHolyPower);
         }
@@ -437,7 +437,7 @@ namespace Scripts.Spells.Paladin
                 caster.CastSpell(caster, SpellIds.JudementGainHolyPower, TriggerCastFlags.FullMask);
         }
 
-        void Register()
+        public override void Register()
         {
             OnHit .Add(new HitHandler(HandleOnHit));
         }
@@ -653,7 +653,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 204074 - Righteous Protector
+    [Script] // 204074 - Righteous Protector
     class spell_pal_righteous_protector : AuraScript
     {
         SpellPowerCost _baseHolyPowerCost;
@@ -692,22 +692,23 @@ namespace Scripts.Spells.Paladin
     [Script] // 267610 - Righteous Verdict
     class spell_pal_righteous_verdict : AuraScript
     {
-        bool Validate(SpellInfo spellEntry)
+        public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.RighteousVerdictAura);
         }
+
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             procInfo.GetActor().CastSpell(procInfo.GetActor(), SpellIds.RighteousVerdictAura, true);
         }
 
-        void Register()
+        public override void Register()
         {
             OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
-    // 85804 - Selfless Healer
+    [Script] // 85804 - Selfless Healer
     class spell_pal_selfless_healer : AuraScript
     {
         bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -719,16 +720,16 @@ namespace Scripts.Spells.Paladin
             return false;
         }
 
-        void Register()
+        public override void Register()
         {
             DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
-    // 85256 - Templar's Verdict
+    [Script] // 85256 - Templar's Verdict
     class spell_pal_templar_s_verdict : SpellScript
     {
-        bool Validate(SpellInfo spellEntry)
+        public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.TemplarVerdictDamage);
         }
@@ -738,7 +739,7 @@ namespace Scripts.Spells.Paladin
             GetCaster().CastSpell(GetHitUnit(), SpellIds.TemplarVerdictDamage, true);
         }
 
-        void Register()
+        public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleHitTarget, 0, SpellEffectName.Dummy));
         }
@@ -826,10 +827,10 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 269569 - Zeal
+    [Script] // 269569 - Zeal
     class spell_pal_zeal : AuraScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ZealAura);
         }
@@ -842,7 +843,7 @@ namespace Scripts.Spells.Paladin
             PreventDefaultAction();
         }
 
-        void Register()
+        public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
         }
