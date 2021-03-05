@@ -2677,11 +2677,7 @@ namespace Game.Spells
 
         SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
-            var spellPowerRecord = PowerCosts.First(spellPowerEntry =>
-            {
-                return spellPowerEntry.PowerType == powerType;
-            });
-
+            var spellPowerRecord = PowerCosts.First(spellPowerEntry => spellPowerEntry?.PowerType == powerType);
             if (spellPowerRecord == null)
                 return null;
 
@@ -2690,6 +2686,9 @@ namespace Game.Spells
 
         SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
+            if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
+                return null;
+
             SpellPowerCost cost = new();
 
             // Spell drain all exist power on cast (Only paladin lay of Hands)
@@ -2893,9 +2892,6 @@ namespace Game.Spells
             foreach (SpellPowerRecord power in PowerCosts)
             {
                 if (power == null)
-                    continue;
-
-                if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                     continue;
 
                 SpellPowerCost cost = CalcPowerCost(power, false, caster, schoolMask, spell);
