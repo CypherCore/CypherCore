@@ -2675,7 +2675,7 @@ namespace Game.Spells
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
         }
 
-        SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        public SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             var spellPowerRecord = PowerCosts.First(spellPowerEntry => spellPowerEntry?.PowerType == powerType);
             if (spellPowerRecord == null)
@@ -2684,7 +2684,7 @@ namespace Game.Spells
             return CalcPowerCost(spellPowerRecord, optionalCost, caster, schoolMask, spell);
         }
 
-        SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        public SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                 return null;

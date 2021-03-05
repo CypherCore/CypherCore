@@ -6502,7 +6502,7 @@ namespace Game.Spells
             SendChannelUpdate((uint)m_timer);
         }
 
-        bool HasPowerTypeCost(PowerType power)
+        public bool HasPowerTypeCost(PowerType power)
         {
             return m_powerCost.Any(cost => cost.Power == power);
         }
