@@ -32,7 +32,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.UseItem)]
-        void HandleUseItem(UseItem packet)
+        private void HandleUseItem(UseItem packet)
         {
             var user = GetPlayer();
 
@@ -126,7 +126,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.OpenItem)]
-        void HandleOpenItem(OpenItem packet)
+        private void HandleOpenItem(OpenItem packet)
         {
             var player = GetPlayer();
 
@@ -195,7 +195,7 @@ namespace Game
                 player.SendLoot(item.GetGUID(), LootType.Corpse);
         }
 
-        void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)
+        private void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)
         {
             if (!GetPlayer())
                 return;
@@ -235,7 +235,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GameObjUse)]
-        void HandleGameObjectUse(GameObjUse packet)
+        private void HandleGameObjectUse(GameObjUse packet)
         {
             var obj = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
             if (obj)
@@ -250,7 +250,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GameObjReportUse)]
-        void HandleGameobjectReportUse(GameObjReportUse packet)
+        private void HandleGameobjectReportUse(GameObjReportUse packet)
         {
             // ignore for remote control state
             if (GetPlayer().m_unitMovedByMe != GetPlayer())
@@ -267,7 +267,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CastSpell, Processing = PacketProcessing.ThreadSafe)]
-        void HandleCastSpell(CastSpell cast)
+        private void HandleCastSpell(CastSpell cast)
         {
             // ignore for remote control state (for player case)
             var mover = GetPlayer().m_unitMovedByMe;
@@ -342,14 +342,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]
-        void HandleCancelCast(CancelCast packet)
+        private void HandleCancelCast(CancelCast packet)
         {
             if (GetPlayer().IsNonMeleeSpellCast(false))
                 GetPlayer().InterruptNonMeleeSpells(false, packet.SpellID, false);
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelAura)]
-        void HandleCancelAura(CancelAura cancelAura)
+        private void HandleCancelAura(CancelAura cancelAura)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
@@ -379,7 +379,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelGrowthAura)]
-        void HandleCancelGrowthAura(CancelGrowthAura cancelGrowthAura)
+        private void HandleCancelGrowthAura(CancelGrowthAura cancelGrowthAura)
         {
             GetPlayer().RemoveAurasByType(AuraType.ModScale, aurApp =>
             {
@@ -389,7 +389,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelMountAura)]
-        void HandleCancelMountAura(CancelMountAura packet)
+        private void HandleCancelMountAura(CancelMountAura packet)
         {
             GetPlayer().RemoveAurasByType(AuraType.Mounted, aurApp =>
             {
@@ -399,7 +399,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetCancelAura)]
-        void HandlePetCancelAura(PetCancelAura packet)
+        private void HandlePetCancelAura(PetCancelAura packet)
         {
             if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
             {
@@ -430,7 +430,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell)]
-        void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell packet)
+        private void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell packet)
         {
             //may be better send SMSG_CANCEL_AUTO_REPEAT?
             //cancel and prepare for deleting
@@ -438,7 +438,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelChannelling)]
-        void HandleCancelChanneling(CancelChannelling cancelChanneling)
+        private void HandleCancelChanneling(CancelChannelling cancelChanneling)
         {
             // ignore for remote control state (for player case)
             var mover = _player.m_unitMovedByMe;
@@ -449,7 +449,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TotemDestroyed)]
-        void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
+        private void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
         {
             // ignore for remote control state
             if (GetPlayer().m_unitMovedByMe != GetPlayer())
@@ -470,7 +470,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SelfRes)]
-        void HandleSelfRes(SelfRes selfRes)
+        private void HandleSelfRes(SelfRes selfRes)
         {
             if (_player.HasAuraType(AuraType.PreventResurrection))
                 return; // silent return, client should display error by itself and not send this opcode
@@ -487,7 +487,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SpellClick)]
-        void HandleSpellClick(SpellClick packet)
+        private void HandleSpellClick(SpellClick packet)
         {
             // this will get something not in world. crash
             Creature unit = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.SpellClickUnitGuid);
@@ -502,7 +502,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GetMirrorImageData)]
-        void HandleMirrorImageDataRequest(GetMirrorImageData packet)
+        private void HandleMirrorImageDataRequest(GetMirrorImageData packet)
         {
             var guid = packet.UnitGUID;
 
@@ -580,7 +580,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MissileTrajectoryCollision)]
-        void HandleMissileTrajectoryCollision(MissileTrajectoryCollision packet)
+        private void HandleMissileTrajectoryCollision(MissileTrajectoryCollision packet)
         {
             var caster = Global.ObjAccessor.GetUnit(_player, packet.Target);
             if (caster == null)
@@ -605,7 +605,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UpdateMissileTrajectory)]
-        void HandleUpdateMissileTrajectory(UpdateMissileTrajectory packet)
+        private void HandleUpdateMissileTrajectory(UpdateMissileTrajectory packet)
         {
             var caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
             var spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
@@ -634,7 +634,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestCategoryCooldowns, Processing = PacketProcessing.Inplace)]
-        void HandleRequestCategoryCooldowns(RequestCategoryCooldowns requestCategoryCooldowns)
+        private void HandleRequestCategoryCooldowns(RequestCategoryCooldowns requestCategoryCooldowns)
         {
             GetPlayer().SendSpellCategoryCooldowns();
         }

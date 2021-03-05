@@ -200,17 +200,17 @@ namespace Game.Networking.Packets
             data.WriteString(Notes);
         }
 
-        ObjectGuid Guid;
-        ObjectGuid WowAccountGuid;
-        uint VirtualRealmAddr;
-        uint NativeRealmAddr;
-        SocialFlag TypeFlags;
-        string Notes;
-        FriendStatus Status;
-        uint AreaID;
-        uint Level;
-        Class ClassID;
-        bool Mobile;
+        private ObjectGuid Guid;
+        private ObjectGuid WowAccountGuid;
+        private uint VirtualRealmAddr;
+        private uint NativeRealmAddr;
+        private SocialFlag TypeFlags;
+        private string Notes;
+        private FriendStatus Status;
+        private uint AreaID;
+        private uint Level;
+        private Class ClassID;
+        private bool Mobile;
     }
 
     public struct QualifiedGUID

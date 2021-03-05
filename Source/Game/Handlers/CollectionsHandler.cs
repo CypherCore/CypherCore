@@ -24,7 +24,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.CollectionItemSetFavorite)]
-        void HandleCollectionItemSetFavorite(CollectionItemSetFavorite collectionItemSetFavorite)
+        private void HandleCollectionItemSetFavorite(CollectionItemSetFavorite collectionItemSetFavorite)
         {
             switch (collectionItemSetFavorite.Type)
             {

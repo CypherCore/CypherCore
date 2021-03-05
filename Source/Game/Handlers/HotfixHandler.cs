@@ -25,7 +25,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.DbQueryBulk, Processing = PacketProcessing.Inplace, Status = SessionStatus.Authed)]
-        void HandleDBQueryBulk(DBQueryBulk dbQuery)
+        private void HandleDBQueryBulk(DBQueryBulk dbQuery)
         {
             var store = Global.DB2Mgr.GetStorage(dbQuery.TableHash);
 
@@ -58,13 +58,13 @@ namespace Game
             }
         }
 
-        void SendAvailableHotfixes()
+        private void SendAvailableHotfixes()
         {
             SendPacket(new AvailableHotfixes(Global.WorldMgr.GetRealmId().GetAddress(), Global.DB2Mgr.GetHotfixCount(), Global.DB2Mgr.GetHotfixData()));
         }
 
         [WorldPacketHandler(ClientOpcodes.HotfixRequest, Status = SessionStatus.Authed)]
-        void HandleHotfixRequest(HotfixRequest hotfixQuery)
+        private void HandleHotfixRequest(HotfixRequest hotfixQuery)
         {
             var hotfixes = Global.DB2Mgr.GetHotfixData();
 

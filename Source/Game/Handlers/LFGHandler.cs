@@ -30,7 +30,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.DfJoin)]
-        void HandleLfgJoin(DFJoin dfJoin)
+        private void HandleLfgJoin(DFJoin dfJoin)
         {
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser) ||
                 (GetPlayer().GetGroup() && GetPlayer().GetGroup().GetLeaderGUID() != GetPlayer().GetGUID() &&
@@ -57,7 +57,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DfLeave)]
-        void HandleLfgLeave(DFLeave dfLeave)
+        private void HandleLfgLeave(DFLeave dfLeave)
         {
             var group = GetPlayer().GetGroup();
 
@@ -69,14 +69,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DfProposalResponse)]
-        void HandleLfgProposalResult(DFProposalResponse dfProposalResponse)
+        private void HandleLfgProposalResult(DFProposalResponse dfProposalResponse)
         {
             Log.outDebug(LogFilter.Lfg, "CMSG_LFG_PROPOSAL_RESULT {0} proposal: {1} accept: {2}", GetPlayerInfo(), dfProposalResponse.ProposalID, dfProposalResponse.Accepted ? 1 : 0);
             Global.LFGMgr.UpdateProposal(dfProposalResponse.ProposalID, GetPlayer().GetGUID(), dfProposalResponse.Accepted);
         }
 
         [WorldPacketHandler(ClientOpcodes.DfSetRoles)]
-        void HandleLfgSetRoles(DFSetRoles dfSetRoles)
+        private void HandleLfgSetRoles(DFSetRoles dfSetRoles)
         {
             var guid = GetPlayer().GetGUID();
             var group = GetPlayer().GetGroup();
@@ -92,7 +92,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DfBootPlayerVote)]
-        void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
+        private void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
         {
             var guid = GetPlayer().GetGUID();
             Log.outDebug(LogFilter.Lfg, "CMSG_LFG_SET_BOOT_VOTE {0} agree: {1}", GetPlayerInfo(), dfBootPlayerVote.Vote ? 1 : 0);
@@ -100,14 +100,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DfTeleport)]
-        void HandleLfgTeleport(DFTeleport dfTeleport)
+        private void HandleLfgTeleport(DFTeleport dfTeleport)
         {
             Log.outDebug(LogFilter.Lfg, "CMSG_DF_TELEPORT {0} out: {1}", GetPlayerInfo(), dfTeleport.TeleportOut ? 1 : 0);
             Global.LFGMgr.TeleportPlayer(GetPlayer(), dfTeleport.TeleportOut, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.DfGetSystemInfo, Processing = PacketProcessing.ThreadSafe)]
-        void HandleDfGetSystemInfo(DFGetSystemInfo dfGetSystemInfo)
+        private void HandleDfGetSystemInfo(DFGetSystemInfo dfGetSystemInfo)
         {
             Log.outDebug(LogFilter.Lfg, "CMSG_LFG_Lock_INFO_REQUEST {0} for {1}", GetPlayerInfo(), (dfGetSystemInfo.Player ? "player" : "party"));
 
@@ -118,7 +118,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DfGetJoinStatus, Processing = PacketProcessing.ThreadSafe)]
-        void HandleDfGetJoinStatus(DFGetJoinStatus packet)
+        private void HandleDfGetJoinStatus(DFGetJoinStatus packet)
         {
             if (!GetPlayer().IsUsingLfg())
                 return;

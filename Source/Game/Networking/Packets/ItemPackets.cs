@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGUID;
     }
 
-    class SetItemPurchaseData : ServerPacket
+    internal class SetItemPurchaseData : ServerPacket
     {
         public SetItemPurchaseData() : base(ServerOpcodes.SetItemPurchaseData, ConnectionType.Instance) { }
 
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGUID;
     }
 
-    class ItemPurchaseRefund : ClientPacket
+    internal class ItemPurchaseRefund : ClientPacket
     {
         public ItemPurchaseRefund(WorldPacket packet) : base(packet) { }
 
@@ -140,7 +140,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGUID;
     }
 
-    class ItemPurchaseRefundResult : ServerPacket
+    internal class ItemPurchaseRefundResult : ServerPacket
     {
         public ItemPurchaseRefundResult() : base(ServerOpcodes.ItemPurchaseRefundResult, ConnectionType.Instance) { }
 
@@ -159,7 +159,7 @@ namespace Game.Networking.Packets
         public Optional<ItemPurchaseContents> Contents;
     }
 
-    class ItemExpirePurchaseRefund : ServerPacket
+    internal class ItemExpirePurchaseRefund : ServerPacket
     {
         public ItemExpirePurchaseRefund() : base(ServerOpcodes.ItemExpirePurchaseRefund, ConnectionType.Instance) { }
 
@@ -345,7 +345,7 @@ namespace Game.Networking.Packets
         public byte PackSlot;
     }
 
-    class AutoEquipItemSlot : ClientPacket
+    internal class AutoEquipItemSlot : ClientPacket
     {
         public AutoEquipItemSlot(WorldPacket packet) : base(packet) { }
 
@@ -411,7 +411,7 @@ namespace Game.Networking.Packets
         public SellResult Reason = SellResult.Unk;
     }
 
-    class ItemPushResult : ServerPacket
+    internal class ItemPushResult : ServerPacket
     {
         public ItemPushResult() : base(ServerOpcodes.ItemPushResult) { }
 
@@ -468,7 +468,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class ReadItem : ClientPacket
+    internal class ReadItem : ClientPacket
     {
         public ReadItem(WorldPacket packet) : base(packet) { }
 
@@ -482,7 +482,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class ReadItemResultFailed : ServerPacket
+    internal class ReadItemResultFailed : ServerPacket
     {
         public ReadItemResultFailed() : base(ServerOpcodes.ReadItemResultFailed) { }
 
@@ -499,7 +499,7 @@ namespace Game.Networking.Packets
         public uint Delay;
     }
 
-    class ReadItemResultOK : ServerPacket
+    internal class ReadItemResultOK : ServerPacket
     {
         public ReadItemResultOK() : base(ServerOpcodes.ReadItemResultOk) { }
 
@@ -511,7 +511,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Item;
     }
 
-    class WrapItem : ClientPacket
+    internal class WrapItem : ClientPacket
     {
         public WrapItem(WorldPacket packet) : base(packet) { }
 
@@ -523,7 +523,7 @@ namespace Game.Networking.Packets
         public InvUpdate Inv;
     }
 
-    class EnchantmentLog : ServerPacket
+    internal class EnchantmentLog : ServerPacket
     {
         public EnchantmentLog() : base(ServerOpcodes.EnchantmentLog, ConnectionType.Instance) { }
 
@@ -545,7 +545,7 @@ namespace Game.Networking.Packets
         public uint EnchantSlot;
     }
 
-    class CancelTempEnchantment : ClientPacket
+    internal class CancelTempEnchantment : ClientPacket
     {
         public CancelTempEnchantment(WorldPacket packet) : base(packet) { }
 
@@ -557,7 +557,7 @@ namespace Game.Networking.Packets
         public int Slot;
     }
 
-    class ItemCooldown : ServerPacket
+    internal class ItemCooldown : ServerPacket
     {
         public ItemCooldown() : base(ServerOpcodes.ItemCooldown) { }
 
@@ -572,8 +572,8 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public uint Cooldown;
     }
-    
-    class ItemEnchantTimeUpdate : ServerPacket
+
+    internal class ItemEnchantTimeUpdate : ServerPacket
     {
         public ItemEnchantTimeUpdate() : base(ServerOpcodes.ItemEnchantTimeUpdate, ConnectionType.Instance) { }
 
@@ -591,7 +591,7 @@ namespace Game.Networking.Packets
         public uint Slot;
     }
 
-    class UseCritterItem : ClientPacket
+    internal class UseCritterItem : ClientPacket
     {
         public UseCritterItem(WorldPacket packet) : base(packet) { }
 
@@ -603,7 +603,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGuid;
     }
 
-    class SocketGems : ClientPacket
+    internal class SocketGems : ClientPacket
     {
         public SocketGems(WorldPacket packet) : base(packet) { }
 
@@ -618,7 +618,7 @@ namespace Game.Networking.Packets
         public ObjectGuid[] GemItem = new ObjectGuid[ItemConst.MaxGemSockets];
     }
 
-    class SocketGemsSuccess : ServerPacket
+    internal class SocketGemsSuccess : ServerPacket
     {
         public SocketGemsSuccess() : base(ServerOpcodes.SocketGemsSuccess, ConnectionType.Instance) { }
 
@@ -630,35 +630,35 @@ namespace Game.Networking.Packets
         public ObjectGuid Item;
     }
 
-    class SortBags : ClientPacket
+    internal class SortBags : ClientPacket
     {
         public SortBags(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class SortBankBags : ClientPacket
+    internal class SortBankBags : ClientPacket
     {
         public SortBankBags(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class SortReagentBankBags : ClientPacket
+    internal class SortReagentBankBags : ClientPacket
     {
         public SortReagentBankBags(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class BagCleanupFinished : ServerPacket
+    internal class BagCleanupFinished : ServerPacket
     {
         public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
 
-    class RemoveNewItem : ClientPacket
+    internal class RemoveNewItem : ClientPacket
     {
         public RemoveNewItem(WorldPacket packet) : base(packet) { }
 
@@ -670,7 +670,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGuid { get; set; }
     }
 
-    class InventoryFullOverflow : ServerPacket
+    internal class InventoryFullOverflow : ServerPacket
     {
         public InventoryFullOverflow() : base(ServerOpcodes.InventoryFullOverflow) { }
 
@@ -1041,7 +1041,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct ItemPurchaseRefundItem
+    internal struct ItemPurchaseRefundItem
     {
         public void Write(WorldPacket data)
         {
@@ -1053,7 +1053,7 @@ namespace Game.Networking.Packets
         public uint ItemCount;
     }
 
-    struct ItemPurchaseRefundCurrency
+    internal struct ItemPurchaseRefundCurrency
     {
         public void Write(WorldPacket data)
         {
@@ -1065,7 +1065,7 @@ namespace Game.Networking.Packets
         public uint CurrencyCount;
     }
 
-    class ItemPurchaseContents
+    internal class ItemPurchaseContents
     {
         public void Write(WorldPacket data)
         {

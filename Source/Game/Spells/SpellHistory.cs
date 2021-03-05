@@ -850,13 +850,13 @@ namespace Game.Spells
             }
         }
 
-        void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
+        private void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
         {
             var notUsed = 0;
             GetCooldownDurations(spellInfo, itemId, ref notUsed, ref categoryId, ref notUsed);
         }
 
-        void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref int cooldown, ref uint categoryId, ref int categoryCooldown)
+        private void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref int cooldown, ref uint categoryId, ref int categoryCooldown)
         {
             var tmpCooldown = -1;
             uint tmpCategoryId = 0;
@@ -941,13 +941,13 @@ namespace Game.Spells
             }
         }
 
-        Unit _owner;
-        Dictionary<uint, CooldownEntry> _spellCooldowns = new Dictionary<uint, CooldownEntry>();
-        Dictionary<uint, CooldownEntry> _spellCooldownsBeforeDuel = new Dictionary<uint, CooldownEntry>();
-        Dictionary<uint, CooldownEntry> _categoryCooldowns = new Dictionary<uint, CooldownEntry>();
-        DateTime[] _schoolLockouts = new DateTime[(int)SpellSchools.Max];
-        MultiMap<uint, ChargeEntry> _categoryCharges = new MultiMap<uint, ChargeEntry>();
-        Dictionary<uint, DateTime> _globalCooldowns = new Dictionary<uint, DateTime>();
+        private Unit _owner;
+        private Dictionary<uint, CooldownEntry> _spellCooldowns = new Dictionary<uint, CooldownEntry>();
+        private Dictionary<uint, CooldownEntry> _spellCooldownsBeforeDuel = new Dictionary<uint, CooldownEntry>();
+        private Dictionary<uint, CooldownEntry> _categoryCooldowns = new Dictionary<uint, CooldownEntry>();
+        private DateTime[] _schoolLockouts = new DateTime[(int)SpellSchools.Max];
+        private MultiMap<uint, ChargeEntry> _categoryCharges = new MultiMap<uint, ChargeEntry>();
+        private Dictionary<uint, DateTime> _globalCooldowns = new Dictionary<uint, DateTime>();
 
         public class CooldownEntry
         {

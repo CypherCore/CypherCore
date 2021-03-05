@@ -27,10 +27,10 @@ using System.Collections.Generic;
 namespace Game.Chat.Commands
 {
     [CommandGroup("list", RBACPermissions.CommandList, true)]
-    class ListCommands
+    internal class ListCommands
     {
         [Command("auras", RBACPermissions.CommandListAuras)]
-        static bool HandleListAurasCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListAurasCommand(StringArguments args, CommandHandler handler)
         {
             var unit = handler.GetSelectedUnit();
             if (!unit)
@@ -77,7 +77,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("creature", RBACPermissions.CommandListCreature, true)]
-        static bool HandleListCreatureCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListCreatureCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -173,7 +173,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("item", RBACPermissions.CommandListItem, true)]
-        static bool HandleListItemCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListItemCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -364,7 +364,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("mail", RBACPermissions.CommandListMail, true)]
-        static bool HandleListMailCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListMailCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -471,7 +471,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("object", RBACPermissions.CommandListObject, true)]
-        static bool HandleListObjectCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListObjectCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -568,7 +568,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("respawns", RBACPermissions.CommandListRespawns)]
-        static bool HandleListRespawnsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListRespawnsCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var map = player.GetMap();
@@ -632,7 +632,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("scenes", RBACPermissions.CommandListScenes)]
-        static bool HandleListScenesCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListScenesCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedPlayer();
             if (!target)
@@ -655,7 +655,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("spawnpoints", RBACPermissions.CommandListSpawnpoints)]
-        static bool HandleListSpawnPointsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListSpawnPointsCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var map = player.GetMap();
@@ -692,7 +692,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static string GetZoneName(uint zoneId, Locale locale)
+        private static string GetZoneName(uint zoneId, Locale locale)
         {
             var zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
             return zoneEntry != null ? zoneEntry.AreaName[locale] : "<unknown zone>";

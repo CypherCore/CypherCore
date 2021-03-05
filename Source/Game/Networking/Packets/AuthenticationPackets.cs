@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace Game.Networking.Packets
 {
-    class Ping : ClientPacket
+    internal class Ping : ClientPacket
     {
         public Ping(WorldPacket packet) : base(packet) { }
 
@@ -41,7 +41,7 @@ namespace Game.Networking.Packets
         public uint Latency;
     }
 
-    class Pong : ServerPacket
+    internal class Pong : ServerPacket
     {
         public Pong(uint serial) : base(ServerOpcodes.Pong)
         {
@@ -53,10 +53,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Serial);
         }
 
-        uint Serial;
+        private uint Serial;
     }
 
-    class AuthChallenge : ServerPacket
+    internal class AuthChallenge : ServerPacket
     {
         public AuthChallenge() : base(ServerOpcodes.AuthChallenge) { }
 
@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
         public byte DosZeroBits;
     }
 
-    class AuthSession : ClientPacket
+    internal class AuthSession : ClientPacket
     {
         public AuthSession(WorldPacket packet) : base(packet) { }
 
@@ -104,7 +104,7 @@ namespace Game.Networking.Packets
         public bool UseIPv6;
     }
 
-    class AuthResponse : ServerPacket
+    internal class AuthResponse : ServerPacket
     {
         public AuthResponse() : base(ServerOpcodes.AuthResponse)
         {
@@ -236,7 +236,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class WaitQueueUpdate : ServerPacket
+    internal class WaitQueueUpdate : ServerPacket
     {
         public WaitQueueUpdate() : base(ServerOpcodes.WaitQueueUpdate) { }
 
@@ -248,14 +248,14 @@ namespace Game.Networking.Packets
         public AuthWaitInfo WaitInfo;
     }
 
-    class WaitQueueFinish : ServerPacket
+    internal class WaitQueueFinish : ServerPacket
     {
         public WaitQueueFinish() : base(ServerOpcodes.WaitQueueFinish) { }
 
         public override void Write() { }
     }
 
-    class ConnectTo : ServerPacket
+    internal class ConnectTo : ServerPacket
     {
         public ConnectTo() : base(ServerOpcodes.ConnectTo)
         {
@@ -326,7 +326,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuthContinuedSession : ClientPacket
+    internal class AuthContinuedSession : ClientPacket
     {
         public AuthContinuedSession(WorldPacket packet) : base(packet) { }
 
@@ -344,14 +344,14 @@ namespace Game.Networking.Packets
         public byte[] Digest = new byte[24];
     }
 
-    class ResumeComms : ServerPacket
+    internal class ResumeComms : ServerPacket
     {
         public ResumeComms(ConnectionType connection) : base(ServerOpcodes.ResumeComms, connection) { }
 
         public override void Write() { }
     }
 
-    class ConnectToFailed : ClientPacket
+    internal class ConnectToFailed : ClientPacket
     {
         public ConnectToFailed(WorldPacket packet) : base(packet) { }
 
@@ -362,15 +362,15 @@ namespace Game.Networking.Packets
         }
 
         public ConnectToSerial Serial;
-        byte Con;
+        private byte Con;
     }
 
-    class EnterEncryptedMode : ServerPacket
+    internal class EnterEncryptedMode : ServerPacket
     {
-        byte[] EncryptionKey;
-        bool Enabled;
+        private byte[] EncryptionKey;
+        private bool Enabled;
 
-        static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
+        private static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
 
         public EnterEncryptedMode(byte[] encryptionKey, bool enabled) : base(ServerOpcodes.EnterEncryptedMode)
         {
@@ -406,7 +406,7 @@ namespace Game.Networking.Packets
         public bool HasFCM; // true if the account has a forced character migration pending. @todo implement
     }
 
-    struct VirtualRealmNameInfo
+    internal struct VirtualRealmNameInfo
     {
         public VirtualRealmNameInfo(bool isHomeRealm, bool isInternalRealm, string realmNameActual, string realmNameNormalized)
         {
@@ -434,7 +434,7 @@ namespace Game.Networking.Packets
         public string RealmNameNormalized; // the name of the realm without spaces
     }
 
-    struct VirtualRealmInfo
+    internal struct VirtualRealmInfo
     {
         public VirtualRealmInfo(uint realmAddress, bool isHomeRealm, bool isInternalRealm, string realmNameActual, string realmNameNormalized)
         {

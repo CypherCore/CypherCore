@@ -362,7 +362,8 @@ namespace Game.Chat
 
             return str.Replace("\"", String.Empty);
         }
-        string ExtractPlayerNameFromLink(StringArguments args)
+
+        private string ExtractPlayerNameFromLink(StringArguments args)
         {
             // |color|Hplayer:name|h[name]|h|r
             var name = ExtractKeyFromLink(args, "Hplayer");
@@ -476,7 +477,7 @@ namespace Game.Chat
             return 0;
         }
 
-        static string[] spellKeys =
+        private static string[] spellKeys =
         {
             "Hspell",                                               // normal spell
             "Htalent",                                              // talent spell
@@ -620,7 +621,8 @@ namespace Game.Chat
 
             return creature;
         }
-        GameObject GetNearbyGameObject()
+
+        private GameObject GetNearbyGameObject()
         {
             if (_session == null)
                 return null;
@@ -696,7 +698,7 @@ namespace Game.Chat
             return false;
         }
 
-        bool HasStringAbbr(string name, string part)
+        private bool HasStringAbbr(string name, string part)
         {
             // non "" command
             if (!name.IsEmpty())
@@ -838,16 +840,16 @@ namespace Game.Chat
         public bool HasSentErrorMessage() { return _sentErrorMessage; }
 
         internal bool _sentErrorMessage;
-        WorldSession _session;
+        private WorldSession _session;
     }
 
-    class AddonChannelCommandHandler : CommandHandler
+    internal class AddonChannelCommandHandler : CommandHandler
     {
         public static string PREFIX = "TrinityCore";
 
-        string echo;
-        bool hadAck;
-        bool humanReadable;
+        private string echo;
+        private bool hadAck;
+        private bool humanReadable;
 
         public AddonChannelCommandHandler(WorldSession session) : base(session) { }
 
@@ -891,25 +893,25 @@ namespace Game.Chat
             }
         }
 
-        void Send(string msg)
+        private void Send(string msg)
         {
             var chat = new ChatPkt();
             chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
             GetSession().SendPacket(chat);
         }
 
-        void SendAck() // a Command acknowledged, no body
+        private void SendAck() // a Command acknowledged, no body
         {
             Send($"a{echo:4}\0");
             hadAck = true;
         }
 
-        void SendOK() // o Command OK, no body
+        private void SendOK() // o Command OK, no body
         {
             Send($"o{echo:4}\0");
         }
 
-        void SendFailed() // f Command failed, no body
+        private void SendFailed() // f Command failed, no body
         {
             Send($"f{echo:4}\0");
         }

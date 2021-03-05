@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Scripts.World.ItemScripts
 {
-    struct  SpellIds
+    internal struct  SpellIds
     {  
         //Onlyforflight
         public const uint ArcaneCharges = 45072;
@@ -33,7 +33,7 @@ namespace Scripts.World.ItemScripts
         public const uint PetrovBomb = 42406;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         //Pilefakefur
         public const uint NesingwaryTrapper = 25835;
@@ -48,7 +48,7 @@ namespace Scripts.World.ItemScripts
         public const uint VanirasSentryTotem = 40187;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         //Pilefakefur
         public const uint HighQualityFur = 187983;
@@ -70,7 +70,7 @@ namespace Scripts.World.ItemScripts
         };
     }
 
-    struct QuestIds
+    internal struct QuestIds
     {
         //Helpthemselves
         public const uint CannotHelpThemselves = 11876;
@@ -82,7 +82,7 @@ namespace Scripts.World.ItemScripts
         public const uint ThePerfectSpies = 25444;
     }
 
-    struct Misc
+    internal struct Misc
     {
         //Petrovclusterbombs
         public const uint AreaIdShatteredStraits = 4064;
@@ -90,7 +90,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_only_for_flight : ItemScript
+    internal class item_only_for_flight : ItemScript
     {
         public item_only_for_flight() : base("item_only_for_flight") { }
 
@@ -128,7 +128,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_nether_wraith_beacon : ItemScript
+    internal class item_nether_wraith_beacon : ItemScript
     {
         public item_nether_wraith_beacon() : base("item_nether_wraith_beacon") { }
 
@@ -149,7 +149,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_gor_dreks_ointment : ItemScript
+    internal class item_gor_dreks_ointment : ItemScript
     {
         public item_gor_dreks_ointment() : base("item_gor_dreks_ointment") { }
 
@@ -165,7 +165,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_incendiary_explosives : ItemScript
+    internal class item_incendiary_explosives : ItemScript
     {
         public item_incendiary_explosives() : base("item_incendiary_explosives") { }
 
@@ -182,7 +182,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_mysterious_egg : ItemScript
+    internal class item_mysterious_egg : ItemScript
     {
         public item_mysterious_egg() : base("item_mysterious_egg") { }
 
@@ -198,7 +198,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_disgusting_jar : ItemScript
+    internal class item_disgusting_jar : ItemScript
     {
         public item_disgusting_jar() : base("item_disgusting_jar") { }
 
@@ -214,7 +214,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_pile_fake_furs : ItemScript
+    internal class item_pile_fake_furs : ItemScript
     {
         public item_pile_fake_furs() : base("item_pile_fake_furs") { }
 
@@ -248,7 +248,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_petrov_cluster_bombs : ItemScript
+    internal class item_petrov_cluster_bombs : ItemScript
     {
         public item_petrov_cluster_bombs() : base("item_petrov_cluster_bombs") { }
 
@@ -271,7 +271,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_dehta_trap_smasher : ItemScript
+    internal class item_dehta_trap_smasher : ItemScript
     {
         public item_dehta_trap_smasher() : base("item_dehta_trap_smasher") { }
 
@@ -300,7 +300,7 @@ namespace Scripts.World.ItemScripts
     }
 
     [Script]
-    class item_captured_frog : ItemScript
+    internal class item_captured_frog : ItemScript
     {
         public item_captured_frog() : base("item_captured_frog") { }
 
@@ -321,7 +321,7 @@ namespace Scripts.World.ItemScripts
 
     [Script] // Only used currently for
     // 19169: Nightfall
-    class item_generic_limit_chance_above_60 : ItemScript
+    internal class item_generic_limit_chance_above_60 : ItemScript
     {
         public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
 

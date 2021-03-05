@@ -23,7 +23,7 @@ namespace Game.DataStorage
 {
     public class CharacterTemplateDataStorage : Singleton<CharacterTemplateDataStorage>
     {
-        CharacterTemplateDataStorage() { }
+        private CharacterTemplateDataStorage() { }
 
         public void LoadCharacterTemplates()
         {
@@ -101,7 +101,7 @@ namespace Game.DataStorage
             return _characterTemplateStore.LookupByKey(templateId);
         }
 
-        Dictionary<uint, CharacterTemplate> _characterTemplateStore = new Dictionary<uint, CharacterTemplate>();
+        private Dictionary<uint, CharacterTemplate> _characterTemplateStore = new Dictionary<uint, CharacterTemplate>();
     }
 
     public struct CharacterTemplateClass

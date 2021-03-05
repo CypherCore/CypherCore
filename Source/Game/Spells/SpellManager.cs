@@ -32,7 +32,7 @@ namespace Game.Entities
 {
     public sealed class SpellManager : Singleton<SpellManager>
     {
-        SpellManager()
+        private SpellManager()
         {
             var currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())
@@ -291,7 +291,7 @@ namespace Game.Entities
             return mSpellLearnSpells.LookupByKey(spell_id);
         }
 
-        bool IsSpellLearnSpell(uint spell_id)
+        private bool IsSpellLearnSpell(uint spell_id)
         {
             return mSpellLearnSpells.ContainsKey(spell_id);
         }
@@ -326,7 +326,7 @@ namespace Game.Entities
             return false;
         }
 
-        List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
+        private List<int> GetSpellGroupSpellMapBounds(SpellGroup group_id)
         {
             return mSpellGroupSpell.LookupByKey(group_id);
         }
@@ -337,7 +337,7 @@ namespace Game.Entities
             GetSetOfSpellsInSpellGroup(group_id, out foundSpells, ref usedGroups);
         }
 
-        void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
+        private void GetSetOfSpellsInSpellGroup(SpellGroup group_id, out List<int> foundSpells, ref List<SpellGroup> usedGroups)
         {
             foundSpells = new List<int>();
             if (usedGroups.Find(p => p == group_id) == 0)
@@ -663,7 +663,7 @@ namespace Game.Entities
             return null;
         }
 
-        List<SpellInfo> _GetSpellInfo(uint spellId)
+        private List<SpellInfo> _GetSpellInfo(uint spellId)
         {
             return mSpellInfoMap.LookupByKey(spellId);
         }
@@ -680,7 +680,7 @@ namespace Game.Entities
                 callback(spellInfo);
         }
 
-        void UnloadSpellInfoChains()
+        private void UnloadSpellInfoChains()
         {
             foreach (var pair in mSpellChains)
                 foreach (var spellInfo in _GetSpellInfo(pair.Key))
@@ -1900,7 +1900,7 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} summonable creature templates in {1} ms", countCreature, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
+        private bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
         {
             // skip empty list;
             var have_spell = false;
@@ -3440,7 +3440,7 @@ namespace Game.Entities
         }
         #endregion
 
-        bool IsTriggerAura(AuraType type)
+        private bool IsTriggerAura(AuraType type)
         {
             switch (type)
             {
@@ -3494,7 +3494,8 @@ namespace Game.Entities
             }
             return false;
         }
-        bool IsAlwaysTriggeredAura(AuraType type)
+
+        private bool IsAlwaysTriggeredAura(AuraType type)
         {
             switch (type)
             {
@@ -3513,7 +3514,8 @@ namespace Game.Entities
             }
             return false;
         }
-        ProcFlagsSpellType GetSpellTypeMask(AuraType type)
+
+        private ProcFlagsSpellType GetSpellTypeMask(AuraType type)
         {
             switch (type)
             {
@@ -3647,39 +3649,42 @@ namespace Game.Entities
         }
         
         #region Fields
-        Dictionary<uint, SpellChainNode> mSpellChains = new Dictionary<uint, SpellChainNode>();
-        MultiMap<uint, uint> mSpellsReqSpell = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> mSpellReq = new MultiMap<uint, uint>();
-        Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new Dictionary<uint, SpellLearnSkillNode>();
-        MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new MultiMap<uint, SpellLearnSpellNode>();
-        Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition>();
-        MultiMap<uint, SpellGroup> mSpellSpellGroup = new MultiMap<uint, SpellGroup>();
-        MultiMap<SpellGroup, int> mSpellGroupSpell = new MultiMap<SpellGroup, int>();
-        Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new Dictionary<SpellGroup, SpellGroupStackRule>();
-        MultiMap<SpellGroup, AuraType> mSpellSameEffectStack = new MultiMap<SpellGroup, AuraType>();
-        Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new Dictionary<(uint id, Difficulty difficulty), SpellProcEntry>();
-        Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new Dictionary<uint, SpellThreatEntry>();
-        Dictionary<uint, PetAura> mSpellPetAuraMap = new Dictionary<uint, PetAura>();
-        MultiMap<int, int> mSpellLinkedMap = new MultiMap<int, int>();
-        Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new Dictionary<uint, SpellEnchantProcEntry>();
-        Dictionary<int, bool> mEnchantCustomAttr = new Dictionary<int, bool>();
-        MultiMap<uint, SpellArea> mSpellAreaMap = new MultiMap<uint, SpellArea>();
-        MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new MultiMap<uint, SpellArea>();
-        MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new MultiMap<uint, SpellArea>();
-        MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new MultiMap<uint, SpellArea>();
-        MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new MultiMap<uint, SpellArea>();
-        MultiMap<Tuple<uint, uint>, SpellArea> mSpellAreaForQuestAreaMap = new MultiMap<Tuple<uint, uint>, SpellArea>();
-        MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new MultiMap<uint, SkillLineAbilityRecord>();
-        Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new Dictionary<uint, MultiMap<uint, uint>>();
-        Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new Dictionary<uint, PetDefaultSpellsEntry>();           // only spells not listed in related mPetLevelupSpellMap entry
-        MultiMap<uint, SpellInfo> mSpellInfoMap = new MultiMap<uint, SpellInfo>();
-        Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new Dictionary<Tuple<uint, byte>, uint>();
-        Dictionary<uint, BattlePetSpeciesRecord> mBattlePets = new Dictionary<uint, BattlePetSpeciesRecord>();
+
+        private Dictionary<uint, SpellChainNode> mSpellChains = new Dictionary<uint, SpellChainNode>();
+        private MultiMap<uint, uint> mSpellsReqSpell = new MultiMap<uint, uint>();
+        private MultiMap<uint, uint> mSpellReq = new MultiMap<uint, uint>();
+        private Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new Dictionary<uint, SpellLearnSkillNode>();
+        private MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new MultiMap<uint, SpellLearnSpellNode>();
+        private Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition>();
+        private MultiMap<uint, SpellGroup> mSpellSpellGroup = new MultiMap<uint, SpellGroup>();
+        private MultiMap<SpellGroup, int> mSpellGroupSpell = new MultiMap<SpellGroup, int>();
+        private Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new Dictionary<SpellGroup, SpellGroupStackRule>();
+        private MultiMap<SpellGroup, AuraType> mSpellSameEffectStack = new MultiMap<SpellGroup, AuraType>();
+        private Dictionary<(uint id, Difficulty difficulty), SpellProcEntry> mSpellProcMap = new Dictionary<(uint id, Difficulty difficulty), SpellProcEntry>();
+        private Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new Dictionary<uint, SpellThreatEntry>();
+        private Dictionary<uint, PetAura> mSpellPetAuraMap = new Dictionary<uint, PetAura>();
+        private MultiMap<int, int> mSpellLinkedMap = new MultiMap<int, int>();
+        private Dictionary<uint, SpellEnchantProcEntry> mSpellEnchantProcEventMap = new Dictionary<uint, SpellEnchantProcEntry>();
+        private Dictionary<int, bool> mEnchantCustomAttr = new Dictionary<int, bool>();
+        private MultiMap<uint, SpellArea> mSpellAreaMap = new MultiMap<uint, SpellArea>();
+        private MultiMap<uint, SpellArea> mSpellAreaForQuestMap = new MultiMap<uint, SpellArea>();
+        private MultiMap<uint, SpellArea> mSpellAreaForQuestEndMap = new MultiMap<uint, SpellArea>();
+        private MultiMap<uint, SpellArea> mSpellAreaForAuraMap = new MultiMap<uint, SpellArea>();
+        private MultiMap<uint, SpellArea> mSpellAreaForAreaMap = new MultiMap<uint, SpellArea>();
+        private MultiMap<Tuple<uint, uint>, SpellArea> mSpellAreaForQuestAreaMap = new MultiMap<Tuple<uint, uint>, SpellArea>();
+        private MultiMap<uint, SkillLineAbilityRecord> mSkillLineAbilityMap = new MultiMap<uint, SkillLineAbilityRecord>();
+        private Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new Dictionary<uint, MultiMap<uint, uint>>();
+        private Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new Dictionary<uint, PetDefaultSpellsEntry>();           // only spells not listed in related mPetLevelupSpellMap entry
+        private MultiMap<uint, SpellInfo> mSpellInfoMap = new MultiMap<uint, SpellInfo>();
+        private Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new Dictionary<Tuple<uint, byte>, uint>();
+        private Dictionary<uint, BattlePetSpeciesRecord> mBattlePets = new Dictionary<uint, BattlePetSpeciesRecord>();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
-        Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new Dictionary<AuraType, AuraEffectHandler>();
+
+        private Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new Dictionary<AuraType, AuraEffectHandler>();
         public delegate void SpellEffectHandler(Spell spell, uint effectIndex);
-        Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new Dictionary<SpellEffectName, SpellEffectHandler>();
+
+        private Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new Dictionary<SpellEffectName, SpellEffectHandler>();
 
         public MultiMap<uint, uint> PetFamilySpellsStorage = new MultiMap<uint, uint>();
         #endregion
@@ -3908,9 +3913,9 @@ namespace Game.Entities
             return damage;
         }
 
-        Dictionary<uint, uint> auras = new Dictionary<uint, uint>();
-        bool removeOnChangePet;
-        int damage;
+        private Dictionary<uint, uint> auras = new Dictionary<uint, uint>();
+        private bool removeOnChangePet;
+        private int damage;
     }
 
     public class SpellEnchantProcEntry

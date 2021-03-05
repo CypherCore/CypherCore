@@ -26,9 +26,9 @@ namespace Game.Entities
 {
     public class SocialManager : Singleton<SocialManager>
     {
-        Dictionary<ObjectGuid, PlayerSocial> _socialMap = new Dictionary<ObjectGuid, PlayerSocial>();
+        private Dictionary<ObjectGuid, PlayerSocial> _socialMap = new Dictionary<ObjectGuid, PlayerSocial>();
 
-        SocialManager() { }
+        private SocialManager() { }
 
         public const int FriendLimit = 50;
         public const int IgnoreLimit = 50;
@@ -95,7 +95,7 @@ namespace Game.Entities
                 player.SendPacket(friendStatus);
         }
 
-        void BroadcastToFriendListers(Player player, ServerPacket packet)
+        private void BroadcastToFriendListers(Player player, ServerPacket packet)
         {
             if (!player)
                 return;
@@ -152,9 +152,9 @@ namespace Game.Entities
     public class PlayerSocial
     {
         public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new Dictionary<ObjectGuid, FriendInfo>();
-        ObjectGuid m_playerGUID;
+        private ObjectGuid m_playerGUID;
 
-        uint GetNumberOfSocialsWithFlag(SocialFlag flag)
+        private uint GetNumberOfSocialsWithFlag(SocialFlag flag)
         {
             uint counter = 0;
             foreach (var pair in _playerSocialMap)
@@ -262,7 +262,7 @@ namespace Game.Entities
             player.SendPacket(contactList);
         }
 
-        bool _HasContact(ObjectGuid guid, SocialFlag flags)
+        private bool _HasContact(ObjectGuid guid, SocialFlag flags)
         {
             var friendInfo = _playerSocialMap.LookupByKey(guid);
             if (friendInfo != null)
@@ -281,7 +281,7 @@ namespace Game.Entities
             return _HasContact(ignoreGuid, SocialFlag.Ignored);
         }
 
-        ObjectGuid GetPlayerGUID() { return m_playerGUID; }
+        private ObjectGuid GetPlayerGUID() { return m_playerGUID; }
 
         public void SetPlayerGUID(ObjectGuid guid) { m_playerGUID = guid; }
     }

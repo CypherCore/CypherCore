@@ -51,7 +51,7 @@ namespace Game.AI
             }
         }
 
-        void SetTargetLocation(T owner)
+        private void SetTargetLocation(T owner)
         {
             if (owner.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
             { // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
@@ -82,7 +82,7 @@ namespace Game.AI
             return MovementGeneratorType.Home;
         }
 
-        bool _arrived;
-        bool _skipToHome;
+        private bool _arrived;
+        private bool _skipToHome;
     }
 }

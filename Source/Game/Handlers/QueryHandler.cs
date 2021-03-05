@@ -31,7 +31,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.QueryPlayerName)]
-        void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
+        private void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
             SendNameQuery(queryPlayerName.Player);
         }
@@ -52,12 +52,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryTime)]
-        void HandleQueryTime(QueryTime packet)
+        private void HandleQueryTime(QueryTime packet)
         {
             SendQueryTimeResponse();
         }
 
-        void SendQueryTimeResponse()
+        private void SendQueryTimeResponse()
         {
             var queryTimeResponse = new QueryTimeResponse();
             queryTimeResponse.CurrentTime = Time.UnixTime;
@@ -65,7 +65,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryGameObject, Processing = PacketProcessing.Inplace)]
-        void HandleGameObjectQuery(QueryGameObject packet)
+        private void HandleGameObjectQuery(QueryGameObject packet)
         {
             GameObjectTemplate info = Global.ObjectMgr.GetGameObjectTemplate(packet.GameObjectID);
             if (info != null)
@@ -101,7 +101,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCreature, Processing = PacketProcessing.Inplace)]
-        void HandleCreatureQuery(QueryCreature packet)
+        private void HandleCreatureQuery(QueryCreature packet)
         {
             CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
             if (ci != null)
@@ -143,7 +143,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryNpcText)]
-        void HandleNpcTextQuery(QueryNPCText packet)
+        private void HandleNpcTextQuery(QueryNPCText packet)
         {
             NpcText npcText = Global.ObjectMgr.GetNpcText(packet.TextID);
 
@@ -168,7 +168,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPageText)]
-        void HandleQueryPageText(QueryPageText packet)
+        private void HandleQueryPageText(QueryPageText packet)
         {
             var response = new QueryPageTextResponse();
             response.PageTextID = packet.PageTextID;
@@ -205,7 +205,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCorpseLocationFromClient)]
-        void HandleQueryCorpseLocation(QueryCorpseLocationFromClient queryCorpseLocation)
+        private void HandleQueryCorpseLocation(QueryCorpseLocationFromClient queryCorpseLocation)
         {
             var packet = new CorpseLocation();
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseLocation.Player);
@@ -256,7 +256,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCorpseTransport)]
-        void HandleQueryCorpseTransport(QueryCorpseTransport queryCorpseTransport)
+        private void HandleQueryCorpseTransport(QueryCorpseTransport queryCorpseTransport)
         {
             var response = new CorpseTransportQuery();
             response.Player = queryCorpseTransport.Player;
@@ -276,7 +276,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryQuestCompletionNpcs)]
-        void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
+        private void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
         {
             var response = new QuestCompletionNPCResponse();
 
@@ -307,7 +307,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestPoiQuery)]
-        void HandleQuestPOIQuery(QuestPOIQuery packet)
+        private void HandleQuestPOIQuery(QuestPOIQuery packet)
         {
             if (packet.MissingQuestCount >= SharedConst.MaxQuestLogSize)
                 return;
@@ -333,7 +333,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ItemTextQuery)]
-        void HandleItemTextQuery(ItemTextQuery packet)
+        private void HandleItemTextQuery(ItemTextQuery packet)
         {
             var queryItemTextResponse = new QueryItemTextResponse();
             queryItemTextResponse.Id = packet.Id;
@@ -349,7 +349,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryRealmName)]
-        void HandleQueryRealmName(QueryRealmName queryRealmName)
+        private void HandleQueryRealmName(QueryRealmName queryRealmName)
         {
             var realmQueryResponse = new RealmQueryResponse();
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;

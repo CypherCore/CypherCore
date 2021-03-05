@@ -22,13 +22,13 @@ namespace Framework.Networking
 {
     public class NetworkThread<TSocketType> where TSocketType : ISocket
     {
-        int _connections;
-        volatile bool _stopped;
+        private int _connections;
+        private volatile bool _stopped;
 
-        Thread _thread;
+        private Thread _thread;
 
-        List<TSocketType> _Sockets = new List<TSocketType>();
-        List<TSocketType> _newSockets = new List<TSocketType>();
+        private List<TSocketType> _Sockets = new List<TSocketType>();
+        private List<TSocketType> _newSockets = new List<TSocketType>();
 
         public void Stop()
         {
@@ -67,7 +67,7 @@ namespace Framework.Networking
 
         protected virtual void SocketRemoved(TSocketType sock) { }
 
-        void AddNewSockets()
+        private void AddNewSockets()
         {
             if (_newSockets.Empty())
                 return;
@@ -87,7 +87,7 @@ namespace Framework.Networking
             _newSockets.Clear();
         }
 
-        void Run()
+        private void Run()
         {
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 

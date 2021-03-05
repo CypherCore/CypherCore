@@ -25,7 +25,7 @@ namespace Scripts.Pets
 {
     namespace Shaman
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             //npc_pet_shaman_earth_elemental
             public const uint AngeredEarth = 36213;
@@ -37,7 +37,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_shaman_earth_elemental : ScriptedAI
+        internal class npc_pet_shaman_earth_elemental : ScriptedAI
         {
             public npc_pet_shaman_earth_elemental(Creature creature) : base(creature) { }
 

@@ -26,7 +26,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle)]
-        void HandleMoveDismissVehicle(MoveDismissVehicle packet)
+        private void HandleMoveDismissVehicle(MoveDismissVehicle packet)
         {
             var vehicleGUID = GetPlayer().GetCharmGUID();
             if (vehicleGUID.IsEmpty())                                       // something wrong here...
@@ -39,7 +39,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehiclePrevSeat)]
-        void HandleRequestVehiclePrevSeat(RequestVehiclePrevSeat packet)
+        private void HandleRequestVehiclePrevSeat(RequestVehiclePrevSeat packet)
         {
             var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
@@ -57,7 +57,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleNextSeat)]
-        void HandleRequestVehicleNextSeat(RequestVehicleNextSeat packet)
+        private void HandleRequestVehicleNextSeat(RequestVehicleNextSeat packet)
         {
             var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
@@ -75,7 +75,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats)]
-        void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats packet)
+        private void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats packet)
         {
             var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
@@ -112,7 +112,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat)]
-        void HandleRequestVehicleSwitchSeat(RequestVehicleSwitchSeat packet)
+        private void HandleRequestVehicleSwitchSeat(RequestVehicleSwitchSeat packet)
         {
             var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
@@ -142,7 +142,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RideVehicleInteract)]
-        void HandleRideVehicleInteract(RideVehicleInteract packet)
+        private void HandleRideVehicleInteract(RideVehicleInteract packet)
         {
             var player = Global.ObjAccessor.GetPlayer(_player, packet.Vehicle);
             if (player)
@@ -162,7 +162,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.EjectPassenger)]
-        void HandleEjectPassenger(EjectPassenger packet)
+        private void HandleEjectPassenger(EjectPassenger packet)
         {
             var vehicle = GetPlayer().GetVehicleKit();
             if (!vehicle)
@@ -199,7 +199,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehicleExit)]
-        void HandleRequestVehicleExit(RequestVehicleExit packet)
+        private void HandleRequestVehicleExit(RequestVehicleExit packet)
         {
             var vehicle = GetPlayer().GetVehicle();
             if (vehicle)
@@ -217,7 +217,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSetVehicleRecIdAck)]
-        void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
+        private void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
         {
             GetPlayer().ValidateMovementInfo(setVehicleRecIdAck.Data.Status);
         }

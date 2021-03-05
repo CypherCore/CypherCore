@@ -181,7 +181,7 @@ namespace Game.Misc
         public void SetMenuId(uint menu_id) { _menuId = menu_id; }
         public uint GetMenuId() { return _menuId; }
         public void SetLocale(Locale locale) { _locale = locale; }
-        Locale GetLocale() { return _locale; }
+        private Locale GetLocale() { return _locale; }
 
         public int GetMenuItemCount()
         {
@@ -208,10 +208,10 @@ namespace Game.Misc
             return _menuItems;
         }
 
-        Dictionary<uint, GossipMenuItem> _menuItems = new Dictionary<uint, GossipMenuItem>();
-        Dictionary<uint, GossipMenuItemData> _menuItemData = new Dictionary<uint, GossipMenuItemData>();
-        uint _menuId;
-        Locale _locale;
+        private Dictionary<uint, GossipMenuItem> _menuItems = new Dictionary<uint, GossipMenuItem>();
+        private Dictionary<uint, GossipMenuItemData> _menuItemData = new Dictionary<uint, GossipMenuItemData>();
+        private uint _menuId;
+        private Locale _locale;
     }
 
     public class InteractionData
@@ -648,16 +648,16 @@ namespace Game.Misc
         public QuestMenu GetQuestMenu() { return _questMenu; }
         public InteractionData GetInteractionData() { return _interactionData; }
 
-        bool IsEmpty() { return _gossipMenu.IsEmpty() && _questMenu.IsEmpty(); }
+        private bool IsEmpty() { return _gossipMenu.IsEmpty() && _questMenu.IsEmpty(); }
 
         public uint GetGossipOptionSender(uint selection) { return _gossipMenu.GetMenuItemSender(selection); }
         public uint GetGossipOptionAction(uint selection) { return _gossipMenu.GetMenuItemAction(selection); }
         public bool IsGossipOptionCoded(uint selection) { return _gossipMenu.IsMenuItemCoded(selection); }
 
-        GossipMenu _gossipMenu = new GossipMenu();
-        QuestMenu _questMenu = new QuestMenu();
-        WorldSession _session;
-        InteractionData _interactionData = new InteractionData();
+        private GossipMenu _gossipMenu = new GossipMenu();
+        private QuestMenu _questMenu = new QuestMenu();
+        private WorldSession _session;
+        private InteractionData _interactionData = new InteractionData();
     }
 
     public class QuestMenu
@@ -675,7 +675,7 @@ namespace Game.Misc
             _questMenuItems.Add(questMenuItem);
         }
 
-        bool HasItem(uint questId)
+        private bool HasItem(uint questId)
         {
             foreach (var item in _questMenuItems)
                 if (item.QuestId == questId)
@@ -704,7 +704,7 @@ namespace Game.Misc
             return _questMenuItems.LookupByIndex(index);
         }
 
-        List<QuestMenuItem> _questMenuItems = new List<QuestMenuItem>();
+        private List<QuestMenuItem> _questMenuItems = new List<QuestMenuItem>();
     }
 
     public struct QuestMenuItem

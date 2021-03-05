@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class Notification : ServerPacket
+    internal class Notification : ServerPacket
     {
         public Notification() : base(ServerOpcodes.BattlenetNotification) { }
 
@@ -36,7 +36,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Data = new ByteBuffer();
     }
 
-    class Response : ServerPacket
+    internal class Response : ServerPacket
     {
         public Response() : base(ServerOpcodes.BattlenetResponse) { }
 
@@ -53,7 +53,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Data = new ByteBuffer();
     }
 
-    class ConnectionStatus : ServerPacket
+    internal class ConnectionStatus : ServerPacket
     {
         public ConnectionStatus() : base(ServerOpcodes.BattleNetConnectionStatus) { }
 
@@ -68,7 +68,7 @@ namespace Game.Networking.Packets
         public bool SuppressNotification;
     }
 
-    class ChangeRealmTicketResponse : ServerPacket
+    internal class ChangeRealmTicketResponse : ServerPacket
     {
         public ChangeRealmTicketResponse() : base(ServerOpcodes.ChangeRealmTicketResponse) { }
 
@@ -85,7 +85,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Ticket;
     }
 
-    class BattlenetRequest : ClientPacket
+    internal class BattlenetRequest : ClientPacket
     {
         public BattlenetRequest(WorldPacket packet) : base(packet) { }
 
@@ -101,7 +101,7 @@ namespace Game.Networking.Packets
         public byte[] Data;
     }
 
-    class ChangeRealmTicket : ClientPacket
+    internal class ChangeRealmTicket : ClientPacket
     {
         public ChangeRealmTicket(WorldPacket packet) : base(packet) { }
 

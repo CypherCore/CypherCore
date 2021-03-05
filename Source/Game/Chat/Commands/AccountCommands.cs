@@ -25,10 +25,10 @@ using System;
 namespace Game.Chat
 {
     [CommandGroup("account", RBACPermissions.CommandAccount, true)]
-    class AccountCommands
+    internal class AccountCommands
     {
         [Command("", RBACPermissions.CommandAccount)]
-        static bool HandleAccountCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountCommand(StringArguments args, CommandHandler handler)
         {
             if (handler.GetSession() == null)
                 return false;
@@ -71,7 +71,7 @@ namespace Game.Chat
         }
 
         [Command("addon", RBACPermissions.CommandAccountAddon)]
-        static bool HandleAccountAddonCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountAddonCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -98,7 +98,7 @@ namespace Game.Chat
         }
 
         [Command("create", RBACPermissions.CommandAccountCreate, true)]
-        static bool HandleAccountCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountCreateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -150,7 +150,7 @@ namespace Game.Chat
         }
 
         [Command("delete", RBACPermissions.CommandAccountDelete, true)]
-        static bool HandleAccountDeleteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountDeleteCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -191,7 +191,7 @@ namespace Game.Chat
         }
 
         [Command("email", RBACPermissions.CommandAccountSetSecEmail)]
-        static bool HandleAccountEmailCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountEmailCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -268,7 +268,7 @@ namespace Game.Chat
         }
 
         [Command("password", RBACPermissions.CommandAccountPassword)]
-        static bool HandleAccountPasswordCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountPasswordCommand(StringArguments args, CommandHandler handler)
         {
             // If no args are given at all, we can return false right away.
             if (args.Empty())
@@ -347,7 +347,7 @@ namespace Game.Chat
         }
 
         [Command("onlinelist", RBACPermissions.CommandAccountOnlineList, true)]
-        static bool HandleAccountOnlineListCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountOnlineListCommand(StringArguments args, CommandHandler handler)
         {
             // Get the list of accounts ID logged to the realm
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ONLINE);
@@ -393,10 +393,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("set", RBACPermissions.CommandAccountSet, true)]
-        class SetCommands
+        private class SetCommands
         {
             [Command("addon", RBACPermissions.CommandAccountSetAddon, true)]
-            static bool HandleAccountSetAddonCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountSetAddonCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -458,13 +458,13 @@ namespace Game.Chat
             }
 
             [Command("gmlevel", RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetGmLevelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountSetGmLevelCommand(StringArguments args, CommandHandler handler)
             {
                 return HandleAccountSetSecLevelCommand(args, handler);
             }
 
             [Command("password", RBACPermissions.CommandAccountSetPassword, true)]
-            static bool HandleAccountSetPasswordCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountSetPasswordCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -518,7 +518,7 @@ namespace Game.Chat
             }
 
             [Command("seclevel", RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetSecLevelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountSetSecLevelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -613,10 +613,10 @@ namespace Game.Chat
             }
 
             [CommandGroup("sec", RBACPermissions.CommandAccountSetSec, true)]
-            class SetSecCommands
+            private class SetSecCommands
             {
                 [Command("email", RBACPermissions.CommandAccountSetSecEmail, true)]
-                static bool HandleAccountSetEmailCommand(StringArguments args, CommandHandler handler)
+                private static bool HandleAccountSetEmailCommand(StringArguments args, CommandHandler handler)
                 {
                     if (args.Empty())
                         return false;
@@ -672,7 +672,7 @@ namespace Game.Chat
                 }
 
                 [Command("regmail", RBACPermissions.CommandAccountSetSecRegmail, true)]
-                static bool HandleAccountSetRegEmailCommand(StringArguments args, CommandHandler handler)
+                private static bool HandleAccountSetRegEmailCommand(StringArguments args, CommandHandler handler)
                 {
                     if (args.Empty())
                         return false;
@@ -735,10 +735,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("lock", RBACPermissions.CommandAccountLock)]
-        class LockCommands
+        private class LockCommands
         {
             [Command("country", RBACPermissions.CommandAccountLockCountry)]
-            static bool HandleAccountLockCountryCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountLockCountryCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -788,7 +788,7 @@ namespace Game.Chat
             }
 
             [Command("ip", RBACPermissions.CommandAccountLockIp)]
-            static bool HandleAccountLockIpCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAccountLockIpCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {

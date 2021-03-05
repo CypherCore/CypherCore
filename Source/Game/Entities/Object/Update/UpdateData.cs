@@ -24,11 +24,11 @@ namespace Game.Entities
 {
     public class UpdateData
     {
-        uint MapId;
-        uint BlockCount;
-        List<ObjectGuid> destroyGUIDs = new List<ObjectGuid>();
-        List<ObjectGuid> outOfRangeGUIDs = new List<ObjectGuid>();
-        ByteBuffer data = new ByteBuffer();
+        private uint MapId;
+        private uint BlockCount;
+        private List<ObjectGuid> destroyGUIDs = new List<ObjectGuid>();
+        private List<ObjectGuid> outOfRangeGUIDs = new List<ObjectGuid>();
+        private ByteBuffer data = new ByteBuffer();
 
         public UpdateData(uint mapId)
         {

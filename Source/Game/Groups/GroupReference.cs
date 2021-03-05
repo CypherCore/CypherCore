@@ -40,7 +40,7 @@ namespace Game.Groups
 
         public void SetSubGroup(byte pSubGroup) { iSubGroup = pSubGroup; }
 
-        byte iSubGroup;
+        private byte iSubGroup;
     }
 
     public class GroupRefManager : RefManager<Group, Player>

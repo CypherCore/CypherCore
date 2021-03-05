@@ -27,7 +27,7 @@ namespace Scripts.Pets
 {
     namespace Mage
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint CloneMe = 45204;
             public const uint MastersThreatList = 58838;
@@ -35,7 +35,7 @@ namespace Scripts.Pets
             public const uint MageFireBlast = 59637;
         }
 
-        struct MiscConst
+        internal struct MiscConst
         {
             public const uint TimerMirrorImageInit = 0;
             public const uint TimerMirrorImageFrostBolt = 4000;
@@ -43,11 +43,11 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_mage_mirror_image : CasterAI
+        internal class npc_pet_mage_mirror_image : CasterAI
         {
             public npc_pet_mage_mirror_image(Creature creature) : base(creature) { }
 
-            void Init()
+            private void Init()
             {
                 var owner = me.GetCharmerOrOwner();
 
@@ -109,7 +109,7 @@ namespace Scripts.Pets
                     me.Attack(nearestPlayer, false);
             }
 
-            bool IsInThreatList(Unit target)
+            private bool IsInThreatList(Unit target)
             {
                 var owner = me.GetCharmerOrOwner();
 

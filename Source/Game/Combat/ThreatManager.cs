@@ -34,7 +34,7 @@ namespace Game.Combat
             threatOfflineContainer = new ThreatContainer();
         }
 
-        const int ThreatUpdateInternal = 1 * Time.InMilliseconds;
+        private const int ThreatUpdateInternal = 1 * Time.InMilliseconds;
 
         public void ForwardThreatForAssistingMe(Unit victim, float amount, SpellInfo spell, bool ignoreModifiers = false, bool ignoreRedirection = false)
         {
@@ -119,7 +119,7 @@ namespace Game.Combat
             AddThreat(victim, threat);
         }
 
-        void AddThreat(Unit victim, float threat)
+        private void AddThreat(Unit victim, float threat)
         {
             var reff = threatContainer.AddThreat(victim, threat);
             // Ref is not in the online refs, search the offline refs next
@@ -165,7 +165,7 @@ namespace Game.Combat
             return threat;
         }
 
-        void TauntApply(Unit taunter)
+        private void TauntApply(Unit taunter)
         {
             var refe = threatContainer.GetReferenceByTarget(taunter);
             if (GetCurrentVictim() != null && refe != null && (refe.GetThreat() < getCurrentVictim().GetThreat()))
@@ -175,7 +175,7 @@ namespace Game.Combat
             }
         }
 
-        void TauntFadeOut(Unit taunter)
+        private void TauntFadeOut(Unit taunter)
         {
             var refe = threatContainer.GetReferenceByTarget(taunter);
             if (refe != null)
@@ -254,7 +254,7 @@ namespace Game.Combat
         }
 
         // Reset all aggro without modifying the threatlist.
-        void ResetAllAggro()
+        private void ResetAllAggro()
         {
             var threatList = threatContainer.threatList;
             if (threatList.Empty())
@@ -281,7 +281,7 @@ namespace Game.Combat
             return Owner;
         }
 
-        void SetDirty(bool isDirty)
+        private void SetDirty(bool isDirty)
         {
             threatContainer.SetDirty(isDirty);
         }
@@ -319,7 +319,7 @@ namespace Game.Combat
         }
         public void ResetAllThreat() { ResetAllAggro(); }
 
-        HostileReference FindReference(Unit who, bool includeOffline)
+        private HostileReference FindReference(Unit who, bool includeOffline)
         {
             var refe = threatContainer.GetReferenceByTarget(who);
             if (refe != null)
@@ -393,11 +393,11 @@ namespace Game.Combat
             return true;
         }
 
-        Unit Owner;
-        HostileReference currentVictim;
-        uint updateTimer;
-        ThreatContainer threatContainer;
-        ThreatContainer threatOfflineContainer;
+        private Unit Owner;
+        private HostileReference currentVictim;
+        private uint updateTimer;
+        private ThreatContainer threatContainer;
+        private ThreatContainer threatOfflineContainer;
     }
 
     public class ThreatContainer
@@ -531,7 +531,7 @@ namespace Game.Combat
             iDirty = isDirty;
         }
 
-        bool IsDirty()
+        private bool IsDirty()
         {
             return iDirty;
         }
@@ -557,6 +557,6 @@ namespace Game.Combat
         public List<HostileReference> GetThreatList() { return threatList; }
 
         public List<HostileReference> threatList { get; set; }
-        bool iDirty;
+        private bool iDirty;
     }
 }

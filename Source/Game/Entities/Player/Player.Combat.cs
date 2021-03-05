@@ -28,7 +28,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void SetRegularAttackTime()
+        private void SetRegularAttackTime()
         {
             for (WeaponAttackType weaponAttackType = 0; weaponAttackType < WeaponAttackType.Max; ++weaponAttackType)
             {
@@ -89,9 +89,9 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        bool CanTitanGrip() { return m_canTitanGrip; }
+        private bool CanTitanGrip() { return m_canTitanGrip; }
 
-        float GetRatingMultiplier(CombatRating cr)
+        private float GetRatingMultiplier(CombatRating cr)
         {
             var Rating = CliDB.CombatRatingsGameTable.GetRow(GetLevel());
             if (Rating == null)
@@ -111,7 +111,7 @@ namespace Game.Entities
             return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
         }
 
-        void GetDodgeFromAgility(float diminishing, float nondiminishing)
+        private void GetDodgeFromAgility(float diminishing, float nondiminishing)
         {
             /*// Table for base dodge values
             float[] dodge_base =
@@ -165,7 +165,7 @@ namespace Game.Entities
             */
         }
 
-        float ApplyRatingDiminishing(CombatRating cr, float bonusValue)
+        private float ApplyRatingDiminishing(CombatRating cr, float bonusValue)
         {
             uint diminishingCurveId = 0;
             switch (cr)
@@ -248,7 +248,7 @@ namespace Game.Entities
             m_titanGripPenaltySpellId = penaltySpellId;
         }
 
-        void CheckTitanGripPenalty()
+        private void CheckTitanGripPenalty()
         {
             if (!CanTitanGrip())
                 return;
@@ -263,7 +263,7 @@ namespace Game.Entities
                 RemoveAurasDueToSpell(m_titanGripPenaltySpellId);
         }
 
-        bool IsTwoHandUsed()
+        private bool IsTwoHandUsed()
         {
             var mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
             if (!mainItem)
@@ -275,7 +275,7 @@ namespace Game.Entities
                 (itemTemplate.GetInventoryType() == InventoryType.RangedRight && itemTemplate.GetClass() == ItemClass.Weapon && (ItemSubClassWeapon)itemTemplate.GetSubClass() != ItemSubClassWeapon.Wand);
         }
 
-        bool IsUsingTwoHandedWeaponInOneHand()
+        private bool IsUsingTwoHandedWeaponInOneHand()
         {
             var offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
             if (offItem && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
@@ -377,7 +377,7 @@ namespace Game.Entities
         public void RestoreHealthAfterDuel() { SetHealth(healthBeforeDuel); }
         public void RestoreManaAfterDuel() { SetPower(PowerType.Mana, (int)manaBeforeDuel); }
 
-        void UpdateDuelFlag(long currTime)
+        private void UpdateDuelFlag(long currTime)
         {
             if (duel == null || duel.startTimer == 0 || currTime < duel.startTimer + 3)
                 return;
@@ -393,7 +393,7 @@ namespace Game.Entities
             duel.opponent.duel.startTime = currTime;
         }
 
-        void CheckDuelDistance(long currTime)
+        private void CheckDuelDistance(long currTime)
         {
             if (duel == null)
                 return;
@@ -537,7 +537,7 @@ namespace Game.Entities
             duel = null;
         }
         public void SetDuelArbiter(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelArbiter), guid); }
-        void SetDuelTeam(uint duelTeam) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelTeam), duelTeam); }
+        private void SetDuelTeam(uint duelTeam) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelTeam), duelTeam); }
 
         //PVP
         public void SetPvPDeath(bool on)
@@ -556,7 +556,8 @@ namespace Game.Entities
             RemovePlayerFlag(PlayerFlags.ContestedPVP);
             m_contestedPvPTimer = 0;
         }
-        void UpdateAfkReport(long currTime)
+
+        private void UpdateAfkReport(long currTime)
         {
             if (m_bgData.bgAfkReportedTimer <= currTime)
             {

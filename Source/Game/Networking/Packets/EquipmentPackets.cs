@@ -121,7 +121,7 @@ namespace Game.Networking.Packets
         public EquipmentSetInfo.EquipmentSetData Set;
     }
 
-    class DeleteEquipmentSet : ClientPacket
+    internal class DeleteEquipmentSet : ClientPacket
     {
         public DeleteEquipmentSet(WorldPacket packet) : base(packet) { }
 
@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
         public ulong ID;
     }
 
-    class UseEquipmentSet : ClientPacket
+    internal class UseEquipmentSet : ClientPacket
     {
         public UseEquipmentSet(WorldPacket packet) : base(packet) { }
 
@@ -163,7 +163,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class UseEquipmentSetResult : ServerPacket
+    internal class UseEquipmentSetResult : ServerPacket
     {
         public UseEquipmentSetResult() : base(ServerOpcodes.UseEquipmentSetResult) { }
 

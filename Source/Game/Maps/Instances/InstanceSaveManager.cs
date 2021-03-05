@@ -29,7 +29,7 @@ namespace Game.Maps
 {
     public class InstanceSaveManager : Singleton<InstanceSaveManager>
     {
-        InstanceSaveManager() { }
+        private InstanceSaveManager() { }
 
         public InstanceSave AddInstanceSave(uint mapId, uint instanceId, Difficulty difficulty, long resetTime, uint entranceId, bool canReset, bool load = false)
         {
@@ -177,7 +177,7 @@ namespace Game.Maps
             Log.outInfo(LogFilter.ServerLoading, "Loaded instances in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        void LoadResetTimes()
+        private void LoadResetTimes()
         {
             var now = Time.UnixTime;
             var today = (now / Time.Day) * Time.Day;
@@ -412,7 +412,7 @@ namespace Game.Maps
             }
         }
 
-        void _ResetSave(KeyValuePair<uint, InstanceSave> pair)
+        private void _ResetSave(KeyValuePair<uint, InstanceSave> pair)
         {
             // unbind all players bound to the instance
             // do not allow UnbindInstance to automatically unload the InstanceSaves
@@ -451,7 +451,7 @@ namespace Game.Maps
             lock_instLists = false;
         }
 
-        void _ResetInstance(uint mapid, uint instanceId)
+        private void _ResetInstance(uint mapid, uint instanceId)
         {
             Log.outDebug(LogFilter.Maps, "InstanceSaveMgr._ResetInstance {0}, {1}", mapid, instanceId);
             var map = Global.MapMgr.CreateBaseMap(mapid);
@@ -481,7 +481,7 @@ namespace Game.Maps
             Global.MapMgr.FreeInstanceId(instanceId);
         }
 
-        void _ResetOrWarnAll(uint mapid, Difficulty difficulty, bool warn, long resetTime)
+        private void _ResetOrWarnAll(uint mapid, Difficulty difficulty, bool warn, long resetTime)
         {
             // global reset for all instances of the given map
             var mapEntry = CliDB.MapStorage.LookupByKey(mapid);
@@ -594,12 +594,12 @@ namespace Game.Maps
         }
 
         // Use this on startup when initializing reset times
-        void InitializeResetTimeFor(uint mapid, Difficulty d, long t)
+        private void InitializeResetTimeFor(uint mapid, Difficulty d, long t)
         {
             m_resetTimeByMapDifficulty[MathFunctions.MakePair64(mapid, (uint)d)] = t;
         }
         // Use this only when updating existing reset times
-        void SetResetTimeFor(uint mapid, Difficulty d, long t)
+        private void SetResetTimeFor(uint mapid, Difficulty d, long t)
         {
             var key = MathFunctions.MakePair64(mapid, (uint)d);
             Cypher.Assert(m_resetTimeByMapDifficulty.ContainsKey(key));
@@ -629,15 +629,15 @@ namespace Game.Maps
             public uint instanceId;
         }
 
-        static ushort[] ResetTimeDelay = { 3600, 900, 300, 60 };
+        private static ushort[] ResetTimeDelay = { 3600, 900, 300, 60 };
 
         // used during global instance resets
         public bool lock_instLists;
         // fast lookup by instance id
-        Dictionary<uint, InstanceSave> m_instanceSaveById = new Dictionary<uint, InstanceSave>();
+        private Dictionary<uint, InstanceSave> m_instanceSaveById = new Dictionary<uint, InstanceSave>();
         // fast lookup for reset times (always use existed functions for access/set)
-        Dictionary<ulong, long> m_resetTimeByMapDifficulty = new Dictionary<ulong, long>();
-        MultiMap<long, InstResetEvent> m_resetTimeQueue = new MultiMap<long, InstResetEvent>();
+        private Dictionary<ulong, long> m_resetTimeByMapDifficulty = new Dictionary<ulong, long>();
+        private MultiMap<long, InstResetEvent> m_resetTimeQueue = new MultiMap<long, InstResetEvent>();
     }
 
     public class InstanceSave
@@ -697,12 +697,12 @@ namespace Game.Maps
                 return GetResetTime();
         }
 
-        InstanceTemplate GetTemplate()
+        private InstanceTemplate GetTemplate()
         {
             return Global.ObjectMgr.GetInstanceTemplate(m_mapid);
         }
 
-        MapRecord GetMapEntry()
+        private MapRecord GetMapEntry()
         {
             return CliDB.MapStorage.LookupByKey(m_mapid);
         }
@@ -735,7 +735,7 @@ namespace Game.Maps
         public void SetResetTime(long resetTime) { m_resetTime = resetTime; }
 
         public uint GetEntranceLocation() { return m_entranceId; }
-        void SetEntranceLocation(uint entranceId) { m_entranceId = entranceId; }
+        private void SetEntranceLocation(uint entranceId) { m_entranceId = entranceId; }
 
         public void AddPlayer(Player player)
         {
@@ -768,12 +768,12 @@ namespace Game.Maps
 
         public List<Player> m_playerList = new List<Player>();
         public List<Group> m_groupList = new List<Group>();
-        long m_resetTime;
-        uint m_instanceid;
-        uint m_mapid;
-        Difficulty m_difficulty;
-        uint m_entranceId;
-        bool m_canReset;
-        bool m_toDelete;
+        private long m_resetTime;
+        private uint m_instanceid;
+        private uint m_mapid;
+        private Difficulty m_difficulty;
+        private uint m_entranceId;
+        private bool m_canReset;
+        private bool m_toDelete;
     }
 }

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game
 {
-    class QuestObjectiveCriteriaManager : CriteriaHandler
+    internal class QuestObjectiveCriteriaManager : CriteriaHandler
     {
         public QuestObjectiveCriteriaManager(Player owner)
         {
@@ -223,7 +223,7 @@ namespace Game
             }
         }
 
-        void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
+        private void CompletedObjective(QuestObjective questObjective, Player referencePlayer)
         {
             if (HasCompletedObjective(questObjective))
                 return;
@@ -327,7 +327,7 @@ namespace Game
         }
 
 
-        Player _owner;
-        List<uint> _completedObjectives = new List<uint>();
+        private Player _owner;
+        private List<uint> _completedObjectives = new List<uint>();
     }
 }

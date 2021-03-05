@@ -24,19 +24,19 @@ namespace Scripts.Pets
 {
     namespace Generic
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint FeelingFroggy = 43906;
             public const uint SeductionVisual = 43919;
         }
 
-        struct TextIds
+        internal struct TextIds
         {
             public const uint SayMojo = 0;
         }
 
         [Script]
-        class npc_pet_gen_mojo : ScriptedAI
+        internal class npc_pet_gen_mojo : ScriptedAI
         {
             public npc_pet_gen_mojo(Creature creature) : base(creature) { }
 
@@ -79,7 +79,7 @@ namespace Scripts.Pets
                 me.GetMotionMaster().MoveFollow(player, 0.0f, 0.0f);
             }
 
-            ObjectGuid _victimGUID;
+            private ObjectGuid _victimGUID;
         }
     }
 }

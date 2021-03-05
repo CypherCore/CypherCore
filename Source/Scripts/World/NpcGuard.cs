@@ -25,7 +25,7 @@ using System;
 
 namespace Scripts.World.NpcGuard
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint BanishedShattrathA = 36642;
         public const uint BanishedShattrathS = 36671;
@@ -33,13 +33,13 @@ namespace Scripts.World.NpcGuard
         public const uint Exile = 39533;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         public const uint SayGuardSilAggro = 0;
     }
 
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint CenarionHoldInfantry = 15184;
         public const uint StormwindCityGuard = 68;
@@ -49,9 +49,9 @@ namespace Scripts.World.NpcGuard
     }
 
     [Script]
-    class npc_guard_generic : GuardAI
+    internal class npc_guard_generic : GuardAI
     {
-        TaskScheduler _combatScheduler;
+        private TaskScheduler _combatScheduler;
 
         public npc_guard_generic(Creature creature) : base(creature)
         {
@@ -75,7 +75,7 @@ namespace Scripts.World.NpcGuard
             });
         }
 
-        void DoReplyToTextEmote(TextEmotes emote)
+        private void DoReplyToTextEmote(TextEmotes emote)
         {
             switch (emote)
             {
@@ -190,7 +190,7 @@ namespace Scripts.World.NpcGuard
     }
 
     [Script]
-    class npc_guard_shattrath_faction : GuardAI
+    internal class npc_guard_shattrath_faction : GuardAI
     {
         public npc_guard_shattrath_faction(Creature creature) : base(creature)
         {
@@ -215,7 +215,7 @@ namespace Scripts.World.NpcGuard
             _scheduler.Update(diff, base.DoMeleeAttackIfReady);
         }
 
-        void ScheduleVanish()
+        private void ScheduleVanish()
         {
             _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {

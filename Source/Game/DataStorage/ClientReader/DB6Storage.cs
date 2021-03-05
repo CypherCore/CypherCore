@@ -39,7 +39,7 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        WDCHeader _header;
+        private WDCHeader _header;
 
         public void LoadData(WDCHeader header, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
@@ -226,7 +226,7 @@ namespace Game.DataStorage
             }
         }
 
-        TValue[] ReadArray<TValue>(SQLResult result, int dbIndex, int arrayLength)
+        private TValue[] ReadArray<TValue>(SQLResult result, int dbIndex, int arrayLength)
         {
             var values = new TValue[arrayLength];
             for (var i = 0; i < arrayLength; ++i)
@@ -332,7 +332,7 @@ namespace Game.DataStorage
             }
         }
 
-        void WriteArrayValues(object entry, FieldInfo fieldInfo, ByteBuffer buffer)
+        private void WriteArrayValues(object entry, FieldInfo fieldInfo, ByteBuffer buffer)
         {
             var type = fieldInfo.FieldType.GetElementType();
             var array = (Array)fieldInfo.GetValue(entry);

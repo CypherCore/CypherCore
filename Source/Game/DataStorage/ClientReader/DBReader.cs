@@ -31,7 +31,7 @@ using System.Collections;
 
 namespace Game.DataStorage
 {
-    class DBReader
+    internal class DBReader
     {
         private const uint WDC3FmtSig = 0x33434457; // WDC3
 
@@ -65,7 +65,7 @@ namespace Game.DataStorage
             return storage;
         }
 
-        bool Load(Stream stream)
+        private bool Load(Stream stream)
         {
             using (var reader = new BinaryReader(stream, Encoding.UTF8))
             {
@@ -262,10 +262,10 @@ namespace Game.DataStorage
         internal Value32[][] PalletData;
         internal Dictionary<int, Value32>[] CommonData;
 
-        Dictionary<int, WDC3Row> _records = new Dictionary<int, WDC3Row>();
+        private Dictionary<int, WDC3Row> _records = new Dictionary<int, WDC3Row>();
     }
 
-    class WDC3Row
+    internal class WDC3Row
     {
         private BitReader _data;
         private int _dataOffset;
@@ -307,7 +307,7 @@ namespace Game.DataStorage
             }
         }
 
-        T GetFieldValue<T>(int fieldIndex) where T : unmanaged
+        private T GetFieldValue<T>(int fieldIndex) where T : unmanaged
         {
             var columnMeta = _columnMeta[fieldIndex];
             switch (columnMeta.CompressionType)
@@ -335,7 +335,7 @@ namespace Game.DataStorage
             throw new Exception(string.Format("Unexpected compression type {0}", _columnMeta[fieldIndex].CompressionType));
         }
 
-        T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
+        private T[] GetFieldValueArray<T>(int fieldIndex, int arraySize) where T : unmanaged
         {
             var columnMeta = _columnMeta[fieldIndex];
 
@@ -749,6 +749,6 @@ namespace Game.DataStorage
             }
         }
 
-        StringArray stringStorage = new StringArray((int)Locale.Total);
+        private StringArray stringStorage = new StringArray((int)Locale.Total);
     }
 }

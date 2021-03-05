@@ -23,10 +23,10 @@ using Game.Entities;
 namespace Game.Chat
 {
     [CommandGroup("scene", RBACPermissions.CommandScene)]
-    class SceneCommands
+    internal class SceneCommands
     {
         [Command("cancel", RBACPermissions.CommandSceneCancel)]
-        static bool HandleCancelSceneCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCancelSceneCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -48,7 +48,7 @@ namespace Game.Chat
         }
 
         [Command("debug", RBACPermissions.CommandSceneDebug)]
-        static bool HandleDebugSceneCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleDebugSceneCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             if (player)
@@ -61,7 +61,7 @@ namespace Game.Chat
         }
 
         [Command("play", RBACPermissions.CommandScenePlay)]
-        static bool HandlePlaySceneCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePlaySceneCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -82,7 +82,7 @@ namespace Game.Chat
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePlayScenePackageCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

@@ -234,11 +234,11 @@ namespace Game.Collision
             }
             iLoadedTiles.Remove(tileID);
         }
-        
-        static uint PackTileID(uint tileX, uint tileY) { return tileX << 16 | tileY; }
-        static void UnpackTileID(uint ID, ref uint tileX, ref uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
 
-        static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
+        private static uint PackTileID(uint tileX, uint tileY) { return tileX << 16 | tileY; }
+        private static void UnpackTileID(uint ID, ref uint tileX, ref uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
+
+        private static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
             var result = new TileFileOpenResult();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
@@ -336,7 +336,8 @@ namespace Game.Collision
 
             return height;
         }
-        bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
+
+        private bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             var distance = pMaxDist;
             var intersectionCallBack = new MapRayCallback(iTreeValues, ignoreFlags);
@@ -412,17 +413,17 @@ namespace Game.Collision
 
         public int NumLoadedTiles() { return iLoadedTiles.Count; }
 
-        uint iMapID;
-        BIH iTree = new BIH();
-        ModelInstance[] iTreeValues;
-        uint iNTreeValues;
-        Dictionary<uint, uint> iSpawnIndices = new Dictionary<uint, uint>();
+        private uint iMapID;
+        private BIH iTree = new BIH();
+        private ModelInstance[] iTreeValues;
+        private uint iNTreeValues;
+        private Dictionary<uint, uint> iSpawnIndices = new Dictionary<uint, uint>();
 
-        Dictionary<uint, bool> iLoadedTiles = new Dictionary<uint, bool>();
-        Dictionary<uint, uint> iLoadedSpawns = new Dictionary<uint, uint>();
+        private Dictionary<uint, bool> iLoadedTiles = new Dictionary<uint, bool>();
+        private Dictionary<uint, uint> iLoadedSpawns = new Dictionary<uint, uint>();
     }
 
-    class TileFileOpenResult
+    internal class TileFileOpenResult
     {
         public string Name;
         public FileStream File;

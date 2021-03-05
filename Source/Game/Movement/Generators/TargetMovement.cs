@@ -212,7 +212,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        bool IsReachable()
+        private bool IsReachable()
         {
             return _path != null ? _path.GetPathType().HasAnyFlag(PathType.Normal) : true;
         }
@@ -234,15 +234,15 @@ namespace Game.Movement
         public bool IsTargetValid() { return _target.IsValid(); }
         public Unit GetTarget() { return _target.GetTarget(); }
 
-        FollowerReference _target;
-        PathGenerator _path;
-        TimeTracker _timer;
-        float _offset;
-        float _angle;
-        bool _recalculateTravel;
-        bool _speedChanged;
-        bool _targetReached;
-        bool _interrupt;
+        private FollowerReference _target;
+        private PathGenerator _path;
+        private TimeTracker _timer;
+        private float _offset;
+        private float _angle;
+        private bool _recalculateTravel;
+        private bool _speedChanged;
+        private bool _targetReached;
+        private bool _interrupt;
     }
 
     public class ChaseMovementGenerator<T> : TargetedMovementGenerator<T> where T : Unit
@@ -379,7 +379,7 @@ namespace Game.Movement
             return MovementGeneratorType.Follow;
         }
 
-        void UpdateSpeed(T owner)
+        private void UpdateSpeed(T owner)
         {
             if (owner.IsTypeId(TypeId.Player))
                 return;

@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class BlackMarketOpen : ClientPacket
+    internal class BlackMarketOpen : ClientPacket
     {
         public BlackMarketOpen(WorldPacket packet) : base(packet) { }
 
@@ -33,7 +33,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class BlackMarketOpenResult : ServerPacket
+    internal class BlackMarketOpenResult : ServerPacket
     {
         public BlackMarketOpenResult() : base(ServerOpcodes.BlackMarketOpenResult) { }
 
@@ -48,7 +48,7 @@ namespace Game.Networking.Packets
         public bool Enable = true;
     }
 
-    class BlackMarketRequestItems : ClientPacket
+    internal class BlackMarketRequestItems : ClientPacket
     {
         public BlackMarketRequestItems(WorldPacket packet) : base(packet) { }
 
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
         public List<BlackMarketItem> Items = new List<BlackMarketItem>();
     }
 
-    class BlackMarketBidOnItem : ClientPacket
+    internal class BlackMarketBidOnItem : ClientPacket
     {
         public BlackMarketBidOnItem(WorldPacket packet) : base(packet) { }
 
@@ -97,7 +97,7 @@ namespace Game.Networking.Packets
         public ulong BidAmount;
     }
 
-    class BlackMarketBidOnItemResult : ServerPacket
+    internal class BlackMarketBidOnItemResult : ServerPacket
     {
         public BlackMarketBidOnItemResult() : base(ServerOpcodes.BlackMarketBidOnItemResult) { }
 
@@ -113,7 +113,7 @@ namespace Game.Networking.Packets
         public BlackMarketError Result;
     }
 
-    class BlackMarketOutbid : ServerPacket
+    internal class BlackMarketOutbid : ServerPacket
     {
         public BlackMarketOutbid() : base(ServerOpcodes.BlackMarketOutbid) { }
 
@@ -129,7 +129,7 @@ namespace Game.Networking.Packets
         public uint RandomPropertiesID;
     }
 
-    class BlackMarketWon : ServerPacket
+    internal class BlackMarketWon : ServerPacket
     {
         public BlackMarketWon() : base(ServerOpcodes.BlackMarketWon) { }
 

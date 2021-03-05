@@ -375,22 +375,22 @@ namespace Game.Entities
 
         public UnitActionBarEntry GetCharmSpell(byte index) { return _charmspells[index]; }
 
-        Unit _unit;
-        UnitActionBarEntry[] PetActionBar = new UnitActionBarEntry[SharedConst.ActionBarIndexMax];
-        UnitActionBarEntry[] _charmspells = new UnitActionBarEntry[4];
-        CommandStates _CommandState;
-        uint _petnumber;
+        private Unit _unit;
+        private UnitActionBarEntry[] PetActionBar = new UnitActionBarEntry[SharedConst.ActionBarIndexMax];
+        private UnitActionBarEntry[] _charmspells = new UnitActionBarEntry[4];
+        private CommandStates _CommandState;
+        private uint _petnumber;
 
-        ReactStates _oldReactState;
+        private ReactStates _oldReactState;
 
-        bool _isCommandAttack;
-        bool _isCommandFollow;
-        bool _isAtStay;
-        bool _isFollowing;
-        bool _isReturning;
-        float _stayX;
-        float _stayY;
-        float _stayZ;
+        private bool _isCommandAttack;
+        private bool _isCommandFollow;
+        private bool _isAtStay;
+        private bool _isFollowing;
+        private bool _isReturning;
+        private float _stayX;
+        private float _stayY;
+        private float _stayZ;
     }
 
     public class UnitActionBarEntry

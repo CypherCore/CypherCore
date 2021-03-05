@@ -39,7 +39,7 @@ namespace Game.Networking.Packets
         Smsg_HashRequest = 5
     }
 
-    class WardenData : ClientPacket
+    internal class WardenData : ClientPacket
     {
         public WardenData(WorldPacket packet) : base(packet) { }
 
@@ -54,7 +54,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Data;
     }
 
-    class Warden3DataServer : ServerPacket
+    internal class Warden3DataServer : ServerPacket
     {
         public Warden3DataServer() : base(ServerOpcodes.Warden3Data) { }
 
@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Data;
     }
 
-    class WardenModuleTransfer : ByteBuffer
+    internal class WardenModuleTransfer : ByteBuffer
     {
         public byte[] Write()
         {
@@ -82,7 +82,7 @@ namespace Game.Networking.Packets
         public byte[] Data = new byte[500];
     }
 
-    class WardenModuleUse : ByteBuffer
+    internal class WardenModuleUse : ByteBuffer
     {
         public byte[] Write()
         {
@@ -100,7 +100,7 @@ namespace Game.Networking.Packets
         public uint Size;
     }
 
-    class WardenHashRequest : ByteBuffer
+    internal class WardenHashRequest : ByteBuffer
     {
         public byte[] Write()
         {
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
         public byte[] Seed = new byte[16];
     }
 
-    class WardenInitModuleRequest : ByteBuffer
+    internal class WardenInitModuleRequest : ByteBuffer
     {
         public byte[] Write()
         {

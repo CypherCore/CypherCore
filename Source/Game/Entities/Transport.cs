@@ -355,7 +355,7 @@ namespace Game.Entities
             return creature;
         }
 
-        GameObject CreateGOPassenger(ulong guid, GameObjectData data)
+        private GameObject CreateGOPassenger(ulong guid, GameObjectData data)
         {
             var map = GetMap();
 
@@ -535,7 +535,7 @@ namespace Game.Entities
             // 4. is handed by grid unload
         }
 
-        void LoadStaticPassengers()
+        private void LoadStaticPassengers()
         {
             var mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
             var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, (byte)GetMap().GetDifficultyID());
@@ -553,7 +553,7 @@ namespace Game.Entities
             }
         }
 
-        void UnloadStaticPassengers()
+        private void UnloadStaticPassengers()
         {
             while (!_staticPassengers.Empty())
             {
@@ -572,7 +572,7 @@ namespace Game.Entities
 
         public void SetDelayedAddModelToMap() { _delayedAddModel = true; }
 
-        void MoveToNextWaypoint()
+        private void MoveToNextWaypoint()
         {
             // Clear events flagging
             _triggeredArrivalEvent = false;
@@ -584,7 +584,7 @@ namespace Game.Entities
                 _nextFrame = 0;
         }
 
-        float CalculateSegmentPos(float now)
+        private float CalculateSegmentPos(float now)
         {
             var frame = _currentFrame;
             float speed = GetGoInfo().MoTransport.moveSpeed;
@@ -615,7 +615,7 @@ namespace Game.Entities
             return segmentPos / frame.NextDistFromPrev;
         }
 
-        bool TeleportTransport(uint newMapid, float x, float y, float z, float o)
+        private bool TeleportTransport(uint newMapid, float x, float y, float z, float o)
         {
             var oldMap = GetMap();
 
@@ -652,7 +652,7 @@ namespace Game.Entities
             }
         }
 
-        void DelayedTeleportTransport()
+        private void DelayedTeleportTransport()
         {
             if (!_delayedTeleport)
                 return;
@@ -695,7 +695,7 @@ namespace Game.Entities
             GetMap().AddToMap(this);
         }
 
-        void UpdatePassengerPositions(HashSet<WorldObject> passengers)
+        private void UpdatePassengerPositions(HashSet<WorldObject> passengers)
         {
             foreach (var passenger in passengers)
             {
@@ -756,7 +756,7 @@ namespace Game.Entities
             }
         }
 
-        void DoEventIfAny(KeyFrame node, bool departure)
+        private void DoEventIfAny(KeyFrame node, bool departure)
         {
             var eventid = departure ? node.Node.DepartureEventID : node.Node.ArrivalEventID;
             if (eventid != 0)
@@ -783,31 +783,31 @@ namespace Game.Entities
 
         public override uint GetTransportPeriod() { return m_gameObjectData.Level; }
         public void SetPeriod(uint period) { SetLevel(period); }
-        uint GetTimer() { return m_goValue.Transport.PathProgress; }
+        private uint GetTimer() { return m_goValue.Transport.PathProgress; }
 
         public List<KeyFrame> GetKeyFrames() { return _transportInfo.keyFrames; }
         public TransportTemplate GetTransportTemplate() { return _transportInfo; }
 
         //! Helpers to know if stop frame was reached
-        bool IsMoving() { return _isMoving; }
-        void SetMoving(bool val) { _isMoving = val; }
+        private bool IsMoving() { return _isMoving; }
+        private void SetMoving(bool val) { _isMoving = val; }
 
-        TransportTemplate _transportInfo;
+        private TransportTemplate _transportInfo;
 
-        KeyFrame _currentFrame;
-        int _nextFrame;
-        TimeTrackerSmall _positionChangeTimer = new TimeTrackerSmall();
-        bool _isMoving;
-        bool _pendingStop;
+        private KeyFrame _currentFrame;
+        private int _nextFrame;
+        private TimeTrackerSmall _positionChangeTimer = new TimeTrackerSmall();
+        private bool _isMoving;
+        private bool _pendingStop;
 
         //! These are needed to properly control events triggering only once for each frame
-        bool _triggeredArrivalEvent;
-        bool _triggeredDepartureEvent;
+        private bool _triggeredArrivalEvent;
+        private bool _triggeredDepartureEvent;
 
-        HashSet<WorldObject> _passengers = new HashSet<WorldObject>();
-        HashSet<WorldObject> _staticPassengers = new HashSet<WorldObject>();
+        private HashSet<WorldObject> _passengers = new HashSet<WorldObject>();
+        private HashSet<WorldObject> _staticPassengers = new HashSet<WorldObject>();
 
-        bool _delayedAddModel;
-        bool _delayedTeleport;
+        private bool _delayedAddModel;
+        private bool _delayedTeleport;
     }
 }

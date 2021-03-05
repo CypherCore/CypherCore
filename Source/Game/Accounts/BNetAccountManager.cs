@@ -24,7 +24,7 @@ namespace Game
 {
     public sealed class BNetAccountManager : Singleton<BNetAccountManager>
     {
-        BNetAccountManager() { }
+        private BNetAccountManager() { }
 
         public AccountOpResult CreateBattlenetAccount(string email, string password, bool withGameAccount, out string gameAccountName)
         {

@@ -39,7 +39,7 @@ namespace Game.Movement
             _path = path;
         }
 
-        void LoadPath(Creature creature)
+        private void LoadPath(Creature creature)
         {
             if (_loadedFromDB)
             {
@@ -87,7 +87,7 @@ namespace Game.Movement
             }
         }
 
-        void OnArrived(Creature creature)
+        private void OnArrived(Creature creature)
         {
             if (_path == null || _path.nodes.Empty())
                 return;
@@ -117,7 +117,7 @@ namespace Game.Movement
             creature.UpdateCurrentWaypointInfo(waypoint.id, _path.id);
         }
 
-        bool StartMove(Creature creature)
+        private bool StartMove(Creature creature)
         {
             if (!creature || !creature.IsAlive())
                 return true;
@@ -282,7 +282,7 @@ namespace Game.Movement
             return true;
         }
 
-        void MovementInform(Creature creature)
+        private void MovementInform(Creature creature)
         {
             if (creature.IsAIEnabled)
                 creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
@@ -318,7 +318,7 @@ namespace Game.Movement
                 _nextMoveTime.Reset((int)overrideTimer);
         }
 
-        bool CanMove(Creature creature)
+        private bool CanMove(Creature creature)
         {
             return _nextMoveTime.Passed() && !creature.HasUnitState(UnitState.NotMove) && !creature.IsMovementPreventedByCasting();
         }
@@ -327,22 +327,22 @@ namespace Game.Movement
 
         public override void UnitSpeedChanged() { _recalculateSpeed = true; }
 
-        bool StartMoveNow(Creature creature)
+        private bool StartMoveNow(Creature creature)
         {
             _nextMoveTime.Reset(0);
             return StartMove(creature);
         }
 
-        TimeTrackerSmall _nextMoveTime;
-        bool _recalculateSpeed;
-        bool _isArrivalDone;
-        uint _pathId;
-        bool _repeating;
-        bool _loadedFromDB;
-        bool _stalled;
-        bool _done;
+        private TimeTrackerSmall _nextMoveTime;
+        private bool _recalculateSpeed;
+        private bool _isArrivalDone;
+        private uint _pathId;
+        private bool _repeating;
+        private bool _loadedFromDB;
+        private bool _stalled;
+        private bool _done;
 
-        WaypointPath _path;
-        int _currentNode;
+        private WaypointPath _path;
+        private int _currentNode;
     }
 }

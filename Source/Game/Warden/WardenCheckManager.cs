@@ -25,7 +25,7 @@ namespace Game
 {
     public class WardenCheckManager : Singleton<WardenCheckManager>
     {
-        WardenCheckManager() { }
+        private WardenCheckManager() { }
 
         public void LoadWardenChecks()
         {
@@ -160,8 +160,8 @@ namespace Game
 
         public List<ushort> MemChecksIdPool = new List<ushort>();
         public List<ushort> OtherChecksIdPool = new List<ushort>();
-        List<WardenCheck> CheckStore = new List<WardenCheck>();
-        Dictionary<uint, BigInteger> CheckResultStore = new Dictionary<uint, BigInteger>();
+        private List<WardenCheck> CheckStore = new List<WardenCheck>();
+        private Dictionary<uint, BigInteger> CheckResultStore = new Dictionary<uint, BigInteger>();
     }
 
     public enum WardenActions

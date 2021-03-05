@@ -26,7 +26,7 @@ namespace Game.BlackMarket
 {
     public class BlackMarketManager : Singleton<BlackMarketManager>
     {
-        BlackMarketManager() { }
+        private BlackMarketManager() { }
 
         public void LoadTemplates()
         {
@@ -302,8 +302,8 @@ namespace Game.BlackMarket
 
         public long GetLastUpdate() { return _lastUpdate; }
 
-        Dictionary<uint, BlackMarketEntry> _auctions = new Dictionary<uint, BlackMarketEntry>();
-        Dictionary<uint, BlackMarketTemplate> _templates = new Dictionary<uint, BlackMarketTemplate>();
-        long _lastUpdate;
+        private Dictionary<uint, BlackMarketEntry> _auctions = new Dictionary<uint, BlackMarketEntry>();
+        private Dictionary<uint, BlackMarketTemplate> _templates = new Dictionary<uint, BlackMarketTemplate>();
+        private long _lastUpdate;
     }
 }

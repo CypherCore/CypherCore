@@ -27,7 +27,7 @@ namespace Game.Scenarios
 {
     public class ScenarioManager : Singleton<ScenarioManager>
     {
-        ScenarioManager() { }
+        private ScenarioManager() { }
 
         public InstanceScenario CreateInstanceScenario(Map map, int team)
         {
@@ -225,9 +225,9 @@ namespace Game.Scenarios
             return _scenarioPOIStore[CriteriaTreeID];
         }
 
-        Dictionary<uint, ScenarioData> _scenarioData = new Dictionary<uint, ScenarioData>();
-        MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new MultiMap<uint, ScenarioPOI>();
-        Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new Dictionary<Tuple<uint, byte>, ScenarioDBData>();
+        private Dictionary<uint, ScenarioData> _scenarioData = new Dictionary<uint, ScenarioData>();
+        private MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new MultiMap<uint, ScenarioPOI>();
+        private Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new Dictionary<Tuple<uint, byte>, ScenarioDBData>();
     }
 
     public class ScenarioData
@@ -236,7 +236,7 @@ namespace Game.Scenarios
         public Dictionary<byte, ScenarioStepRecord> Steps = new Dictionary<byte, ScenarioStepRecord>();
     }
 
-    class ScenarioDBData
+    internal class ScenarioDBData
     {
         public uint MapID;
         public byte DifficultyID;

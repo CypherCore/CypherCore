@@ -485,12 +485,12 @@ namespace Framework.GameMath
             this *= rsq(dot(this));
         }
 
-        float dot(Quaternion other)
+        private float dot(Quaternion other)
         {
             return (float)((X * other.X) + (Y * other.Y) + (Z * other.Z) + (W * other.W));
         }
 
-        float rsq(float x)
+        private float rsq(float x)
         {
             return 1.0f / (float)Math.Sqrt(x);
         }

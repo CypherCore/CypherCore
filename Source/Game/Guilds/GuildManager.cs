@@ -27,7 +27,7 @@ namespace Game
 {
     public sealed class GuildManager : Singleton<GuildManager>
     {
-        GuildManager() { }
+        private GuildManager() { }
 
         public void AddGuild(Guild guild)
         {
@@ -504,9 +504,9 @@ namespace Game
         public List<GuildReward> GetGuildRewards() { return guildRewards; }
 
 
-        uint NextGuildId;
-        Dictionary<ulong, Guild> GuildStore = new Dictionary<ulong, Guild>();
-        List<GuildReward> guildRewards = new List<GuildReward>();
+        private uint NextGuildId;
+        private Dictionary<ulong, Guild> GuildStore = new Dictionary<ulong, Guild>();
+        private List<GuildReward> guildRewards = new List<GuildReward>();
     }
 
     public class GuildReward

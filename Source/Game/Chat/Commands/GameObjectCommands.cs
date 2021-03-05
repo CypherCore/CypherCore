@@ -29,10 +29,10 @@ using System.Text;
 namespace Game.Chat
 {
     [CommandGroup("gobject", RBACPermissions.CommandGobject)]
-    class GameObjectCommands
+    internal class GameObjectCommands
     {
         [Command("activate", RBACPermissions.CommandGobjectActivate)]
-        static bool HandleGameObjectActivateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectActivateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -62,7 +62,7 @@ namespace Game.Chat
         }
 
         [Command("delete", RBACPermissions.CommandGobjectDelete)]
-        static bool HandleGameObjectDeleteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectDeleteCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
             var id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -105,7 +105,7 @@ namespace Game.Chat
         }
 
         [Command("despawngroup", RBACPermissions.CommandGobjectDespawngroup)]
-        static bool HandleGameObjectDespawnGroup(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectDespawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -140,7 +140,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGobjectInfo)]
-        static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectInfoCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -228,7 +228,7 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandGobjectMove)]
-        static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
             var id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -294,7 +294,7 @@ namespace Game.Chat
         }
 
         [Command("near", RBACPermissions.CommandGobjectNear)]
-        static bool HandleGameObjectNearCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectNearCommand(StringArguments args, CommandHandler handler)
         {
             var distance = args.Empty() ? 10.0f : args.NextSingle();
             uint count = 0;
@@ -338,7 +338,7 @@ namespace Game.Chat
         }
 
         [Command("spawngroup", RBACPermissions.CommandGobjectSpawngroup)]
-        static bool HandleGameObjectSpawnGroup(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectSpawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -381,7 +381,7 @@ namespace Game.Chat
         }
 
         [Command("target", RBACPermissions.CommandGobjectTarget)]
-        static bool HandleGameObjectTargetCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectTargetCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             SQLResult result;
@@ -496,7 +496,7 @@ namespace Game.Chat
         }
 
         [Command("turn", RBACPermissions.CommandGobjectTurn)]
-        static bool HandleGameObjectTurnCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameObjectTurnCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
             var id = handler.ExtractKeyFromLink(args, "Hgameobject");
@@ -562,10 +562,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("add", RBACPermissions.CommandGobjectAdd)]
-        class AddCommands
+        private class AddCommands
         {
             [Command("", RBACPermissions.CommandGobjectAdd)]
-            static bool HandleGameObjectAddCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGameObjectAddCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -625,7 +625,7 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandGobjectAddTemp)]
-            static bool HandleGameObjectAddTempCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGameObjectAddTempCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -657,10 +657,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("set", RBACPermissions.CommandGobjectSet)]
-        class SetCommands
+        private class SetCommands
         {
             [Command("phase", RBACPermissions.CommandGobjectSetPhase)]
-            static bool HandleGameObjectSetPhaseCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGameObjectSetPhaseCommand(StringArguments args, CommandHandler handler)
             {
                 /*// number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
                 string id = handler.extractKeyFromLink(args, "Hgameobject");
@@ -697,7 +697,7 @@ namespace Game.Chat
             }
 
             [Command("state", RBACPermissions.CommandGobjectSetState)]
-            static bool HandleGameObjectSetStateCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGameObjectSetStateCommand(StringArguments args, CommandHandler handler)
             {
                 // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
                 var id = handler.ExtractKeyFromLink(args, "Hgameobject");

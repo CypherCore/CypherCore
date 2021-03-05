@@ -1021,6 +1021,6 @@ namespace Game
             Values[confi] = value;
         }
 
-        static Dictionary<WorldCfg, object> Values = new Dictionary<WorldCfg, object>();
+        private static Dictionary<WorldCfg, object> Values = new Dictionary<WorldCfg, object>();
     }
 }

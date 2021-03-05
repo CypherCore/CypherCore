@@ -37,7 +37,7 @@ namespace Game
             _sendFactionIncreased = false;
         }
 
-        ReputationRank ReputationToRank(int standing)
+        private ReputationRank ReputationToRank(int standing)
         {
             var limit = Reputation_Cap + 1;
             for (var rank = ReputationRank.Max - 1; rank >= ReputationRank.Min; --rank)
@@ -125,7 +125,7 @@ namespace Game
             return ReputationToRank(reputation);
         }
 
-        ReputationRank GetBaseRank(FactionRecord factionEntry)
+        private ReputationRank GetBaseRank(FactionRecord factionEntry)
         {
             var reputation = GetBaseReputation(factionEntry);
             return ReputationToRank(reputation);
@@ -144,7 +144,7 @@ namespace Game
                 _forcedReactions.Remove(faction_id);
         }
 
-        uint GetDefaultStateFlags(FactionRecord factionEntry)
+        private uint GetDefaultStateFlags(FactionRecord factionEntry)
         {
             if (factionEntry == null)
                 return 0;
@@ -228,7 +228,7 @@ namespace Game
             _player.SendPacket(packet);
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _factions.Clear();
             _visibleFactionCount = 0;
@@ -421,7 +421,7 @@ namespace Game
             SetVisible(factionState);
         }
 
-        void SetVisible(FactionState faction)
+        private void SetVisible(FactionState faction)
         {
             // always invisible or hidden faction can't be make visible
             // except if faction has FACTION_FLAG_SPECIAL
@@ -454,7 +454,7 @@ namespace Game
             SetAtWar(factionState, on);
         }
 
-        void SetAtWar(FactionState faction, bool atWar)
+        private void SetAtWar(FactionState faction, bool atWar)
         {
             // Do not allow to declare war to our own faction. But allow for rival factions (eg Aldor vs Scryer).
             if (atWar && faction.Flags.HasAnyFlag(FactionFlags.PeaceForced) && !faction.Flags.HasAnyFlag(FactionFlags.Rival))
@@ -482,7 +482,7 @@ namespace Game
             SetInactive(factionState, on);
         }
 
-        void SetInactive(FactionState faction, bool inactive)
+        private void SetInactive(FactionState faction, bool inactive)
         {
             // always invisible or hidden faction can't be inactive
             if (inactive && Convert.ToBoolean(faction.Flags & (FactionFlags.InvisibleForced | FactionFlags.Hidden)) || !Convert.ToBoolean(faction.Flags & FactionFlags.Visible))
@@ -580,7 +580,7 @@ namespace Game
             }
         }
 
-        void UpdateRankCounters(ReputationRank old_rank, ReputationRank new_rank)
+        private void UpdateRankCounters(ReputationRank old_rank, ReputationRank new_rank)
         {
             if (old_rank >= ReputationRank.Exalted)
                 --_exaltedFactionCount;
@@ -643,12 +643,13 @@ namespace Game
         }
 
         #region Fields
-        Player _player;
-        byte _visibleFactionCount;
-        byte _honoredFactionCount;
-        byte _reveredFactionCount;
-        byte _exaltedFactionCount;
-        bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
+
+        private Player _player;
+        private byte _visibleFactionCount;
+        private byte _honoredFactionCount;
+        private byte _reveredFactionCount;
+        private byte _exaltedFactionCount;
+        private bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
         #endregion
 
         public static int[] PointsInRank = { 36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000 };
@@ -657,10 +658,11 @@ namespace Game
             CypherStrings.RepHated, CypherStrings.RepHostile, CypherStrings.RepUnfriendly, CypherStrings.RepNeutral,
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
         };
-        const int Reputation_Cap = 42999;
-        const int Reputation_Bottom = -42000;
-        SortedDictionary<uint, FactionState> _factions = new SortedDictionary<uint, FactionState>();
-        Dictionary<uint, ReputationRank> _forcedReactions = new Dictionary<uint, ReputationRank>();
+
+        private const int Reputation_Cap = 42999;
+        private const int Reputation_Bottom = -42000;
+        private SortedDictionary<uint, FactionState> _factions = new SortedDictionary<uint, FactionState>();
+        private Dictionary<uint, ReputationRank> _forcedReactions = new Dictionary<uint, ReputationRank>();
 
 
     }

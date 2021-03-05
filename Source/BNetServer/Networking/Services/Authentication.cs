@@ -15,7 +15,7 @@ namespace BNetServer.Networking
     public partial class Session
     {
         [Service(OriginalHash.AuthenticationService, 1)]
-        BattlenetRpcErrorCode HandleLogon(LogonRequest logonRequest, NoData response)
+        private BattlenetRpcErrorCode HandleLogon(LogonRequest logonRequest, NoData response)
         {
             if (logonRequest.Program != "WoW")
             {
@@ -50,7 +50,7 @@ namespace BNetServer.Networking
         }
 
         [Service(OriginalHash.AuthenticationService, 7)]
-        BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
+        private BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
             if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
                 return BattlenetRpcErrorCode.Denied;

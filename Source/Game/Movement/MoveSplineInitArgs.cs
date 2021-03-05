@@ -75,7 +75,7 @@ namespace Game.Movement
             return true;
         }
 
-        bool _checkPathLengths()
+        private bool _checkPathLengths()
         {
             if (path.Length > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
                 for (uint i = 0; i < path.Length - 1; ++i)

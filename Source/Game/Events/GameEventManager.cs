@@ -30,9 +30,9 @@ namespace Game
 {
     public class GameEventManager : Singleton<GameEventManager>
     {
-        GameEventManager() { }
+        private GameEventManager() { }
 
-        bool CheckOneGameEvent(ushort entry)
+        private bool CheckOneGameEvent(ushort entry)
         {
             switch (mGameEvent[entry].state)
             {
@@ -109,7 +109,7 @@ namespace Game
                 return delay;
         }
 
-        void StartInternalEvent(ushort event_id)
+        private void StartInternalEvent(ushort event_id)
         {
             if (event_id < 1 || event_id >= mGameEvent.Length)
                 return;
@@ -1045,7 +1045,7 @@ namespace Game
             return (nextEventDelay + 1) * Time.InMilliseconds;           // Add 1 second to be sure event has started/stopped at next call
         }
 
-        void UnApplyEvent(ushort event_id)
+        private void UnApplyEvent(ushort event_id)
         {
             Log.outInfo(LogFilter.Gameevent, "GameEvent {0} \"{1}\" removed.", event_id, mGameEvent[event_id].description);
             //! Run SAI scripts with SMART_EVENT_GAME_EVENT_END
@@ -1068,7 +1068,7 @@ namespace Game
             UpdateBattlegroundSettings();
         }
 
-        void ApplyNewEvent(ushort event_id)
+        private void ApplyNewEvent(ushort event_id)
         {
             var announce = mGameEvent[event_id].announce;
             if (announce == 1)// || (announce == 2 && WorldConfigEventAnnounce))
@@ -1101,7 +1101,7 @@ namespace Game
                 Global.WorldMgr.ResetEventSeasonalQuests(event_id);
         }
 
-        void UpdateEventNPCFlags(ushort event_id)
+        private void UpdateEventNPCFlags(ushort event_id)
         {
             var creaturesByMap = new MultiMap<uint, ulong>();
 
@@ -1138,7 +1138,7 @@ namespace Game
             }            
         }
 
-        void UpdateBattlegroundSettings()
+        private void UpdateBattlegroundSettings()
         {
             uint mask = 0;
             foreach (var eventId in m_ActiveEvents)
@@ -1147,7 +1147,7 @@ namespace Game
             Global.BattlegroundMgr.SetHolidayWeekends(mask);
         }
 
-        void UpdateEventNPCVendor(ushort eventId, bool activate)
+        private void UpdateEventNPCVendor(ushort eventId, bool activate)
         {
             foreach (var npcEventVendor in mGameEventVendors[eventId])
             {
@@ -1158,7 +1158,7 @@ namespace Game
             }
         }
 
-        void GameEventSpawn(short event_id)
+        private void GameEventSpawn(short event_id)
         {
             var internal_event_id = mGameEvent.Length + event_id - 1;
 
@@ -1228,7 +1228,7 @@ namespace Game
                 Global.PoolMgr.SpawnPool(id);
         }
 
-        void GameEventUnspawn(short event_id)
+        private void GameEventUnspawn(short event_id)
         {
             var internal_event_id = mGameEvent.Length + event_id - 1;
 
@@ -1298,7 +1298,7 @@ namespace Game
                 Global.PoolMgr.DespawnPool(poolId);
         }
 
-        void ChangeEquipOrModel(short event_id, bool activate)
+        private void ChangeEquipOrModel(short event_id, bool activate)
         {
             foreach (var tuple in mGameEventModelEquip[event_id])
             {
@@ -1355,7 +1355,7 @@ namespace Game
             }
         }
 
-        bool HasCreatureQuestActiveEventExcept(uint questId, ushort eventId)
+        private bool HasCreatureQuestActiveEventExcept(uint questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1367,7 +1367,7 @@ namespace Game
             return false;
         }
 
-        bool HasGameObjectQuestActiveEventExcept(uint questId, ushort eventId)
+        private bool HasGameObjectQuestActiveEventExcept(uint questId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1378,7 +1378,8 @@ namespace Game
             }
             return false;
         }
-        bool HasCreatureActiveEventExcept(ulong creatureId, ushort eventId)
+
+        private bool HasCreatureActiveEventExcept(ulong creatureId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1392,7 +1393,8 @@ namespace Game
             }
             return false;
         }
-        bool HasGameObjectActiveEventExcept(ulong goId, ushort eventId)
+
+        private bool HasGameObjectActiveEventExcept(ulong goId, ushort eventId)
         {
             foreach (var activeEventId in m_ActiveEvents)
             {
@@ -1407,7 +1409,7 @@ namespace Game
             return false;
         }
 
-        void UpdateEventQuests(ushort eventId, bool activate)
+        private void UpdateEventQuests(ushort eventId, bool activate)
         {
             foreach (var pair in mGameEventCreatureQuests[eventId])
             {
@@ -1439,7 +1441,7 @@ namespace Game
             }
         }
 
-        void UpdateWorldStates(ushort event_id, bool Activate)
+        private void UpdateWorldStates(ushort event_id, bool Activate)
         {
             var Event = mGameEvent[event_id];
             if (Event.holiday_id != HolidayIds.None)
@@ -1515,7 +1517,7 @@ namespace Game
             }
         }
 
-        bool CheckOneGameEventConditions(ushort event_id)
+        private bool CheckOneGameEventConditions(ushort event_id)
         {
             foreach (var pair in mGameEvent[event_id].conditions)
                 if (pair.Value.done < pair.Value.reqNum)
@@ -1532,7 +1534,7 @@ namespace Game
             return true;
         }
 
-        void SaveWorldEventStateToDB(ushort event_id)
+        private void SaveWorldEventStateToDB(ushort event_id)
         {
             var trans = new SQLTransaction();
 
@@ -1548,7 +1550,7 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        void SendWorldStateUpdate(Player player, ushort event_id)
+        private void SendWorldStateUpdate(Player player, ushort event_id)
         {
             foreach (var pair in mGameEvent[event_id].conditions)
             {
@@ -1559,7 +1561,7 @@ namespace Game
             }
         }
 
-        void RunSmartAIScripts(ushort event_id, bool activate)
+        private void RunSmartAIScripts(ushort event_id, bool activate)
         {
             //! Iterate over every supported source type (creature and gameobject)
             //! Not entirely sure how this will affect units in non-loaded grids.
@@ -1571,7 +1573,7 @@ namespace Game
             });
         }
 
-        void SetHolidayEventTime(GameEventData gameEvent)
+        private void SetHolidayEventTime(GameEventData gameEvent)
         {
             if (gameEvent.holidayStage == 0) // Ignore holiday
                 return;
@@ -1667,20 +1669,20 @@ namespace Game
         public GameEventData[] GetEventMap() { return mGameEvent; }
         public bool IsActiveEvent(ushort event_id) { return m_ActiveEvents.Contains(event_id); }
 
-        void AddActiveEvent(ushort event_id) { m_ActiveEvents.Add(event_id); }
-        void RemoveActiveEvent(ushort event_id) { m_ActiveEvents.Remove(event_id); }
+        private void AddActiveEvent(ushort event_id) { m_ActiveEvents.Add(event_id); }
+        private void RemoveActiveEvent(ushort event_id) { m_ActiveEvents.Remove(event_id); }
 
-        List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
-        List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
-        Dictionary<uint, VendorItem>[] mGameEventVendors;
-        List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
-        List<uint>[] mGameEventPoolIds;
-        GameEventData[] mGameEvent;
-        uint[] mGameEventBattlegroundHolidays;
-        Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new Dictionary<uint, GameEventQuestToEventConditionNum>();
-        List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
-        List<ushort> m_ActiveEvents = new List<ushort>();
-        bool isSystemInit;
+        private List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
+        private List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
+        private Dictionary<uint, VendorItem>[] mGameEventVendors;
+        private List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
+        private List<uint>[] mGameEventPoolIds;
+        private GameEventData[] mGameEvent;
+        private uint[] mGameEventBattlegroundHolidays;
+        private Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new Dictionary<uint, GameEventQuestToEventConditionNum>();
+        private List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
+        private List<ushort> m_ActiveEvents = new List<ushort>();
+        private bool isSystemInit;
 
         public List<ulong>[] mGameEventCreatureGuids;
         public List<ulong>[] mGameEventGameobjectGuids;
@@ -1732,7 +1734,7 @@ namespace Game
         public byte equipement_id_prev;
     }
 
-    class GameEventAIHookWorker : Notifier
+    internal class GameEventAIHookWorker : Notifier
     {
         public GameEventAIHookWorker(ushort eventId, bool activate)
         {
@@ -1759,8 +1761,8 @@ namespace Game
             }
         }
 
-        ushort _eventId;
-        bool _activate;
+        private ushort _eventId;
+        private bool _activate;
     }
 
     public enum GameEventState

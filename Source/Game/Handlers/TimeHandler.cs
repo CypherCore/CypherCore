@@ -25,7 +25,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
-        void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
+        private void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
             var response = new ServerTimeOffset();
             response.Time = (uint)Time.UnixTime;
@@ -33,7 +33,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TimeSyncResponse, Processing = PacketProcessing.Inplace)]
-        void HandleTimeSyncResponse(TimeSyncResponse packet)
+        private void HandleTimeSyncResponse(TimeSyncResponse packet)
         {
             Log.outDebug(LogFilter.Network, "CMSG_TIME_SYNC_RESP");
 

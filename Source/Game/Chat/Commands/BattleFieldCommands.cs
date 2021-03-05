@@ -22,10 +22,10 @@ using Game.BattleFields;
 namespace Game.Chat
 {
     [CommandGroup("bf", RBACPermissions.CommandBf)]
-    class BattleFieldCommands
+    internal class BattleFieldCommands
     {
         [Command("enable", RBACPermissions.CommandBfEnable)]
-        static bool HandleBattlefieldEnable(StringArguments args, CommandHandler handler)
+        private static bool HandleBattlefieldEnable(StringArguments args, CommandHandler handler)
         {
             var battleid = args.NextUInt32();
             var bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -50,7 +50,7 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandBfStart)]
-        static bool HandleBattlefieldStart(StringArguments args, CommandHandler handler)
+        private static bool HandleBattlefieldStart(StringArguments args, CommandHandler handler)
         {
             var battleid = args.NextUInt32();
             var bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -67,7 +67,7 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandBfStop)]
-        static bool HandleBattlefieldEnd(StringArguments args, CommandHandler handler)
+        private static bool HandleBattlefieldEnd(StringArguments args, CommandHandler handler)
         {
             var battleid = args.NextUInt32();
             var bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -84,7 +84,7 @@ namespace Game.Chat
         }
 
         [Command("switch", RBACPermissions.CommandBfSwitch)]
-        static bool HandleBattlefieldSwitch(StringArguments args, CommandHandler handler)
+        private static bool HandleBattlefieldSwitch(StringArguments args, CommandHandler handler)
         {
             var battleid = args.NextUInt32();
             var bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);
@@ -100,7 +100,7 @@ namespace Game.Chat
         }
 
         [Command("timer", RBACPermissions.CommandBfTimer)]
-        static bool HandleBattlefieldTimer(StringArguments args, CommandHandler handler)
+        private static bool HandleBattlefieldTimer(StringArguments args, CommandHandler handler)
         {
             var battleid = args.NextUInt32();
             var bf = Global.BattleFieldMgr.GetBattlefieldByBattleId(battleid);

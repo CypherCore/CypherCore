@@ -26,9 +26,9 @@ namespace Game.Entities
 {
     public class AzeriteEmpoweredItem : Item
     {
-        AzeriteEmpoweredItemData m_azeriteEmpoweredItemData;
-        List<AzeritePowerSetMemberRecord> m_azeritePowers;
-        int m_maxTier;
+        private AzeriteEmpoweredItemData m_azeriteEmpoweredItemData;
+        private List<AzeritePowerSetMemberRecord> m_azeritePowers;
+        private int m_maxTier;
 
         public AzeriteEmpoweredItem()
         {
@@ -140,7 +140,7 @@ namespace Game.Entities
             _bonusData.AddBonusList(CliDB.AzeritePowerStorage.LookupByKey(azeritePowerId).ItemBonusListID);
         }
 
-        void ClearSelectedAzeritePowers()
+        private void ClearSelectedAzeritePowers()
         {
             for (var i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_azeriteEmpoweredItemData).ModifyValue(m_azeriteEmpoweredItemData.Selections, i), 0);
@@ -192,7 +192,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteEmpoweredItemMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteEmpoweredItemMask, Player target)
         {
             var flags = GetUpdateFieldFlagsFor(target);
             var valuesMask = new UpdateMask((int)TypeId.Max);
@@ -233,7 +233,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        void InitAzeritePowerData()
+        private void InitAzeritePowerData()
         {
             m_azeritePowers = Global.DB2Mgr.GetAzeritePowers(GetEntry());
             if (m_azeritePowers != null)

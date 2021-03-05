@@ -24,9 +24,9 @@ namespace Game.Entities
 {
     public class PetitionManager : Singleton<PetitionManager>
     {
-        Dictionary<ObjectGuid, Petition> _petitionStorage = new Dictionary<ObjectGuid, Petition>();
+        private Dictionary<ObjectGuid, Petition> _petitionStorage = new Dictionary<ObjectGuid, Petition>();
 
-        PetitionManager() { }
+        private PetitionManager() { }
 
         public void LoadPetitions()
         {

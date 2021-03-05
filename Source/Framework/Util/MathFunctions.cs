@@ -78,7 +78,7 @@ public static class MathFunctions
     }
     #endregion
 
-    static double eps(float a, float b)
+    private static double eps(float a, float b)
     {
         var aa = Math.Abs(a) + 1.0f;
         if (float.IsPositiveInfinity(aa))

@@ -99,7 +99,7 @@ namespace Game.Networking.Packets
             CaseID = _worldPacket.ReadInt32();
         }
 
-        int CaseID;
+        private int CaseID;
     }
 
     public class SubmitUserFeedback : ClientPacket
@@ -462,7 +462,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class Complaint : ClientPacket
+    internal class Complaint : ClientPacket
     {
         public Complaint(WorldPacket packet) : base(packet) { }
 
@@ -487,14 +487,14 @@ namespace Game.Networking.Packets
         }
 
         public SupportSpamType ComplaintType;
-        ComplaintOffender Offender;
-        uint MailID;
-        ComplaintChat Chat;
+        private ComplaintOffender Offender;
+        private uint MailID;
+        private ComplaintChat Chat;
 
-        ulong EventGuid;
-        ulong InviteGuid;
+        private ulong EventGuid;
+        private ulong InviteGuid;
 
-        struct ComplaintOffender
+        private struct ComplaintOffender
         {
             public void Read(WorldPacket data)
             {
@@ -508,7 +508,7 @@ namespace Game.Networking.Packets
             public uint TimeSinceOffence;
         }
 
-        struct ComplaintChat
+        private struct ComplaintChat
         {
             public void Read(WorldPacket data)
             {
@@ -537,7 +537,7 @@ namespace Game.Networking.Packets
         public byte Result;
     }
 
-    class BugReport : ClientPacket
+    internal class BugReport : ClientPacket
     {
         public BugReport(WorldPacket packet) : base(packet) { }
 

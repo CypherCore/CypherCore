@@ -23,7 +23,7 @@ namespace Framework.Database
     public class SQLQueryHolder<T>
     {
         public Dictionary<T, PreparedStatement> m_queries = new Dictionary<T, PreparedStatement>();
-        Dictionary<T, SQLResult> _results = new Dictionary<T, SQLResult>();
+        private Dictionary<T, SQLResult> _results = new Dictionary<T, SQLResult>();
 
         public void SetQuery(T index, string sql, params object[] args)
         {
@@ -49,10 +49,10 @@ namespace Framework.Database
         }
     }
 
-    class SQLQueryHolderTask<R> : ISqlOperation
+    internal class SQLQueryHolderTask<R> : ISqlOperation
     {
-        SQLQueryHolder<R> m_holder;
-        TaskCompletionSource<SQLQueryHolder<R>> m_result;
+        private SQLQueryHolder<R> m_holder;
+        private TaskCompletionSource<SQLQueryHolder<R>> m_result;
 
         public SQLQueryHolderTask(SQLQueryHolder<R> holder)
         {

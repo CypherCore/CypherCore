@@ -11,7 +11,7 @@ namespace BNetServer.Networking
     public partial class Session
     {
         [Service(OriginalHash.ConnectionService, 1)]
-        BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response)
+        private BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response)
         {
             if (request.ClientId != null)
                 response.ClientId.MergeFrom(request.ClientId);
@@ -27,13 +27,13 @@ namespace BNetServer.Networking
         }
 
         [Service(OriginalHash.ConnectionService, 5)]
-        BattlenetRpcErrorCode HandleKeepAlive(NoData request)
+        private BattlenetRpcErrorCode HandleKeepAlive(NoData request)
         {
             return BattlenetRpcErrorCode.Ok;
         }
 
         [Service(OriginalHash.ConnectionService, 7)]
-        BattlenetRpcErrorCode HandleRequestDisconnect(DisconnectRequest request)
+        private BattlenetRpcErrorCode HandleRequestDisconnect(DisconnectRequest request)
         {
             var disconnectNotification = new DisconnectNotification();
             disconnectNotification.ErrorCode = request.ErrorCode;

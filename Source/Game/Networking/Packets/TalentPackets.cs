@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class UpdateTalentData : ServerPacket
+    internal class UpdateTalentData : ServerPacket
     {
         public UpdateTalentData() : base(ServerOpcodes.UpdateTalentData, ConnectionType.Instance) { }
 
@@ -62,7 +62,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class LearnTalents : ClientPacket
+    internal class LearnTalents : ClientPacket
     {
         public LearnTalents(WorldPacket packet) : base(packet) { }
 
@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         public Array<ushort> Talents = new Array<ushort>(PlayerConst.MaxTalentTiers);
     }
 
-    class RespecWipeConfirm : ServerPacket
+    internal class RespecWipeConfirm : ServerPacket
     {
         public RespecWipeConfirm() : base(ServerOpcodes.RespecWipeConfirm) { }
 
@@ -92,7 +92,7 @@ namespace Game.Networking.Packets
         public SpecResetType RespecType;
     }
 
-    class ConfirmRespecWipe : ClientPacket
+    internal class ConfirmRespecWipe : ClientPacket
     {
         public ConfirmRespecWipe(WorldPacket packet) : base(packet) { }
 
@@ -106,7 +106,7 @@ namespace Game.Networking.Packets
         public SpecResetType RespecType;
     }
 
-    class LearnTalentFailed : ServerPacket
+    internal class LearnTalentFailed : ServerPacket
     {
         public LearnTalentFailed() : base(ServerOpcodes.LearnTalentFailed) { }
 
@@ -125,7 +125,7 @@ namespace Game.Networking.Packets
         public List<ushort> Talents = new List<ushort>();
     }
 
-    class ActiveGlyphs : ServerPacket
+    internal class ActiveGlyphs : ServerPacket
     {
         public ActiveGlyphs() : base(ServerOpcodes.ActiveGlyphs) { }
 
@@ -143,7 +143,7 @@ namespace Game.Networking.Packets
         public bool IsFullUpdate;
     }
 
-    class LearnPvpTalents : ClientPacket
+    internal class LearnPvpTalents : ClientPacket
     {
         public LearnPvpTalents(WorldPacket packet) : base(packet) { }
 
@@ -157,7 +157,7 @@ namespace Game.Networking.Packets
         public Array<PvPTalent> Talents = new Array<PvPTalent>(4);
     }
 
-    class LearnPvpTalentFailed : ServerPacket
+    internal class LearnPvpTalentFailed : ServerPacket
     {
         public LearnPvpTalentFailed() : base(ServerOpcodes.LearnPvpTalentFailed) { }
 
@@ -195,7 +195,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GlyphBinding
+    internal struct GlyphBinding
     {
         public GlyphBinding(uint spellId, ushort glyphId)
         {
@@ -209,7 +209,7 @@ namespace Game.Networking.Packets
             data.WriteUInt16(GlyphID);
         }
 
-        uint SpellID;
-        ushort GlyphID;
+        private uint SpellID;
+        private ushort GlyphID;
     }
 }

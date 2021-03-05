@@ -794,7 +794,7 @@ namespace Game.Groups
             Global.GroupMgr.RemoveGroup(this);
         }
 
-        void SendLootStartRollToPlayer(uint countDown, uint mapId, Player p, bool canNeed, Roll r)
+        private void SendLootStartRollToPlayer(uint countDown, uint mapId, Player p, bool canNeed, Roll r)
         {
             var startLootRoll = new StartLootRoll();
             startLootRoll.LootObj = r.GetTarget().GetGUID();
@@ -814,7 +814,7 @@ namespace Game.Groups
             p.SendPacket(startLootRoll);
         }
 
-        void SendLootRoll(ObjectGuid playerGuid, int rollNumber, RollType rollType, Roll roll)
+        private void SendLootRoll(ObjectGuid playerGuid, int rollNumber, RollType rollType, Roll roll)
         {
             var lootRoll = new LootRollBroadcast();
             lootRoll.LootObj = roll.GetTarget().GetGUID();
@@ -834,7 +834,7 @@ namespace Game.Groups
             }
         }
 
-        void SendLootRollWon(ObjectGuid winnerGuid, int rollNumber, RollType rollType, Roll roll)
+        private void SendLootRollWon(ObjectGuid winnerGuid, int rollNumber, RollType rollType, Roll roll)
         {
             var lootRollWon = new LootRollWon();
             lootRollWon.LootObj = roll.GetTarget().GetGUID();
@@ -855,7 +855,7 @@ namespace Game.Groups
             }
         }
 
-        void SendLootAllPassed(Roll roll)
+        private void SendLootAllPassed(Roll roll)
         {
             var lootAllPassed = new LootAllPassed();
             lootAllPassed.LootObj = roll.GetTarget().GetGUID();
@@ -872,7 +872,7 @@ namespace Game.Groups
             }
         }
 
-        void SendLootRollsComplete(Roll roll)
+        private void SendLootRollsComplete(Roll roll)
         {
             var lootRollsComplete = new LootRollsComplete();
             lootRollsComplete.LootObj = roll.GetTarget().GetGUID();
@@ -1129,7 +1129,7 @@ namespace Game.Groups
             }
         }
 
-        void CountTheRoll(Roll roll, Map allowedMap)
+        private void CountTheRoll(Roll roll, Map allowedMap)
         {
             if (!roll.IsValid())                                   // is loot already deleted ?
             {
@@ -1449,7 +1449,7 @@ namespace Game.Groups
             player.SendPacket(partyUpdate);
         }
 
-        void SendUpdateDestroyGroupToPlayer(Player player)
+        private void SendUpdateDestroyGroupToPlayer(Player player)
         {
             var partyUpdate = new PartyUpdate();
             partyUpdate.PartyFlags = GroupFlags.Destroyed;
@@ -1504,7 +1504,7 @@ namespace Game.Groups
             }
         }
 
-        bool _setMembersGroup(ObjectGuid guid, byte group)
+        private bool _setMembersGroup(ObjectGuid guid, byte group)
         {
             var slot = _getMemberSlot(guid);
             if (slot == null)
@@ -2076,7 +2076,7 @@ namespace Game.Groups
             }
         }
 
-        void _homebindIfInstance(Player player)
+        private void _homebindIfInstance(Player player)
         {
             if (player && !player.IsGameMaster() && CliDB.MapStorage.LookupByKey(player.GetMapId()).IsDungeon())
                 player.m_InstanceValid = false;
@@ -2155,7 +2155,7 @@ namespace Game.Groups
             UpdateReadyCheck(diff);
         }
 
-        void UpdateReadyCheck(uint diff)
+        private void UpdateReadyCheck(uint diff)
         {
             if (!m_readyCheckStarted)
                 return;
@@ -2189,7 +2189,7 @@ namespace Game.Groups
             BroadcastPacket(readyCheckStarted, false);
         }
 
-        void EndReadyCheck()
+        private void EndReadyCheck()
         {
             if (!m_readyCheckStarted)
                 return;
@@ -2205,7 +2205,7 @@ namespace Game.Groups
             BroadcastPacket(readyCheckCompleted, false);
         }
 
-        bool IsReadyCheckCompleted()
+        private bool IsReadyCheckCompleted()
         {
             foreach (var member in m_memberSlots)
                 if (!member.readyChecked)
@@ -2223,7 +2223,7 @@ namespace Game.Groups
                 SetMemberReadyCheck(slot, ready);
         }
 
-        void SetMemberReadyCheck(MemberSlot slot, bool ready)
+        private void SetMemberReadyCheck(MemberSlot slot, bool ready)
         {
             var response = new ReadyCheckResponse();
             response.PartyGUID = m_guid;
@@ -2234,7 +2234,7 @@ namespace Game.Groups
             SetMemberReadyChecked(slot);
         }
 
-        void SetOfflineMembersReadyChecked()
+        private void SetOfflineMembersReadyChecked()
         {
             foreach (var member in m_memberSlots)
             {
@@ -2244,14 +2244,14 @@ namespace Game.Groups
             }
         }
 
-        void SetMemberReadyChecked(MemberSlot slot)
+        private void SetMemberReadyChecked(MemberSlot slot)
         {
             slot.readyChecked = true;
             if (IsReadyCheckCompleted())
                 EndReadyCheck();
         }
 
-        void ResetMemberReadyChecked()
+        private void ResetMemberReadyChecked()
         {
             foreach (var member in m_memberSlots)
                 member.readyChecked = false;
@@ -2349,7 +2349,7 @@ namespace Game.Groups
             return m_guid.GetCounter();
         }
 
-        string GetLeaderName()
+        private string GetLeaderName()
         {
             return m_leaderName;
         }
@@ -2489,7 +2489,7 @@ namespace Game.Groups
             SendUpdate();
         }
 
-        Roll GetRoll(ObjectGuid lootObjectGuid, byte lootListId)
+        private Roll GetRoll(ObjectGuid lootObjectGuid, byte lootListId)
         {
             foreach (var roll in RollId)
                 if (roll.GetTarget() != null && roll.GetTarget().GetGUID() == lootObjectGuid && roll.itemSlot == lootListId && roll.IsValid())
@@ -2502,7 +2502,7 @@ namespace Game.Groups
             m_memberMgr.InsertFirst(pRef);
         }
 
-        void DelinkMember(ObjectGuid guid)
+        private void DelinkMember(ObjectGuid guid)
         {
             var refe = m_memberMgr.GetFirst();
             while (refe != null)
@@ -2522,7 +2522,7 @@ namespace Game.Groups
             return m_boundInstances.LookupByKey(difficulty);
         }
 
-        void _initRaidSubGroupsCounter()
+        private void _initRaidSubGroupsCounter()
         {
             // Sub group counters initialization
             if (m_subGroupsCounts == null)
@@ -2532,7 +2532,7 @@ namespace Game.Groups
                 ++m_subGroupsCounts[memberSlot.group];
         }
 
-        MemberSlot _getMemberSlot(ObjectGuid guid)
+        private MemberSlot _getMemberSlot(ObjectGuid guid)
         {
             foreach (var member in m_memberSlots)
                 if (member.guid == guid)
@@ -2540,13 +2540,13 @@ namespace Game.Groups
             return null;
         }
 
-        void SubGroupCounterIncrease(byte subgroup)
+        private void SubGroupCounterIncrease(byte subgroup)
         {
             if (m_subGroupsCounts != null)
                 ++m_subGroupsCounts[subgroup];
         }
 
-        void SubGroupCounterDecrease(byte subgroup)
+        private void SubGroupCounterDecrease(byte subgroup)
         {
             if (m_subGroupsCounts != null)
                 --m_subGroupsCounts[subgroup];
@@ -2559,7 +2559,7 @@ namespace Game.Groups
                     member.flags &= ~flag;
         }
 
-        void ToggleGroupMemberFlag(MemberSlot slot, GroupMemberFlags flag, bool apply)
+        private void ToggleGroupMemberFlag(MemberSlot slot, GroupMemberFlags flag, bool apply)
         {
             if (apply)
                 slot.flags |= flag;
@@ -2589,7 +2589,7 @@ namespace Game.Groups
         public uint GetInviteeCount() { return (uint)m_invitees.Count; }
         public GroupFlags GetGroupFlags() { return m_groupFlags; }
 
-        bool IsReadyCheckStarted() { return m_readyCheckStarted; }
+        private bool IsReadyCheckStarted() { return m_readyCheckStarted; }
 
         public void BroadcastWorker(Action<Player> worker)
         {
@@ -2597,37 +2597,37 @@ namespace Game.Groups
                 worker(refe.GetSource());
         }
 
-        List<MemberSlot> m_memberSlots = new List<MemberSlot>();
-        GroupRefManager m_memberMgr = new GroupRefManager();
-        List<Player> m_invitees = new List<Player>();
-        ObjectGuid m_leaderGuid;
-        string m_leaderName;
-        GroupFlags m_groupFlags;
-        GroupCategory m_groupCategory;
-        Difficulty m_dungeonDifficulty;
-        Difficulty m_raidDifficulty;
-        Difficulty m_legacyRaidDifficulty;
-        Battleground m_bgGroup;
-        BattleField m_bfGroup;
-        ObjectGuid[] m_targetIcons = new ObjectGuid[MapConst.TargetIconsCount];
-        LootMethod m_lootMethod;
-        ItemQuality m_lootThreshold;
-        ObjectGuid m_looterGuid;
-        ObjectGuid m_masterLooterGuid;
-        List<Roll> RollId = new List<Roll>();
-        Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
-        byte[] m_subGroupsCounts;
-        ObjectGuid m_guid;
-        uint m_maxEnchantingLevel;
-        uint m_dbStoreId;
+        private List<MemberSlot> m_memberSlots = new List<MemberSlot>();
+        private GroupRefManager m_memberMgr = new GroupRefManager();
+        private List<Player> m_invitees = new List<Player>();
+        private ObjectGuid m_leaderGuid;
+        private string m_leaderName;
+        private GroupFlags m_groupFlags;
+        private GroupCategory m_groupCategory;
+        private Difficulty m_dungeonDifficulty;
+        private Difficulty m_raidDifficulty;
+        private Difficulty m_legacyRaidDifficulty;
+        private Battleground m_bgGroup;
+        private BattleField m_bfGroup;
+        private ObjectGuid[] m_targetIcons = new ObjectGuid[MapConst.TargetIconsCount];
+        private LootMethod m_lootMethod;
+        private ItemQuality m_lootThreshold;
+        private ObjectGuid m_looterGuid;
+        private ObjectGuid m_masterLooterGuid;
+        private List<Roll> RollId = new List<Roll>();
+        private Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
+        private byte[] m_subGroupsCounts;
+        private ObjectGuid m_guid;
+        private uint m_maxEnchantingLevel;
+        private uint m_dbStoreId;
 
         // Ready Check
-        bool m_readyCheckStarted;
-        int m_readyCheckTimer;
+        private bool m_readyCheckStarted;
+        private int m_readyCheckTimer;
 
         // Raid markers
-        RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
-        uint m_activeMarkers;
+        private RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
+        private uint m_activeMarkers;
 
         public static implicit operator bool (Group group)
         {

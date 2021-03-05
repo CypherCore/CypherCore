@@ -117,15 +117,16 @@ namespace Game.DungeonFinding
         }
 
         // General
-        RideTicket m_Ticket;
-        LfgState m_State;
-        LfgState m_OldState;
+        private RideTicket m_Ticket;
+        private LfgState m_State;
+
+        private LfgState m_OldState;
         // Player
-        Team m_Team;
-        ObjectGuid m_Group;
+        private Team m_Team;
+        private ObjectGuid m_Group;
 
         // Queue
-        LfgRoles m_Roles;
-        List<uint> m_SelectedDungeons = new List<uint>();
+        private LfgRoles m_Roles;
+        private List<uint> m_SelectedDungeons = new List<uint>();
     }
 }

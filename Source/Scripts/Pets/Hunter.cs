@@ -24,7 +24,7 @@ namespace Scripts.Pets
 {
     namespace Hunter
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint CripplingPoison = 30981;   // Viper
             public const uint DeadlyPoisonPassive = 34657;   // Venomous Snake
@@ -32,13 +32,13 @@ namespace Scripts.Pets
 
         }
 
-        struct CreatureIds
+        internal struct CreatureIds
         {
             public const int Viper = 19921;
         }
 
         [Script]
-        class npc_pet_hunter_snake_trap : ScriptedAI
+        internal class npc_pet_hunter_snake_trap : ScriptedAI
         {
             public npc_pet_hunter_snake_trap(Creature creature) : base(creature) { }
 
@@ -120,8 +120,8 @@ namespace Scripts.Pets
                 DoMeleeAttackIfReady();
             }
 
-            bool _isViper;
-            uint _spellTimer;
+            private bool _isViper;
+            private uint _spellTimer;
         }
     }
 }

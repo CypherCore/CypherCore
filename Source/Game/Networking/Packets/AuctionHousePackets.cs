@@ -22,7 +22,7 @@ using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
-    class AuctionBrowseQuery : ClientPacket
+    internal class AuctionBrowseQuery : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
@@ -69,7 +69,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionCancelCommoditiesPurchase : ClientPacket
+    internal class AuctionCancelCommoditiesPurchase : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public Optional<AddOnInfo> TaintedBy;
@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionConfirmCommoditiesPurchase : ClientPacket
+    internal class AuctionConfirmCommoditiesPurchase : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public int ItemID;
@@ -107,7 +107,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionHelloRequest : ClientPacket
+    internal class AuctionHelloRequest : ClientPacket
     {
         public ObjectGuid Guid;
 
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListBiddedItems : ClientPacket
+    internal class AuctionListBiddedItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListBucketsByBucketKeys : ClientPacket
+    internal class AuctionListBucketsByBucketKeys : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public Optional<AddOnInfo> TaintedBy;
@@ -177,7 +177,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListItemsByBucketKey : ClientPacket
+    internal class AuctionListItemsByBucketKey : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
@@ -206,7 +206,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListItemsByItemID : ClientPacket
+    internal class AuctionListItemsByItemID : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint ItemID;
@@ -237,7 +237,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionListOwnedItems : ClientPacket
+    internal class AuctionListOwnedItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
@@ -262,7 +262,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionPlaceBid : ClientPacket
+    internal class AuctionPlaceBid : ClientPacket
     {   
         public ObjectGuid Auctioneer;
         public ulong BidAmount;
@@ -283,7 +283,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionRemoveItem : ClientPacket
+    internal class AuctionRemoveItem : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint AuctionID;
@@ -302,7 +302,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionReplicateItems : ClientPacket
+    internal class AuctionReplicateItems : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public uint ChangeNumberGlobal;
@@ -327,7 +327,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionSellCommodity : ClientPacket
+    internal class AuctionSellCommodity : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public ulong UnitPrice;
@@ -353,7 +353,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionSellItem : ClientPacket
+    internal class AuctionSellItem : ClientPacket
     {
         public ulong BuyoutPrice;
         public ObjectGuid Auctioneer;
@@ -382,7 +382,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionSetFavoriteItem : ClientPacket
+    internal class AuctionSetFavoriteItem : ClientPacket
     {    
         public AuctionFavoriteInfo Item;
         public bool IsNotFavorite = true;
@@ -396,7 +396,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionGetCommodityQuote : ClientPacket
+    internal class AuctionGetCommodityQuote : ClientPacket
     {
         public ObjectGuid Auctioneer;
         public int ItemID;
@@ -417,7 +417,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionClosedNotification : ServerPacket
+    internal class AuctionClosedNotification : ServerPacket
     { 
         public AuctionOwnerNotification Info;
         public float ProceedsMailDelay;
@@ -434,7 +434,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionCommandResult : ServerPacket
+    internal class AuctionCommandResult : ServerPacket
     {   
         public uint AuctionID; ///< the id of the auction that triggered this notification
         public int Command; ///< the type of action that triggered this notification. Possible values are @ref AuctionAction
@@ -460,7 +460,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionGetCommodityQuoteResult : ServerPacket
+    internal class AuctionGetCommodityQuoteResult : ServerPacket
     {
         public Optional<ulong> TotalPrice;
         public Optional<uint> Quantity;
@@ -489,7 +489,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionHelloResponse : ServerPacket
+    internal class AuctionHelloResponse : ServerPacket
     {
         public ObjectGuid Guid;
         public bool OpenForBusiness = true;
@@ -550,7 +550,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionFavoriteList : ServerPacket
+    internal class AuctionFavoriteList : ServerPacket
     {    
         public uint DesiredDelay;
         public List<AuctionFavoriteInfo> Items = new List<AuctionFavoriteInfo>();
@@ -622,7 +622,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionOutbidNotification : ServerPacket
+    internal class AuctionOutbidNotification : ServerPacket
     {    
         public AuctionBidderNotification Info;
         public ulong BidAmount;
@@ -638,7 +638,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionOwnerBidNotification : ServerPacket
+    internal class AuctionOwnerBidNotification : ServerPacket
     {    
         public AuctionOwnerNotification Info;
         public ObjectGuid Bidder;
@@ -679,7 +679,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class AuctionWonNotification : ServerPacket
+    internal class AuctionWonNotification : ServerPacket
     {  
         public AuctionBidderNotification Info;
 
@@ -999,7 +999,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct AuctionBidderNotification
+    internal struct AuctionBidderNotification
     {
         public uint AuctionID;
         public ObjectGuid Bidder;

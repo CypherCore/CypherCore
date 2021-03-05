@@ -95,7 +95,7 @@ namespace Game.DungeonFinding
             return str;
         }
 
-        string GetCompatibleString(LfgCompatibility compatibles)
+        private string GetCompatibleString(LfgCompatibility compatibles)
         {
             switch (compatibles)
             {
@@ -181,7 +181,7 @@ namespace Game.DungeonFinding
             currentQueueStore.Add(guid);
         }
 
-        void AddToFrontCurrentQueue(ObjectGuid guid)
+        private void AddToFrontCurrentQueue(ObjectGuid guid)
         {
             currentQueueStore.Insert(0, guid);
         }
@@ -230,7 +230,7 @@ namespace Game.DungeonFinding
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
-        void RemoveFromCompatibles(ObjectGuid guid)
+        private void RemoveFromCompatibles(ObjectGuid guid)
         {
             var strGuid = guid.ToString();
 
@@ -242,7 +242,7 @@ namespace Game.DungeonFinding
             }
         }
 
-        void SetCompatibles(string key, LfgCompatibility compatibles)
+        private void SetCompatibles(string key, LfgCompatibility compatibles)
         {
             if (!CompatibleMapStore.ContainsKey(key))
                 CompatibleMapStore[key] = new LfgCompatibilityData();
@@ -250,12 +250,12 @@ namespace Game.DungeonFinding
             CompatibleMapStore[key].compatibility = compatibles;
         }
 
-        void SetCompatibilityData(string key, LfgCompatibilityData data)
+        private void SetCompatibilityData(string key, LfgCompatibilityData data)
         {
             CompatibleMapStore[key] = data;
         }
 
-        LfgCompatibility GetCompatibles(string key)
+        private LfgCompatibility GetCompatibles(string key)
         {
             var compatibilityData = CompatibleMapStore.LookupByKey(key);
             if (compatibilityData != null)
@@ -264,7 +264,7 @@ namespace Game.DungeonFinding
             return LfgCompatibility.Pending;
         }
 
-        LfgCompatibilityData GetCompatibilityData(string key)
+        private LfgCompatibilityData GetCompatibilityData(string key)
         {
             var compatibilityData = CompatibleMapStore.LookupByKey(key);
             if (compatibilityData != null)
@@ -296,7 +296,7 @@ namespace Game.DungeonFinding
             return proposals;
         }
 
-        LfgCompatibility FindNewGroups(List<ObjectGuid> check, List<ObjectGuid> all)
+        private LfgCompatibility FindNewGroups(List<ObjectGuid> check, List<ObjectGuid> all)
         {
             var strGuids = ConcatenateGuids(check);
             var compatibles = GetCompatibles(strGuids);
@@ -328,7 +328,7 @@ namespace Game.DungeonFinding
             return compatibles;
         }
 
-        LfgCompatibility CheckCompatibility(List<ObjectGuid> check)
+        private LfgCompatibility CheckCompatibility(List<ObjectGuid> check)
         {
             var strGuids = ConcatenateGuids(check);
             var proposal = new LfgProposal();
@@ -668,7 +668,7 @@ namespace Game.DungeonFinding
             return str;
         }
 
-        void FindBestCompatibleInQueue(ObjectGuid guid, LfgQueueData data)
+        private void FindBestCompatibleInQueue(ObjectGuid guid, LfgQueueData data)
         {
             Log.outDebug(LogFilter.Lfg, "FindBestCompatibleInQueue: {0}", guid);
 
@@ -708,15 +708,15 @@ namespace Game.DungeonFinding
         }
 
         // Queue
-        Dictionary<ObjectGuid, LfgQueueData> QueueDataStore = new Dictionary<ObjectGuid, LfgQueueData>();
-        Dictionary<string, LfgCompatibilityData> CompatibleMapStore = new Dictionary<string, LfgCompatibilityData>();
+        private Dictionary<ObjectGuid, LfgQueueData> QueueDataStore = new Dictionary<ObjectGuid, LfgQueueData>();
+        private Dictionary<string, LfgCompatibilityData> CompatibleMapStore = new Dictionary<string, LfgCompatibilityData>();
 
-        Dictionary<uint, LfgWaitTime> waitTimesAvgStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesTankStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesHealerStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesDpsStore = new Dictionary<uint, LfgWaitTime>();
-        List<ObjectGuid> currentQueueStore = new List<ObjectGuid>();
-        List<ObjectGuid> newToQueueStore = new List<ObjectGuid>();
+        private Dictionary<uint, LfgWaitTime> waitTimesAvgStore = new Dictionary<uint, LfgWaitTime>();
+        private Dictionary<uint, LfgWaitTime> waitTimesTankStore = new Dictionary<uint, LfgWaitTime>();
+        private Dictionary<uint, LfgWaitTime> waitTimesHealerStore = new Dictionary<uint, LfgWaitTime>();
+        private Dictionary<uint, LfgWaitTime> waitTimesDpsStore = new Dictionary<uint, LfgWaitTime>();
+        private List<ObjectGuid> currentQueueStore = new List<ObjectGuid>();
+        private List<ObjectGuid> newToQueueStore = new List<ObjectGuid>();
     }
 
     public class LfgCompatibilityData

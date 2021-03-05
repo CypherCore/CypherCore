@@ -30,7 +30,7 @@ namespace Game.BattleGrounds
 {
     public class BattlegroundManager : Singleton<BattlegroundManager>
     {
-        BattlegroundManager()
+        private BattlegroundManager()
         {
             m_NextRatedArenaUpdate = WorldConfig.GetUIntValue(WorldCfg.ArenaRatedUpdateTimer);
         }
@@ -119,7 +119,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, ArenaTypes arenaType)
+        private void BuildBattlegroundStatusHeader(BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, BattlegroundQueueTypeId queueId, ArenaTypes arenaType)
         {
             header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
@@ -218,7 +218,7 @@ namespace Game.BattleGrounds
             return null;
         }
 
-        uint CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
+        private uint CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
         {
             if (IsArenaType(bgTypeId))
                 return 0;                                           //arenas don't have client-instanceids
@@ -279,7 +279,7 @@ namespace Game.BattleGrounds
         }
 
         // used to create the BG templates
-        bool CreateBattleground(BattlegroundTemplate bgTemplate)
+        private bool CreateBattleground(BattlegroundTemplate bgTemplate)
         {
             var bg = GetBattlegroundTemplate(bgTemplate.Id);
             if (!bg)
@@ -478,7 +478,7 @@ namespace Game.BattleGrounds
             player.SendPacket(areaSpiritHealerTime);
         }
 
-        bool IsArenaType(BattlegroundTypeId bgTypeId)
+        private bool IsArenaType(BattlegroundTypeId bgTypeId)
         {
             return bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.BE || bgTypeId == BattlegroundTypeId.NA
                 || bgTypeId == BattlegroundTypeId.DS || bgTypeId == BattlegroundTypeId.RV || bgTypeId == BattlegroundTypeId.RL;
@@ -627,7 +627,7 @@ namespace Game.BattleGrounds
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} battlemaster entries in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        void CheckBattleMasters()
+        private void CheckBattleMasters()
         {
             var templates = Global.ObjectMgr.GetCreatureTemplates();
             foreach (var creature in templates)
@@ -640,7 +640,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        HolidayIds BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId)
+        private HolidayIds BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId)
         {
             switch (bgTypeId)
             {
@@ -695,7 +695,7 @@ namespace Game.BattleGrounds
             return Global.GameEventMgr.IsHolidayActive(BGTypeToWeekendHolidayId(bgTypeId));
         }
 
-        BattlegroundTypeId GetRandomBG(BattlegroundTypeId bgTypeId)
+        private BattlegroundTypeId GetRandomBG(BattlegroundTypeId bgTypeId)
         {
             var bgTemplate = GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bgTemplate != null)
@@ -770,24 +770,24 @@ namespace Game.BattleGrounds
             return mBattleMastersMap.LookupByKey(entry);
         }
 
-        BattlegroundTemplate GetBattlegroundTemplateByTypeId(BattlegroundTypeId id)
+        private BattlegroundTemplate GetBattlegroundTemplateByTypeId(BattlegroundTypeId id)
         {
             return _battlegroundTemplates.LookupByKey(id);
         }
 
-        BattlegroundTemplate GetBattlegroundTemplateByMapId(uint mapId)
+        private BattlegroundTemplate GetBattlegroundTemplateByMapId(uint mapId)
         {
             return _battlegroundMapTemplates.LookupByKey(mapId);
         }
 
-        Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new Dictionary<BattlegroundTypeId, BattlegroundData>();
-        Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new Dictionary<BattlegroundQueueTypeId, BattlegroundQueue>();
-        MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new MultiMap<BattlegroundQueueTypeId, Battleground>();
-        Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new Dictionary<uint, BattlegroundTypeId>();
-        Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new Dictionary<BattlegroundTypeId, BattlegroundTemplate>();
-        Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new Dictionary<uint, BattlegroundTemplate>();
+        private Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new Dictionary<BattlegroundTypeId, BattlegroundData>();
+        private Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new Dictionary<BattlegroundQueueTypeId, BattlegroundQueue>();
+        private MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new MultiMap<BattlegroundQueueTypeId, Battleground>();
+        private Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new Dictionary<uint, BattlegroundTypeId>();
+        private Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new Dictionary<BattlegroundTypeId, BattlegroundTemplate>();
+        private Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new Dictionary<uint, BattlegroundTemplate>();
 
-        struct ScheduledQueueUpdate
+        private struct ScheduledQueueUpdate
         {
             public ScheduledQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId queueId, BattlegroundBracketId bracketId)
             {
@@ -820,11 +820,12 @@ namespace Game.BattleGrounds
                 return ArenaMatchmakerRating.GetHashCode() ^ QueueId.GetHashCode() ^ BracketId.GetHashCode();
             }
         }
-        List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new List<ScheduledQueueUpdate>();
-        uint m_NextRatedArenaUpdate;
-        uint m_UpdateTimer;
-        bool m_ArenaTesting;
-        bool m_Testing;
+
+        private List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new List<ScheduledQueueUpdate>();
+        private uint m_NextRatedArenaUpdate;
+        private uint m_UpdateTimer;
+        private bool m_ArenaTesting;
+        private bool m_Testing;
     }
 
     public class BattlegroundData

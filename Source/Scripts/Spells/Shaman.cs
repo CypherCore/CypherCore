@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Scripts.Spells.Shaman
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint AncestralGuidance = 108281;
         public const uint AncestralGuidanceHeal = 114911;
@@ -72,21 +72,21 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 108281 - Ancestral Guidance
-    class spell_sha_ancestral_guidance : AuraScript
+    internal class spell_sha_ancestral_guidance : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AncestralGuidanceHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetHealInfo().GetSpellInfo().Id == SpellIds.AncestralGuidanceHeal)
                 return false;
             return true;
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
@@ -102,14 +102,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 114911 - Ancestral Guidance Heal
-    class spell_sha_ancestral_guidance_heal : SpellScript
+    internal class spell_sha_ancestral_guidance_heal : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AncestralGuidance);
         }
 
-        void ResizeTargets(List<WorldObject> targets)
+        private void ResizeTargets(List<WorldObject> targets)
         {
             targets.Resize(3);
         }
@@ -121,21 +121,21 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 2825 - Bloodlust
-    class spell_sha_bloodlust : SpellScript
+    internal class spell_sha_bloodlust : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Sated, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
         }
 
-        void RemoveInvalidTargets(List<WorldObject> targets)
+        private void RemoveInvalidTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.Sated));
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
         }
 
-        void ApplyDebuff()
+        private void ApplyDebuff()
         {
             var target = GetHitUnit();
             if (target)
@@ -151,19 +151,19 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 187874 - Crash Lightning
-    class spell_sha_crash_lightning : SpellScript
+    internal class spell_sha_crash_lightning : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CrashLightningCleave);
         }
 
-        void CountTargets(List<WorldObject> targets)
+        private void CountTargets(List<WorldObject> targets)
         {
             _targetsHit = targets.Count;
         }
 
-        void TriggerCleaveBuff()
+        private void TriggerCleaveBuff()
         {
             if (_targetsHit >= 2)
                 GetCaster().CastSpell(GetCaster(), SpellIds.CrashLightningCleave, true);
@@ -179,25 +179,25 @@ namespace Scripts.Spells.Shaman
             AfterCast.Add(new CastHandler(TriggerCleaveBuff));
         }
 
-        int _targetsHit;
+        private int _targetsHit;
     }
 
     [Script] // 204288 - Earth Shield
-    class spell_sha_earth_shield : AuraScript
+    internal class spell_sha_earth_shield : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthShieldHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetDamageInfo() == null || !HasEffect(1) || eventInfo.GetDamageInfo().GetDamage() < GetTarget().CountPctFromMaxHealth(GetEffect(1).GetAmount()))
                 return false;
             return true;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -219,7 +219,7 @@ namespace Scripts.Spells.Shaman
             return ValidateSpellInfo(SpellIds.EarthenRagePeriodic, SpellIds.EarthenRageDamage);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             _procTargetGuid = eventInfo.GetProcTarget().GetGUID();
@@ -236,18 +236,18 @@ namespace Scripts.Spells.Shaman
             return _procTargetGuid;
         }
 
-        ObjectGuid _procTargetGuid;
+        private ObjectGuid _procTargetGuid;
     }
 
     [Script] // 170377 - Earthen Rage (Proc Aura)
-    class spell_sha_earthen_rage_proc_aura : AuraScript
+    internal class spell_sha_earthen_rage_proc_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EarthenRagePassive, SpellIds.EarthenRageDamage);
         }
 
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
             var aura = GetCaster().GetAura(SpellIds.EarthenRagePassive);
@@ -271,7 +271,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 117014 - Elemental Blast
-    class spell_sha_elemental_blast : SpellScript
+    internal class spell_sha_elemental_blast : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -283,7 +283,7 @@ namespace Scripts.Spells.Shaman
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void TriggerBuff()
+        private void TriggerBuff()
         {
             var caster = GetCaster().ToPlayer();
             var spellId = RandomHelper.RAND(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
@@ -298,14 +298,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 194084 - Flametongue
-    class spell_sha_flametongue : AuraScript
+    internal class spell_sha_flametongue : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlametongueAttack);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -321,9 +321,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 52042 - Healing Stream Totem
-    class spell_sha_healing_stream_totem_heal : SpellScript
+    internal class spell_sha_healing_stream_totem_heal : SpellScript
     {
-        void SelectTargets(List<WorldObject> targets)
+        private void SelectTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(target => !target.ToUnit() || target.ToUnit().IsFullHealth());
 
@@ -340,21 +340,21 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 32182 - Heroism
-    class spell_sha_heroism : SpellScript
+    internal class spell_sha_heroism : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Exhaustion, SpellIds.HunterInsanity, SpellIds.MageTemporalDisplacement, SpellIds.PetNetherwindsFatigued);
         }
 
-        void RemoveInvalidTargets(List<WorldObject> targets)
+        private void RemoveInvalidTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.Exhaustion));
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.MageTemporalDisplacement));
         }
 
-        void ApplyDebuff()
+        private void ApplyDebuff()
         {
             var target = GetHitUnit();
             if (target)
@@ -370,14 +370,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 23551 - Lightning Shield T2 Bonus
-    class spell_sha_item_lightning_shield : AuraScript
+    internal class spell_sha_item_lightning_shield : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemLightningShield);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ItemLightningShield, true, null, aurEff);
@@ -390,14 +390,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 23552 - Lightning Shield T2 Bonus
-    class spell_sha_item_lightning_shield_trigger : AuraScript
+    internal class spell_sha_item_lightning_shield_trigger : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemLightningShieldDamage);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.ItemLightningShieldDamage, true, null, aurEff);
@@ -410,19 +410,19 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 23572 - Mana Surge
-    class spell_sha_item_mana_surge : AuraScript
+    internal class spell_sha_item_mana_surge : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemManaSurge);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcSpell() != null;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -444,14 +444,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 40463 - Shaman Tier 6 Trinket
-    class spell_sha_item_t6_trinket : AuraScript
+    internal class spell_sha_item_t6_trinket : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.EnergySurge, SpellIds.PowerSurge);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var spellInfo = eventInfo.GetSpellInfo();
@@ -493,14 +493,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 70811 - Item - Shaman T10 Elemental 2P Bonus
-    class spell_sha_item_t10_elemental_2p_bonus : AuraScript
+    internal class spell_sha_item_t10_elemental_2p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ElementalMastery);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var target = GetTarget().ToPlayer();
@@ -515,9 +515,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 189063 - Lightning Vortex (proc 185881 Item - Shaman T18 Elemental 4P Bonus)
-    class spell_sha_item_t18_elemental_4p_bonus : AuraScript
+    internal class spell_sha_item_t18_elemental_4p_bonus : AuraScript
     {
-        void DiminishHaste(AuraEffect aurEff)
+        private void DiminishHaste(AuraEffect aurEff)
         {
             PreventDefaultAction();
             var hasteBuff = GetEffect(0);
@@ -532,14 +532,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 51505 - Lava burst
-    class spell_sha_lava_burst : SpellScript
+    internal class spell_sha_lava_burst : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PathOfFlamesTalent, SpellIds.PathOfFlamesSpread);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             if (caster)
@@ -558,14 +558,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77756 - Lava Surge
-    class spell_sha_lava_surge : AuraScript
+    internal class spell_sha_lava_surge : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LavaSurge);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.LavaSurge, true);
@@ -578,7 +578,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 77762 - Lava Surge
-    class spell_sha_lava_surge_proc : SpellScript
+    internal class spell_sha_lava_surge_proc : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -590,7 +590,7 @@ namespace Scripts.Spells.Shaman
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void ResetCooldown()
+        private void ResetCooldown()
         {
             GetCaster().GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurst, GetCastDifficulty()).ChargeCategoryId);
         }
@@ -602,20 +602,20 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 210621 - Path of Flames Spread
-    class spell_sha_path_of_flames_spread : SpellScript
+    internal class spell_sha_path_of_flames_spread : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlameShockMaelstrom);
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.Remove(GetExplTargetUnit());
             targets.RandomResize(target => target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID()), 1);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var mainTarget = GetExplTargetUnit();
             if (mainTarget)
@@ -641,14 +641,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 51562 - Tidal Waves
-    class spell_sha_tidal_waves : AuraScript
+    internal class spell_sha_tidal_waves : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TidalWaves);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var basePoints0 = -aurEff.GetAmount();
@@ -664,14 +664,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 28823 - Totemic Power
-    class spell_sha_t3_6p_bonus : AuraScript
+    internal class spell_sha_t3_6p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TotemicPowerArmor, SpellIds.TotemicPowerAttackPower, SpellIds.TotemicPowerSpellPower, SpellIds.TotemicPowerMp5);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -712,14 +712,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 64928 - Item - Shaman T8 Elemental 4P Bonus
-    class spell_sha_t8_elemental_4p_bonus : AuraScript
+    internal class spell_sha_t8_elemental_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Electrified);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -746,14 +746,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 67228 - Item - Shaman T9 Elemental 4P Bonus (Lava Burst)
-    class spell_sha_t9_elemental_4p_bonus : AuraScript
+    internal class spell_sha_t9_elemental_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LavaBurstBonusDamage);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -780,9 +780,9 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 70817 - Item - Shaman T10 Elemental 4P Bonus
-    class spell_sha_t10_elemental_4p_bonus : AuraScript
+    internal class spell_sha_t10_elemental_4p_bonus : AuraScript
     {
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -812,14 +812,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 70808 - Item - Shaman T10 Restoration 4P Bonus
-    class spell_sha_t10_restoration_4p_bonus : AuraScript
+    internal class spell_sha_t10_restoration_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChainedHeal);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -846,14 +846,14 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 33757 - Windfury
-    class spell_sha_windfury : AuraScript
+    internal class spell_sha_windfury : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.WindfuryAttack);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 

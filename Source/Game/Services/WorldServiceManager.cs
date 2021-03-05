@@ -28,9 +28,9 @@ namespace Game.Services
 {
     public class WorldServiceManager : Singleton<WorldServiceManager>
     {
-        ConcurrentDictionary<(uint ServiceHash, uint MethodId), WorldServiceHandler> serviceHandlers;
+        private ConcurrentDictionary<(uint ServiceHash, uint MethodId), WorldServiceHandler> serviceHandlers;
 
-        WorldServiceManager()
+        private WorldServiceManager()
         {
             serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), WorldServiceHandler>();
 
@@ -72,9 +72,9 @@ namespace Game.Services
 
     public class WorldServiceHandler
     {
-        Delegate methodCaller;
-        Type requestType;
-        Type responseType;
+        private Delegate methodCaller;
+        private Type requestType;
+        private Type responseType;
 
         public WorldServiceHandler(MethodInfo info, ParameterInfo[] parameters)
         {

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Scripts.Spells.Warrior
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint BladestormPeriodicWhirlwind = 50622;
         public const uint BloodthirstHeal = 117313;
@@ -61,20 +61,20 @@ namespace Scripts.Spells.Warrior
         public const uint VictoriousRushHeal = 118779;
     }
 
-    struct Misc
+    internal struct Misc
     {
         public const uint SpellVisualBlazingCharge = 26423;
     }
 
     [Script] // 23881 - Bloodthirst
-    class spell_warr_bloodthirst : SpellScript
+    internal class spell_warr_bloodthirst : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BloodthirstHeal);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
         }
@@ -86,14 +86,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 100 - Charge
-    class spell_warr_charge : SpellScript
+    internal class spell_warr_charge : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var spellId = SpellIds.ChargeEffect;
             if (GetCaster().HasAura(SpellIds.GlyphOfTheBlazingTrail))
@@ -109,9 +109,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 126661 - Warrior Charge Drop Fire Periodic
-    class spell_warr_charge_drop_fire_periodic : AuraScript
+    internal class spell_warr_charge_drop_fire_periodic : AuraScript
     {
-        void DropFireVisual(AuraEffect aurEff)
+        private void DropFireVisual(AuraEffect aurEff)
         {
             PreventDefaultAction();
             if (GetTarget().IsSplineEnabled())
@@ -133,14 +133,14 @@ namespace Scripts.Spells.Warrior
 
     // 198337 - Charge Effect (dropping Blazing Trail)
     [Script] // 218104 - Charge Effect
-    class spell_warr_charge_effect : SpellScript
+    internal class spell_warr_charge_effect : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
         }
 
-        void HandleCharge(uint effIndex)
+        private void HandleCharge(uint effIndex)
         {
             var caster = GetCaster();
             var target = GetHitUnit();
@@ -156,14 +156,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 167105 - Colossus Smash 7.1.5
-    class spell_warr_colossus_smash_SpellScript : SpellScript
+    internal class spell_warr_colossus_smash_SpellScript : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmashEffect);
         }
 
-        void HandleOnHit()
+        private void HandleOnHit()
         {
             var target = GetHitUnit();
             if (target)
@@ -177,14 +177,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 6544 Heroic leap
-    class spell_warr_heroic_leap : SpellScript
+    internal class spell_warr_heroic_leap : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HeroicLeapJump);
         }
 
-        SpellCastResult CheckElevation()
+        private SpellCastResult CheckElevation()
         {
             var dest = GetExplTargetDest();
             if (dest != null)
@@ -220,7 +220,7 @@ namespace Scripts.Spells.Warrior
             return SpellCastResult.NoValidTargets;
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var dest = GetHitDest();
             if (dest != null)
@@ -235,7 +235,7 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // Heroic Leap (triggered by Heroic Leap (6544)) - 178368
-    class spell_warr_heroic_leap_jump : SpellScript
+    internal class spell_warr_heroic_leap_jump : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -245,7 +245,7 @@ namespace Scripts.Spells.Warrior
                 SpellIds.Taunt);
         }
 
-        void AfterJump(uint effIndex)
+        private void AfterJump(uint effIndex)
         {
             if (GetCaster().HasAura(SpellIds.GlyphOfHeroicLeap))
                 GetCaster().CastSpell(GetCaster(), SpellIds.GlyphOfHeroicLeapBuff, true);
@@ -260,14 +260,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 202168 - Impending Victory
-    class spell_warr_impending_victory : SpellScript
+    internal class spell_warr_impending_victory : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ImpendingVictoryHeal);
         }
 
-        void HandleAfterCast()
+        private void HandleAfterCast()
         {
             var caster = GetCaster();
             caster.CastSpell(caster, SpellIds.ImpendingVictoryHeal, true);
@@ -282,9 +282,9 @@ namespace Scripts.Spells.Warrior
 
     // 5246 - Intimidating Shout
     [Script]
-    class spell_warr_intimidating_shout : SpellScript
+    internal class spell_warr_intimidating_shout : SpellScript
     {
-        void FilterTargets(List<WorldObject> unitList)
+        private void FilterTargets(List<WorldObject> unitList)
         {
             unitList.Remove(GetExplTargetWorldObject());
         }
@@ -298,14 +298,14 @@ namespace Scripts.Spells.Warrior
 
     // 70844 - Item - Warrior T10 Protection 4P Bonus
     [Script] // 7.1.5
-    class spell_warr_item_t10_prot_4p_bonus : AuraScript
+    internal class spell_warr_item_t10_prot_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Stoicism);
         }
 
-        void HandleProc(ProcEventInfo eventInfo)
+        private void HandleProc(ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -321,14 +321,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 12294 - Mortal Strike 7.1.5
-    class spell_warr_mortal_strike : SpellScript
+    internal class spell_warr_mortal_strike : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MortalWounds);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var target = GetHitUnit();
             if (target)
@@ -342,7 +342,7 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 97462 - Rallying Cry
-    class spell_warr_rallying_cry : SpellScript
+    internal class spell_warr_rallying_cry : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -354,7 +354,7 @@ namespace Scripts.Spells.Warrior
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var basePoints0 = (int)(GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
@@ -368,7 +368,7 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 46968 - Shockwave
-    class spell_warr_shockwave : SpellScript
+    internal class spell_warr_shockwave : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -383,14 +383,14 @@ namespace Scripts.Spells.Warrior
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleStun(uint effIndex)
+        private void HandleStun(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ShockwaveStun, true);
             ++_targetCount;
         }
 
         // Cooldown reduced by 20 sec if it strikes at least 3 targets.
-        void HandleAfterCast()
+        private void HandleAfterCast()
         {
             if (_targetCount >= (uint)GetSpellInfo().GetEffect(0).CalcValue())
                 GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, -(GetSpellInfo().GetEffect(3).CalcValue() * Time.InMilliseconds));
@@ -402,18 +402,18 @@ namespace Scripts.Spells.Warrior
             AfterCast.Add(new CastHandler(HandleAfterCast));
         }
 
-        uint _targetCount;
+        private uint _targetCount;
     }
 
     [Script] // 107570 - Storm Bolt
-    class spell_warr_storm_bolt : SpellScript
+    internal class spell_warr_storm_bolt : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StormBoltStun);
         }
 
-        void HandleOnHit(uint effIndex)
+        private void HandleOnHit(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.StormBoltStun, true);
         }
@@ -426,14 +426,14 @@ namespace Scripts.Spells.Warrior
 
     // 52437 - Sudden Death
     [Script]
-    class spell_warr_sudden_death : AuraScript
+    internal class spell_warr_sudden_death : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmash);
         }
 
-        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Remove cooldown on Colossus Smash
             var player = GetTarget().ToPlayer();
@@ -449,20 +449,20 @@ namespace Scripts.Spells.Warrior
 
     // 12328, 18765, 35429 - Sweeping Strikes
     [Script]
-    class spell_warr_sweeping_strikes : AuraScript
+    internal class spell_warr_sweeping_strikes : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SweepingStrikesExtraAttack1, SpellIds.SweepingStrikesExtraAttack2);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             _procTarget = eventInfo.GetActor().SelectNearbyTarget(eventInfo.GetProcTarget());
             return _procTarget;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var damageInfo = eventInfo.GetDamageInfo();
@@ -488,18 +488,18 @@ namespace Scripts.Spells.Warrior
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
 
-        Unit _procTarget;
+        private Unit _procTarget;
     }
 
     [Script] // 215538 - Trauma
-    class spell_warr_trauma : AuraScript
+    internal class spell_warr_trauma : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TraumaEffect);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             var target = eventInfo.GetActionTarget();
             //Get the Remaining Damage from the aura (if exist)
@@ -516,9 +516,9 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 28845 - Cheat Death
-    class spell_warr_t3_prot_8p_bonus : AuraScript
+    internal class spell_warr_t3_prot_8p_bonus : AuraScript
     {
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             if (eventInfo.GetActionTarget().HealthBelowPct(20))
                 return true;
@@ -538,14 +538,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 32215 - Victorious State
-    class spell_warr_victorious_state : AuraScript
+    internal class spell_warr_victorious_state : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ImpendingVictory);
         }
 
-        void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        private void HandleOnProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             if (procInfo.GetActor().GetTypeId() == TypeId.Player && procInfo.GetActor().ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.WarriorFury)
                 PreventDefaultAction();
@@ -560,14 +560,14 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 34428 - Victory Rush
-    class spell_warr_victory_rush : SpellScript
+    internal class spell_warr_victory_rush : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Victorious, SpellIds.VictoriousRushHeal);
         }
 
-        void HandleHeal()
+        private void HandleHeal()
         {
             var caster = GetCaster();
 

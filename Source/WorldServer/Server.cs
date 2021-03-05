@@ -30,9 +30,9 @@ namespace WorldServer
 {
     public class Server
     {
-        const uint WorldSleep = 50;
+        private const uint WorldSleep = 50;
 
-        static void Main()
+        private static void Main()
         {
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -125,7 +125,7 @@ namespace WorldServer
             }
         }
 
-        static bool StartDB()
+        private static bool StartDB()
         {
             // Load databases
             var loader = new DatabaseLoader(DatabaseTypeFlags.All);
@@ -153,7 +153,7 @@ namespace WorldServer
             return true;
         }
 
-        static void ClearOnlineAccounts()
+        private static void ClearOnlineAccounts()
         {
             // Reset online status for all accounts with characters on the current realm
             DB.Login.DirectExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Index);
@@ -165,7 +165,7 @@ namespace WorldServer
             DB.Characters.DirectExecute("UPDATE character_battleground_data SET instanceId = 0");
         }
 
-        static void WorldUpdateLoop()
+        private static void WorldUpdateLoop()
         {
             var realPrevTime = Time.GetMSTime();
 
@@ -185,13 +185,13 @@ namespace WorldServer
             }
         }
 
-        static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+        private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = e.ExceptionObject as Exception;
             Log.outException(ex);
         }
 
-        static void ExitNow()
+        private static void ExitNow()
         {
             Log.outInfo(LogFilter.Server, "Halting process...");
             Thread.Sleep(5000);

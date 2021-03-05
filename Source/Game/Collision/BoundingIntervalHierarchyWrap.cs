@@ -64,17 +64,17 @@ namespace Game.Collision
             m_tree.IntersectPoint(point, callback);
         }
 
-        BIH m_tree = new BIH();
-        List<T> m_objects = new List<T>();
-        Dictionary<T, uint> m_obj2Idx = new Dictionary<T, uint>();
-        HashSet<T> m_objects_to_push = new HashSet<T>();
-        int unbalanced_times;
+        private BIH m_tree = new BIH();
+        private List<T> m_objects = new List<T>();
+        private Dictionary<T, uint> m_obj2Idx = new Dictionary<T, uint>();
+        private HashSet<T> m_objects_to_push = new HashSet<T>();
+        private int unbalanced_times;
 
         public class MDLCallback : WorkerCallback
         {
-            T[] objects;
-            WorkerCallback _callback;
-            uint objects_size;
+            private T[] objects;
+            private WorkerCallback _callback;
+            private uint objects_size;
 
             public MDLCallback(WorkerCallback callback, T[] objects_array, uint size)
             {

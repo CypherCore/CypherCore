@@ -225,7 +225,7 @@ namespace Game.Entities
             return level;
         }
 
-        uint GetCurrentKnowledgeLevel()
+        private uint GetCurrentKnowledgeLevel()
         {
             // count weeks from 14.01.2020
             var now = GameTime.GetDateAndTime();
@@ -239,7 +239,7 @@ namespace Game.Entities
             return knowledge;
         }
 
-        ulong CalcTotalXPToNextLevel(uint level, uint knowledgeLevel)
+        private ulong CalcTotalXPToNextLevel(uint level, uint knowledgeLevel)
         {
             var levelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(level);
             var totalXp = levelInfo.BaseExperienceToNextLevel * (ulong)CliDB.AzeriteKnowledgeMultiplierStorage.LookupByKey(knowledgeLevel).Multiplier;
@@ -476,7 +476,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteItemMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteItemMask, Player target)
         {
             var flags = GetUpdateFieldFlagsFor(target);
             var valuesMask = new UpdateMask((int)TypeId.Max);
@@ -518,7 +518,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        void UnlockDefaultMilestones()
+        private void UnlockDefaultMilestones()
         {
             var hasPreviousMilestone = true;
             foreach (var milestone in Global.DB2Mgr.GetAzeriteItemMilestonePowers())

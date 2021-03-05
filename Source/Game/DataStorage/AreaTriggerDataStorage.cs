@@ -26,7 +26,7 @@ namespace Game.DataStorage
 {
     public class AreaTriggerDataStorage : Singleton<AreaTriggerDataStorage>
     {
-        AreaTriggerDataStorage() { }
+        private AreaTriggerDataStorage() { }
 
         public void LoadAreaTriggerTemplates()
         {
@@ -349,9 +349,9 @@ namespace Game.DataStorage
             return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
         }
 
-        Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new Dictionary<(uint mapId, uint cellId), SortedSet<ulong>>();
-        Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new Dictionary<ulong, AreaTriggerSpawn>();
-        Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new Dictionary<AreaTriggerId, AreaTriggerTemplate>();
-        Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new Dictionary<uint, AreaTriggerMiscTemplate>();
+        private Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new Dictionary<(uint mapId, uint cellId), SortedSet<ulong>>();
+        private Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new Dictionary<ulong, AreaTriggerSpawn>();
+        private Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new Dictionary<AreaTriggerId, AreaTriggerTemplate>();
+        private Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new Dictionary<uint, AreaTriggerMiscTemplate>();
     }
 }

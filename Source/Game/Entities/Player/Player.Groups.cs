@@ -24,7 +24,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        Player GetNextRandomRaidMember(float radius)
+        private Player GetNextRandomRaidMember(float radius)
         {
             var group = GetGroup();
             if (!group)
@@ -104,7 +104,7 @@ namespace Game.Entities
             return Global.LFGMgr.GetState(GetGUID()) != LfgState.None;
         }
 
-        bool InRandomLfgDungeon()
+        private bool InRandomLfgDungeon()
         {
             if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
             {
@@ -274,7 +274,7 @@ namespace Game.Entities
             group.RemoveMember(guid, method, kicker, reason);
         }
 
-        void SendUpdateToOutOfRangeGroupMembers()
+        private void SendUpdateToOutOfRangeGroupMembers()
         {
             if (m_groupUpdateMask == GroupUpdateFlags.None)
                 return;

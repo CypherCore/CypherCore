@@ -25,10 +25,10 @@ using System.Collections.Generic;
 namespace Game.Chat.Commands
 {
     [CommandGroup("send", RBACPermissions.CommandSend, false)]
-    class SendCommands
+    internal class SendCommands
     {
         [Command("mail", RBACPermissions.CommandSendMail, true)]
-        static bool HandleSendMailCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleSendMailCommand(StringArguments args, CommandHandler handler)
         {
             // format: name "subject text" "mail text"
             Player target;
@@ -69,7 +69,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("items", RBACPermissions.CommandSendItems, true)]
-        static bool HandleSendItemsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleSendItemsCommand(StringArguments args, CommandHandler handler)
         {
             // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
             Player receiver;
@@ -169,7 +169,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("money", RBACPermissions.CommandSendMoney, true)]
-        static bool HandleSendMoneyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleSendMoneyCommand(StringArguments args, CommandHandler handler)
         {
             // format: name "subject text" "mail text" money
 
@@ -218,7 +218,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("message", RBACPermissions.CommandSendMessage, true)]
-        static bool HandleSendMessageCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleSendMessageCommand(StringArguments args, CommandHandler handler)
         {
             // - Find the player
             Player player;

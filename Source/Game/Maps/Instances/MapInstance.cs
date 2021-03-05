@@ -171,7 +171,7 @@ namespace Game.Maps
             return map;
         }
 
-        InstanceMap CreateInstance(uint InstanceId, InstanceSave save, Difficulty difficulty, int teamId)
+        private InstanceMap CreateInstance(uint InstanceId, InstanceSave save, Difficulty difficulty, int teamId)
         {
             lock (_mapLock)
             {
@@ -214,7 +214,7 @@ namespace Game.Maps
             }
         }
 
-        BattlegroundMap CreateBattleground(uint InstanceId, Battleground bg)
+        private BattlegroundMap CreateBattleground(uint InstanceId, Battleground bg)
         {
             lock (_mapLock)
             {
@@ -230,7 +230,7 @@ namespace Game.Maps
             }
         }
 
-        GarrisonMap CreateGarrison(uint instanceId, Player owner)
+        private GarrisonMap CreateGarrison(uint instanceId, Player owner)
         {
             lock (_mapLock)
             {
@@ -242,7 +242,7 @@ namespace Game.Maps
             }
         }
 
-        bool DestroyInstance(KeyValuePair<uint, Map> pair)
+        private bool DestroyInstance(KeyValuePair<uint, Map> pair)
         {
             pair.Value.RemoveAllPlayers();
             if (pair.Value.HavePlayers())
@@ -279,7 +279,7 @@ namespace Game.Maps
 
         public Dictionary<uint, Map> GetInstancedMaps() { return m_InstancedMaps; }
 
-        Dictionary<uint, Map> m_InstancedMaps = new Dictionary<uint, Map>();
+        private Dictionary<uint, Map> m_InstancedMaps = new Dictionary<uint, Map>();
     }
 
     public class InstanceTemplate

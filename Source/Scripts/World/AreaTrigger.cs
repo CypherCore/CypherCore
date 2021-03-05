@@ -23,13 +23,13 @@ using System.Collections.Generic;
 
 namespace Scripts.World.Areatriggers
 {
-    struct TextIds
+    internal struct TextIds
     {
         //Brewfest
         public const uint SayWelcome = 4;
     }
 
-    struct SpellIds
+    internal struct SpellIds
     {
         //Legion Teleporter
         public const uint TeleATo = 37387;
@@ -49,7 +49,7 @@ namespace Scripts.World.Areatriggers
         public const uint A52Neuralyzer = 34400;
     }
 
-    struct QuestIds
+    internal struct QuestIds
     {
         //Legion Teleporter
         public const uint GainingAccessA = 10589;
@@ -77,7 +77,7 @@ namespace Scripts.World.Areatriggers
         public const uint TheLonesomeWatcher = 12877;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         //Scent Larkorwi
         public const uint LarkorwiMate = 9683;
@@ -97,13 +97,13 @@ namespace Scripts.World.Areatriggers
         public const uint StormforgedEradictor = 29861;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         //Coilfang Waterfall
         public const uint CoilfangWaterfall = 184212;
     }
 
-    struct AreaTriggerIds
+    internal struct AreaTriggerIds
     {
         //Sholazar Waygate
         public const uint Sholazar = 5046;
@@ -120,7 +120,7 @@ namespace Scripts.World.Areatriggers
         public const uint Area52East = 4422;
     }
 
-    struct Misc
+    internal struct Misc
     { 
         //Brewfest
         public const uint AreatriggerTalkCooldown = 5; // In Seconds
@@ -137,7 +137,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_coilfang_waterfall : AreaTriggerScript
+    internal class AreaTrigger_at_coilfang_waterfall : AreaTriggerScript
     {
         public AreaTrigger_at_coilfang_waterfall() : base("at_coilfang_waterfall") { }
 
@@ -153,7 +153,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_legion_teleporter : AreaTriggerScript
+    internal class AreaTrigger_at_legion_teleporter : AreaTriggerScript
     {
         public AreaTrigger_at_legion_teleporter() : base("at_legion_teleporter") { }
 
@@ -180,7 +180,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_stormwright_shelf : AreaTriggerScript
+    internal class AreaTrigger_at_stormwright_shelf : AreaTriggerScript
     {
         public AreaTrigger_at_stormwright_shelf() : base("at_stormwright_shelf") { }
 
@@ -194,7 +194,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_scent_larkorwi : AreaTriggerScript
+    internal class AreaTrigger_at_scent_larkorwi : AreaTriggerScript
     {
         public AreaTrigger_at_scent_larkorwi() : base("at_scent_larkorwi") { }
 
@@ -211,7 +211,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_last_rites : AreaTriggerScript
+    internal class AreaTrigger_at_last_rites : AreaTriggerScript
     {
         public AreaTrigger_at_last_rites() : base("at_last_rites") { }
 
@@ -252,7 +252,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
+    internal class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
     {
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }
 
@@ -278,7 +278,7 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_nats_landing : AreaTriggerScript
+    internal class AreaTrigger_at_nats_landing : AreaTriggerScript
     {
         public AreaTrigger_at_nats_landing() : base("at_nats_landing") { }
 
@@ -303,9 +303,9 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_brewfest : AreaTriggerScript
+    internal class AreaTrigger_at_brewfest : AreaTriggerScript
     {
-        Dictionary<uint, long> _triggerTimes;
+        private Dictionary<uint, long> _triggerTimes;
 
         public AreaTrigger_at_brewfest() : base("at_brewfest")
         {
@@ -346,9 +346,9 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_area_52_entrance : AreaTriggerScript
+    internal class AreaTrigger_at_area_52_entrance : AreaTriggerScript
     {
-        Dictionary<uint, long> _triggerTimes;
+        private Dictionary<uint, long> _triggerTimes;
 
         public AreaTrigger_at_area_52_entrance() : base("at_area_52_entrance")
         {
@@ -403,10 +403,10 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
+    internal class AreaTrigger_at_frostgrips_hollow : AreaTriggerScript
     {
-        ObjectGuid stormforgedMonitorGUID;
-        ObjectGuid stormforgedEradictorGUID;
+        private ObjectGuid stormforgedMonitorGUID;
+        private ObjectGuid stormforgedEradictorGUID;
 
         public AreaTrigger_at_frostgrips_hollow() : base("at_frostgrips_hollow")
         {

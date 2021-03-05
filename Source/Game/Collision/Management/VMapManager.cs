@@ -40,7 +40,7 @@ namespace Game.Collision
 
     public class VMapManager : Singleton<VMapManager>
     {
-        VMapManager() { }
+        private VMapManager() { }
 
         public static string VMapPath = Global.WorldMgr.GetDataPath() + "/vmaps/";
 
@@ -78,7 +78,7 @@ namespace Game.Collision
             return result;
         }
 
-        LoadResult LoadSingleMap(uint mapId, uint tileX, uint tileY)
+        private LoadResult LoadSingleMap(uint mapId, uint tileX, uint tileY)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree == null)
@@ -106,7 +106,7 @@ namespace Game.Collision
             UnloadSingleMap(mapId, x, y);
         }
 
-        void UnloadSingleMap(uint mapId, uint x, uint y)
+        private void UnloadSingleMap(uint mapId, uint x, uint y)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -128,7 +128,7 @@ namespace Game.Collision
             UnloadSingleMap(mapId);
         }
 
-        void UnloadSingleMap(uint mapId)
+        private void UnloadSingleMap(uint mapId)
         {
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
@@ -345,7 +345,7 @@ namespace Game.Collision
             return -1;
         }
 
-        Vector3 ConvertPositionToInternalRep(float x, float y, float z)
+        private Vector3 ConvertPositionToInternalRep(float x, float y, float z)
         {
             var pos = new Vector3();
             var mid = 0.5f * 64.0f * 533.33333333f;
@@ -368,14 +368,14 @@ namespace Game.Collision
         public bool IsHeightCalcEnabled() { return _enableHeightCalc; }
         public bool IsMapLoadingEnabled() { return _enableLineOfSightCalc || _enableHeightCalc; }
 
-        Dictionary<string, ManagedModel> iLoadedModelFiles = new Dictionary<string, ManagedModel>();
-        Dictionary<uint, StaticMapTree> iInstanceMapTrees = new Dictionary<uint, StaticMapTree>();
-        MultiMap<uint, uint> iChildMapData = new MultiMap<uint, uint>();
-        Dictionary<uint, uint> iParentMapData = new Dictionary<uint, uint>();
-        bool _enableLineOfSightCalc;
-        bool _enableHeightCalc;
+        private Dictionary<string, ManagedModel> iLoadedModelFiles = new Dictionary<string, ManagedModel>();
+        private Dictionary<uint, StaticMapTree> iInstanceMapTrees = new Dictionary<uint, StaticMapTree>();
+        private MultiMap<uint, uint> iChildMapData = new MultiMap<uint, uint>();
+        private Dictionary<uint, uint> iParentMapData = new Dictionary<uint, uint>();
+        private bool _enableLineOfSightCalc;
+        private bool _enableHeightCalc;
 
-        object LoadedModelFilesLock = new object();
+        private object LoadedModelFilesLock = new object();
     }
 
     public class ManagedModel
@@ -391,8 +391,8 @@ namespace Game.Collision
         public void IncRefCount() { ++iRefCount; }
         public int DecRefCount() { return --iRefCount; }
 
-        WorldModel iModel;
-        int iRefCount;
+        private WorldModel iModel;
+        private int iRefCount;
     }
 
     public class AreaAndLiquidData

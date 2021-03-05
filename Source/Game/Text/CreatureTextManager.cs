@@ -32,7 +32,7 @@ namespace Game
 {
     public sealed class CreatureTextManager : Singleton<CreatureTextManager>
     {
-        CreatureTextManager() { }
+        private CreatureTextManager() { }
 
         public void LoadCreatureTexts()
         {
@@ -237,7 +237,7 @@ namespace Game
             return textEntry.duration;
         }
 
-        float GetRangeForChatType(ChatMsg msgType)
+        private float GetRangeForChatType(ChatMsg msgType)
         {
             var dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
             switch (msgType)
@@ -264,7 +264,7 @@ namespace Game
             SendNonChatPacket(source, new PlaySound(source.GetGUID(), sound, keyBroadcastTextId), msgType, whisperTarget, range, team, gmOnly);
         }
 
-        void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
+        private void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
         {
             var dist = GetRangeForChatType(msgType);
 
@@ -347,7 +347,7 @@ namespace Game
             source.SendMessageToSetInRange(data, dist, true);
         }
 
-        void SendEmote(Unit source, Emote emote)
+        private void SendEmote(Unit source, Emote emote)
         {
             if (!source)
                 return;
@@ -495,8 +495,8 @@ namespace Game
             Cell.VisitWorldObjects(source, worker, dist);
         }
 
-        Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new Dictionary<uint, MultiMap<byte, CreatureTextEntry>>();
-        Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new Dictionary<CreatureTextId,CreatureTextLocale>();
+        private Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new Dictionary<uint, MultiMap<byte, CreatureTextEntry>>();
+        private Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new Dictionary<CreatureTextId,CreatureTextLocale>();
     }
 
     public class CreatureTextHolder
@@ -517,8 +517,8 @@ namespace Game
             return Groups.LookupByKey(group);
         }
 
-        uint Entry;
-        MultiMap<uint, CreatureTextEntry> Groups;
+        private uint Entry;
+        private MultiMap<uint, CreatureTextEntry> Groups;
     }
 
     public class CreatureTextRepeatHolder
@@ -539,8 +539,8 @@ namespace Game
             return Groups.LookupByKey(group);
         }
 
-        ulong Guid;
-        MultiMap<byte, byte> Groups;
+        private ulong Guid;
+        private MultiMap<byte, byte> Groups;
     }
 
     public class CreatureTextEntry
@@ -571,9 +571,9 @@ namespace Game
             textId = i;
         }
 
-        uint entry;
-        uint textGroup;
-        uint textId;
+        private uint entry;
+        private uint textGroup;
+        private uint textId;
     }
 
     public enum CreatureTextRange
@@ -621,9 +621,9 @@ namespace Game
             player.SendPacket(message);
         }
 
-        Dictionary<Locale, ServerPacket> _packetCache = new Dictionary<Locale, ServerPacket>();
-        MessageBuilder _builder;
-        ChatMsg _msgType;
+        private Dictionary<Locale, ServerPacket> _packetCache = new Dictionary<Locale, ServerPacket>();
+        private MessageBuilder _builder;
+        private ChatMsg _msgType;
     }
 
     public class CreatureTextBuilder : MessageBuilder
@@ -647,13 +647,13 @@ namespace Game
             return packet;
         }
 
-        WorldObject _source;
-        Gender _gender;
-        ChatMsg _msgType;
-        byte _textGroup;
-        uint _textId;
-        Language _language;
-        WorldObject _target;
+        private WorldObject _source;
+        private Gender _gender;
+        private ChatMsg _msgType;
+        private byte _textGroup;
+        private uint _textId;
+        private Language _language;
+        private WorldObject _target;
     }
 
     public class PlayerTextBuilder : MessageBuilder
@@ -678,13 +678,13 @@ namespace Game
             return packet;
         }
 
-        WorldObject _source;
-        WorldObject _talker;
-        Gender _gender;
-        ChatMsg _msgType;
-        byte _textGroup;
-        uint _textId;
-        Language _language;
-        WorldObject _target;
+        private WorldObject _source;
+        private WorldObject _talker;
+        private Gender _gender;
+        private ChatMsg _msgType;
+        private byte _textGroup;
+        private uint _textId;
+        private Language _language;
+        private WorldObject _target;
     }
 }

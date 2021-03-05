@@ -40,101 +40,101 @@ namespace Game.Entities
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];
-        RefManager<Unit, ITargetedMovementGeneratorBase> m_FollowingRefManager;
+        private RefManager<Unit, ITargetedMovementGeneratorBase> m_FollowingRefManager;
         public MoveSpline MoveSpline { get; set; }
-        MotionMaster i_motionMaster;
+        private MotionMaster i_motionMaster;
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
-        TimeTrackerSmall movesplineTimer;
+        private TimeTrackerSmall movesplineTimer;
         public Player m_playerMovingMe;
-        MovementForces _movementForces;
+        private MovementForces _movementForces;
 
         //Combat
         protected List<Unit> attackerList = new List<Unit>();
-        Dictionary<ReactiveType, uint> m_reactiveTimer = new Dictionary<ReactiveType, uint>();
+        private Dictionary<ReactiveType, uint> m_reactiveTimer = new Dictionary<ReactiveType, uint>();
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
         public float[] m_threatModifier = new float[(int)SpellSchools.Max];
 
-        uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
-        float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
+        private uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
+        private float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
 
-        ThreatManager threatManager;
-        HostileRefManager hostileRefManager;
-        RedirectThreatInfo _redirectThreatInfo;
+        private ThreatManager threatManager;
+        private HostileRefManager hostileRefManager;
+        private RedirectThreatInfo _redirectThreatInfo;
         protected Unit attacking;
 
         public float ModMeleeHitChance { get; set; }
         public float ModRangedHitChance { get; set; }
         public float ModSpellHitChance { get; set; }
-        bool m_canDualWield;
+        private bool m_canDualWield;
         public int BaseSpellCritChance { get; set; }
         public uint RegenTimer { get; set; }
-        uint combatTimer;
+        private uint combatTimer;
         public uint ExtraAttacks { get; set; }
 
         //Charm
         public List<Unit> m_Controlled = new List<Unit>();
-        List<Player> m_sharedVision = new List<Player>();
-        CharmInfo m_charmInfo;
+        private List<Player> m_sharedVision = new List<Player>();
+        private CharmInfo m_charmInfo;
         protected bool m_ControlledByPlayer;
         public ObjectGuid LastCharmerGUID { get; set; }
 
-        uint _oldFactionId;         // faction before charm
-        bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
+        private uint _oldFactionId;         // faction before charm
+        private bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
 
         //Spells 
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new Dictionary<CurrentSpellTypes, Spell>((int)CurrentSpellTypes.Max);
-        Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
-        MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
-        uint[] m_interruptMask = new uint[2];
+        private Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
+        private MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
+        private uint[] m_interruptMask = new uint[2];
         protected int m_procDeep;
-        bool m_AutoRepeatFirstCast;
-        SpellHistory _spellHistory;
+        private bool m_AutoRepeatFirstCast;
+        private SpellHistory _spellHistory;
 
         //Auras
-        List<AuraEffect> AuraEffectList = new List<AuraEffect>();
-        MultiMap<AuraType, AuraEffect> m_modAuras = new MultiMap<AuraType, AuraEffect>();
-        List<Aura> m_removedAuras = new List<Aura>();
-        List<AuraApplication> m_interruptableAuras = new List<AuraApplication>();             // auras which have interrupt mask applied on unit
-        MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new MultiMap<AuraStateType, AuraApplication>();        // Used for improve performance of aura state checks on aura apply/remove
-        SortedSet<AuraApplication> m_visibleAuras = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
-        SortedSet<AuraApplication> m_visibleAurasToUpdate = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
-        MultiMap<uint, AuraApplication> m_appliedAuras = new MultiMap<uint, AuraApplication>();
-        MultiMap<uint, Aura> m_ownedAuras = new MultiMap<uint, Aura>();
-        List<Aura> m_scAuras = new List<Aura>();
+        private List<AuraEffect> AuraEffectList = new List<AuraEffect>();
+        private MultiMap<AuraType, AuraEffect> m_modAuras = new MultiMap<AuraType, AuraEffect>();
+        private List<Aura> m_removedAuras = new List<Aura>();
+        private List<AuraApplication> m_interruptableAuras = new List<AuraApplication>();             // auras which have interrupt mask applied on unit
+        private MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new MultiMap<AuraStateType, AuraApplication>();        // Used for improve performance of aura state checks on aura apply/remove
+        private SortedSet<AuraApplication> m_visibleAuras = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
+        private SortedSet<AuraApplication> m_visibleAurasToUpdate = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
+        private MultiMap<uint, AuraApplication> m_appliedAuras = new MultiMap<uint, AuraApplication>();
+        private MultiMap<uint, Aura> m_ownedAuras = new MultiMap<uint, Aura>();
+        private List<Aura> m_scAuras = new List<Aura>();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
         protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
-        uint m_removedAurasCount;
+        private uint m_removedAurasCount;
 
         //General  
         public UnitData m_unitData;
 
-        DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
+        private DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
         protected List<GameObject> m_gameObj = new List<GameObject>();
-        List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
+        private List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
         protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
         protected float[] CreateStats = new float[(int)Stats.Max];
-        float[] m_floatStatPosBuff = new float[(int)Stats.Max];
-        float[] m_floatStatNegBuff = new float[(int)Stats.Max];
+        private float[] m_floatStatPosBuff = new float[(int)Stats.Max];
+        private float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public EventSystem m_Events = new EventSystem();
         public UnitTypeMask UnitTypeMask { get; set; }
-        UnitState m_state;
+        private UnitState m_state;
         protected LiquidTypeRecord _lastLiquid;
         protected DeathState m_deathState;
         public Vehicle m_vehicle { get; set; }
         public Vehicle VehicleKit { get; set; }
-        bool canModifyStats;
+        private bool canModifyStats;
         public uint LastSanctuaryTime { get; set; }
-        uint m_transform;
-        bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
-        bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
-        bool _instantCast;
+        private uint m_transform;
+        private bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
+        private bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
+        private bool _instantCast;
 
-        ushort _aiAnimKitId;
-        ushort _movementAnimKitId;
-        ushort _meleeAnimKitId;
+        private ushort _aiAnimKitId;
+        private ushort _movementAnimKitId;
+        private ushort _meleeAnimKitId;
     }
 
     public struct DiminishingReturn
@@ -212,16 +212,16 @@ namespace Game.Entities
 
         public Spell GetProcSpell() { return _spell; }
 
-        Unit _actor;
-        Unit _actionTarget;
-        Unit _procTarget;
-        ProcFlags _typeMask;
-        ProcFlagsSpellType _spellTypeMask;
-        ProcFlagsSpellPhase _spellPhaseMask;
-        ProcFlagsHit _hitMask;
-        Spell _spell;
-        DamageInfo _damageInfo;
-        HealInfo _healInfo;
+        private Unit _actor;
+        private Unit _actionTarget;
+        private Unit _procTarget;
+        private ProcFlags _typeMask;
+        private ProcFlagsSpellType _spellTypeMask;
+        private ProcFlagsSpellPhase _spellPhaseMask;
+        private ProcFlagsHit _hitMask;
+        private Spell _spell;
+        private DamageInfo _damageInfo;
+        private HealInfo _healInfo;
     }
 
     public class DamageInfo
@@ -344,7 +344,8 @@ namespace Game.Entities
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
         }
-        void BlockDamage(uint amount)
+
+        private void BlockDamage(uint amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_block += amount;
@@ -361,27 +362,27 @@ namespace Game.Entities
         public Unit GetVictim() { return m_victim; }
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public SpellSchoolMask GetSchoolMask() { return m_schoolMask; }
-        DamageEffectType GetDamageType() { return m_damageType; }
+        private DamageEffectType GetDamageType() { return m_damageType; }
         public WeaponAttackType GetAttackType() { return m_attackType; }
         public uint GetDamage() { return m_damage; }
         public uint GetOriginalDamage() { return m_originalDamage; }
         public uint GetAbsorb() { return m_absorb; }
         public uint GetResist() { return m_resist; }
-        uint GetBlock() { return m_block; }
+        private uint GetBlock() { return m_block; }
         public ProcFlagsHit GetHitMask() { return m_hitMask; }
 
-        Unit m_attacker;
-        Unit m_victim;
-        uint m_damage;
-        uint m_originalDamage;
-        SpellInfo m_spellInfo;
-        SpellSchoolMask m_schoolMask;
-        DamageEffectType m_damageType;
-        WeaponAttackType m_attackType;
-        uint m_absorb;
-        uint m_resist;
-        uint m_block;
-        ProcFlagsHit m_hitMask;
+        private Unit m_attacker;
+        private Unit m_victim;
+        private uint m_damage;
+        private uint m_originalDamage;
+        private SpellInfo m_spellInfo;
+        private SpellSchoolMask m_schoolMask;
+        private DamageEffectType m_damageType;
+        private WeaponAttackType m_attackType;
+        private uint m_absorb;
+        private uint m_resist;
+        private uint m_block;
+        private ProcFlagsHit m_hitMask;
     }
 
     public class HealInfo
@@ -415,17 +416,17 @@ namespace Game.Entities
         public uint GetAbsorb() { return _absorb; }
         public SpellInfo GetSpellInfo() { return _spellInfo; }
         public SpellSchoolMask GetSchoolMask() { return _schoolMask; }
-        ProcFlagsHit GetHitMask() { return _hitMask; }
+        private ProcFlagsHit GetHitMask() { return _hitMask; }
 
-        Unit _healer;
-        Unit _target;
-        uint _heal;
-        uint _originalHeal;
-        uint _effectiveHeal;
-        uint _absorb;
-        SpellInfo _spellInfo;
-        SpellSchoolMask _schoolMask;
-        ProcFlagsHit _hitMask;
+        private Unit _healer;
+        private Unit _target;
+        private uint _heal;
+        private uint _originalHeal;
+        private uint _effectiveHeal;
+        private uint _absorb;
+        private SpellInfo _spellInfo;
+        private SpellSchoolMask _schoolMask;
+        private ProcFlagsHit _hitMask;
     }
 
     public class CalcDamageInfo
@@ -507,22 +508,22 @@ namespace Game.Entities
         }
 
         public Unit GetDispeller() { return _dispellerUnit; }
-        uint GetDispellerSpellId() { return _dispellerSpell; }
+        private uint GetDispellerSpellId() { return _dispellerSpell; }
         public byte GetRemovedCharges() { return _chargesRemoved; }
         public void SetRemovedCharges(byte amount)
         {
             _chargesRemoved = amount;
         }
 
-        Unit _dispellerUnit;
-        uint _dispellerSpell;
-        byte _chargesRemoved;
+        private Unit _dispellerUnit;
+        private uint _dispellerSpell;
+        private byte _chargesRemoved;
     }
 
     public struct RedirectThreatInfo
     {
-        ObjectGuid _targetGUID;
-        uint _threatPct;
+        private ObjectGuid _targetGUID;
+        private uint _threatPct;
 
         public ObjectGuid GetTargetGUID() { return _targetGUID; }
         public uint GetThreatPct() { return _threatPct; }
@@ -564,7 +565,7 @@ namespace Game.Entities
         public bool critical;
     }
 
-    class VisibleAuraSlotCompare : IComparer<AuraApplication>
+    internal class VisibleAuraSlotCompare : IComparer<AuraApplication>
     {
         public int Compare(AuraApplication x, AuraApplication y)
         {
@@ -577,7 +578,7 @@ namespace Game.Entities
         public StringArray name = new StringArray(SharedConst.MaxDeclinedNameCases);
     }
 
-    class CombatLogSender : Notifier
+    internal class CombatLogSender : Notifier
     {
         public CombatLogSender(WorldObject src, CombatLogServerPacket msg, float dist)
         {
@@ -586,7 +587,7 @@ namespace Game.Entities
             i_distSq = dist * dist;
         }
 
-        bool IsInRangeHelper(WorldObject obj)
+        private bool IsInRangeHelper(WorldObject obj)
         {
             if (!obj.IsInPhase(i_source))
                 return false;
@@ -651,7 +652,7 @@ namespace Game.Entities
             }
         }
 
-        void SendPacket(Player player)
+        private void SendPacket(Player player)
         {
             if (!player.HaveAtClient(i_source))
                 return;
@@ -662,8 +663,8 @@ namespace Game.Entities
             player.SendPacket(i_message);
         }
 
-        WorldObject i_source;
-        CombatLogServerPacket i_message;
-        float i_distSq;
+        private WorldObject i_source;
+        private CombatLogServerPacket i_message;
+        private float i_distSq;
     }
 }

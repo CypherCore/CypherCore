@@ -169,7 +169,7 @@ namespace Game.Entities
             }
         }
 
-        int GetDuration()
+        private int GetDuration()
         {
             if (_aura == null)
                 return _duration;
@@ -196,7 +196,7 @@ namespace Game.Entities
             _aura = aura;
         }
 
-        void RemoveAura()
+        private void RemoveAura()
         {
             Cypher.Assert(_aura != null && _removedAura == null);
             _removedAura = _aura;
@@ -215,7 +215,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveCasterViewpoint()
+        private void RemoveCasterViewpoint()
         {
             var caster = _caster.ToPlayer();
             if (caster != null)
@@ -225,7 +225,7 @@ namespace Game.Entities
             }
         }
 
-        void BindToCaster()
+        private void BindToCaster()
         {
             Cypher.Assert(_caster == null);
             _caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
@@ -234,7 +234,7 @@ namespace Game.Entities
             _caster._RegisterDynObject(this);
         }
 
-        void UnbindFromCaster()
+        private void UnbindFromCaster()
         {
             Cypher.Assert(_caster != null);
             _caster._UnregisterDynObject(this);
@@ -275,7 +275,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
         {
             var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
@@ -313,12 +313,12 @@ namespace Game.Entities
         public ObjectGuid GetCasterGUID() { return m_dynamicObjectData.Caster; }
         public float GetRadius() { return m_dynamicObjectData.Radius; }
 
-        DynamicObjectData m_dynamicObjectData;
-        Aura _aura;
-        Aura _removedAura;
-        Unit _caster;
-        int _duration; // for non-aura dynobjects
-        bool _isViewpoint;
+        private DynamicObjectData m_dynamicObjectData;
+        private Aura _aura;
+        private Aura _removedAura;
+        private Unit _caster;
+        private int _duration; // for non-aura dynobjects
+        private bool _isViewpoint;
     }
 
     public enum DynamicObjectType

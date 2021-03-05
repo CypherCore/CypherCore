@@ -154,7 +154,7 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadObjectData: {0} objects loaded.", _creatureInfo.Count + _gameObjectInfo.Count);
         }
 
-        void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
+        private void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
         {
             foreach (var data in objectData)
             {
@@ -194,7 +194,7 @@ namespace Game.Maps
             door.SetGoState(open ? GameObjectState.Active : GameObjectState.Ready);
         }
 
-        void UpdateMinionState(Creature minion, EncounterState state)
+        private void UpdateMinionState(Creature minion, EncounterState state)
         {
             switch (state)
             {
@@ -215,8 +215,9 @@ namespace Game.Maps
             }
         }
 
-        enum states { Block, Spawn, ForceBlock };
-        void UpdateSpawnGroups()
+        private enum states { Block, Spawn, ForceBlock };
+
+        private void UpdateSpawnGroups()
         {
             if (_instanceSpawnGroups.Empty())
                 return;
@@ -259,19 +260,19 @@ namespace Game.Maps
             return bosses[id];
         }
 
-        void AddObject(Creature obj, bool add)
+        private void AddObject(Creature obj, bool add)
         {
             if (_creatureInfo.ContainsKey(obj.GetEntry()))
                 AddObject(obj, _creatureInfo[obj.GetEntry()], add);
         }
 
-        void AddObject(GameObject obj, bool add)
+        private void AddObject(GameObject obj, bool add)
         {
             if (_gameObjectInfo.ContainsKey(obj.GetEntry()))
                 AddObject(obj, _gameObjectInfo[obj.GetEntry()], add);
         }
 
-        void AddObject(WorldObject obj, uint type, bool add)
+        private void AddObject(WorldObject obj, uint type, bool add)
         {
             if (add)
                 _objectGuids[type] = obj.GetGUID();
@@ -442,7 +443,7 @@ namespace Game.Maps
             OUT_LOAD_INST_DATA_COMPLETE();
         }
 
-        bool ReadSaveDataHeaders(StringArguments data)
+        private bool ReadSaveDataHeaders(StringArguments data)
         {
             foreach (var header in headers)
             {
@@ -455,7 +456,7 @@ namespace Game.Maps
             return true;
         }
 
-        void ReadSaveDataBossStates(StringArguments data)
+        private void ReadSaveDataBossStates(StringArguments data)
         {
             foreach (var pair in bosses)
             {
@@ -484,13 +485,13 @@ namespace Game.Maps
             return saveStream.ToString();
         }
 
-        void WriteSaveDataHeaders(StringBuilder data)
+        private void WriteSaveDataHeaders(StringBuilder data)
         {
             foreach (var header in headers)
                 data.AppendFormat("{0} ", header);
         }
 
-        void WriteSaveDataBossStates(StringBuilder data)
+        private void WriteSaveDataBossStates(StringBuilder data)
         {
             foreach (var bossInfo in bosses.Values)
                 data.AppendFormat("{0} ", (uint)bossInfo.state);
@@ -528,7 +529,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Scripts, "InstanceScript: DoUseDoorOrButton failed");
         }
 
-        void DoCloseDoorOrButton(ObjectGuid guid)
+        private void DoCloseDoorOrButton(ObjectGuid guid)
         {
             if (guid.IsEmpty())
                 return;
@@ -589,7 +590,7 @@ namespace Game.Maps
         }
 
         // Send Notify to all players in instance
-        void DoSendNotifyToInstance(string format, params object[] args)
+        private void DoSendNotifyToInstance(string format, params object[] args)
         {
             var players = instance.GetPlayers();
 
@@ -709,7 +710,7 @@ namespace Game.Maps
             }
         }
 
-        void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
+        private void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
         {
             var encounterStartMessage = new InstanceEncounterStart();
             encounterStartMessage.InCombatResCount = inCombatResCount;
@@ -720,7 +721,7 @@ namespace Game.Maps
             instance.SendToPlayers(encounterStartMessage);
         }
 
-        void SendEncounterEnd()
+        private void SendEncounterEnd()
         {
             instance.SendToPlayers(new InstanceEncounterEnd());
         }
@@ -743,7 +744,7 @@ namespace Game.Maps
             UpdateEncounterState(EncounterCreditType.CastSpell, spellId, source);
         }
 
-        void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
+        private void UpdateEncounterState(EncounterCreditType type, uint creditEntry, Unit source)
         {
             var encounters = Global.ObjectMgr.GetDungeonEncounterList(instance.GetId(), instance.GetDifficultyID());
             if (encounters.Empty())
@@ -782,7 +783,7 @@ namespace Game.Maps
             }
         }
 
-        void UpdatePhasing()
+        private void UpdatePhasing()
         {
             var players = instance.GetPlayers();
             foreach (var player in players)
@@ -800,7 +801,7 @@ namespace Game.Maps
                 _combatResurrectionTimer -= diff;
         }
 
-        void InitializeCombatResurrections(byte charges = 1, uint interval = 0)
+        private void InitializeCombatResurrections(byte charges = 1, uint interval = 0)
         {
             _combatResurrectionCharges = charges;
             if (interval == 0)
@@ -846,7 +847,7 @@ namespace Game.Maps
             return interval;
         }
 
-        bool InstanceHasScript(WorldObject obj, string scriptName)
+        private bool InstanceHasScript(WorldObject obj, string scriptName)
         {
             var instance = obj.GetMap().ToInstanceMap();
             if (instance != null)
@@ -905,21 +906,21 @@ namespace Game.Maps
         public virtual void WriteSaveDataMore(StringBuilder data) { }
 
         public InstanceMap instance;
-        List<char> headers = new List<char>();
-        Dictionary<uint, BossInfo> bosses = new Dictionary<uint, BossInfo>();
-        MultiMap<uint, DoorInfo> doors = new MultiMap<uint, DoorInfo>();
-        Dictionary<uint, MinionInfo> minions = new Dictionary<uint, MinionInfo>();
-        Dictionary<uint, uint> _creatureInfo = new Dictionary<uint, uint>();
-        Dictionary<uint, uint> _gameObjectInfo = new Dictionary<uint, uint>();
-        Dictionary<uint, ObjectGuid> _objectGuids = new Dictionary<uint, ObjectGuid>();
-        uint completedEncounters;
-        List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new List<InstanceSpawnGroupInfo>();
-        List<uint> _activatedAreaTriggers = new List<uint>();
-        uint _entranceId;
-        uint _temporaryEntranceId;
-        uint _combatResurrectionTimer;
-        byte _combatResurrectionCharges; // the counter for available battle resurrections
-        bool _combatResurrectionTimerStarted;
+        private List<char> headers = new List<char>();
+        private Dictionary<uint, BossInfo> bosses = new Dictionary<uint, BossInfo>();
+        private MultiMap<uint, DoorInfo> doors = new MultiMap<uint, DoorInfo>();
+        private Dictionary<uint, MinionInfo> minions = new Dictionary<uint, MinionInfo>();
+        private Dictionary<uint, uint> _creatureInfo = new Dictionary<uint, uint>();
+        private Dictionary<uint, uint> _gameObjectInfo = new Dictionary<uint, uint>();
+        private Dictionary<uint, ObjectGuid> _objectGuids = new Dictionary<uint, ObjectGuid>();
+        private uint completedEncounters;
+        private List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new List<InstanceSpawnGroupInfo>();
+        private List<uint> _activatedAreaTriggers = new List<uint>();
+        private uint _entranceId;
+        private uint _temporaryEntranceId;
+        private uint _combatResurrectionTimer;
+        private byte _combatResurrectionCharges; // the counter for available battle resurrections
+        private bool _combatResurrectionTimerStarted;
     }
 
 
@@ -987,7 +988,8 @@ namespace Game.Maps
         public List<ObjectGuid> minion = new List<ObjectGuid>();
         public List<AreaBoundary> boundary = new List<AreaBoundary>();
     }
-    class DoorInfo
+
+    internal class DoorInfo
     {
         public DoorInfo(BossInfo _bossInfo, DoorType _type)
         {
@@ -998,7 +1000,8 @@ namespace Game.Maps
         public BossInfo bossInfo;
         public DoorType type;
     }
-    class MinionInfo
+
+    internal class MinionInfo
     {
         public MinionInfo(BossInfo _bossInfo)
         {

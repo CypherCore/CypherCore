@@ -28,7 +28,7 @@ namespace Game.Movement
 {
     public class FlightPathMovementGenerator : MovementGeneratorMedium<Player>
     {
-        uint GetPathAtMapEnd()
+        private uint GetPathAtMapEnd()
         {
             if (_currentNode >= _path.Count)
                 return (uint)_path.Count;
@@ -43,7 +43,7 @@ namespace Game.Movement
             return (uint)_path.Count;
         }
 
-        bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
+        private bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
         {
             return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
         }
@@ -194,7 +194,7 @@ namespace Game.Movement
 
         }
 
-        void DoEventIfAny(Player player, TaxiPathNodeRecord node, bool departure)
+        private void DoEventIfAny(Player player, TaxiPathNodeRecord node, bool departure)
         {
             var eventid = departure ? node.DepartureEventID : node.ArrivalEventID;
             if (eventid != 0)
@@ -204,7 +204,7 @@ namespace Game.Movement
             }
         }
 
-        bool GetResetPos(Player player, out float x, out float y, out float z)
+        private bool GetResetPos(Player player, out float x, out float y, out float z)
         {
             var node = _path[_currentNode];
             x = node.Loc.X;
@@ -213,7 +213,7 @@ namespace Game.Movement
             return true;
         }
 
-        void InitEndGridInfo()
+        private void InitEndGridInfo()
         {
             var nodeCount = _path.Count;        //! Number of nodes in path.
             _endMapId = _path[nodeCount - 1].ContinentID; //! MapId of last node
@@ -222,7 +222,7 @@ namespace Game.Movement
             _endGridY = _path[nodeCount - 1].Loc.Y;
         }
 
-        void PreloadEndGrid()
+        private void PreloadEndGrid()
         {
             // used to preload the final grid where the flightmaster is
             var endMap = Global.MapMgr.FindBaseNonInstanceMap(_endMapId);
@@ -241,22 +241,22 @@ namespace Game.Movement
 
         public List<TaxiPathNodeRecord> GetPath() { return _path; }
 
-        bool HasArrived() { return (_currentNode >= _path.Count); }
+        private bool HasArrived() { return (_currentNode >= _path.Count); }
 
         public void SkipCurrentNode() { ++_currentNode; }
 
         public uint GetCurrentNode() { return (uint)_currentNode; }
 
-        float _endGridX;                //! X coord of last node location
-        float _endGridY;                //! Y coord of last node location
-        uint _endMapId;               //! map Id of last node location
-        uint _preloadTargetNode;      //! node index where preloading starts
+        private float _endGridX;                //! X coord of last node location
+        private float _endGridY;                //! Y coord of last node location
+        private uint _endMapId;               //! map Id of last node location
+        private uint _preloadTargetNode;      //! node index where preloading starts
 
-        List<TaxiPathNodeRecord> _path = new List<TaxiPathNodeRecord>();
-        int _currentNode;
-        List<TaxiNodeChangeInfo> _pointsForPathSwitch = new List<TaxiNodeChangeInfo>();    //! node indexes and costs where TaxiPath changes
+        private List<TaxiPathNodeRecord> _path = new List<TaxiPathNodeRecord>();
+        private int _currentNode;
+        private List<TaxiNodeChangeInfo> _pointsForPathSwitch = new List<TaxiNodeChangeInfo>();    //! node indexes and costs where TaxiPath changes
 
-        class TaxiNodeChangeInfo
+        private class TaxiNodeChangeInfo
         {
             public TaxiNodeChangeInfo(uint pathIndex, long cost)
             {

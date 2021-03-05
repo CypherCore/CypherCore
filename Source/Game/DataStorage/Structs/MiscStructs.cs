@@ -27,9 +27,9 @@ namespace Game.DataStorage
         }
 
         // ordered by entropy; that way memcmp will have a minimal medium runtime
-        int groupId;
-        int rootId;
-        int adtId;
+        private int groupId;
+        private int rootId;
+        private int adtId;
     }
 
     public class TaxiPathBySourceAndDestination

@@ -48,7 +48,7 @@ namespace Framework.Cryptography
             }
         }
 
-        void FillUp()
+        private void FillUp()
         {
             sh.Initialize();
             sh.TransformBlock(o1, 0, 32, o1, 0);
@@ -59,10 +59,10 @@ namespace Framework.Cryptography
             taken = 0;
         }
 
-        SHA256 sh;
-        uint taken;
-        byte[] o0 = new byte[32];
-        byte[] o1 = new byte[32];
-        byte[] o2 = new byte[32];
+        private SHA256 sh;
+        private uint taken;
+        private byte[] o0 = new byte[32];
+        private byte[] o1 = new byte[32];
+        private byte[] o2 = new byte[32];
     }
 }

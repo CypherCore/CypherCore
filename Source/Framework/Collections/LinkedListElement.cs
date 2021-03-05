@@ -29,8 +29,8 @@ namespace Framework.Collections
 
         ~LinkedListElement() { Delink(); }
 
-        bool HasNext() { return (INext != null && INext.INext != null); }
-        bool HasPrev() { return (IPrev != null && IPrev.IPrev != null); }
+        private bool HasNext() { return (INext != null && INext.INext != null); }
+        private bool HasPrev() { return (IPrev != null && IPrev.IPrev != null); }
         public bool IsInList() { return (INext != null && IPrev != null); }
 
         public LinkedListElement GetNextElement() { return HasNext() ? INext : null; }
@@ -66,9 +66,9 @@ namespace Framework.Collections
 
     public class LinkedListHead
     {
-        LinkedListElement _iFirst = new LinkedListElement();
-        LinkedListElement _iLast = new LinkedListElement();
-        uint _iSize;
+        private LinkedListElement _iFirst = new LinkedListElement();
+        private LinkedListElement _iLast = new LinkedListElement();
+        private uint _iSize;
 
         public LinkedListHead()
         {

@@ -25,8 +25,8 @@ namespace Game.Entities
 {
     public class UpdateFieldHolder
     {
-        UpdateMask _changesMask = new UpdateMask((int)TypeId.Max);
-        WorldObject _owner;
+        private UpdateMask _changesMask = new UpdateMask((int)TypeId.Max);
+        private WorldObject _owner;
 
         public UpdateFieldHolder(WorldObject owner) { _owner = owner; }
 
@@ -449,8 +449,8 @@ namespace Game.Entities
 
     public class DynamicUpdateFieldSetter<T> : IUpdateField<T> where T : new()
     {
-        DynamicUpdateField<T> _dynamicUpdateField;
-        int _index;
+        private DynamicUpdateField<T> _dynamicUpdateField;
+        private int _index;
 
         public DynamicUpdateFieldSetter(DynamicUpdateField<T> dynamicUpdateField, int index)
         {

@@ -116,13 +116,13 @@ namespace Framework.Dynamic
             }
         }
 
-        uint[] _values { get; set; }
+        private uint[] _values { get; set; }
     }
 
     public class FlaggedArray<T> where T : struct
     {
-        int[] m_values;
-        uint m_flags;
+        private int[] m_values;
+        private uint m_flags;
 
         public FlaggedArray(byte arraysize)
         {

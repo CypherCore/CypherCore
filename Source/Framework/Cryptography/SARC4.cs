@@ -61,8 +61,8 @@ namespace Framework.Cryptography
             }
         }
 
-        byte[] _s;
-        byte _tmp;
-        byte _tmp2;
+        private byte[] _s;
+        private byte _tmp;
+        private byte _tmp2;
     }
 }

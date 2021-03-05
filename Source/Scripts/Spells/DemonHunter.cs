@@ -22,20 +22,20 @@ using Game.Spells;
 
 namespace Scripts.Spells.DemonHunter
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint ChaosStrikeEnergize = 193840;
     }
 
     [Script] // 197125 - Chaos Strike
-    class spell_dh_chaos_strike : AuraScript
+    internal class spell_dh_chaos_strike : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ChaosStrikeEnergize);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastCustomSpell(SpellIds.ChaosStrikeEnergize, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);

@@ -28,7 +28,7 @@ namespace Game.AI
 {
     public class SmartAIManager : Singleton<SmartAIManager>
     {
-        SmartAIManager()
+        private SmartAIManager()
         {
             for (byte i = 0; i < (int)SmartScriptType.Max; i++)
                 mEventMap[i] = new MultiMap<int, SmartScriptHolder>();
@@ -370,7 +370,7 @@ namespace Game.AI
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        bool IsTargetValid(SmartScriptHolder e)
+        private bool IsTargetValid(SmartScriptHolder e)
         {
             if (Math.Abs(e.Target.o) > 2 * MathFunctions.PI)
                 Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} has abs(`target.o` = {4}) > 2*PI (orientation is expressed in radians)",
@@ -454,7 +454,7 @@ namespace Game.AI
             return true;
         }
 
-        bool IsSpellVisualKitValid(SmartScriptHolder e, uint entry)
+        private bool IsSpellVisualKitValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.SpellVisualKitStorage.ContainsKey(entry))
             {
@@ -464,7 +464,7 @@ namespace Game.AI
             return true;
         }
 
-        bool IsEventValid(SmartScriptHolder e)
+        private bool IsEventValid(SmartScriptHolder e)
         {
             if (e.Event.type >= SmartEvents.End)
             {
@@ -1426,7 +1426,8 @@ namespace Game.AI
 
             return true;
         }
-        bool IsAnimKitValid(SmartScriptHolder e, uint entry)
+
+        private bool IsAnimKitValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.AnimKitStorage.ContainsKey(entry))
             {
@@ -1436,7 +1437,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsTextValid(SmartScriptHolder e, uint id)
+
+        private bool IsTextValid(SmartScriptHolder e, uint id)
         {
             if (e.GetScriptType() != SmartScriptType.Creature)
                 return true;
@@ -1481,7 +1483,8 @@ namespace Game.AI
 
             return true;
         }
-        bool IsCreatureValid(SmartScriptHolder e, uint entry)
+
+        private bool IsCreatureValid(SmartScriptHolder e, uint entry)
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
@@ -1490,7 +1493,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsGameObjectValid(SmartScriptHolder e, uint entry)
+
+        private bool IsGameObjectValid(SmartScriptHolder e, uint entry)
         {
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
@@ -1499,7 +1503,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsQuestValid(SmartScriptHolder e, uint entry)
+
+        private bool IsQuestValid(SmartScriptHolder e, uint entry)
         {
             if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
             {
@@ -1508,7 +1513,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsSpellValid(SmartScriptHolder e, uint entry)
+
+        private bool IsSpellValid(SmartScriptHolder e, uint entry)
         {
             if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
             {
@@ -1517,7 +1523,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsMinMaxValid(SmartScriptHolder e, uint min, uint max)
+
+        private bool IsMinMaxValid(SmartScriptHolder e, uint min, uint max)
         {
             if (max < min)
             {
@@ -1526,7 +1533,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool NotNULL(SmartScriptHolder e, uint data)
+
+        private bool NotNULL(SmartScriptHolder e, uint data)
         {
             if (data == 0)
             {
@@ -1535,7 +1543,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsEmoteValid(SmartScriptHolder e, uint entry)
+
+        private bool IsEmoteValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.EmotesStorage.ContainsKey(entry))
             {
@@ -1544,7 +1553,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsItemValid(SmartScriptHolder e, uint entry)
+
+        private bool IsItemValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.ItemSparseStorage.ContainsKey(entry))
             {
@@ -1553,7 +1563,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsTextEmoteValid(SmartScriptHolder e, uint entry)
+
+        private bool IsTextEmoteValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.EmotesTextStorage.ContainsKey(entry))
             {
@@ -1562,7 +1573,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsAreaTriggerValid(SmartScriptHolder e, uint entry)
+
+        private bool IsAreaTriggerValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.AreaTriggerStorage.ContainsKey(entry))
             {
@@ -1571,7 +1583,8 @@ namespace Game.AI
             }
             return true;
         }
-        bool IsSoundValid(SmartScriptHolder e, uint entry)
+
+        private bool IsSoundValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.SoundKitStorage.ContainsKey(entry))
             {
@@ -1621,10 +1634,10 @@ namespace Game.AI
             return null;
         }
 
-        MultiMap<int, SmartScriptHolder>[] mEventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
-        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
+        private MultiMap<int, SmartScriptHolder>[] mEventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
+        private Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
 
-        Dictionary<SmartScriptType, uint> SmartAITypeMask = new Dictionary<SmartScriptType, uint>
+        private Dictionary<SmartScriptType, uint> SmartAITypeMask = new Dictionary<SmartScriptType, uint>
         {
             { SmartScriptType.Creature,                     SmartScriptTypeMaskId.Creature },
             { SmartScriptType.GameObject,                   SmartScriptTypeMaskId.Gameobject },
@@ -1641,7 +1654,7 @@ namespace Game.AI
             { SmartScriptType.AreaTriggerEntityServerside,  SmartScriptTypeMaskId.AreatrigggerEntity }
         };
 
-        Dictionary<SmartEvents, uint> SmartAIEventMask = new Dictionary<SmartEvents, uint>
+        private Dictionary<SmartEvents, uint> SmartAIEventMask = new Dictionary<SmartEvents, uint>
         {
             { SmartEvents.UpdateIc,                 SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist },
             { SmartEvents.UpdateOoc,                SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance + SmartScriptTypeMaskId.AreatrigggerEntity },

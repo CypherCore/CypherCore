@@ -23,7 +23,7 @@ using System;
 namespace Scripts.World
 {
     [Script]
-    class trigger_periodic : NullCreatureAI
+    internal class trigger_periodic : NullCreatureAI
     {
         public trigger_periodic(Creature creature) : base(creature)
         {

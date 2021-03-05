@@ -23,7 +23,7 @@ namespace Game
 {
     public sealed class WaypointManager : Singleton<WaypointManager>
     {
-        WaypointManager() { }
+        private WaypointManager() { }
 
         public void Load()
         {
@@ -135,7 +135,7 @@ namespace Game
             return _waypointStore.LookupByKey(id);
         }
 
-        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
+        private Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
     }
 
     public class WaypointNode

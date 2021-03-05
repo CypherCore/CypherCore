@@ -549,7 +549,8 @@ namespace Framework.GameMath
             inverse(ref kInverse, fTolerance);
             return kInverse;
         }
-        bool inverse(ref Matrix3 rkInverse, float fTolerance)
+
+        private bool inverse(ref Matrix3 rkInverse, float fTolerance)
         {
             // Invert a 3x3 using cofactors.  This is about 8 times faster than
             // the Numerical Recipes code which uses Gaussian elimination.

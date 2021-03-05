@@ -27,7 +27,7 @@ using Game.Maps;
 
 namespace Scripts.Spells.Priest
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint AngelicFeatherAreatrigger = 158624;
         public const uint AngelicFeatherAura = 121557;
@@ -68,14 +68,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 26169 - Oracle Healing Bonus
-    class spell_pri_aq_3p_bonus : AuraScript
+    internal class spell_pri_aq_3p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.OracularHeal);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var caster = eventInfo.GetActor();
@@ -99,19 +99,19 @@ namespace Scripts.Spells.Priest
     [Script] // 81749 - Atonement
     public class spell_pri_atonement : AuraScript
     {
-        List<ObjectGuid> _appliedAtonements = new List<ObjectGuid>();
+        private List<ObjectGuid> _appliedAtonements = new List<ObjectGuid>();
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AtonementHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetDamageInfo() != null;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             var damageInfo = eventInfo.GetDamageInfo();
             var heal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
@@ -147,14 +147,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 194384 - Atonement
-    class spell_pri_atonement_triggered : AuraScript
+    internal class spell_pri_atonement_triggered : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Atonement);
         }
 
-        void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var caster = GetCaster();
             if (caster)
@@ -169,7 +169,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var caster = GetCaster();
             if (caster)
@@ -193,9 +193,9 @@ namespace Scripts.Spells.Priest
 
     // 64844 - Divine Hymn
     [Script]
-    class spell_pri_divine_hymn : SpellScript
+    internal class spell_pri_divine_hymn : SpellScript
     {
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
             {
@@ -223,9 +223,9 @@ namespace Scripts.Spells.Priest
 
     // 47788 - Guardian Spirit
     [Script]
-    class spell_pri_guardian_spirit : AuraScript
+    internal class spell_pri_guardian_spirit : AuraScript
     {
-        uint healPct;
+        private uint healPct;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -238,13 +238,13 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             // Set absorbtion amount to unlimited
             amount = -1;
         }
 
-        void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        private void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             var target = GetTarget();
             if (dmgInfo.GetDamage() < target.GetHealth())
@@ -265,14 +265,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 40438 - Priest Tier 6 Trinket
-    class spell_pri_item_t6_trinket : AuraScript
+    internal class spell_pri_item_t6_trinket : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DivineBlessing, SpellIds.DivineWrath);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var caster = eventInfo.GetActor();
@@ -291,14 +291,14 @@ namespace Scripts.Spells.Priest
 
     // 92833 - Leap of Faith
     [Script]
-    class spell_pri_leap_of_faith_effect_trigger : SpellScript
+    internal class spell_pri_leap_of_faith_effect_trigger : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LeapOfFaithEffect);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        private void HandleEffectDummy(uint effIndex)
         {
             var destPos = GetHitDest().GetPosition();
 
@@ -315,14 +315,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 1706 - Levitate
-    class spell_pri_levitate : SpellScript
+    internal class spell_pri_levitate : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LevitateEffect);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.LevitateEffect, true);
         }
@@ -335,7 +335,7 @@ namespace Scripts.Spells.Priest
 
     // 47540 - Penance
     [Script]
-    class spell_pri_penance : SpellScript
+    internal class spell_pri_penance : SpellScript
     {
         public override bool Load()
         {
@@ -361,7 +361,7 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             var target = GetHitUnit();
@@ -379,7 +379,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        SpellCastResult CheckCast()
+        private SpellCastResult CheckCast()
         {
             var caster = GetCaster().ToPlayer();
             var target = GetExplTargetUnit();
@@ -414,9 +414,9 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 17 - Power Word: Shield
-    class spell_pri_power_word_shield : AuraScript
+    internal class spell_pri_power_word_shield : AuraScript
     {
-        void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
 
@@ -432,7 +432,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var caster = GetCaster();
             var target = GetTarget();
@@ -451,7 +451,7 @@ namespace Scripts.Spells.Priest
                 caster.CastSpell(target, SpellIds.AtonementTriggered, true);
         }
 
-        void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAura(SpellIds.StrengthOfSoulEffect);
             var caster = GetCaster();
@@ -469,10 +469,10 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 33076 - Prayer of Mending
-    class spell_pri_prayer_of_mending : SpellScript
+    internal class spell_pri_prayer_of_mending : SpellScript
     {
-        SpellInfo _spellInfoHeal;
-        SpellEffectInfo _healEffectDummy;
+        private SpellInfo _spellInfoHeal;
+        private SpellEffectInfo _healEffectDummy;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -487,7 +487,7 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void HandleEffectDummy(uint effIndex)
+        private void HandleEffectDummy(uint effIndex)
         {
             var basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
             var values = new Dictionary<SpellValueMod, int>();
@@ -503,14 +503,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 41635 - Prayer of Mending (Aura) - SPELL_PRIEST_PRAYER_OF_MENDING_AURA
-    class spell_pri_prayer_of_mending_AuraScript : AuraScript
+    internal class spell_pri_prayer_of_mending_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingJump);
         }
 
-        void HandleHeal(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleHeal(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             // Caster: player (priest) that cast the Prayer of Mending
             // Target: player that currently has Prayer of Mending aura on him
@@ -537,10 +537,10 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 155793 - prayer of mending (Jump) - SPELL_PRIEST_PRAYER_OF_MENDING_JUMP
-    class spell_pri_prayer_of_mending_jump : SpellScript
+    internal class spell_pri_prayer_of_mending_jump : SpellScript
     {
-        SpellInfo _spellInfoHeal;
-        SpellEffectInfo _healEffectDummy;
+        private SpellInfo _spellInfoHeal;
+        private SpellEffectInfo _healEffectDummy;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -555,7 +555,7 @@ namespace Scripts.Spells.Priest
             return true;
         }
 
-        void OnTargetSelect(List<WorldObject> targets)
+        private void OnTargetSelect(List<WorldObject> targets)
         {
             // Find the best target - prefer players over pets
             var foundPlayer = false;
@@ -580,7 +580,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        void HandleJump(uint effIndex)
+        private void HandleJump(uint effIndex)
         {
             var origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
             var target = GetHitUnit(); // the target we decided the aura should jump to
@@ -603,14 +603,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 20711 - Spirit of Redemption
-    class spell_priest_spirit_of_redemption : AuraScript
+    internal class spell_priest_spirit_of_redemption : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SpiritOfRedemption);
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             var target = GetTarget();
             if (dmgInfo.GetDamage() >= target.GetHealth())
@@ -630,14 +630,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 28809 - Greater Heal
-    class spell_pri_t3_4p_bonus : AuraScript
+    internal class spell_pri_t3_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ArmorOfFaith);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.ArmorOfFaith, true, null, aurEff);
@@ -650,14 +650,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 37594 - Greater Heal Refund
-    class spell_pri_t5_heal_2p_bonus : AuraScript
+    internal class spell_pri_t5_heal_2p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ItemEfficiency);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             var healInfo = eventInfo.GetHealInfo();
             if (healInfo != null)
@@ -672,7 +672,7 @@ namespace Scripts.Spells.Priest
             return false;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastSpell(GetTarget(), SpellIds.ItemEfficiency, true, null, aurEff);
@@ -686,14 +686,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 70770 - Item - Priest T10 Healer 2P Bonus
-    class spell_pri_t10_heal_2p_bonus : AuraScript
+    internal class spell_pri_t10_heal_2p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessedHealing);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -721,20 +721,20 @@ namespace Scripts.Spells.Priest
 
     // 15286 - Vampiric Embrace
     [Script]
-    class spell_pri_vampiric_embrace : AuraScript
+    internal class spell_pri_vampiric_embrace : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricEmbraceHeal);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             // Not proc from Mind Sear
             return !eventInfo.GetDamageInfo().GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x80000u);
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var damageInfo = eventInfo.GetDamageInfo();
@@ -756,9 +756,9 @@ namespace Scripts.Spells.Priest
 
     // 15290 - Vampiric Embrace (heal)
     [Script]
-    class spell_pri_vampiric_embrace_target : SpellScript
+    internal class spell_pri_vampiric_embrace_target : SpellScript
     {
-        void FilterTargets(List<WorldObject> unitList)
+        private void FilterTargets(List<WorldObject> unitList)
         {
             unitList.Remove(GetCaster());
         }
@@ -771,14 +771,14 @@ namespace Scripts.Spells.Priest
 
     // 34914 - Vampiric Touch
     [Script]
-    class spell_pri_vampiric_touch : AuraScript
+    internal class spell_pri_vampiric_touch : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.VampiricTouchDispel, SpellIds.GenReplenishment);
         }
 
-        void HandleDispel(DispelInfo dispelInfo)
+        private void HandleDispel(DispelInfo dispelInfo)
         {
             var caster = GetCaster();
             if (caster)
@@ -797,12 +797,12 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcTarget() == GetCaster();
         }
 
-        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetProcTarget().CastSpell((Unit)null, SpellIds.GenReplenishment, true, null, aurEff);
@@ -817,14 +817,14 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 121536 - Angelic Feather talent
-    class spell_pri_angelic_feather_trigger : SpellScript
+    internal class spell_pri_angelic_feather_trigger : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.AngelicFeatherAreatrigger);
         }
 
-        void HandleEffectDummy(uint effIndex)
+        private void HandleEffectDummy(uint effIndex)
         {
             var destPos = GetHitDest().GetPosition();
             var radius = GetEffectInfo().CalcRadius();
@@ -849,11 +849,11 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
-    class areatrigger_pri_angelic_feather : AreaTriggerEntityScript
+    internal class areatrigger_pri_angelic_feather : AreaTriggerEntityScript
     {
         public areatrigger_pri_angelic_feather() : base("areatrigger_pri_angelic_feather") { }
 
-        class areatrigger_pri_angelic_featherAI : AreaTriggerAI
+        private class areatrigger_pri_angelic_featherAI : AreaTriggerAI
         {
             public areatrigger_pri_angelic_featherAI(AreaTrigger areatrigger) : base(areatrigger) { }
 

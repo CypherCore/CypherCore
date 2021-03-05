@@ -636,7 +636,7 @@ namespace Game.Spells
             return true;
         }
 
-        bool IsAffectedBySpellMods()
+        private bool IsAffectedBySpellMods()
         {
             return !HasAttribute(SpellAttr3.NoDoneBonus);
         }
@@ -1621,7 +1621,7 @@ namespace Game.Spells
             return _diminishInfo.DiminishDurationLimit;
         }
 
-        DiminishingGroup DiminishingGroupCompute()
+        private DiminishingGroup DiminishingGroupCompute()
         {
             if (IsPositive())
                 return DiminishingGroup.None;
@@ -1976,7 +1976,7 @@ namespace Game.Spells
             return DiminishingGroup.None;
         }
 
-        DiminishingReturnsType DiminishingTypeCompute(DiminishingGroup group)
+        private DiminishingReturnsType DiminishingTypeCompute(DiminishingGroup group)
         {
             switch (group)
             {
@@ -1991,7 +1991,7 @@ namespace Game.Spells
             }
         }
 
-        DiminishingLevels DiminishingMaxLevelCompute(DiminishingGroup group)
+        private DiminishingLevels DiminishingMaxLevelCompute(DiminishingGroup group)
         {
             switch (group)
             {
@@ -2004,7 +2004,7 @@ namespace Game.Spells
             }
         }
 
-        int DiminishingLimitDurationCompute()
+        private int DiminishingLimitDurationCompute()
         {
             // Explicit diminishing duration
             switch (SpellFamilyName)
@@ -2422,7 +2422,7 @@ namespace Game.Spells
                 target.ApplySpellImmune(Id, SpellImmunity.Effect, effectType, apply);
         }
 
-        bool CanSpellProvideImmunityAgainstAura(SpellInfo auraSpellInfo)
+        private bool CanSpellProvideImmunityAgainstAura(SpellInfo auraSpellInfo)
         {
             if (auraSpellInfo == null)
                 return false;
@@ -2911,7 +2911,7 @@ namespace Game.Spells
             return costs;
         }
 
-        float CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
+        private float CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
             float haste = caster.m_unitData.ModHaste;
             float rangedHaste = caster.m_unitData.ModRangedHaste;
@@ -2937,7 +2937,7 @@ namespace Game.Spells
             return 0.0f;
         }
 
-        float CalcPPMCritMod(SpellProcsPerMinuteModRecord mod, Unit caster)
+        private float CalcPPMCritMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
             Player player = caster.ToPlayer();
             if (player == null)
@@ -2964,7 +2964,7 @@ namespace Game.Spells
             return 0.0f;
         }
 
-        float CalcPPMItemLevelMod(SpellProcsPerMinuteModRecord mod, int itemLevel)
+        private float CalcPPMItemLevelMod(SpellProcsPerMinuteModRecord mod, int itemLevel)
         {
             if (itemLevel == mod.Param)
                 return 0.0f;
@@ -3054,7 +3054,8 @@ namespace Game.Spells
                 return this;
             return ChainEntry.first;
         }
-        SpellInfo GetLastRankSpell()
+
+        private SpellInfo GetLastRankSpell()
         {
             if (ChainEntry == null)
                 return null;
@@ -3066,7 +3067,8 @@ namespace Game.Spells
                 return null;
             return ChainEntry.next;
         }
-        SpellInfo GetPrevRankSpell()
+
+        private SpellInfo GetPrevRankSpell()
         {
             if (ChainEntry == null)
                 return null;
@@ -3447,7 +3449,7 @@ namespace Game.Spells
             return true;
         }
 
-        bool _IsPositiveTarget(Targets targetA, Targets targetB)
+        private bool _IsPositiveTarget(Targets targetA, Targets targetB)
         {
             // non-positive targets
             switch (targetA)
@@ -3621,7 +3623,7 @@ namespace Game.Spells
         public uint ProcCharges { get; set; }
         public uint ProcCooldown { get; set; }
         public float ProcBasePPM { get; set; }
-        List<SpellProcsPerMinuteModRecord> ProcPPMMods = new List<SpellProcsPerMinuteModRecord>();
+        private List<SpellProcsPerMinuteModRecord> ProcPPMMods = new List<SpellProcsPerMinuteModRecord>();
         public uint MaxLevel { get; set; }
         public uint BaseLevel { get; set; }
         public uint SpellLevel { get; set; }
@@ -3660,13 +3662,13 @@ namespace Game.Spells
         public uint ExplicitTargetMask { get; set; }
         public SpellChainNode ChainEntry { get; set; }
 
-        SpellEffectInfo[] _effects = new SpellEffectInfo[SpellConst.MaxEffects];
-        List<SpellXSpellVisualRecord> _visuals = new List<SpellXSpellVisualRecord>();
-        SpellSpecificType _spellSpecific;
-        AuraStateType _auraState;
+        private SpellEffectInfo[] _effects = new SpellEffectInfo[SpellConst.MaxEffects];
+        private List<SpellXSpellVisualRecord> _visuals = new List<SpellXSpellVisualRecord>();
+        private SpellSpecificType _spellSpecific;
+        private AuraStateType _auraState;
 
-        SpellDiminishInfo _diminishInfo;
-        uint _allowedMechanicMask;
+        private SpellDiminishInfo _diminishInfo;
+        private uint _allowedMechanicMask;
         #endregion
 
         public struct ScalingInfo
@@ -3762,7 +3764,7 @@ namespace Game.Spells
                 || (Effect == SpellEffectName.Resurrect);
         }
 
-        bool IsFarDestTargetEffect()
+        private bool IsFarDestTargetEffect()
         {
             return Effect == SpellEffectName.TeleportUnits;
         }
@@ -4034,7 +4036,7 @@ namespace Game.Spells
             return _data[(int)Effect].UsedTargetObjectType;
         }
 
-        ExpectedStatType GetScalingExpectedStat()
+        private ExpectedStatType GetScalingExpectedStat()
         {
             switch (Effect)
             {
@@ -4137,7 +4139,7 @@ namespace Game.Spells
             public SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object type for spell effect
         }
 
-        static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
+        private static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
         {
             // implicit target type           used target object type
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 0
@@ -4427,7 +4429,8 @@ namespace Game.Spells
         };
 
         #region Fields
-        SpellInfo _spellInfo;
+
+        private SpellInfo _spellInfo;
         public uint EffectIndex;
 
         public SpellEffectName Effect;
@@ -4456,7 +4459,7 @@ namespace Game.Spells
         public SpellEffectAttributes EffectAttributes;
         public ScalingInfo Scaling;
 
-        ImmunityInfo _immunityInfo;
+        private ImmunityInfo _immunityInfo;
         #endregion
 
         public struct ScalingInfo
@@ -4499,7 +4502,7 @@ namespace Game.Spells
             return _data[(int)_target].SelectionCheckType;
         }
 
-        SpellTargetDirectionTypes GetDirectionType()
+        private SpellTargetDirectionTypes GetDirectionType()
         {
             return _data[(int)_target].DirectionType;
         }
@@ -4620,7 +4623,7 @@ namespace Game.Spells
             return targetMask;
         }
 
-        Targets _target;
+        private Targets _target;
 
         public struct StaticData
         {
@@ -4640,7 +4643,7 @@ namespace Game.Spells
             public SpellTargetDirectionTypes DirectionType; // direction for cone and dest targets
         }
 
-        static StaticData[] _data = new StaticData[(int)Targets.TotalSpellTargets]
+        private static StaticData[] _data = new StaticData[(int)Targets.TotalSpellTargets]
         {
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 0
             new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 1 TARGET_UNIT_CASTER
@@ -4803,7 +4806,7 @@ namespace Game.Spells
         public int Amount;
     }
 
-    class SpellDiminishInfo
+    internal class SpellDiminishInfo
     {
         public DiminishingGroup DiminishGroup = DiminishingGroup.None;
         public DiminishingReturnsType DiminishReturnType = DiminishingReturnsType.None;

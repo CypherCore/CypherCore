@@ -31,7 +31,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UnlockVoidStorage)]
-        void HandleVoidStorageUnlock(UnlockVoidStorage unlockVoidStorage)
+        private void HandleVoidStorageUnlock(UnlockVoidStorage unlockVoidStorage)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
             if (!unit)
@@ -51,7 +51,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryVoidStorage)]
-        void HandleVoidStorageQuery(QueryVoidStorage queryVoidStorage)
+        private void HandleVoidStorageQuery(QueryVoidStorage queryVoidStorage)
         {
             var player = GetPlayer();
 
@@ -90,7 +90,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.VoidStorageTransfer)]
-        void HandleVoidStorageTransfer(VoidStorageTransfer voidStorageTransfer)
+        private void HandleVoidStorageTransfer(VoidStorageTransfer voidStorageTransfer)
         {
             var player = GetPlayer();
 
@@ -209,7 +209,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SwapVoidItem)]
-        void HandleVoidSwapItem(SwapVoidItem swapVoidItem)
+        private void HandleVoidSwapItem(SwapVoidItem swapVoidItem)
         { 
             var player = GetPlayer();
 

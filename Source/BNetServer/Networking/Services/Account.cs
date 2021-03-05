@@ -10,7 +10,7 @@ namespace BNetServer.Networking
     public partial class Session
     {
         [Service(OriginalHash.AccountService, 30)]
-        BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
+        private BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
@@ -31,7 +31,7 @@ namespace BNetServer.Networking
         }
 
         [Service(OriginalHash.AccountService, 31)]
-        BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
+        private BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;

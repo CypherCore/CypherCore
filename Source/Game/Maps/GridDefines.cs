@@ -94,7 +94,7 @@ namespace Game.Maps
 
     public class CellCoord : ICoord
     {
-        const int Limit = MapConst.TotalCellsPerMap;
+        private const int Limit = MapConst.TotalCellsPerMap;
 
         public CellCoord(uint x, uint y)
         {
@@ -181,7 +181,7 @@ namespace Game.Maps
 
     public class GridCoord : ICoord
     {
-        const int Limit = MapConst.MaxGrids;
+        private const int Limit = MapConst.MaxGrids;
 
         public GridCoord(uint x, uint y)
         {

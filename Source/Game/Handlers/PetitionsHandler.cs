@@ -28,7 +28,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.PetitionBuy)]
-        void HandlePetitionBuy(PetitionBuy packet)
+        private void HandlePetitionBuy(PetitionBuy packet)
         {
             // prevent cheating
             var creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
@@ -107,7 +107,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionShowSignatures)]
-        void HandlePetitionShowSignatures(PetitionShowSignatures packet)
+        private void HandlePetitionShowSignatures(PetitionShowSignatures packet)
         {
             var petition = Global.PetitionMgr.GetPetition(packet.Item);
             if (petition == null)
@@ -123,7 +123,7 @@ namespace Game
             SendPetitionSigns(petition, _player);
         }
 
-        void SendPetitionSigns(Petition petition, Player sendTo)
+        private void SendPetitionSigns(Petition petition, Player sendTo)
         {
             var signaturesPacket = new ServerPetitionShowSignatures();
             signaturesPacket.Item = petition.PetitionGuid;
@@ -143,7 +143,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPetition)]
-        void HandleQueryPetition(QueryPetition packet)
+        private void HandleQueryPetition(QueryPetition packet)
         {
             SendPetitionQuery(packet.ItemGUID);
         }
@@ -178,7 +178,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionRenameGuild)]
-        void HandlePetitionRenameGuild(PetitionRenameGuild packet)
+        private void HandlePetitionRenameGuild(PetitionRenameGuild packet)
         {
             Item item = GetPlayer().GetItemByGuid(packet.PetitionGuid);
             if (!item)
@@ -212,7 +212,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SignPetition)]
-        void HandleSignPetition(SignPetition packet)
+        private void HandleSignPetition(SignPetition packet)
         {
             var petition = Global.PetitionMgr.GetPetition(packet.PetitionGUID);
             if (petition == null)
@@ -293,7 +293,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DeclinePetition)]
-        void HandleDeclinePetition(DeclinePetition packet)
+        private void HandleDeclinePetition(DeclinePetition packet)
         {
             // Disabled because packet isn't handled by the client in any way
             /*
@@ -313,7 +313,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.OfferPetition)]
-        void HandleOfferPetition(OfferPetition packet)
+        private void HandleOfferPetition(OfferPetition packet)
         {
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetPlayer);
             if (!player)
@@ -345,7 +345,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TurnInPetition)]
-        void HandleTurnInPetition(TurnInPetition packet)
+        private void HandleTurnInPetition(TurnInPetition packet)
         {
             // Check if player really has the required petition charter
             Item item = GetPlayer().GetItemByGuid(packet.Item);
@@ -425,7 +425,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetitionShowList)]
-        void HandlePetitionShowList(PetitionShowList packet)
+        private void HandlePetitionShowList(PetitionShowList packet)
         {
             SendPetitionShowList(packet.PetitionUnit);
         }

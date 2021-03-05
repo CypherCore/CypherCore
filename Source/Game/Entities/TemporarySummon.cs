@@ -286,7 +286,7 @@ namespace Game.Entities
 
         public ObjectGuid GetSummonerGUID() { return m_summonerGUID; }
 
-        TempSummonType GetSummonType() { return m_type; }
+        private TempSummonType GetSummonType() { return m_type; }
 
         public uint GetTimer() { return m_timer; }
 
@@ -294,11 +294,11 @@ namespace Game.Entities
         public bool IsVisibleBySummonerOnly() { return m_visibleBySummonerOnly; }
 
         public SummonPropertiesRecord m_Properties;
-        TempSummonType m_type;
-        uint m_timer;
-        uint m_lifetime;
-        ObjectGuid m_summonerGUID;
-        bool m_visibleBySummonerOnly;
+        private TempSummonType m_type;
+        private uint m_timer;
+        private uint m_lifetime;
+        private ObjectGuid m_summonerGUID;
+        private bool m_visibleBySummonerOnly;
     }
 
     public class Minion : TempSummon
@@ -362,7 +362,7 @@ namespace Game.Entities
         public bool IsSpiritWolf() { return GetEntry() == (uint)PetEntry.SpiritWolf; } // Spirit wolf from feral spirits
 
         protected Unit m_owner;
-        float m_followAngle;
+        private float m_followAngle;
     }
 
     public class Guardian : Minion
@@ -656,16 +656,16 @@ namespace Game.Entities
             return true;
         }
 
-        const int ENTRY_IMP = 416;
-        const int ENTRY_VOIDWALKER = 1860;
-        const int ENTRY_SUCCUBUS = 1863;
-        const int ENTRY_FELHUNTER = 417;
-        const int ENTRY_FELGUARD = 17252;
-        const int ENTRY_WATER_ELEMENTAL = 510;
-        const int ENTRY_TREANT = 1964;
-        const int ENTRY_FIRE_ELEMENTAL = 15438;
-        const int ENTRY_GHOUL = 26125;
-        const int ENTRY_BLOODWORM = 28017;
+        private const int ENTRY_IMP = 416;
+        private const int ENTRY_VOIDWALKER = 1860;
+        private const int ENTRY_SUCCUBUS = 1863;
+        private const int ENTRY_FELHUNTER = 417;
+        private const int ENTRY_FELGUARD = 17252;
+        private const int ENTRY_WATER_ELEMENTAL = 510;
+        private const int ENTRY_TREANT = 1964;
+        private const int ENTRY_FIRE_ELEMENTAL = 15438;
+        private const int ENTRY_GHOUL = 26125;
+        private const int ENTRY_BLOODWORM = 28017;
 
         public override bool UpdateStats(Stats stat)
         {
@@ -954,7 +954,7 @@ namespace Game.Entities
             SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
         }
 
-        void SetBonusDamage(int damage)
+        private void SetBonusDamage(int damage)
         {
             m_bonusSpellDamage = damage;
             var playerOwner = GetOwner().ToPlayer();
@@ -965,8 +965,8 @@ namespace Game.Entities
         public int GetBonusDamage() { return m_bonusSpellDamage; }
         public float GetBonusStatFromOwner(Stats stat) { return m_statFromOwner[(int)stat]; }
 
-        int m_bonusSpellDamage;
-        float[] m_statFromOwner = new float[(int)Stats.Max];
+        private int m_bonusSpellDamage;
+        private float[] m_statFromOwner = new float[(int)Stats.Max];
     }
 
     public class Puppet : Minion
@@ -1028,7 +1028,7 @@ namespace Game.Entities
             return true;
         }
 
-        TempSummon m_owner;
+        private TempSummon m_owner;
     }
 
     public class TempSummonData
@@ -1039,7 +1039,7 @@ namespace Game.Entities
         public uint time;         // Despawn time, usable only with certain temp summon types
     }
 
-    enum PetEntry
+    internal enum PetEntry
     {
         // Warlock pets
         Imp = 416,

@@ -25,7 +25,7 @@ namespace Game.Networking.Packets
         TransmogSet = 4
     }
 
-    class CollectionItemSetFavorite : ClientPacket
+    internal class CollectionItemSetFavorite : ClientPacket
     {
         public CollectionItemSetFavorite(WorldPacket packet) : base(packet) { }
 

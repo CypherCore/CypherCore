@@ -224,7 +224,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 0u);
         }
 
-        void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
+        private void _InitHonorLevelOnLoadFromDB(uint honor, uint honorLevel)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HonorLevel), honorLevel);
             UpdateHonorNextLevel();
@@ -232,12 +232,12 @@ namespace Game.Entities
             AddHonorXP(honor);
         }
 
-        void RewardPlayerWithRewardPack(uint rewardPackID)
+        private void RewardPlayerWithRewardPack(uint rewardPackID)
         {
             RewardPlayerWithRewardPack(CliDB.RewardPackStorage.LookupByKey(rewardPackID));
         }
 
-        void RewardPlayerWithRewardPack(RewardPackRecord rewardPackEntry)
+        private void RewardPlayerWithRewardPack(RewardPackRecord rewardPackEntry)
         {
             if (rewardPackEntry == null)
                 return;
@@ -281,7 +281,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Honor), IsMaxHonorLevel() ? 0 : newHonorXP);
         }
 
-        void SetHonorLevel(byte level)
+        private void SetHonorLevel(byte level)
         {
             var oldHonorLevel = (byte)GetHonorLevel();
             if (level == oldHonorLevel)
@@ -293,7 +293,7 @@ namespace Game.Entities
             UpdateCriteria(CriteriaTypes.HonorLevelReached);
         }
 
-        void UpdateHonorNextLevel()
+        private void UpdateHonorNextLevel()
         {
             // 5500 at honor level 1
             // no idea what between here
@@ -307,7 +307,7 @@ namespace Game.Entities
         public void ActivatePvpItemLevels(bool activate) { _usePvpItemLevels = activate; }
         public bool IsUsingPvpItemLevels() { return _usePvpItemLevels; }
 
-        void ResetPvpTalents()
+        private void ResetPvpTalents()
         {
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
@@ -377,7 +377,7 @@ namespace Game.Entities
             return TalentLearnResult.LearnOk;
         }
 
-        bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
+        private bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
         {
             //ASSERT(talent);
             var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
@@ -405,7 +405,7 @@ namespace Game.Entities
             return true;
         }
 
-        void RemovePvpTalent(PvpTalentRecord talent)
+        private void RemovePvpTalent(PvpTalentRecord talent)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
@@ -442,7 +442,7 @@ namespace Game.Entities
             }
         }
 
-        bool HasPvpTalent(uint talentID, byte activeTalentGroup)
+        private bool HasPvpTalent(uint talentID, byte activeTalentGroup)
         {
             return GetPvpTalentMap(activeTalentGroup).Contains(talentID);
         }
@@ -469,7 +469,7 @@ namespace Game.Entities
             UpdateItemLevelAreaBasedScaling();
         }
 
-        void DisablePvpRules()
+        private void DisablePvpRules()
         {
             // Don't disable pvp rules when in pvp zone.
             if (IsInAreaThatActivatesPvpTalents())
@@ -488,17 +488,17 @@ namespace Game.Entities
             }
         }
 
-        bool HasPvpRulesEnabled()
+        private bool HasPvpRulesEnabled()
         {
             return HasAura(PlayerConst.SpellPvpRulesEnabled);
         }
 
-        bool IsInAreaThatActivatesPvpTalents()
+        private bool IsInAreaThatActivatesPvpTalents()
         {
             return IsAreaThatActivatesPvpTalents(GetAreaId());
         }
 
-        bool IsAreaThatActivatesPvpTalents(uint areaID)
+        private bool IsAreaThatActivatesPvpTalents(uint areaID)
         {
             if (InBattleground())
                 return true;
@@ -771,7 +771,7 @@ namespace Game.Entities
 
         public void ClearAfkReports() { m_bgData.bgAfkReporter.Clear(); }
 
-        bool CanReportAfkDueToLimit()
+        private bool CanReportAfkDueToLimit()
         {
             // a player can complain about 15 people per 5 minutes
             if (m_bgData.bgAfkReportedCount++ >= 15)
@@ -845,7 +845,7 @@ namespace Game.Entities
             return true;
         }
 
-        void SendBGWeekendWorldStates()
+        private void SendBGWeekendWorldStates()
         {
             foreach (var bl in CliDB.BattlemasterListStorage.Values)
             {
@@ -866,7 +866,7 @@ namespace Game.Entities
         }
 
         //Battlefields
-        void SendBattlefieldWorldStates()
+        private void SendBattlefieldWorldStates()
         {
             // Send misc stuff that needs to be sent on every login, like the battle timers.
             if (WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable))

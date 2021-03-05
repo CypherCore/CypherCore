@@ -22,48 +22,48 @@ using Game.Spells;
 
 namespace Game.Chat.Commands
 {
-    struct Spells
+    internal struct Spells
     {
         public const uint LFGDundeonDeserter = 71041;
         public const uint BGDeserter = 26013;
     }
 
     [CommandGroup("deserter", RBACPermissions.CommandDeserter)]
-    class DeserterCommands
+    internal class DeserterCommands
     {
         [CommandGroup("instance", RBACPermissions.CommandDeserterInstance)]
-        class DeserterInstanceCommands
+        private class DeserterInstanceCommands
         {
             [Command("add", RBACPermissions.CommandDeserterInstanceAdd)]
-            static bool HandleDeserterInstanceAdd(StringArguments args, CommandHandler handler)
+            private static bool HandleDeserterInstanceAdd(StringArguments args, CommandHandler handler)
             {
                 return HandleDeserterAdd(args, handler, true);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterInstanceRemove)]
-            static bool HandleDeserterInstanceRemove(StringArguments args, CommandHandler handler)
+            private static bool HandleDeserterInstanceRemove(StringArguments args, CommandHandler handler)
             {
                 return HandleDeserterRemove(args, handler, true);
             }
         }
 
         [CommandGroup("bg", RBACPermissions.CommandDeserterBg)]
-        class DeserterBGCommands
+        private class DeserterBGCommands
         {
             [Command("add", RBACPermissions.CommandDeserterBgAdd)]
-            static bool HandleDeserterBGAdd(StringArguments args, CommandHandler handler)
+            private static bool HandleDeserterBGAdd(StringArguments args, CommandHandler handler)
             {
                 return HandleDeserterAdd(args, handler, false);
             }
 
             [Command("remove", RBACPermissions.CommandDeserterBgRemove)]
-            static bool HandleDeserterBGRemove(StringArguments args, CommandHandler handler)
+            private static bool HandleDeserterBGRemove(StringArguments args, CommandHandler handler)
             {
                 return HandleDeserterRemove(args, handler, false);
             }
         }
 
-        static bool HandleDeserterAdd(StringArguments args, CommandHandler handler, bool isInstance)
+        private static bool HandleDeserterAdd(StringArguments args, CommandHandler handler, bool isInstance)
         {
             if (args.Empty())
                 return false;
@@ -92,7 +92,7 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        static bool HandleDeserterRemove(StringArguments args, CommandHandler handler, bool isInstance)
+        private static bool HandleDeserterRemove(StringArguments args, CommandHandler handler, bool isInstance)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)

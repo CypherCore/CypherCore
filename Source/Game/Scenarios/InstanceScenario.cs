@@ -93,7 +93,7 @@ namespace Game.Scenarios
             DB.Characters.CommitTransaction(trans);
         }
 
-        void LoadInstanceData(uint instanceId)
+        private void LoadInstanceData(uint instanceId)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE);
             stmt.AddValue(0, instanceId);
@@ -177,7 +177,7 @@ namespace Game.Scenarios
             _map.SendToPlayers(data);
         }
 
-        Map _map;
-        Dictionary<byte, Dictionary<uint, CriteriaProgress>> _stepCriteriaProgress = new Dictionary<byte, Dictionary<uint, CriteriaProgress>>();
+        private Map _map;
+        private Dictionary<byte, Dictionary<uint, CriteriaProgress>> _stepCriteriaProgress = new Dictionary<byte, Dictionary<uint, CriteriaProgress>>();
     }
 }

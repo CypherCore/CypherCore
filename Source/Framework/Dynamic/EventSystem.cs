@@ -117,8 +117,8 @@ namespace Framework.Dynamic
 
         public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
 
-        ulong m_time;
-        SortedMultiMap<ulong, BasicEvent> m_events = new SortedMultiMap<ulong, BasicEvent>();
+        private ulong m_time;
+        private SortedMultiMap<ulong, BasicEvent> m_events = new SortedMultiMap<ulong, BasicEvent>();
     }
 
     public class BasicEvent
@@ -150,12 +150,12 @@ namespace Framework.Dynamic
         public bool IsAbortScheduled() { return m_abortState == AbortState.Scheduled; }
         public bool IsAborted() { return m_abortState == AbortState.Aborted; }
 
-        AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
+        private AbortState m_abortState; // set by externals when the event is aborted, aborted events don't execute
         public ulong m_addTime; // time when the event was added to queue, filled by event handler
         public ulong m_execTime; // planned time of next execution, filled by event handler
     }
 
-    enum AbortState
+    internal enum AbortState
     {
         Running,
         Scheduled,

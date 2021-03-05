@@ -33,7 +33,7 @@ namespace Game.AI
             UpdateAllies();
         }
 
-        bool _needToStop()
+        private bool _needToStop()
         {
             // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
             if (me.IsCharmed() && me.GetVictim() == me.GetCharmer())
@@ -48,7 +48,7 @@ namespace Game.AI
             return !me.IsValidAttackTarget(me.GetVictim());
         }
 
-        void _stopAttack()
+        private void _stopAttack()
         {
             if (!me.IsAlive())
             {
@@ -243,7 +243,7 @@ namespace Game.AI
             me.UpdateSpeed(UnitMoveType.Flight);
         }
 
-        void UpdateAllies()
+        private void UpdateAllies()
         {
             m_updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
 
@@ -369,7 +369,7 @@ namespace Game.AI
             AttackStart(target);
         }
 
-        Unit SelectNextTarget(bool allowAutoSelect)
+        private Unit SelectNextTarget(bool allowAutoSelect)
         {
             // Provides next target selection after current target death.
             // This function should only be called internally by the AI
@@ -419,7 +419,7 @@ namespace Game.AI
             return null;
         }
 
-        void HandleReturnMovement()
+        private void HandleReturnMovement()
         {
             // Handles moving the pet back to stay or owner
 
@@ -456,7 +456,7 @@ namespace Game.AI
             me.ClearInPetCombat();
         }
 
-        void DoAttack(Unit target, bool chase)
+        private void DoAttack(Unit target, bool chase)
         {
             // Handles attack with or without chase and also resets flags
             // for next update / creature kill
@@ -613,7 +613,7 @@ namespace Game.AI
             me.IsAIEnabled = false;
         }
 
-        void ClearCharmInfoFlags()
+        private void ClearCharmInfoFlags()
         {
             // Quick access to set all flags to FALSE
 
@@ -640,8 +640,8 @@ namespace Game.AI
         public override void MoveInLineOfSight_Safe(Unit who) { }
         public override void EnterEvadeMode(EvadeReason why) { }
 
-        TimeTracker i_tracker;
-        List<ObjectGuid> m_AllySet = new List<ObjectGuid>();
-        uint m_updateAlliesTimer;
+        private TimeTracker i_tracker;
+        private List<ObjectGuid> m_AllySet = new List<ObjectGuid>();
+        private uint m_updateAlliesTimer;
     }
 }

@@ -82,11 +82,11 @@ namespace Framework.Database
             }
         }
 
-        Task<SQLResult> _result;
-        Queue<QueryCallbackData> _callbacks = new Queue<QueryCallbackData>();
+        private Task<SQLResult> _result;
+        private Queue<QueryCallbackData> _callbacks = new Queue<QueryCallbackData>();
     }
 
-    struct QueryCallbackData
+    internal struct QueryCallbackData
     {
         public QueryCallbackData(Action<QueryCallback, SQLResult> callback)
         {

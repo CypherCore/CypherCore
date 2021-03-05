@@ -43,9 +43,9 @@ namespace Framework.Database
 
     public class PreparedStatementTask : ISqlOperation
     {
-        PreparedStatement m_stmt;
-        bool _needsResult;
-        TaskCompletionSource<SQLResult> m_result;
+        private PreparedStatement m_stmt;
+        private bool _needsResult;
+        private TaskCompletionSource<SQLResult> m_result;
 
         public PreparedStatementTask(PreparedStatement stmt, bool needsResult = false)
         {

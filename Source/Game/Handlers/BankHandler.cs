@@ -27,7 +27,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.AutobankItem)]
-        void HandleAutoBankItem(AutoBankItem packet)
+        private void HandleAutoBankItem(AutoBankItem packet)
         {
             if (!CanUseBank())
             {
@@ -59,7 +59,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BankerActivate)]
-        void HandleBankerActivate(Hello packet)
+        private void HandleBankerActivate(Hello packet)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
             if (!unit)
@@ -75,7 +75,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AutostoreBankItem)]
-        void HandleAutoStoreBankItem(AutoStoreBankItem packet)
+        private void HandleAutoStoreBankItem(AutoStoreBankItem packet)
         {
             if (!CanUseBank())
             {
@@ -118,7 +118,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BuyBankSlot)]
-        void HandleBuyBankSlot(BuyBankSlot packet)
+        private void HandleBuyBankSlot(BuyBankSlot packet)
         {
             if (!CanUseBank(packet.Guid))
             {

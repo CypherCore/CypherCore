@@ -29,7 +29,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void UpdateSkillsForLevel()
+        private void UpdateSkillsForLevel()
         {
             var maxSkill = GetMaxSkillValueForLevel();
             SkillInfo skillInfoField = m_activePlayerData.Skill;
@@ -77,7 +77,7 @@ namespace Game.Entities
             return (ushort)(result < 0 ? 0 : result);
         }
 
-        ushort GetMaxSkillValue(SkillType skill)
+        private ushort GetMaxSkillValue(SkillType skill)
         {
             if (skill == 0)
                 return 0;
@@ -180,7 +180,7 @@ namespace Game.Entities
             return skillInfo.SkillTempBonus[skillStatusData.Pos];
         }
 
-        void InitializeSelfResurrectionSpells()
+        private void InitializeSelfResurrectionSpells()
         {
             ClearSelfResSpell();
 
@@ -296,7 +296,7 @@ namespace Game.Entities
             m_overrideSpells.Remove(overridenSpellId, newSpellId);
         }
 
-        void LearnSpecializationSpells()
+        private void LearnSpecializationSpells()
         {
             var specSpells = Global.DB2Mgr.GetSpecializationSpells(GetPrimarySpecialization());
             if (specSpells != null)
@@ -315,7 +315,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveSpecializationSpells()
+        private void RemoveSpecializationSpells()
         {
             for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
@@ -363,7 +363,7 @@ namespace Game.Entities
             SendPacket(cooldowns);
         }
 
-        void InitializeSkillFields()
+        private void InitializeSkillFields()
         {
             uint i = 0;
             foreach (var skillLine in CliDB.SkillLineStorage.Values)
@@ -441,7 +441,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:F3}% taken", chance / 10.0f);
             return true;
         }
-        void UpdateSkillEnchantments(uint skill_id, ushort curr_value, ushort new_value)
+
+        private void UpdateSkillEnchantments(uint skill_id, ushort curr_value, ushort new_value)
         {
             for (byte i = 0; i < InventorySlots.BagEnd; ++i)
             {
@@ -486,7 +487,7 @@ namespace Game.Entities
             }
         }
 
-        void UpdateEnchantTime(uint time)
+        private void UpdateEnchantTime(uint time)
         {
             foreach (var enchat in m_enchantDuration)
             {
@@ -507,7 +508,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplyEnchantment(Item item, bool apply)
+        private void ApplyEnchantment(Item item, bool apply)
         {
             for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
                 ApplyEnchantment(item, slot, apply);
@@ -869,7 +870,7 @@ namespace Game.Entities
             }
         }
 
-        void AddEnchantmentDurations(Item item)
+        private void AddEnchantmentDurations(Item item)
         {
             for (EnchantmentSlot x = 0; x < EnchantmentSlot.Max; ++x)
             {
@@ -881,7 +882,8 @@ namespace Game.Entities
                     AddEnchantmentDuration(item, x, duration);
             }
         }
-        void AddEnchantmentDuration(Item item, EnchantmentSlot slot, uint duration)
+
+        private void AddEnchantmentDuration(Item item, EnchantmentSlot slot, uint duration)
         {
             if (item == null)
                 return;
@@ -904,7 +906,8 @@ namespace Game.Entities
                 m_enchantDuration.Add(new EnchantDuration(item, slot, duration));
             }
         }
-        void RemoveEnchantmentDurations(Item item)
+
+        private void RemoveEnchantmentDurations(Item item)
         {
             foreach (var enchantDuration in m_enchantDuration)
             {
@@ -917,7 +920,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveEnchantmentDurationsReferences(Item item)
+        private void RemoveEnchantmentDurationsReferences(Item item)
         {
             foreach (var enchantDuration in m_enchantDuration)
             {
@@ -1305,7 +1308,7 @@ namespace Game.Entities
             return false;
         }
 
-        byte GetFishingStepsNeededToLevelUp(uint SkillValue)
+        private byte GetFishingStepsNeededToLevelUp(uint SkillValue)
         {
             // These formulas are guessed to be as close as possible to how the skill difficulty curve for fishing was on Retail.
             if (SkillValue < 75)
@@ -1340,7 +1343,7 @@ namespace Game.Entities
             return false;
         }
 
-        int SkillGainChance(uint SkillValue, uint GrayLevel, uint GreenLevel, uint YellowLevel)
+        private int SkillGainChance(uint SkillValue, uint GrayLevel, uint GreenLevel, uint YellowLevel)
         {
             if (SkillValue >= GrayLevel)
                 return WorldConfig.GetIntValue(WorldCfg.SkillChanceGrey) * 10;
@@ -1351,7 +1354,7 @@ namespace Game.Entities
             return WorldConfig.GetIntValue(WorldCfg.SkillChanceOrange) * 10;
         }
 
-        bool EnchantmentFitsRequirements(uint enchantmentcondition, sbyte slot)
+        private bool EnchantmentFitsRequirements(uint enchantmentcondition, sbyte slot)
         {
             if (enchantmentcondition == 0)
                 return true;
@@ -1423,7 +1426,8 @@ namespace Game.Entities
 
             return activate;
         }
-        void CorrectMetaGemEnchants(byte exceptslot, bool apply)
+
+        private void CorrectMetaGemEnchants(byte exceptslot, bool apply)
         {
             //cycle all equipped items
             for (var slot = EquipmentSlot.Start; slot < EquipmentSlot.End; ++slot)
@@ -1565,7 +1569,7 @@ namespace Game.Entities
         public uint GetLastPotionId() { return m_lastPotionId; }
         public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
 
-        void LearnSkillRewardedSpells(uint skillId, uint skillValue)
+        private void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
             var raceMask = SharedConst.GetMaskForRace(GetRace());
             var classMask = GetClassMask();
@@ -1622,7 +1626,7 @@ namespace Game.Entities
             }
         }
 
-        int FindProfessionSlotFor(uint skillId)
+        private int FindProfessionSlotFor(uint skillId)
         {
             var skillEntry = CliDB.SkillLineStorage.LookupByKey(skillId);
             if (skillEntry == null)
@@ -1641,7 +1645,7 @@ namespace Game.Entities
             return -1;
         }
 
-        void RemoveItemDependentAurasAndCasts(Item pItem)
+        private void RemoveItemDependentAurasAndCasts(Item pItem)
         {
             foreach (var pair in GetOwnedAuras())
             {
@@ -1735,7 +1739,7 @@ namespace Game.Entities
 
         public Dictionary<uint, PlayerSpell> GetSpellMap() { return m_spells; }
 
-        void CastAllObtainSpells()
+        private void CastAllObtainSpells()
         {
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (var slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
@@ -1760,7 +1764,7 @@ namespace Game.Entities
             }
         }
 
-        void ApplyItemObtainSpells(Item item, bool apply)
+        private void ApplyItemObtainSpells(Item item, bool apply)
         {
             foreach (var effect in item.GetEffects())
             {
@@ -1783,7 +1787,7 @@ namespace Game.Entities
 
         // this one rechecks weapon auras and stores them in BaseModGroup container
         // needed for things like axe specialization applying only to axe weapons in case of dual-wield
-        void UpdateWeaponDependentCritAuras(WeaponAttackType attackType)
+        private void UpdateWeaponDependentCritAuras(WeaponAttackType attackType)
         {
             BaseModGroup modGroup;
             switch (attackType)
@@ -2002,7 +2006,7 @@ namespace Game.Entities
             }
         }
 
-        void SendKnownSpells()
+        private void SendKnownSpells()
         {
             var knownSpells = new SendKnownSpells();
             knownSpells.InitialLogin = false; // @todo
@@ -2244,7 +2248,8 @@ namespace Game.Entities
                 SendPacket(unlearnedSpells);
             }
         }
-        bool HandlePassiveSpellLearn(SpellInfo spellInfo)
+
+        private bool HandlePassiveSpellLearn(SpellInfo spellInfo)
         {
             // note: form passives activated with shapeshift spells be implemented by HandleShapeshiftBoosts instead of spell_learn_spell
             // talent dependent passives activated at form apply have proper stance data
@@ -2283,7 +2288,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0)
+        private bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -2805,7 +2810,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
+        private bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
         {
             if (mod == null || spellInfo == null)
                 return false;
@@ -2832,7 +2837,7 @@ namespace Game.Entities
             m_spellModTakingSpell = apply ? spell : null;
         }
 
-        void SendSpellModifiers()
+        private void SendSpellModifiers()
         {
             var flatMods = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
             var pctMods = new SetSpellModifier(ServerOpcodes.SetPctSpellModifier);
@@ -2886,7 +2891,7 @@ namespace Game.Entities
                 SendPacket(pctMods);
         }
 
-        void SendSupercededSpell(uint oldSpell, uint newSpell)
+        private void SendSupercededSpell(uint oldSpell, uint newSpell)
         {
             var supercededSpells = new SupercededSpells();
             supercededSpells.SpellID.Add(newSpell);
@@ -2908,7 +2913,7 @@ namespace Game.Entities
             UpdateItemSetAuras(true);
         }
 
-        void UpdateItemSetAuras(bool formChange = false)
+        private void UpdateItemSetAuras(bool formChange = false)
         { 
             // item set bonuses not dependent from item broken state
             for (var setindex = 0; setindex < ItemSetEff.Count; ++setindex)
@@ -3248,7 +3253,7 @@ namespace Game.Entities
             }
         }
 
-        float GetWeaponProcChance()
+        private float GetWeaponProcChance()
         {
             // normalized proc chance for weapon attack speed
             // (odd formula...)

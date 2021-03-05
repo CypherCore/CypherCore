@@ -20,7 +20,7 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class BFMgrEntryInvite : ServerPacket
+    internal class BFMgrEntryInvite : ServerPacket
     {
         public BFMgrEntryInvite() : base(ServerOpcodes.None) { }
 
@@ -36,7 +36,7 @@ namespace Game.Networking.Packets
         public long ExpireTime;
     }
 
-    class BFMgrEntryInviteResponse : ClientPacket
+    internal class BFMgrEntryInviteResponse : ClientPacket
     {
         public BFMgrEntryInviteResponse(WorldPacket packet) : base(packet) { }
 
@@ -50,7 +50,7 @@ namespace Game.Networking.Packets
         public bool AcceptedInvite;
     }
 
-    class BFMgrQueueInvite : ServerPacket
+    internal class BFMgrQueueInvite : ServerPacket
     {
         public BFMgrQueueInvite() : base(ServerOpcodes.None) { }
 
@@ -77,7 +77,7 @@ namespace Game.Networking.Packets
         public sbyte Index;                                         // unused in client
     }
 
-    class BFMgrQueueInviteResponse : ClientPacket
+    internal class BFMgrQueueInviteResponse : ClientPacket
     {
         public BFMgrQueueInviteResponse(WorldPacket packet) : base(packet) { }
 
@@ -91,7 +91,7 @@ namespace Game.Networking.Packets
         public bool AcceptedInvite;
     }
 
-    class BFMgrQueueRequestResponse : ServerPacket
+    internal class BFMgrQueueRequestResponse : ServerPacket
     {
         public BFMgrQueueRequestResponse() : base(ServerOpcodes.None) { }
 
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
         public bool LoggingIn;
     }
 
-    class BFMgrQueueExitRequest : ClientPacket
+    internal class BFMgrQueueExitRequest : ClientPacket
     {
         public BFMgrQueueExitRequest(WorldPacket packet) : base(packet) { }
 
@@ -126,7 +126,7 @@ namespace Game.Networking.Packets
         public ulong QueueID;
     }
 
-    class BFMgrEntering : ServerPacket
+    internal class BFMgrEntering : ServerPacket
     {
         public BFMgrEntering() : base(ServerOpcodes.None, ConnectionType.Instance) { }
 
@@ -144,7 +144,7 @@ namespace Game.Networking.Packets
         public ulong QueueID;
     }
 
-    class BFMgrEjected : ServerPacket
+    internal class BFMgrEjected : ServerPacket
     {
         public BFMgrEjected() : base(ServerOpcodes.None, ConnectionType.Instance) { }
 

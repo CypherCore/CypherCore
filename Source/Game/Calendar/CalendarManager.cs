@@ -30,7 +30,7 @@ namespace Game
 {
     public class CalendarManager : Singleton<CalendarManager>
     {
-        CalendarManager()
+        private CalendarManager()
         {
             _events = new List<CalendarEvent>();
             _invites = new MultiMap<ulong,CalendarInvite>();
@@ -293,7 +293,7 @@ namespace Game
             return null;
         }
 
-        void FreeEventId(ulong id)
+        private void FreeEventId(ulong id)
         {
             if (id == _maxEventId)
                 --_maxEventId;
@@ -311,7 +311,7 @@ namespace Game
             return eventId;
         }
 
-        void FreeInviteId(ulong id)
+        private void FreeInviteId(ulong id)
         {
             if (id == _maxInviteId)
                 --_maxInviteId;
@@ -456,7 +456,7 @@ namespace Game
             SendPacketToAllEventRelatives(packet, calendarEvent);
         }
 
-        void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
+        private void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
         {
             var packet = new CalendarEventRemovedAlert();
             packet.ClearPending = true; // FIXME
@@ -466,7 +466,7 @@ namespace Game
             SendPacketToAllEventRelatives(packet, calendarEvent);
         }
 
-        void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
+        private void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
         {
             var packet = new CalendarInviteRemoved();
             packet.ClearPending = true; // FIXME
@@ -488,7 +488,7 @@ namespace Game
             SendPacketToAllEventRelatives(packet, calendarEvent);
         }
 
-        void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
+        private void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
             var packet = new CalendarInviteAlert();
             packet.Date = calendarEvent.Date;
@@ -567,7 +567,7 @@ namespace Game
             player.SendPacket(packet);
         }
 
-        void SendCalendarEventInviteRemoveAlert(ObjectGuid guid, CalendarEvent calendarEvent, CalendarInviteStatus status)
+        private void SendCalendarEventInviteRemoveAlert(ObjectGuid guid, CalendarEvent calendarEvent, CalendarInviteStatus status)
         {
             var player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
@@ -611,7 +611,7 @@ namespace Game
             }
         }
 
-        void SendPacketToAllEventRelatives(ServerPacket packet, CalendarEvent calendarEvent)
+        private void SendPacketToAllEventRelatives(ServerPacket packet, CalendarEvent calendarEvent)
         {
             // Send packet to all guild members
             if (calendarEvent.IsGuildEvent() || calendarEvent.IsGuildAnnouncement())
@@ -632,13 +632,13 @@ namespace Game
             }
         }
 
-        List<CalendarEvent> _events;
-        MultiMap<ulong, CalendarInvite> _invites;
+        private List<CalendarEvent> _events;
+        private MultiMap<ulong, CalendarInvite> _invites;
 
-        List<ulong> _freeEventIds = new List<ulong>();
-        List<ulong> _freeInviteIds = new List<ulong>();
-        ulong _maxEventId;
-        ulong _maxInviteId;
+        private List<ulong> _freeEventIds = new List<ulong>();
+        private List<ulong> _freeInviteIds = new List<ulong>();
+        private ulong _maxEventId;
+        private ulong _maxInviteId;
     }
 
     public class CalendarInvite

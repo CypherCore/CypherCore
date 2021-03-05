@@ -26,7 +26,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.AddToy)]
-        void HandleAddToy(AddToy packet)
+        private void HandleAddToy(AddToy packet)
         {
             if (packet.Guid.IsEmpty())
                 return;
@@ -53,7 +53,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UseToy)]
-        void HandleUseToy(UseToy packet)
+        private void HandleUseToy(UseToy packet)
         {
             var itemId = packet.Cast.Misc[0];
             ItemTemplate item = Global.ObjectMgr.GetItemTemplate(itemId);
@@ -95,7 +95,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ToyClearFanfare)]
-        void HandleToyClearFanfare(ToyClearFanfare toyClearFanfare)
+        private void HandleToyClearFanfare(ToyClearFanfare toyClearFanfare)
         {
             _collectionMgr.ToyClearFanfare(toyClearFanfare.ItemID);
         }

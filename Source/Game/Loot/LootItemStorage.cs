@@ -27,7 +27,7 @@ namespace Game.Loots
 {
     public class LootItemStorage : Singleton<LootItemStorage>
     {
-        LootItemStorage() { }
+        private LootItemStorage() { }
 
         public void LoadStorageFromDB()
         {
@@ -221,10 +221,10 @@ namespace Game.Loots
             _lootItemStorage.TryAdd(loot.containerID.GetCounter(), container);
         }
 
-        ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new ConcurrentDictionary<ulong, StoredLootContainer>();
+        private ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new ConcurrentDictionary<ulong, StoredLootContainer>();
     }
 
-    class StoredLootContainer
+    internal class StoredLootContainer
     {
         public StoredLootContainer(ulong containerId)
         {
@@ -308,18 +308,18 @@ namespace Game.Loots
             DB.Characters.Execute(stmt);
         }
 
-        ulong GetContainer() { return _containerId; }
+        private ulong GetContainer() { return _containerId; }
 
         public uint GetMoney() { return _money; }
 
         public MultiMap<uint, StoredLootItem> GetLootItems() { return _lootItems; }
 
-        MultiMap<uint, StoredLootItem> _lootItems = new MultiMap<uint, StoredLootItem>();
-        ulong _containerId;
-        uint _money;
+        private MultiMap<uint, StoredLootItem> _lootItems = new MultiMap<uint, StoredLootItem>();
+        private ulong _containerId;
+        private uint _money;
     }
 
-    class StoredLootItem
+    internal class StoredLootItem
     {
         public StoredLootItem(LootItem lootItem)
         {

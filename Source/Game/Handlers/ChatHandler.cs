@@ -38,7 +38,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatMessageSay)]
         [WorldPacketHandler(ClientOpcodes.ChatMessageYell)]
         [WorldPacketHandler(ClientOpcodes.ChatMessageInstanceChat)]
-        void HandleChatMessage(ChatMessage packet)
+        private void HandleChatMessage(ChatMessage packet)
         {
             ChatMsg type;
 
@@ -77,24 +77,24 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageWhisper)]
-        void HandleChatMessageWhisper(ChatMessageWhisper packet)
+        private void HandleChatMessageWhisper(ChatMessageWhisper packet)
         {
             HandleChat(ChatMsg.Whisper, packet.Language, packet.Text, packet.Target);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageChannel)]
-        void HandleChatMessageChannel(ChatMessageChannel packet)
+        private void HandleChatMessageChannel(ChatMessageChannel packet)
         {
             HandleChat(ChatMsg.Channel, packet.Language, packet.Text, packet.Target);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageEmote)]
-        void HandleChatMessageEmote(ChatMessageEmote packet)
+        private void HandleChatMessageEmote(ChatMessageEmote packet)
         {
             HandleChat(ChatMsg.Emote, Language.Universal, packet.Text);
         }
 
-        void HandleChat(ChatMsg type, Language lang, string msg, string target = "")
+        private void HandleChat(ChatMsg type, Language lang, string msg, string target = "")
         {
             var sender = GetPlayer();
 
@@ -380,18 +380,18 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessage)]
-        void HandleChatAddonMessage(ChatAddonMessage chatAddonMessage)
+        private void HandleChatAddonMessage(ChatAddonMessage chatAddonMessage)
         {
             HandleChatAddon(chatAddonMessage.Params.Type, chatAddonMessage.Params.Prefix, chatAddonMessage.Params.Text, chatAddonMessage.Params.IsLogged);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
-        void HandleChatAddonMessageTargeted(ChatAddonMessageTargeted chatAddonMessageTargeted)
+        private void HandleChatAddonMessageTargeted(ChatAddonMessageTargeted chatAddonMessageTargeted)
         {
             HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target);
         }
 
-        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "")
+        private void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "")
         {
             var sender = GetPlayer();
 
@@ -467,7 +467,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageAfk)]
-        void HandleChatMessageAFK(ChatMessageAFK packet)
+        private void HandleChatMessageAFK(ChatMessageAFK packet)
         {
             var sender = GetPlayer();
 
@@ -505,7 +505,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageDnd)]
-        void HandleChatMessageDND(ChatMessageDND packet)
+        private void HandleChatMessageDND(ChatMessageDND packet)
         {
             var sender = GetPlayer();
 
@@ -543,7 +543,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.Emote)]
-        void HandleEmote(EmoteClient packet)
+        private void HandleEmote(EmoteClient packet)
         {
             if (!GetPlayer().IsAlive() || GetPlayer().HasUnitState(UnitState.Died))
                 return;
@@ -553,7 +553,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SendTextEmote)]
-        void HandleTextEmote(CTextEmote packet)
+        private void HandleTextEmote(CTextEmote packet)
         {
             if (!GetPlayer().IsAlive())
                 return;
@@ -614,7 +614,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatReportIgnored)]
-        void HandleChatIgnoredOpcode(ChatReportIgnored packet)
+        private void HandleChatIgnoredOpcode(ChatReportIgnored packet)
         {
             Player player = Global.ObjAccessor.FindPlayer(packet.IgnoredGUID);
             if (!player || player.GetSession() == null)
@@ -625,17 +625,17 @@ namespace Game
             player.SendPacket(data);
         }
 
-        void SendChatPlayerNotfoundNotice(string name)
+        private void SendChatPlayerNotfoundNotice(string name)
         {
             SendPacket(new ChatPlayerNotfound(name));
         }
 
-        void SendPlayerAmbiguousNotice(string name)
+        private void SendPlayerAmbiguousNotice(string name)
         {
             SendPacket(new ChatPlayerAmbiguous(name));
         }
 
-        void SendChatRestricted(ChatRestrictionType restriction)
+        private void SendChatRestricted(ChatRestrictionType restriction)
         {
             SendPacket(new ChatRestricted(restriction));
         }

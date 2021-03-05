@@ -107,7 +107,7 @@ namespace Game
         /// Send by client on clicking in accept or refuse of invitation windows for join game.
         /// </summary>
         //[WorldPacketHandler(ClientOpcodes.BfMgrEntryInviteResponse)]
-        void HandleBfEntryInviteResponse(BFMgrEntryInviteResponse bfMgrEntryInviteResponse)
+        private void HandleBfEntryInviteResponse(BFMgrEntryInviteResponse bfMgrEntryInviteResponse)
         {
             var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrEntryInviteResponse.QueueID);
             if (bf == null)
@@ -129,7 +129,7 @@ namespace Game
         /// Send by client when he click on accept for queue.
         /// </summary>
         //[WorldPacketHandler(ClientOpcodes.BfMgrQueueInviteResponse)]
-        void HandleBfQueueInviteResponse(BFMgrQueueInviteResponse bfMgrQueueInviteResponse)
+        private void HandleBfQueueInviteResponse(BFMgrQueueInviteResponse bfMgrQueueInviteResponse)
         {
             var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueInviteResponse.QueueID);
             if (bf == null)
@@ -143,7 +143,7 @@ namespace Game
         /// Send by client when exited battlefield
         /// </summary>
         //[WorldPacketHandler(ClientOpcodes.BfMgrQueueExitRequest)]
-        void HandleBfExitRequest(BFMgrQueueExitRequest bfMgrQueueExitRequest)
+        private void HandleBfExitRequest(BFMgrQueueExitRequest bfMgrQueueExitRequest)
         {
             var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueExitRequest.QueueID);
             if (bf == null)

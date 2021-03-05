@@ -27,10 +27,10 @@ using System.Collections.Generic;
 namespace Game.Chat
 {
     [CommandGroup("tele", RBACPermissions.CommandTele)]
-    class TeleCommands
+    internal class TeleCommands
     {
         [Command("", RBACPermissions.CommandTele)]
-        static bool HandleTeleCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTeleCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -73,7 +73,7 @@ namespace Game.Chat
         }
 
         [Command("add", RBACPermissions.CommandTeleAdd)]
-        static bool HandleTeleAddCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTeleAddCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -113,7 +113,7 @@ namespace Game.Chat
         }
 
         [Command("del", RBACPermissions.CommandTeleDel, true)]
-        static bool HandleTeleDelCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTeleDelCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -132,7 +132,7 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandTeleGroup)]
-        static bool HandleTeleGroupCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTeleGroupCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -211,7 +211,7 @@ namespace Game.Chat
         }
 
         [Command("name", RBACPermissions.CommandTeleName, true)]
-        static bool HandleTeleNameCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTeleNameCommand(StringArguments args, CommandHandler handler)
         {
             handler.ExtractOptFirstArg(args, out var nameStr, out var teleStr);
             if (teleStr.IsEmpty())

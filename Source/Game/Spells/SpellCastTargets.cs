@@ -163,7 +163,7 @@ namespace Game.Spells
             m_targetMask |= SpellCastTargetFlags.Unit;
         }
 
-        ObjectGuid GetGOTargetGUID()
+        private ObjectGuid GetGOTargetGUID()
         {
             if (m_objectTargetGUID.IsAnyTypeGameObject())
                 return m_objectTargetGUID;
@@ -259,13 +259,13 @@ namespace Game.Spells
             return m_src.Position;
         }
 
-        void SetSrc(float x, float y, float z)
+        private void SetSrc(float x, float y, float z)
         {
             m_src = new SpellDestination(x, y, z);
             m_targetMask |= SpellCastTargetFlags.SourceLocation;
         }
 
-        void SetSrc(Position pos)
+        private void SetSrc(Position pos)
         {
             m_src = new SpellDestination(pos);
             m_targetMask |= SpellCastTargetFlags.SourceLocation;
@@ -406,7 +406,7 @@ namespace Game.Spells
 
         public float GetPitch() { return m_pitch; }
         public void SetPitch(float pitch) { m_pitch = pitch; }
-        float GetSpeed() { return m_speed; }
+        private float GetSpeed() { return m_speed; }
         public void SetSpeed(float speed) { m_speed = speed; }
 
         public float GetDist2d() { return m_src.Position.GetExactDist2d(m_dst.Position); }
@@ -416,24 +416,25 @@ namespace Game.Spells
         public string GetTargetString() { return m_strTarget; }
 
         #region Fields
-        SpellCastTargetFlags m_targetMask;
+
+        private SpellCastTargetFlags m_targetMask;
 
         // objects (can be used at spell creating and after Update at casting)
-        WorldObject m_objectTarget;
-        Item m_itemTarget;
+        private WorldObject m_objectTarget;
+        private Item m_itemTarget;
 
         // object GUID/etc, can be used always
-        ObjectGuid m_origObjectTargetGUID;
-        ObjectGuid m_objectTargetGUID;
-        ObjectGuid m_itemTargetGUID;
-        uint m_itemTargetEntry;
+        private ObjectGuid m_origObjectTargetGUID;
+        private ObjectGuid m_objectTargetGUID;
+        private ObjectGuid m_itemTargetGUID;
+        private uint m_itemTargetEntry;
 
-        SpellDestination m_src;
-        SpellDestination m_dst;
+        private SpellDestination m_src;
+        private SpellDestination m_dst;
 
-        float m_pitch;
-        float m_speed;
-        string m_strTarget;
+        private float m_pitch;
+        private float m_speed;
+        private string m_strTarget;
         #endregion
     }
 }

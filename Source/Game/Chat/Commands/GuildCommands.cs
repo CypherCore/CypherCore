@@ -23,10 +23,10 @@ using Game.Guilds;
 namespace Game.Chat
 {
     [CommandGroup("guild", RBACPermissions.CommandGuild, true)]
-    class GuildCommands
+    internal class GuildCommands
     {
         [Command("create", RBACPermissions.CommandGuildCreate, true)]
-        static bool HandleGuildCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildCreateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -58,7 +58,7 @@ namespace Game.Chat
         }
 
         [Command("delete", RBACPermissions.CommandGuildDelete, true)]
-        static bool HandleGuildDeleteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildDeleteCommand(StringArguments args, CommandHandler handler)
         {
             var guildName = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(guildName))
@@ -73,7 +73,7 @@ namespace Game.Chat
         }
 
         [Command("invite", RBACPermissions.CommandGuildInvite, true)]
-        static bool HandleGuildInviteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildInviteCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -96,7 +96,7 @@ namespace Game.Chat
         }
 
         [Command("uninvite", RBACPermissions.CommandGuildUninvite, true)]
-        static bool HandleGuildUninviteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildUninviteCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             ObjectGuid targetGuid;
@@ -116,7 +116,7 @@ namespace Game.Chat
         }
 
         [Command("rank", RBACPermissions.CommandGuildRank, true)]
-        static bool HandleGuildRankCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildRankCommand(StringArguments args, CommandHandler handler)
         {
             string nameStr;
             string rankStr;
@@ -144,7 +144,7 @@ namespace Game.Chat
         }
 
         [Command("rename", RBACPermissions.CommandGuildRename, true)]
-        static bool HandleGuildRenameCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildRenameCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -187,7 +187,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGuildInfo, true)]
-        static bool HandleGuildInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGuildInfoCommand(StringArguments args, CommandHandler handler)
         {
             Guild guild = null;
             var target = handler.GetSelectedPlayerOrSelf();

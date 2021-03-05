@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class ScenarioState : ServerPacket
+    internal class ScenarioState : ServerPacket
     {
         public ScenarioState() : base(ServerOpcodes.ScenarioState, ConnectionType.Instance) { }
 
@@ -67,7 +67,7 @@ namespace Game.Networking.Packets
         public bool ScenarioComplete = false;
     }
 
-    class ScenarioProgressUpdate : ServerPacket
+    internal class ScenarioProgressUpdate : ServerPacket
     {
         public ScenarioProgressUpdate() : base(ServerOpcodes.ScenarioProgressUpdate, ConnectionType.Instance) { }
 
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
         public CriteriaProgressPkt CriteriaProgress;
     }
 
-    class ScenarioCompleted : ServerPacket
+    internal class ScenarioCompleted : ServerPacket
     {
         public ScenarioCompleted(uint scenarioId) : base(ServerOpcodes.ScenarioCompleted, ConnectionType.Instance)
         {
@@ -94,7 +94,7 @@ namespace Game.Networking.Packets
         public uint ScenarioID;
     }
 
-    class ScenarioVacate : ServerPacket
+    internal class ScenarioVacate : ServerPacket
     {
         public ScenarioVacate() : base(ServerOpcodes.ScenarioVacate, ConnectionType.Instance) { }
 
@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
         public byte Unk2;
     }
 
-    class QueryScenarioPOI : ClientPacket
+    internal class QueryScenarioPOI : ClientPacket
     {
         public QueryScenarioPOI(WorldPacket packet) : base(packet) { }
 
@@ -125,7 +125,7 @@ namespace Game.Networking.Packets
         public Array<int> MissingScenarioPOIs = new Array<int>(50);
     }
 
-    class ScenarioPOIs : ServerPacket
+    internal class ScenarioPOIs : ServerPacket
     {
         public ScenarioPOIs() : base(ServerOpcodes.ScenarioPois) { }
 
@@ -163,7 +163,7 @@ namespace Game.Networking.Packets
         public List<ScenarioPOIData> ScenarioPOIDataStats = new List<ScenarioPOIData>();
     }
 
-    struct BonusObjectiveData
+    internal struct BonusObjectiveData
     {
         public void Write(WorldPacket data)
         {
@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
         public bool ObjectiveComplete;
     }
 
-    class ScenarioSpellUpdate
+    internal class ScenarioSpellUpdate
     {
         public void Write(WorldPacket data)
         {
@@ -189,7 +189,7 @@ namespace Game.Networking.Packets
         public bool Usable = true;
     }
 
-    struct ScenarioPOIData
+    internal struct ScenarioPOIData
     {
         public int CriteriaTreeID;
         public List<ScenarioPOI> ScenarioPOIs;

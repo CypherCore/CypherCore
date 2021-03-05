@@ -143,18 +143,18 @@ namespace Game.Movement
             return MovementGeneratorType.Formation;
         }
 
-        void MovementInform(Creature owner)
+        private void MovementInform(Creature owner)
         {
             if (owner.GetAI() != null)
                 owner.GetAI().MovementInform(MovementGeneratorType.Formation, _movementId);
         }
 
-        uint _movementId;
-        Position _destination;
-        WaypointMoveType _moveType;
-        bool _run;
-        bool _orientation;
-        bool _recalculateSpeed;
-        bool _interrupt;
+        private uint _movementId;
+        private Position _destination;
+        private WaypointMoveType _moveType;
+        private bool _run;
+        private bool _orientation;
+        private bool _recalculateSpeed;
+        private bool _interrupt;
     }
 }

@@ -79,6 +79,6 @@ namespace Framework.Configuration
             return _configList.Where(p => p.Key.Contains(name)).Select(p => p.Key);
         }
 
-        static Dictionary<string, string> _configList = new Dictionary<string, string>();
+        private static Dictionary<string, string> _configList = new Dictionary<string, string>();
     }
 }

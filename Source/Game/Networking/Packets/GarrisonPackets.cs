@@ -24,7 +24,7 @@ using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
-    class GarrisonCreateResult : ServerPacket
+    internal class GarrisonCreateResult : ServerPacket
     {
         public GarrisonCreateResult() : base(ServerOpcodes.GarrisonCreateResult, ConnectionType.Instance) { }
 
@@ -38,7 +38,7 @@ namespace Game.Networking.Packets
         public uint Result;
     }
 
-    class GarrisonDeleteResult : ServerPacket
+    internal class GarrisonDeleteResult : ServerPacket
     {
         public GarrisonDeleteResult() : base(ServerOpcodes.GarrisonDeleteResult, ConnectionType.Instance) { }
 
@@ -52,14 +52,14 @@ namespace Game.Networking.Packets
         public  uint GarrSiteID;
     }
 
-    class GetGarrisonInfo : ClientPacket
+    internal class GetGarrisonInfo : ClientPacket
     {
         public GetGarrisonInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class GetGarrisonInfoResult : ServerPacket
+    internal class GetGarrisonInfoResult : ServerPacket
     {
         public GetGarrisonInfoResult() : base(ServerOpcodes.GetGarrisonInfoResult, ConnectionType.Instance) { }
 
@@ -81,7 +81,7 @@ namespace Game.Networking.Packets
         public List<FollowerSoftCapInfo> FollowerSoftCaps = new List<FollowerSoftCapInfo>();
     }
 
-    class GarrisonRemoteInfo : ServerPacket
+    internal class GarrisonRemoteInfo : ServerPacket
     {
         public GarrisonRemoteInfo() : base(ServerOpcodes.GarrisonRemoteInfo, ConnectionType.Instance) { }
 
@@ -95,7 +95,7 @@ namespace Game.Networking.Packets
         public List<GarrisonRemoteSiteInfo> Sites = new List<GarrisonRemoteSiteInfo>();
     }
 
-    class GarrisonPurchaseBuilding : ClientPacket
+    internal class GarrisonPurchaseBuilding : ClientPacket
     {
         public GarrisonPurchaseBuilding(WorldPacket packet) : base(packet) { }
 
@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
         public uint PlotInstanceID;
     }
 
-    class GarrisonPlaceBuildingResult : ServerPacket
+    internal class GarrisonPlaceBuildingResult : ServerPacket
     {
         public GarrisonPlaceBuildingResult() : base(ServerOpcodes.GarrisonPlaceBuildingResult, ConnectionType.Instance) { }
 
@@ -130,7 +130,7 @@ namespace Game.Networking.Packets
         public bool PlayActivationCinematic;
     }
 
-    class GarrisonCancelConstruction : ClientPacket
+    internal class GarrisonCancelConstruction : ClientPacket
     {
         public GarrisonCancelConstruction(WorldPacket packet) : base(packet) { }
 
@@ -144,7 +144,7 @@ namespace Game.Networking.Packets
         public uint PlotInstanceID;
     }
 
-    class GarrisonBuildingRemoved : ServerPacket
+    internal class GarrisonBuildingRemoved : ServerPacket
     {
         public GarrisonBuildingRemoved() : base(ServerOpcodes.GarrisonBuildingRemoved, ConnectionType.Instance) { }
 
@@ -162,7 +162,7 @@ namespace Game.Networking.Packets
         public uint GarrBuildingID;
     }
 
-    class GarrisonLearnBlueprintResult : ServerPacket
+    internal class GarrisonLearnBlueprintResult : ServerPacket
     {
         public GarrisonLearnBlueprintResult() : base(ServerOpcodes.GarrisonLearnBlueprintResult, ConnectionType.Instance) { }
 
@@ -178,7 +178,7 @@ namespace Game.Networking.Packets
         public GarrisonError Result;
     }
 
-    class GarrisonUnlearnBlueprintResult : ServerPacket
+    internal class GarrisonUnlearnBlueprintResult : ServerPacket
     {
         public GarrisonUnlearnBlueprintResult() : base(ServerOpcodes.GarrisonUnlearnBlueprintResult, ConnectionType.Instance) { }
 
@@ -194,14 +194,14 @@ namespace Game.Networking.Packets
         public GarrisonError Result;
     }
 
-    class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
+    internal class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
     {
         public GarrisonRequestBlueprintAndSpecializationData(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class GarrisonRequestBlueprintAndSpecializationDataResult : ServerPacket
+    internal class GarrisonRequestBlueprintAndSpecializationDataResult : ServerPacket
     {
         public GarrisonRequestBlueprintAndSpecializationDataResult() : base(ServerOpcodes.GarrisonRequestBlueprintAndSpecializationDataResult, ConnectionType.Instance) { }
 
@@ -224,14 +224,14 @@ namespace Game.Networking.Packets
         public List<uint> BlueprintsKnown = null;
     }
 
-    class GarrisonGetMapData : ClientPacket
+    internal class GarrisonGetMapData : ClientPacket
     {
         public GarrisonGetMapData(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class GarrisonMapDataResponse : ServerPacket
+    internal class GarrisonMapDataResponse : ServerPacket
     {
         public GarrisonMapDataResponse() : base(ServerOpcodes.GarrisonMapDataResponse, ConnectionType.Instance) { }
 
@@ -245,7 +245,7 @@ namespace Game.Networking.Packets
         public List<GarrisonBuildingMapData> Buildings = new List<GarrisonBuildingMapData>();
     }
 
-    class GarrisonPlotPlaced : ServerPacket
+    internal class GarrisonPlotPlaced : ServerPacket
     {
         public GarrisonPlotPlaced() : base(ServerOpcodes.GarrisonPlotPlaced, ConnectionType.Instance) { }
 
@@ -259,7 +259,7 @@ namespace Game.Networking.Packets
         public GarrisonPlotInfo PlotInfo;
     }
 
-    class GarrisonPlotRemoved : ServerPacket
+    internal class GarrisonPlotRemoved : ServerPacket
     {
         public GarrisonPlotRemoved() : base(ServerOpcodes.GarrisonPlotRemoved, ConnectionType.Instance) { }
 
@@ -271,7 +271,7 @@ namespace Game.Networking.Packets
         public uint GarrPlotInstanceID;
     }
 
-    class GarrisonAddFollowerResult : ServerPacket
+    internal class GarrisonAddFollowerResult : ServerPacket
     {
         public GarrisonAddFollowerResult() : base(ServerOpcodes.GarrisonAddFollowerResult, ConnectionType.Instance) { }
 
@@ -287,7 +287,7 @@ namespace Game.Networking.Packets
         public GarrisonError Result;
     }
 
-    class GarrisonRemoveFollowerResult : ServerPacket
+    internal class GarrisonRemoveFollowerResult : ServerPacket
     {
         public GarrisonRemoveFollowerResult() : base(ServerOpcodes.GarrisonRemoveFollowerResult) { }
 
@@ -305,7 +305,7 @@ namespace Game.Networking.Packets
         public uint Destroyed;
     }
 
-    class GarrisonBuildingActivated : ServerPacket
+    internal class GarrisonBuildingActivated : ServerPacket
     {
         public GarrisonBuildingActivated() : base(ServerOpcodes.GarrisonBuildingActivated, ConnectionType.Instance) { }
 
@@ -400,7 +400,7 @@ namespace Game.Networking.Packets
         public string CustomName = "";
     }
 
-    class GarrisonMission
+    internal class GarrisonMission
     {
         public void Write(WorldPacket data)
         {
@@ -430,7 +430,7 @@ namespace Game.Networking.Packets
         public float MissionScalar = 1.0f;
     }
 
-    struct GarrisonMissionReward
+    internal struct GarrisonMissionReward
     {
         public void Write(WorldPacket data)
         {
@@ -458,7 +458,7 @@ namespace Game.Networking.Packets
         public Optional<ItemInstance> ItemInstance;
     }
 
-    struct GarrisonMissionBonusAbility
+    internal struct GarrisonMissionBonusAbility
     {
         public void Write(WorldPacket data)
         {
@@ -470,7 +470,7 @@ namespace Game.Networking.Packets
         public long StartTime;
     }
 
-    struct GarrisonTalentSocketData
+    internal struct GarrisonTalentSocketData
     {
         public int SoulbindConduitID;
         public int SoulbindConduitRank;
@@ -482,7 +482,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonTalent
+    internal struct GarrisonTalent
     {
         public void Write(WorldPacket data)
         {
@@ -504,7 +504,7 @@ namespace Game.Networking.Packets
         public Optional<GarrisonTalentSocketData> Socket;
     }
 
-    struct GarrisonCollectionEntry
+    internal struct GarrisonCollectionEntry
     {
         public int EntryID;
         public int Rank;
@@ -516,7 +516,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonCollection
+    internal class GarrisonCollection
     {
         public int Type;
         public List<GarrisonCollectionEntry> Entries = new List<GarrisonCollectionEntry>();
@@ -530,7 +530,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonEventEntry
+    internal struct GarrisonEventEntry
     {
         public int EntryID;
         public int EventValue;
@@ -542,7 +542,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonEventList
+    internal class GarrisonEventList
     {
         public int Type;
         public List<GarrisonEventEntry> Events = new List<GarrisonEventEntry>();
@@ -556,7 +556,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonInfo
+    internal class GarrisonInfo
     {
         public void Write(WorldPacket data)
         {
@@ -649,7 +649,7 @@ namespace Game.Networking.Packets
         public List<int> ArchivedMissions = new List<int>();
     }
 
-    struct FollowerSoftCapInfo
+    internal struct FollowerSoftCapInfo
     {
         public void Write(WorldPacket data)
         {
@@ -661,7 +661,7 @@ namespace Game.Networking.Packets
         public uint Count;
     }
 
-    struct GarrisonRemoteBuildingInfo
+    internal struct GarrisonRemoteBuildingInfo
     {
         public GarrisonRemoteBuildingInfo(uint plotInstanceId, uint buildingId)
         {
@@ -679,7 +679,7 @@ namespace Game.Networking.Packets
         public uint GarrBuildingID;
     }
 
-    class GarrisonRemoteSiteInfo
+    internal class GarrisonRemoteSiteInfo
     {
         public void Write(WorldPacket data)
         {
@@ -693,7 +693,7 @@ namespace Game.Networking.Packets
         public List<GarrisonRemoteBuildingInfo> Buildings = new List<GarrisonRemoteBuildingInfo>();
     }
 
-    struct GarrisonBuildingMapData
+    internal struct GarrisonBuildingMapData
     {
         public GarrisonBuildingMapData(uint buildingPlotInstId, Position pos)
         {

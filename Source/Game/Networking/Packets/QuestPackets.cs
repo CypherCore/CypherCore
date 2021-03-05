@@ -272,7 +272,7 @@ namespace Game.Networking.Packets
         public byte ObjectiveType;
     }
 
-    class QuestUpdateAddCreditSimple : ServerPacket
+    internal class QuestUpdateAddCreditSimple : ServerPacket
     {
         public QuestUpdateAddCreditSimple() : base(ServerOpcodes.QuestUpdateAddCreditSimple, ConnectionType.Instance) { }
 
@@ -288,7 +288,7 @@ namespace Game.Networking.Packets
         public QuestObjectiveType ObjectiveType;
     }
 
-    class QuestUpdateAddPvPCredit : ServerPacket
+    internal class QuestUpdateAddPvPCredit : ServerPacket
     {
         public QuestUpdateAddPvPCredit() : base(ServerOpcodes.QuestUpdateAddPvpCredit, ConnectionType.Instance) { }
 
@@ -649,7 +649,7 @@ namespace Game.Networking.Packets
         public string Greeting = "";
     }
 
-    class QuestUpdateComplete : ServerPacket
+    internal class QuestUpdateComplete : ServerPacket
     {
         public QuestUpdateComplete() : base(ServerOpcodes.QuestUpdateComplete) { }
 
@@ -661,7 +661,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
     }
 
-    class QuestConfirmAcceptResponse : ServerPacket
+    internal class QuestConfirmAcceptResponse : ServerPacket
     {
         public QuestConfirmAcceptResponse() : base(ServerOpcodes.QuestConfirmAccept) { }
 
@@ -679,7 +679,7 @@ namespace Game.Networking.Packets
         public string QuestTitle;
     }
 
-    class QuestConfirmAccept : ClientPacket
+    internal class QuestConfirmAccept : ClientPacket
     {
         public QuestConfirmAccept(WorldPacket packet) : base(packet) { }
 
@@ -691,7 +691,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
     }
 
-    class QuestPushResultResponse : ServerPacket
+    internal class QuestPushResultResponse : ServerPacket
     {
         public QuestPushResultResponse() : base(ServerOpcodes.QuestPushResult) { }
 
@@ -705,7 +705,7 @@ namespace Game.Networking.Packets
         public QuestPushReason Result;
     }
 
-    class QuestPushResult : ClientPacket
+    internal class QuestPushResult : ClientPacket
     {
         public QuestPushResult(WorldPacket packet) : base(packet) { }
 
@@ -721,7 +721,7 @@ namespace Game.Networking.Packets
         public QuestPushReason Result;
     }
 
-    class QuestGiverInvalidQuest : ServerPacket
+    internal class QuestGiverInvalidQuest : ServerPacket
     {
         public QuestGiverInvalidQuest() : base(ServerOpcodes.QuestGiverInvalidQuest) { }
 
@@ -743,7 +743,7 @@ namespace Game.Networking.Packets
         public string ReasonText = "";
     }
 
-    class QuestUpdateFailedTimer : ServerPacket
+    internal class QuestUpdateFailedTimer : ServerPacket
     {
         public QuestUpdateFailedTimer() : base(ServerOpcodes.QuestUpdateFailedTimer) { }
 
@@ -755,7 +755,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
     }
 
-    class QuestGiverQuestFailed : ServerPacket
+    internal class QuestGiverQuestFailed : ServerPacket
     {
         public QuestGiverQuestFailed() : base(ServerOpcodes.QuestGiverQuestFailed) { }
 
@@ -769,7 +769,7 @@ namespace Game.Networking.Packets
         public InventoryResult Reason;
     }
 
-    class PushQuestToParty : ClientPacket
+    internal class PushQuestToParty : ClientPacket
     {
         public PushQuestToParty(WorldPacket packet) : base(packet) { }
 
@@ -781,7 +781,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
     }
 
-    class DailyQuestsReset : ServerPacket
+    internal class DailyQuestsReset : ServerPacket
     {
         public DailyQuestsReset() : base(ServerOpcodes.DailyQuestsReset) { }
 
@@ -793,21 +793,21 @@ namespace Game.Networking.Packets
         public int Count;
     }
 
-    class QuestLogFull : ServerPacket
+    internal class QuestLogFull : ServerPacket
     {
         public QuestLogFull() : base(ServerOpcodes.QuestLogFull) { }
 
         public override void Write() { }
     }
 
-    class RequestWorldQuestUpdate : ClientPacket
+    internal class RequestWorldQuestUpdate : ClientPacket
     {
         public RequestWorldQuestUpdate(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class WorldQuestUpdateResponse : ServerPacket
+    internal class WorldQuestUpdateResponse : ServerPacket
     {
         public WorldQuestUpdateResponse() : base(ServerOpcodes.WorldQuestUpdateResponse, ConnectionType.Instance) { }
 
@@ -825,10 +825,10 @@ namespace Game.Networking.Packets
             }
         }
 
-        List<WorldQuestUpdateInfo> WorldQuestUpdates = new List<WorldQuestUpdateInfo>();
+        private List<WorldQuestUpdateInfo> WorldQuestUpdates = new List<WorldQuestUpdateInfo>();
     }
 
-    class DisplayPlayerChoice : ServerPacket
+    internal class DisplayPlayerChoice : ServerPacket
     {
         public DisplayPlayerChoice() : base(ServerOpcodes.DisplayPlayerChoice) { }
 
@@ -862,7 +862,7 @@ namespace Game.Networking.Packets
         public bool KeepOpenAfterChoice;
     }
 
-    class ChoiceResponse : ClientPacket
+    internal class ChoiceResponse : ClientPacket
     {
         public ChoiceResponse(WorldPacket packet) : base(packet) { }
 
@@ -1181,7 +1181,7 @@ namespace Game.Networking.Packets
         public int Amount;
     }
 
-    struct WorldQuestUpdateInfo
+    internal struct WorldQuestUpdateInfo
     {
         public WorldQuestUpdateInfo(int lastUpdate, uint questID, uint timer, int variableID, int value)
         {
@@ -1213,7 +1213,7 @@ namespace Game.Networking.Packets
         public int Quantity;
     }
 
-    class PlayerChoiceResponseReward
+    internal class PlayerChoiceResponseReward
     {
         public void Write(WorldPacket data)
         {
@@ -1258,7 +1258,7 @@ namespace Game.Networking.Packets
         public List<PlayerChoiceResponseRewardEntry> ItemChoices = new List<PlayerChoiceResponseRewardEntry>();
     }
 
-    struct PlayerChoiceResponseMawPower
+    internal struct PlayerChoiceResponseMawPower
     {
         public int Unused901_1;
         public int TypeArtFileID;
@@ -1280,7 +1280,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class PlayerChoiceResponse
+    internal class PlayerChoiceResponse
     {    
         public int ResponseID;
         public ushort ResponseIdentifier;

@@ -25,12 +25,12 @@ namespace Framework.Database
         bool Execute<T>(MySqlBase<T> mySqlBase);
     }
 
-    class DatabaseWorker<T>
+    internal class DatabaseWorker<T>
     {
-        Thread _workerThread;
-        volatile bool _cancelationToken;
-        ProducerConsumerQueue<ISqlOperation> _queue;
-        MySqlBase<T> _mySqlBase;
+        private Thread _workerThread;
+        private volatile bool _cancelationToken;
+        private ProducerConsumerQueue<ISqlOperation> _queue;
+        private MySqlBase<T> _mySqlBase;
 
         public DatabaseWorker(ProducerConsumerQueue<ISqlOperation> newQueue, MySqlBase<T> mySqlBase)
         {
@@ -41,7 +41,7 @@ namespace Framework.Database
             _workerThread.Start();
         }
 
-        void WorkerThread()
+        private void WorkerThread()
         {
             if (_queue == null)
                 return;

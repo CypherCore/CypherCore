@@ -30,9 +30,9 @@ namespace Game.Entities
 {
     public class Pet : Guardian
     {
-        const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
-        const int HappinessLevelSize = 333000;
-        const float PetXPFactor = 0.05f;
+        private const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
+        private const int HappinessLevelSize = 333000;
+        private const float PetXPFactor = 0.05f;
 
         public Pet(Player owner, PetType type = PetType.Max) : base(null, owner, true)
         {
@@ -708,7 +708,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool CreateBaseAtTamed(CreatureTemplate cinfo, Map map)
+        private bool CreateBaseAtTamed(CreatureTemplate cinfo, Map map)
         {
             Log.outDebug(LogFilter.Pet, "CreateBaseForTamed");
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry))
@@ -766,7 +766,7 @@ namespace Game.Entities
                 return 0;                                           //food too low level
         }
 
-        void _LoadSpellCooldowns()
+        private void _LoadSpellCooldowns()
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -778,7 +778,7 @@ namespace Game.Entities
             GetSpellHistory().LoadFromDB<Pet>(cooldownsResult, chargesResult);
         }
 
-        void _LoadSpells()
+        private void _LoadSpells()
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -794,7 +794,7 @@ namespace Game.Entities
             }
         }
 
-        void _SaveSpells(SQLTransaction trans)
+        private void _SaveSpells(SQLTransaction trans)
         {
             foreach (var pair in m_spells.ToList())
             {
@@ -840,7 +840,7 @@ namespace Game.Entities
             }
         }
 
-        void _LoadAuras(uint timediff)
+        private void _LoadAuras(uint timediff)
         {
             Log.outDebug(LogFilter.Pet, "Loading auras for {0}", GetGUID().ToString());
 
@@ -943,7 +943,7 @@ namespace Game.Entities
             }
         }
 
-        void _SaveAuras(SQLTransaction trans)
+        private void _SaveAuras(SQLTransaction trans)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
@@ -1002,7 +1002,7 @@ namespace Game.Entities
             }
         }
 
-        bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
+        private bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -1122,7 +1122,7 @@ namespace Game.Entities
             return true;
         }
 
-        void LearnSpells(List<uint> spellIds)
+        private void LearnSpells(List<uint> spellIds)
         {
             var packet = new PetLearnedSpells();
 
@@ -1138,7 +1138,7 @@ namespace Game.Entities
                 GetOwner().SendPacket(packet);
         }
 
-        void InitLevelupSpellsForLevel()
+        private void InitLevelupSpellsForLevel()
         {
             var level = GetLevel();
             var levelupSpells = GetCreatureTemplate().Family != 0 ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) : null;
@@ -1176,7 +1176,7 @@ namespace Game.Entities
             }
         }
 
-        bool UnlearnSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
+        private bool UnlearnSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
         {
             if (RemoveSpell(spellId, learnPrev, clearActionBar))
             {
@@ -1191,7 +1191,7 @@ namespace Game.Entities
             return false;
         }
 
-        void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
+        private void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
         {
             var packet = new PetUnlearnedSpells();
 
@@ -1248,7 +1248,7 @@ namespace Game.Entities
             return true;
         }
 
-        void CleanupActionBar()
+        private void CleanupActionBar()
         {
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
@@ -1369,7 +1369,7 @@ namespace Game.Entities
         }
 
         // Get all passive spells in our skill line
-        void LearnPetPassives()
+        private void LearnPetPassives()
         {
             var cInfo = GetCreatureTemplate();
             if (cInfo == null)
@@ -1390,7 +1390,7 @@ namespace Game.Entities
             }
         }
 
-        void CastPetAuras(bool current)
+        private void CastPetAuras(bool current)
         {
             var owner = GetOwner();
 
@@ -1421,7 +1421,7 @@ namespace Game.Entities
                 CastSpell(this, auraId, true);
         }
 
-        bool IsPetAura(Aura aura)
+        private bool IsPetAura(Aura aura)
         {
             var owner = GetOwner();
 
@@ -1434,7 +1434,7 @@ namespace Game.Entities
             return false;
         }
 
-        void LearnSpellHighRank(uint spellid)
+        private void LearnSpellHighRank(uint spellid)
         {
             LearnSpell(spellid);
             var next = Global.SpellMgr.GetNextSpellInChain(spellid);
@@ -1515,7 +1515,7 @@ namespace Game.Entities
                 GetOwner().RemoveGroupUpdateFlag(GroupUpdateFlags.Pet);
         }
 
-        void LearnSpecializationSpells()
+        private void LearnSpecializationSpells()
         {
             var learnedSpells = new List<uint>();
 
@@ -1535,7 +1535,7 @@ namespace Game.Entities
             LearnSpells(learnedSpells);
         }
 
-        void RemoveSpecializationSpells(bool clearActionBar)
+        private void RemoveSpecializationSpells(bool clearActionBar)
         {
             var unlearnedSpells = new List<uint>();
 
@@ -1593,7 +1593,7 @@ namespace Game.Entities
             GetOwner().SendPacket(setPetSpecialization);
         }
 
-        string GenerateActionBarData()
+        private string GenerateActionBarData()
         {
             var ss = new StringBuilder();
 
@@ -1608,17 +1608,17 @@ namespace Game.Entities
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
         public new Dictionary<uint, PetSpell> m_spells = new Dictionary<uint, PetSpell>();
-        List<uint> m_autospells = new List<uint>();
+        private List<uint> m_autospells = new List<uint>();
         public bool m_removed;
 
-        PetType m_petType;
-        int m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
-        bool m_loading;
-        uint m_focusRegenTimer;
-        GroupUpdatePetFlags m_groupUpdateMask;
+        private PetType m_petType;
+        private int m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+        private bool m_loading;
+        private uint m_focusRegenTimer;
+        private GroupUpdatePetFlags m_groupUpdateMask;
 
-        DeclinedName _declinedname;
-        ushort m_petSpecialization;
+        private DeclinedName _declinedname;
+        private ushort m_petSpecialization;
     }
     public class PetSpell
     {

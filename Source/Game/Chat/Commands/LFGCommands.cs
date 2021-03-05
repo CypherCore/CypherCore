@@ -25,10 +25,10 @@ using Game.Groups;
 namespace Game.Chat
 {
     [CommandGroup("lfg", RBACPermissions.CommandLfg, true)]
-    class LFGCommands
+    internal class LFGCommands
     {
         [Command("player", RBACPermissions.CommandLfgPlayer, true)]
-        static bool HandleLfgPlayerInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleLfgPlayerInfoCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -39,7 +39,7 @@ namespace Game.Chat
         }
 
         [Command("group", RBACPermissions.CommandLfgGroup, true)]
-        static bool HandleLfgGroupInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleLfgGroupInfoCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -91,7 +91,7 @@ namespace Game.Chat
         }
 
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
-        static bool HandleLfgOptionsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleLfgOptionsCommand(StringArguments args, CommandHandler handler)
         {
             var str = args.NextString();
             var options = -1;
@@ -111,21 +111,21 @@ namespace Game.Chat
         }
 
         [Command("queue", RBACPermissions.CommandLfgQueue, true)]
-        static bool HandleLfgQueueInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleLfgQueueInfoCommand(StringArguments args, CommandHandler handler)
         {
             handler.SendSysMessage(Global.LFGMgr.DumpQueueInfo(args.NextBoolean()));
             return true;
         }
 
         [Command("clean", RBACPermissions.CommandLfgClean, true)]
-        static bool HandleLfgCleanCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleLfgCleanCommand(StringArguments args, CommandHandler handler)
         {
             handler.SendSysMessage(CypherStrings.LfgClean);
             Global.LFGMgr.Clean();
             return true;
         }
 
-        static void GetPlayerInfo(CommandHandler handler, Player player)
+        private static void GetPlayerInfo(CommandHandler handler, Player player)
         {
             if (!player)
                 return;

@@ -22,7 +22,7 @@ using System;
 
 namespace Game.AI
 {
-    enum FollowState
+    internal enum FollowState
     {
         None = 0x000,
         Inprogress = 0x001,                    //must always have this state for any follow
@@ -33,7 +33,7 @@ namespace Game.AI
         PostEvent = 0x020                      //can be set at complete and allow post event to run
     }
 
-    class FollowerAI : ScriptedAI
+    internal class FollowerAI : ScriptedAI
     {
         public FollowerAI(Creature creature) : base(creature)
         {
@@ -62,7 +62,7 @@ namespace Game.AI
         //This part provides assistance to a player that are attacked by who, even if out of normal aggro range
         //It will cause me to attack who that are attacking _any_ player (which has been confirmed may happen also on offi)
         //The flag (type_flag) is unconfirmed, but used here for further research and is a good candidate.
-        bool AssistPlayerInCombatAgainst(Unit who)
+        private bool AssistPlayerInCombatAgainst(Unit who)
         {
             if (!who || !who.GetVictim())
                 return false;
@@ -250,7 +250,7 @@ namespace Game.AI
             UpdateFollowerAI(uiDiff);
         }
 
-        void UpdateFollowerAI(uint diff)
+        private void UpdateFollowerAI(uint diff)
         {
             if (!UpdateVictim())
                 return;
@@ -275,7 +275,7 @@ namespace Game.AI
             }
         }
 
-        void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
+        private void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
             if (me.GetVictim())
             {
@@ -314,7 +314,7 @@ namespace Game.AI
             Log.outDebug(LogFilter.Scripts, "FollowerAI start follow {0} ({1})", player.GetName(), m_uiLeaderGUID.ToString());
         }
 
-        Player GetLeaderForFollower()
+        private Player GetLeaderForFollower()
         {
             var player = Global.ObjAccessor.GetPlayer(me, m_uiLeaderGUID);
             if (player)
@@ -344,7 +344,7 @@ namespace Game.AI
             return null;
         }
 
-        void SetFollowComplete(bool bWithEndEvent = false)
+        private void SetFollowComplete(bool bWithEndEvent = false)
         {
             if (me.HasUnitState(UnitState.Follow))
             {
@@ -366,15 +366,15 @@ namespace Game.AI
             AddFollowState(FollowState.Complete);
         }
 
-        bool HasFollowState(FollowState uiFollowState) { return (m_uiFollowState & uiFollowState) != 0; }
+        private bool HasFollowState(FollowState uiFollowState) { return (m_uiFollowState & uiFollowState) != 0; }
 
-        void AddFollowState(FollowState uiFollowState) { m_uiFollowState |= uiFollowState; }
-        void RemoveFollowState(FollowState uiFollowState) { m_uiFollowState &= ~uiFollowState; }
+        private void AddFollowState(FollowState uiFollowState) { m_uiFollowState |= uiFollowState; }
+        private void RemoveFollowState(FollowState uiFollowState) { m_uiFollowState &= ~uiFollowState; }
 
-        ObjectGuid m_uiLeaderGUID;
-        uint m_uiUpdateFollowTimer;
-        FollowState m_uiFollowState;
+        private ObjectGuid m_uiLeaderGUID;
+        private uint m_uiUpdateFollowTimer;
+        private FollowState m_uiFollowState;
 
-        Quest m_pQuestForFollow;                     //normally we have a quest
+        private Quest m_pQuestForFollow;                     //normally we have a quest
     }
 }

@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class TransmogrifyItems : ClientPacket
+    internal class TransmogrifyItems : ClientPacket
     {
         public TransmogrifyItems(WorldPacket packet) : base(packet) { }
 
@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
         public bool CurrentSpecOnly;
     }
 
-    class AccountTransmogUpdate : ServerPacket
+    internal class AccountTransmogUpdate : ServerPacket
     {
         public AccountTransmogUpdate() : base(ServerOpcodes.AccountTransmogUpdate) { }
 
@@ -69,7 +69,7 @@ namespace Game.Networking.Packets
         public List<uint> NewAppearances = new List<uint>();
     }
 
-    class TransmogrifyNPC : ServerPacket
+    internal class TransmogrifyNPC : ServerPacket
     {
         public TransmogrifyNPC(ObjectGuid guid) : base(ServerOpcodes.TransmogrifyNpc, ConnectionType.Instance)
         {
@@ -81,10 +81,10 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        ObjectGuid Guid;
+        private ObjectGuid Guid;
     }
 
-    struct TransmogrifyItem
+    internal struct TransmogrifyItem
     {
         public void Read(WorldPacket data)
         {

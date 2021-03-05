@@ -119,7 +119,7 @@ namespace Game.Scripting
 
             public abstract bool CheckEffect(SpellInfo spellEntry, uint effIndex);
 
-            uint _effIndex;
+            private uint _effIndex;
         }
 
         public byte m_currentScriptState { get; set; }
@@ -165,7 +165,7 @@ namespace Game.Scripting
                 pCastHandlerScript();
             }
 
-            SpellCastFnType pCastHandlerScript;
+            private SpellCastFnType pCastHandlerScript;
         }
 
         public class CheckCastHandler
@@ -180,7 +180,7 @@ namespace Game.Scripting
                 return _checkCastHandlerScript();
             }
 
-            SpellCheckCastFnType _checkCastHandlerScript;
+            private SpellCheckCastFnType _checkCastHandlerScript;
         }
 
         public class EffectHandler : EffectHook
@@ -209,8 +209,8 @@ namespace Game.Scripting
                 _pEffectHandlerScript(effIndex);
             }
 
-            SpellEffectName _effName;
-            SpellEffectFnType _pEffectHandlerScript;
+            private SpellEffectName _effName;
+            private SpellEffectFnType _pEffectHandlerScript;
         }
 
         public class BeforeHitHandler
@@ -225,7 +225,7 @@ namespace Game.Scripting
                 _pBeforeHitHandlerScript(missInfo);
             }
 
-            SpellBeforeHitFnType _pBeforeHitHandlerScript;
+            private SpellBeforeHitFnType _pBeforeHitHandlerScript;
         }
 
         public class HitHandler
@@ -240,7 +240,7 @@ namespace Game.Scripting
                 _pHitHandlerScript();
             }
 
-            SpellHitFnType _pHitHandlerScript;
+            private SpellHitFnType _pHitHandlerScript;
         }
 
         public class TargetHook : EffectHook
@@ -303,9 +303,9 @@ namespace Game.Scripting
 
             public Targets GetTarget() { return _targetType; }
 
-            Targets _targetType;
-            bool _area;
-            bool _dest;
+            private Targets _targetType;
+            private bool _area;
+            private bool _dest;
         }
 
         public class ObjectAreaTargetSelectHandler : TargetHook
@@ -321,7 +321,7 @@ namespace Game.Scripting
                 _pObjectAreaTargetSelectHandlerScript(targets);
             }
 
-            SpellObjectAreaTargetSelectFnType _pObjectAreaTargetSelectHandlerScript;
+            private SpellObjectAreaTargetSelectFnType _pObjectAreaTargetSelectHandlerScript;
         }
 
         public class ObjectTargetSelectHandler : TargetHook
@@ -337,7 +337,7 @@ namespace Game.Scripting
                 pObjectTargetSelectHandlerScript(ref target);
             }
 
-            SpellObjectTargetSelectFnType pObjectTargetSelectHandlerScript;
+            private SpellObjectTargetSelectFnType pObjectTargetSelectHandlerScript;
         }
 
         public class DestinationTargetSelectHandler : TargetHook
@@ -353,7 +353,7 @@ namespace Game.Scripting
                 DestinationTargetSelectHandlerScript(ref target);
             }
 
-            SpellDestinationTargetSelectFnType DestinationTargetSelectHandlerScript;
+            private SpellDestinationTargetSelectFnType DestinationTargetSelectHandlerScript;
         }
 
         public override bool _Validate(SpellInfo entry)
@@ -439,9 +439,9 @@ namespace Game.Scripting
                 || m_currentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
 
-        Spell m_spell;
-        uint m_hitPreventEffectMask;
-        uint m_hitPreventDefaultEffectMask;
+        private Spell m_spell;
+        private uint m_hitPreventEffectMask;
+        private uint m_hitPreventDefaultEffectMask;
 
         // SpellScript interface
         // hooks to which you can attach your functions
@@ -533,10 +533,10 @@ namespace Game.Scripting
         public Unit GetExplTargetUnit() { return m_spell.m_targets.GetUnitTarget(); }
 
         // returns: GameObject which was selected as an explicit spell target or null if there's no target
-        GameObject GetExplTargetGObj() { return m_spell.m_targets.GetGOTarget(); }
+        private GameObject GetExplTargetGObj() { return m_spell.m_targets.GetGOTarget(); }
 
         // returns: Item which was selected as an explicit spell target or null if there's no target
-        Item GetExplTargetItem() { return m_spell.m_targets.GetItemTarget(); }
+        private Item GetExplTargetItem() { return m_spell.m_targets.GetItemTarget(); }
 
         // methods useable only during spell hit on target, or during spell launch on target:
         // returns: target of current effect if it was Unit otherwise null
@@ -576,7 +576,7 @@ namespace Game.Scripting
                 return null;
         }
         // returns: target of current effect if it was Item otherwise null
-        Item GetHitItem()
+        private Item GetHitItem()
         {
             if (!IsInTargetHook())
             {
@@ -646,7 +646,8 @@ namespace Game.Scripting
             }
             m_spell.m_healing = heal;
         }
-        void PreventHitHeal() { SetHitHeal(0); }
+
+        private void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
         // returns current spell hit target aura
         public Aura GetHitAura()
@@ -786,7 +787,7 @@ namespace Game.Scripting
                 return pHandlerScript(target);
             }
 
-            AuraCheckAreaTargetDelegate pHandlerScript;
+            private AuraCheckAreaTargetDelegate pHandlerScript;
         }
         public class AuraDispelHandler
         {
@@ -796,7 +797,7 @@ namespace Game.Scripting
                 pHandlerScript(dispelInfo);
             }
 
-            AuraDispelDelegate pHandlerScript;
+            private AuraDispelDelegate pHandlerScript;
         }
         public class EffectBase : EffectHook
         {
@@ -819,7 +820,7 @@ namespace Game.Scripting
                 return (effAurName == AuraType.Any) || (effect.ApplyAuraName == effAurName);
             }
 
-            AuraType effAurName;
+            private AuraType effAurName;
         }
 
         public class EffectPeriodicHandler : EffectBase
@@ -833,7 +834,8 @@ namespace Game.Scripting
             {
                 pEffectHandlerScript(_aurEff);
             }
-            AuraEffectPeriodicDelegate pEffectHandlerScript;
+
+            private AuraEffectPeriodicDelegate pEffectHandlerScript;
         }
         public class EffectUpdatePeriodicHandler : EffectBase
         {
@@ -844,7 +846,7 @@ namespace Game.Scripting
             }
             public void Call(AuraEffect aurEff) { pEffectHandlerScript(aurEff); }
 
-            AuraEffectUpdatePeriodicDelegate pEffectHandlerScript;
+            private AuraEffectUpdatePeriodicDelegate pEffectHandlerScript;
         }
         public class EffectCalcAmountHandler : EffectBase
         {
@@ -872,7 +874,7 @@ namespace Game.Scripting
                 pEffectHandlerScript(aurEff, isPeriodic, periodicTimer);
             }
 
-            AuraEffectCalcPeriodicDelegate pEffectHandlerScript;
+            private AuraEffectCalcPeriodicDelegate pEffectHandlerScript;
         }
         public class EffectCalcSpellModHandler : EffectBase
         {
@@ -886,7 +888,7 @@ namespace Game.Scripting
                 pEffectHandlerScript(aurEff, ref spellMod);
             }
 
-            AuraEffectCalcSpellModDelegate pEffectHandlerScript;
+            private AuraEffectCalcSpellModDelegate pEffectHandlerScript;
         }
         public class EffectApplyHandler : EffectBase
         {
@@ -902,8 +904,8 @@ namespace Game.Scripting
                     pEffectHandlerScript(_aurEff, _mode);
             }
 
-            AuraEffectApplicationModeDelegate pEffectHandlerScript;
-            AuraEffectHandleModes mode;
+            private AuraEffectApplicationModeDelegate pEffectHandlerScript;
+            private AuraEffectHandleModes mode;
         }
         public class EffectAbsorbHandler : EffectBase
         {
@@ -918,7 +920,7 @@ namespace Game.Scripting
                 pEffectHandlerScript(aurEff, dmgInfo, ref absorbAmount);
             }
 
-            AuraEffectAbsorbDelegate pEffectHandlerScript;
+            private AuraEffectAbsorbDelegate pEffectHandlerScript;
         }
         public class EffectManaShieldHandler : EffectBase
         {
@@ -932,7 +934,7 @@ namespace Game.Scripting
                 pEffectHandlerScript(aurEff, dmgInfo, ref absorbAmount);
             }
 
-            AuraEffectAbsorbDelegate pEffectHandlerScript;
+            private AuraEffectAbsorbDelegate pEffectHandlerScript;
         }
         public class EffectSplitHandler : EffectBase
         {
@@ -946,7 +948,7 @@ namespace Game.Scripting
                 pEffectHandlerScript(aurEff, dmgInfo, splitAmount);
             }
 
-            AuraEffectSplitDelegate pEffectHandlerScript;
+            private AuraEffectSplitDelegate pEffectHandlerScript;
         }
         public class CheckProcHandler
         {
@@ -959,7 +961,7 @@ namespace Game.Scripting
                 return _HandlerScript(eventInfo);
             }
 
-            AuraCheckProcDelegate _HandlerScript;
+            private AuraCheckProcDelegate _HandlerScript;
         }
         public class CheckEffectProcHandler : EffectBase
         {
@@ -973,7 +975,7 @@ namespace Game.Scripting
                 return _HandlerScript(aurEff, eventInfo);
             }
 
-            AuraCheckEffectProcDelegate _HandlerScript;
+            private AuraCheckEffectProcDelegate _HandlerScript;
         }
 
         public class AuraProcHandler
@@ -988,7 +990,7 @@ namespace Game.Scripting
                 _HandlerScript(eventInfo);
             }
 
-            AuraProcDelegate _HandlerScript;
+            private AuraProcDelegate _HandlerScript;
         }
         public class EffectProcHandler : EffectBase
         {
@@ -1001,7 +1003,7 @@ namespace Game.Scripting
                 _EffectHandlerScript(aurEff, eventInfo);
             }
 
-            AuraEffectProcDelegate _EffectHandlerScript;
+            private AuraEffectProcDelegate _EffectHandlerScript;
         }
 
         public AuraScript()
@@ -1152,11 +1154,11 @@ namespace Game.Scripting
             }
         }
 
-        Aura m_aura;
-        AuraApplication m_auraApplication;
-        bool m_defaultActionPrevented;
+        private Aura m_aura;
+        private AuraApplication m_auraApplication;
+        private bool m_defaultActionPrevented;
 
-        class ScriptStateStore
+        private class ScriptStateStore
         {
             public AuraApplication _auraApplication;
             public byte _currentScriptState;
@@ -1168,7 +1170,8 @@ namespace Game.Scripting
                 _defaultActionPrevented = defaultActionPrevented;
             }
         }
-        Stack<ScriptStateStore> m_scriptStates = new Stack<ScriptStateStore>();
+
+        private Stack<ScriptStateStore> m_scriptStates = new Stack<ScriptStateStore>();
 
         // AuraScript interface
         // hooks to which you can attach your functions
@@ -1333,7 +1336,7 @@ namespace Game.Scripting
         // returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)
         public Unit GetUnitOwner() { return m_aura.GetUnitOwner(); }
         // returns owner if it's dynobj, null otherwise
-        DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
+        private DynamicObject GetDynobjOwner() { return m_aura.GetDynobjOwner(); }
 
         // removes aura with remove mode (see AuraRemoveMode enum)
         public void Remove(AuraRemoveMode removeMode = 0) { m_aura.Remove(removeMode); }
@@ -1341,39 +1344,41 @@ namespace Game.Scripting
         public Aura GetAura() { return m_aura; }
 
         // returns type of the aura, may be dynobj owned aura or unit owned aura
-        AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
+        private AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
 
         // aura duration manipulation - when duration goes to 0 aura is removed
-        int GetDuration() { return m_aura.GetDuration(); }
+        private int GetDuration() { return m_aura.GetDuration(); }
         public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
         // sets duration to maxduration
-        void RefreshDuration() { m_aura.RefreshDuration(); }
-        long GetApplyTime() { return m_aura.GetApplyTime(); }
+        private void RefreshDuration() { m_aura.RefreshDuration(); }
+        private long GetApplyTime() { return m_aura.GetApplyTime(); }
         public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
-        void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
-        int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
+        private void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
+
+        private int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
         // expired - duration just went to 0
         public bool IsExpired() { return m_aura.IsExpired(); }
         // permament - has infinite duration
-        bool IsPermanent() { return m_aura.IsPermanent(); }
+        private bool IsPermanent() { return m_aura.IsPermanent(); }
 
         // charges manipulation - 0 - not charged aura
-        byte GetCharges() { return m_aura.GetCharges(); }
-        void SetCharges(byte charges) { m_aura.SetCharges(charges); }
-        byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
-        bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
+        private byte GetCharges() { return m_aura.GetCharges(); }
+        private void SetCharges(byte charges) { m_aura.SetCharges(charges); }
+        private byte CalcMaxCharges() { return m_aura.CalcMaxCharges(); }
+
+        private bool ModCharges(sbyte num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModCharges(num, removeMode); }
         // returns true if last charge dropped
-        bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
+        private bool DropCharge(AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.DropCharge(removeMode); }
 
         // stack amount manipulation
         public byte GetStackAmount() { return m_aura.GetStackAmount(); }
-        void SetStackAmount(byte num) { m_aura.SetStackAmount(num); }
+        private void SetStackAmount(byte num) { m_aura.SetStackAmount(num); }
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default) { return m_aura.ModStackAmount(num, removeMode); }
 
         // passive - "working in background", not saved, not removed by immunities, not seen by player
-        bool IsPassive() { return m_aura.IsPassive(); }
+        private bool IsPassive() { return m_aura.IsPassive(); }
         // death persistent - not removed on death
-        bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
+        private bool IsDeathPersistent() { return m_aura.IsDeathPersistent(); }
 
         // check if aura has effect of given effindex
         public bool HasEffect(byte effIndex) { return m_aura.HasEffect(effIndex); }
@@ -1381,7 +1386,7 @@ namespace Game.Scripting
         public AuraEffect GetEffect(byte effIndex) { return m_aura.GetEffect(effIndex); }
 
         // check if aura has effect of given aura type
-        bool HasEffectType(AuraType type)
+        private bool HasEffectType(AuraType type)
         {
             return m_aura.HasEffectType(type);
         }

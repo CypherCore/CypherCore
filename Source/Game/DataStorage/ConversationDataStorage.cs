@@ -25,7 +25,7 @@ namespace Game.DataStorage
 {
     public class ConversationDataStorage : Singleton<ConversationDataStorage>
     {
-        ConversationDataStorage() { }
+        private ConversationDataStorage() { }
 
         public void LoadConversationTemplates()
         {
@@ -210,9 +210,9 @@ namespace Game.DataStorage
             return _conversationTemplateStorage.LookupByKey(conversationId);
         }
 
-        Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new Dictionary<uint, ConversationTemplate>();
-        Dictionary<uint, ConversationActorTemplate> _conversationActorTemplateStorage = new Dictionary<uint, ConversationActorTemplate>();
-        Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new Dictionary<uint, ConversationLineTemplate>();
+        private Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new Dictionary<uint, ConversationTemplate>();
+        private Dictionary<uint, ConversationActorTemplate> _conversationActorTemplateStorage = new Dictionary<uint, ConversationActorTemplate>();
+        private Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new Dictionary<uint, ConversationLineTemplate>();
     }
 
     public class ConversationActorTemplate

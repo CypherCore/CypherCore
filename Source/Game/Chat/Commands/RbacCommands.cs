@@ -24,10 +24,10 @@ using System.Collections.Generic;
 namespace Game.Chat.Commands
 {
     [CommandGroup("rbac", RBACPermissions.CommandRbac, true)]
-    class RbacComands
+    internal class RbacComands
     {
         [Command("list", RBACPermissions.CommandRbacList, true)]
-        static bool HandleRBACListPermissionsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleRBACListPermissionsCommand(StringArguments args, CommandHandler handler)
         {
             var id = args.NextUInt32();
 
@@ -63,10 +63,10 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("account", RBACPermissions.CommandRbacAcc, true)]
-        class RbacAccountCommands
+        private class RbacAccountCommands
         {
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
-            static bool HandleRBACPermGrantCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRBACPermGrantCommand(StringArguments args, CommandHandler handler)
             {
                 var command = ReadParams(args, handler);
                 if (command == null)
@@ -100,7 +100,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
-            static bool HandleRBACPermDenyCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRBACPermDenyCommand(StringArguments args, CommandHandler handler)
             {
                 var command = ReadParams(args, handler);
 
@@ -135,7 +135,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
-            static bool HandleRBACPermRevokeCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRBACPermRevokeCommand(StringArguments args, CommandHandler handler)
             {
                 var command = ReadParams(args, handler);
 
@@ -166,7 +166,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("list", RBACPermissions.CommandRbacAccPermList, true)]
-            static bool HandleRBACPermListCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRBACPermListCommand(StringArguments args, CommandHandler handler)
             {
                 var command = ReadParams(args, handler, false);
 
@@ -215,7 +215,7 @@ namespace Game.Chat.Commands
             }
         }
 
-        static RBACCommandData ReadParams(StringArguments args, CommandHandler handler, bool checkParams = true)
+        private static RBACCommandData ReadParams(StringArguments args, CommandHandler handler, bool checkParams = true)
         {
             if (args.Empty())
                 return null;
@@ -308,7 +308,7 @@ namespace Game.Chat.Commands
             return data;
         }
 
-        class RBACCommandData
+        private class RBACCommandData
         {
             public uint id;
             public int realmId;

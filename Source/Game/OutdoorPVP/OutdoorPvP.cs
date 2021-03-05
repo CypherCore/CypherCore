@@ -119,7 +119,7 @@ namespace Game.PvP
             }
         }
 
-        bool IsInsideObjective(Player player)
+        private bool IsInsideObjective(Player player)
         {
             foreach (var pair in m_capturePoints)
                 if (pair.Value.IsInsideObjective(player))
@@ -178,7 +178,7 @@ namespace Game.PvP
             return false;
         }
 
-        void BroadcastPacket(ServerPacket packet)
+        private void BroadcastPacket(ServerPacket packet)
         {
             // This is faster than sWorld.SendZoneMessage
             for (var team = 0; team < 2; ++team)
@@ -250,7 +250,7 @@ namespace Game.PvP
             BroadcastWorker(localizer, zoneId);
         }
 
-        void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
+        private void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
         {
             for (uint i = 0; i < SharedConst.BGTeamsCount; ++i)
             {
@@ -286,7 +286,7 @@ namespace Game.PvP
             m_capturePoints[cp.m_capturePointSpawnId] = cp;
         }
 
-        OPvPCapturePoint GetCapturePoint(ulong lowguid)
+        private OPvPCapturePoint GetCapturePoint(ulong lowguid)
         {
             return m_capturePoints.LookupByKey(lowguid);
         }
@@ -305,11 +305,11 @@ namespace Game.PvP
 
         // the map of the objectives belonging to this outdoorpvp
         public Dictionary<ulong, OPvPCapturePoint> m_capturePoints = new Dictionary<ulong, OPvPCapturePoint>();
-        List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];
+        private List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];
         public OutdoorPvPTypes m_TypeId;
-        bool m_sendUpdate;
+        private bool m_sendUpdate;
 
-        Map m_map;
+        private Map m_map;
     }
 
     public class OPvPCapturePoint
@@ -356,7 +356,7 @@ namespace Game.PvP
             SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
         }
 
-        void AddGO(uint type, ulong guid)
+        private void AddGO(uint type, ulong guid)
         {
             GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
             if (data == null)
@@ -366,7 +366,7 @@ namespace Game.PvP
             m_ObjectTypes[guid] = type;
         }
 
-        void AddCre(uint type, ulong guid)
+        private void AddCre(uint type, ulong guid)
         {
             CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
             if (data == null)
@@ -478,7 +478,7 @@ namespace Game.PvP
             return true;
         }
 
-        bool DelCapturePoint()
+        private bool DelCapturePoint()
         {
             Global.ObjectMgr.DeleteGameObjectData(m_capturePointSpawnId);
             m_capturePointSpawnId = 0;
@@ -708,12 +708,14 @@ namespace Game.PvP
         public HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[2];
         // total shift needed to capture the objective
         public float m_maxValue;
-        float m_minValue;
+
+        private float m_minValue;
         // maximum speed of capture
-        float m_maxSpeed;
+        private float m_maxSpeed;
         // the status of the objective
         public float m_value;
-        uint m_team;
+
+        private uint m_team;
         // objective states
         public ObjectiveStates OldState { get; set; }
         public ObjectiveStates State { get; set; }
@@ -724,11 +726,11 @@ namespace Game.PvP
 
         public Dictionary<uint, ulong> m_Objects = new Dictionary<uint, ulong>();
         public Dictionary<uint, ulong> m_Creatures = new Dictionary<uint, ulong>();
-        Dictionary<ulong, uint> m_ObjectTypes = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> m_CreatureTypes = new Dictionary<ulong, uint>();
+        private Dictionary<ulong, uint> m_ObjectTypes = new Dictionary<ulong, uint>();
+        private Dictionary<ulong, uint> m_CreatureTypes = new Dictionary<ulong, uint>();
     }
 
-    class DefenseMessageBuilder : MessageBuilder
+    internal class DefenseMessageBuilder : MessageBuilder
     {
         public DefenseMessageBuilder(uint zoneId, uint id)
         {
@@ -746,8 +748,8 @@ namespace Game.PvP
             return defenseMessage;
         }
 
-        uint _zoneId; // ZoneId
-        uint _id;     // BroadcastTextId
+        private uint _zoneId; // ZoneId
+        private uint _id;     // BroadcastTextId
     }
 
     public class go_type
@@ -766,7 +768,7 @@ namespace Game.PvP
         public Quaternion rot;
     }
 
-    class creature_type
+    internal class creature_type
     {
         public creature_type(uint _entry, uint _map, float _x, float _y, float _z, float _o)
         {
@@ -777,6 +779,6 @@ namespace Game.PvP
 
         public uint entry;
         public uint map;
-        Position pos;
+        private Position pos;
     }
 }

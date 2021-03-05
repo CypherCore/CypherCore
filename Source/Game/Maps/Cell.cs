@@ -180,7 +180,7 @@ namespace Game.Maps
             }
         }
 
-        void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
+        private void VisitCircle(Visitor visitor, Map map, ICoord begin_cell, ICoord end_cell)
         {
             //here is an algorithm for 'filling' circum-squared octagon
             var x_shift = (uint)Math.Ceiling((end_cell.X_coord - begin_cell.X_coord) * 0.3f - 0.5f);
@@ -325,7 +325,7 @@ namespace Game.Maps
             high_bound = high;
         }
 
-        void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
+        private void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
         {
             begin_cell = low_bound;
             end_cell = high_bound;

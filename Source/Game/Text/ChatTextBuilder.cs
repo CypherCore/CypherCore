@@ -50,12 +50,12 @@ namespace Game.Chat
             return packet;
         }
 
-        WorldObject _source;
-        ChatMsg _msgType;
-        uint _textId;
-        Gender _gender;
-        WorldObject _target;
-        uint _achievementId;
+        private WorldObject _source;
+        private ChatMsg _msgType;
+        private uint _textId;
+        private Gender _gender;
+        private WorldObject _target;
+        private uint _achievementId;
     }
 
     public class CustomChatTextBuilder : MessageBuilder
@@ -76,14 +76,14 @@ namespace Game.Chat
             return packet;
         }
 
-        WorldObject _source;
-        ChatMsg _msgType;
-        string _text;
-        Language _language;
-        WorldObject _target;
+        private WorldObject _source;
+        private ChatMsg _msgType;
+        private string _text;
+        private Language _language;
+        private WorldObject _target;
     }
 
-    class CypherStringChatBuilder : MessageBuilder
+    internal class CypherStringChatBuilder : MessageBuilder
     {
         public CypherStringChatBuilder(WorldObject obj, ChatMsg msgType, CypherStrings textId, WorldObject target = null, object[] args = null)
         {
@@ -108,10 +108,10 @@ namespace Game.Chat
             return packet;
         }
 
-        WorldObject _source;
-        ChatMsg _msgType;
-        CypherStrings _textId;
-        WorldObject _target;
-        object[] _args;
+        private WorldObject _source;
+        private ChatMsg _msgType;
+        private CypherStrings _textId;
+        private WorldObject _target;
+        private object[] _args;
     }
 }

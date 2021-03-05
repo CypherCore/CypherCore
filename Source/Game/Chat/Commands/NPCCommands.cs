@@ -31,10 +31,10 @@ using Game.Loots;
 namespace Game.Chat
 {
     [CommandGroup("npc", RBACPermissions.CommandNpc)]
-    class NPCCommands
+    internal class NPCCommands
     {
         [Command("despawngroup", RBACPermissions.CommandNpcDespawngroup)]
-        static bool HandleNpcDespawnGroup(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcDespawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -69,7 +69,7 @@ namespace Game.Chat
         }
 
         [Command("evade", RBACPermissions.CommandNpcEvade)]
-        static bool HandleNpcEvadeCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcEvadeCommand(StringArguments args, CommandHandler handler)
         {
             var creatureTarget = handler.GetSelectedCreature();
             if (!creatureTarget || creatureTarget.IsPet())
@@ -113,7 +113,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandNpcInfo)]
-        static bool HandleNpcInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcInfoCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedCreature();
             if (!target)
@@ -198,7 +198,7 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandNpcMove)]
-        static bool HandleNpcMoveCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcMoveCommand(StringArguments args, CommandHandler handler)
         {
             ulong lowguid;
 
@@ -262,7 +262,7 @@ namespace Game.Chat
         }
 
         [Command("near", RBACPermissions.CommandNpcNear)]
-        static bool HandleNpcNearCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcNearCommand(StringArguments args, CommandHandler handler)
         {
             var distance = args.Empty() ? 10.0f : args.NextSingle();
             uint count = 0;
@@ -308,7 +308,7 @@ namespace Game.Chat
         }
 
         [Command("playemote", RBACPermissions.CommandNpcPlayemote)]
-        static bool HandleNpcPlayEmoteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcPlayEmoteCommand(StringArguments args, CommandHandler handler)
         {
             var emote = args.NextUInt32();
 
@@ -325,7 +325,7 @@ namespace Game.Chat
         }
 
         [Command("say", RBACPermissions.CommandNpcSay)]
-        static bool HandleNpcSayCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcSayCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -357,7 +357,7 @@ namespace Game.Chat
         }
 
         [Command("showloot", RBACPermissions.CommandNpcShowloot)]
-        static bool HandleNpcShowLootCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcShowLootCommand(StringArguments args, CommandHandler handler)
         {
             var creatureTarget = handler.GetSelectedCreature();
             if (creatureTarget == null || creatureTarget.IsPet())
@@ -418,7 +418,7 @@ namespace Game.Chat
         }
 
         [Command("spawngroup", RBACPermissions.CommandNpcSpawngroup)]
-        static bool HandleNpcSpawnGroup(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcSpawnGroup(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -461,7 +461,7 @@ namespace Game.Chat
         }
 
         [Command("tame", RBACPermissions.CommandNpcTame)]
-        static bool HandleNpcTameCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcTameCommand(StringArguments args, CommandHandler handler)
         {
             var creatureTarget = handler.GetSelectedCreature();
             if (!creatureTarget || creatureTarget.IsPet())
@@ -524,7 +524,7 @@ namespace Game.Chat
         }
 
         [Command("textemote", RBACPermissions.CommandNpcTextemote)]
-        static bool HandleNpcTextEmoteCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcTextEmoteCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -543,7 +543,7 @@ namespace Game.Chat
         }
 
         [Command("whisper", RBACPermissions.CommandNpcWhisper)]
-        static bool HandleNpcWhisperCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcWhisperCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -579,7 +579,7 @@ namespace Game.Chat
         }
 
         [Command("yell", RBACPermissions.CommandNpcYell)]
-        static bool HandleNpcYellCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNpcYellCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -599,7 +599,7 @@ namespace Game.Chat
             return true;
         }
 
-        static void _ShowLootEntry(CommandHandler handler, uint itemId, byte itemCount, bool alternateString = false)
+        private static void _ShowLootEntry(CommandHandler handler, uint itemId, byte itemCount, bool alternateString = false)
         {
             var name = "Unknown item";
 
@@ -610,7 +610,8 @@ namespace Game.Chat
             handler.SendSysMessage(alternateString ? CypherStrings.CommandNpcShowLootEntry2 : CypherStrings.CommandNpcShowLootEntry,
                 itemCount, ItemConst.ItemQualityColors[(int)(itemTemplate != null ? itemTemplate.GetQuality() : ItemQuality.Poor)], itemId, name, itemId);
         }
-        static void _IterateNotNormalLootMap(CommandHandler handler, MultiMap<ObjectGuid, NotNormalLootItem> map, List<LootItem> items)
+
+        private static void _IterateNotNormalLootMap(CommandHandler handler, MultiMap<ObjectGuid, NotNormalLootItem> map, List<LootItem> items)
         {
             foreach (var key in map.Keys)
             {
@@ -632,10 +633,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("add", RBACPermissions.CommandNpcAdd)]
-        class AddCommands
+        private class AddCommands
         {
             [Command("", RBACPermissions.CommandNpcAdd)]
-            static bool HandleNpcAddCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcAddCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -688,7 +689,7 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcAddItem)]
-            static bool HandleNpcAddVendorItemCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcAddVendorItemCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -751,7 +752,7 @@ namespace Game.Chat
             }
 
             [Command("move", RBACPermissions.CommandNpcAddMove)]
-            static bool HandleNpcAddMoveCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcAddMoveCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -782,7 +783,7 @@ namespace Game.Chat
             }
 
             [Command("formation", RBACPermissions.CommandNpcAddFormation)]
-            static bool HandleNpcAddFormationCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcAddFormationCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -831,7 +832,7 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandNpcAddTemp)]
-            static bool HandleNpcAddTempSpawnCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcAddTempSpawnCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -861,10 +862,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("delete", RBACPermissions.CommandNpcDelete)]
-        class DeleteCommands
+        private class DeleteCommands
         {
             [Command("", RBACPermissions.CommandNpcDelete)]
-            static bool HandleNpcDeleteCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcDeleteCommand(StringArguments args, CommandHandler handler)
             {
                 Creature creature;
 
@@ -909,7 +910,7 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcDeleteItem)]
-            static bool HandleNpcDeleteVendorItemCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcDeleteVendorItemCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -946,10 +947,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("follow", RBACPermissions.CommandNpcFollow)]
-        class FollowCommands
+        private class FollowCommands
         {
             [Command("", RBACPermissions.CommandNpcFollow)]
-            static bool HandleNpcFollowCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcFollowCommand(StringArguments args, CommandHandler handler)
             {
                 var player = handler.GetSession().GetPlayer();
                 var creature = handler.GetSelectedCreature();
@@ -968,7 +969,7 @@ namespace Game.Chat
             }
 
             [Command("stop", RBACPermissions.CommandNpcFollowStop)]
-            static bool HandleNpcUnFollowCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcUnFollowCommand(StringArguments args, CommandHandler handler)
             {
                 var player = handler.GetPlayer();
                 var creature = handler.GetSelectedCreature();
@@ -1003,10 +1004,10 @@ namespace Game.Chat
         }
 
         [CommandGroup("set", RBACPermissions.CommandNpcSet, true)]
-        class SetCommands
+        private class SetCommands
         {
             [Command("allowmove", RBACPermissions.CommandNpcSetAllowmove)]
-            static bool HandleNpcSetAllowMovementCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetAllowMovementCommand(StringArguments args, CommandHandler handler)
             {
                 /*
                 if (Global.WorldMgr.getAllowMovement())
@@ -1024,7 +1025,7 @@ namespace Game.Chat
             }
 
             [Command("data", RBACPermissions.CommandNpcSetData)]
-            static bool HandleNpcSetDataCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetDataCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1049,7 +1050,7 @@ namespace Game.Chat
             }
 
             [Command("entry", RBACPermissions.CommandNpcSetEntry)]
-            static bool HandleNpcSetEntryCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetEntryCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1074,7 +1075,7 @@ namespace Game.Chat
             }
 
             [Command("factionid", RBACPermissions.CommandNpcSetFactionid)]
-            static bool HandleNpcSetFactionIdCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetFactionIdCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1117,7 +1118,7 @@ namespace Game.Chat
             }
 
             [Command("flag", RBACPermissions.CommandNpcSetFlag)]
-            static bool HandleNpcSetFlagCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetFlagCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1145,7 +1146,7 @@ namespace Game.Chat
             }
 
             [Command("level", RBACPermissions.CommandNpcSetLevel)]
-            static bool HandleNpcSetLevelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetLevelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1173,7 +1174,7 @@ namespace Game.Chat
             }
 
             [Command("link", RBACPermissions.CommandNpcSetLink)]
-            static bool HandleNpcSetLinkCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetLinkCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1204,7 +1205,7 @@ namespace Game.Chat
             }
 
             [Command("model", RBACPermissions.CommandNpcSetModel)]
-            static bool HandleNpcSetModelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetModelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1228,7 +1229,7 @@ namespace Game.Chat
             }
 
             [Command("movetype", RBACPermissions.CommandNpcSetMovetype)]
-            static bool HandleNpcSetMoveTypeCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetMoveTypeCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1348,7 +1349,7 @@ namespace Game.Chat
             }
 
             [Command("phase", RBACPermissions.CommandNpcSetPhase)]
-            static bool HandleNpcSetPhaseCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetPhaseCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1376,7 +1377,7 @@ namespace Game.Chat
             }
 
             [Command("phasegroup", RBACPermissions.CommandNpcSetPhase)]
-            static bool HandleNpcSetPhaseGroup(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetPhaseGroup(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1400,7 +1401,7 @@ namespace Game.Chat
             }
 
             [Command("spawndist", RBACPermissions.CommandNpcSetSpawndist)]
-            static bool HandleNpcSetSpawnDistCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetSpawnDistCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -1445,7 +1446,7 @@ namespace Game.Chat
             }
 
             [Command("spawntime", RBACPermissions.CommandNpcSetSpawntime)]
-            static bool HandleNpcSetSpawnTimeCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleNpcSetSpawnTimeCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;

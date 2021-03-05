@@ -38,226 +38,226 @@ namespace Game.Entities
 
         //Gossip
         public PlayerMenu PlayerTalkClass;
-        PlayerSocial m_social;
-        List<Channel> m_channels = new List<Channel>();
-        List<ObjectGuid> WhisperList = new List<ObjectGuid>();
+        private PlayerSocial m_social;
+        private List<Channel> m_channels = new List<Channel>();
+        private List<ObjectGuid> WhisperList = new List<ObjectGuid>();
         public string autoReplyMsg;
 
         //Inventory
-        Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new Dictionary<ulong, EquipmentSetInfo>();
+        private Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new Dictionary<ulong, EquipmentSetInfo>();
         public List<ItemSetEffect> ItemSetEff = new List<ItemSetEffect>();
-        List<EnchantDuration> m_enchantDuration = new List<EnchantDuration>();
-        List<Item> m_itemDuration = new List<Item>();
-        List<ObjectGuid> m_itemSoulboundTradeable = new List<ObjectGuid>();
-        List<ObjectGuid> m_refundableItems = new List<ObjectGuid>();
+        private List<EnchantDuration> m_enchantDuration = new List<EnchantDuration>();
+        private List<Item> m_itemDuration = new List<Item>();
+        private List<ObjectGuid> m_itemSoulboundTradeable = new List<ObjectGuid>();
+        private List<ObjectGuid> m_refundableItems = new List<ObjectGuid>();
         public List<Item> ItemUpdateQueue = new List<Item>();
-        VoidStorageItem[] _voidStorageItems = new VoidStorageItem[SharedConst.VoidStorageMaxSlot];
-        Item[] m_items = new Item[(int)PlayerSlots.Count];
-        uint m_WeaponProficiency;
-        uint m_ArmorProficiency;
-        uint m_currentBuybackSlot;
-        TradeData m_trade;
+        private VoidStorageItem[] _voidStorageItems = new VoidStorageItem[SharedConst.VoidStorageMaxSlot];
+        private Item[] m_items = new Item[(int)PlayerSlots.Count];
+        private uint m_WeaponProficiency;
+        private uint m_ArmorProficiency;
+        private uint m_currentBuybackSlot;
+        private TradeData m_trade;
 
         //PVP
-        BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues]; 
-        BGData m_bgData;
-        bool m_IsBGRandomWinner;
+        private BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues];
+        private BGData m_bgData;
+        private bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
-        uint m_ArenaTeamIdInvited;
-        long m_lastHonorUpdateTime;
-        uint m_contestedPvPTimer;
-        bool _usePvpItemLevels;
+        private uint m_ArenaTeamIdInvited;
+        private long m_lastHonorUpdateTime;
+        private uint m_contestedPvPTimer;
+        private bool _usePvpItemLevels;
 
         //Groups/Raids
-        GroupReference m_group = new GroupReference();
-        GroupReference m_originalGroup = new GroupReference();
-        Group m_groupInvite;
-        GroupUpdateFlags m_groupUpdateMask;
-        bool m_bPassOnGroupLoot;
-        GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
+        private GroupReference m_group = new GroupReference();
+        private GroupReference m_originalGroup = new GroupReference();
+        private Group m_groupInvite;
+        private GroupUpdateFlags m_groupUpdateMask;
+        private bool m_bPassOnGroupLoot;
+        private GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
         public Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
-        Dictionary<uint, long> _instanceResetTimes = new Dictionary<uint, long>();
-        uint _pendingBindId;
-        uint _pendingBindTimer;
+        private Dictionary<uint, long> _instanceResetTimes = new Dictionary<uint, long>();
+        private uint _pendingBindId;
+        private uint _pendingBindTimer;
         public bool m_InstanceValid;
 
-        Difficulty m_dungeonDifficulty;
-        Difficulty m_raidDifficulty;
-        Difficulty m_legacyRaidDifficulty;
-        Difficulty m_prevMapDifficulty;
+        private Difficulty m_dungeonDifficulty;
+        private Difficulty m_raidDifficulty;
+        private Difficulty m_legacyRaidDifficulty;
+        private Difficulty m_prevMapDifficulty;
 
         //Movement
         public PlayerTaxi m_taxi = new PlayerTaxi();
         public byte[] m_forced_speed_changes = new byte[(int)UnitMoveType.Max];
         public byte m_movementForceModMagnitudeChanges;
-        uint m_lastFallTime;
-        float m_lastFallZ;
-        WorldLocation teleportDest;
-        TeleportToOptions m_teleport_options;
-        bool mSemaphoreTeleport_Near;
-        bool mSemaphoreTeleport_Far;
-        PlayerDelayedOperations m_DelayedOperations;
-        bool m_bCanDelayTeleport;
-        bool m_bHasDelayedTeleport;
+        private uint m_lastFallTime;
+        private float m_lastFallZ;
+        private WorldLocation teleportDest;
+        private TeleportToOptions m_teleport_options;
+        private bool mSemaphoreTeleport_Near;
+        private bool mSemaphoreTeleport_Far;
+        private PlayerDelayedOperations m_DelayedOperations;
+        private bool m_bCanDelayTeleport;
+        private bool m_bHasDelayedTeleport;
 
-        PlayerUnderwaterState m_MirrorTimerFlags;
-        PlayerUnderwaterState m_MirrorTimerFlagsLast;
-        bool m_isInWater;
+        private PlayerUnderwaterState m_MirrorTimerFlags;
+        private PlayerUnderwaterState m_MirrorTimerFlagsLast;
+        private bool m_isInWater;
 
         //Stats
-        uint m_baseSpellPower;
-        uint m_baseManaRegen;
-        uint m_baseHealthRegen;
-        int m_spellPenetrationItemMod;
-        uint m_lastPotionId;
+        private uint m_baseSpellPower;
+        private uint m_baseManaRegen;
+        private uint m_baseHealthRegen;
+        private int m_spellPenetrationItemMod;
+        private uint m_lastPotionId;
 
         //Spell
-        Dictionary<uint, PlayerSpell> m_spells = new Dictionary<uint, PlayerSpell>();
-        Dictionary<uint, SkillStatusData> mSkillStatus = new Dictionary<uint, SkillStatusData>();
-        Dictionary<uint, PlayerCurrency> _currencyStorage = new Dictionary<uint, PlayerCurrency>();
-        List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
-        MultiMap<uint, uint> m_overrideSpells = new MultiMap<uint, uint>();
+        private Dictionary<uint, PlayerSpell> m_spells = new Dictionary<uint, PlayerSpell>();
+        private Dictionary<uint, SkillStatusData> mSkillStatus = new Dictionary<uint, SkillStatusData>();
+        private Dictionary<uint, PlayerCurrency> _currencyStorage = new Dictionary<uint, PlayerCurrency>();
+        private List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
+        private MultiMap<uint, uint> m_overrideSpells = new MultiMap<uint, uint>();
         public Spell m_spellModTakingSpell;
-        uint m_oldpetspell;
+        private uint m_oldpetspell;
 
         //Mail
-        List<Mail> m_mail = new List<Mail>();
-        Dictionary<ulong, Item> mMitems = new Dictionary<ulong, Item>();
+        private List<Mail> m_mail = new List<Mail>();
+        private Dictionary<ulong, Item> mMitems = new Dictionary<ulong, Item>();
         public byte unReadMails;
-        long m_nextMailDelivereTime;
+        private long m_nextMailDelivereTime;
         public bool m_mailsLoaded;
         public bool m_mailsUpdated;
 
         //Pets
         public List<PetAura> m_petAuras = new List<PetAura>();
         public uint m_stableSlots;
-        uint m_temporaryUnsummonedPetNumber;
-        uint m_lastpetnumber;
+        private uint m_temporaryUnsummonedPetNumber;
+        private uint m_lastpetnumber;
 
         // Player summoning
-        long m_summon_expire;
-        WorldLocation m_summon_location;
+        private long m_summon_expire;
+        private WorldLocation m_summon_location;
 
-        RestMgr _restMgr;
+        private RestMgr _restMgr;
 
         //Combat 
-        int[] baseRatingValue = new int[(int)CombatRating.Max];
-        float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
-        float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
+        private int[] baseRatingValue = new int[(int)CombatRating.Max];
+        private float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
+        private float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
         public DuelInfo duel;
-        bool m_canParry;
-        bool m_canBlock;
-        bool m_canTitanGrip;
-        uint m_titanGripPenaltySpellId;
-        uint m_deathTimer;
-        long m_deathExpireTime;
-        byte m_swingErrorMsg;
-        uint m_combatExitTime;
-        uint m_regenTimerCount;
-        uint m_weaponChangeTimer;
+        private bool m_canParry;
+        private bool m_canBlock;
+        private bool m_canTitanGrip;
+        private uint m_titanGripPenaltySpellId;
+        private uint m_deathTimer;
+        private long m_deathExpireTime;
+        private byte m_swingErrorMsg;
+        private uint m_combatExitTime;
+        private uint m_regenTimerCount;
+        private uint m_weaponChangeTimer;
 
         //Quest
-        List<uint> m_timedquests = new List<uint>();
-        List<uint> m_weeklyquests = new List<uint>();
-        List<uint> m_monthlyquests = new List<uint>();
-        MultiMap<uint, uint> m_seasonalquests = new MultiMap<uint, uint>();
-        Dictionary<uint, QuestStatusData> m_QuestStatus = new Dictionary<uint, QuestStatusData>();
-        Dictionary<uint, QuestSaveType> m_QuestStatusSave = new Dictionary<uint, QuestSaveType>();
-        List<uint> m_DFQuests = new List<uint>();
-        List<uint> m_RewardedQuests = new List<uint>();
-        Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new Dictionary<uint, QuestSaveType>();
+        private List<uint> m_timedquests = new List<uint>();
+        private List<uint> m_weeklyquests = new List<uint>();
+        private List<uint> m_monthlyquests = new List<uint>();
+        private MultiMap<uint, uint> m_seasonalquests = new MultiMap<uint, uint>();
+        private Dictionary<uint, QuestStatusData> m_QuestStatus = new Dictionary<uint, QuestStatusData>();
+        private Dictionary<uint, QuestSaveType> m_QuestStatusSave = new Dictionary<uint, QuestSaveType>();
+        private List<uint> m_DFQuests = new List<uint>();
+        private List<uint> m_RewardedQuests = new List<uint>();
+        private Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new Dictionary<uint, QuestSaveType>();
 
-        bool m_DailyQuestChanged;
-        bool m_WeeklyQuestChanged;
-        bool m_MonthlyQuestChanged;
-        bool m_SeasonalQuestChanged;
-        long m_lastDailyQuestTime;
+        private bool m_DailyQuestChanged;
+        private bool m_WeeklyQuestChanged;
+        private bool m_MonthlyQuestChanged;
+        private bool m_SeasonalQuestChanged;
+        private long m_lastDailyQuestTime;
 
-        Garrison _garrison;
+        private Garrison _garrison;
 
-        CinematicManager _cinematicMgr;
+        private CinematicManager _cinematicMgr;
 
         // variables to save health and mana before duel and restore them after duel
-        ulong healthBeforeDuel;
-        uint manaBeforeDuel;
+        private ulong healthBeforeDuel;
+        private uint manaBeforeDuel;
 
-        bool _advancedCombatLoggingEnabled;
+        private bool _advancedCombatLoggingEnabled;
 
-        WorldLocation _corpseLocation;
+        private WorldLocation _corpseLocation;
 
         //Core
-        WorldSession Session;
+        private WorldSession Session;
 
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;
 
-        uint m_nextSave;
-        byte m_cinematic;
+        private uint m_nextSave;
+        private byte m_cinematic;
 
-        uint m_movie;
-        bool m_customizationsChanged;
+        private uint m_movie;
+        private bool m_customizationsChanged;
 
-        SpecializationInfo _specializationInfo;
+        private SpecializationInfo _specializationInfo;
         public List<ObjectGuid> m_clientGUIDs = new List<ObjectGuid>();
         public List<ObjectGuid> m_visibleTransports = new List<ObjectGuid>();
         public WorldObject seerView;
         // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
         public Unit m_unitMovedByMe;
-        Team m_team;
+        private Team m_team;
         public Stack<uint> m_timeSyncQueue = new Stack<uint>();
-        uint m_timeSyncTimer;
+        private uint m_timeSyncTimer;
         public uint m_timeSyncClient;
         public uint m_timeSyncServer;
-        ReputationMgr reputationMgr;
-        QuestObjectiveCriteriaManager m_questObjectiveCriteriaMgr;
+        private ReputationMgr reputationMgr;
+        private QuestObjectiveCriteriaManager m_questObjectiveCriteriaMgr;
         public AtLoginFlags atLoginFlags;
         public bool m_itemUpdateQueueBlocked;
 
-        PlayerExtraFlags m_ExtraFlags;
+        private PlayerExtraFlags m_ExtraFlags;
 
         public bool IsDebugAreaTriggers { get; set; }
-        uint m_zoneUpdateId;
-        uint m_areaUpdateId;
-        uint m_zoneUpdateTimer;
+        private uint m_zoneUpdateId;
+        private uint m_areaUpdateId;
+        private uint m_zoneUpdateTimer;
 
-        uint m_ChampioningFaction;
-        byte m_fishingSteps;
+        private uint m_ChampioningFaction;
+        private byte m_fishingSteps;
 
         // Recall position
-        WorldLocation m_recall_location;
-        WorldLocation homebind;
-        uint homebindAreaId;
-        uint m_HomebindTimer;
+        private WorldLocation m_recall_location;
+        private WorldLocation homebind;
+        private uint homebindAreaId;
+        private uint m_HomebindTimer;
 
-        ResurrectionData _resurrectionData;
+        private ResurrectionData _resurrectionData;
 
-        PlayerAchievementMgr m_achievementSys;
+        private PlayerAchievementMgr m_achievementSys;
 
-        SceneMgr m_sceneMgr;
+        private SceneMgr m_sceneMgr;
 
-        Dictionary<ObjectGuid /*LootObject*/, ObjectGuid /*WorldObject*/> m_AELootView = new Dictionary<ObjectGuid, ObjectGuid>();
+        private Dictionary<ObjectGuid /*LootObject*/, ObjectGuid /*WorldObject*/> m_AELootView = new Dictionary<ObjectGuid, ObjectGuid>();
 
-        CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
-        float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
-        int[] m_MirrorTimer = new int[3];
+        private CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
+        private float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
+        private int[] m_MirrorTimer = new int[3];
 
-        ulong m_GuildIdInvited;
-        DeclinedName _declinedname;
-        Runes m_runes = new Runes();
-        uint m_hostileReferenceCheckTimer;
-        uint m_drunkTimer;
-        long m_logintime;
-        long m_Last_tick;
-        uint m_PlayedTimeTotal;
-        uint m_PlayedTimeLevel;
+        private ulong m_GuildIdInvited;
+        private DeclinedName _declinedname;
+        private Runes m_runes = new Runes();
+        private uint m_hostileReferenceCheckTimer;
+        private uint m_drunkTimer;
+        private long m_logintime;
+        private long m_Last_tick;
+        private uint m_PlayedTimeTotal;
+        private uint m_PlayedTimeLevel;
 
-        Dictionary<byte, ActionButton> m_actionButtons = new Dictionary<byte, ActionButton>();
-        ObjectGuid m_playerSharingQuest;
-        uint m_sharedQuestId;
-        uint m_ingametime;
+        private Dictionary<byte, ActionButton> m_actionButtons = new Dictionary<byte, ActionButton>();
+        private ObjectGuid m_playerSharingQuest;
+        private uint m_sharedQuestId;
+        private uint m_ingametime;
 
-        PlayerCommandStates _activeCheats;
+        private PlayerCommandStates _activeCheats;
     }
 
     public class PlayerInfo
@@ -606,7 +606,7 @@ namespace Game.Entities
         // More fields can be added to BoolOptions without changing DB schema (up to 32, currently 27)
     }
 
-    struct GroupUpdateCounter
+    internal struct GroupUpdateCounter
     {
         public ObjectGuid GroupGuid;
         public int UpdateSequenceNumber;

@@ -63,7 +63,7 @@ namespace Framework.Cryptography
             Digest = sha.Hash;
         }
 
-        SHA256 sha;
+        private SHA256 sha;
         public byte[] Digest { get; private set; }
     }
 

@@ -424,7 +424,7 @@ public static partial class Detour
     /// Swaps the values of the two parameters.
     ///  @param[in,out]	a	Value A
     ///  @param[in,out]	b	Value B
-    static void dtSwap<T>(ref T lhs, ref T rhs)
+    private static void dtSwap<T>(ref T lhs, ref T rhs)
     {
         var temp = lhs;
         lhs = rhs;

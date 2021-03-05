@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Scripts.Spells.Quest
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         //Thaumaturgychannel        
         public const uint ThaumaturgyChannel = 21029;
@@ -169,7 +169,7 @@ namespace Scripts.Spells.Quest
         public const uint RenewedLife = 93097;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         //Quest55
         public const uint Morbent = 1200;
@@ -254,7 +254,7 @@ namespace Scripts.Spells.Quest
         public const uint InjuredStormwindInfantry = 50047;
     }
 
-    struct Misc
+    internal struct Misc
     {
         //Quests6124 6129
         public const uint DespawnTime = 30000;
@@ -287,7 +287,7 @@ namespace Scripts.Spells.Quest
     [Script("spell_q55_sacred_cleansing", SpellEffectName.Dummy, 1u, CreatureIds.Morbent, CreatureIds.WeakenedMorbent, true, 0)]
     [Script("spell_q10255_administer_antidote", SpellEffectName.Dummy, 0u, CreatureIds.Helboar, CreatureIds.Dreadtusk, true, 0)]
     [Script("spell_q11515_fel_siphon_dummy", SpellEffectName.Dummy, 0u, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true, 0)]
-    class spell_generic_quest_update_entry : SpellScript
+    internal class spell_generic_quest_update_entry : SpellScript
     {
         public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime)
         {
@@ -299,7 +299,7 @@ namespace Scripts.Spells.Quest
             _despawnTime = despawnTime;
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var creatureTarget = GetHitCreature();
             if (creatureTarget)
@@ -321,24 +321,24 @@ namespace Scripts.Spells.Quest
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, _effIndex, _spellEffect));
         }
 
-        SpellEffectName _spellEffect;
-        byte _effIndex;
-        uint _originalEntry;
-        uint _newEntry;
-        bool _shouldAttack;
-        uint _despawnTime;
+        private SpellEffectName _spellEffect;
+        private byte _effIndex;
+        private uint _originalEntry;
+        private uint _newEntry;
+        private bool _shouldAttack;
+        private uint _despawnTime;
     }
 
     // 9712 - Thaumaturgy Channel
     [Script]
-    class spell_q2203_thaumaturgy_channel : AuraScript
+    internal class spell_q2203_thaumaturgy_channel : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ThaumaturgyChannel);
         }
 
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
             var caster = GetCaster();
@@ -355,7 +355,7 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=5206 Marauders of Darrowshire
     // 17271 Test Fetid Skull
     [Script]
-    class spell_q5206_test_fetid_skull : SpellScript
+    internal class spell_q5206_test_fetid_skull : SpellScript
     {
         public override bool Load()
         {
@@ -367,7 +367,7 @@ namespace Scripts.Spells.Quest
             return ValidateSpellInfo(SpellIds.CreateResonatingSkull, SpellIds.CreateBoneDust);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             var spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
@@ -384,14 +384,14 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=6129 Curing the Sick (H)
     // 19512 Apply Salve
     [Script]
-    class spell_q6124_6129_apply_salve : SpellScript
+    internal class spell_q6124_6129_apply_salve : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
             if (GetCastItem())
@@ -429,16 +429,16 @@ namespace Scripts.Spells.Quest
 
     // 43874 Scourge Mur'gul Camp: Force Shield Arcane Purple x3
     [Script]
-    class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript
+    internal class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript
     {
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             target.AddUnitFlag(UnitFlags.ImmuneToPc);
             target.AddUnitState(UnitState.Root);
         }
 
-        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveUnitFlag(UnitFlags.ImmuneToPc);
         }
@@ -452,14 +452,14 @@ namespace Scripts.Spells.Quest
 
     // 50133 Scourging Crystal Controller
     [Script]
-    class spell_q11396_11399_scourging_crystal_controller : SpellScript
+    internal class spell_q11396_11399_scourging_crystal_controller : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3, SpellIds.ScourgingCrystalController);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var target = GetHitUnit();
             if (target)
@@ -477,14 +477,14 @@ namespace Scripts.Spells.Quest
 
     // 43882 Scourging Crystal Controller Dummy
     [Script]
-    class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScript
+    internal class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var target = GetHitUnit();
             if (target)
@@ -501,14 +501,14 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=11587 Prison Break
     // 45449 Arcane Prisoner Rescue
     [Script]
-    class spell_q11587_arcane_prisoner_rescue : SpellScript
+    internal class spell_q11587_arcane_prisoner_rescue : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale, SpellIds.ArcanePrisonerKillCredit);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
 
@@ -532,7 +532,7 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=11730 Master and Servant
     // 46023 The Ultrasonic Screwdriver
     [Script]
-    class spell_q11730_ultrasonic_screwdriver : SpellScript
+    internal class spell_q11730_ultrasonic_screwdriver : SpellScript
     {
         public override bool Load()
         {
@@ -545,7 +545,7 @@ namespace Scripts.Spells.Quest
                 SpellIds.SummonScavengebot005b6, SpellIds.Summon55dCollectatron, SpellIds.RobotKillCredit);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var castItem = GetCastItem();
             var caster = GetCaster();
@@ -589,9 +589,9 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12459 That Which Creates Can Also Destroy
     // 49587 Seeds of Nature's Wrath
     [Script]
-    class spell_q12459_seeds_of_natures_wrath : SpellScript
+    internal class spell_q12459_seeds_of_natures_wrath : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var creatureTarget = GetHitCreature();
             if (creatureTarget)
@@ -623,14 +623,14 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12634 Some Make Lemonade, Some Make Liquor
     // 51840 Despawn Fruit Tosser
     [Script]
-    class spell_q12634_despawn_fruit_tosser : SpellScript
+    internal class spell_q12634_despawn_fruit_tosser : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.BananasFallToGround, SpellIds.OrangeFallsToGround, SpellIds.PapayaFallsToGround, SpellIds.SummonAdventurousDwarf);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var spellId = SpellIds.BananasFallToGround;
             switch (RandomHelper.URand(0, 3))
@@ -657,9 +657,9 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12683 Burning to Help
     // 52308 Take Sputum Sample
     [Script]
-    class spell_q12683_take_sputum_sample : SpellScript
+    internal class spell_q12683_take_sputum_sample : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
 
@@ -680,9 +680,9 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12851 Going Bearback
     // 54798 FLAMING Arrow Triggered Effect
     [Script]
-    class spell_q12851_going_bearback : AuraScript
+    internal class spell_q12851_going_bearback : AuraScript
     {
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var caster = GetCaster();
             if (caster)
@@ -720,7 +720,7 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12937 Relief for the Fallen
     // 55804 Healing Finished
     [Script]
-    class spell_q12937_relief_for_the_fallen : SpellScript
+    internal class spell_q12937_relief_for_the_fallen : SpellScript
     {
         public override bool Load()
         {
@@ -732,7 +732,7 @@ namespace Scripts.Spells.Quest
             return ValidateSpellInfo(SpellIds.TriggerAidOfTheEarthen);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
 
@@ -752,14 +752,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q10041_q10040_who_are_they : SpellScript
+    internal class spell_q10041_q10040_who_are_they : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.MaleDisguise, SpellIds.FemaleDisguise, SpellIds.GenericDisguise);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             var target = GetHitPlayer();
@@ -778,9 +778,9 @@ namespace Scripts.Spells.Quest
 
     // 8593 Symbol of life dummy
     [Script]
-    class spell_symbol_of_life_dummy : SpellScript
+    internal class spell_symbol_of_life_dummy : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var target = GetHitCreature();
             if (target)
@@ -805,14 +805,14 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12659 Scalps!
     // 52090 Ahunae's Knife
     [Script]
-    class spell_q12659_ahunaes_knife : SpellScript
+    internal class spell_q12659_ahunaes_knife : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
 
@@ -831,14 +831,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q9874_liquid_fire : SpellScript
+    internal class spell_q9874_liquid_fire : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
             var target = GetHitCreature();
@@ -860,14 +860,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12805_lifeblood_dummy : SpellScript
+    internal class spell_q12805_lifeblood_dummy : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
 
@@ -893,9 +893,9 @@ namespace Scripts.Spells.Quest
  4338 Plant Alliance Battle Standard
  */
     [Script]
-    class spell_q13280_13283_plant_battle_standard : SpellScript
+    internal class spell_q13280_13283_plant_battle_standard : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             if (caster.IsVehicle())
@@ -913,14 +913,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q14112_14145_chum_the_water : SpellScript
+    internal class spell_q14112_14145_chum_the_water : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        private void HandleScriptEffect(uint effIndex)
         {
             var caster = GetCaster();
             caster.CastSpell(caster, RandomHelper.RAND(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark));
@@ -934,14 +934,14 @@ namespace Scripts.Spells.Quest
 
     // http://old01.wowhead.com/quest=9452 - Red Snapper - Very Tasty!
     [Script]
-    class spell_q9452_cast_net : SpellScript
+    internal class spell_q9452_cast_net : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
             if (RandomHelper.randChance(66))
@@ -950,7 +950,7 @@ namespace Scripts.Spells.Quest
                 caster.CastSpell(caster, SpellIds.FishedUpMurloc, true);
         }
 
-        void HandleActiveObject(uint effIndex)
+        private void HandleActiveObject(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetHitGObj().SetRespawnTime(RandomHelper.randChance(50) ? 2 * Time.Minute : 3 * Time.Minute);
@@ -966,9 +966,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q14076_14092_pound_drum : SpellScript
+    internal class spell_q14076_14092_pound_drum : SpellScript
     {
-        void HandleSummon()
+        private void HandleSummon()
         {
             var caster = GetCaster();
 
@@ -978,7 +978,7 @@ namespace Scripts.Spells.Quest
                 caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
         }
 
-        void HandleActiveObject(uint effIndex)
+        private void HandleActiveObject(uint effIndex)
         {
             GetHitGObj().SetLootState(LootState.JustDeactivated);
         }
@@ -991,9 +991,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12279_cast_net : SpellScript
+    internal class spell_q12279_cast_net : SpellScript
     {
-        void HandleActiveObject(uint effIndex)
+        private void HandleActiveObject(uint effIndex)
         {
             GetHitGObj().SetLootState(LootState.JustDeactivated);
         }
@@ -1005,9 +1005,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12987_read_pronouncement : AuraScript
+    internal class spell_q12987_read_pronouncement : AuraScript
     {
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // player must cast kill credit and do emote text, according to sniff
             var target = GetTarget().ToPlayer();
@@ -1030,9 +1030,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12277_wintergarde_mine_explosion : SpellScript
+    internal class spell_q12277_wintergarde_mine_explosion : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var unitTarget = GetHitCreature();
             if (unitTarget)
@@ -1069,9 +1069,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12066_bunny_kill_credit : SpellScript
+    internal class spell_q12066_bunny_kill_credit : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var target = GetHitCreature();
             if (target)
@@ -1085,9 +1085,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12735_song_of_cleansing : SpellScript
+    internal class spell_q12735_song_of_cleansing : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             switch (caster.GetAreaId())
@@ -1113,9 +1113,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12372_cast_from_gossip_trigger : SpellScript
+    internal class spell_q12372_cast_from_gossip_trigger : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SummonWyrmrestDefender, true);
         }
@@ -1129,9 +1129,9 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=12372 Defending Wyrmrest Temple
     // 49370 - Wyrmrest Defender: Destabilize Azure Dragonshrine Effect
     [Script]
-    class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript
+    internal class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             if (GetHitCreature())
             {
@@ -1161,9 +1161,9 @@ namespace Scripts.Spells.Quest
 
     // ID - 50287 Azure Dragon: On Death Force Cast Wyrmrest Defender to Whisper to Controller - Random (cast from Azure Dragons and Azure Drakes on death)
     [Script]
-    class spell_q12372_azure_on_death_force_whisper : SpellScript
+    internal class spell_q12372_azure_on_death_force_whisper : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var defender = GetHitCreature();
             if (defender)
@@ -1178,9 +1178,9 @@ namespace Scripts.Spells.Quest
 
     // 40113 Knockdown Fel Cannon: The Aggro Check Aura
     [Script]
-    class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript
+    internal class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript
     {
-        void HandleTriggerSpell(AuraEffect aurEff)
+        private void HandleTriggerSpell(AuraEffect aurEff)
         {
             var target = GetTarget();
             if (target)
@@ -1196,9 +1196,9 @@ namespace Scripts.Spells.Quest
 
     // 40112 Knockdown Fel Cannon: The Aggro Check
     [Script]
-    class spell_q11010_q11102_q11023_aggro_check : SpellScript
+    internal class spell_q11010_q11102_q11023_aggro_check : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var playerTarget = GetHitPlayer();
             if (playerTarget)
@@ -1215,9 +1215,9 @@ namespace Scripts.Spells.Quest
 
     // 40119 Knockdown Fel Cannon: The Aggro Burst
     [Script]
-    class spell_q11010_q11102_q11023_aggro_burst : AuraScript
+    internal class spell_q11010_q11102_q11023_aggro_burst : AuraScript
     {
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             var target = GetTarget();
             if (target)
@@ -1233,9 +1233,9 @@ namespace Scripts.Spells.Quest
 
     // 40056 Knockdown Fel Cannon: Choose Loc
     [Script]
-    class spell_q11010_q11102_q11023_choose_loc : SpellScript
+    internal class spell_q11010_q11102_q11023_choose_loc : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             // Check for player that is in 65 y range
@@ -1261,9 +1261,9 @@ namespace Scripts.Spells.Quest
     // 39844 - Skyguard Blasting Charge
     // 40160 - Throw Bomb
     [Script]
-    class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript
+    internal class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript
     {
-        SpellCastResult CheckRequirement()
+        private SpellCastResult CheckRequirement()
         {
             var caster = GetCaster();
             // This spell will be cast only if caster has one of these auras
@@ -1279,14 +1279,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12527_zuldrak_rat : SpellScript
+    internal class spell_q12527_zuldrak_rat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.SummonGorgedLurkingBasilisk);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        private void HandleScriptEffect(uint effIndex)
         {
             if (GetHitAura() != null && GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)
             {
@@ -1305,9 +1305,9 @@ namespace Scripts.Spells.Quest
 
     // 55368 - Summon Stefan
     [Script]
-    class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript
+    internal class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript
     {
-        void SetDest(ref SpellDestination dest)
+        private void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
             var offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
@@ -1321,14 +1321,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12730_quenching_mist : AuraScript
+    internal class spell_q12730_quenching_mist : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FlickeringFlames);
         }
 
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.FlickeringFlames);
         }
@@ -1341,14 +1341,14 @@ namespace Scripts.Spells.Quest
 
     // 13291 - Borrowed Technology/13292 - The Solution Solution /Daily//13239 - Volatility/13261 - Volatiliy /Daily//
     [Script]
-    class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellScript
+    internal class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Ride);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             if (!GetHitCreature())
                 return;
@@ -1365,9 +1365,9 @@ namespace Scripts.Spells.Quest
 
     // 59303 - Summon Frost Wyrm
     [Script]
-    class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript
+    internal class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript
     {
-        void SetDest(ref SpellDestination dest)
+        private void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
             var offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
@@ -1382,9 +1382,9 @@ namespace Scripts.Spells.Quest
 
     // 12601 - Second Chances: Summon Landgren's Soul Moveto Target Bunny
     [Script]
-    class spell_q12847_summon_soul_moveto_bunny : SpellScript
+    internal class spell_q12847_summon_soul_moveto_bunny : SpellScript
     {
-        void SetDest(ref SpellDestination dest)
+        private void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
             var offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
@@ -1398,7 +1398,7 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q13011_bear_flank_master : SpellScript
+    internal class spell_q13011_bear_flank_master : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1410,7 +1410,7 @@ namespace Scripts.Spells.Quest
             return GetCaster().IsTypeId(TypeId.Unit);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var player = GetHitPlayer();
             if (player)
@@ -1433,14 +1433,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q13086_cannons_target : SpellScript
+    internal class spell_q13086_cannons_target : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
-        void HandleEffectDummy(uint effIndex)
+        private void HandleEffectDummy(uint effIndex)
         {
             var pos = GetExplTargetDest();
             if (pos != null)
@@ -1454,7 +1454,7 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12690_burst_at_the_seams : SpellScript
+    internal class spell_q12690_burst_at_the_seams : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1467,7 +1467,7 @@ namespace Scripts.Spells.Quest
             return GetCaster().IsTypeId(TypeId.Unit);
         }
 
-        void HandleKnockBack(uint effIndex)
+        private void HandleKnockBack(uint effIndex)
         {
             Unit creature = GetHitCreature();
             if (creature)
@@ -1496,7 +1496,7 @@ namespace Scripts.Spells.Quest
             }
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetCaster().ToCreature().DespawnOrUnsummon(2 * Time.InMilliseconds);
         }
@@ -1510,14 +1510,14 @@ namespace Scripts.Spells.Quest
 
     // 48682 - Escape from Silverbrook - Periodic Dummy
     [Script]
-    class spell_q12308_escape_from_silverbrook : SpellScript
+    internal class spell_q12308_escape_from_silverbrook : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SummonWorgen);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SummonWorgen, true);
         }
@@ -1530,9 +1530,9 @@ namespace Scripts.Spells.Quest
 
     // 48681 - Summon Silverbrook Worgen
     [Script]
-    class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
+    internal class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
     {
-        void ModDest(ref SpellDestination dest)
+        private void ModDest(ref SpellDestination dest)
         {
             var dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
             var angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
@@ -1549,14 +1549,14 @@ namespace Scripts.Spells.Quest
 
     // 51858 - Siphon of Acherus
     [Script]
-    class spell_q12641_death_comes_from_on_high : SpellScript
+    internal class spell_q12641_death_comes_from_on_high : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ForgeCredit, SpellIds.TownHallCredit, SpellIds.ScarletHoldCredit, SpellIds.ChapelCredit);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             uint spellId;
 
@@ -1589,9 +1589,9 @@ namespace Scripts.Spells.Quest
 
     // 52694 - Recall Eye of Acherus
     [Script]
-    class spell_q12641_recall_eye_of_acherus : SpellScript
+    internal class spell_q12641_recall_eye_of_acherus : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var player = GetCaster().GetCharmerOrOwner().ToPlayer();
             if (player)
@@ -1610,9 +1610,9 @@ namespace Scripts.Spells.Quest
 
     // 51769 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade : AuraScript
+    internal class spell_q12619_emblazon_runeblade : AuraScript
     {
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
             var caster = GetCaster();
@@ -1628,9 +1628,9 @@ namespace Scripts.Spells.Quest
 
     // 51770 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade_effect : SpellScript
+    internal class spell_q12619_emblazon_runeblade_effect : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue(), false);
         }
@@ -1642,14 +1642,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12919_gymers_grab : SpellScript
+    internal class spell_q12919_gymers_grab : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.RideGymer);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             sbyte seatId = 2;
             if (!GetHitCreature())
@@ -1665,9 +1665,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12919_gymers_throw : SpellScript
+    internal class spell_q12919_gymers_throw : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             if (caster.IsVehicle())
@@ -1688,14 +1688,14 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q13400_illidan_kill_master : SpellScript
+    internal class spell_q13400_illidan_kill_master : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.IllidanKillCredit);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             if (caster.IsVehicle())
@@ -1714,14 +1714,14 @@ namespace Scripts.Spells.Quest
 
     // 66744 - Make Player Destroy Totems
     [Script]
-    class spell_q14100_q14111_make_player_destroy_totems : SpellScript
+    internal class spell_q14100_q14111_make_player_destroy_totems : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TotemOfTheEarthenRing);
         }
 
-        void HandleScriptEffect(uint effIndex)
+        private void HandleScriptEffect(uint effIndex)
         {
             var player = GetHitPlayer();
             if (player)
@@ -1736,14 +1736,14 @@ namespace Scripts.Spells.Quest
 
     // 39238 - Fumping
     [Script]
-    class spell_q10929_fumping : AuraScript
+    internal class spell_q10929_fumping : AuraScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer);
         }
 
-        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
@@ -1761,14 +1761,14 @@ namespace Scripts.Spells.Quest
 
     // 93072 - Get Our Boys Back Dummy
     [Script]
-    class spell_q28813_get_our_boys_back_dummy : SpellScript
+    internal class spell_q28813_get_our_boys_back_dummy : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RenewedLife);
         }
 
-        void HandleDummyEffect()
+        private void HandleDummyEffect()
         {
             var caster = GetCaster();
             var injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
@@ -1786,9 +1786,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q28813_set_health_random : SpellScript
+    internal class spell_q28813_set_health_random : SpellScript
     {
-        void HandleDummyEffect()
+        private void HandleDummyEffect()
         {
             var caster = GetCaster();
             caster.SetHealth(caster.CountPctFromMaxHealth(RandomHelper.IRand(3, 5) * 10));
@@ -1801,9 +1801,9 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q12414_hand_over_reins : SpellScript
+    internal class spell_q12414_hand_over_reins : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster().ToCreature();
             GetHitUnit().ExitVehicle();

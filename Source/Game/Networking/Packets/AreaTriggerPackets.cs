@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class AreaTriggerPkt : ClientPacket
+    internal class AreaTriggerPkt : ClientPacket
     {
         public AreaTriggerPkt(WorldPacket packet) : base(packet) { }
 
@@ -40,7 +40,7 @@ namespace Game.Networking.Packets
         public bool FromClient;
     }
 
-    class AreaTriggerDenied : ServerPacket
+    internal class AreaTriggerDenied : ServerPacket
     {
         public AreaTriggerDenied() : base(ServerOpcodes.AreaTriggerDenied) { }
 
@@ -55,14 +55,14 @@ namespace Game.Networking.Packets
         public bool Entered;
     }
 
-    class AreaTriggerNoCorpse : ServerPacket
+    internal class AreaTriggerNoCorpse : ServerPacket
     {
         public AreaTriggerNoCorpse() : base(ServerOpcodes.AreaTriggerNoCorpse) { }
 
         public override void Write() { }
     }
 
-    class AreaTriggerRePath : ServerPacket
+    internal class AreaTriggerRePath : ServerPacket
     {
         public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath) { }
 
@@ -92,7 +92,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    class AreaTriggerSplineInfo
+    internal class AreaTriggerSplineInfo
     {
         public void Write(WorldPacket data)
         {

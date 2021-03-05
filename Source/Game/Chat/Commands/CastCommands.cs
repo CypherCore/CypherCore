@@ -24,10 +24,10 @@ using System;
 namespace Game.Chat
 {
     [CommandGroup("cast", RBACPermissions.CommandCast)]
-    class CastCommands
+    internal class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        static bool HandleCastCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCastCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -59,7 +59,7 @@ namespace Game.Chat
         }
 
         [Command("back", RBACPermissions.CommandCastBack)]
-        static bool HandleCastBackCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCastBackCommand(StringArguments args, CommandHandler handler)
         {
             var caster = handler.GetSelectedCreature();
             if (!caster)
@@ -91,7 +91,7 @@ namespace Game.Chat
         }
 
         [Command("dist", RBACPermissions.CommandCastDist)]
-        static bool HandleCastDistCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCastDistCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("self", RBACPermissions.CommandCastSelf)]
-        static bool HandleCastSelfCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCastSelfCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -150,7 +150,7 @@ namespace Game.Chat
         }
 
         [Command("target", RBACPermissions.CommandCastTarget)]
-        static bool HandleCastTargetCommad(StringArguments args, CommandHandler handler)
+        private static bool HandleCastTargetCommad(StringArguments args, CommandHandler handler)
         {
             var caster = handler.GetSelectedCreature();
             if (!caster)
@@ -188,7 +188,7 @@ namespace Game.Chat
         }
 
         [Command("dest", RBACPermissions.CommandCastDest)]
-        static bool HandleCastDestCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleCastDestCommand(StringArguments args, CommandHandler handler)
         {
             var caster = handler.GetSelectedUnit();
             if (!caster)
@@ -226,7 +226,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
+        private static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)

@@ -222,7 +222,7 @@ namespace Game
             return rate;
         }
 
-        static Expansion GetExpansionForLevel(uint level)
+        private static Expansion GetExpansionForLevel(uint level)
         {
             if (level < 60)
                 return Expansion.Classic;

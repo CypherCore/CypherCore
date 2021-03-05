@@ -17,7 +17,7 @@
  
 namespace Game.BattleGrounds.Zones
 {
-    class IsleofConquest
+    internal class IsleofConquest
     {
     }
 

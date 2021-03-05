@@ -19,9 +19,9 @@ namespace System.Collections.Generic
 {
     public class MultiMapEnumerator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
     {
-        MultiMap<TKey, TValue> _map;
-        IEnumerator<TKey> _keyEnumerator;
-        IEnumerator<TValue> _valueEnumerator;
+        private MultiMap<TKey, TValue> _map;
+        private IEnumerator<TKey> _keyEnumerator;
+        private IEnumerator<TValue> _valueEnumerator;
 
         public MultiMapEnumerator(MultiMap<TKey, TValue> map)
         {
@@ -74,9 +74,9 @@ namespace System.Collections.Generic
 
     public class SortedMultiMapEnumerator<TKey, TValue> : IEnumerator<KeyValuePair<TKey, TValue>>
     {
-        SortedMultiMap<TKey, TValue> _map;
-        IEnumerator<TKey> _keyEnumerator;
-        IEnumerator<TValue> _valueEnumerator;
+        private SortedMultiMap<TKey, TValue> _map;
+        private IEnumerator<TKey> _keyEnumerator;
+        private IEnumerator<TValue> _valueEnumerator;
 
         public SortedMultiMapEnumerator(SortedMultiMap<TKey, TValue> map)
         {

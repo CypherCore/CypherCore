@@ -26,7 +26,7 @@ namespace Game.SupportSystem
 {
     public class SupportManager : Singleton<SupportManager>
     {
-        SupportManager() { }
+        private SupportManager() { }
 
         public void Initialize()
         {
@@ -341,9 +341,9 @@ namespace Game.SupportSystem
             }
         }
 
-        long GetAge(ulong t) { return (Time.UnixTime - (long)t) / Time.Day; }
+        private long GetAge(ulong t) { return (Time.UnixTime - (long)t) / Time.Day; }
 
-        IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
+        private IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
         {
             return _complaintTicketList.Where(ticket => ticket.Value.GetPlayerGuid() == playerGuid);
         }
@@ -367,20 +367,20 @@ namespace Game.SupportSystem
         public uint GenerateComplaintId() { return ++_lastComplaintId; }
         public uint GenerateSuggestionId() { return ++_lastSuggestionId; }
 
-        bool _supportSystemStatus;
-        bool _ticketSystemStatus;
-        bool _bugSystemStatus;
-        bool _complaintSystemStatus;
-        bool _suggestionSystemStatus;
-        Dictionary<uint, BugTicket> _bugTicketList = new Dictionary<uint, BugTicket>();
-        Dictionary<uint, ComplaintTicket> _complaintTicketList = new Dictionary<uint, ComplaintTicket>();
-        Dictionary<uint, SuggestionTicket> _suggestionTicketList = new Dictionary<uint, SuggestionTicket>();
-        uint _lastBugId;
-        uint _lastComplaintId;
-        uint _lastSuggestionId;
-        uint _openBugTicketCount;
-        uint _openComplaintTicketCount;
-        uint _openSuggestionTicketCount;
-        ulong _lastChange;
+        private bool _supportSystemStatus;
+        private bool _ticketSystemStatus;
+        private bool _bugSystemStatus;
+        private bool _complaintSystemStatus;
+        private bool _suggestionSystemStatus;
+        private Dictionary<uint, BugTicket> _bugTicketList = new Dictionary<uint, BugTicket>();
+        private Dictionary<uint, ComplaintTicket> _complaintTicketList = new Dictionary<uint, ComplaintTicket>();
+        private Dictionary<uint, SuggestionTicket> _suggestionTicketList = new Dictionary<uint, SuggestionTicket>();
+        private uint _lastBugId;
+        private uint _lastComplaintId;
+        private uint _lastSuggestionId;
+        private uint _openBugTicketCount;
+        private uint _openComplaintTicketCount;
+        private uint _openSuggestionTicketCount;
+        private ulong _lastChange;
     }
 }

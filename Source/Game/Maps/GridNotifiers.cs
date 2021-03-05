@@ -72,7 +72,7 @@ namespace Game.Maps
         public void Visit(IList<Corpse> corpses) { _notifier.Visit(corpses); }
         public void Visit(IList<Player> players) { _notifier.Visit(players); }
 
-        Notifier _notifier;
+        private Notifier _notifier;
         internal GridMapTypeMask _mask;
     }
 
@@ -220,7 +220,7 @@ namespace Game.Maps
             }
         }
 
-        WorldObject i_object;
+        private WorldObject i_object;
     }
 
     public class PlayerRelocationNotifier : VisibleNotifier
@@ -298,7 +298,7 @@ namespace Game.Maps
             }
         }
 
-        Creature i_creature;
+        private Creature i_creature;
     }
 
     public class DelayedUnitRelocation : Notifier
@@ -349,10 +349,10 @@ namespace Game.Maps
             }
         }
 
-        Map i_map;
-        Cell cell;
-        CellCoord p;
-        float i_radius;
+        private Map i_map;
+        private Cell cell;
+        private CellCoord p;
+        private float i_radius;
     }
 
     public class AIRelocationNotifier : Notifier
@@ -374,8 +374,8 @@ namespace Game.Maps
             }
         }
 
-        Unit i_unit;
-        bool isCreature;
+        private Unit i_unit;
+        private bool isCreature;
     }
 
     public class MessageDistDeliverer : Notifier
@@ -456,7 +456,7 @@ namespace Game.Maps
             }
         }
 
-        void SendPacket(Player player)
+        private void SendPacket(Player player)
         {
             // never send packet to self
             if (i_source == player || (team != 0 && (uint)player.GetTeam() != team) || skipped_receiver == player)
@@ -468,18 +468,18 @@ namespace Game.Maps
             player.SendPacket(i_message);
         }
 
-        WorldObject i_source;
-        ServerPacket i_message;
-        float i_distSq;
-        uint team;
-        Player skipped_receiver;
+        private WorldObject i_source;
+        private ServerPacket i_message;
+        private float i_distSq;
+        private uint team;
+        private Player skipped_receiver;
     }
 
     public class MessageDistDelivererToHostile : Notifier
     {
-        Unit i_source;
-        ServerPacket i_message;
-        float i_distSq;
+        private Unit i_source;
+        private ServerPacket i_message;
+        private float i_distSq;
 
         public MessageDistDelivererToHostile(Unit src, ServerPacket msg, float dist)
         {
@@ -555,7 +555,7 @@ namespace Game.Maps
             }
         }
 
-        void SendPacket(Player player)
+        private void SendPacket(Player player)
         {
             // never send packet to self
             if (player == i_source || !player.HaveAtClient(i_source) || player.IsFriendlyTo(i_source))
@@ -586,7 +586,7 @@ namespace Game.Maps
             }
         }
 
-        uint i_timeDiff;
+        private uint i_timeDiff;
     }
 
     public class PlayerWorker : Notifier
@@ -607,8 +607,8 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        Action<Player> action;
+        private WorldObject _searcher;
+        private Action<Player> action;
     }
 
     public class CreatureWorker : Notifier
@@ -629,8 +629,8 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        IDoWork<Creature> Do;
+        private WorldObject _searcher;
+        private IDoWork<Creature> Do;
     }
 
     public class GameObjectWorker : Notifier
@@ -651,8 +651,8 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        IDoWork<GameObject> Do;
+        private WorldObject _searcher;
+        private IDoWork<GameObject> Do;
     }
 
     public class WorldObjectWorker : Notifier
@@ -755,9 +755,9 @@ namespace Game.Maps
             }
         }
 
-        GridMapTypeMask i_mapTypeMask;
-        WorldObject _searcher;
-        IDoWork<WorldObject> i_do;
+        private GridMapTypeMask i_mapTypeMask;
+        private WorldObject _searcher;
+        private IDoWork<WorldObject> i_do;
     }
 
     public class ResetNotifier : Notifier
@@ -835,7 +835,7 @@ namespace Game.Maps
             }
         }
 
-        void BuildPacket(Player player)
+        private void BuildPacket(Player player)
         {
             // Only send update once to a player
             if (!plr_list.Contains(player.GetGUID()) && player.HaveAtClient(worldObject))
@@ -845,9 +845,9 @@ namespace Game.Maps
             }
         }
 
-        Dictionary<Player, UpdateData> updateData;
-        WorldObject worldObject;
-        List<ObjectGuid> plr_list = new List<ObjectGuid>();
+        private Dictionary<Player, UpdateData> updateData;
+        private WorldObject worldObject;
+        private List<ObjectGuid> plr_list = new List<ObjectGuid>();
     }
 
     public class PlayerDistWorker : Notifier
@@ -869,9 +869,9 @@ namespace Game.Maps
             }
         }
 
-        WorldObject i_searcher;
-        float i_dist;
-        IDoWork<Player> Do;
+        private WorldObject i_searcher;
+        private float i_dist;
+        private IDoWork<Player> Do;
     }
 
     public class CallOfHelpCreatureInRangeDo : IDoWork<Creature>
@@ -903,9 +903,9 @@ namespace Game.Maps
                 u.GetAI().AttackStart(i_enemy);
         }
 
-        Unit i_funit;
-        Unit i_enemy;
-        float i_range;
+        private Unit i_funit;
+        private Unit i_enemy;
+        private float i_range;
     }
 
     public class LocalizedPacketDo : IDoWork<Player>
@@ -937,8 +937,8 @@ namespace Game.Maps
             player.SendPacket(data);
         }
 
-        MessageBuilder Builder;
-        ServerPacket[] i_data_cache = new ServerPacket[(int)Locale.Total];     // 0 = default, i => i-1 locale index
+        private MessageBuilder Builder;
+        private ServerPacket[] i_data_cache = new ServerPacket[(int)Locale.Total];     // 0 = default, i => i-1 locale index
     }
 
     public class LocalizedPacketListDo : IDoWork<Player>
@@ -968,8 +968,9 @@ namespace Game.Maps
                 p.SendPacket(packet);
         }
 
-        MessageBuilder i_builder;
-        MultiMap<int, ServerPacket> i_data_cache = new MultiMap<int, ServerPacket>();
+        private MessageBuilder i_builder;
+
+        private MultiMap<int, ServerPacket> i_data_cache = new MultiMap<int, ServerPacket>();
         // 0 = default, i => i-1 locale index
     }
 
@@ -1162,10 +1163,10 @@ namespace Game.Maps
 
         public WorldObject GetTarget() { return i_object; }
 
-        GridMapTypeMask i_mapTypeMask;
-        WorldObject i_object;
-        WorldObject _searcher;
-        ICheck<WorldObject> i_check;
+        private GridMapTypeMask i_mapTypeMask;
+        private WorldObject i_object;
+        private WorldObject _searcher;
+        private ICheck<WorldObject> i_check;
     }
     public class WorldObjectLastSearcher : Notifier
     {
@@ -1290,10 +1291,10 @@ namespace Game.Maps
 
         public WorldObject GetTarget() { return i_object; }
 
-        GridMapTypeMask i_mapTypeMask;
-        WorldObject i_object;
-        WorldObject _searcher;
-        ICheck<WorldObject> i_check;
+        private GridMapTypeMask i_mapTypeMask;
+        private WorldObject i_object;
+        private WorldObject _searcher;
+        private ICheck<WorldObject> i_check;
     }
     public class WorldObjectListSearcher : Notifier
     {
@@ -1396,10 +1397,10 @@ namespace Game.Maps
             }
         }
 
-        GridMapTypeMask i_mapTypeMask;
-        List<WorldObject> i_objects;
-        WorldObject _searcher;
-        ICheck<WorldObject> i_check;
+        private GridMapTypeMask i_mapTypeMask;
+        private List<WorldObject> i_objects;
+        private WorldObject _searcher;
+        private ICheck<WorldObject> i_check;
     }
 
     public class GameObjectSearcher : Notifier
@@ -1432,9 +1433,9 @@ namespace Game.Maps
 
         public GameObject GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        GameObject i_object;
-        ICheck<GameObject> i_check;
+        private WorldObject _searcher;
+        private GameObject i_object;
+        private ICheck<GameObject> i_check;
     }
     public class GameObjectLastSearcher : Notifier
     {
@@ -1459,9 +1460,9 @@ namespace Game.Maps
 
         public GameObject GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        GameObject i_object;
-        ICheck<GameObject> i_check;
+        private WorldObject _searcher;
+        private GameObject i_object;
+        private ICheck<GameObject> i_check;
     }
     public class GameObjectListSearcher : Notifier
     {
@@ -1483,9 +1484,9 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        List<GameObject> i_objects;
-        ICheck<GameObject> i_check;
+        private WorldObject _searcher;
+        private List<GameObject> i_objects;
+        private ICheck<GameObject> i_check;
     }
 
     public class UnitSearcher : Notifier
@@ -1530,9 +1531,9 @@ namespace Game.Maps
 
         public Unit GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Unit i_object;
-        ICheck<Unit> i_check;
+        private WorldObject _searcher;
+        private Unit i_object;
+        private ICheck<Unit> i_check;
     }
     public class UnitLastSearcher : Notifier
     {
@@ -1570,9 +1571,9 @@ namespace Game.Maps
 
         public Unit GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Unit i_object;
-        ICheck<Unit> i_check;
+        private WorldObject _searcher;
+        private Unit i_object;
+        private ICheck<Unit> i_check;
     }
     public class UnitListSearcher : Notifier
     {
@@ -1605,9 +1606,9 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        List<Unit> i_objects;
-        ICheck<Unit> i_check;
+        private WorldObject _searcher;
+        private List<Unit> i_objects;
+        private ICheck<Unit> i_check;
     }
 
     public class CreatureSearcher : Notifier
@@ -1640,9 +1641,9 @@ namespace Game.Maps
 
         public Creature GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Creature i_object;
-        ICheck<Creature> i_check;
+        private WorldObject _searcher;
+        private Creature i_object;
+        private ICheck<Creature> i_check;
     }
     public class CreatureLastSearcher : Notifier
     {
@@ -1667,9 +1668,9 @@ namespace Game.Maps
 
         public Creature GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Creature i_object;
-        ICheck<Creature> i_check;
+        private WorldObject _searcher;
+        private Creature i_object;
+        private ICheck<Creature> i_check;
     }
     public class CreatureListSearcher : Notifier
     {
@@ -1691,9 +1692,9 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        List<Creature> i_objects;
-        ICheck<Creature> i_check;
+        private WorldObject _searcher;
+        private List<Creature> i_objects;
+        private ICheck<Creature> i_check;
     }
 
     public class PlayerSearcher : Notifier
@@ -1726,9 +1727,9 @@ namespace Game.Maps
 
         public Player GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Player i_object;
-        ICheck<Player> i_check;
+        private WorldObject _searcher;
+        private Player i_object;
+        private ICheck<Player> i_check;
     }
     public class PlayerLastSearcher : Notifier
     {
@@ -1753,9 +1754,9 @@ namespace Game.Maps
 
         public Player GetTarget() { return i_object; }
 
-        WorldObject _searcher;
-        Player i_object;
-        ICheck<Player> i_check;
+        private WorldObject _searcher;
+        private Player i_object;
+        private ICheck<Player> i_check;
     }
     public class PlayerListSearcher : Notifier
     {
@@ -1777,9 +1778,9 @@ namespace Game.Maps
             }
         }
 
-        WorldObject _searcher;
-        List<Unit> i_objects;
-        ICheck<Player> i_check;
+        private WorldObject _searcher;
+        private List<Unit> i_objects;
+        private ICheck<Player> i_check;
     }
 
     //Checks
@@ -1803,9 +1804,9 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_obj;
-        float i_range;
-        ulong i_hp;
+        private Unit i_obj;
+        private float i_range;
+        private ulong i_hp;
     }
 
     public class FriendlyBelowHpPctEntryInRange : ICheck<Unit>
@@ -1828,11 +1829,11 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_obj;
-        uint i_entry;
-        float i_range;
-        byte i_pct;
-        bool i_excludeSelf;
+        private Unit i_obj;
+        private uint i_entry;
+        private float i_range;
+        private byte i_pct;
+        private bool i_excludeSelf;
     }
 
     public class FriendlyCCedInRange : ICheck<Creature>
@@ -1851,8 +1852,8 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_obj;
-        float i_range;
+        private Unit i_obj;
+        private float i_range;
     }
 
     public class FriendlyMissingBuffInRange : ICheck<Creature>
@@ -1874,9 +1875,9 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_obj;
-        float i_range;
-        uint i_spell;
+        private Unit i_obj;
+        private float i_range;
+        private uint i_spell;
     }
 
     public class AnyUnfriendlyUnitInObjectRangeCheck : ICheck<Unit>
@@ -1896,9 +1897,9 @@ namespace Game.Maps
                 return false;
         }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
+        private WorldObject i_obj;
+        private Unit i_funit;
+        private float i_range;
     }
 
     public class NearestAttackableNoTotemUnitInObjectRangeCheck : ICheck<Unit>
@@ -1931,9 +1932,9 @@ namespace Game.Maps
             return true;
         }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
+        private WorldObject i_obj;
+        private Unit i_funit;
+        private float i_range;
     }
 
     public class AnyFriendlyUnitInObjectRangeCheck : ICheck<Unit>
@@ -1968,12 +1969,12 @@ namespace Game.Maps
             return !i_playerOnly || u.GetTypeId() == TypeId.Player;
         }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
-        bool i_playerOnly;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
+        private WorldObject i_obj;
+        private Unit i_funit;
+        private float i_range;
+        private bool i_playerOnly;
+        private bool i_incOwnRadius;
+        private bool i_incTargetRadius;
     }
 
     public class AnyGroupedUnitInObjectRangeCheck : ICheck<Unit>
@@ -2017,13 +2018,13 @@ namespace Game.Maps
             return u.IsInMap(_source) && u.IsInPhase(_source) && u.IsWithinDoubleVerticalCylinder(_source, searchRadius, searchRadius);
         }
 
-        WorldObject _source;
-        Unit _refUnit;
-        float _range;
-        bool _raid;
-        bool _playerOnly;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
+        private WorldObject _source;
+        private Unit _refUnit;
+        private float _range;
+        private bool _raid;
+        private bool _playerOnly;
+        private bool i_incOwnRadius;
+        private bool i_incTargetRadius;
     }
 
     public class AnyUnitInObjectRangeCheck : ICheck<Unit>
@@ -2043,9 +2044,9 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        float i_range;
-        bool i_check3D;
+        private WorldObject i_obj;
+        private float i_range;
+        private bool i_check3D;
     }
 
     // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)
@@ -2070,9 +2071,9 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
+        private WorldObject i_obj;
+        private Unit i_funit;
+        private float i_range;
     }
 
     public class AnyAoETargetUnitInObjectRangeCheck : ICheck<Unit>
@@ -2115,12 +2116,12 @@ namespace Game.Maps
             return u.IsInMap(i_obj) && u.IsInPhase(i_obj) && u.IsWithinDoubleVerticalCylinder(i_obj, searchRadius, searchRadius);
         }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        SpellInfo _spellInfo;
-        float i_range;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
+        private WorldObject i_obj;
+        private Unit i_funit;
+        private SpellInfo _spellInfo;
+        private float i_range;
+        private bool i_incOwnRadius;
+        private bool i_incTargetRadius;
     }
 
     public class AnyDeadUnitCheck : ICheck<Unit>
@@ -2153,12 +2154,12 @@ namespace Game.Maps
             return true;
         }
 
-        Creature me;
-        float m_range;
-        bool i_playerOnly;
+        private Creature me;
+        private float m_range;
+        private bool i_playerOnly;
     }
 
-    class NearestHostileUnitInAttackDistanceCheck : ICheck<Unit>
+    internal class NearestHostileUnitInAttackDistanceCheck : ICheck<Unit>
     {
         public NearestHostileUnitInAttackDistanceCheck(Creature creature, float dist = 0)
         {
@@ -2187,12 +2188,12 @@ namespace Game.Maps
             return true;
         }
 
-        Creature me;
-        float m_range;
-        bool m_force;
+        private Creature me;
+        private float m_range;
+        private bool m_force;
     }
 
-    class NearestHostileUnitInAggroRangeCheck : ICheck<Unit>
+    internal class NearestHostileUnitInAggroRangeCheck : ICheck<Unit>
     {
         public NearestHostileUnitInAggroRangeCheck(Creature creature, bool useLOS = false)
         {
@@ -2217,11 +2218,11 @@ namespace Game.Maps
             return true;
         }
 
-        Creature _me;
-        bool _useLOS;
+        private Creature _me;
+        private bool _useLOS;
     }
 
-    class AnyAssistCreatureInRangeCheck : ICheck<Creature>
+    internal class AnyAssistCreatureInRangeCheck : ICheck<Creature>
     {
         public AnyAssistCreatureInRangeCheck(Unit funit, Unit enemy, float range)
         {
@@ -2250,12 +2251,12 @@ namespace Game.Maps
             return true;
         }
 
-        Unit i_funit;
-        Unit i_enemy;
-        float i_range;
+        private Unit i_funit;
+        private Unit i_enemy;
+        private float i_range;
     }
 
-    class NearestAssistCreatureInCreatureRangeCheck : ICheck<Creature>
+    internal class NearestAssistCreatureInCreatureRangeCheck : ICheck<Creature>
     {
         public NearestAssistCreatureInCreatureRangeCheck(Creature obj, Unit enemy, float range)
         {
@@ -2281,13 +2282,13 @@ namespace Game.Maps
             return true;
         }
 
-        Creature i_obj;
-        Unit i_enemy;
-        float i_range;
+        private Creature i_obj;
+        private Unit i_enemy;
+        private float i_range;
     }
 
     // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
-    class NearestCreatureEntryWithLiveStateInObjectRangeCheck : ICheck<Creature>
+    internal class NearestCreatureEntryWithLiveStateInObjectRangeCheck : ICheck<Creature>
     {
         public NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject obj, uint entry, bool alive, float range)
         {
@@ -2307,10 +2308,10 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        uint i_entry;
-        bool i_alive;
-        float i_range;
+        private WorldObject i_obj;
+        private uint i_entry;
+        private bool i_alive;
+        private float i_range;
     }
 
     public class AnyPlayerInObjectRangeCheck : ICheck<Player>
@@ -2333,12 +2334,12 @@ namespace Game.Maps
             return true;
         }
 
-        WorldObject _obj;
-        float _range;
-        bool _reqAlive;
+        private WorldObject _obj;
+        private float _range;
+        private bool _reqAlive;
     }
 
-    class AnyPlayerInPositionRangeCheck : ICheck<Player>
+    internal class AnyPlayerInPositionRangeCheck : ICheck<Player>
     {
         public AnyPlayerInPositionRangeCheck(Position pos, float range, bool reqAlive = true)
         {
@@ -2358,12 +2359,12 @@ namespace Game.Maps
             return true;
         }
 
-        Position _pos;
-        float _range;
-        bool _reqAlive;
+        private Position _pos;
+        private float _range;
+        private bool _reqAlive;
     }
-    
-    class NearestPlayerInObjectRangeCheck : ICheck<Player>
+
+    internal class NearestPlayerInObjectRangeCheck : ICheck<Player>
     {
         public NearestPlayerInObjectRangeCheck(WorldObject obj, float range)
         {
@@ -2383,11 +2384,11 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        float i_range;
+        private WorldObject i_obj;
+        private float i_range;
     }
 
-    class AllFriendlyCreaturesInGrid : ICheck<Unit>
+    internal class AllFriendlyCreaturesInGrid : ICheck<Unit>
     {
         public AllFriendlyCreaturesInGrid(Unit obj)
         {
@@ -2402,10 +2403,10 @@ namespace Game.Maps
             return false;
         }
 
-        Unit unit;
+        private Unit unit;
     }
 
-    class AllGameObjectsWithEntryInRange : ICheck<GameObject>
+    internal class AllGameObjectsWithEntryInRange : ICheck<GameObject>
     {
         public AllGameObjectsWithEntryInRange(WorldObject obj, uint entry, float maxRange)
         {
@@ -2422,9 +2423,9 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject m_pObject;
-        uint m_uiEntry;
-        float m_fRange;
+        private WorldObject m_pObject;
+        private uint m_uiEntry;
+        private float m_fRange;
     }
 
     public class AllCreaturesOfEntryInRange : ICheck<Creature>
@@ -2444,12 +2445,12 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject m_pObject;
-        uint m_uiEntry;
-        float m_fRange;
+        private WorldObject m_pObject;
+        private uint m_uiEntry;
+        private float m_fRange;
     }
 
-    class PlayerAtMinimumRangeAway : ICheck<Player>
+    internal class PlayerAtMinimumRangeAway : ICheck<Player>
     {
         public PlayerAtMinimumRangeAway(Unit _unit, float fMinRange)
         {
@@ -2466,11 +2467,11 @@ namespace Game.Maps
             return false;
         }
 
-        Unit unit;
-        float fRange;
+        private Unit unit;
+        private float fRange;
     }
 
-    class GameObjectInRangeCheck : ICheck<GameObject>
+    internal class GameObjectInRangeCheck : ICheck<GameObject>
     {
         public GameObjectInRangeCheck(float _x, float _y, float _z, float _range, uint _entry = 0)
         {
@@ -2488,8 +2489,8 @@ namespace Game.Maps
             else return false;
         }
 
-        float x, y, z, range;
-        uint entry;
+        private float x, y, z, range;
+        private uint entry;
     }
 
     public class AllWorldObjectsInRange : ICheck<WorldObject>
@@ -2505,8 +2506,8 @@ namespace Game.Maps
             return m_pObject.IsWithinDist(go, m_fRange, false) && m_pObject.IsInPhase(go);
         }
 
-        WorldObject m_pObject;
-        float m_fRange;
+        private WorldObject m_pObject;
+        private float m_fRange;
     }
 
     public class ObjectTypeIdCheck : ICheck<WorldObject>
@@ -2522,8 +2523,8 @@ namespace Game.Maps
             return (obj.GetTypeId() == _typeId) == _equals;
         }
 
-        TypeId _typeId;
-        bool _equals;
+        private TypeId _typeId;
+        private bool _equals;
     }
 
     public class ObjectGUIDCheck : ICheck<WorldObject>
@@ -2543,7 +2544,7 @@ namespace Game.Maps
             return check.Invoke;
         }
 
-        ObjectGuid _GUID;
+        private ObjectGuid _GUID;
     }
 
     public class HeightDifferenceCheck : ICheck<WorldObject>
@@ -2561,9 +2562,9 @@ namespace Game.Maps
             return (unit.GetPositionZ() - _baseObject.GetPositionZ() > _difference) != _reverse;
         }
 
-        WorldObject _baseObject;
-        float _difference;
-        bool _reverse;
+        private WorldObject _baseObject;
+        private float _difference;
+        private bool _reverse;
     }
 
     public class UnitAuraCheck<T> : ICheck<T> where T : WorldObject
@@ -2585,12 +2586,12 @@ namespace Game.Maps
             return unit.Invoke;
         }
 
-        bool _present;
-        uint _spellId;
-        ObjectGuid _casterGUID;
+        private bool _present;
+        private uint _spellId;
+        private ObjectGuid _casterGUID;
     }
 
-    class GameObjectFocusCheck : ICheck<GameObject>
+    internal class GameObjectFocusCheck : ICheck<GameObject>
     {
         public GameObjectFocusCheck(Unit unit, uint focusId)
         {
@@ -2611,12 +2612,12 @@ namespace Game.Maps
             return go.IsWithinDistInMap(i_unit, dist);
         }
 
-        Unit i_unit;
-        uint i_focusId;
+        private Unit i_unit;
+        private uint i_focusId;
     }
 
     // Find the nearest Fishing hole and return true only if source object is in range of hole
-    class NearestGameObjectFishingHole : ICheck<GameObject>
+    internal class NearestGameObjectFishingHole : ICheck<GameObject>
     {
         public NearestGameObjectFishingHole(WorldObject obj, float range)
         {
@@ -2634,11 +2635,11 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        float i_range;
+        private WorldObject i_obj;
+        private float i_range;
     }
 
-    class NearestGameObjectCheck : ICheck<GameObject>
+    internal class NearestGameObjectCheck : ICheck<GameObject>
     {
         public NearestGameObjectCheck(WorldObject obj)
         {
@@ -2656,12 +2657,12 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        float i_range;
+        private WorldObject i_obj;
+        private float i_range;
     }
 
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
-    class NearestGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
+    internal class NearestGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
     {
         public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range)
         {
@@ -2680,13 +2681,13 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        uint i_entry;
-        float i_range;
+        private WorldObject i_obj;
+        private uint i_entry;
+        private float i_range;
     }
 
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
-    class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
+    internal class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
     {
         public NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range)
         {
@@ -2705,9 +2706,9 @@ namespace Game.Maps
             return false;
         }
 
-        WorldObject i_obj;
-        GameObjectTypes i_type;
-        float i_range;
+        private WorldObject i_obj;
+        private GameObjectTypes i_type;
+        private float i_range;
     }
 
     public class AnyDeadUnitObjectInRangeCheck<T> : ICheck<T> where T : WorldObject
@@ -2735,8 +2736,8 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_searchObj;
-        float i_range;
+        private Unit i_searchObj;
+        private float i_range;
     }
 
     public class AnyDeadUnitSpellTargetInRangeCheck<T> : AnyDeadUnitObjectInRangeCheck<T> where T : WorldObject
@@ -2753,8 +2754,8 @@ namespace Game.Maps
             return base.Invoke(obj) && i_check.Invoke(obj);
         }
 
-        SpellInfo i_spellInfo;
-        WorldObjectSpellTargetCheck i_check;
+        private SpellInfo i_spellInfo;
+        private WorldObjectSpellTargetCheck i_check;
     }
 
     public class PlayerOrPetCheck : ICheck<WorldObject>

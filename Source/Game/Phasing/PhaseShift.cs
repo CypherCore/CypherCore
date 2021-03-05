@@ -224,7 +224,7 @@ namespace Game
                 Flags |= unphasedFlag;
         }
 
-        void UpdatePersonalGuid()
+        private void UpdatePersonalGuid()
         {
             if (PersonalReferences == 0)
                 PersonalGuid.Clear();
@@ -245,10 +245,10 @@ namespace Game
         public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>();
         public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>();
 
-        int NonCosmeticReferences;
-        int CosmeticReferences;
+        private int NonCosmeticReferences;
+        private int CosmeticReferences;
         public int PersonalReferences;
-        int DefaultReferences;
+        private int DefaultReferences;
         public bool IsDbPhaseShift;
     }
 

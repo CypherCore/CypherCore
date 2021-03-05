@@ -24,9 +24,9 @@ namespace Framework.Cryptography
 {
     public class SRP6
     {
-        static SHA1 _sha1;
-        static BigInteger _g;
-        static BigInteger _N;
+        private static SHA1 _sha1;
+        private static BigInteger _g;
+        private static BigInteger _N;
 
         static SRP6()
         {

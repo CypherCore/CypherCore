@@ -22,10 +22,10 @@ namespace Game.Entities
 {
     public class UpdateMask
     {
-        int _blockCount;
-        int _blocksMaskCount;
-        uint[] _blocks;
-        uint[] _blocksMask;
+        private int _blockCount;
+        private int _blocksMaskCount;
+        private uint[] _blocks;
+        private uint[] _blocksMask;
 
         public UpdateMask(int bits, uint[] input = null)
         {

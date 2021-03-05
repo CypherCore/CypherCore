@@ -28,15 +28,15 @@ namespace Game.Entities
 {
     public class CollectionMgr
     {
-        static Dictionary<uint, uint> FactionSpecificMounts = new Dictionary<uint, uint>();
+        private static Dictionary<uint, uint> FactionSpecificMounts = new Dictionary<uint, uint>();
 
-        WorldSession _owner;
-        Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
-        Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
-        Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
-        BitSet _appearances;
-        MultiMap<uint, ObjectGuid> _temporaryAppearances = new MultiMap<uint, ObjectGuid>();
-        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new Dictionary<uint, FavoriteAppearanceState>();
+        private WorldSession _owner;
+        private Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
+        private Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
+        private Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
+        private BitSet _appearances;
+        private MultiMap<uint, ObjectGuid> _temporaryAppearances = new MultiMap<uint, ObjectGuid>();
+        private Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new Dictionary<uint, FavoriteAppearanceState>();
 
         public static void LoadMountDefinitions()
         {
@@ -121,7 +121,7 @@ namespace Game.Entities
             }
         }
 
-        bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
+        private bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
         {
             if (_toys.ContainsKey(itemId))
                 return false;
@@ -149,7 +149,7 @@ namespace Game.Entities
             _toys[itemId] &= ~ToyFlags.HasFanfare;
         }
 
-        ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
+        private ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
         {
             var flags = ToyFlags.None;
             if (isFavourite)
@@ -211,7 +211,7 @@ namespace Game.Entities
             }
         }
 
-        bool UpdateAccountHeirlooms(uint itemId, HeirloomPlayerFlags flags)
+        private bool UpdateAccountHeirlooms(uint itemId, HeirloomPlayerFlags flags)
         {
             if (_heirlooms.ContainsKey(itemId))
                 return false;
@@ -457,7 +457,7 @@ namespace Game.Entities
             SendSingleMountUpdate(spellId, _mounts[spellId]);
         }
 
-        void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
+        private void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
         {
             var player = _owner.GetPlayer();
             if (!player)
@@ -574,7 +574,7 @@ namespace Game.Entities
             }
         }
 
-        uint[] PlayerClassByArmorSubclass =
+        private uint[] PlayerClassByArmorSubclass =
         {
             (int)Class.ClassMaskAllPlayable,                                                                                        //ITEM_SUBCLASS_ARMOR_MISCELLANEOUS
             (1 << ((int)Class.Priest - 1)) | (1 << ((int)Class.Mage - 1)) | (1 << ((int)Class.Warlock - 1)),                                       //ITEM_SUBCLASS_ARMOR_CLOTH
@@ -617,7 +617,7 @@ namespace Game.Entities
             AddItemAppearance(itemModifiedAppearance);
         }
 
-        bool CanAddAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
+        private bool CanAddAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
             if (itemModifiedAppearance == null)
                 return false;
@@ -700,7 +700,7 @@ namespace Game.Entities
             return true;
         }
         //todo  check this
-        void AddItemAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
+        private void AddItemAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
             var owner = _owner.GetPlayer();
             if (_appearances.Count <= itemModifiedAppearance.Id)
@@ -737,7 +737,7 @@ namespace Game.Entities
                     _owner.GetPlayer().UpdateCriteria(CriteriaTypes.TransmogSetUnlocked, set.TransmogSetGroupID);
         }
 
-        void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)
+        private void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
             var itemsWithAppearance = _temporaryAppearances[itemModifiedAppearance.Id];
             if (itemsWithAppearance.Empty())
@@ -848,7 +848,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsSetCompleted(uint transmogSetId)
+        private bool IsSetCompleted(uint transmogSetId)
         {
             var transmogSetItems = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
             if (transmogSetItems.Empty())
@@ -886,7 +886,7 @@ namespace Game.Entities
         public Dictionary<uint, MountStatusFlags> GetAccountMounts() { return _mounts; }
     }
 
-    enum FavoriteAppearanceState
+    internal enum FavoriteAppearanceState
     {
         New,
         Removed,

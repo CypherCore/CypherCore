@@ -17,7 +17,7 @@
 
 namespace Game.BattleGrounds.Zones
 {
-    class BattleforGilneas
+    internal class BattleforGilneas
     {
     }
 }

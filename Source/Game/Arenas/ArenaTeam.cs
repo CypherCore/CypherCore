@@ -405,7 +405,7 @@ namespace Game.Arenas
             }
         }
 
-        void BroadcastPacket(ServerPacket packet)
+        private void BroadcastPacket(ServerPacket packet)
         {
             foreach (var member in Members)
             {
@@ -482,14 +482,14 @@ namespace Game.Arenas
             return matchMakerRating;
         }
 
-        float GetChanceAgainst(uint ownRating, uint opponentRating)
+        private float GetChanceAgainst(uint ownRating, uint opponentRating)
         {
             // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
             // ELO system
             return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
         }
 
-        int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)
+        private int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
@@ -515,7 +515,7 @@ namespace Game.Arenas
             return (int)Math.Ceiling(mod);
         }
 
-        int GetRatingMod(uint ownRating, uint opponentRating, bool won)
+        private int GetRatingMod(uint ownRating, uint opponentRating, bool won)
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
@@ -791,25 +791,25 @@ namespace Game.Arenas
         public uint GetRating() { return stats.Rating; }
 
         public int GetMembersSize() { return Members.Count; }
-        bool Empty() { return Members.Empty(); }
+        private bool Empty() { return Members.Empty(); }
         public List<ArenaTeamMember> GetMembers()
         {
             return Members;
         }
 
-        uint teamId;
-        byte type;
-        string TeamName;
-        ObjectGuid CaptainGuid;
+        private uint teamId;
+        private byte type;
+        private string TeamName;
+        private ObjectGuid CaptainGuid;
 
-        uint BackgroundColor; // ARGB format
-        byte EmblemStyle;     // icon id
-        uint EmblemColor;     // ARGB format
-        byte BorderStyle;     // border image id
-        uint BorderColor;     // ARGB format
+        private uint BackgroundColor; // ARGB format
+        private byte EmblemStyle;     // icon id
+        private uint EmblemColor;     // ARGB format
+        private byte BorderStyle;     // border image id
+        private uint BorderColor;     // ARGB format
 
-        List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
-        ArenaTeamStats stats;
+        private List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
+        private ArenaTeamStats stats;
     }
 
     public class ArenaTeamMember

@@ -26,7 +26,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
-        void HandleAttackSwing(AttackSwing packet)
+        private void HandleAttackSwing(AttackSwing packet)
         {
             var enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
             if (!enemy)
@@ -62,13 +62,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AttackStop, Processing = PacketProcessing.Inplace)]
-        void HandleAttackStop(AttackStop packet)
+        private void HandleAttackStop(AttackStop packet)
         {
             GetPlayer().AttackStop();
         }
 
         [WorldPacketHandler(ClientOpcodes.SetSheathed, Processing = PacketProcessing.Inplace)]
-        void HandleSetSheathed(SetSheathed packet)
+        private void HandleSetSheathed(SetSheathed packet)
         {
             if (packet.CurrentSheathState >= (int)SheathState.Max)
             {
@@ -79,7 +79,7 @@ namespace Game
             GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
         }
 
-        void SendAttackStop(Unit enemy)
+        private void SendAttackStop(Unit enemy)
         {
             SendPacket(new SAttackStop(GetPlayer(), enemy));
         }

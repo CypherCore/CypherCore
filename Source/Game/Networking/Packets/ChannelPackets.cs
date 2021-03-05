@@ -146,7 +146,7 @@ namespace Game.Networking.Packets
         public bool Suspended;
     }
 
-    class UserlistAdd : ServerPacket
+    internal class UserlistAdd : ServerPacket
     {
         public UserlistAdd() : base(ServerOpcodes.UserlistAdd) { }
 
@@ -169,7 +169,7 @@ namespace Game.Networking.Packets
         public string ChannelName;
     }
 
-    class UserlistRemove : ServerPacket
+    internal class UserlistRemove : ServerPacket
     {
         public UserlistRemove() : base(ServerOpcodes.UserlistRemove) { }
 
@@ -190,7 +190,7 @@ namespace Game.Networking.Packets
         public string ChannelName;
     }
 
-    class UserlistUpdate : ServerPacket
+    internal class UserlistUpdate : ServerPacket
     {
         public UserlistUpdate() : base(ServerOpcodes.UserlistUpdate) { }
 
@@ -213,7 +213,7 @@ namespace Game.Networking.Packets
         public string ChannelName;
     }
 
-    class ChannelCommand : ClientPacket
+    internal class ChannelCommand : ClientPacket
     {
         public ChannelCommand(WorldPacket packet) : base(packet)
         {
@@ -239,7 +239,7 @@ namespace Game.Networking.Packets
         public string ChannelName;
     }
 
-    class ChannelPlayerCommand : ClientPacket
+    internal class ChannelPlayerCommand : ClientPacket
     {
         public ChannelPlayerCommand(WorldPacket packet) : base(packet)
         {
@@ -273,7 +273,7 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class ChannelPassword : ClientPacket
+    internal class ChannelPassword : ClientPacket
     {
         public ChannelPassword(WorldPacket packet) : base(packet) { }
 

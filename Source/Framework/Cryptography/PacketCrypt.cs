@@ -72,9 +72,9 @@ namespace Framework.Cryptography
 
         public bool IsInitialized { get; set; }
 
-        AesGcm _serverEncrypt;
-        AesGcm _clientDecrypt;
-        ulong _clientCounter;
-        ulong _serverCounter;
+        private AesGcm _serverEncrypt;
+        private AesGcm _clientDecrypt;
+        private ulong _clientCounter;
+        private ulong _serverCounter;
     }
 }

@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class CombatLogServerPacket : ServerPacket
+    internal class CombatLogServerPacket : ServerPacket
     {
         public CombatLogServerPacket(ServerOpcodes opcode, ConnectionType connection = ConnectionType.Realm) : base(opcode, connection)
         {
@@ -56,7 +56,7 @@ namespace Game.Networking.Packets
         internal SpellCastLogData LogData;
     }
 
-    class SpellNonMeleeDamageLog : CombatLogServerPacket
+    internal class SpellNonMeleeDamageLog : CombatLogServerPacket
     {
         public SpellNonMeleeDamageLog() : base(ServerOpcodes.SpellNonMeleeDamageLog, ConnectionType.Instance) { }
 
@@ -104,7 +104,7 @@ namespace Game.Networking.Packets
         public Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
     }
 
-    class EnvironmentalDamageLog : CombatLogServerPacket
+    internal class EnvironmentalDamageLog : CombatLogServerPacket
     {
         public EnvironmentalDamageLog() : base(ServerOpcodes.EnvironmentalDamageLog) { }
 
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
         public int Absorbed;
     }
 
-    class SpellExecuteLog : CombatLogServerPacket
+    internal class SpellExecuteLog : CombatLogServerPacket
     {
         public SpellExecuteLog() : base(ServerOpcodes.SpellExecuteLog, ConnectionType.Instance) { }
 
@@ -203,7 +203,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class SpellHealLog : CombatLogServerPacket
+    internal class SpellHealLog : CombatLogServerPacket
     {
         public SpellHealLog() : base(ServerOpcodes.SpellHealLog, ConnectionType.Instance) { }
 
@@ -248,10 +248,10 @@ namespace Game.Networking.Packets
         public bool Crit;
         public Optional<float> CritRollMade;
         public Optional<float> CritRollNeeded;
-        Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
+        private Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
     }
 
-    class SpellPeriodicAuraLog : CombatLogServerPacket
+    internal class SpellPeriodicAuraLog : CombatLogServerPacket
     {
         public SpellPeriodicAuraLog() : base(ServerOpcodes.SpellPeriodicAuraLog, ConnectionType.Instance) { }
 
@@ -320,7 +320,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class SpellInterruptLog : ServerPacket
+    internal class SpellInterruptLog : ServerPacket
     {
         public SpellInterruptLog() : base(ServerOpcodes.SpellInterruptLog, ConnectionType.Instance) { }
 
@@ -338,7 +338,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class SpellDispellLog : ServerPacket
+    internal class SpellDispellLog : ServerPacket
     {
         public SpellDispellLog() : base(ServerOpcodes.SpellDispellLog, ConnectionType.Instance) { }
 
@@ -375,7 +375,7 @@ namespace Game.Networking.Packets
     }
 
 
-    class SpellEnergizeLog : CombatLogServerPacket
+    internal class SpellEnergizeLog : CombatLogServerPacket
     {
         public SpellEnergizeLog() : base(ServerOpcodes.SpellEnergizeLog, ConnectionType.Instance) { }
 
@@ -418,7 +418,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class SpellMissLog : ServerPacket
+    internal class SpellMissLog : ServerPacket
     {
         public SpellMissLog() : base(ServerOpcodes.SpellMissLog, ConnectionType.Instance) { }
 
@@ -437,7 +437,7 @@ namespace Game.Networking.Packets
         public List<SpellLogMissEntry> Entries = new List<SpellLogMissEntry>();
     }
 
-    class ProcResist : ServerPacket
+    internal class ProcResist : ServerPacket
     {
         public ProcResist() : base(ServerOpcodes.ProcResist) { }
 
@@ -464,7 +464,7 @@ namespace Game.Networking.Packets
         public Optional<float> Needed;
     }
 
-    class SpellOrDamageImmune : ServerPacket
+    internal class SpellOrDamageImmune : ServerPacket
     {
         public SpellOrDamageImmune() : base(ServerOpcodes.SpellOrDamageImmune, ConnectionType.Instance) { }
 
@@ -483,7 +483,7 @@ namespace Game.Networking.Packets
         public bool IsPeriodic;
     }
 
-    class SpellDamageShield : CombatLogServerPacket
+    internal class SpellDamageShield : CombatLogServerPacket
     {
         public SpellDamageShield() : base(ServerOpcodes.SpellDamageShield, ConnectionType.Instance) { }
 
@@ -513,7 +513,7 @@ namespace Game.Networking.Packets
         public uint LogAbsorbed;
     }
 
-    class AttackerStateUpdate : CombatLogServerPacket
+    internal class AttackerStateUpdate : CombatLogServerPacket
     {
         public AttackerStateUpdate() : base(ServerOpcodes.AttackerStateUpdate, ConnectionType.Instance)
         {
@@ -609,7 +609,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    struct SpellLogEffectPowerDrainParams
+    internal struct SpellLogEffectPowerDrainParams
     {
         public ObjectGuid Victim;
         public uint Points;
@@ -617,35 +617,35 @@ namespace Game.Networking.Packets
         public float Amplitude;
     }
 
-    struct SpellLogEffectExtraAttacksParams
+    internal struct SpellLogEffectExtraAttacksParams
     {
         public ObjectGuid Victim;
         public uint NumAttacks;
     }
 
-    struct SpellLogEffectDurabilityDamageParams
+    internal struct SpellLogEffectDurabilityDamageParams
     {
         public ObjectGuid Victim;
         public int ItemID;
         public int Amount;
     }
 
-    struct SpellLogEffectGenericVictimParams
+    internal struct SpellLogEffectGenericVictimParams
     {
         public ObjectGuid Victim;
     }
 
-    struct SpellLogEffectTradeSkillItemParams
+    internal struct SpellLogEffectTradeSkillItemParams
     {
         public int ItemID;
     }
 
-    struct SpellLogEffectFeedPetParams
+    internal struct SpellLogEffectFeedPetParams
     {
         public int ItemID;
     }
 
-    struct SpellLogMissDebug
+    internal struct SpellLogMissDebug
     {
         public void Write(WorldPacket data)
         {
@@ -678,10 +678,10 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Victim;
         public byte MissReason;
-        Optional<SpellLogMissDebug> Debug;
+        private Optional<SpellLogMissDebug> Debug;
     }
 
-    struct SpellDispellData
+    internal struct SpellDispellData
     {
         public uint SpellID;
         public bool Harmful;

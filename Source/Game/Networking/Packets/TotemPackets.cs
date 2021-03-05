@@ -20,7 +20,7 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class TotemDestroyed : ClientPacket
+    internal class TotemDestroyed : ClientPacket
     {
         public TotemDestroyed(WorldPacket packet) : base(packet) { }
 
@@ -34,7 +34,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class TotemCreated : ServerPacket
+    internal class TotemCreated : ServerPacket
     {
         public TotemCreated() : base(ServerOpcodes.TotemCreated) { }
 
@@ -57,7 +57,7 @@ namespace Game.Networking.Packets
         public bool CannotDismiss;
     }
 
-    class TotemMoved : ServerPacket
+    internal class TotemMoved : ServerPacket
     {
         public TotemMoved() : base(ServerOpcodes.TotemMoved) { }
 

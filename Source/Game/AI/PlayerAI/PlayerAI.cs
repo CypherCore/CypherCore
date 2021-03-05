@@ -397,7 +397,7 @@ namespace Game.AI
             _isSelfRangedAttacker = IsPlayerRangedAttacker(player);
         }
 
-        bool IsPlayerHealer(Player who)
+        private bool IsPlayerHealer(Player who)
         {
             if (!who)
                 return false;
@@ -425,7 +425,8 @@ namespace Game.AI
                     return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration;
             }
         }
-        bool IsPlayerRangedAttacker(Player who)
+
+        private bool IsPlayerRangedAttacker(Player who)
         {
             if (!who)
                 return false;
@@ -462,7 +463,7 @@ namespace Game.AI
             }
         }
 
-        Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
+        private Tuple<Spell, Unit> VerifySpellCast(uint spellId, Unit target)
         {
             // Find highest spell rank that we know
             uint knownRank, nextRank;
@@ -501,7 +502,7 @@ namespace Game.AI
             return null;
         }
 
-        Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
+        private Tuple<Spell, Unit> VerifySpellCast(uint spellId, SpellTarget target)
         {
             Unit pTarget = null;
             switch (target)
@@ -558,7 +559,7 @@ namespace Game.AI
             return selected;
         }
 
-        void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
+        private void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
         {
             var spell = VerifySpellCast(spellId, target);
             if (spell != null)
@@ -572,7 +573,7 @@ namespace Game.AI
             spell.Item1.Prepare(targets);
         }
 
-        void DoRangedAttackIfReady()
+        private void DoRangedAttackIfReady()
         {
             if (me.HasUnitState(UnitState.Casting))
                 return;
@@ -621,7 +622,7 @@ namespace Game.AI
                 DoMeleeAttackIfReady();
         }
 
-        void CancelAllShapeshifts()
+        private void CancelAllShapeshifts()
         {
             var shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
             var removableShapeshifts = new List<Aura>();
@@ -654,22 +655,22 @@ namespace Game.AI
         public override void OnCharmed(bool apply) { }
 
         // helper functions to determine player info
-        bool IsHealer(Player who = null)
+        private bool IsHealer(Player who = null)
         {
             return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
         }
         public bool IsRangedAttacker(Player who = null) { return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who); }
-        uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
-        void SetIsRangedAttacker(bool state) { _isSelfRangedAttacker = state; } // this allows overriding of the default ranged attacker detection
+        private uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
+        private void SetIsRangedAttacker(bool state) { _isSelfRangedAttacker = state; } // this allows overriding of the default ranged attacker detection
 
         public virtual Unit SelectAttackTarget() { return me.GetCharmer() ? me.GetCharmer().GetVictim() : null; }
 
         protected new Player me;
-        uint _selfSpec;
-        bool _isSelfHealer;
-        bool _isSelfRangedAttacker;
+        private uint _selfSpec;
+        private bool _isSelfHealer;
+        private bool _isSelfRangedAttacker;
 
-        enum SpellTarget
+        private enum SpellTarget
         {
             None,
             Victim,
@@ -678,7 +679,7 @@ namespace Game.AI
         }
     }
 
-    class SimpleCharmedPlayerAI : PlayerAI
+    internal class SimpleCharmedPlayerAI : PlayerAI
     {
         public SimpleCharmedPlayerAI(Player player) : base(player)
         {
@@ -708,7 +709,7 @@ namespace Game.AI
             return null;
         }
 
-        Tuple<Spell, Unit> SelectAppropriateCastForSpec()
+        private Tuple<Spell, Unit> SelectAppropriateCastForSpec()
         {
             var spells = new List<Tuple<Tuple<Spell, Unit>, uint>>();
             /*
@@ -1234,7 +1235,7 @@ namespace Game.AI
             return SelectSpellCast(spells);
         }
 
-        const float CASTER_CHASE_DISTANCE = 28.0f;
+        private const float CASTER_CHASE_DISTANCE = 28.0f;
 
         public override void UpdateAI(uint diff)
         {
@@ -1360,15 +1361,15 @@ namespace Game.AI
             }
         }
 
-        uint _castCheckTimer;
-        bool _chaseCloser;
-        bool _forceFacing;
-        bool _isFollowing;
+        private uint _castCheckTimer;
+        private bool _chaseCloser;
+        private bool _forceFacing;
+        private bool _isFollowing;
     }
 
-    struct ValidTargetSelectPredicate : ICheck<Unit>
+    internal struct ValidTargetSelectPredicate : ICheck<Unit>
     {
-        UnitAI _ai;
+        private UnitAI _ai;
 
         public ValidTargetSelectPredicate(UnitAI ai)
         {

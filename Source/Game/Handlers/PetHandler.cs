@@ -29,7 +29,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.DismissCritter)]
-        void HandleDismissCritter(DismissCritter packet)
+        private void HandleDismissCritter(DismissCritter packet)
         {
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.CritterGUID);
             if (!pet)
@@ -47,12 +47,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestPetInfo)]
-        void HandleRequestPetInfo(RequestPetInfo packet)
+        private void HandleRequestPetInfo(RequestPetInfo packet)
         {
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAction)]
-        void HandlePetAction(PetAction packet)
+        private void HandlePetAction(PetAction packet)
         {
             var guid1 = packet.PetGUID;         //pet guid
             var guid2 = packet.TargetGUID;      //tag guid
@@ -103,7 +103,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetStopAttack)]
-        void HandlePetStopAttack(PetStopAttack packet)
+        private void HandlePetStopAttack(PetStopAttack packet)
         {
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
             if (!pet)
@@ -125,7 +125,7 @@ namespace Game
             pet.ClearInPetCombat();
         }
 
-        void HandlePetActionHelper(Unit pet, ObjectGuid guid1, uint spellid, ActiveStates flag, ObjectGuid guid2, float x, float y, float z)
+        private void HandlePetActionHelper(Unit pet, ObjectGuid guid1, uint spellid, ActiveStates flag, ObjectGuid guid2, float x, float y, float z)
         {
             var charmInfo = pet.GetCharmInfo();
             if (charmInfo == null)
@@ -411,12 +411,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryPetName)]
-        void HandleQueryPetName(QueryPetName packet)
+        private void HandleQueryPetName(QueryPetName packet)
         {
             SendQueryPetNameResponse(packet.UnitGUID);
         }
 
-        void SendQueryPetNameResponse(ObjectGuid guid)
+        private void SendQueryPetNameResponse(ObjectGuid guid)
         {
             var response = new QueryPetNameResponse();
             response.UnitGUID = guid;
@@ -443,7 +443,7 @@ namespace Game
             GetPlayer().SendPacket(response);
         }
 
-        bool CheckStableMaster(ObjectGuid guid)
+        private bool CheckStableMaster(ObjectGuid guid)
         {
             // spell case or GM
             if (guid == GetPlayer().GetGUID())
@@ -467,7 +467,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetSetAction)]
-        void HandlePetSetAction(PetSetAction packet)
+        private void HandlePetSetAction(PetSetAction packet)
         {
             var petguid = packet.PetGUID;
             var pet = Global.ObjAccessor.GetUnit(GetPlayer(), petguid);
@@ -530,7 +530,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetRename)]
-        void HandlePetRename(PetRename packet)
+        private void HandlePetRename(PetRename packet)
         {
             var petguid = packet.RenameData.PetGUID;
             var isdeclined = packet.RenameData.HasDeclinedNames;
@@ -589,7 +589,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAbandon)]
-        void HandlePetAbandon(PetAbandon packet)
+        private void HandlePetAbandon(PetAbandon packet)
         {
             if (!GetPlayer().IsInWorld)
                 return;
@@ -603,7 +603,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetSpellAutocast)]
-        void HandlePetSpellAutocast(PetSpellAutocast packet)
+        private void HandlePetSpellAutocast(PetSpellAutocast packet)
         {
             Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
             if (!pet)
@@ -646,7 +646,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetCastSpell)]
-        void HandlePetCastSpell(PetCastSpell petCastSpell)
+        private void HandlePetCastSpell(PetCastSpell petCastSpell)
         {
             var caster = Global.ObjAccessor.GetUnit(GetPlayer(), petCastSpell.PetGUID);
             if (!caster)
@@ -720,7 +720,7 @@ namespace Game
             }
         }
 
-        void SendPetNameInvalid(PetNameInvalidReason error, string name, DeclinedName declinedName)
+        private void SendPetNameInvalid(PetNameInvalidReason error, string name, DeclinedName declinedName)
         {
             var petNameInvalid = new PetNameInvalid();
             petNameInvalid.Result = error;

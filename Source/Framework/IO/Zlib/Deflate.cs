@@ -87,13 +87,13 @@ namespace Framework.IO
 		private const int FINISH_STATE=666;
 
 		// Data structure describing a single value and its code string.
-		struct ct_data
+		private struct ct_data
 		{
-			ushort freq;
+			private ushort freq;
 			public ushort Freq { get { return freq; } set { freq=value; } } // frequency count
 			public ushort Code { get { return freq; } set { freq=value; } }	// bit string
 
-			ushort dad;
+			private ushort dad;
 			public ushort Dad { get { return dad; } set { dad=value; } }		// father node in Huffman tree
 			public ushort Len { get { return dad; } set { dad=value; } }		// length of bit string
 
@@ -110,7 +110,7 @@ namespace Framework.IO
 			}
 		}
 
-		struct tree_desc
+		private struct tree_desc
 		{
 			public ct_data[] dyn_tree;			// the dynamic tree
 			public int max_code;				// largest code with non zero frequency
@@ -124,7 +124,7 @@ namespace Framework.IO
 			}
 		}
 
-		class deflate_state //internal_state 
+		private class deflate_state //internal_state 
 		{
 			public z_stream strm;			// pointer back to this zlib stream
 			public int status;				// as the name implies
@@ -337,7 +337,7 @@ namespace Framework.IO
 		// ===========================================================================
 		// Function prototypes.
 
-		enum block_state
+		private enum block_state
 		{
 			need_more,      // block not completed, need more input or more output
 			block_done,     // block flush performed
@@ -346,7 +346,7 @@ namespace Framework.IO
 		}
 
 		// Compression function. Returns the block state after the call.
-		delegate block_state compress_func(deflate_state s, int flush);
+		private delegate block_state compress_func(deflate_state s, int flush);
 
 		// ===========================================================================
 		// Local data
@@ -361,7 +361,7 @@ namespace Framework.IO
 		// the desired pack level (0..9). The values given below have been tuned to
 		// exclude worst case performance for pathological files. Better values may be
 		// found for specific files.
-		struct config
+		private struct config
 		{
 			public ushort good_length;	// reduce lazy search above this match length
 			public ushort max_lazy;		// do not perform lazy search above this match length
@@ -379,7 +379,7 @@ namespace Framework.IO
 			}
 		}
 
-		static readonly config[] configuration_table=new config[] 
+		private static readonly config[] configuration_table=new config[] 
 		{ // good lazy nice chain
 			new config( 0,   0,   0,    0, deflate_stored),	// store only
 			new config( 4,   4,   8,    4, deflate_fast),	// max speed, no lazy matches
@@ -887,7 +887,7 @@ namespace Framework.IO
 		// Put a short in the pending buffer. The 16-bit value is put in MSB order.
 		// IN assertion: the stream state is correct and there is enough room in
 		// pending_buf.
-		static void putShortMSB(deflate_state s, uint b)
+		private static void putShortMSB(deflate_state s, uint b)
 		{
 			//was put_byte(s, (byte)(b >> 8));
 			s.pending_buf[s.pending++]=(byte)(b >> 8);
@@ -900,7 +900,7 @@ namespace Framework.IO
 		// through this function so some applications may wish to modify it
 		// to avoid allocating a large strm.next_out buffer and copying into it.
 		// (See also read_buf()).
-		static void flush_pending(z_stream strm)
+		private static void flush_pending(z_stream strm)
 		{
 			var s=(deflate_state)strm.state;
 			var len=s.pending;
@@ -919,7 +919,7 @@ namespace Framework.IO
 			if(s.pending==0) s.pending_out=0;
 		}
 
-		const int PRESET_DICT=0x20; // preset dictionary flag in zlib header
+		private const int PRESET_DICT=0x20; // preset dictionary flag in zlib header
 
 		#region deflate
 		// =========================================================================
@@ -1418,12 +1418,12 @@ namespace Framework.IO
 		// this function so some applications may wish to modify it to avoid
 		// allocating a large strm.next_in buffer and copying from it.
 		// (See also flush_pending()).
-		static int read_buf(z_stream strm, byte[] buf, uint size)
+		private static int read_buf(z_stream strm, byte[] buf, uint size)
 		{
 			return read_buf(strm, buf, 0, size);
 		}
 
-		static int read_buf(z_stream strm, byte[] buf, int buf_ind, uint size)
+		private static int read_buf(z_stream strm, byte[] buf, int buf_ind, uint size)
 		{
 			var len=strm.avail_in;
 
@@ -1447,7 +1447,7 @@ namespace Framework.IO
 
 		// ===========================================================================
 		// Initialize the "longest match" routines for a new zlib stream
-		static void lm_init(deflate_state s)
+		private static void lm_init(deflate_state s)
 		{
 			s.window_size=(uint)2*s.w_size;
 
@@ -1478,7 +1478,7 @@ namespace Framework.IO
 		// IN assertions: cur_match is the head of the hash chain for the current
 		//   string (strstart) and its distance is <= MAX_DIST, and prev_length >= 1
 		// OUT assertion: the match length is not greater than s.lookahead.
-		static uint longest_match(deflate_state s, uint cur_match)
+		private static uint longest_match(deflate_state s, uint cur_match)
 		{
 			var chain_length=s.max_chain_length;	// max hash chain length
 			var scan=s.window;					// current string
@@ -1566,7 +1566,7 @@ namespace Framework.IO
 
 		// ---------------------------------------------------------------------------
 		// Optimized version for FASTEST only
-	    static uint longest_match_fast(deflate_state s, uint cur_match)
+		private static uint longest_match_fast(deflate_state s, uint cur_match)
 	    {
 	        var scan = s.window;
 	        var scan_ind = (int) s.strstart; // current string
@@ -1624,7 +1624,7 @@ namespace Framework.IO
 		//    At least one byte has been read, or avail_in == 0; reads are
 		//    performed for at least two bytes (required for the zip translate_eol
 		//    option -- not supported here).
-		static void fill_window(deflate_state s)
+		private static void fill_window(deflate_state s)
 		{
 			uint n, m;
 			uint more;    // Amount of free space at the end of the window.
@@ -1762,7 +1762,7 @@ namespace Framework.IO
 		// only for the level=0 compression option.
 		// NOTE: this function should be optimized to avoid extra copying from
 		// window to pending_buf.
-		static block_state deflate_stored(deflate_state s, int flush)
+		private static block_state deflate_stored(deflate_state s, int flush)
 		{
 			// Stored blocks are limited to 0xffff bytes, pending_buf is limited
 			// to pending_buf_size, and each stored block has a 5 byte header:
@@ -1836,7 +1836,7 @@ namespace Framework.IO
 		// This function does not perform lazy evaluation of matches and inserts
 		// new strings in the dictionary only for unmatched strings or for short
 		// matches. It is used only for the fast compression options.
-		static block_state deflate_fast(deflate_state s, int flush)
+		private static block_state deflate_fast(deflate_state s, int flush)
 		{
 			uint hash_head=NIL; // head of the hash chain
 			int bflush;           // set if current block must be flushed
@@ -1965,7 +1965,7 @@ namespace Framework.IO
 		// Same as above, but achieves better compression. We use a lazy
 		// evaluation for matches: a match is finally adopted only if there is
 		// no better match at the next window position.
-		static block_state deflate_slow(deflate_state s, int flush)
+		private static block_state deflate_slow(deflate_state s, int flush)
 		{
 			uint hash_head=NIL;	// head of hash chain
 			int bflush;			// set if current block must be flushed
@@ -2136,7 +2136,7 @@ namespace Framework.IO
 		// For Z_RLE, simply look for runs of bytes, generate matches only of distance
 		// one.  Do not maintain a hash table.  (It will be regenerated if this run of
 		// deflate switches away from Z_RLE.)
-		static block_state deflate_rle(deflate_state s, int flush)
+		private static block_state deflate_rle(deflate_state s, int flush)
 		{
 			bool bflush;			// set if current block must be flushed
 			uint prev;				// byte at distance one to match
@@ -2236,7 +2236,7 @@ namespace Framework.IO
 		// ===========================================================================
 		// For Z_HUFFMAN_ONLY, do not look for matches.  Do not maintain a hash table.
 		// (It will be regenerated if this run of deflate switches away from Huffman.)
-		static block_state deflate_huff(deflate_state s, int flush)
+		private static block_state deflate_huff(deflate_state s, int flush)
 		{
 			bool bflush;				// set if current block must be flushed
 

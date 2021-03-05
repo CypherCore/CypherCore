@@ -277,11 +277,11 @@ namespace Game.Entities
         public bool IsEmpty() { return m_members.Empty(); }
         public bool IsFormed() { return m_Formed; }
         public bool IsLeader(Creature creature) { return m_leader == creature; }
-        
-        Creature m_leader;
-        Dictionary<Creature, FormationInfo> m_members = new Dictionary<Creature, FormationInfo>();
 
-        uint m_groupID;
-        bool m_Formed;
+        private Creature m_leader;
+        private Dictionary<Creature, FormationInfo> m_members = new Dictionary<Creature, FormationInfo>();
+
+        private uint m_groupID;
+        private bool m_Formed;
     }
 }

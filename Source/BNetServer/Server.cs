@@ -70,7 +70,7 @@ namespace BNetServer
             _banExpiryCheckTimer.Start();
         }
 
-        static bool StartDB()
+        private static bool StartDB()
         {
             var loader = new DatabaseLoader(DatabaseTypeFlags.None);
             loader.AddDatabase(DB.Login, "Login");
@@ -82,14 +82,14 @@ namespace BNetServer
             return true;
         }
 
-        static void ExitNow()
+        private static void ExitNow()
         {
             Console.WriteLine("Halting process...");
             System.Threading.Thread.Sleep(10000);
             Environment.Exit(-1);
         }
 
-        static void FixLegacyAuthHashes()
+        private static void FixLegacyAuthHashes()
         {
             Log.outInfo(LogFilter.Server, "Updating password hashes...");
             var start = Time.GetMSTime();
@@ -108,7 +108,7 @@ namespace BNetServer
             do
             {
                 var id = result.Read<uint>(0);
-                (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationDataFromHash(result.Read<string>(1).ToByteArray());
+                var (salt, verifier) = SRP6.MakeRegistrationDataFromHash(result.Read<string>(1).ToByteArray());
 
                 if (result.Read<long>(2) != 0 && !hadWarning)
                 {
@@ -117,8 +117,8 @@ namespace BNetServer
                 }
 
                 var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
-                stmt.AddValue(0, registrationData.salt);
-                stmt.AddValue(1, registrationData.verifier);
+                stmt.AddValue(0, salt);
+                stmt.AddValue(1, verifier);
                 stmt.AddValue(2, id);
                 trans.Append(stmt);
 
@@ -130,13 +130,13 @@ namespace BNetServer
             Log.outInfo(LogFilter.Server, $"{count} password hashes updated in {Time.GetMSTimeDiffToNow(start)} ms");
         }
 
-        static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void BanExpiryCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.UpdExpiredAccountBans));
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelBnetExpiredAccountBanned));
         }
 
-        static Timer _banExpiryCheckTimer;
+        private static Timer _banExpiryCheckTimer;
     }
 }

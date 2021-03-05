@@ -10,10 +10,10 @@ namespace Game.Cache
 {
     public class CharacterCache : Singleton<CharacterCache>
     {
-        Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new Dictionary<ObjectGuid, CharacterCacheEntry>();
-        Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new Dictionary<string, CharacterCacheEntry>();
+        private Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new Dictionary<ObjectGuid, CharacterCacheEntry>();
+        private Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new Dictionary<string, CharacterCacheEntry>();
 
-        CharacterCache() { }
+        private CharacterCache() { }
 
         public void LoadCharacterCacheStorage()
         {

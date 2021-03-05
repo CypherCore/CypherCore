@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class CancelAura : ClientPacket
+    internal class CancelAura : ClientPacket
     {
         public CancelAura(WorldPacket packet) : base(packet) { }
 
@@ -39,14 +39,14 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class CancelAutoRepeatSpell : ClientPacket
+    internal class CancelAutoRepeatSpell : ClientPacket
     {
         public CancelAutoRepeatSpell(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class CancelChannelling : ClientPacket
+    internal class CancelChannelling : ClientPacket
     {
         public CancelChannelling(WorldPacket packet) : base(packet) { }
 
@@ -56,19 +56,20 @@ namespace Game.Networking.Packets
             Reason = _worldPacket.ReadInt32();
         }
 
-        int ChannelSpell;
-        int Reason = 0;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
+        private int ChannelSpell;
+
+        private int Reason = 0;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
                                 // does not match SpellCastResult enum
     }
 
-    class CancelGrowthAura : ClientPacket
+    internal class CancelGrowthAura : ClientPacket
     {
         public CancelGrowthAura(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class CancelMountAura : ClientPacket
+    internal class CancelMountAura : ClientPacket
     {
         public CancelMountAura(WorldPacket packet) : base(packet) { }
 
@@ -169,7 +170,7 @@ namespace Game.Networking.Packets
 
     public class SendUnlearnSpells : ServerPacket
     {
-        List<uint> Spells = new List<uint>();
+        private List<uint> Spells = new List<uint>();
 
         public SendUnlearnSpells() : base(ServerOpcodes.SendUnlearnSpells, ConnectionType.Instance) { }
 
@@ -253,7 +254,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class SpellPrepare : ServerPacket
+    internal class SpellPrepare : ServerPacket
     {
         public SpellPrepare() : base(ServerOpcodes.SpellPrepare) { }
 
@@ -267,7 +268,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ServerCastID;
     }
 
-    class SpellGo : CombatLogServerPacket
+    internal class SpellGo : CombatLogServerPacket
     {
         public SpellGo() : base(ServerOpcodes.SpellGo, ConnectionType.Instance) { }
 
@@ -394,7 +395,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CastID;
     }
 
-    class CastFailedBase : ServerPacket
+    internal class CastFailedBase : ServerPacket
     {
         public ObjectGuid CastID;
         public int SpellID;
@@ -410,7 +411,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class CastFailed : CastFailedBase
+    internal class CastFailed : CastFailedBase
     {
         public SpellCastVisual Visual;
 
@@ -429,7 +430,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class PetCastFailed : CastFailedBase
+    internal class PetCastFailed : CastFailedBase
     {
         public PetCastFailed() : base(ServerOpcodes.PetCastFailed, ConnectionType.Instance) { }
 
@@ -676,7 +677,7 @@ namespace Game.Networking.Packets
         public uint SpellVisualID;
     }
 
-    class CancelSpellVisualKit : ServerPacket
+    internal class CancelSpellVisualKit : ServerPacket
     {
         public CancelSpellVisualKit() : base(ServerOpcodes.CancelSpellVisualKit) { }
 
@@ -693,7 +694,7 @@ namespace Game.Networking.Packets
         public bool MountedVisual;
     }
 
-    class PlayOrphanSpellVisual : ServerPacket
+    internal class PlayOrphanSpellVisual : ServerPacket
     {
         public PlayOrphanSpellVisual() : base(ServerOpcodes.PlayOrphanSpellVisual) { }
 
@@ -722,7 +723,7 @@ namespace Game.Networking.Packets
         public Vector3 TargetLocation; // Exclusive with Target
     }
 
-    class PlaySpellVisual : ServerPacket
+    internal class PlaySpellVisual : ServerPacket
     {
         public PlaySpellVisual() : base(ServerOpcodes.PlaySpellVisual) { }
 
@@ -757,7 +758,7 @@ namespace Game.Networking.Packets
         public bool SpeedAsTime;
     }
 
-    class PlaySpellVisualKit : ServerPacket
+    internal class PlaySpellVisualKit : ServerPacket
     {
         public PlaySpellVisualKit() : base(ServerOpcodes.PlaySpellVisualKit) { }
 
@@ -851,7 +852,7 @@ namespace Game.Networking.Packets
         public int TimeRemaining;
     }
 
-    class ResurrectRequest : ServerPacket
+    internal class ResurrectRequest : ServerPacket
     {
         public ResurrectRequest() : base(ServerOpcodes.ResurrectRequest) { }
 
@@ -878,7 +879,7 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class UnlearnSkill : ClientPacket
+    internal class UnlearnSkill : ClientPacket
     {
         public UnlearnSkill(WorldPacket packet) : base(packet) { }
 
@@ -890,7 +891,7 @@ namespace Game.Networking.Packets
         public uint SkillLine;
     }
 
-    class SelfRes : ClientPacket
+    internal class SelfRes : ClientPacket
     {
         public SelfRes(WorldPacket packet) : base(packet) { }
 
@@ -902,7 +903,7 @@ namespace Game.Networking.Packets
         public uint SpellId;
     }
 
-    class GetMirrorImageData : ClientPacket
+    internal class GetMirrorImageData : ClientPacket
     {
         public GetMirrorImageData(WorldPacket packet) : base(packet) { }
 
@@ -916,7 +917,7 @@ namespace Game.Networking.Packets
         public uint DisplayID;
     }
 
-    class MirrorImageComponentedData : ServerPacket
+    internal class MirrorImageComponentedData : ServerPacket
     {
         public MirrorImageComponentedData() : base(ServerOpcodes.MirrorImageComponentedData) { }
 
@@ -954,7 +955,7 @@ namespace Game.Networking.Packets
         public List<int> ItemDisplayID = new List<int>();
     }
 
-    class MirrorImageCreatureData : ServerPacket
+    internal class MirrorImageCreatureData : ServerPacket
     {
         public MirrorImageCreatureData() : base(ServerOpcodes.MirrorImageCreatureData) { }
 
@@ -970,7 +971,7 @@ namespace Game.Networking.Packets
         public int SpellVisualKitID;
     }
 
-    class SpellClick : ClientPacket
+    internal class SpellClick : ClientPacket
     {
         public SpellClick(WorldPacket packet) : base(packet) { }
 
@@ -984,7 +985,7 @@ namespace Game.Networking.Packets
         public bool TryAutoDismount;
     }
 
-    class ResyncRunes : ServerPacket
+    internal class ResyncRunes : ServerPacket
     {
         public ResyncRunes() : base(ServerOpcodes.ResyncRunes) { }
 
@@ -996,7 +997,7 @@ namespace Game.Networking.Packets
         public RuneData Runes = new RuneData();
     }
 
-    class AddRunePower : ServerPacket
+    internal class AddRunePower : ServerPacket
     {
         public AddRunePower() : base(ServerOpcodes.AddRunePower, ConnectionType.Instance) { }
 
@@ -1008,7 +1009,7 @@ namespace Game.Networking.Packets
         public uint AddedRunesMask;
     }
 
-    class MissileTrajectoryCollision : ClientPacket
+    internal class MissileTrajectoryCollision : ClientPacket
     {
         public MissileTrajectoryCollision(WorldPacket packet) : base(packet) { }
 
@@ -1026,7 +1027,7 @@ namespace Game.Networking.Packets
         public Vector3 CollisionPos;
     }
 
-    class NotifyMissileTrajectoryCollision : ServerPacket
+    internal class NotifyMissileTrajectoryCollision : ServerPacket
     {
         public NotifyMissileTrajectoryCollision() : base(ServerOpcodes.NotifyMissileTrajectoryCollision) { }
 
@@ -1042,7 +1043,7 @@ namespace Game.Networking.Packets
         public Vector3 CollisionPos;
     }
 
-    class UpdateMissileTrajectory : ClientPacket
+    internal class UpdateMissileTrajectory : ClientPacket
     {
         public UpdateMissileTrajectory(WorldPacket packet) : base(packet) { }
 
@@ -1086,7 +1087,7 @@ namespace Game.Networking.Packets
         public int ActualDelay;
     }
 
-    class DispelFailed : ServerPacket
+    internal class DispelFailed : ServerPacket
     {
         public DispelFailed() : base(ServerOpcodes.DispelFailed) { }
 
@@ -1106,7 +1107,7 @@ namespace Game.Networking.Packets
         public List<uint> FailedSpells = new List<uint>();
     }
 
-    class CustomLoadScreen : ServerPacket
+    internal class CustomLoadScreen : ServerPacket
     {
         public CustomLoadScreen(uint teleportSpellId, uint loadingScreenId) : base(ServerOpcodes.CustomLoadScreen)
         {
@@ -1120,11 +1121,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(LoadingScreenID);
         }
 
-        uint TeleportSpellID;
-        uint LoadingScreenID;
+        private uint TeleportSpellID;
+        private uint LoadingScreenID;
     }
 
-    class MountResultPacket : ServerPacket
+    internal class MountResultPacket : ServerPacket
     {
         public MountResultPacket() : base(ServerOpcodes.MountResult, ConnectionType.Instance) { }
 
@@ -1136,7 +1137,7 @@ namespace Game.Networking.Packets
         public uint Result;
     }
 
-    class MissileCancel : ServerPacket
+    internal class MissileCancel : ServerPacket
     {
         public MissileCancel() : base(ServerOpcodes.MissileCancel) { }
 
@@ -1215,21 +1216,21 @@ namespace Game.Networking.Packets
             }
         }
 
-        long Health;
-        int AttackPower;
-        int SpellPower;
-        uint Armor;
-        List<SpellLogPowerData> PowerData = new List<SpellLogPowerData>();
+        private long Health;
+        private int AttackPower;
+        private int SpellPower;
+        private uint Armor;
+        private List<SpellLogPowerData> PowerData = new List<SpellLogPowerData>();
     }
 
-    class ContentTuningParams
+    internal class ContentTuningParams
     {
-        bool GenerateDataPlayerToPlayer(Player attacker, Player target)
+        private bool GenerateDataPlayerToPlayer(Player attacker, Player target)
         {
             return false;
         }
 
-        bool GenerateDataCreatureToPlayer(Creature attacker, Player target)
+        private bool GenerateDataCreatureToPlayer(Creature attacker, Player target)
         {
             var creatureTemplate = attacker.GetCreatureTemplate();
             var creatureScaling = creatureTemplate.GetLevelScaling(attacker.GetMap().GetDifficultyID());
@@ -1246,7 +1247,7 @@ namespace Game.Networking.Packets
             return true;
         }
 
-        bool GenerateDataPlayerToCreature(Player attacker, Creature target)
+        private bool GenerateDataPlayerToCreature(Player attacker, Creature target)
         {
             var creatureTemplate = target.GetCreatureTemplate();
             var creatureScaling = creatureTemplate.GetLevelScaling(target.GetMap().GetDifficultyID());
@@ -1263,7 +1264,7 @@ namespace Game.Networking.Packets
             return true;
         }
 
-        bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
+        private bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
         {
             var accessor = target.HasScalableLevels() ? target : attacker;
             var creatureTemplate = accessor.GetCreatureTemplate();
@@ -1443,11 +1444,11 @@ namespace Game.Networking.Packets
         public ushort CastLevel = 1;
         public byte Applications = 1;
         public int ContentTuningID;
-        Optional<ContentTuningParams> ContentTuning;
+        private Optional<ContentTuningParams> ContentTuning;
         public Optional<ObjectGuid> CastUnit;
         public Optional<int> Duration;
         public Optional<int> Remaining;
-        Optional<float> TimeMod;
+        private Optional<float> TimeMod;
         public float[] Points = new float[0];
         public List<float> EstimatedPoints = new List<float>();
     }
@@ -1929,8 +1930,8 @@ namespace Game.Networking.Packets
         public int CategoryRecoveryTime;
         public float ModRate = 1.0f;
         public bool OnHold;
-        Optional<uint> unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
-        Optional<uint> unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
+        private Optional<uint> unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
+        private Optional<uint> unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
     }
 
     public class SpellChargeEntry

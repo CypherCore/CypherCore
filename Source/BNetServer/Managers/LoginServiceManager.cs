@@ -18,13 +18,13 @@ namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
-        ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
-        FormInputs formInputs;
-        IPEndPoint externalAddress;
-        IPEndPoint localAddress;
-        X509Certificate2 certificate;
+        private ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
+        private FormInputs formInputs;
+        private IPEndPoint externalAddress;
+        private IPEndPoint localAddress;
+        private X509Certificate2 certificate;
 
-        LoginServiceManager() 
+        private LoginServiceManager() 
         {
             serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler>();
             formInputs = new FormInputs();
@@ -138,9 +138,9 @@ namespace BNetServer
 
     public class BnetServiceHandler
     {
-        Delegate methodCaller;
-        Type requestType;
-        Type responseType;
+        private Delegate methodCaller;
+        private Type requestType;
+        private Type responseType;
 
         public BnetServiceHandler(MethodInfo info, ParameterInfo[] parameters)
         {

@@ -25,7 +25,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.QueryScenarioPoi)]
-        void HandleQueryScenarioPOI(QueryScenarioPOI queryScenarioPOI)
+        private void HandleQueryScenarioPOI(QueryScenarioPOI queryScenarioPOI)
         {
             var response = new ScenarioPOIs();
 

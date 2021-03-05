@@ -25,7 +25,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.CanDuel)]
-        void HandleCanDuel(CanDuel packet)
+        private void HandleCanDuel(CanDuel packet)
         {
             Player player = Global.ObjAccessor.FindPlayer(packet.TargetGUID);
 
@@ -47,7 +47,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DuelResponse)]
-        void HandleDuelResponse(DuelResponse duelResponse)
+        private void HandleDuelResponse(DuelResponse duelResponse)
         {
             if (duelResponse.Accepted && !duelResponse.Forfeited)
                 HandleDuelAccepted();
@@ -55,7 +55,7 @@ namespace Game
                 HandleDuelCancelled();
         }
 
-        void HandleDuelAccepted()
+        private void HandleDuelAccepted()
         {
             if (GetPlayer().duel == null)                                  // ignore accept from duel-sender
                 return;
@@ -82,7 +82,7 @@ namespace Game
             plTarget.EnablePvpRules();
         }
 
-        void HandleDuelCancelled()
+        private void HandleDuelCancelled()
         {
             // no duel requested
             if (GetPlayer().duel == null)

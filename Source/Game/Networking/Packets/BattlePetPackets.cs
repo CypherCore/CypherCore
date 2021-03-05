@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class BattlePetJournal : ServerPacket
+    internal class BattlePetJournal : ServerPacket
     {
         public BattlePetJournal() : base(ServerOpcodes.BattlePetJournal) { }
 
@@ -44,27 +44,27 @@ namespace Game.Networking.Packets
         }
 
         public ushort Trap;
-        bool HasJournalLock = true;
+        private bool HasJournalLock = true;
         public List<BattlePetSlot> Slots = new List<BattlePetSlot>();
         public List<BattlePetStruct> Pets = new List<BattlePetStruct>();
-        int MaxPets = 1000;
+        private int MaxPets = 1000;
     }
 
-    class BattlePetJournalLockAcquired : ServerPacket
+    internal class BattlePetJournalLockAcquired : ServerPacket
     {
         public BattlePetJournalLockAcquired() : base(ServerOpcodes.BattlePetJournalLockAcquired) { }
 
         public override void Write() { }
     }
 
-    class BattlePetRequestJournal : ClientPacket
+    internal class BattlePetRequestJournal : ClientPacket
     {
         public BattlePetRequestJournal(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class BattlePetUpdates : ServerPacket
+    internal class BattlePetUpdates : ServerPacket
     {
         public BattlePetUpdates() : base(ServerOpcodes.BattlePetUpdates) { }
 
@@ -82,7 +82,7 @@ namespace Game.Networking.Packets
         public bool PetAdded;
     }
 
-    class PetBattleSlotUpdates : ServerPacket
+    internal class PetBattleSlotUpdates : ServerPacket
     {
         public PetBattleSlotUpdates() : base(ServerOpcodes.PetBattleSlotUpdates) { }
 
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
         public bool NewSlot;
     }
 
-    class BattlePetSetBattleSlot : ClientPacket
+    internal class BattlePetSetBattleSlot : ClientPacket
     {
         public BattlePetSetBattleSlot(WorldPacket packet) : base(packet) { }
 
@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class BattlePetModifyName : ClientPacket
+    internal class BattlePetModifyName : ClientPacket
     {
         public BattlePetModifyName(WorldPacket packet) : base(packet) { }
 
@@ -146,7 +146,7 @@ namespace Game.Networking.Packets
         public DeclinedName Declined;
     }
 
-    class BattlePetDeletePet : ClientPacket
+    internal class BattlePetDeletePet : ClientPacket
     {
         public BattlePetDeletePet(WorldPacket packet) : base(packet) { }
 
@@ -158,7 +158,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PetGuid;
     }
 
-    class BattlePetSetFlags : ClientPacket
+    internal class BattlePetSetFlags : ClientPacket
     {
         public BattlePetSetFlags(WorldPacket packet) : base(packet) { }
 
@@ -174,7 +174,7 @@ namespace Game.Networking.Packets
         public FlagsControlType ControlType;
     }
 
-    class CageBattlePet : ClientPacket
+    internal class CageBattlePet : ClientPacket
     {
         public CageBattlePet(WorldPacket packet) : base(packet) { }
 
@@ -186,7 +186,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PetGuid;
     }
 
-    class BattlePetDeleted : ServerPacket
+    internal class BattlePetDeleted : ServerPacket
     {
         public BattlePetDeleted() : base(ServerOpcodes.BattlePetDeleted) { }
 
@@ -198,7 +198,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PetGuid;
     }
 
-    class BattlePetErrorPacket : ServerPacket
+    internal class BattlePetErrorPacket : ServerPacket
     {
         public BattlePetErrorPacket() : base(ServerOpcodes.BattlePetError) { }
 
@@ -212,7 +212,7 @@ namespace Game.Networking.Packets
         public uint CreatureID;
     }
 
-    class BattlePetSummon : ClientPacket
+    internal class BattlePetSummon : ClientPacket
     {
         public BattlePetSummon(WorldPacket packet) : base(packet) { }
 

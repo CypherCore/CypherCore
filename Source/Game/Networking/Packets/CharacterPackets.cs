@@ -312,7 +312,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class CheckCharacterNameAvailability : ClientPacket
+    internal class CheckCharacterNameAvailability : ClientPacket
     {     
         public uint SequenceIndex;
         public string Name;
@@ -326,7 +326,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class CheckCharacterNameAvailabilityResult : ServerPacket
+    internal class CheckCharacterNameAvailabilityResult : ServerPacket
     {
         public uint SequenceIndex;
         public ResponseCodes Result;
@@ -716,7 +716,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Code);
         }
 
-        LoginFailureReason Code;
+        private LoginFailureReason Code;
     }
 
     public class LogoutRequest : ClientPacket
@@ -896,7 +896,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class LogXPGain : ServerPacket
+    internal class LogXPGain : ServerPacket
     {
         public LogXPGain() : base(ServerOpcodes.LogXpGain) { }
 
@@ -918,7 +918,7 @@ namespace Game.Networking.Packets
         public byte ReferAFriendBonusType; // 1 - 300% of normal XP; 2 - 150% of normal XP
     }
 
-    class TitleEarned : ServerPacket
+    internal class TitleEarned : ServerPacket
     {
         public TitleEarned(ServerOpcodes opcode) : base(opcode) { }
 
@@ -930,7 +930,7 @@ namespace Game.Networking.Packets
         public uint Index;
     }
 
-    class SetFactionAtWar : ClientPacket
+    internal class SetFactionAtWar : ClientPacket
     {
         public SetFactionAtWar(WorldPacket packet) : base(packet) { }
 
@@ -942,7 +942,7 @@ namespace Game.Networking.Packets
         public byte FactionIndex;
     }
 
-    class SetFactionNotAtWar : ClientPacket
+    internal class SetFactionNotAtWar : ClientPacket
     {
         public SetFactionNotAtWar(WorldPacket packet) : base(packet) { }
 
@@ -954,7 +954,7 @@ namespace Game.Networking.Packets
         public byte FactionIndex;
     }
 
-    class SetFactionInactive : ClientPacket
+    internal class SetFactionInactive : ClientPacket
     {
         public SetFactionInactive(WorldPacket packet) : base(packet) { }
 
@@ -968,7 +968,7 @@ namespace Game.Networking.Packets
         public bool State;
     }
 
-    class SetWatchedFaction : ClientPacket
+    internal class SetWatchedFaction : ClientPacket
     {
         public SetWatchedFaction(WorldPacket packet) : base(packet) { }
 
@@ -980,7 +980,7 @@ namespace Game.Networking.Packets
         public uint FactionIndex;
     }
 
-    class SetFactionVisible : ServerPacket
+    internal class SetFactionVisible : ServerPacket
     {
         public SetFactionVisible(bool visible) : base(visible ? ServerOpcodes.SetFactionVisible : ServerOpcodes.SetFactionNotVisible, ConnectionType.Instance) { }
 
@@ -992,7 +992,7 @@ namespace Game.Networking.Packets
         public uint FactionIndex;
     }
 
-    class CharCustomizeSuccess : ServerPacket
+    internal class CharCustomizeSuccess : ServerPacket
     {
         public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
         {
@@ -1018,13 +1018,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(CharName);
         }
 
-        ObjectGuid CharGUID;
-        string CharName = "";
-        byte SexID;
-        Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+        private ObjectGuid CharGUID;
+        private string CharName = "";
+        private byte SexID;
+        private Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
     }
 
-    class CharCustomizeFailure : ServerPacket
+    internal class CharCustomizeFailure : ServerPacket
     {
         public CharCustomizeFailure() : base(ServerOpcodes.CharCustomizeFailure) { }
 
@@ -1038,7 +1038,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CharGUID;
     }
 
-    class SetPlayerDeclinedNames : ClientPacket
+    internal class SetPlayerDeclinedNames : ClientPacket
     {
         public SetPlayerDeclinedNames(WorldPacket packet) : base(packet)
         {
@@ -1062,7 +1062,7 @@ namespace Game.Networking.Packets
         public DeclinedName DeclinedNames;
     }
 
-    class SetPlayerDeclinedNamesResult : ServerPacket
+    internal class SetPlayerDeclinedNamesResult : ServerPacket
     {
         public SetPlayerDeclinedNamesResult() : base(ServerOpcodes.SetPlayerDeclinedNamesResult) { }
 

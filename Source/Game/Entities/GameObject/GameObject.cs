@@ -91,7 +91,7 @@ namespace Game.Entities
             RemoveFromOwner();
         }
 
-        void RemoveFromOwner()
+        private void RemoveFromOwner()
         {
             var ownerGUID = GetOwnerGUID();
             if (ownerGUID.IsEmpty())
@@ -181,7 +181,7 @@ namespace Game.Entities
             return go;
         }
 
-        bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
+        private bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit, bool dynamic, ulong spawnid)
         {
             Cypher.Assert(map);
             SetMap(map);
@@ -1274,7 +1274,7 @@ namespace Game.Entities
                 trapGO.CastSpell(target, trapSpell.Id);
         }
 
-        GameObject LookupFishingHoleAround(float range)
+        private GameObject LookupFishingHoleAround(float range)
         {
             var u_check = new NearestGameObjectFishingHole(this, range);
             var checker = new GameObjectSearcher(this, u_check);
@@ -1332,7 +1332,7 @@ namespace Game.Entities
                 data.artKit = artkit;
         }
 
-        void SwitchDoorOrButton(bool activate, bool alternative = false)
+        private void SwitchDoorOrButton(bool activate, bool alternative = false)
         {
             if (activate)
                 AddFlag(GameObjectFlags.InUse);
@@ -2448,7 +2448,7 @@ namespace Game.Entities
             return 0;
         }
 
-        void EnableCollision(bool enable)
+        private void EnableCollision(bool enable)
         {
             if (m_model == null)
                 return;
@@ -2456,7 +2456,7 @@ namespace Game.Entities
             m_model.EnableCollision(enable);
         }
 
-        void UpdateModel()
+        private void UpdateModel()
         {
             if (!IsInWorld)
                 return;
@@ -2473,14 +2473,14 @@ namespace Game.Entities
                 GetMap().InsertGameObjectModel(m_model);
         }
 
-        Player GetLootRecipient()
+        private Player GetLootRecipient()
         {
             if (m_lootRecipient.IsEmpty())
                 return null;
             return Global.ObjAccessor.FindPlayer(m_lootRecipient);
         }
 
-        Group GetLootRecipientGroup()
+        private Group GetLootRecipientGroup()
         {
             if (m_lootRecipientGroup.IsEmpty())
                 return Global.GroupMgr.GetGroupByGUID(m_lootRecipientGroup);
@@ -2727,17 +2727,17 @@ namespace Game.Entities
         public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }
         public void SetGoType(GameObjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.TypeID), (sbyte)type); }
         public GameObjectState GetGoState() { return (GameObjectState)(sbyte)m_gameObjectData.State; }
-        uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
-        byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
+        private uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
+        private byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
         public void SetGoAnimProgress(uint animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
 
         public LootState GetLootState() { return m_lootState; }
         public LootModes GetLootMode() { return m_LootMode; }
-        bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
-        void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
-        void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
-        void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
-        void ResetLootMode() { m_LootMode = LootModes.Default; }
+        private bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
+        private void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
+        private void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
+        private void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
+        private void ResetLootMode() { m_LootMode = LootModes.Default; }
         public void SetLootGenerationTime() { m_lootGenerationTime = (uint)Time.UnixTime; }
         public uint GetLootGenerationTime() { return m_lootGenerationTime; }
 
@@ -2750,14 +2750,15 @@ namespace Game.Entities
 
             return false;
         }
-        void ClearSkillupList() { m_SkillupList.Clear(); }
+
+        private void ClearSkillupList() { m_SkillupList.Clear(); }
 
         public void AddUse() { ++m_usetimes; }
 
         public uint GetUseCount() { return m_usetimes; }
-        uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
+        private uint GetUniqueUseCount() { return (uint)m_unique_users.Count; }
 
-        bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
+        private bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
 
         public override uint GetLevelForTarget(WorldObject target)
         {
@@ -2768,7 +2769,7 @@ namespace Game.Entities
             return 1;
         }
 
-        GameObjectDestructibleState GetDestructibleState()
+        private GameObjectDestructibleState GetDestructibleState()
         {
             if ((m_gameObjectData.Flags & (uint)GameObjectFlags.Destroyed) != 0)
                 return GameObjectDestructibleState.Destroyed;
@@ -2808,7 +2809,7 @@ namespace Game.Entities
         }
 
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
-        void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
+        private void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
         public void SetVisibleByUnitOnly(ObjectGuid unit) { m_visibleByUnitOnly = unit; }
@@ -2820,51 +2821,52 @@ namespace Game.Entities
         protected GameObjectValue m_goValue;
         protected GameObjectTemplate m_goInfo;
         protected GameObjectTemplateAddon m_goTemplateAddon;
-        GameObjectData m_goData;
-        ulong m_spawnId;
-        uint m_spellId;
-        long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
-        LootState m_lootState;
-        ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
-        bool m_spawnedByDefault;
-        uint m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
+        private GameObjectData m_goData;
+        private ulong m_spawnId;
+        private uint m_spellId;
+        private long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
+        private uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
+        private LootState m_lootState;
+        private ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
+        private bool m_spawnedByDefault;
+
+        private uint m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
         // For traps this: spell casting cooldown, for doors/buttons: reset time.
 
-        Player m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
-        List<ObjectGuid> m_unique_users = new List<ObjectGuid>();
-        uint m_usetimes;
+        private Player m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
+        private List<ObjectGuid> m_unique_users = new List<ObjectGuid>();
+        private uint m_usetimes;
 
-        ObjectGuid m_lootRecipient;
-        ObjectGuid m_lootRecipientGroup;
-        LootModes m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
-        uint m_lootGenerationTime;
+        private ObjectGuid m_lootRecipient;
+        private ObjectGuid m_lootRecipientGroup;
+        private LootModes m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+        private uint m_lootGenerationTime;
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
-        long m_packedRotation;
-        Quaternion m_worldRotation;
+        private long m_packedRotation;
+        private Quaternion m_worldRotation;
         public Position StationaryPosition { get; set; }
 
-        GameObjectAI m_AI;
-        bool m_respawnCompatibilityMode;
-        ushort _animKitId;
-        uint _worldEffectID;
-        ObjectGuid m_visibleByUnitOnly;
+        private GameObjectAI m_AI;
+        private bool m_respawnCompatibilityMode;
+        private ushort _animKitId;
+        private uint _worldEffectID;
+        private ObjectGuid m_visibleByUnitOnly;
 
-        GameObjectState m_prevGoState;                          // What state to set whenever resetting
+        private GameObjectState m_prevGoState;                          // What state to set whenever resetting
 
-        Dictionary<uint, ObjectGuid> ChairListSlots = new Dictionary<uint, ObjectGuid>();
-        List<ObjectGuid> m_SkillupList = new List<ObjectGuid>();
+        private Dictionary<uint, ObjectGuid> ChairListSlots = new Dictionary<uint, ObjectGuid>();
+        private List<ObjectGuid> m_SkillupList = new List<ObjectGuid>();
 
         public Loot loot = new Loot();
 
         public GameObjectModel m_model;
 
-        ObjectGuid m_linkedTrap;
+        private ObjectGuid m_linkedTrap;
         #endregion
     }
 
-    class GameObjectModelOwnerImpl : GameObjectModelOwnerBase
+    internal class GameObjectModelOwnerImpl : GameObjectModelOwnerBase
     {
         public GameObjectModelOwnerImpl(GameObject owner)
         {
@@ -2879,7 +2881,7 @@ namespace Game.Entities
         public override float GetOrientation() { return _owner.GetOrientation(); }
         public override float GetScale() { return _owner.GetObjectScale(); }
 
-        GameObject _owner;
+        private GameObject _owner;
     }
 
     public struct GameObjectValue

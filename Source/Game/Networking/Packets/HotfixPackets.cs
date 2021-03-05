@@ -22,7 +22,7 @@ using Game.DataStorage;
 
 namespace Game.Networking.Packets
 {
-    class DBQueryBulk : ClientPacket
+    internal class DBQueryBulk : ClientPacket
     {
         public DBQueryBulk(WorldPacket packet) : base(packet) { }
 
@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
         public ByteBuffer Data = new ByteBuffer();
     }
 
-    class AvailableHotfixes : ServerPacket
+    internal class AvailableHotfixes : ServerPacket
     {
         public AvailableHotfixes(uint virtualRealmAddress, uint hotfixCount, List<HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
@@ -96,7 +96,7 @@ namespace Game.Networking.Packets
         public List<HotfixRecord> Hotfixes;
     }
 
-    class HotfixRequest : ClientPacket
+    internal class HotfixRequest : ClientPacket
     {
         public HotfixRequest(WorldPacket packet) : base(packet) { }
 
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
         public List<HotfixRecord> Hotfixes = new List<HotfixRecord>();
     }
 
-    class HotfixConnect : ServerPacket
+    internal class HotfixConnect : ServerPacket
     {
         public HotfixConnect() : base(ServerOpcodes.HotfixConnect) { }
 

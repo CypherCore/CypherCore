@@ -46,7 +46,7 @@ namespace Framework.Dynamic
         /// 
         /// </summary>
         /// <returns>Current timer in ms value.</returns>
-        uint GetTimer()
+        private uint GetTimer()
         {
             return _time;
         }
@@ -55,7 +55,7 @@ namespace Framework.Dynamic
         /// 
         /// </summary>
         /// <returns>Active phases as mask.</returns>
-        byte GetPhaseMask()
+        private byte GetPhaseMask()
         {
             return _phase;
         }
@@ -85,7 +85,7 @@ namespace Framework.Dynamic
         /// Activates the given phase (bitwise).
         /// </summary>
         /// <param name="phase">Phase which should be activated. Values: 1 - 8</param>
-        void AddPhase(byte phase)
+        private void AddPhase(byte phase)
         {
             if (phase != 0 && phase <= 8)
                 _phase |= (byte)(1 << (phase - 1));
@@ -95,7 +95,7 @@ namespace Framework.Dynamic
         /// Deactivates the given phase (bitwise).
         /// </summary>
         /// <param name="phase">Phase which should be deactivated. Values: 1 - 8.</param>
-        void RemovePhase(byte phase)
+        private void RemovePhase(byte phase)
         {
             if (phase != 0 && phase <= 8)
                 _phase &= (byte)~(1 << (phase - 1));
@@ -165,7 +165,7 @@ namespace Framework.Dynamic
         /// <param name="maxTime">The maximum time until the event occurs as TimeSpan type.</param>
         /// <param name="group">The group which the event is associated to. Has to be between 1 and 8. 0 means it has no group.</param>
         /// <param name="phase">The phase in which the event can occur. Has to be between 1 and 8. 0 means it can occur in all phases.</param>
-        void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
+        private void RescheduleEvent(uint eventId, TimeSpan minTime, TimeSpan maxTime, uint group = 0, byte phase = 0)
         {
             RescheduleEvent(eventId, RandomHelper.URand(minTime.TotalMilliseconds, maxTime.TotalMilliseconds), group, phase);
         }
@@ -350,7 +350,7 @@ namespace Framework.Dynamic
         /// 
         /// </summary>
         /// <returns>Time of next event.</returns>
-        uint GetNextEventTime()
+        private uint GetNextEventTime()
         {
             return Empty() ? 0 : _eventMap[0][0];
         }
@@ -386,7 +386,7 @@ namespace Framework.Dynamic
         /// it can be resetted and so on. Events occur when this timer
         /// has reached their time value. Its value is changed in the Update method.
         /// </summary>
-        uint _time;
+        private uint _time;
 
         /// <summary>
         /// Phase mask of the event map.
@@ -394,12 +394,12 @@ namespace Framework.Dynamic
         /// phases from 1 to 8 can be set with SetPhase or
         /// AddPhase. RemovePhase deactives a phase.
         /// </summary>
-        byte _phase;
+        private byte _phase;
 
         /// <summary>
         /// Stores information on the most recently executed event
         /// </summary>
-        uint _lastEvent;
+        private uint _lastEvent;
 
         /// <summary>
         /// Key: Time as uint when the event should occur.
@@ -411,6 +411,6 @@ namespace Framework.Dynamic
         /// - Bit 24 - 31: Phase
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
-        SortedMultiMap<uint, uint> _eventMap = new SortedMultiMap<uint, uint>();
+        private SortedMultiMap<uint, uint> _eventMap = new SortedMultiMap<uint, uint>();
     }
 }

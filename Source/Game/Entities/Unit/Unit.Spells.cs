@@ -387,7 +387,7 @@ namespace Game.Entities
             return advertisedBenefit;
         }
 
-        int SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
+        private int SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
         {
             return GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)schoolMask);
         }
@@ -836,7 +836,7 @@ namespace Game.Entities
         }
 
         // Melee based spells hit result calculations
-        SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
+        private SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
         {
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
@@ -972,7 +972,7 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spell)
+        private SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spell)
         {
             // Can`t miss on dead target (on skinning for example)
             if (!victim.IsAlive() && !victim.IsTypeId(TypeId.Player))
@@ -1172,7 +1172,7 @@ namespace Game.Entities
             spell.Finish(ok);
         }
 
-        uint GetCastingTimeForBonus(SpellInfo spellProto, DamageEffectType damagetype, uint CastingTime)
+        private uint GetCastingTimeForBonus(SpellInfo spellProto, DamageEffectType damagetype, uint CastingTime)
         {
             // Not apply this to creature casted spells with casttime == 0
             if (CastingTime == 0 && IsTypeId(TypeId.Unit) && !IsPet())
@@ -1451,8 +1451,8 @@ namespace Game.Entities
                     return true;
             return false;
         }
-        
-        bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura)
+
+        private bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura)
         {
             var auras = GetAuraEffectsByType(type);
             foreach (var eff in auras)
@@ -1514,7 +1514,7 @@ namespace Game.Entities
             return diseases;
         }
 
-        uint GetDoTsByCaster(ObjectGuid casterGUID)
+        private uint GetDoTsByCaster(ObjectGuid casterGUID)
         {
             AuraType[] diseaseAuraTypes =
             {
@@ -1561,7 +1561,7 @@ namespace Game.Entities
                 EnergizeBySpell(victim, info, damage, powerType);
         }
 
-        void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
+        private void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
         {
             int gain = victim.ModifyPower(powerType, damage);
             int overEnergize = damage - gain;
@@ -1811,7 +1811,7 @@ namespace Game.Entities
             TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
         }
 
-        void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlags typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
+        private void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlags typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
         {
             // Player is loaded now - do not allow passive spell casts to proc
             if (IsPlayer() && ToPlayer().GetSession().PlayerLoading())
@@ -1871,7 +1871,7 @@ namespace Game.Entities
             }
         }
 
-        void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
+        private void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
         {
             DateTime now = GameTime.GetGameTimeSteadyPoint();
 
@@ -1904,13 +1904,13 @@ namespace Game.Entities
             }
         }
 
-        void TriggerAurasProcOnEvent(CalcDamageInfo damageInfo)
+        private void TriggerAurasProcOnEvent(CalcDamageInfo damageInfo)
         {
             DamageInfo dmgInfo = new DamageInfo(damageInfo);
             TriggerAurasProcOnEvent(null, null, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
         }
 
-        void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        private void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             // prepare data for self trigger
             ProcEventInfo myProcEventInfo = new ProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
@@ -1948,7 +1948,7 @@ namespace Game.Entities
                 actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
         }
 
-        void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
+        private void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
         {
             Spell triggeringSpell = eventInfo.GetProcSpell();
             bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
@@ -1977,7 +1977,7 @@ namespace Game.Entities
                 SetCantProc(false);
         }
 
-        void SetCantProc(bool apply)
+        private void SetCantProc(bool apply)
         {
             if (apply)
                 ++m_procDeep;
@@ -2218,7 +2218,7 @@ namespace Game.Entities
             return (uint)crit_bonus;
         }
 
-        bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        private bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             // These spells can't be blocked
             if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
@@ -2311,7 +2311,7 @@ namespace Game.Entities
                 healInfo.SetEffectiveHeal(gain > 0 ? (uint)gain : 0u);
         }
 
-        void SendHealSpellLog(HealInfo healInfo, bool critical = false)
+        private void SendHealSpellLog(HealInfo healInfo, bool critical = false)
         {
             SpellHealLog spellHealLog = new SpellHealLog();
 
@@ -2587,7 +2587,7 @@ namespace Game.Entities
             SendMessageToSet(spellMissLog, true);
         }
 
-        void SendSpellDamageResist(Unit target, uint spellId)
+        private void SendSpellDamageResist(Unit target, uint spellId)
         {
             ProcResist procResist = new ProcResist();
             procResist.Caster = GetGUID();
@@ -2844,7 +2844,7 @@ namespace Game.Entities
             }
         }
 
-        void ClearDiminishings()
+        private void ClearDiminishings()
         {
             for (int i = 0; i < (int)DiminishingGroup.Max; ++i)
                 m_Diminishing[i].Clear();
@@ -3180,7 +3180,8 @@ namespace Game.Entities
             }
             return false;
         }
-        bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default)
+
+        private bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default)
         {
             foreach (var list in GetAppliedAuras())
             {
@@ -3210,7 +3211,8 @@ namespace Game.Entities
             var aurApp = GetAuraApplicationOfRankedSpell(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
-        AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
+
+        private AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
@@ -3275,7 +3277,7 @@ namespace Game.Entities
             RemoveAurasWithInterruptFlags((uint)flag, 1, except);
         }
 
-        void RemoveAurasWithInterruptFlags(uint flag, int index, uint except = 0)
+        private void RemoveAurasWithInterruptFlags(uint flag, int index, uint except = 0)
         {
             if (!Convert.ToBoolean(m_interruptMask[index] & flag))
                 return;
@@ -3682,7 +3684,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check)
+        private void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check)
         {
             foreach (var app in m_appliedAuras.LookupByKey(spellId))
             {
@@ -3691,7 +3693,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check)
+        private void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check)
         {
             foreach (var aura in m_ownedAuras.LookupByKey(spellId))
             {
@@ -3733,7 +3735,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveAreaAurasDueToLeaveWorld()
+        private void RemoveAreaAurasDueToLeaveWorld()
         {
             // make sure that all area auras not applied on self are removed
             foreach (var pair in GetOwnedAuras())
@@ -3899,7 +3901,7 @@ namespace Game.Entities
             return (m_unitData.AuraState & (1 << ((int)flag - 1))) != 0;
         }
 
-        SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
+        private SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
         {
             SpellSchools school = SpellSchools.Normal;
 
@@ -4290,7 +4292,7 @@ namespace Game.Entities
             return null;
         }
 
-        void _RemoveNoStackAurasDueToAura(Aura aura)
+        private void _RemoveNoStackAurasDueToAura(Aura aura)
         {
             SpellInfo spellProto = aura.GetSpellInfo();
 
@@ -4582,7 +4584,7 @@ namespace Game.Entities
             });
         }
 
-        int GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        private int GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int miscValue)
         {
             return GetMaxPositiveAuraModifier(auratype, aurEff =>
             {
@@ -4592,7 +4594,7 @@ namespace Game.Entities
             });
         }
 
-        int GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        private int GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int miscValue)
         {
             return GetMaxNegativeAuraModifier(auratype, aurEff =>
             {
@@ -4639,7 +4641,7 @@ namespace Game.Entities
             UpdateAuraForGroup();
         }
 
-        void UpdateAuraForGroup()
+        private void UpdateAuraForGroup()
         {
             Player player = ToPlayer();
             if (player != null)

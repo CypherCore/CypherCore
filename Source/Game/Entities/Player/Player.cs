@@ -768,7 +768,7 @@ namespace Game.Entities
             }
         }
 
-        void ScheduleDelayedOperation(PlayerDelayedOperations operation)
+        private void ScheduleDelayedOperation(PlayerDelayedOperations operation)
         {
             if (operation < PlayerDelayedOperations.End)
                 m_DelayedOperations |= operation;
@@ -824,7 +824,7 @@ namespace Game.Entities
             return GetSession().PlayerLoading();
         }
 
-        new PlayerAI GetAI() { return (PlayerAI)i_AI; }
+        private new PlayerAI GetAI() { return (PlayerAI)i_AI; }
 
         //Network
         public void SendPacket(ServerPacket data)
@@ -833,13 +833,14 @@ namespace Game.Entities
         }
 
         //Time
-        void ResetTimeSync()
+        private void ResetTimeSync()
         {
             m_timeSyncTimer = 0;
             m_timeSyncClient = 0;
             m_timeSyncServer = GameTime.GetGameTimeMS();
         }
-        void SendTimeSync()
+
+        private void SendTimeSync()
         {
             m_timeSyncQueue.Push(m_movementCounter++);
 
@@ -864,7 +865,7 @@ namespace Game.Entities
                 _garrison = null;
         }
 
-        void DeleteGarrison()
+        private void DeleteGarrison()
         {
             if (_garrison != null)
             {
@@ -1085,7 +1086,7 @@ namespace Game.Entities
         }
 
         //Currency - Money
-        void SetCreateCurrency(CurrencyTypes id, uint count, bool printLog = true)
+        private void SetCreateCurrency(CurrencyTypes id, uint count, bool printLog = true)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1244,7 +1245,8 @@ namespace Game.Entities
         {
             return currency.MaxEarnablePerWeek;
         }
-        uint GetCurrencyTotalCap(CurrencyTypesRecord currency)
+
+        private uint GetCurrencyTotalCap(CurrencyTypesRecord currency)
         {
             uint cap = currency.MaxQty;
 
@@ -1268,7 +1270,8 @@ namespace Game.Entities
 
             return cap;
         }
-        uint GetCurrencyOnWeek(CurrencyTypes id)
+
+        private uint GetCurrencyOnWeek(CurrencyTypes id)
         {
             var playerCurrency = _currencyStorage.LookupByKey(id);
             if (playerCurrency == null)
@@ -1292,7 +1295,7 @@ namespace Game.Entities
             return (byte)_CUFProfiles.Count(p => p != null);
         }
 
-        bool IsActionButtonDataValid(byte button, uint action, uint type)
+        private bool IsActionButtonDataValid(byte button, uint action, uint type)
         {
             if (button >= PlayerConst.MaxActionButtons)
             {
@@ -1393,8 +1396,10 @@ namespace Game.Entities
 
             return button;
         }
-        void SendInitialActionButtons() { SendActionButtons(0); }
-        void SendActionButtons(uint state)
+
+        private void SendInitialActionButtons() { SendActionButtons(0); }
+
+        private void SendActionButtons(uint state)
         {
             UpdateActionButtons packet = new UpdateActionButtons();
 
@@ -1545,7 +1550,7 @@ namespace Game.Entities
             }
         }
         // Calculate how many reputation points player gain with the quest
-        void RewardReputation(Quest quest)
+        private void RewardReputation(Quest quest)
         {
             for (byte i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
@@ -1598,10 +1603,10 @@ namespace Game.Entities
         }
 
         //Movement
-        bool IsCanDelayTeleport() { return m_bCanDelayTeleport; }
-        void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
-        bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
-        void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
+        private bool IsCanDelayTeleport() { return m_bCanDelayTeleport; }
+        private void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
+        private bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
+        private void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
         public bool TeleportTo(WorldLocation loc, TeleportToOptions options = 0)
         {
             return TeleportTo(loc.GetMapId(), loc.posX, loc.posY, loc.posZ, loc.Orientation, options);
@@ -2539,7 +2544,8 @@ namespace Game.Entities
 
             return GetGossipTextId(GetDefaultGossipMenuForSource(source), source);
         }
-        uint GetGossipTextId(uint menuId, WorldObject source)
+
+        private uint GetGossipTextId(uint menuId, WorldObject source)
         {
             uint textId = SharedConst.DefaultGossipMessage;
 
@@ -2615,7 +2621,8 @@ namespace Game.Entities
             }
             Log.outDebug(LogFilter.ChatSystem, "Player {0}: channels cleaned up!", GetName());
         }
-        void UpdateLocalChannels(uint newZone)
+
+        private void UpdateLocalChannels(uint newZone)
         {
             if (GetSession().PlayerLoading() && !IsBeingTeleportedFar())
                 return;                                              // The client handles it automatically after loading, but not after teleporting
@@ -2718,7 +2725,8 @@ namespace Game.Entities
 
             SendPacket(result);
         }
-        void SendNewMail()
+
+        private void SendNewMail()
         {
             SendPacket(new NotifyReceivedMail());
         }
@@ -2768,7 +2776,8 @@ namespace Game.Entities
 
         //Binds
         public bool HasPendingBind() { return _pendingBindId > 0; }
-        void UpdateHomebindTime(uint time)
+
+        private void UpdateHomebindTime(uint time)
         {
             // GMs never get homebind timer online
             if (m_InstanceValid || IsGameMaster())
@@ -2844,7 +2853,7 @@ namespace Game.Entities
             SendPacket(worldstate);
         }
 
-        void SendInitWorldStates(uint zoneid, uint areaid)
+        private void SendInitWorldStates(uint zoneid, uint areaid)
         {
             // data depends on zoneid/mapid...
             Battleground bg = GetBattleground();
@@ -3470,7 +3479,7 @@ namespace Game.Entities
             return cost;
         }
 
-        uint GetChampioningFaction() { return m_ChampioningFaction; }
+        private uint GetChampioningFaction() { return m_ChampioningFaction; }
         public void SetChampioningFaction(uint faction) { m_ChampioningFaction = faction; }
         public void SetFactionForRace(Race race)
         {
@@ -3518,7 +3527,7 @@ namespace Game.Entities
             ResurrectUsingRequestDataImpl();
         }
 
-        void ResurrectUsingRequestDataImpl()
+        private void ResurrectUsingRequestDataImpl()
         {
             // save health and mana before resurrecting, _resurrectionData can be erased
             uint resurrectHealth = _resurrectionData.Health;
@@ -3646,7 +3655,7 @@ namespace Game.Entities
             return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
-        void RegenerateAll()
+        private void RegenerateAll()
         {
             m_regenTimerCount += RegenTimer;
 
@@ -3686,7 +3695,8 @@ namespace Game.Entities
 
             RegenTimer = 0;
         }
-        void Regenerate(PowerType power)
+
+        private void Regenerate(PowerType power)
         {
             // Skip regeneration for power type we cannot have
             uint powerIndex = GetPowerIndex(power);
@@ -3823,7 +3833,8 @@ namespace Game.Entities
                 });
             }
         }
-        void RegenerateHealth()
+
+        private void RegenerateHealth()
         {
             uint curValue = (uint)GetHealth();
             uint maxValue = (uint)GetMaxHealth();
@@ -3899,7 +3910,8 @@ namespace Game.Entities
                 return Global.ObjAccessor.GetUnit(this, selectionGUID);
             return null;
         }
-        Player GetSelectedPlayer()
+
+        private Player GetSelectedPlayer()
         {
             ObjectGuid selectionGUID = GetTarget();
             if (!selectionGUID.IsEmpty())
@@ -3917,7 +3929,7 @@ namespace Game.Entities
             m_combatExitTime = Time.GetMSTime();
         }
 
-        void LeaveLFGChannel()
+        private void LeaveLFGChannel()
         {
             foreach (var i in m_channels)
             {
@@ -3929,7 +3941,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsImmuneToEnvironmentalDamage()
+        private bool IsImmuneToEnvironmentalDamage()
         {
             // check for GM and death state included in isAttackableByAOE
             return (!IsTargetableForAttack(false));
@@ -3984,7 +3996,7 @@ namespace Game.Entities
             return final_damage;
         }
 
-        bool IsTotalImmune()
+        private bool IsTotalImmune()
         {
             var immune = GetAuraEffectsByType(AuraType.SchoolImmunity);
 
@@ -4106,7 +4118,7 @@ namespace Game.Entities
             return m_MirrorTimer[(int)type] == GetMaxTimer(type);
         }
 
-        void HandleDrowning(uint time_diff)
+        private void HandleDrowning(uint time_diff)
         {
             if (m_MirrorTimerFlags == 0)
                 return;
@@ -4228,7 +4240,7 @@ namespace Game.Entities
             m_MirrorTimerFlagsLast = m_MirrorTimerFlags;
         }
 
-        void HandleSobering()
+        private void HandleSobering()
         {
             m_drunkTimer = 0;
 
@@ -4237,7 +4249,7 @@ namespace Game.Entities
             SetDrunkValue(drunk);
         }
 
-        void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen)
+        private void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen)
         {
             if (MaxValue == -1)
             {
@@ -4249,13 +4261,13 @@ namespace Game.Entities
             SendPacket(new StartMirrorTimer(Type, CurrentValue, MaxValue, Regen, 0, false));
         }
 
-        void StopMirrorTimer(MirrorTimerType Type)
+        private void StopMirrorTimer(MirrorTimerType Type)
         {
             m_MirrorTimer[(int)Type] = -1;
             SendPacket(new StopMirrorTimer(Type));
         }
 
-        int GetMaxTimer(MirrorTimerType timer)
+        private int GetMaxTimer(MirrorTimerType timer)
         {
             switch (timer)
             {
@@ -4414,7 +4426,7 @@ namespace Game.Entities
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
-        Corpse CreateCorpse()
+        private Corpse CreateCorpse()
         {
             // prevent existence 2 corpse for player
             SpawnCorpseBones();
@@ -4552,7 +4564,8 @@ namespace Game.Entities
             ulong count = (ulong)((now < m_deathExpireTime - 1) ? (m_deathExpireTime - 1 - now) / PlayerConst.DeathExpireStep : 0);
             return PlayerConst.copseReclaimDelay[count];
         }
-        void UpdateCorpseReclaimDelay()
+
+        private void UpdateCorpseReclaimDelay()
         {
             bool pvp = m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.PVPDeath);
 
@@ -4572,7 +4585,8 @@ namespace Game.Entities
             else
                 m_deathExpireTime = now + PlayerConst.DeathExpireStep;
         }
-        int CalculateCorpseReclaimDelay(bool load = false)
+
+        private int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
             if (load && !corpse)
@@ -4609,7 +4623,8 @@ namespace Game.Entities
 
             return (int)(delay * Time.InMilliseconds);
         }
-        void SendCorpseReclaimDelay(int delay)
+
+        private void SendCorpseReclaimDelay(int delay)
         {
             CorpseReclaimDelay packet = new CorpseReclaimDelay();
             packet.Remaining = (uint)delay;
@@ -5041,7 +5056,7 @@ namespace Game.Entities
         }
 
         public void SetRegenTimerCount(uint time) { m_regenTimerCount = time; }
-        void SetWeaponChangeTimer(uint time) { m_weaponChangeTimer = time; }
+        private void SetWeaponChangeTimer(uint time) { m_weaponChangeTimer = time; }
 
         //Team
         public static Team TeamForRace(Race race)
@@ -5649,9 +5664,9 @@ namespace Game.Entities
         public void Recall() { TeleportTo(m_recall_location); }
 
         public uint GetSaveTimer() { return m_nextSave; }
-        void SetSaveTimer(uint timer) { m_nextSave = timer; }
+        private void SetSaveTimer(uint timer) { m_nextSave = timer; }
 
-        void SendAurasForTarget(Unit target)
+        private void SendAurasForTarget(Unit target)
         {
             if (target == null || target.GetVisibleAuras().Empty())                  // speedup things
                 return;
@@ -5876,7 +5891,8 @@ namespace Game.Entities
         }
 
         #region Sends / Updates
-        void BeforeVisibilityDestroy(WorldObject obj, Player p)
+
+        private void BeforeVisibilityDestroy(WorldObject obj, Player p)
         {
             if (!obj.IsTypeId(TypeId.Unit))
                 return;
@@ -5932,7 +5948,8 @@ namespace Game.Entities
                 }
             }
         }
-        void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
+
+        private void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
         {
             switch (target.GetTypeId())
             {
@@ -5999,7 +6016,7 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
-        void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only)
+        private void SendMessageToSetInRange(ServerPacket data, float dist, bool self, bool own_team_only)
         {
             if (self)
                 SendPacket(data);
@@ -6045,7 +6062,7 @@ namespace Game.Entities
             return true;
         }
 
-        void SendNewCurrency(uint id)
+        private void SendNewCurrency(uint id)
         {
             var Curr = _currencyStorage.LookupByKey(id);
             if (Curr == null)
@@ -6069,7 +6086,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        void SendCurrencies()
+        private void SendCurrencies()
         {
             SetupCurrency packet = new SetupCurrency();
 
@@ -6121,7 +6138,8 @@ namespace Game.Entities
 
         public void AddExploredZones(uint pos, ulong mask) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
         public void RemoveExploredZones(uint pos, ulong mask) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)pos), mask); }
-        void CheckAreaExploreAndOutdoor()
+
+        private void CheckAreaExploreAndOutdoor()
         {
             if (!IsAlive())
                 return;
@@ -6205,7 +6223,8 @@ namespace Game.Entities
                 }
             }
         }
-        void SendExplorationExperience(uint Area, uint Experience)
+
+        private void SendExplorationExperience(uint Area, uint Experience)
         {
             SendPacket(new ExplorationExperience(Experience, Area));
         }
@@ -6549,7 +6568,7 @@ namespace Game.Entities
             HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, amount, true);
         }
 
-        void UpdateBaseModGroup(BaseModGroup modGroup)
+        private void UpdateBaseModGroup(BaseModGroup modGroup)
         {
             if (!CanModifyStats())
                 return;
@@ -6570,7 +6589,7 @@ namespace Game.Entities
             }
         }
 
-        float GetBaseModValue(BaseModGroup modGroup, BaseModType modType)
+        private float GetBaseModValue(BaseModGroup modGroup, BaseModType modType)
         {
             if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
             {
@@ -6581,7 +6600,7 @@ namespace Game.Entities
             return (modType == BaseModType.FlatMod ? m_auraBaseFlatMod[(int)modGroup] : m_auraBasePctMod[(int)modGroup]);
         }
 
-        float GetTotalBaseModValue(BaseModGroup modGroup)
+        private float GetTotalBaseModValue(BaseModGroup modGroup)
         {
             if (modGroup >= BaseModGroup.End)
             {
@@ -6975,7 +6994,7 @@ namespace Game.Entities
             return recruitAFriend;
         }
 
-        bool IsAtRecruitAFriendDistance(WorldObject pOther)
+        private bool IsAtRecruitAFriendDistance(WorldObject pOther)
         {
             if (!pOther || !IsInMap(pOther))
                 return false;
@@ -7081,12 +7100,12 @@ namespace Game.Entities
         }
 
         //New shit
-        void InitPrimaryProfessions()
+        private void InitPrimaryProfessions()
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));
         }
         public uint GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }
-        void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
+        private void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
         public bool HaveAtClient(WorldObject u)
         {
             bool one = u.GetGUID() == GetGUID();
@@ -7420,10 +7439,10 @@ namespace Game.Entities
 
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
-        void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
-        void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
+        private void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
+        private void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
         public void SendAttackSwingNotInRange() { SendPacket(new AttackSwingError(AttackSwingErr.NotInRange)); }
-        void SendAttackSwingBadFacingAttack() { SendPacket(new AttackSwingError(AttackSwingErr.BadFacing)); }
+        private void SendAttackSwingBadFacingAttack() { SendPacket(new AttackSwingError(AttackSwingErr.BadFacing)); }
         public void SendAttackSwingCancelAttack() { SendPacket(new CancelCombat()); }
         public void SendAutoRepeatCancel(Unit target)
         {
@@ -7540,7 +7559,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, UpdateMask requestedPlayerMask, UpdateMask requestedActivePlayerMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, UpdateMask requestedPlayerMask, UpdateMask requestedActivePlayerMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);

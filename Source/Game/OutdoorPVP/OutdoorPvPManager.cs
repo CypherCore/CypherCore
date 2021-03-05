@@ -27,7 +27,7 @@ namespace Game.PvP
 {
     public class OutdoorPvPManager : Singleton<OutdoorPvPManager>
     {
-        OutdoorPvPManager() { }
+        private OutdoorPvPManager() { }
 
         public void InitOutdoorPvP()
         {
@@ -224,16 +224,16 @@ namespace Game.PvP
 
         // contains all initiated outdoor pvp events
         // used when initing / cleaning up
-        List<OutdoorPvP> m_OutdoorPvPSet = new List<OutdoorPvP>();
+        private List<OutdoorPvP> m_OutdoorPvPSet = new List<OutdoorPvP>();
 
         // maps the zone ids to an outdoor pvp event
         // used in player event handling
-        Dictionary<uint, OutdoorPvP> m_OutdoorPvPMap = new Dictionary<uint, OutdoorPvP>();
+        private Dictionary<uint, OutdoorPvP> m_OutdoorPvPMap = new Dictionary<uint, OutdoorPvP>();
 
         // Holds the outdoor PvP templates
-        Dictionary<OutdoorPvPTypes, uint> OutdoorPvPScriptIds = new Dictionary<OutdoorPvPTypes, uint>();
+        private Dictionary<OutdoorPvPTypes, uint> OutdoorPvPScriptIds = new Dictionary<OutdoorPvPTypes, uint>();
 
         // update interval
-        uint m_UpdateTimer;
+        private uint m_UpdateTimer;
     }
 }

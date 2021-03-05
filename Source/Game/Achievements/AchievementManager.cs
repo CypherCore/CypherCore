@@ -149,7 +149,7 @@ namespace Game.Achievements
                     CompletedAchievement(refAchievement, referencePlayer);
         }
 
-        bool IsCompletedAchievement(AchievementRecord entry)
+        private bool IsCompletedAchievement(AchievementRecord entry)
         {
             // counter can never complete
             if (entry.Flags.HasAnyFlag(AchievementFlags.Counter))
@@ -643,7 +643,7 @@ namespace Game.Achievements
             SendPacket(criteriaDeleted);
         }
 
-        void SendAchievementEarned(AchievementRecord achievement)
+        private void SendAchievementEarned(AchievementRecord achievement)
         {
             // Don't send for achievements with ACHIEVEMENT_FLAG_HIDDEN
             if (achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))
@@ -708,7 +708,7 @@ namespace Game.Achievements
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        Player _owner;
+        private Player _owner;
     }
 
     public class GuildAchievementMgr : AchievementManager
@@ -737,7 +737,7 @@ namespace Game.Achievements
             DeleteFromDB(guid);
         }
 
-        void DeleteFromDB(ObjectGuid guid)
+        private void DeleteFromDB(ObjectGuid guid)
         {
             var trans = new SQLTransaction();
 
@@ -1037,7 +1037,7 @@ namespace Game.Achievements
             SendPacket(guildCriteriaDeleted);
         }
 
-        void SendAchievementEarned(AchievementRecord achievement)
+        private void SendAchievementEarned(AchievementRecord achievement)
         {
             if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
             {
@@ -1072,12 +1072,12 @@ namespace Game.Achievements
             return $"Guild ID {_owner.GetId()} {_owner.GetName()}";
         }
 
-        Guild _owner;
+        private Guild _owner;
     }
 
     public class AchievementGlobalMgr : Singleton<AchievementGlobalMgr>
     {
-        AchievementGlobalMgr() { }
+        private AchievementGlobalMgr() { }
 
         public List<AchievementRecord> GetAchievementByReferencedId(uint id)
         {
@@ -1348,13 +1348,13 @@ namespace Game.Achievements
         }
 
         // store achievements by referenced achievement id to speed up lookup
-        MultiMap<uint, AchievementRecord> _achievementListByReferencedId = new MultiMap<uint, AchievementRecord>();
+        private MultiMap<uint, AchievementRecord> _achievementListByReferencedId = new MultiMap<uint, AchievementRecord>();
 
         // store realm first achievements
-        Dictionary<uint /*achievementId*/, DateTime /*completionTime*/> _allCompletedAchievements = new Dictionary<uint, DateTime>();
+        private Dictionary<uint /*achievementId*/, DateTime /*completionTime*/> _allCompletedAchievements = new Dictionary<uint, DateTime>();
 
-        Dictionary<uint, AchievementReward> _achievementRewards = new Dictionary<uint, AchievementReward>();
-        Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new Dictionary<uint, AchievementRewardLocale>();
+        private Dictionary<uint, AchievementReward> _achievementRewards = new Dictionary<uint, AchievementReward>();
+        private Dictionary<uint, AchievementRewardLocale> _achievementRewardLocales = new Dictionary<uint, AchievementRewardLocale>();
     }
 
     public class AchievementReward

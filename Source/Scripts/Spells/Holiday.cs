@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Scripts.Spells.Holiday
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         //Romantic Picnic
         public const uint BasketCheck = 45119; // Holiday - Valentine - Romantic Picnic Near Basket Check
@@ -111,7 +111,7 @@ namespace Scripts.Spells.Holiday
         public const uint RibbonDance = 29175;
     }
 
-    struct QuestIds
+    internal struct QuestIds
     {
         //Ramblabla
         public const uint BrewfestSpeedBunnyGreen = 43345;
@@ -128,7 +128,7 @@ namespace Scripts.Spells.Holiday
         public const uint BarkForThunderbrews = 11294;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         // Bark For Drohn'S Distillery!
         public const uint DrohnDistillery1 = 23520;
@@ -155,21 +155,21 @@ namespace Scripts.Spells.Holiday
         public const uint Thunderbrews4 = 22942;
     }
 
-    struct GameobjectIds
+    internal struct GameobjectIds
     {
         public const uint RibbonPole = 181605;
     }
     [Script] // 45102 Romantic Picnic
-    class spell_love_is_in_the_air_romantic_picnic : AuraScript
+    internal class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             target.SetStandState(UnitStandStateType.Sit);
             target.CastSpell(target, SpellIds.MealPeriodic, false);
         }
 
-        void OnPeriodic(AuraEffect aurEff)
+        private void OnPeriodic(AuraEffect aurEff)
         {
             // Every 5 seconds
             var target = GetTarget();
@@ -219,7 +219,7 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 24750 Trick
-    class spell_hallow_end_trick : SpellScript
+    internal class spell_hallow_end_trick : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
@@ -227,7 +227,7 @@ namespace Scripts.Spells.Holiday
                 SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.SkeletonCostume, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale, SpellIds.TrickBuff);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             var target = GetHitPlayer();
@@ -267,14 +267,14 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 24751 Trick or Treat
-    class spell_hallow_end_trick_or_treat : SpellScript
+    internal class spell_hallow_end_trick_or_treat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Trick, SpellIds.Treat, SpellIds.TrickedOrTreated);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             var target = GetHitPlayer();
@@ -292,14 +292,14 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script]
-    class spell_hallow_end_tricky_treat : SpellScript
+    internal class spell_hallow_end_tricky_treat : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.TrickyTreatSpeed, SpellIds.TrickyTreatTrigger, SpellIds.UpsetTummy);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var caster = GetCaster();
             if (caster.HasAura(SpellIds.TrickyTreatTrigger) && caster.GetAuraCount(SpellIds.TrickyTreatSpeed) > 3 && RandomHelper.randChance(33))
@@ -313,7 +313,7 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script]
-    class spell_hallow_end_wand : SpellScript
+    internal class spell_hallow_end_wand : SpellScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
@@ -321,7 +321,7 @@ namespace Scripts.Spells.Holiday
                 SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
         }
 
-        void HandleScriptEffect()
+        private void HandleScriptEffect()
         {
             var caster = GetCaster();
             var target = GetHitUnit();
@@ -363,7 +363,7 @@ namespace Scripts.Spells.Holiday
     [Script("spell_gen_spice_bread_stuffing", SpellIds.WellFedHitTrigger)]
     [Script("spell_gen_pumpkin_pie", SpellIds.WellFedSpiritTrigger)]
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
-    class spell_pilgrims_bounty_buff_food : AuraScript
+    internal class spell_pilgrims_bounty_buff_food : AuraScript
     {
         public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
         {
@@ -371,7 +371,7 @@ namespace Scripts.Spells.Holiday
             _handled = false;
         }
 
-        void HandleTriggerSpell(AuraEffect aurEff)
+        private void HandleTriggerSpell(AuraEffect aurEff)
         {
             PreventDefaultAction();
             if (_handled)
@@ -386,20 +386,20 @@ namespace Scripts.Spells.Holiday
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
-        readonly uint _triggeredSpellId;
+        private readonly uint _triggeredSpellId;
 
-        bool _handled;
+        private bool _handled;
     }
 
     [Script]
-    class spell_winter_veil_mistletoe : SpellScript
+    internal class spell_winter_veil_mistletoe : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             var target = GetHitPlayer();
             if (target)
@@ -416,7 +416,7 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 26275 - PX-238 Winter Wondervolt TRAP
-    class spell_winter_veil_px_238_winter_wondervolt : SpellScript
+    internal class spell_winter_veil_px_238_winter_wondervolt : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -424,7 +424,7 @@ namespace Scripts.Spells.Holiday
                 SpellIds.Px238WinterWondervoltTransform3, SpellIds.Px238WinterWondervoltTransform4);
         }
 
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -454,9 +454,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 42924 - Giddyup!
-    class spell_brewfest_giddyup : AuraScript
+    internal class spell_brewfest_giddyup : AuraScript
     {
-        void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             if (!target.HasAura(SpellIds.RentalRacingRam) && !target.HasAura(SpellIds.SwiftWorkRam))
@@ -495,7 +495,7 @@ namespace Scripts.Spells.Holiday
             }
         }
 
-        void OnPeriodic(AuraEffect aurEff)
+        private void OnPeriodic(AuraEffect aurEff)
         {
             GetTarget().RemoveAuraFromStack(GetId());
         }
@@ -513,9 +513,9 @@ namespace Scripts.Spells.Holiday
     // 42993 - Ram - Canter
     // 42994 - Ram - Gallop
     [Script]
-    class spell_brewfest_ram : AuraScript
+    internal class spell_brewfest_ram : AuraScript
     {
-        void OnPeriodic(AuraEffect aurEff)
+        private void OnPeriodic(AuraEffect aurEff)
         {
             var target = GetTarget();
             if (target.HasAura(SpellIds.ExhaustedRam))
@@ -562,9 +562,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 43052 - Ram Fatigue
-    class spell_brewfest_ram_fatigue : AuraScript
+    internal class spell_brewfest_ram_fatigue : AuraScript
     {
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
 
@@ -587,9 +587,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 43450 - Brewfest - apple trap - friendly DND
-    class spell_brewfest_apple_trap : AuraScript
+    internal class spell_brewfest_apple_trap : AuraScript
     {
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAura(SpellIds.RamFatigue);
         }
@@ -601,9 +601,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 43332 - Exhausted Ram
-    class spell_brewfest_exhausted_ram : AuraScript
+    internal class spell_brewfest_exhausted_ram : AuraScript
     {
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             target.CastSpell(target, SpellIds.RamLevelNeutral, true);
@@ -616,9 +616,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 43714 - Brewfest - Relay Race - Intro - Force - Player to throw- DND
-    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
+    internal class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
     {
-        void HandleForceCast(uint effIndex)
+        private void HandleForceCast(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
@@ -633,9 +633,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script]
-    class spell_brewfest_relay_race_turn_in : SpellScript
+    internal class spell_brewfest_relay_race_turn_in : SpellScript
     {
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
 
@@ -654,9 +654,9 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 43876 - Dismount Ram
-    class spell_brewfest_dismount_ram : SpellScript
+    internal class spell_brewfest_dismount_ram : SpellScript
     {
-        void HandleScript(uint effIndex)
+        private void HandleScript(uint effIndex)
         {
             GetCaster().RemoveAura(SpellIds.RentalRacingRam);
         }
@@ -672,14 +672,14 @@ namespace Scripts.Spells.Holiday
     // 43261 Brewfest  - Barker Bunny 3
     // 43262 Brewfest  - Barker Bunny 4
     [Script]
-    class spell_brewfest_barker_bunny : AuraScript
+    internal class spell_brewfest_barker_bunny : AuraScript
     {
         public override bool Load()
         {
             return GetUnitOwner().IsTypeId(TypeId.Player);
         }
 
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget().ToPlayer();
 
@@ -712,14 +712,14 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script] // 45724 - Braziers Hit!
-    class spell_midsummer_braziers_hit : AuraScript
+    internal class spell_midsummer_braziers_hit : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
         }
 
-        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var player = GetTarget().ToPlayer();
             if (!player)
@@ -742,14 +742,14 @@ namespace Scripts.Spells.Holiday
     }
 
     [Script]
-    class spell_gen_ribbon_pole_dancer_check : AuraScript
+    internal class spell_gen_ribbon_pole_dancer_check : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance, SpellIds.BurningHotPoleDance);
         }
 
-        void PeriodicTick(AuraEffect aurEff)
+        private void PeriodicTick(AuraEffect aurEff)
         {
             var target = GetTarget();
 

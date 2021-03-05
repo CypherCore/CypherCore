@@ -165,12 +165,12 @@ namespace BNetServer.Networking
             }
         }
 
-        async void SendResponse<T>(HttpCode code, T response)
+        private async void SendResponse<T>(HttpCode code, T response)
         {
             await AsyncWrite(HttpHelper.CreateResponse(code, Json.CreateString(response)));
         }
 
-        string CalculateShaPassHash(string name, string password)
+        private string CalculateShaPassHash(string name, string password)
         {
             var sha256 = SHA256.Create();
             var email = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));

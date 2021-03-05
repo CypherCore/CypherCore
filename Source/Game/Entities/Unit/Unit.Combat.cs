@@ -140,7 +140,7 @@ namespace Game.Entities
             SendMessageToSet(packet, false);
         }
 
-        void SendThreatListUpdate()
+        private void SendThreatListUpdate()
         {
             if (!GetThreatManager().IsThreatListEmpty())
             {
@@ -540,11 +540,13 @@ namespace Game.Entities
             SendMeleeAttackStop(victim);
             return true;
         }
-        void _addAttacker(Unit pAttacker)
+
+        private void _addAttacker(Unit pAttacker)
         {
             attackerList.Add(pAttacker);
         }
-        void _removeAttacker(Unit pAttacker)
+
+        private void _removeAttacker(Unit pAttacker)
         {
             attackerList.Remove(pAttacker);
         }
@@ -746,7 +748,7 @@ namespace Game.Entities
 
         public void SetBaseWeaponDamage(WeaponAttackType attType, WeaponDamageRange damageRange, float value) { m_weaponDamage[(int)attType][(int)damageRange] = value; }
 
-        void StartReactiveTimer(ReactiveType reactive) { m_reactiveTimer[reactive] = 4000; }
+        private void StartReactiveTimer(ReactiveType reactive) { m_reactiveTimer[reactive] = 4000; }
 
         public Unit GetMagicHitRedirectTarget(Unit victim, SpellInfo spellInfo)
         {
@@ -806,7 +808,7 @@ namespace Game.Entities
             return _IsValidAttackTarget(target, null);
         }
 
-        void DealDamageMods(Unit victim, ref uint damage)
+        private void DealDamageMods(Unit victim, ref uint damage)
         {
             if (victim == null || !victim.IsAlive() || victim.HasUnitState(UnitState.InFlight)
                 || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsInEvadeMode()))
@@ -826,7 +828,8 @@ namespace Game.Entities
 
            damage = (uint)(damage * GetDamageMultiplierForTarget(victim));
         }
-        void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
+
+        private void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
         {
             var victim = damageInfo.target;
 
@@ -1715,7 +1718,7 @@ namespace Game.Entities
 
         public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 
-        void UpdateReactives(uint p_time)
+        private void UpdateReactives(uint p_time)
         {
             for (ReactiveType reactive = 0; reactive < ReactiveType.Max; ++reactive)
             {
@@ -1860,7 +1863,7 @@ namespace Game.Entities
         }
 
         // TODO for melee need create structure as in
-        void CalculateMeleeDamage(Unit victim, uint damage, out CalcDamageInfo damageInfo, WeaponAttackType attackType)
+        private void CalculateMeleeDamage(Unit victim, uint damage, out CalcDamageInfo damageInfo, WeaponAttackType attackType)
         {
             damageInfo = new CalcDamageInfo();
 
@@ -2043,7 +2046,8 @@ namespace Game.Entities
             else // Impossible get negative result but....
                 damageInfo.damage = 0;
         }
-        MeleeHitOutcome RollMeleeOutcomeAgainst(Unit victim, WeaponAttackType attType)
+
+        private MeleeHitOutcome RollMeleeOutcomeAgainst(Unit victim, WeaponAttackType attType)
         {
             if (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks())
                 return MeleeHitOutcome.Evade;
@@ -2311,7 +2315,8 @@ namespace Game.Entities
             m_baseAttackSpeed[(int)att] = val;
             UpdateAttackTimeField(att);
         }
-        void UpdateAttackTimeField(WeaponAttackType att)
+
+        private void UpdateAttackTimeField(WeaponAttackType att)
         {
             switch (att)
             {
@@ -2355,7 +2360,7 @@ namespace Game.Entities
             return true;
         }
 
-        uint CalcSpellResistedDamage(Unit attacker, Unit victim, uint damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
+        private uint CalcSpellResistedDamage(Unit attacker, Unit victim, uint damage, SpellSchoolMask schoolMask, SpellInfo spellInfo)
         {
             // Magic damage, check for resists
             if (!Convert.ToBoolean(schoolMask & SpellSchoolMask.Magic))
@@ -2424,7 +2429,7 @@ namespace Game.Entities
             return (uint)damageResisted;
         }
 
-        float CalculateAverageResistReduction(SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo)
+        private float CalculateAverageResistReduction(SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo)
         {
             var victimResistance = (float)victim.GetResistance(schoolMask);
 
@@ -2980,7 +2985,7 @@ namespace Game.Entities
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
-        bool IsBlockCritical()
+        private bool IsBlockCritical()
         {
             if (RandomHelper.randChance(GetTotalAuraModifier(AuraType.ModBlockCritChance)))
                 return true;
@@ -2991,14 +2996,14 @@ namespace Game.Entities
         // Redirect Threat
         public void SetRedirectThreat(ObjectGuid guid, uint pct) { _redirectThreatInfo.Set(guid, pct); }
         public void ResetRedirectThreat() { SetRedirectThreat(ObjectGuid.Empty, 0); }
-        void ModifyRedirectThreat(int amount) { _redirectThreatInfo.ModifyThreatPct(amount); }
+        private void ModifyRedirectThreat(int amount) { _redirectThreatInfo.ModifyThreatPct(amount); }
         public uint GetRedirectThreatPercent() { return _redirectThreatInfo.GetThreatPct(); }
         public Unit GetRedirectThreatTarget()
         {
             return Global.ObjAccessor.GetUnit(this, _redirectThreatInfo.GetTargetGUID());
         }
 
-        float CalculateDefaultCoefficient(SpellInfo spellInfo, DamageEffectType damagetype)
+        private float CalculateDefaultCoefficient(SpellInfo spellInfo, DamageEffectType damagetype)
         {
             // Damage over Time spells bonus calculation
             var DotFactor = 1.0f;
@@ -3022,7 +3027,7 @@ namespace Game.Entities
             return (CastingTime / 3500.0f) * DotFactor;
         }
 
-        void ApplyPercentModFloatVar(ref float var, float val, bool apply)
+        private void ApplyPercentModFloatVar(ref float var, float val, bool apply)
         {
             var *= (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val));
         }

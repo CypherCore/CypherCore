@@ -80,7 +80,7 @@ namespace Game.AI
             }
         }
 
-        void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        private void ProcessAction(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             //calc random
             if (e.GetEventType() != SmartEvents.Link && e.Event.event_chance < 100 && e.Event.event_chance != 0)
@@ -2364,7 +2364,7 @@ namespace Game.AI
             }
         }
 
-        void ProcessTimedAction(SmartScriptHolder e, uint min, uint max, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        private void ProcessTimedAction(SmartScriptHolder e, uint min, uint max, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             // We may want to execute action rarely and because of this if condition is not fulfilled the action will be rechecked in a long time
             if (Global.ConditionMgr.IsObjectMeetingSmartEventConditions(e.entryOrGuid, e.event_id, e.source_type, unit, GetBaseObject()))
@@ -2376,7 +2376,7 @@ namespace Game.AI
                 RecalcTimer(e, Math.Min(min, 5000), Math.Min(min, 5000));
         }
 
-        void InstallTemplate(SmartScriptHolder e)
+        private void InstallTemplate(SmartScriptHolder e)
         {
             if (GetBaseObject() == null)
                 return;
@@ -2451,14 +2451,14 @@ namespace Game.AI
             }
         }
 
-        void AddEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
+        private void AddEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
             SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6,
             SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint phaseMask)
         {
             mInstallEvents.Add(CreateSmartEvent(e, event_flags, event_param1, event_param2, event_param3, event_param4, event_param5, action, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, t, target_param1, target_param2, target_param3, phaseMask));
         }
 
-        SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
+        private SmartScriptHolder CreateSmartEvent(SmartEvents e, SmartEventFlags event_flags, uint event_param1, uint event_param2, uint event_param3, uint event_param4, uint event_param5,
             SmartActions action, uint action_param1, uint action_param2, uint action_param3, uint action_param4, uint action_param5, uint action_param6,
             SmartTargets t, uint target_param1, uint target_param2, uint target_param3, uint phaseMask)
         {
@@ -2491,7 +2491,7 @@ namespace Game.AI
             return script;
         }
 
-        List<WorldObject> GetTargets(SmartScriptHolder e, Unit invoker = null)
+        private List<WorldObject> GetTargets(SmartScriptHolder e, Unit invoker = null)
         {
             Unit scriptTrigger = null;
             var tempLastInvoker = GetLastInvoker();
@@ -2893,7 +2893,7 @@ namespace Game.AI
             return targets;
         }
 
-        List<WorldObject> GetWorldObjectsInDist(float dist)
+        private List<WorldObject> GetWorldObjectsInDist(float dist)
         {
             var targets = new List<WorldObject>();
             var obj = GetBaseObject();
@@ -2906,7 +2906,7 @@ namespace Game.AI
             return targets;
         }
 
-        void ProcessEvent(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
+        private void ProcessEvent(SmartScriptHolder e, Unit unit = null, uint var0 = 0, uint var1 = 0, bool bvar = false, SpellInfo spell = null, GameObject gob = null, string varString = "")
         {
             if (!e.active && e.GetEventType() != SmartEvents.Link)
                 return;
@@ -3503,7 +3503,7 @@ namespace Game.AI
             }
         }
 
-        void InitTimer(SmartScriptHolder e)
+        private void InitTimer(SmartScriptHolder e)
         {
             switch (e.GetEventType())
             {
@@ -3523,7 +3523,7 @@ namespace Game.AI
             }
         }
 
-        void RecalcTimer(SmartScriptHolder e, uint min, uint max)
+        private void RecalcTimer(SmartScriptHolder e, uint min, uint max)
         {
             if (e.entryOrGuid == 15294 && e.timer != 0)
             {
@@ -3534,7 +3534,7 @@ namespace Game.AI
             e.active = e.timer == 0;
         }
 
-        void UpdateTimer(SmartScriptHolder e, uint diff)
+        private void UpdateTimer(SmartScriptHolder e, uint diff)
         {
             if (e.GetEventType() == SmartEvents.Link)
                 return;
@@ -3624,12 +3624,12 @@ namespace Game.AI
 
         }
 
-        bool CheckTimer(SmartScriptHolder e)
+        private bool CheckTimer(SmartScriptHolder e)
         {
             return e.active;
         }
 
-        void InstallEvents()
+        private void InstallEvents()
         {
             if (!mInstallEvents.Empty())
             {
@@ -3694,7 +3694,7 @@ namespace Game.AI
             }
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Spell spell = null)
+        private void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Spell spell = null)
         {
             if (e.Empty())
             {
@@ -3745,7 +3745,7 @@ namespace Game.AI
             }
         }
 
-        void GetScript()
+        private void GetScript()
         {
             List<SmartScriptHolder> e;
             if (me != null)
@@ -3900,7 +3900,7 @@ namespace Game.AI
             ProcessEventsFor(me.IsEngaged() ? SmartEvents.IcLos : SmartEvents.OocLos, who);
         }
 
-        Unit DoSelectLowestHpFriendly(float range, uint MinHPDiff)
+        private Unit DoSelectLowestHpFriendly(float range, uint MinHPDiff)
         {
             if (!me)
                 return null;
@@ -3911,7 +3911,7 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
+        private Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
         {
             var u_check = new FriendlyBelowHpPctEntryInRange(me, entry, range, minHPDiff, excludeSelf);
             var searcher = new UnitLastSearcher(me, u_check);
@@ -3920,7 +3920,7 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        void DoFindFriendlyCC(List<Creature> creatures, float range)
+        private void DoFindFriendlyCC(List<Creature> creatures, float range)
         {
             if (me == null)
                 return;
@@ -3930,7 +3930,7 @@ namespace Game.AI
             Cell.VisitGridObjects(me, searcher, range);
         }
 
-        void DoFindFriendlyMissingBuff(List<Creature> creatures, float range, uint spellid)
+        private void DoFindFriendlyMissingBuff(List<Creature> creatures, float range, uint spellid)
         {
             if (me == null)
                 return;
@@ -3940,7 +3940,7 @@ namespace Game.AI
             Cell.VisitGridObjects(me, searcher, range);
         }
 
-        Unit DoFindClosestFriendlyInRange(float range)
+        private Unit DoFindClosestFriendlyInRange(float range)
         {
             if (!me)
                 return null;
@@ -3974,7 +3974,7 @@ namespace Game.AI
             }
         }
 
-        Unit GetLastInvoker(Unit invoker = null)
+        private Unit GetLastInvoker(Unit invoker = null)
         {
             // Look for invoker only on map of base object... Prevents multithreaded crashes
             var baseObject = GetBaseObject();
@@ -3989,7 +3989,8 @@ namespace Game.AI
 
         public void SetPathId(uint id) { mPathId = id; }
         public uint GetPathId() { return mPathId; }
-        WorldObject GetBaseObject()
+
+        private WorldObject GetBaseObject()
         {
             WorldObject obj = null;
             if (me != null)
@@ -4001,7 +4002,8 @@ namespace Game.AI
 
             return obj;
         }
-        WorldObject GetBaseObjectOrUnit(Unit unit)
+
+        private WorldObject GetBaseObjectOrUnit(Unit unit)
         {
             var summoner = GetBaseObject();
 
@@ -4011,10 +4013,11 @@ namespace Game.AI
             return summoner;
         }
 
-        bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
+        private bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
-        bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }
-        static bool IsCharmedCreature(WorldObject obj)
+        private bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }
+
+        private static bool IsCharmedCreature(WorldObject obj)
         {
             if (!obj)
                 return false;
@@ -4025,9 +4028,10 @@ namespace Game.AI
 
             return false;
         }
-        bool IsGameObject(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.GameObject); }
 
-        void StoreTargetList(List<WorldObject> targets, uint id)
+        private bool IsGameObject(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.GameObject); }
+
+        private void StoreTargetList(List<WorldObject> targets, uint id)
         {
             // insert or replace
             _storedTargets.Remove(id);
@@ -4042,8 +4046,8 @@ namespace Game.AI
 
             return null;
         }
-        
-        bool IsSmart(Creature c = null)
+
+        private bool IsSmart(Creature c = null)
         {
             var smart = true;
             if (c != null && c.GetAIName() != "SmartAI")
@@ -4058,7 +4062,7 @@ namespace Game.AI
             return smart;
         }
 
-        bool IsSmartGO(GameObject g = null)
+        private bool IsSmartGO(GameObject g = null)
         {
             var smart = true;
             if (g != null && g.GetAIName() != "SmartGameObjectAI")
@@ -4072,7 +4076,7 @@ namespace Game.AI
             return smart;
         }
 
-        void StoreCounter(uint id, uint value, uint reset)
+        private void StoreCounter(uint id, uint value, uint reset)
         {
             if (mCounterList.ContainsKey(id))
             {
@@ -4087,14 +4091,14 @@ namespace Game.AI
             ProcessEventsFor(SmartEvents.CounterSet, null, id);
         }
 
-        uint GetCounterValue(uint id)
+        private uint GetCounterValue(uint id)
         {
             if (mCounterList.ContainsKey(id))
                 return mCounterList[id];
             return 0;
         }
 
-        GameObject FindGameObjectNear(WorldObject searchObject, ulong guid)
+        private GameObject FindGameObjectNear(WorldObject searchObject, ulong guid)
         {
             var bounds = searchObject.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(guid);
             if (bounds.Empty())
@@ -4103,7 +4107,7 @@ namespace Game.AI
             return bounds[0];
         }
 
-        Creature FindCreatureNear(WorldObject searchObject, ulong guid)
+        private Creature FindCreatureNear(WorldObject searchObject, ulong guid)
         {
             var bounds = searchObject.GetMap().GetCreatureBySpawnIdStore().LookupByKey(guid);
             if (bounds.Empty())
@@ -4114,7 +4118,7 @@ namespace Game.AI
             return foundCreature ?? bounds[0];
         }
 
-        void ResetBaseObject()
+        private void ResetBaseObject()
         {
             WorldObject lookupRoot = me;
             if (!lookupRoot)
@@ -4148,20 +4152,21 @@ namespace Game.AI
             meOrigGUID.Clear();
         }
 
-        void IncPhase(uint p)
+        private void IncPhase(uint p)
         {
             // protect phase from overflowing
             SetPhase(Math.Min((uint)SmartPhase.Phase12, mEventPhase + p));
         }
 
-        void DecPhase(uint p)
+        private void DecPhase(uint p)
         {
             if (p >= mEventPhase)
                 SetPhase(0);
             else
                 SetPhase(mEventPhase - p);
         }
-        void SetPhase(uint p)
+
+        private void SetPhase(uint p)
         {
             var oldPhase = mEventPhase;
 
@@ -4170,7 +4175,8 @@ namespace Game.AI
             if (oldPhase != mEventPhase)
                 ProcessEventsFor(SmartEvents.PhaseChange);
         }
-        bool IsInPhase(uint p)
+
+        private bool IsInPhase(uint p)
         {
             if (mEventPhase == 0)
                 return false;
@@ -4178,7 +4184,7 @@ namespace Game.AI
             return ((1 << (int)(mEventPhase - 1)) & p) != 0;
         }
 
-        void RemoveStoredEvent(uint id)
+        private void RemoveStoredEvent(uint id)
         {
             if (!mStoredEvents.Empty())
             {
@@ -4195,41 +4201,41 @@ namespace Game.AI
 
         public ObjectGuid mLastInvoker;
 
-        Dictionary<uint, uint> mCounterList = new Dictionary<uint, uint>();
+        private Dictionary<uint, uint> mCounterList = new Dictionary<uint, uint>();
 
-        List<SmartScriptHolder> mEvents = new List<SmartScriptHolder>();
-        List<SmartScriptHolder> mInstallEvents = new List<SmartScriptHolder>();
-        List<SmartScriptHolder> mTimedActionList = new List<SmartScriptHolder>();
-        Creature me;
-        ObjectGuid meOrigGUID;
-        GameObject go;
-        ObjectGuid goOrigGUID;
-        AreaTriggerRecord trigger;
-        AreaTrigger areaTrigger;
-        SceneTemplate sceneTemplate;
-        Spell spellTemplate;
-        SmartScriptType mScriptType;
-        uint mEventPhase;
+        private List<SmartScriptHolder> mEvents = new List<SmartScriptHolder>();
+        private List<SmartScriptHolder> mInstallEvents = new List<SmartScriptHolder>();
+        private List<SmartScriptHolder> mTimedActionList = new List<SmartScriptHolder>();
+        private Creature me;
+        private ObjectGuid meOrigGUID;
+        private GameObject go;
+        private ObjectGuid goOrigGUID;
+        private AreaTriggerRecord trigger;
+        private AreaTrigger areaTrigger;
+        private SceneTemplate sceneTemplate;
+        private Spell spellTemplate;
+        private SmartScriptType mScriptType;
+        private uint mEventPhase;
 
-        uint mPathId;
-        List<SmartScriptHolder> mStoredEvents = new List<SmartScriptHolder>();
-        List<uint> mRemIDs = new List<uint>();
+        private uint mPathId;
+        private List<SmartScriptHolder> mStoredEvents = new List<SmartScriptHolder>();
+        private List<uint> mRemIDs = new List<uint>();
 
-        uint mTextTimer;
-        uint mLastTextID;
-        ObjectGuid mTextGUID;
-        uint mTalkerEntry;
-        bool mUseTextTimer;
+        private uint mTextTimer;
+        private uint mLastTextID;
+        private ObjectGuid mTextGUID;
+        private uint mTalkerEntry;
+        private bool mUseTextTimer;
 
-        Dictionary<uint, ObjectGuidList> _storedTargets = new Dictionary<uint, ObjectGuidList>();
+        private Dictionary<uint, ObjectGuidList> _storedTargets = new Dictionary<uint, ObjectGuidList>();
 
-        SmartAITemplate mTemplate;
+        private SmartAITemplate mTemplate;
     }
 
-    class ObjectGuidList
+    internal class ObjectGuidList
     {
-        List<ObjectGuid> _guidList = new List<ObjectGuid>();
-        List<WorldObject> _objectList = new List<WorldObject>();
+        private List<ObjectGuid> _guidList = new List<ObjectGuid>();
+        private List<WorldObject> _objectList = new List<WorldObject>();
 
         public ObjectGuidList(List<WorldObject> objectList)
         {
@@ -4245,7 +4251,7 @@ namespace Game.AI
         }
 
         //sanitize vector using _guidVector
-        void UpdateObjects(WorldObject obj)
+        private void UpdateObjects(WorldObject obj)
         {
             _objectList.Clear();
 

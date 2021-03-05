@@ -29,7 +29,7 @@ using Framework.Realm;
 
 public class RealmManager : Singleton<RealmManager>
 {
-    RealmManager() { }
+    private RealmManager() { }
 
     public void Initialize(int updateInterval)
     {
@@ -43,7 +43,7 @@ public class RealmManager : Singleton<RealmManager>
         _updateTimer.Start();
     }
 
-    void LoadBuildInfo()
+    private void LoadBuildInfo()
     {
         //                                         0             1             2              3              4      5              6
         var result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed FROM build_info ORDER BY build ASC");
@@ -79,7 +79,7 @@ public class RealmManager : Singleton<RealmManager>
         _updateTimer.Close();
     }
 
-    void UpdateRealm(Realm realm)
+    private void UpdateRealm(Realm realm)
     {
         var oldRealm = _realms.LookupByKey(realm.Id);
         if (oldRealm != null && oldRealm == realm)
@@ -88,7 +88,7 @@ public class RealmManager : Singleton<RealmManager>
         _realms[realm.Id] = realm;
     }
 
-    void UpdateRealms(object source, ElapsedEventArgs e)
+    private void UpdateRealms(object source, ElapsedEventArgs e)
     {
         var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         var result = DB.Login.Query(stmt);
@@ -326,12 +326,12 @@ public class RealmManager : Singleton<RealmManager>
     }
 
     public ICollection<Realm> GetRealms() { return _realms.Values; }
-    List<string> GetSubRegions() { return _subRegions; }
+    private List<string> GetSubRegions() { return _subRegions; }
 
-    List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
-    List<string> _subRegions = new List<string>();
-    Timer _updateTimer;
+    private List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
+    private ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
+    private List<string> _subRegions = new List<string>();
+    private Timer _updateTimer;
 }
 
 public class RealmBuildInfo

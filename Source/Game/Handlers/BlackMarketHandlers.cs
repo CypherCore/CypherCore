@@ -27,7 +27,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.BlackMarketOpen)]
-        void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
+        private void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
             if (!unit)
@@ -43,7 +43,7 @@ namespace Game
             SendBlackMarketOpenResult(blackMarketOpen.Guid, unit);
         }
 
-        void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
+        private void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
         {
             var packet = new BlackMarketOpenResult();
             packet.Guid = guid;
@@ -52,7 +52,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BlackMarketRequestItems)]
-        void HandleBlackMarketRequestItems(BlackMarketRequestItems blackMarketRequestItems)
+        private void HandleBlackMarketRequestItems(BlackMarketRequestItems blackMarketRequestItems)
         {
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
@@ -70,7 +70,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BlackMarketBidOnItem)]
-        void HandleBlackMarketBidOnItem(BlackMarketBidOnItem blackMarketBidOnItem)
+        private void HandleBlackMarketBidOnItem(BlackMarketBidOnItem blackMarketBidOnItem)
         {
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
@@ -129,7 +129,7 @@ namespace Game
             SendBlackMarketBidOnItemResult(BlackMarketError.Ok, blackMarketBidOnItem.MarketID, blackMarketBidOnItem.Item);
         }
 
-        void SendBlackMarketBidOnItemResult(BlackMarketError result, uint marketId, ItemInstance item)
+        private void SendBlackMarketBidOnItemResult(BlackMarketError result, uint marketId, ItemInstance item)
         {
             var packet = new BlackMarketBidOnItemResult();
 

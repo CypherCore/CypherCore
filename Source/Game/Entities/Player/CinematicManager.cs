@@ -26,16 +26,16 @@ namespace Game.Entities
     public class CinematicManager : IDisposable
     {
         // Remote location information
-        Player player;
+        private Player player;
 
         public uint m_cinematicDiff;
         public uint m_lastCinematicCheck;
-        CinematicSequencesRecord m_activeCinematic;
+        private CinematicSequencesRecord m_activeCinematic;
         public int m_activeCinematicCameraIndex;
         public uint m_cinematicLength;
-        List<FlyByCamera> m_cinematicCamera;
-        Position m_remoteSightPosition;
-        TempSummon m_CinematicObject;
+        private List<FlyByCamera> m_cinematicCamera;
+        private Position m_remoteSightPosition;
+        private TempSummon m_CinematicObject;
 
         public CinematicManager(Player playerref)
         {

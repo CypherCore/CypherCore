@@ -138,14 +138,15 @@ namespace Game.DungeonFinding
         }
 
         // General
-        LfgState m_State;
-        LfgState m_OldState;
-        ObjectGuid m_Leader;
-        List<ObjectGuid> m_Players = new List<ObjectGuid>();
+        private LfgState m_State;
+        private LfgState m_OldState;
+        private ObjectGuid m_Leader;
+
+        private List<ObjectGuid> m_Players = new List<ObjectGuid>();
         // Dungeon
-        uint m_Dungeon;
+        private uint m_Dungeon;
         // Vote Kick
-        byte m_KicksLeft;
-        bool m_VoteKickActive;
+        private byte m_KicksLeft;
+        private bool m_VoteKickActive;
     }
 }

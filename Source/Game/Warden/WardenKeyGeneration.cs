@@ -20,7 +20,7 @@ using System;
 
 namespace Game
 {
-    class SHA1Randx
+    internal class SHA1Randx
     {
         public SHA1Randx(byte[] buff)
         {
@@ -49,7 +49,7 @@ namespace Game
         }
 
 
-        void FillUp()
+        private void FillUp()
         {
             sh = SHA1.Create();
             sh.ComputeHash(o1, 0, 20);
@@ -59,11 +59,11 @@ namespace Game
             taken = 0;
         }
 
-        SHA1 sh;
-        uint taken;
-        byte[] o0 = new byte[20];
-        byte[] o1 = new byte[20];
-        byte[] o2 = new byte[20];
+        private SHA1 sh;
+        private uint taken;
+        private byte[] o0 = new byte[20];
+        private byte[] o1 = new byte[20];
+        private byte[] o2 = new byte[20];
     }
 
 }

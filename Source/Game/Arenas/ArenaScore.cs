@@ -22,7 +22,7 @@ using Game.Networking.Packets;
 
 namespace Game.Arenas
 {
-    class ArenaScore : BattlegroundScore
+    internal class ArenaScore : BattlegroundScore
     {
         public ArenaScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
         {
@@ -53,10 +53,10 @@ namespace Game.Arenas
                 $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
         }
 
-        uint PreMatchRating;
-        uint PreMatchMMR;
-        uint PostMatchRating;
-        uint PostMatchMMR;
+        private uint PreMatchRating;
+        private uint PreMatchMMR;
+        private uint PostMatchRating;
+        private uint PostMatchMMR;
     }
 
     public class ArenaTeamScore

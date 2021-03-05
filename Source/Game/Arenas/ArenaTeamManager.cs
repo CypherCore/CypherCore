@@ -23,7 +23,7 @@ namespace Game.Arenas
 {
     public class ArenaTeamManager : Singleton<ArenaTeamManager>
     {
-        ArenaTeamManager()
+        private ArenaTeamManager()
         {
             NextArenaTeamId = 1;
         }
@@ -122,7 +122,7 @@ namespace Game.Arenas
 
         public Dictionary<uint, ArenaTeam> GetArenaTeamMap() { return ArenaTeamStorage; }
 
-        uint NextArenaTeamId;
-        Dictionary<uint, ArenaTeam> ArenaTeamStorage = new Dictionary<uint, ArenaTeam>();
+        private uint NextArenaTeamId;
+        private Dictionary<uint, ArenaTeam> ArenaTeamStorage = new Dictionary<uint, ArenaTeam>();
     }
 }

@@ -22,13 +22,13 @@ namespace Game.Maps
 {
     public class MapUpdater
     {
-        ProducerConsumerQueue<MapUpdateRequest> _queue = new ProducerConsumerQueue<MapUpdateRequest>();
+        private ProducerConsumerQueue<MapUpdateRequest> _queue = new ProducerConsumerQueue<MapUpdateRequest>();
 
-        Thread[] _workerThreads;
-        volatile bool _cancelationToken;
+        private Thread[] _workerThreads;
+        private volatile bool _cancelationToken;
 
-        object _lock = new object();
-        int _pendingRequests;
+        private object _lock = new object();
+        private int _pendingRequests;
 
         public MapUpdater(int numThreads)
         {
@@ -80,7 +80,7 @@ namespace Game.Maps
             }
         }
 
-        void WorkerThread()
+        private void WorkerThread()
         {
             while (true)
             {
@@ -98,9 +98,9 @@ namespace Game.Maps
 
     public class MapUpdateRequest
     {
-        Map m_map;
-        MapUpdater m_updater;
-        uint m_diff;
+        private Map m_map;
+        private MapUpdater m_updater;
+        private uint m_diff;
 
         public MapUpdateRequest(Map m, uint d)
         {

@@ -61,14 +61,14 @@ namespace Game.Spells
 
     public class AuraApplication
     {
-        Unit _target;
-        Aura _base;
-        AuraRemoveMode _removeMode;                  // Store info for know remove aura reason
-        byte _slot;                                   // Aura slot on unit
-        AuraFlags _flags;                                  // Aura info flag
-        uint _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
-        bool _needClientUpdate;
-        uint _effectMask;
+        private Unit _target;
+        private Aura _base;
+        private AuraRemoveMode _removeMode;                  // Store info for know remove aura reason
+        private byte _slot;                                   // Aura slot on unit
+        private AuraFlags _flags;                                  // Aura info flag
+        private uint _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
+        private bool _needClientUpdate;
+        private uint _effectMask;
 
         public AuraApplication(Unit target, Unit caster, Aura aura, uint effMask)
         {
@@ -118,7 +118,7 @@ namespace Game.Spells
             }
         }
 
-        void _InitFlags(Unit caster, uint effMask)
+        private void _InitFlags(Unit caster, uint effMask)
         {
             // mark as selfcasted if needed
             _flags |= (GetBase().GetCasterGUID() == GetTarget().GetGUID()) ? AuraFlags.NoCaster : AuraFlags.None;
@@ -271,7 +271,7 @@ namespace Game.Spells
             return Convert.ToBoolean(_effectMask & (1 << (int)effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
-        bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
+        private bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
         public uint GetEffectsToApply() { return _effectsToApply; }
 
         public void SetRemoveMode(AuraRemoveMode mode) { _removeMode = mode; }
@@ -283,7 +283,7 @@ namespace Game.Spells
 
     public class Aura
     {
-        const int UPDATE_TARGET_MAP_INTERVAL = 500;
+        private const int UPDATE_TARGET_MAP_INTERVAL = 500;
 
         public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Difficulty castDifficulty, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
         {
@@ -430,7 +430,7 @@ namespace Game.Spells
             }
         }
 
-        void UpdateTargetMap(Unit caster, bool apply = true)
+        private void UpdateTargetMap(Unit caster, bool apply = true)
         {
             if (IsRemoved())
                 return;
@@ -634,7 +634,7 @@ namespace Game.Spells
             _DeleteRemovedApplications();
         }
 
-        void Update(uint diff, Unit caster)
+        private void Update(uint diff, Unit caster)
         {
             if (m_duration > 0)
             {
@@ -685,7 +685,7 @@ namespace Game.Spells
             }
         }
 
-        int CalcMaxDuration(Unit caster)
+        private int CalcMaxDuration(Unit caster)
         {
             Player modOwner = null;
             int maxDuration;
@@ -744,7 +744,7 @@ namespace Game.Spells
                 m_timeCla = 1 * Time.InMilliseconds;
         }
 
-        void RefreshTimers(bool resetPeriodicTimer)
+        private void RefreshTimers(bool resetPeriodicTimer)
         {
             m_maxDuration = CalcMaxDuration();
             if (m_spellInfo.HasAttribute(SpellAttr8.DontResetPeriodicTimer))
@@ -1501,7 +1501,7 @@ namespace Game.Spells
             }
         }
 
-        bool CanBeAppliedOn(Unit target)
+        private bool CanBeAppliedOn(Unit target)
         {
             // unit not in world or during remove from world
             if (!target.IsInWorld || target.IsDuringRemoveFromWorld())
@@ -1518,7 +1518,7 @@ namespace Game.Spells
                 return CheckAreaTarget(target);
         }
 
-        bool CheckAreaTarget(Unit target)
+        private bool CheckAreaTarget(Unit target)
         {
             return CallScriptCheckAreaTargetHandlers(target);
         }
@@ -1815,7 +1815,7 @@ namespace Game.Spells
             return 0;
         }
 
-        float CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
+        private float CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             var chance = procEntry.Chance;
             // calculate chances depending on unit with caster's data
@@ -1891,7 +1891,7 @@ namespace Game.Spells
             return chance * 100.0f;
         }
 
-        void _DeleteRemovedApplications()
+        private void _DeleteRemovedApplications()
         {
             m_removedApplications.Clear();
         }
@@ -1909,7 +1909,7 @@ namespace Game.Spells
         public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
         #region CallScripts
 
-        bool CallScriptCheckAreaTargetHandlers(Unit target)
+        private bool CallScriptCheckAreaTargetHandlers(Unit target)
         {
             var result = true;
             foreach (var auraScript in m_loadedScripts)
@@ -2339,7 +2339,8 @@ namespace Game.Spells
 
         public byte GetCharges() { return m_procCharges; }
         public byte CalcMaxCharges() { return CalcMaxCharges(GetCaster()); }
-        byte CalcMaxCharges(Unit caster)
+
+        private byte CalcMaxCharges(Unit caster)
         {
             var maxProcCharges = m_spellInfo.ProcCharges;
             var procEntry = Global.SpellMgr.GetSpellProcEntry(GetSpellInfo());
@@ -2519,43 +2520,44 @@ namespace Game.Spells
         }
 
         #region Fields
-        List<AuraScript> m_loadedScripts = new List<AuraScript>();
-        SpellInfo m_spellInfo;
-        Difficulty m_castDifficulty;
-        ObjectGuid m_castGuid;
-        ObjectGuid m_casterGuid;
-        ObjectGuid m_castItemGuid;
-        uint m_castItemId;
-        int m_castItemLevel;
-        SpellCastVisual m_spellVisual;
-        long m_applyTime;
-        WorldObject m_owner;
 
-        int m_maxDuration;                                // Max aura duration
-        int m_duration;                                   // Current time
-        int m_timeCla;                                    // Timer for power per sec calcultion
-        List<SpellPowerRecord> m_periodicCosts = new List<SpellPowerRecord>();// Periodic costs
-        int m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
+        private List<AuraScript> m_loadedScripts = new List<AuraScript>();
+        private SpellInfo m_spellInfo;
+        private Difficulty m_castDifficulty;
+        private ObjectGuid m_castGuid;
+        private ObjectGuid m_casterGuid;
+        private ObjectGuid m_castItemGuid;
+        private uint m_castItemId;
+        private int m_castItemLevel;
+        private SpellCastVisual m_spellVisual;
+        private long m_applyTime;
+        private WorldObject m_owner;
 
-        uint m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
-        byte m_procCharges;                                // Aura charges (0 for infinite)
-        byte m_stackAmount;                                // Aura stack amount
+        private int m_maxDuration;                                // Max aura duration
+        private int m_duration;                                   // Current time
+        private int m_timeCla;                                    // Timer for power per sec calcultion
+        private List<SpellPowerRecord> m_periodicCosts = new List<SpellPowerRecord>();// Periodic costs
+        private int m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
+
+        private uint m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
+        private byte m_procCharges;                                // Aura charges (0 for infinite)
+        private byte m_stackAmount;                                // Aura stack amount
 
         //might need to be arrays still
-        AuraEffect[] _effects;
-        Dictionary<ObjectGuid, AuraApplication> m_applications = new Dictionary<ObjectGuid, AuraApplication>();
+        private AuraEffect[] _effects;
+        private Dictionary<ObjectGuid, AuraApplication> m_applications = new Dictionary<ObjectGuid, AuraApplication>();
 
-        bool m_isRemoved;
-        bool m_isSingleTarget;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
-        bool m_isUsingCharges;
+        private bool m_isRemoved;
+        private bool m_isSingleTarget;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
+        private bool m_isUsingCharges;
 
-        ChargeDropEvent m_dropEvent;
+        private ChargeDropEvent m_dropEvent;
 
-        DateTime m_procCooldown;
-        DateTime m_lastProcAttemptTime;
-        DateTime m_lastProcSuccessTime;
+        private DateTime m_procCooldown;
+        private DateTime m_lastProcAttemptTime;
+        private DateTime m_lastProcSuccessTime;
 
-        List<AuraApplication> m_removedApplications = new List<AuraApplication>();
+        private List<AuraApplication> m_removedApplications = new List<AuraApplication>();
         #endregion
     }
 
@@ -2683,7 +2685,7 @@ namespace Game.Spells
         public void SetDiminishGroup(DiminishingGroup group) { m_AuraDRGroup = group; }
         public DiminishingGroup GetDiminishGroup() { return m_AuraDRGroup; }
 
-        DiminishingGroup m_AuraDRGroup;              // Diminishing
+        private DiminishingGroup m_AuraDRGroup;              // Diminishing
     }
 
     public class DynObjAura : Aura
@@ -2757,8 +2759,8 @@ namespace Game.Spells
             return true;
         }
 
-        Aura _base;
-        AuraRemoveMode _mode;
+        private Aura _base;
+        private AuraRemoveMode _mode;
     }
 
     public class AuraKey : IEquatable<AuraKey>

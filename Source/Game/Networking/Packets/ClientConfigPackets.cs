@@ -118,7 +118,7 @@ namespace Game.Networking.Packets
         public ByteBuffer CompressedData;
     }
 
-    class SetAdvancedCombatLogging : ClientPacket
+    internal class SetAdvancedCombatLogging : ClientPacket
     {
         public SetAdvancedCombatLogging(WorldPacket packet) : base(packet) { }
 

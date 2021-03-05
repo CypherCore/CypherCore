@@ -28,7 +28,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.TransmogrifyItems)]
-        void HandleTransmogrifyItems(TransmogrifyItems transmogrifyItems)
+        private void HandleTransmogrifyItems(TransmogrifyItems transmogrifyItems)
         {
             var player = GetPlayer();
 

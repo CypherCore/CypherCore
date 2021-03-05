@@ -16,20 +16,20 @@ namespace BNetServer.Networking
 {
     partial class Session : SSLSocket
     {
-        AccountInfo accountInfo;
-        GameAccountInfo gameAccountInfo;
+        private AccountInfo accountInfo;
+        private GameAccountInfo gameAccountInfo;
 
-        string locale;
-        string os;
-        uint build;
-        string ipCountry;
+        private string locale;
+        private string os;
+        private uint build;
+        private string ipCountry;
 
-        byte[] clientSecret;
-        bool authed;
-        uint requestToken;
+        private byte[] clientSecret;
+        private bool authed;
+        private uint requestToken;
 
-        AsyncCallbackProcessor<QueryCallback> queryProcessor;
-        Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
+        private AsyncCallbackProcessor<QueryCallback> queryProcessor;
+        private Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
         public Session(Socket socket) : base(socket)
         {

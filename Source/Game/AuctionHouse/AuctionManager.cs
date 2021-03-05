@@ -32,23 +32,23 @@ namespace Game
 {
     public class AuctionManager : Singleton<AuctionManager>
     {
-        const int MIN_AUCTION_TIME = 12 * Time.Hour;
+        private const int MIN_AUCTION_TIME = 12 * Time.Hour;
 
-        AuctionHouseObject mHordeAuctions;
-        AuctionHouseObject mAllianceAuctions;
-        AuctionHouseObject mNeutralAuctions;
-        AuctionHouseObject mGoblinAuctions;
+        private AuctionHouseObject mHordeAuctions;
+        private AuctionHouseObject mAllianceAuctions;
+        private AuctionHouseObject mNeutralAuctions;
+        private AuctionHouseObject mGoblinAuctions;
 
-        Dictionary<ObjectGuid, PlayerPendingAuctions> _pendingAuctionsByPlayer = new Dictionary<ObjectGuid, PlayerPendingAuctions>();
+        private Dictionary<ObjectGuid, PlayerPendingAuctions> _pendingAuctionsByPlayer = new Dictionary<ObjectGuid, PlayerPendingAuctions>();
 
-        Dictionary<ObjectGuid, Item> _itemsByGuid = new Dictionary<ObjectGuid, Item>();
+        private Dictionary<ObjectGuid, Item> _itemsByGuid = new Dictionary<ObjectGuid, Item>();
 
-        uint _replicateIdGenerator;
+        private uint _replicateIdGenerator;
 
-        Dictionary<ObjectGuid, PlayerThrottleObject> _playerThrottleObjects = new Dictionary<ObjectGuid, PlayerThrottleObject>();
-        DateTime _playerThrottleObjectsCleanupTime;
+        private Dictionary<ObjectGuid, PlayerThrottleObject> _playerThrottleObjects = new Dictionary<ObjectGuid, PlayerThrottleObject>();
+        private DateTime _playerThrottleObjectsCleanupTime;
 
-        AuctionManager()
+        private AuctionManager()
         {
             mHordeAuctions = new AuctionHouseObject(6);
             mAllianceAuctions = new AuctionHouseObject(2);
@@ -499,7 +499,7 @@ namespace Game
             return CliDB.AuctionHouseStorage.LookupByKey(houseid);
         }
 
-        class PendingAuctionInfo
+        private class PendingAuctionInfo
         {
             public uint AuctionId;
             public uint AuctionHouseId;
@@ -513,13 +513,13 @@ namespace Game
             }
         }
 
-        class PlayerPendingAuctions
+        private class PlayerPendingAuctions
         {
             public List<PendingAuctionInfo> Auctions = new List<PendingAuctionInfo>();
             public int LastAuctionsSize;
         }
 
-        class PlayerThrottleObject
+        private class PlayerThrottleObject
         {
             public DateTime PeriodEnd;
             public byte QueriesRemaining = 100;
@@ -1561,7 +1561,7 @@ namespace Game
             }
         }
 
-        class PlayerReplicateThrottleData
+        private class PlayerReplicateThrottleData
         {
             public uint Global;
             public uint Cursor;
@@ -1571,7 +1571,7 @@ namespace Game
             public bool IsReplicationInProgress() { return Cursor != Tombstone && Global != 0; }
         }
 
-        class MailedItemsBatch
+        private class MailedItemsBatch
         {
             public Item[] Items = new Item[SharedConst.MaxMailItems];
             public ulong TotalPrice;
@@ -1588,19 +1588,19 @@ namespace Game
                 TotalPrice += unitPrice * item.GetCount();
             }
         }
-        
-        AuctionHouseRecord _auctionHouse;
 
-        SortedList<uint, AuctionPosting> _itemsByAuctionId = new SortedList<uint, AuctionPosting>(); // ordered for replicate
-        SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new SortedDictionary<AuctionsBucketKey, AuctionsBucketData>();// ordered for search by itemid only
-        Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new Dictionary<ObjectGuid, CommodityQuote>();
+        private AuctionHouseRecord _auctionHouse;
 
-        MultiMap<ObjectGuid, uint> _playerOwnedAuctions = new MultiMap<ObjectGuid, uint>();
-        MultiMap<ObjectGuid, uint> _playerBidderAuctions = new MultiMap<ObjectGuid, uint>();
+        private SortedList<uint, AuctionPosting> _itemsByAuctionId = new SortedList<uint, AuctionPosting>(); // ordered for replicate
+        private SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new SortedDictionary<AuctionsBucketKey, AuctionsBucketData>();// ordered for search by itemid only
+        private Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new Dictionary<ObjectGuid, CommodityQuote>();
+
+        private MultiMap<ObjectGuid, uint> _playerOwnedAuctions = new MultiMap<ObjectGuid, uint>();
+        private MultiMap<ObjectGuid, uint> _playerBidderAuctions = new MultiMap<ObjectGuid, uint>();
 
         // Map of throttled players for GetAll, and throttle expiry time
         // Stored here, rather than player object to maintain persistence after logout
-        Dictionary<ObjectGuid, PlayerReplicateThrottleData> _replicateThrottleMap = new Dictionary<ObjectGuid, PlayerReplicateThrottleData>();
+        private Dictionary<ObjectGuid, PlayerReplicateThrottleData> _replicateThrottleMap = new Dictionary<ObjectGuid, PlayerReplicateThrottleData>();
     }
 
     public class AuctionPosting
@@ -1745,7 +1745,7 @@ namespace Game
                 return left.Id.CompareTo(right.Id);
             }
 
-            long CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
+            private long CompareColumns(AuctionHouseSortOrder column, AuctionPosting left, AuctionPosting right)
             {
                 switch (column)
                 {
@@ -1774,9 +1774,9 @@ namespace Game
                 return 0;
             }
 
-            Locale _locale;
-            AuctionSortDef[] _sorts;
-            int _sortCount;
+            private Locale _locale;
+            private AuctionSortDef[] _sorts;
+            private int _sortCount;
         }
     }
 
@@ -1864,7 +1864,7 @@ namespace Game
                 return left.Key != right.Key ? 1 : 0;
             }
 
-            long CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
+            private long CompareColumns(AuctionHouseSortOrder column, AuctionsBucketData left, AuctionsBucketData right)
             {
                 switch (column)
                 {
@@ -1883,9 +1883,9 @@ namespace Game
                 return 0;
             }
 
-            Locale _locale;
-            AuctionSortDef[] _sorts;
-            int _sortCount;
+            private Locale _locale;
+            private AuctionSortDef[] _sorts;
+            private int _sortCount;
         }
     }
 
@@ -1997,13 +1997,13 @@ namespace Game
         }
     }
 
-    class AuctionsResultBuilder<T>
+    internal class AuctionsResultBuilder<T>
     {
-        uint _offset;
-        IComparer<T> _sorter;
-        AuctionHouseResultLimits _maxResults;
-        List<T> _items = new List<T>();
-        bool _hasMoreResults;
+        private uint _offset;
+        private IComparer<T> _sorter;
+        private AuctionHouseResultLimits _maxResults;
+        private List<T> _items = new List<T>();
+        private bool _hasMoreResults;
 
         public AuctionsResultBuilder(uint offset, IComparer<T> sorter, AuctionHouseResultLimits maxResults)
         {

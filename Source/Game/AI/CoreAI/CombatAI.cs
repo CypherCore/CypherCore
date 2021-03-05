@@ -183,7 +183,7 @@ namespace Game.AI
             }
         }
 
-        float m_attackDist;
+        private float m_attackDist;
     }
 
     public class ArcherAI : CreatureAI
@@ -233,7 +233,7 @@ namespace Game.AI
                 DoMeleeAttackIfReady();
         }
 
-        float m_minRange;
+        private float m_minRange;
     }
 
     public class TurretAI : CreatureAI
@@ -273,13 +273,13 @@ namespace Game.AI
             DoSpellAttackIfReady(me.m_spells[0]);
         }
 
-        float m_minRange;
+        private float m_minRange;
     }
 
     public class VehicleAI : CreatureAI
     {
-        const int VEHICLE_CONDITION_CHECK_TIME = 1000;
-        const int VEHICLE_DISMISS_TIME = 5000;
+        private const int VEHICLE_CONDITION_CHECK_TIME = 1000;
+        private const int VEHICLE_DISMISS_TIME = 5000;
 
         public VehicleAI(Creature creature) : base(creature)
         {
@@ -319,12 +319,12 @@ namespace Game.AI
             m_DismissTimer = VEHICLE_DISMISS_TIME;//reset timer
         }
 
-        void LoadConditions()
+        private void LoadConditions()
         {
             m_HasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry());
         }
 
-        void CheckConditions(uint diff)
+        private void CheckConditions(uint diff)
         {
             if (!m_HasConditions)
                 return;
@@ -358,10 +358,10 @@ namespace Game.AI
                 m_ConditionsTimer -= diff;
         }
 
-        bool m_HasConditions;
-        uint m_ConditionsTimer;
-        bool m_DoDismiss;
-        uint m_DismissTimer;
+        private bool m_HasConditions;
+        private uint m_ConditionsTimer;
+        private bool m_DoDismiss;
+        private uint m_DismissTimer;
     }
 
     public class ReactorAI : CreatureAI

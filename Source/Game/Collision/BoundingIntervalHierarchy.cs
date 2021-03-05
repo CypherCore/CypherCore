@@ -30,7 +30,7 @@ namespace Game.Collision
             InitEmpty();
         }
 
-        void InitEmpty()
+        private void InitEmpty()
         {
             tree= new uint[3];
             objects = new uint[0];
@@ -38,7 +38,7 @@ namespace Game.Collision
             tree[0] = (3u << 30); // dummy leaf
         }
 
-        void BuildHierarchy(List<uint> tempTree, buildData dat, BuildStats stats)
+        private void BuildHierarchy(List<uint> tempTree, buildData dat, BuildStats stats)
         {
             // create space for the first node
             tempTree.Add(3u << 30); // dummy leaf
@@ -54,7 +54,7 @@ namespace Game.Collision
             Subdivide(0, (int)(dat.numPrims - 1), tempTree, dat, gridBox, nodeBox, 0, 1, stats);
         }
 
-        void Subdivide(int left, int right, List<uint> tempTree, buildData dat, AABound gridBox, AABound nodeBox, int nodeIndex, int depth, BuildStats stats)
+        private void Subdivide(int left, int right, List<uint> tempTree, buildData dat, AABound gridBox, AABound nodeBox, int nodeIndex, int depth, BuildStats stats)
         {
             if ((right - left + 1) <= dat.maxPrims || depth >= 64)
             {
@@ -540,21 +540,22 @@ namespace Game.Collision
             }
         }
 
-        void CreateNode(List<uint> tempTree, int nodeIndex, int left, int right)
+        private void CreateNode(List<uint> tempTree, int nodeIndex, int left, int right)
         {
             // write leaf node
             tempTree[nodeIndex + 0] = (uint)((3 << 30) | left);
             tempTree[nodeIndex + 1] = (uint)(right - left + 1);
         }
 
-        struct buildData
+        private struct buildData
         {
             public uint[] indices;
             public AxisAlignedBox[] primBound;
             public uint numPrims;
             public int maxPrims;
         }
-        struct StackNode
+
+        private struct StackNode
         {
             public uint node;
             public float tnear;
@@ -570,8 +571,8 @@ namespace Game.Collision
             public int sumDepth;
             public int minDepth;
             public int maxDepth;
-            int[] numLeavesN = new int[6];
-            int numBVH2;
+            private int[] numLeavesN = new int[6];
+            private int numBVH2;
 
             public BuildStats()
             {
@@ -606,9 +607,9 @@ namespace Game.Collision
         }
 
 
-        AxisAlignedBox bounds;
-        uint[] tree;
-        uint[] objects;
+        private AxisAlignedBox bounds;
+        private uint[] tree;
+        private uint[] objects;
 
         [StructLayout(LayoutKind.Explicit)]
         public struct FloatToIntConverter
@@ -619,13 +620,14 @@ namespace Game.Collision
             public float FloatValue;
         }
 
-        uint FloatToRawIntBits(float f)
+        private uint FloatToRawIntBits(float f)
         {
             var converter = new FloatToIntConverter();
             converter.FloatValue = f;
             return converter.IntValue;
         }
-        float IntBitsToFloat(uint i)
+
+        private float IntBitsToFloat(uint i)
         {
             var converter = new FloatToIntConverter();
             converter.IntValue = i;

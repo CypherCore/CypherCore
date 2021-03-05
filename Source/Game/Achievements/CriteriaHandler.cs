@@ -754,7 +754,7 @@ namespace Game.Achievements
             return true;
         }
 
-        bool IsCompletedCriteria(Criteria criteria, ulong requiredAmount)
+        private bool IsCompletedCriteria(Criteria criteria, ulong requiredAmount)
         {
             var progress = GetCriteriaProgress(criteria);
             if (progress == null)
@@ -850,7 +850,7 @@ namespace Game.Achievements
             return false;
         }
 
-        bool CanUpdateCriteria(Criteria criteria, List<CriteriaTree> trees, ulong miscValue1, ulong miscValue2, ulong miscValue3, Unit unit, Player referencePlayer)
+        private bool CanUpdateCriteria(Criteria criteria, List<CriteriaTree> trees, ulong miscValue1, ulong miscValue2, ulong miscValue3, Unit unit, Player referencePlayer)
         {
             if (Global.DisableMgr.IsDisabledFor(DisableType.Criteria, criteria.Id, null))
             {
@@ -892,7 +892,7 @@ namespace Game.Achievements
             return true;
         }
 
-        bool ConditionsSatisfied(Criteria criteria, Player referencePlayer)
+        private bool ConditionsSatisfied(Criteria criteria, Player referencePlayer)
         {
             if (criteria.Entry.FailEvent == 0)
                 return true;
@@ -914,7 +914,7 @@ namespace Game.Achievements
             return true;
         }
 
-        bool RequirementsSatisfied(Criteria criteria, ulong miscValue1, ulong miscValue2, ulong miscValue3, Unit unit, Player referencePlayer)
+        private bool RequirementsSatisfied(Criteria criteria, ulong miscValue1, ulong miscValue2, ulong miscValue3, Unit unit, Player referencePlayer)
         {
             switch (criteria.Entry.Type)
             {
@@ -1242,7 +1242,7 @@ namespace Game.Achievements
             return false;
         }
 
-        bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
+        private bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
         {
             var reqValue = modifier.Asset;
             var secondaryAsset = modifier.SecondaryAsset;
@@ -2591,12 +2591,12 @@ namespace Game.Achievements
         public virtual List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset) { return null; }
 
         protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new Dictionary<uint, CriteriaProgress>();
-        Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new Dictionary<uint, uint>();
+        private Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new Dictionary<uint, uint>();
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
     {
-        CriteriaManager()
+        private CriteriaManager()
         {
             for (var i = 0; i < (int)CriteriaTypes.TotalTypes; ++i)
                 _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
@@ -2631,7 +2631,7 @@ namespace Game.Achievements
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+        private T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
         {
             var cur = tree;
             var obj = map.LookupByKey(tree.Id);
@@ -2890,7 +2890,7 @@ namespace Game.Achievements
             return _criteriaModifiers.LookupByKey(modifierTreeId);
         }
 
-        bool IsCriteriaTypeStoredByAsset(CriteriaTypes type)
+        private bool IsCriteriaTypeStoredByAsset(CriteriaTypes type)
         {
             switch (type)
             {
@@ -3003,23 +3003,23 @@ namespace Game.Achievements
             func(tree);
         }
 
-        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new Dictionary<uint, CriteriaDataSet>();
+        private Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new Dictionary<uint, CriteriaDataSet>();
 
-        Dictionary<uint, CriteriaTree> _criteriaTrees = new Dictionary<uint, CriteriaTree>();
-        Dictionary<uint, Criteria> _criteria = new Dictionary<uint, Criteria>();
-        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new Dictionary<uint, ModifierTreeNode>();
+        private Dictionary<uint, CriteriaTree> _criteriaTrees = new Dictionary<uint, CriteriaTree>();
+        private Dictionary<uint, Criteria> _criteria = new Dictionary<uint, Criteria>();
+        private Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new Dictionary<uint, ModifierTreeNode>();
 
-        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new MultiMap<uint, CriteriaTree>();
+        private MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new MultiMap<uint, CriteriaTree>();
 
         // store criterias by type to speed up lookup
-        MultiMap<CriteriaTypes, Criteria> _criteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
-        MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        private MultiMap<CriteriaTypes, Criteria> _criteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        private MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
+        private MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        private MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        private MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
 
-        MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new MultiMap<CriteriaTimedTypes, Criteria>();
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaCondition.Max];
+        private MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new MultiMap<CriteriaTimedTypes, Criteria>();
+        private MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaCondition.Max];
     }
 
     public class ModifierTreeNode
@@ -3622,7 +3622,7 @@ namespace Game.Achievements
 
         public void SetCriteriaId(uint id) { criteria_id = id; }
 
-        uint criteria_id;
-        List<CriteriaData> storage = new List<CriteriaData>();
+        private uint criteria_id;
+        private List<CriteriaData> storage = new List<CriteriaData>();
     }
 }

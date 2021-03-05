@@ -58,9 +58,9 @@ namespace Game.DataStorage
 
     public class WhoListStorageManager : Singleton<WhoListStorageManager>
     {
-        List<WhoListPlayerInfo> _whoListStorage;
+        private List<WhoListPlayerInfo> _whoListStorage;
 
-        WhoListStorageManager()
+        private WhoListStorageManager()
         {
             _whoListStorage = new List<WhoListPlayerInfo>();
         }

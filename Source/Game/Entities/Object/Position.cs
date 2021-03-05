@@ -350,8 +350,8 @@ namespace Game.Entities
 
     public class WorldLocation : Position
     {
-        uint _mapId;
-        Cell currentCell;
+        private uint _mapId;
+        private Cell currentCell;
         public ObjectCellMoveState _moveState;
 
         public Position _newPosition = new Position();

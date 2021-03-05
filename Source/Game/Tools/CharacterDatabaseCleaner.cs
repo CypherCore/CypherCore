@@ -25,7 +25,7 @@ using System.Text;
 
 namespace Game
 {
-    class CharacterDatabaseCleaner
+    internal class CharacterDatabaseCleaner
     {
         public static void CleanDatabase()
         {
@@ -70,9 +70,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Cleaned character database in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        delegate bool CheckFor(uint id);
+        private delegate bool CheckFor(uint id);
 
-        static void CheckUnique(string column, string table, CheckFor check)
+        private static void CheckUnique(string column, string table, CheckFor check)
         {
             var result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
             if (result.IsEmpty())
@@ -108,38 +108,38 @@ namespace Game
             }
         }
 
-        static bool AchievementProgressCheck(uint criteria)
+        private static bool AchievementProgressCheck(uint criteria)
         {
             return Global.CriteriaMgr.GetCriteria(criteria) != null;
         }
 
-        static void CleanCharacterAchievementProgress()
+        private static void CleanCharacterAchievementProgress()
         {
             CheckUnique("criteria", "character_achievement_progress", AchievementProgressCheck);
         }
 
-        static bool SkillCheck(uint skill)
+        private static bool SkillCheck(uint skill)
         {
             return CliDB.SkillLineStorage.ContainsKey(skill);
         }
 
-        static void CleanCharacterSkills()
+        private static void CleanCharacterSkills()
         {
             CheckUnique("skill", "character_skills", SkillCheck);
         }
 
-        static bool SpellCheck(uint spell_id)
+        private static bool SpellCheck(uint spell_id)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
             return spellInfo != null && !spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
         }
 
-        static void CleanCharacterSpell()
+        private static void CleanCharacterSpell()
         {
             CheckUnique("spell", "character_spell", SpellCheck);
         }
 
-        static bool TalentCheck(uint talent_id)
+        private static bool TalentCheck(uint talent_id)
         {
             var talentInfo = CliDB.TalentStorage.LookupByKey(talent_id);
             if (talentInfo == null)
@@ -148,13 +148,13 @@ namespace Game
             return CliDB.ChrSpecializationStorage.ContainsKey(talentInfo.SpecID);
         }
 
-        static void CleanCharacterTalent()
+        private static void CleanCharacterTalent()
         {
             DB.Characters.DirectExecute("DELETE FROM character_talent WHERE talentGroup > {0}", PlayerConst.MaxSpecializations);
             CheckUnique("talentId", "character_talent", TalentCheck);
         }
 
-        static void CleanCharacterQuestStatus()
+        private static void CleanCharacterQuestStatus()
         {
             DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }

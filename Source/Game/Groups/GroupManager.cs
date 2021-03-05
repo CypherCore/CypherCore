@@ -26,7 +26,7 @@ namespace Game.Groups
 {
     public class GroupManager : Singleton<GroupManager>
     {
-        GroupManager()
+        private GroupManager()
         {
             NextGroupDbStoreId = 1;
             NextGroupId = 1;
@@ -231,9 +231,9 @@ namespace Game.Groups
             }
         }
 
-        Dictionary<ulong, Group> GroupStore = new Dictionary<ulong, Group>();
-        Dictionary<uint, Group> GroupDbStore = new Dictionary<uint, Group>();
-        ulong NextGroupId;
-        uint NextGroupDbStoreId;
+        private Dictionary<ulong, Group> GroupStore = new Dictionary<ulong, Group>();
+        private Dictionary<uint, Group> GroupDbStore = new Dictionary<uint, Group>();
+        private ulong NextGroupId;
+        private uint NextGroupDbStoreId;
     }
 }

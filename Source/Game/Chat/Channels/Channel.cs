@@ -131,7 +131,7 @@ namespace Game.Chat
             return result;
         }
 
-        void UpdateChannelInDB()
+        private void UpdateChannelInDB()
         {
             if (_persistentChannel)
             {
@@ -152,7 +152,7 @@ namespace Game.Chat
             }
         }
 
-        void UpdateChannelUseageInDB()
+        private void UpdateChannelUseageInDB()
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
             stmt.AddValue(0, _channelName);
@@ -322,7 +322,7 @@ namespace Game.Chat
             }
         }
 
-        void KickOrBan(Player player, string badname, bool ban)
+        private void KickOrBan(Player player, string badname, bool ban)
         {
             var good = player.GetGUID();
 
@@ -451,7 +451,7 @@ namespace Game.Chat
             UpdateChannelInDB();
         }
 
-        void SetMode(Player player, string p2n, bool mod, bool set)
+        private void SetMode(Player player, string p2n, bool mod, bool set)
         {
             var guid = player.GetGUID();
 
@@ -778,7 +778,7 @@ namespace Game.Chat
 
         public void DeclineInvite(Player player) { }
 
-        void JoinNotify(Player player)
+        private void JoinNotify(Player player)
         {
             var guid = player.GetGUID();
 
@@ -788,7 +788,7 @@ namespace Game.Chat
                 SendToAll(new ChannelUserlistUpdateBuilder(this, guid));
         }
 
-        void LeaveNotify(Player player)
+        private void LeaveNotify(Player player)
         {
             var guid = player.GetGUID();
 
@@ -800,7 +800,7 @@ namespace Game.Chat
                 SendToAll(builder);
         }
 
-        void SetModerator(ObjectGuid guid, bool set)
+        private void SetModerator(ObjectGuid guid, bool set)
         {
             if (!IsOn(guid))
                 return;
@@ -816,7 +816,7 @@ namespace Game.Chat
             }
         }
 
-        void SetMute(ObjectGuid guid, bool set)
+        private void SetMute(ObjectGuid guid, bool set)
         {
             if (!IsOn(guid))
                 return;
@@ -832,7 +832,7 @@ namespace Game.Chat
             }
         }
 
-        void SendToAll(MessageBuilder builder, ObjectGuid guid = default)
+        private void SendToAll(MessageBuilder builder, ObjectGuid guid = default)
         {
             var localizer = new LocalizedPacketDo(builder);
 
@@ -845,7 +845,7 @@ namespace Game.Chat
             }
         }
 
-        void SendToAllButOne(MessageBuilder builder, ObjectGuid who)
+        private void SendToAllButOne(MessageBuilder builder, ObjectGuid who)
         {
             var localizer = new LocalizedPacketDo(builder);
 
@@ -860,7 +860,7 @@ namespace Game.Chat
             }
         }
 
-        void SendToOne(MessageBuilder builder, ObjectGuid who)
+        private void SendToOne(MessageBuilder builder, ObjectGuid who)
         {
             var localizer = new LocalizedPacketDo(builder);
 
@@ -869,7 +869,7 @@ namespace Game.Chat
                 localizer.Invoke(player);
         }
 
-        void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default)
+        private void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default)
         {
             var localizer = new LocalizedPacketDo(builder);
 
@@ -887,16 +887,16 @@ namespace Game.Chat
         public bool IsConstant() { return _channelId != 0; }
 
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
-        bool IsAnnounce() { return _announceEnabled; }
-        void SetAnnounce(bool nannounce) { _announceEnabled = nannounce; }
+        private bool IsAnnounce() { return _announceEnabled; }
+        private void SetAnnounce(bool nannounce) { _announceEnabled = nannounce; }
 
-        string GetPassword() { return _channelPassword; }
-        void SetPassword(string npassword) { _channelPassword = npassword; }
+        private string GetPassword() { return _channelPassword; }
+        private void SetPassword(string npassword) { _channelPassword = npassword; }
 
         public uint GetNumPlayers() { return (uint)_playersStore.Count; }
 
         public ChannelFlags GetFlags() { return _channelFlags; }
-        bool HasFlag(ChannelFlags flag) { return _channelFlags.HasAnyFlag(flag); }
+        private bool HasFlag(ChannelFlags flag) { return _channelFlags.HasAnyFlag(flag); }
 
         public AreaTableRecord GetZoneEntry() { return _zoneEntry; }
 
@@ -910,8 +910,8 @@ namespace Game.Chat
 
         public void SetOwnership(bool ownership) { _ownershipEnabled = ownership; }
 
-        bool IsOn(ObjectGuid who) { return _playersStore.ContainsKey(who); }
-        bool IsBanned(ObjectGuid guid) { return _bannedStore.Contains(guid); }
+        private bool IsOn(ObjectGuid who) { return _playersStore.ContainsKey(who); }
+        private bool IsBanned(ObjectGuid guid) { return _bannedStore.Contains(guid); }
 
         public ChannelMemberFlags GetPlayerFlags(ObjectGuid guid)
         {
@@ -919,22 +919,22 @@ namespace Game.Chat
             return info != null ? info.GetFlags() : 0;
         }
 
-        bool _announceEnabled;
-        bool _ownershipEnabled;
-        bool _persistentChannel;
-        bool _isOwnerInvisible;
+        private bool _announceEnabled;
+        private bool _ownershipEnabled;
+        private bool _persistentChannel;
+        private bool _isOwnerInvisible;
 
-        ChannelFlags _channelFlags;
-        uint _channelId;
-        Team _channelTeam;
-        ObjectGuid _channelGuid;
-        ObjectGuid _ownerGuid;
-        string _channelName;
-        string _channelPassword;
-        Dictionary<ObjectGuid, PlayerInfo> _playersStore = new Dictionary<ObjectGuid, PlayerInfo>();
-        List<ObjectGuid> _bannedStore = new List<ObjectGuid>();
+        private ChannelFlags _channelFlags;
+        private uint _channelId;
+        private Team _channelTeam;
+        private ObjectGuid _channelGuid;
+        private ObjectGuid _ownerGuid;
+        private string _channelName;
+        private string _channelPassword;
+        private Dictionary<ObjectGuid, PlayerInfo> _playersStore = new Dictionary<ObjectGuid, PlayerInfo>();
+        private List<ObjectGuid> _bannedStore = new List<ObjectGuid>();
 
-        AreaTableRecord _zoneEntry;
+        private AreaTableRecord _zoneEntry;
 
         public class PlayerInfo
         {
@@ -979,8 +979,8 @@ namespace Game.Chat
                     RemoveFlag(ChannelMemberFlags.Muted);
             }
 
-            ChannelMemberFlags flags;
-            bool _invisible;
+            private ChannelMemberFlags flags;
+            private bool _invisible;
         }
     }
 }

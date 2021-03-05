@@ -44,7 +44,7 @@ namespace Game.Movement
             _msToNext = info.TimeToNext;
         }
 
-        uint SendPathSpline(Unit me, Span<Vector3> wp)
+        private uint SendPathSpline(Unit me, Span<Vector3> wp)
         {
             var numWp = wp.Length;
             Cypher.Assert(numWp > 1, "Every path must have source & destination");
@@ -57,7 +57,7 @@ namespace Game.Movement
             return (uint)init.Launch();
         }
 
-        void SendSplineFor(Unit me, int index, uint toNext)
+        private void SendSplineFor(Unit me, int index, uint toNext)
         {
             Cypher.Assert(index < _chainSize);
             Log.outDebug(LogFilter.Movement, "{0}: Sending spline for {1}.", me.GetGUID().ToString(), index);
@@ -155,7 +155,7 @@ namespace Game.Movement
             return true;
         }
 
-        SplineChainResumeInfo GetResumeInfo(Unit me)
+        private SplineChainResumeInfo GetResumeInfo(Unit me)
         {
             if (_nextIndex == 0)
                 return new SplineChainResumeInfo(_id, _chain, _walk, 0, 0, _msToNext);
@@ -173,13 +173,13 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
 
-        uint _id;
-        List<SplineChainLink> _chain = new List<SplineChainLink>();
-        byte _chainSize;
-        bool _walk;
-        bool finished;
-        byte _nextIndex;
-        byte _nextFirstWP; // only used for resuming
-        uint _msToNext;
+        private uint _id;
+        private List<SplineChainLink> _chain = new List<SplineChainLink>();
+        private byte _chainSize;
+        private bool _walk;
+        private bool finished;
+        private byte _nextIndex;
+        private byte _nextFirstWP; // only used for resuming
+        private uint _msToNext;
     }
 }

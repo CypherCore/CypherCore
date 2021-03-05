@@ -20,7 +20,7 @@ using System;
 using System.IO;
 using System.Text;
 
-class ConsoleAppender : Appender
+internal class ConsoleAppender : Appender
 {
     public ConsoleAppender(byte id, string name, LogLevel level, AppenderFlags flags) : base(id, name, level, flags)
     {
@@ -48,10 +48,10 @@ class ConsoleAppender : Appender
         return AppenderType.Console;
     }
 
-    ConsoleColor[] _consoleColor;
+    private ConsoleColor[] _consoleColor;
 }
 
-class FileAppender : Appender, IDisposable
+internal class FileAppender : Appender, IDisposable
 {
     public FileAppender(byte id, string name, LogLevel level, string fileName, string logDir, AppenderFlags flags) : base(id, name, level, flags)
     {
@@ -69,7 +69,7 @@ class FileAppender : Appender, IDisposable
         _logStream = OpenFile(_fileName, FileMode.Create);
     }
 
-    FileStream OpenFile(string filename, FileMode mode)
+    private FileStream OpenFile(string filename, FileMode mode)
     {
         return new FileStream(_logDir + "/" + filename, mode, FileAccess.Write, FileShare.ReadWrite);
     }
@@ -121,14 +121,14 @@ class FileAppender : Appender, IDisposable
     }
     #endregion
 
-    string _fileName;
-    string _logDir;
-    bool _dynamicName;
-    FileStream _logStream;
-    object locker = new object();
+    private string _fileName;
+    private string _logDir;
+    private bool _dynamicName;
+    private FileStream _logStream;
+    private object locker = new object();
 }
 
-class DBAppender : Appender
+internal class DBAppender : Appender
 {
     public DBAppender(byte id, string name, LogLevel level) : base(id, name, level) { }
 
@@ -158,11 +158,11 @@ class DBAppender : Appender
         realmId = _realmId;
     }
 
-    uint realmId;
-    bool enabled;
+    private uint realmId;
+    private bool enabled;
 }
 
-abstract class Appender
+internal abstract class Appender
 {
     protected Appender(byte id, string name, LogLevel level = LogLevel.Disabled, AppenderFlags flags = AppenderFlags.None)
     {
@@ -213,13 +213,13 @@ abstract class Appender
         _level = level;
     }
 
-    byte _id;
-    string _name;
-    LogLevel _level;
-    AppenderFlags _flags;
+    private byte _id;
+    private string _name;
+    private LogLevel _level;
+    private AppenderFlags _flags;
 }
 
-class LogMessage
+internal class LogMessage
 {
     public LogMessage(LogLevel _level, LogFilter _type, string _text)
     {

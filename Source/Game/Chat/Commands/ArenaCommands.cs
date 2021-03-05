@@ -23,10 +23,10 @@ using Game.Entities;
 namespace Game.Chat
 {
     [CommandGroup("arena", RBACPermissions.CommandArena)]
-    class ArenaCommands
+    internal class ArenaCommands
     {
         [Command("create", RBACPermissions.CommandArenaCreate, true)]
-        static bool HandleArenaCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaCreateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -78,7 +78,7 @@ namespace Game.Chat
         }
 
         [Command("disband", RBACPermissions.CommandArenaDisband, true)]
-        static bool HandleArenaDisbandCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaDisbandCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -114,7 +114,7 @@ namespace Game.Chat
         }
 
         [Command("rename", RBACPermissions.CommandArenaRename, true)]
-        static bool HandleArenaRenameCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaRenameCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -169,7 +169,7 @@ namespace Game.Chat
         }
 
         [Command("captain", RBACPermissions.CommandArenaCaptain)]
-        static bool HandleArenaCaptainCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaCaptainCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -238,7 +238,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandArenaInfo, true)]
-        static bool HandleArenaInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaInfoCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -263,7 +263,7 @@ namespace Game.Chat
         }
 
         [Command("lookup", RBACPermissions.CommandArenaLookup)]
-        static bool HandleArenaLookupCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleArenaLookupCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

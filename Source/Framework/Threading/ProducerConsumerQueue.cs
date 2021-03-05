@@ -22,9 +22,9 @@ namespace Framework.Threading
 {
     public class ProducerConsumerQueue<T>
     {
-        object _queueLock = new object();
-        Queue<T> _queue = new Queue<T>();
-        volatile bool _shutdown;
+        private object _queueLock = new object();
+        private Queue<T> _queue = new Queue<T>();
+        private volatile bool _shutdown;
 
         public ProducerConsumerQueue()
         {

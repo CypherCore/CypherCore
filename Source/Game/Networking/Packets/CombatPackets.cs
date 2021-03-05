@@ -46,7 +46,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        AttackSwingErr Reason;
+        private AttackSwingErr Reason;
     }
 
     public class AttackStop : ClientPacket
@@ -244,7 +244,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UnitGUID;
     }
 
-    class PvPCredit : ServerPacket
+    internal class PvPCredit : ServerPacket
     {
         public PvPCredit() : base(ServerOpcodes.PvpCredit) { }
 
@@ -262,7 +262,7 @@ namespace Game.Networking.Packets
         public uint Rank;
     }
 
-    class BreakTarget : ServerPacket
+    internal class BreakTarget : ServerPacket
     {
         public BreakTarget() : base(ServerOpcodes.BreakTarget) { }
 

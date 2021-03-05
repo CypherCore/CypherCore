@@ -24,7 +24,7 @@ namespace Game
 {
     public class WeatherManager : Singleton<WeatherManager>
     {
-        WeatherManager() { }
+        private WeatherManager() { }
 
         public void LoadWeatherData()
         {
@@ -87,7 +87,7 @@ namespace Game
             return _weatherData.LookupByKey(zone_id);
         }
 
-        Dictionary<uint, WeatherData> _weatherData = new Dictionary<uint, WeatherData>();
+        private Dictionary<uint, WeatherData> _weatherData = new Dictionary<uint, WeatherData>();
     }
 
     public class Weather
@@ -339,7 +339,7 @@ namespace Game
             UpdateWeather();
         }
 
-        WeatherState GetWeatherState()
+        private WeatherState GetWeatherState()
         {
             if (m_grade < 0.27f)
                 return WeatherState.Fine;
@@ -380,11 +380,11 @@ namespace Game
         public uint GetZone() { return m_zone; }
         public uint GetScriptId() { return m_weatherChances.ScriptId; }
 
-        uint m_zone;
-        WeatherType m_type;
-        float m_grade;
-        IntervalTimer m_timer = new IntervalTimer();
-        WeatherData m_weatherChances;
+        private uint m_zone;
+        private WeatherType m_type;
+        private float m_grade;
+        private IntervalTimer m_timer = new IntervalTimer();
+        private WeatherData m_weatherChances;
     }
 
     public class WeatherData

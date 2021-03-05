@@ -88,7 +88,7 @@ namespace Game.Arenas
         }
     }
 
-    struct NagrandArenaObjectTypes
+    internal struct NagrandArenaObjectTypes
     {
         public const int Door1 = 0;
         public const int Door2 = 1;
@@ -99,7 +99,7 @@ namespace Game.Arenas
         public const int Max = 6;
     }
 
-    struct NagrandArenaObjects
+    internal struct NagrandArenaObjects
     {
         public const uint Door1 = 183978;
         public const uint Door2 = 183980;

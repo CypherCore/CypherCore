@@ -37,14 +37,14 @@ namespace Game.Entities
         public void SetQuestSharingInfo(ObjectGuid guid, uint id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
         public void ClearQuestSharingInfo() { m_playerSharingQuest = ObjectGuid.Empty; m_sharedQuestId = 0; }
 
-        uint GetInGameTime() { return m_ingametime; }
+        private uint GetInGameTime() { return m_ingametime; }
         public void SetInGameTime(uint time) { m_ingametime = time; }
 
-        void AddTimedQuest(uint questId) { m_timedquests.Add(questId); }
+        private void AddTimedQuest(uint questId) { m_timedquests.Add(questId); }
         public void RemoveTimedQuest(uint questId) { m_timedquests.Remove(questId); }
 
         public List<uint> GetRewardedQuests() { return m_RewardedQuests; }
-        Dictionary<uint, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
+        private Dictionary<uint, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
 
         public int GetQuestMinLevel(Quest quest)
         {
@@ -1337,7 +1337,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
+        private bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
         {
             return SatisfyQuestPreviousQuest(qInfo, msg) && SatisfyQuestDependentPreviousQuests(qInfo, msg);
         }
@@ -1368,7 +1368,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool SatisfyQuestDependentPreviousQuests(Quest qInfo, bool msg)
+        private bool SatisfyQuestDependentPreviousQuests(Quest qInfo, bool msg)
         {
             // No previous quest (might be first quest in a series)
             if (qInfo.DependentPreviousQuests.Empty())
@@ -1829,7 +1829,7 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        void SendQuestUpdate(uint questid)
+        private void SendQuestUpdate(uint questid)
         {
             uint zone, area;
             GetZoneAndAreaId(out zone, out area);
@@ -2059,19 +2059,19 @@ namespace Game.Entities
             SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), timer);
         }
 
-        void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
+        private void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
         {
             var questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
         }
 
-        void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
+        private void RemoveQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
         {
             var questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
         }
 
-        void SetQuestCompletedBit(uint questBit, bool completed)
+        private void SetQuestCompletedBit(uint questBit, bool completed)
         {
             if (questBit == 0)
                 return;
@@ -2526,7 +2526,7 @@ namespace Game.Entities
             }
         }
 
-        void CurrencyChanged(uint currencyId, int change)
+        private void CurrencyChanged(uint currencyId, int change)
         {
             for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
             {
@@ -2653,7 +2653,7 @@ namespace Game.Entities
             return status.ObjectiveData[storageIndex];
         }
 
-        bool IsQuestObjectiveProgressComplete(Quest quest)
+        private bool IsQuestObjectiveProgressComplete(Quest quest)
         {
             float progress = 0;
             foreach (var obj in quest.Objectives)
@@ -2889,7 +2889,7 @@ namespace Game.Entities
             }
         }
 
-        void SendQuestUpdateAddCredit(Quest quest, ObjectGuid guid, QuestObjective obj, uint count)
+        private void SendQuestUpdateAddCredit(Quest quest, ObjectGuid guid, QuestObjective obj, uint count)
         {
             var packet = new QuestUpdateAddCredit();
             packet.VictimGUID = guid;
@@ -3074,7 +3074,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        void SetDailyQuestStatus(uint quest_id)
+        private void SetDailyQuestStatus(uint quest_id)
         {
             var qQuest = Global.ObjectMgr.GetQuestTemplate(quest_id);
             if (qQuest != null)
@@ -3100,13 +3100,13 @@ namespace Game.Entities
             return m_activePlayerData.DailyQuestsCompleted.FindIndex(quest_id) >= 0;
         }
 
-        void SetWeeklyQuestStatus(uint quest_id)
+        private void SetWeeklyQuestStatus(uint quest_id)
         {
             m_weeklyquests.Add(quest_id);
             m_WeeklyQuestChanged = true;
         }
 
-        void SetSeasonalQuestStatus(uint quest_id)
+        private void SetSeasonalQuestStatus(uint quest_id)
         {
             var quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
             if (quest == null)
@@ -3116,13 +3116,13 @@ namespace Game.Entities
             m_SeasonalQuestChanged = true;
         }
 
-        void SetMonthlyQuestStatus(uint quest_id)
+        private void SetMonthlyQuestStatus(uint quest_id)
         {
             m_monthlyquests.Add(quest_id);
             m_MonthlyQuestChanged = true;
         }
 
-        void PushQuests()
+        private void PushQuests()
         {
             foreach (var quest in Global.ObjectMgr.GetQuestTemplatesAutoPush())
             {

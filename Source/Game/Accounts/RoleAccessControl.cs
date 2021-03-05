@@ -120,7 +120,7 @@ namespace Game.Accounts
             return RBACCommandResult.OK;
         }
 
-        void SavePermission(uint permission, bool granted, int realmId)
+        private void SavePermission(uint permission, bool granted, int realmId)
         {
             var stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
             stmt.AddValue(0, GetId());
@@ -212,7 +212,7 @@ namespace Game.Accounts
             CalculateNewPermissions();
         }
 
-        void CalculateNewPermissions()
+        private void CalculateNewPermissions()
         {
             Log.outDebug(LogFilter.Rbac, "RBACData.CalculateNewPermissions [Id: {0} Name: {1}]", GetId(), GetName());
 
@@ -224,7 +224,7 @@ namespace Game.Accounts
             RemovePermissions(_globalPerms, revoked);
         }
 
-        void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
+        private void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
         {
             foreach (var id in permsFrom)
                 permsTo.Add(id);
@@ -235,13 +235,13 @@ namespace Game.Accounts
         /// </summary>
         /// <param name="permsFrom"></param>
         /// <param name="permsToRemove"></param>
-        void RemovePermissions(List<uint> permsFrom, List<uint> permsToRemove)
+        private void RemovePermissions(List<uint> permsFrom, List<uint> permsToRemove)
         {
             foreach (var id in permsToRemove)
                 permsFrom.Remove(id);
         }
 
-        void ExpandPermissions(List<uint> permissions)
+        private void ExpandPermissions(List<uint> permissions)
         {
             var toCheck = new List<uint>(permissions);
             permissions.Clear();
@@ -269,7 +269,7 @@ namespace Game.Accounts
             //Log.outDebug(LogFilter.General, "RBACData:ExpandPermissions: Expanded: {0}", GetDebugPermissionString(permissions));
         }
 
-        void ClearData()
+        private void ClearData()
         {
             _grantedPerms.Clear();
             _deniedPerms.Clear();
@@ -300,51 +300,51 @@ namespace Game.Accounts
         }
 
         public byte GetSecurityLevel() { return _secLevel; }
-        int GetRealmId() { return _realmId; }
+        private int GetRealmId() { return _realmId; }
 
         // Checks if a permission is granted
-        bool HasGrantedPermission(uint permissionId)
+        private bool HasGrantedPermission(uint permissionId)
         {
             return _grantedPerms.Contains(permissionId);
         }
 
         // Checks if a permission is denied
-        bool HasDeniedPermission(uint permissionId)
+        private bool HasDeniedPermission(uint permissionId)
         {
             return _deniedPerms.Contains(permissionId);
         }
 
         // Adds a new granted permission
-        void AddGrantedPermission(uint permissionId)
+        private void AddGrantedPermission(uint permissionId)
         {
             _grantedPerms.Add(permissionId);
         }
 
         // Removes a granted permission
-        void RemoveGrantedPermission(uint permissionId)
+        private void RemoveGrantedPermission(uint permissionId)
         {
             _grantedPerms.Remove(permissionId);
         }
 
         // Adds a new denied permission
-        void AddDeniedPermission(uint permissionId)
+        private void AddDeniedPermission(uint permissionId)
         {
             _deniedPerms.Add(permissionId);
         }
 
         // Removes a denied permission
-        void RemoveDeniedPermission(uint permissionId)
+        private void RemoveDeniedPermission(uint permissionId)
         {
             _deniedPerms.Remove(permissionId);
         }
 
-        uint _id;                                        // Account id
-        string _name;                                 // Account name
-        int _realmId;                                    // RealmId Affected
-        byte _secLevel;                                   // Account SecurityLevel
-        List<uint> _grantedPerms = new List<uint>();             // Granted permissions
-        List<uint> _deniedPerms = new List<uint>();              // Denied permissions
-        List<uint> _globalPerms = new List<uint>();              // Calculated permissions
+        private uint _id;                                        // Account id
+        private string _name;                                 // Account name
+        private int _realmId;                                    // RealmId Affected
+        private byte _secLevel;                                   // Account SecurityLevel
+        private List<uint> _grantedPerms = new List<uint>();             // Granted permissions
+        private List<uint> _deniedPerms = new List<uint>();              // Denied permissions
+        private List<uint> _globalPerms = new List<uint>();              // Calculated permissions
     }
 
     public class RBACPermission
@@ -365,12 +365,12 @@ namespace Game.Accounts
         // Adds a new linked Permission
         public void AddLinkedPermission(uint id) { _perms.Add(id); }
         // Removes a linked Permission
-        void RemoveLinkedPermission(uint id) { _perms.Remove(id); }
+        private void RemoveLinkedPermission(uint id) { _perms.Remove(id); }
 
 
-        uint _id;                                 // id of the object
-        string _name;                             // name of the object
-        List<uint> _perms = new List<uint>();     // Set of permissions
+        private uint _id;                                 // id of the object
+        private string _name;                             // name of the object
+        private List<uint> _perms = new List<uint>();     // Set of permissions
     }
 
     public enum RBACCommandResult

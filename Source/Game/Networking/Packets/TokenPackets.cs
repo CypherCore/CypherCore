@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class CommerceTokenGetLog : ClientPacket
+    internal class CommerceTokenGetLog : ClientPacket
     {
         public CommerceTokenGetLog(WorldPacket packet) : base(packet) { }
 
@@ -32,7 +32,7 @@ namespace Game.Networking.Packets
         public uint UnkInt;
     }
 
-    class CommerceTokenGetLogResponse : ServerPacket
+    internal class CommerceTokenGetLogResponse : ServerPacket
     {
         public CommerceTokenGetLogResponse() : base(ServerOpcodes.CommerceTokenGetLogResponse, ConnectionType.Instance) { }
 
@@ -54,9 +54,9 @@ namespace Game.Networking.Packets
 
         public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
         public TokenResult Result;
-        List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new List<AuctionableTokenAuctionable>();
+        private List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new List<AuctionableTokenAuctionable>();
 
-        struct AuctionableTokenAuctionable
+        private struct AuctionableTokenAuctionable
         {
             public ulong UnkInt1;
             public uint UnkInt2;
@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class CommerceTokenGetMarketPrice : ClientPacket
+    internal class CommerceTokenGetMarketPrice : ClientPacket
     {
         public CommerceTokenGetMarketPrice(WorldPacket packet) : base(packet) { }
 
@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
         public uint UnkInt;
     }
 
-    class CommerceTokenGetMarketPriceResponse : ServerPacket
+    internal class CommerceTokenGetMarketPriceResponse : ServerPacket
     {
         public CommerceTokenGetMarketPriceResponse() : base(ServerOpcodes.CommerceTokenGetMarketPriceResponse) { }
 

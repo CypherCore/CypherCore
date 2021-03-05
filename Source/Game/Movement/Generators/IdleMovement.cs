@@ -99,9 +99,9 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
 
-        uint _duration;
-        uint _maxDuration;
-        RotateDirection _direction;
+        private uint _duration;
+        private uint _maxDuration;
+        private RotateDirection _direction;
     }
 
     public class DistractMovementGenerator : IMovementGenerator
@@ -145,7 +145,7 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
 
-        uint _timer;
+        private uint _timer;
     }
 
     public class AssistanceDistractMovementGenerator : DistractMovementGenerator

@@ -36,10 +36,10 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.IgnoreTrade)]
-        void HandleIgnoreTradeOpcode(IgnoreTrade packet) { }
+        private void HandleIgnoreTradeOpcode(IgnoreTrade packet) { }
 
         [WorldPacketHandler(ClientOpcodes.BusyTrade)]
-        void HandleBusyTradeOpcode(BusyTrade packet) { }
+        private void HandleBusyTradeOpcode(BusyTrade packet) { }
 
         public void SendUpdateTrade(bool trader_data = true)
         {
@@ -94,7 +94,7 @@ namespace Game
             SendPacket(tradeUpdated);
         }
 
-        void MoveItems(Item[] myItems, Item[] hisItems)
+        private void MoveItems(Item[] myItems, Item[] hisItems)
         {
             Player trader = GetPlayer().GetTrader();
             if (!trader)
@@ -176,7 +176,7 @@ namespace Game
             }
         }
 
-        static void SetAcceptTradeMode(TradeData myTrade, TradeData hisTrade, Item[] myItems, Item[] hisItems)
+        private static void SetAcceptTradeMode(TradeData myTrade, TradeData hisTrade, Item[] myItems, Item[] hisItems)
         {
             myTrade.SetInAcceptProcess(true);
             hisTrade.SetInAcceptProcess(true);
@@ -202,13 +202,13 @@ namespace Game
             }
         }
 
-        static void ClearAcceptTradeMode(TradeData myTrade, TradeData hisTrade)
+        private static void ClearAcceptTradeMode(TradeData myTrade, TradeData hisTrade)
         {
             myTrade.SetInAcceptProcess(false);
             hisTrade.SetInAcceptProcess(false);
         }
 
-        static void ClearAcceptTradeMode(Item[] myItems, Item[] hisItems)
+        private static void ClearAcceptTradeMode(Item[] myItems, Item[] hisItems)
         {
             // clear 'in-trade' flag
             for (byte i = 0; i < (int)TradeSlots.Count; ++i)
@@ -221,7 +221,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AcceptTrade)]
-        void HandleAcceptTrade(AcceptTrade acceptTrade)
+        private void HandleAcceptTrade(AcceptTrade acceptTrade)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -518,7 +518,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UnacceptTrade)]
-        void HandleUnacceptTrade(UnacceptTrade packet)
+        private void HandleUnacceptTrade(UnacceptTrade packet)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -528,7 +528,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BeginTrade)]
-        void HandleBeginTrade(BeginTrade packet)
+        private void HandleBeginTrade(BeginTrade packet)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -550,7 +550,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelTrade, Status = SessionStatus.LoggedinOrRecentlyLogout)]
-        void HandleCancelTrade(CancelTrade cancelTrade)
+        private void HandleCancelTrade(CancelTrade cancelTrade)
         {
             // sent also after LOGOUT COMPLETE
             if (GetPlayer())                                             // needed because STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT
@@ -558,7 +558,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.InitiateTrade)]
-        void HandleInitiateTrade(InitiateTrade initiateTrade)
+        private void HandleInitiateTrade(InitiateTrade initiateTrade)
         {
             if (GetPlayer().GetTradeData() != null)
                 return;
@@ -683,7 +683,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetTradeGold)]
-        void HandleSetTradeGold(SetTradeGold setTradeGold)
+        private void HandleSetTradeGold(SetTradeGold setTradeGold)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -694,7 +694,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetTradeItem)]
-        void HandleSetTradeItem(SetTradeItem setTradeItem)
+        private void HandleSetTradeItem(SetTradeItem setTradeItem)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -742,7 +742,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ClearTradeItem)]
-        void HandleClearTradeItem(ClearTradeItem clearTradeItem)
+        private void HandleClearTradeItem(ClearTradeItem clearTradeItem)
         {
             TradeData my_trade = GetPlayer().GetTradeData();
             if (my_trade == null)
@@ -758,7 +758,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetTradeCurrency)]
-        void HandleSetTradeCurrency(SetTradeCurrency setTradeCurrency)
+        private void HandleSetTradeCurrency(SetTradeCurrency setTradeCurrency)
         {
         }
     }

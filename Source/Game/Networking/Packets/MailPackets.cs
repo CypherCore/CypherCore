@@ -295,7 +295,7 @@ namespace Game.Networking.Packets
         public float Delay = 0.0f;
     }
 
-    class ShowMailbox : ServerPacket
+    internal class ShowMailbox : ServerPacket
     {
         public ShowMailbox() : base(ServerOpcodes.ShowMailbox) { }
 
@@ -372,8 +372,8 @@ namespace Game.Networking.Packets
         public uint MaxDurability;
         public uint Durability;
         public bool Unlocked;
-        List<ItemEnchantData> Enchants = new List<ItemEnchantData>();
-        List<ItemGemData> Gems= new List<ItemGemData>();
+        private List<ItemEnchantData> Enchants = new List<ItemEnchantData>();
+        private List<ItemGemData> Gems= new List<ItemGemData>();
     }
 
     public class MailListEntry

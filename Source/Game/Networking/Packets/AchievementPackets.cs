@@ -35,7 +35,7 @@ namespace Game.Networking.Packets
         public AllAchievements Data = new AllAchievements();
     }
 
-    class AllAccountCriteria : ServerPacket
+    internal class AllAccountCriteria : ServerPacket
     {
         public AllAccountCriteria() : base(ServerOpcodes.AllAccountCriteria, ConnectionType.Instance) { }
 
@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
         public Optional<ulong> RafAcceptanceID;
     }
 
-    class AccountCriteriaUpdate : ServerPacket
+    internal class AccountCriteriaUpdate : ServerPacket
     {
         public AccountCriteriaUpdate() : base(ServerOpcodes.AccountCriteriaUpdate) { }
 
@@ -271,7 +271,7 @@ namespace Game.Networking.Packets
         public List<EarnedAchievement> Earned = new List<EarnedAchievement>();
     }
 
-    class GuildGetAchievementMembers : ClientPacket
+    internal class GuildGetAchievementMembers : ClientPacket
     {
         public GuildGetAchievementMembers(WorldPacket packet) : base(packet) { }
 
@@ -287,7 +287,7 @@ namespace Game.Networking.Packets
         public uint AchievementID;
     }
 
-    class GuildAchievementMembers : ServerPacket
+    internal class GuildAchievementMembers : ServerPacket
     {
         public GuildAchievementMembers() : base(ServerOpcodes.GuildAchievementMembers) { }
 

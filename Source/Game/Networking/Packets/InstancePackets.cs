@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class UpdateLastInstance : ServerPacket
+    internal class UpdateLastInstance : ServerPacket
     {
         public UpdateLastInstance() : base(ServerOpcodes.UpdateLastInstance) { }
 
@@ -33,7 +33,7 @@ namespace Game.Networking.Packets
         public uint MapID;
     }
 
-    class InstanceInfoPkt : ServerPacket
+    internal class InstanceInfoPkt : ServerPacket
     {
         public InstanceInfoPkt() : base(ServerOpcodes.InstanceInfo) { }
 
@@ -48,14 +48,14 @@ namespace Game.Networking.Packets
         public List<InstanceLock> LockList = new List<InstanceLock>();
     }
 
-    class ResetInstances : ClientPacket
+    internal class ResetInstances : ClientPacket
     {
         public ResetInstances(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class InstanceReset : ServerPacket
+    internal class InstanceReset : ServerPacket
     {
         public InstanceReset() : base(ServerOpcodes.InstanceReset) { }
 
@@ -67,7 +67,7 @@ namespace Game.Networking.Packets
         public uint MapID;
     }
 
-    class InstanceResetFailed : ServerPacket
+    internal class InstanceResetFailed : ServerPacket
     {
         public InstanceResetFailed() : base(ServerOpcodes.InstanceResetFailed) { }
 
@@ -82,14 +82,14 @@ namespace Game.Networking.Packets
         public ResetFailedReason ResetFailedReason;
     }
 
-    class ResetFailedNotify : ServerPacket
+    internal class ResetFailedNotify : ServerPacket
     {
         public ResetFailedNotify() : base(ServerOpcodes.ResetFailedNotify) { }
 
         public override void Write() { }
     }
 
-    class InstanceSaveCreated : ServerPacket
+    internal class InstanceSaveCreated : ServerPacket
     {
         public InstanceSaveCreated() : base(ServerOpcodes.InstanceSaveCreated) { }
 
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
         public bool Gm;
     }
 
-    class InstanceLockResponse : ClientPacket
+    internal class InstanceLockResponse : ClientPacket
     {
         public InstanceLockResponse(WorldPacket packet) : base(packet) { }
 
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
         public bool AcceptLock;
     }
 
-    class RaidGroupOnly : ServerPacket
+    internal class RaidGroupOnly : ServerPacket
     {
         public RaidGroupOnly() : base(ServerOpcodes.RaidGroupOnly) { }
 
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
         public RaidGroupReason Reason;
     }
 
-    class PendingRaidLock : ServerPacket
+    internal class PendingRaidLock : ServerPacket
     {
         public PendingRaidLock() : base(ServerOpcodes.PendingRaidLock) { }
 
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
         public bool WarningOnly;
     }
 
-    class RaidInstanceMessage : ServerPacket
+    internal class RaidInstanceMessage : ServerPacket
     {
         public RaidInstanceMessage() : base(ServerOpcodes.RaidInstanceMessage) { }
 
@@ -168,7 +168,7 @@ namespace Game.Networking.Packets
         public bool Extended;
     }
 
-    class InstanceEncounterEngageUnit : ServerPacket
+    internal class InstanceEncounterEngageUnit : ServerPacket
     {
         public InstanceEncounterEngageUnit() : base(ServerOpcodes.InstanceEncounterEngageUnit, ConnectionType.Instance) { }
 
@@ -182,7 +182,7 @@ namespace Game.Networking.Packets
         public byte TargetFramePriority; // used to set the initial position of the frame if multiple frames are sent
     }
 
-    class InstanceEncounterDisengageUnit : ServerPacket
+    internal class InstanceEncounterDisengageUnit : ServerPacket
     {
         public InstanceEncounterDisengageUnit() : base(ServerOpcodes.InstanceEncounterDisengageUnit, ConnectionType.Instance) { }
 
@@ -194,7 +194,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Unit;
     }
 
-    class InstanceEncounterChangePriority : ServerPacket
+    internal class InstanceEncounterChangePriority : ServerPacket
     {
         public InstanceEncounterChangePriority() : base(ServerOpcodes.InstanceEncounterChangePriority, ConnectionType.Instance) { }
 
@@ -208,7 +208,7 @@ namespace Game.Networking.Packets
         public byte TargetFramePriority; // used to update the position of the unit's current frame
     }
 
-    class InstanceEncounterStart : ServerPacket
+    internal class InstanceEncounterStart : ServerPacket
     {
         public InstanceEncounterStart() : base(ServerOpcodes.InstanceEncounterStart, ConnectionType.Instance) { }
 
@@ -229,21 +229,21 @@ namespace Game.Networking.Packets
         public bool InProgress = true;
     }
 
-    class InstanceEncounterEnd : ServerPacket
+    internal class InstanceEncounterEnd : ServerPacket
     {
         public InstanceEncounterEnd() : base(ServerOpcodes.InstanceEncounterEnd, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
 
-    class InstanceEncounterInCombatResurrection : ServerPacket
+    internal class InstanceEncounterInCombatResurrection : ServerPacket
     {
         public InstanceEncounterInCombatResurrection() : base(ServerOpcodes.InstanceEncounterInCombatResurrection, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
 
-    class InstanceEncounterGainCombatResurrectionCharge : ServerPacket
+    internal class InstanceEncounterGainCombatResurrectionCharge : ServerPacket
     {
         public InstanceEncounterGainCombatResurrectionCharge() : base(ServerOpcodes.InstanceEncounterGainCombatResurrectionCharge, ConnectionType.Instance) { }
 
@@ -257,7 +257,7 @@ namespace Game.Networking.Packets
         public uint CombatResChargeRecovery;
     }
 
-    class BossKill : ServerPacket
+    internal class BossKill : ServerPacket
     {
         public BossKill() : base(ServerOpcodes.BossKill, ConnectionType.Instance) { }
 

@@ -23,7 +23,7 @@ using System;
 
 namespace Scripts.Spells.Monk
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint CracklingJadeLightningChannel = 117952;
         public const uint CracklingJadeLightningChiProc = 123333;
@@ -37,14 +37,14 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 117952 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning : AuraScript
+    internal class spell_monk_crackling_jade_lightning : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StanceOfTheSpiritedCrane, SpellIds.CracklingJadeLightningChiProc);
         }
 
-        void OnTick(AuraEffect aurEff)
+        private void OnTick(AuraEffect aurEff)
         {
             var caster = GetCaster();
             if (caster)
@@ -59,14 +59,14 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 117959 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning_knockback_proc_aura : AuraScript
+    internal class spell_monk_crackling_jade_lightning_knockback_proc_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CracklingJadeLightningKnockback, SpellIds.CracklingJadeLightningKnockbackCd);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             if (GetTarget().HasAura(SpellIds.CracklingJadeLightningKnockbackCd))
                 return false;
@@ -81,7 +81,7 @@ namespace Scripts.Spells.Monk
             return true;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, TriggerCastFlags.FullMask);
             GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, TriggerCastFlags.FullMask);
@@ -95,9 +95,9 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 115546 - Provoke
-    class spell_monk_provoke : SpellScript
+    internal class spell_monk_provoke : SpellScript
     {
-        const uint BlackOxStatusEntry = 61146;
+        private const uint BlackOxStatusEntry = 61146;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -106,7 +106,7 @@ namespace Scripts.Spells.Monk
             return ValidateSpellInfo(SpellIds.ProvokeSingleTarget, SpellIds.ProvokeAoe);
         }
 
-        SpellCastResult CheckExplicitTarget()
+        private SpellCastResult CheckExplicitTarget()
         {
             if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
             {
@@ -121,7 +121,7 @@ namespace Scripts.Spells.Monk
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             if (GetHitUnit().GetEntry() != BlackOxStatusEntry)

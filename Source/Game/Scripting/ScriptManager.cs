@@ -42,7 +42,7 @@ namespace Game.Scripting
     // Manages registration, loading, and execution of Scripts.
     public class ScriptManager : Singleton<ScriptManager>
     {
-        ScriptManager() { }
+        private ScriptManager() { }
 
         //Initialization
         public void Initialize()
@@ -187,7 +187,7 @@ namespace Game.Scripting
             LoadScriptSplineChains();
         }
 
-        void LoadScriptWaypoints()
+        private void LoadScriptWaypoints()
         {
             var oldMSTime = Time.GetMSTime();
 
@@ -248,7 +248,7 @@ namespace Game.Scripting
 
         }
 
-        void LoadScriptSplineChains()
+        private void LoadScriptSplineChains()
         {
             var oldMSTime = Time.GetMSTime();
 
@@ -340,7 +340,7 @@ namespace Game.Scripting
             return GetSplineChain(who.GetEntry(), chainId);
         }
 
-        List<SplineChainLink> GetSplineChain(uint entry, ushort chainId)
+        private List<SplineChainLink> GetSplineChain(uint entry, ushort chainId)
         {
             return m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
         }
@@ -1249,7 +1249,7 @@ namespace Game.Scripting
             GetScriptRegistry<T>().AddScript(script);
         }
 
-        ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
+        private ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
         {
             if (ScriptStorage.ContainsKey(typeof(T)))
                 return (ScriptRegistry<T>)ScriptStorage[typeof(T)];
@@ -1257,14 +1257,14 @@ namespace Game.Scripting
             return null;
         }
 
-        uint _ScriptCount;
+        private uint _ScriptCount;
         public Dictionary<uint, SpellSummary> spellSummaryStorage = new Dictionary<uint, SpellSummary>();
-        Hashtable ScriptStorage = new Hashtable();
+        private Hashtable ScriptStorage = new Hashtable();
 
-        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
+        private Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
         
         // creature entry + chain ID
-        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
+        private MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
     }
 
     public interface IScriptRegistry
@@ -1346,8 +1346,8 @@ namespace Game.Scripting
         }
 
         // Counter used for code-only scripts.
-        uint _scriptIdCounter;
-        Dictionary<uint, TValue> ScriptMap = new Dictionary<uint, TValue>();
+        private uint _scriptIdCounter;
+        private Dictionary<uint, TValue> ScriptMap = new Dictionary<uint, TValue>();
     }
 
     public class SpellSummary

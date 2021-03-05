@@ -227,7 +227,7 @@ namespace Framework.IO
             Current = null;
         }
 
-        bool MoveNext(string delimiters)
+        private bool MoveNext(string delimiters)
         {
             //the stringtotokenize was never set:
             if (activestring == null)
@@ -261,7 +261,7 @@ namespace Framework.IO
             return true;
         }
 
-        bool Match(string pattern, out Match m)
+        private bool Match(string pattern, out Match m)
         {
             var r = new Regex(pattern);
             m = r.Match(activestring);

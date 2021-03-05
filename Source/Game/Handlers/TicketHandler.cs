@@ -26,7 +26,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.GmTicketGetCaseStatus, Processing = PacketProcessing.Inplace)]
-        void HandleGMTicketGetCaseStatus(GMTicketGetCaseStatus packet)
+        private void HandleGMTicketGetCaseStatus(GMTicketGetCaseStatus packet)
         {
             //TODO: Implement GmCase and handle this packet correctly
             var status = new GMTicketCaseStatus();
@@ -34,7 +34,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GmTicketGetSystemStatus, Processing = PacketProcessing.Inplace)]
-        void HandleGMTicketSystemStatusOpcode(GMTicketGetSystemStatus packet)
+        private void HandleGMTicketSystemStatusOpcode(GMTicketGetSystemStatus packet)
         {
             // Note: This only disables the ticket UI at client side and is not fully reliable
             // Note: This disables the whole customer support UI after trying to send a ticket in disabled state (MessageBox: "GM Help Tickets are currently unavaiable."). UI remains disabled until the character relogs.
@@ -44,7 +44,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SubmitUserFeedback)]
-        void HandleSubmitUserFeedback(SubmitUserFeedback userFeedback)
+        private void HandleSubmitUserFeedback(SubmitUserFeedback userFeedback)
         {
             if (userFeedback.IsSuggestion)
             {
@@ -73,7 +73,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SupportTicketSubmitComplaint)]
-        void HandleSupportTicketSubmitComplaint(SupportTicketSubmitComplaint packet)
+        private void HandleSupportTicketSubmitComplaint(SupportTicketSubmitComplaint packet)
         {
             if (!Global.SupportMgr.GetComplaintSystemStatus())
                 return;
@@ -90,7 +90,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BugReport)]
-        void HandleBugReport(BugReport bugReport)
+        private void HandleBugReport(BugReport bugReport)
         {
             // Note: There is no way to trigger this with standard UI except /script ReportBug("text")
             if (!Global.SupportMgr.GetBugSystemStatus())
@@ -103,7 +103,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.Complaint)]
-        void HandleComplaint(Complaint packet)
+        private void HandleComplaint(Complaint packet)
         {    // NOTE: all chat messages from this spammer are automatically ignored by the spam reporter until logout in case of chat spam.
              // if it's mail spam - ALL mails from this spammer are automatically removed by client
 

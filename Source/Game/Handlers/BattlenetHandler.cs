@@ -26,7 +26,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.BattlenetRequest, Status = SessionStatus.Authed)]
-        void HandleBattlenetRequest(BattlenetRequest request)
+        private void HandleBattlenetRequest(BattlenetRequest request)
         {
             var handler = Global.ServiceMgr.GetHandler(request.Method.GetServiceHash(), request.Method.GetMethodId());
             if (handler != null)
@@ -39,7 +39,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChangeRealmTicket, Status = SessionStatus.Authed)]
-        void HandleBattlenetChangeRealmTicket(ChangeRealmTicket changeRealmTicket)
+        private void HandleBattlenetChangeRealmTicket(ChangeRealmTicket changeRealmTicket)
         {
             SetRealmListSecret(changeRealmTicket.Secret);
 

@@ -85,7 +85,7 @@ namespace Game.Maps
             _gridGetHeight = GetHeightFromFlat;
         }
 
-        bool LoadAreaData(BinaryReader reader, uint offset)
+        private bool LoadAreaData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             var areaHeader = reader.Read<MapAreaHeader>();
@@ -100,7 +100,7 @@ namespace Game.Maps
             return true;
         }
 
-        bool LoadHeightData(BinaryReader reader, uint offset)
+        private bool LoadHeightData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             var mapHeader = reader.Read<MapHeightHeader>();
@@ -181,7 +181,7 @@ namespace Game.Maps
             return true;
         }
 
-        bool LoadLiquidData(BinaryReader reader, uint offset)
+        private bool LoadLiquidData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             var liquidHeader = reader.Read<MapLiquidHeader>();
@@ -221,12 +221,12 @@ namespace Game.Maps
             return _areaMap[lx * 16 + ly];
         }
 
-        float GetHeightFromFlat(float x, float y)
+        private float GetHeightFromFlat(float x, float y)
         {
             return _gridHeight;
         }
 
-        float GetHeightFromFloat(float x, float y)
+        private float GetHeightFromFloat(float x, float y)
         {
             if (m_uint16_V8 == null || m_uint16_V9 == null)
                 return _gridHeight;
@@ -292,7 +292,7 @@ namespace Game.Maps
             return a * x + b * y + c;
         }
 
-        float GetHeightFromUint8(float x, float y)
+        private float GetHeightFromUint8(float x, float y)
         {
             if (m_ubyte_V8 == null || m_ubyte_V9 == null)
                 return _gridHeight;
@@ -365,7 +365,7 @@ namespace Game.Maps
             }
         }
 
-        float GetHeightFromUint16(float x, float y)
+        private float GetHeightFromUint16(float x, float y)
         {
             if (m_uint16_V8 == null || m_uint16_V9 == null)
                 return _gridHeight;
@@ -596,10 +596,11 @@ namespace Game.Maps
         public float GetHeight(float x, float y) { return _gridGetHeight(x, y); }
 
         #region Fields
-        delegate float GetHeightDel(float x, float y);
 
-        GetHeightDel _gridGetHeight;
-        uint _flags;
+        private delegate float GetHeightDel(float x, float y);
+
+        private GetHeightDel _gridGetHeight;
+        private uint _flags;
 
         public float[] m_V9;
         public ushort[] m_uint16_V9;
@@ -608,25 +609,25 @@ namespace Game.Maps
         public float[] m_V8;
         public ushort[] m_uint16_V8;
         public byte[] m_ubyte_V8;
-        Plane[] _minHeightPlanes;
-        float _gridHeight;
-        float _gridIntHeightMultiplier;
+        private Plane[] _minHeightPlanes;
+        private float _gridHeight;
+        private float _gridIntHeightMultiplier;
 
         //Area data
         public ushort[] _areaMap;
 
         //Liquid Map
-        float _liquidLevel;
-        ushort[] _liquidEntry;
-        byte[] _liquidFlags;
-        float[] _liquidMap;
-        ushort _gridArea;
-        ushort _liquidGlobalEntry;
-        byte _liquidGlobalFlags;
-        byte _liquidOffX;
-        byte _liquidOffY;
-        byte _liquidWidth;
-        byte _liquidHeight;
+        private float _liquidLevel;
+        private ushort[] _liquidEntry;
+        private byte[] _liquidFlags;
+        private float[] _liquidMap;
+        private ushort _gridArea;
+        private ushort _liquidGlobalEntry;
+        private byte _liquidGlobalFlags;
+        private byte _liquidOffX;
+        private byte _liquidOffY;
+        private byte _liquidWidth;
+        private byte _liquidHeight;
         #endregion
     }
 

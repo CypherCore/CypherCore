@@ -141,14 +141,14 @@ namespace Game.Movement
             return MovementGeneratorType.Point;
         }
 
-        uint _movementId;
-        Position _destination;
-        float _speed;
-        Unit _faceTarget;
-        SpellEffectExtraData _spellEffectExtra;
-        bool _generatePath;
-        bool _recalculateSpeed;
-        bool _interrupt;
+        private uint _movementId;
+        private Position _destination;
+        private float _speed;
+        private Unit _faceTarget;
+        private SpellEffectExtraData _spellEffectExtra;
+        private bool _generatePath;
+        private bool _recalculateSpeed;
+        private bool _interrupt;
     }
 
     public class AssistanceMovementGenerator : PointMovementGenerator<Creature>
@@ -202,8 +202,8 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Effect; }
 
-        uint _pointId;
-        uint _arrivalSpellId;
-        ObjectGuid _arrivalSpellTargetGuid;
+        private uint _pointId;
+        private uint _arrivalSpellId;
+        private ObjectGuid _arrivalSpellTargetGuid;
     }
 }

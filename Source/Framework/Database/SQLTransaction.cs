@@ -46,7 +46,7 @@ namespace Framework.Database
         }
     }
 
-    class TransactionTask : ISqlOperation
+    internal class TransactionTask : ISqlOperation
     {
         public TransactionTask(SQLTransaction trans)
         {
@@ -79,11 +79,11 @@ namespace Framework.Database
             return mySqlBase.DirectCommitTransaction(m_trans);
         }
 
-        SQLTransaction m_trans;
+        private SQLTransaction m_trans;
         public static object _deadlockLock = new object();
     }
 
-    class TransactionWithResultTask : TransactionTask
+    internal class TransactionWithResultTask : TransactionTask
     {
         public TransactionWithResultTask(SQLTransaction trans) : base(trans) { }
 
@@ -119,7 +119,7 @@ namespace Framework.Database
 
         public Task<bool> GetFuture() { return m_result.Task; }
 
-        TaskCompletionSource<bool> m_result = new TaskCompletionSource<bool>();
+        private TaskCompletionSource<bool> m_result = new TaskCompletionSource<bool>();
     }
 
     public class TransactionCallback : ISqlCallback
@@ -145,7 +145,7 @@ namespace Framework.Database
             return false;
         }
 
-        Task<bool> m_future;
-        Action<bool> m_callback;
+        private Task<bool> m_future;
+        private Action<bool> m_callback;
     }
 }

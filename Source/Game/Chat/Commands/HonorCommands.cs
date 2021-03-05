@@ -22,10 +22,10 @@ using Game.Entities;
 namespace Game.Chat.Commands
 {
     [CommandGroup("honor", RBACPermissions.CommandHonor)]
-    class HonorCommands
+    internal class HonorCommands
     {
         [Command("update", RBACPermissions.CommandHonorUpdate)]
-        static bool HandleHonorUpdateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleHonorUpdateCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedPlayer();
             if (!target)
@@ -43,10 +43,10 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("add", RBACPermissions.CommandHonorAdd)]
-        class HonorAddCommands
+        private class HonorAddCommands
         {
             [Command("", RBACPermissions.CommandHonorAdd)]
-            static bool HandleHonorAddCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleHonorAddCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -68,7 +68,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("kill", RBACPermissions.CommandHonorAddKill)]
-            static bool HandleHonorAddKillCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleHonorAddKillCommand(StringArguments args, CommandHandler handler)
             {
                 var target = handler.GetSelectedUnit();
                 if (!target)

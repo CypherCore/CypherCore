@@ -27,7 +27,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LearnTalents)]
-        void HandleLearnTalents(LearnTalents packet)
+        private void HandleLearnTalents(LearnTalents packet)
         {
             var learnTalentFailed = new LearnTalentFailed();
             var anythingLearned = false;
@@ -53,7 +53,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
-        void HandleLearnPvpTalents(LearnPvpTalents packet)
+        private void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
             var learnPvpTalentFailed = new LearnPvpTalentFailed();
             var anythingLearned = false;
@@ -79,7 +79,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]
-        void HandleConfirmRespecWipe(ConfirmRespecWipe confirmRespecWipe)
+        private void HandleConfirmRespecWipe(ConfirmRespecWipe confirmRespecWipe)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(confirmRespecWipe.RespecMaster, NPCFlags.Trainer, NPCFlags2.None);
             if (unit == null)
@@ -115,7 +115,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UnlearnSkill)]
-        void HandleUnlearnSkill(UnlearnSkill packet)
+        private void HandleUnlearnSkill(UnlearnSkill packet)
         {
             var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(packet.SkillLine, GetPlayer().GetRace(), GetPlayer().GetClass());
             if (rcEntry == null || !rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.Unlearnable))

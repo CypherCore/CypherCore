@@ -130,7 +130,7 @@ namespace Game.Entities
             Global.ScriptMgr.OnReset(this);
         }
 
-        void ApplyAllImmunities()
+        private void ApplyAllImmunities()
         {
             // This couldn't be done in DB, because some spells have MECHANIC_NONE
 
@@ -245,7 +245,7 @@ namespace Game.Entities
             return seat;
         }
 
-        void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
+        private void InstallAccessory(uint entry, sbyte seatId, bool minion, byte type, uint summonTime)
         {
             // @Prevent adding accessories when vehicle is uninstalling. (Bad script in OnUninstall/OnRemovePassenger/PassengerBoarded hook.)
             
@@ -413,7 +413,7 @@ namespace Game.Entities
             return false;
         }
 
-        void InitMovementInfoForBase()
+        private void InitMovementInfoForBase()
         {
             var vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
 
@@ -438,7 +438,7 @@ namespace Game.Entities
             return null;
         }
 
-        KeyValuePair<sbyte, VehicleSeat> GetSeatKeyValuePairForPassenger(Unit passenger)
+        private KeyValuePair<sbyte, VehicleSeat> GetSeatKeyValuePairForPassenger(Unit passenger)
         {
             foreach (var pair in Seats)
                 if (pair.Value.Passenger.Guid == passenger.GetGUID())
@@ -523,17 +523,17 @@ namespace Game.Entities
         public uint GetCreatureEntry() { return _creatureEntry; }
 
         public void SetLastShootPos(Position pos) { _lastShootPos.Relocate(pos); }
-        Position GetLastShootPos() { return _lastShootPos; }
+        private Position GetLastShootPos() { return _lastShootPos; }
 
-        Unit _me;
-        VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
-        List<ulong> vehiclePlayers = new List<ulong>();
+        private Unit _me;
+        private VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
+        private List<ulong> vehiclePlayers = new List<ulong>();
 
-        uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
-        Status _status;                                     //< Internal variable for sanity checks
-        Position _lastShootPos;
+        private uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
+        private Status _status;                                     //< Internal variable for sanity checks
+        private Position _lastShootPos;
 
-        List<VehicleJoinEvent> _pendingJoinEvents = new List<VehicleJoinEvent>();
+        private List<VehicleJoinEvent> _pendingJoinEvents = new List<VehicleJoinEvent>();
         public Dictionary<sbyte, VehicleSeat> Seats = new Dictionary<sbyte, VehicleSeat>();
         public uint UsableSeatNum;    //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display flags
 

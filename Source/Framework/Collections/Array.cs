@@ -21,7 +21,7 @@ namespace System.Collections.Generic
 {
     public class Array<T> : List<T>
     {
-        int _limit;
+        private int _limit;
 
         public Array(int size) : base(size)
         {

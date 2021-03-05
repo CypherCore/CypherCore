@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.BattleGrounds.Zones
 {
-    class BgArathiBasin : Battleground
+    internal class BgArathiBasin : Battleground
     {
         public BgArathiBasin(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
@@ -260,7 +260,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
+        private void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
         {
             // Just put it into the queue
             if (delay)
@@ -282,7 +282,7 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
         }
 
-        void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
+        private void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
         {
             var obj = node * 8 + (byte)type + teamIndex;
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
@@ -328,7 +328,7 @@ namespace Game.BattleGrounds.Zones
             packet.AddState(0x745, 0x2);
         }
 
-        void _SendNodeUpdate(byte node)
+        private void _SendNodeUpdate(byte node)
         {
             // Send node owner state update to refresh map icons on client
             byte[] plusArray = { 0, 2, 3, 0, 1 };
@@ -352,7 +352,7 @@ namespace Game.BattleGrounds.Zones
             UpdateWorldState(ABWorldStates.OccupiedBasesHorde, horde);
         }
 
-        void _NodeOccupied(byte node, Team team)
+        private void _NodeOccupied(byte node, Team team)
         {
             if (!AddSpiritGuide(node, SpiritGuidePos[node], GetTeamIndexByTeamId(team)))
                 Log.outError(LogFilter.Battleground, "Failed to spawn spirit guide! point: {0}, team: {1}, ", node, team);
@@ -384,7 +384,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void _NodeDeOccupied(byte node)
+        private void _NodeDeOccupied(byte node)
         {
             //only dynamic nodes, no start points
             if (node >= ABBattlegroundNodes.DynamicNodesCount)
@@ -723,18 +723,20 @@ namespace Game.BattleGrounds.Zones
         ///    3: ally occupied
         ///    4: horde occupied
         /// </summary>
-        ABNodeStatus[] m_Nodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
-        ABNodeStatus[] m_prevNodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
-        BannerTimer[] m_BannerTimers = new BannerTimer[ABBattlegroundNodes.DynamicNodesCount];
-        uint[] m_NodeTimers = new uint[ABBattlegroundNodes.DynamicNodesCount];
-        uint[] m_lastTick = new uint[SharedConst.BGTeamsCount];
-        uint[] m_HonorScoreTics = new uint[SharedConst.BGTeamsCount];
-        uint[] m_ReputationScoreTics = new uint[SharedConst.BGTeamsCount];
-        bool m_IsInformedNearVictory;
-        uint m_HonorTics;
-        uint m_ReputationTics;
+        private ABNodeStatus[] m_Nodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
+
+        private ABNodeStatus[] m_prevNodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
+        private BannerTimer[] m_BannerTimers = new BannerTimer[ABBattlegroundNodes.DynamicNodesCount];
+        private uint[] m_NodeTimers = new uint[ABBattlegroundNodes.DynamicNodesCount];
+        private uint[] m_lastTick = new uint[SharedConst.BGTeamsCount];
+        private uint[] m_HonorScoreTics = new uint[SharedConst.BGTeamsCount];
+        private uint[] m_ReputationScoreTics = new uint[SharedConst.BGTeamsCount];
+        private bool m_IsInformedNearVictory;
+        private uint m_HonorTics;
+
+        private uint m_ReputationTics;
         // need for achievements
-        bool[] m_TeamScores500Disadvantage = new bool[SharedConst.BGTeamsCount];
+        private bool[] m_TeamScores500Disadvantage = new bool[SharedConst.BGTeamsCount];
 
         //Const
         public const uint NotABBGWeekendHonorTicks = 260;
@@ -808,7 +810,7 @@ namespace Game.BattleGrounds.Zones
         public static uint[] NodeIcons = { 1842, 1846, 1845, 1844, 1843 };
     }
 
-    class BattlegroundABScore : BattlegroundScore
+    internal class BattlegroundABScore : BattlegroundScore
     {
         public BattlegroundABScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team)
         {
@@ -843,11 +845,11 @@ namespace Game.BattleGrounds.Zones
         public override uint GetAttr1() { return BasesAssaulted; }
         public override uint GetAttr2() { return BasesDefended; }
 
-        uint BasesAssaulted;
-        uint BasesDefended;
+        private uint BasesAssaulted;
+        private uint BasesDefended;
     }
 
-    struct BannerTimer
+    internal struct BannerTimer
     {
         public uint timer;
         public byte type;
@@ -855,7 +857,8 @@ namespace Game.BattleGrounds.Zones
     }
 
     #region Consts
-    struct ABWorldStates
+
+    internal struct ABWorldStates
     {
         public const uint OccupiedBasesHorde = 1778;
         public const uint OccupiedBasesAlly = 1779;
@@ -894,7 +897,7 @@ namespace Game.BattleGrounds.Zones
     }
 
     // Note: code uses that these IDs follow each other
-    struct NodeObjectId
+    internal struct NodeObjectId
     {
         public const uint Banner0 = 180087;       // Stables Banner
         public const uint Banner1 = 180088;       // Blacksmith Banner
@@ -903,7 +906,7 @@ namespace Game.BattleGrounds.Zones
         public const uint Banner4 = 180091;        // Gold Mine Banner
     }
 
-    struct ABObjectTypes
+    internal struct ABObjectTypes
     {
         // for all 5 node points 8*5=40 objects
         public const int BannerNeutral = 0;
@@ -937,7 +940,7 @@ namespace Game.BattleGrounds.Zones
     }
 
     // Object id templates from DB
-    struct ABObjectIds
+    internal struct ABObjectIds
     {
         public const uint BannerA = 180058;
         public const uint BannerContA = 180059;
@@ -952,7 +955,7 @@ namespace Game.BattleGrounds.Zones
         public const uint GateH = 180256;
     }
 
-    struct ABBattlegroundNodes
+    internal struct ABBattlegroundNodes
     {
         public const int NodeStables = 0;
         public const int NodeBlacksmith = 1;
@@ -968,7 +971,7 @@ namespace Game.BattleGrounds.Zones
         public const int AllCount = 7;                         // All Nodes (Dynamic And Static)
     }
 
-    struct ABBattlegroundBroadcastTexts
+    internal struct ABBattlegroundBroadcastTexts
     {
         public const uint AllianceNearVictory = 10598;
         public const uint HordeNearVictory = 10599;
@@ -983,7 +986,7 @@ namespace Game.BattleGrounds.Zones
         };
     }
 
-    struct ABNodeInfo
+    internal struct ABNodeInfo
     {
         public ABNodeInfo(uint nodeId, uint textAllianceAssaulted, uint textHordeAssaulted, uint textAllianceTaken, uint textHordeTaken, uint textAllianceDefended, uint textHordeDefended, uint textAllianceClaims, uint textHordeClaims)
         {
@@ -1010,8 +1013,7 @@ namespace Game.BattleGrounds.Zones
     }
 
 
-
-    enum ABNodeStatus
+    internal enum ABNodeStatus
     {
         Neutral = 0,
         Contested = 1,
@@ -1022,7 +1024,7 @@ namespace Game.BattleGrounds.Zones
         HordeOccupied = 4
     }
 
-    enum ABObjectives
+    internal enum ABObjectives
     {
         AssaultBase = 122,
         DefendBase = 123

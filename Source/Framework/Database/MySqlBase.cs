@@ -48,12 +48,12 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        Dictionary<T, string> _preparedQueries = new Dictionary<T, string>();
-        ProducerConsumerQueue<ISqlOperation> _queue = new ProducerConsumerQueue<ISqlOperation>();
+        private Dictionary<T, string> _preparedQueries = new Dictionary<T, string>();
+        private ProducerConsumerQueue<ISqlOperation> _queue = new ProducerConsumerQueue<ISqlOperation>();
 
-        MySqlConnectionInfo _connectionInfo;
-        DatabaseUpdater<T> _updater;
-        DatabaseWorker<T> _worker;
+        private MySqlConnectionInfo _connectionInfo;
+        private DatabaseUpdater<T> _updater;
+        private DatabaseWorker<T> _worker;
 
         public MySqlErrorCode Initialize(MySqlConnectionInfo connectionInfo)
         {
@@ -299,7 +299,7 @@ namespace Framework.Database
             }
         }
 
-        MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "", Dictionary<int, object> parameters = null)
+        private MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "", Dictionary<int, object> parameters = null)
         {
             var code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException is MySqlException)

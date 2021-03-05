@@ -22,7 +22,7 @@ namespace Game.Networking.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        const ushort FactionCount = 400;
+        private const ushort FactionCount = 400;
 
         public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
 
@@ -45,14 +45,14 @@ namespace Game.Networking.Packets
         public FactionFlags[] FactionFlags = new FactionFlags[FactionCount];
     }
 
-    class RequestForcedReactions : ClientPacket
+    internal class RequestForcedReactions : ClientPacket
     {
         public RequestForcedReactions(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class SetForcedReactions : ServerPacket
+    internal class SetForcedReactions : ServerPacket
     {
         public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance) { }
 
@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
         public List<ForcedReaction> Reactions = new List<ForcedReaction>();
     }
 
-    class SetFactionStanding : ServerPacket
+    internal class SetFactionStanding : ServerPacket
     {
         public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance) { }
 
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
         public bool ShowVisual;
     }
 
-    struct ForcedReaction
+    internal struct ForcedReaction
     {
         public void Write(WorldPacket data)
         {
@@ -101,7 +101,7 @@ namespace Game.Networking.Packets
         public int Reaction;
     }
 
-    struct FactionStandingData
+    internal struct FactionStandingData
     {
         public FactionStandingData(int index, int standing)
         {
@@ -115,7 +115,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Standing);
         }
 
-        int Index;
-        int Standing;
+        private int Index;
+        private int Standing;
     }
 }

@@ -25,8 +25,8 @@ namespace Game.Entities
         public static ObjectGuid Empty = new ObjectGuid();
         public static ObjectGuid TradeItem = Create(HighGuid.Uniq, 10ul);
 
-        ulong _low;
-        ulong _high;
+        private ulong _low;
+        private ulong _high;
 
         public ObjectGuid(ulong high, ulong low)
         {
@@ -74,18 +74,20 @@ namespace Game.Entities
             return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
         }
 
-        static ObjectGuid GlobalCreate(HighGuid type, ulong counter)
+        private static ObjectGuid GlobalCreate(HighGuid type, ulong counter)
         {
             return new ObjectGuid((ulong)type << 58, counter);
         }
-        static ObjectGuid RealmSpecificCreate(HighGuid type, ulong counter)
+
+        private static ObjectGuid RealmSpecificCreate(HighGuid type, ulong counter)
         {
             if (type == HighGuid.Transport)
                 return new ObjectGuid((ulong)type << 58 | (counter << 38), 0);
             else
                 return new ObjectGuid((ulong)type << 58 | (ulong)Global.WorldMgr.GetRealm().Id.Index << 42, counter);
         }
-        static ObjectGuid MapSpecificCreate(HighGuid type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
+
+        private static ObjectGuid MapSpecificCreate(HighGuid type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
         {
             return new ObjectGuid((((ulong)type << 58) | ((ulong)(Global.WorldMgr.GetRealm().Id.Index & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
                 (((ulong)(serverId & 0xFFFFFF) << 40) | (counter & 0xFFFFFFFFFF)));
@@ -122,10 +124,10 @@ namespace Game.Entities
         }
 
         public HighGuid GetHigh() { return (HighGuid)(_high >> 58); }
-        byte GetSubType() { return (byte)(_high & 0x3F); }
-        uint GetRealmId() { return (uint)((_high >> 42) & 0x1FFF); }
-        uint GetServerId() { return (uint)((_low >> 40) & 0x1FFF); }
-        uint GetMapId() { return (uint)((_high >> 29) & 0x1FFF); }
+        private byte GetSubType() { return (byte)(_high & 0x3F); }
+        private uint GetRealmId() { return (uint)((_high >> 42) & 0x1FFF); }
+        private uint GetServerId() { return (uint)((_low >> 40) & 0x1FFF); }
+        private uint GetMapId() { return (uint)((_high >> 29) & 0x1FFF); }
         public uint GetEntry() { return (uint)((_high >> 6) & 0x7FFFFF); }
         public ulong GetCounter()
         {
@@ -160,12 +162,12 @@ namespace Game.Entities
         public bool IsAnyTypeGameObject() { return IsGameObject() || IsMOTransport(); }
         public bool IsParty() { return GetHigh() == HighGuid.Party; }
         public bool IsGuild() { return GetHigh() == HighGuid.Guild; }
-        bool IsSceneObject() { return GetHigh() == HighGuid.SceneObject; }
-        bool IsConversation() { return GetHigh() == HighGuid.Conversation; }
-        bool IsCast() { return GetHigh() == HighGuid.Cast; }
+        private bool IsSceneObject() { return GetHigh() == HighGuid.SceneObject; }
+        private bool IsConversation() { return GetHigh() == HighGuid.Conversation; }
+        private bool IsCast() { return GetHigh() == HighGuid.Cast; }
 
         public TypeId GetTypeId() { return GetTypeId(GetHigh()); }
-        bool HasEntry() { return HasEntry(GetHigh()); }
+        private bool HasEntry() { return HasEntry(GetHigh()); }
 
         public static bool operator <(ObjectGuid left, ObjectGuid right)
         {
@@ -222,7 +224,7 @@ namespace Game.Entities
         }
 
         //Static Methods 
-        static TypeId GetTypeId(HighGuid high)
+        private static TypeId GetTypeId(HighGuid high)
         {
             switch (high)
             {
@@ -251,7 +253,8 @@ namespace Game.Entities
                     return TypeId.Object;
             }
         }
-        static bool HasEntry(HighGuid high)
+
+        private static bool HasEntry(HighGuid high)
         {
             switch (high)
             {
@@ -330,8 +333,8 @@ namespace Game.Entities
 
     public class ObjectGuidGenerator
     {
-        ulong _nextGuid;
-        HighGuid _highGuid;
+        private ulong _nextGuid;
+        private HighGuid _highGuid;
 
         public ObjectGuidGenerator(HighGuid highGuid, ulong start = 1)
         {
@@ -354,13 +357,13 @@ namespace Game.Entities
 
         public ulong GetNextAfterMaxUsed() { return _nextGuid; }
 
-        void HandleCounterOverflow()
+        private void HandleCounterOverflow()
         {
             Log.outFatal(LogFilter.Server, "{0} guid overflow!! Can't continue, shutting down server. ", _highGuid);
             Global.WorldMgr.StopNow();
         }
 
-        void CheckGuidTrigger(ulong guidlow)
+        private void CheckGuidTrigger(ulong guidlow)
         {
             if (!Global.WorldMgr.IsGuidAlert() && guidlow > WorldConfig.GetUInt64Value(WorldCfg.RespawnGuidAlertLevel))
                 Global.WorldMgr.TriggerGuidAlert();

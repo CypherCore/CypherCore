@@ -372,7 +372,7 @@ namespace Game
             _recvQueue.Enqueue(packet);
         }
 
-        void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
+        private void LogUnexpectedOpcode(WorldPacket packet, SessionStatus status, string reason)
         {
             Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
         }
@@ -488,7 +488,7 @@ namespace Game
             SendPacket(connectTo);
         }
 
-        void LoadAccountData(SQLResult result, AccountDataTypes mask)
+        private void LoadAccountData(SQLResult result, AccountDataTypes mask)
         {
             for (var i = 0; i < (int)AccountDataTypes.Max; ++i)
                 if (Convert.ToBoolean((int)mask & (1 << i)))
@@ -522,7 +522,7 @@ namespace Game
             while (result.NextRow());
         }
 
-        void SetAccountData(AccountDataTypes type, uint time, string data)
+        private void SetAccountData(AccountDataTypes type, uint time, string data)
         {
             if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
             {
@@ -622,7 +622,7 @@ namespace Game
 
         public Player GetPlayer() { return _player; }
 
-        void SetSecurity(AccountTypes security) { _security = security; }
+        private void SetSecurity(AccountTypes security) { _security = security; }
 
         public string GetRemoteAddress() { return m_Address; }
 
@@ -637,17 +637,17 @@ namespace Game
 
         public AsyncCallbackProcessor<QueryCallback> GetQueryProcessor() { return _queryProcessor; }
 
-        void SetLogoutStartTime(long requestTime)
+        private void SetLogoutStartTime(long requestTime)
         {
             _logoutTime = requestTime;
         }
 
-        bool ShouldLogOut(long currTime)
+        private bool ShouldLogOut(long currTime)
         {
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
         }
 
-        void ProcessQueryCallbacks()
+        private void ProcessQueryCallbacks()
         {
             _queryProcessor.ProcessReadyCallbacks();
             _transactionCallbacks.ProcessReadyCallbacks();
@@ -673,12 +673,12 @@ namespace Game
             }
         }
 
-        TransactionCallback AddTransactionCallback(TransactionCallback callback)
+        private TransactionCallback AddTransactionCallback(TransactionCallback callback)
         {
             return _transactionCallbacks.AddCallback(callback);
         }
-        
-        void InitWarden(BigInteger k)
+
+        private void InitWarden(BigInteger k)
         {
             if (_os == "Win")
             {
@@ -731,7 +731,7 @@ namespace Game
             _accountLoginCallback = DB.Login.DelayQueryHolder(holder);
         }
 
-        void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> realmHolder, SQLQueryHolder<AccountInfoQueryLoad> holder)
+        private void InitializeSessionCallback(SQLQueryHolder<AccountInfoQueryLoad> realmHolder, SQLQueryHolder<AccountInfoQueryLoad> holder)
         {
             LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
@@ -798,11 +798,11 @@ namespace Game
             _RBACData = null;
         }
 
-        AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
+        private AccountData GetAccountData(AccountDataTypes type) { return _accountData[(int)type]; }
 
-        uint GetTutorialInt(byte index) { return tutorials[index]; }
+        private uint GetTutorialInt(byte index) { return tutorials[index]; }
 
-        void SetTutorialInt(byte index, uint value)
+        private void SetTutorialInt(byte index, uint value)
         {
             if (tutorials[index] != value)
             {
@@ -824,7 +824,8 @@ namespace Game
             else if (!onlyActive)
                 m_timeOutTime = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.SocketTimeoutTime);
         }
-        bool IsConnectionIdle()
+
+        private bool IsConnectionIdle()
         {
             return m_timeOutTime < GameTime.GetGameTime() && !m_inQueue;
         }
@@ -836,13 +837,13 @@ namespace Game
         public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
         public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
 
-        void ClearRedirectFlag(SessionFlags flag) { m_flags &= ~flag; }
+        private void ClearRedirectFlag(SessionFlags flag) { m_flags &= ~flag; }
         public bool WasRedirected() { return m_flags.HasAnyFlag(SessionFlags.FromRedirect); }
-        bool HasRedirected() { return m_flags.HasAnyFlag(SessionFlags.HasRedirected); }
+        private bool HasRedirected() { return m_flags.HasAnyFlag(SessionFlags.HasRedirected); }
 
         // Battlenet
         public Array<byte> GetRealmListSecret() { return _realmListSecret; }
-        void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
+        private void SetRealmListSecret(Array<byte> secret) { _realmListSecret = secret; }
         public Dictionary<uint, byte> GetRealmCharacterCounts() { return _realmCharacterCounts; }
 
         public static implicit operator bool(WorldSession session)
@@ -851,72 +852,73 @@ namespace Game
         }
 
         #region Fields
-        List<ObjectGuid> _legitCharacters = new List<ObjectGuid>();
-        ulong m_GUIDLow;
-        Player _player;
-        WorldSocket[] m_Socket = new WorldSocket[(int)ConnectionType.Max];
-        string m_Address;
 
-        AccountTypes _security;
-        uint _accountId;
-        string _accountName;
-        uint _battlenetAccountId;
-        Expansion m_accountExpansion;
-        Expansion m_expansion;
-        string _os;
+        private List<ObjectGuid> _legitCharacters = new List<ObjectGuid>();
+        private ulong m_GUIDLow;
+        private Player _player;
+        private WorldSocket[] m_Socket = new WorldSocket[(int)ConnectionType.Max];
+        private string m_Address;
 
-        uint expireTime;
-        bool forceExit;
+        private AccountTypes _security;
+        private uint _accountId;
+        private string _accountName;
+        private uint _battlenetAccountId;
+        private Expansion m_accountExpansion;
+        private Expansion m_expansion;
+        private string _os;
 
-        DosProtection AntiDOS;
-        Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
+        private uint expireTime;
+        private bool forceExit;
 
-        long _logoutTime;
-        bool m_inQueue;
-        SessionFlags m_flags;
-        ObjectGuid m_playerLoading;                               // code processed in LoginPlayer
-        bool m_playerLogout;                                // code processed in LogoutPlayer
-        bool m_playerRecentlyLogout;
-        bool m_playerSave;
-        Locale m_sessionDbcLocale;
-        Locale m_sessionDbLocaleIndex;
-        uint m_latency;
-        uint m_clientTimeDelay;
-        AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
-        uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
-        TutorialsFlag tutorialsChanged;
+        private DosProtection AntiDOS;
+        private Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
 
-        Array<byte> _realmListSecret = new Array<byte>(32);
-        Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new Dictionary<uint, byte>();
-        Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new Dictionary<uint, Action<Google.Protobuf.CodedInputStream>>();
-        uint _battlenetRequestToken;
+        private long _logoutTime;
+        private bool m_inQueue;
+        private SessionFlags m_flags;
+        private ObjectGuid m_playerLoading;                               // code processed in LoginPlayer
+        private bool m_playerLogout;                                // code processed in LogoutPlayer
+        private bool m_playerRecentlyLogout;
+        private bool m_playerSave;
+        private Locale m_sessionDbcLocale;
+        private Locale m_sessionDbLocaleIndex;
+        private uint m_latency;
+        private uint m_clientTimeDelay;
+        private AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
+        private uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
+        private TutorialsFlag tutorialsChanged;
 
-        List<string> _registeredAddonPrefixes = new List<string>();
-        bool _filterAddonMessages;
-        uint recruiterId;
-        bool isRecruiter;
+        private Array<byte> _realmListSecret = new Array<byte>(32);
+        private Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new Dictionary<uint, byte>();
+        private Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new Dictionary<uint, Action<Google.Protobuf.CodedInputStream>>();
+        private uint _battlenetRequestToken;
+
+        private List<string> _registeredAddonPrefixes = new List<string>();
+        private bool _filterAddonMessages;
+        private uint recruiterId;
+        private bool isRecruiter;
 
         public long m_muteTime;
-        long m_timeOutTime;
+        private long m_timeOutTime;
 
-        ConcurrentQueue<WorldPacket> _recvQueue = new ConcurrentQueue<WorldPacket>();
-        RBACData _RBACData;
+        private ConcurrentQueue<WorldPacket> _recvQueue = new ConcurrentQueue<WorldPacket>();
+        private RBACData _RBACData;
 
-        ObjectGuid m_currentBankerGUID;
+        private ObjectGuid m_currentBankerGUID;
 
-        CollectionMgr _collectionMgr;
+        private CollectionMgr _collectionMgr;
 
-        ConnectToKey _instanceConnectKey;
+        private ConnectToKey _instanceConnectKey;
 
-        BattlePetMgr _battlePetMgr;
+        private BattlePetMgr _battlePetMgr;
 
-        Task<SQLQueryHolder<AccountInfoQueryLoad>> _realmAccountLoginCallback;
-        Task<SQLQueryHolder<AccountInfoQueryLoad>> _accountLoginCallback;
-        Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
-        Task<SQLQueryHolder<EnumCharacterQueryLoad>> _charEnumCallback;
+        private Task<SQLQueryHolder<AccountInfoQueryLoad>> _realmAccountLoginCallback;
+        private Task<SQLQueryHolder<AccountInfoQueryLoad>> _accountLoginCallback;
+        private Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
+        private Task<SQLQueryHolder<EnumCharacterQueryLoad>> _charEnumCallback;
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
-        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new AsyncCallbackProcessor<TransactionCallback>();
+        private AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        private AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new AsyncCallbackProcessor<TransactionCallback>();
         #endregion
     }
 
@@ -999,11 +1001,11 @@ namespace Game
             return true;
         }
 
-        Policy _policy;
-        WorldSession Session;
-        Dictionary<uint, PacketCounter> _PacketThrottlingMap = new Dictionary<uint, PacketCounter>();
+        private Policy _policy;
+        private WorldSession Session;
+        private Dictionary<uint, PacketCounter> _PacketThrottlingMap = new Dictionary<uint, PacketCounter>();
 
-        enum Policy
+        private enum Policy
         {
             Log,
             Kick,
@@ -1011,7 +1013,7 @@ namespace Game
         }
     }
 
-    struct PacketCounter
+    internal struct PacketCounter
     {
         public long lastReceiveTime;
         public uint amountCounter;
@@ -1023,7 +1025,7 @@ namespace Game
         public string Data;
     }
 
-    class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
+    internal class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
@@ -1037,7 +1039,7 @@ namespace Game
         }
     }
 
-    class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
+    internal class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
@@ -1075,7 +1077,7 @@ namespace Game
         }
     }
 
-    enum AccountInfoQueryLoad
+    internal enum AccountInfoQueryLoad
     {
         GlobalAccountToys,
         BattlePets,

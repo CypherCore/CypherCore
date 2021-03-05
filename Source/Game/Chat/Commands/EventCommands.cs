@@ -21,10 +21,10 @@ using Framework.IO;
 namespace Game.Chat
 {
     [CommandGroup("event", RBACPermissions.CommandEvent)]
-    class EventCommands
+    internal class EventCommands
     {
         [Command("info", RBACPermissions.CommandEvent, true)]
-        static bool HandleEventInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleEventInfoCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -71,7 +71,7 @@ namespace Game.Chat
         }
 
         [Command("activelist", RBACPermissions.CommandEventActivelist, true)]
-        static bool HandleEventActiveListCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleEventActiveListCommand(StringArguments args, CommandHandler handler)
         {
             uint counter = 0;
 
@@ -99,7 +99,7 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandEventStart, true)]
-        static bool HandleEventStartCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleEventStartCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -138,7 +138,7 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandEventStop, true)]
-        static bool HandleEventStopCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleEventStopCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

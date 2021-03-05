@@ -23,10 +23,10 @@ using Game.Spells;
 namespace Game.Chat
 {
     [CommandGroup("pet", RBACPermissions.CommandPet)]
-    class PetCommands
+    internal class PetCommands
     {
         [Command("create", RBACPermissions.CommandPetCreate)]
-        static bool HandlePetCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePetCreateCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var creatureTarget = handler.GetSelectedCreature();
@@ -94,7 +94,7 @@ namespace Game.Chat
         }
 
         [Command("learn", RBACPermissions.CommandPetLearn)]
-        static bool HandlePetLearnCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePetLearnCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -132,7 +132,7 @@ namespace Game.Chat
         }
 
         [Command("unlearn", RBACPermissions.CommandPetUnlearn)]
-        static bool HandlePetUnlearnCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePetUnlearnCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -155,7 +155,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandPetLevel)]
-        static bool HandlePetLevelCommand(StringArguments args, CommandHandler handler)
+        private static bool HandlePetLevelCommand(StringArguments args, CommandHandler handler)
         {
             var pet = GetSelectedPlayerPetOrOwn(handler);
             var owner = pet ? pet.GetOwner() : null;
@@ -184,7 +184,7 @@ namespace Game.Chat
             return true;
         }
 
-        static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
+        private static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
         {
             var target = handler.GetSelectedUnit();
             if (target)

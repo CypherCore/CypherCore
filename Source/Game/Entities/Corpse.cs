@@ -251,7 +251,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
         {
             var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
@@ -323,8 +323,8 @@ namespace Game.Entities
         public Loot loot = new Loot();
         public Player lootRecipient;
 
-        CorpseType m_type;
-        long m_time;
-        CellCoord _cellCoord;                                    // gride for corpse position for fast search
+        private CorpseType m_type;
+        private long m_time;
+        private CellCoord _cellCoord;                                    // gride for corpse position for fast search
     }
 }

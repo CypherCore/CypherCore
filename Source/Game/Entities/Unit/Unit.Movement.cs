@@ -69,7 +69,7 @@ namespace Game.Entities
             return GetMap().IsUnderWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
-        void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
+        private void PropagateSpeedChange() { GetMotionMaster().PropagateSpeedChange(); }
 
         public float GetSpeed(UnitMoveType mtype)
         {
@@ -242,7 +242,7 @@ namespace Game.Entities
             }
         }
 
-        void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
+        private void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
         {
             var moveKnockBack = new MoveKnockBack();
             moveKnockBack.MoverGUID = GetGUID();
@@ -253,7 +253,7 @@ namespace Game.Entities
             player.SendPacket(moveKnockBack);
         }
 
-        bool SetCollision(bool disable)
+        private bool SetCollision(bool disable)
         {
             if (disable == HasUnitMovementFlag(MovementFlag.DisableCollision))
                 return false;
@@ -598,7 +598,7 @@ namespace Game.Entities
             return (relocated || turn);
         }
 
-        void UpdateOrientation(float orientation)
+        private void UpdateOrientation(float orientation)
         {
             Orientation = orientation;
             if (IsVehicle())
@@ -606,7 +606,7 @@ namespace Game.Entities
         }
 
         //! Only server-side height update, does not broadcast to client
-        void UpdateHeight(float newZ)
+        private void UpdateHeight(float newZ)
         {
             Relocate(GetPositionX(), GetPositionY(), newZ);
             if (IsVehicle())
@@ -1154,7 +1154,7 @@ namespace Game.Entities
             }
         }
 
-        void SetStunned(bool apply)
+        private void SetStunned(bool apply)
         {
             if (apply)
             {
@@ -1222,7 +1222,7 @@ namespace Game.Entities
             }
         }
 
-        void SetFeared(bool apply)
+        private void SetFeared(bool apply)
         {
             if (apply)
             {
@@ -1253,7 +1253,7 @@ namespace Game.Entities
                     player.SetClientControl(this, !apply);
         }
 
-        void SetConfused(bool apply)
+        private void SetConfused(bool apply)
         {
             if (apply)
             {
@@ -1406,7 +1406,7 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
-        void SendSetVehicleRecId(uint vehicleId)
+        private void SendSetVehicleRecId(uint vehicleId)
         {
             var player = ToPlayer();
             if (player)
@@ -1426,7 +1426,7 @@ namespace Game.Entities
 
         public MovementForces GetMovementForces() { return _movementForces; }
 
-        void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, byte type, Vector3 direction, ObjectGuid transportGuid = default)
+        private void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, byte type, Vector3 direction, ObjectGuid transportGuid = default)
         {
             if (_movementForces == null)
                 _movementForces = new MovementForces();
@@ -1462,7 +1462,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveMovementForce(ObjectGuid id)
+        private void RemoveMovementForce(ObjectGuid id)
         {
             if (_movementForces == null)
                 return;
@@ -1556,7 +1556,7 @@ namespace Game.Entities
             }
         }
 
-        void SendSetPlayHoverAnim(bool enable)
+        private void SendSetPlayHoverAnim(bool enable)
         {
             var data = new SetPlayHoverAnim();
             data.UnitGUID = GetGUID();
@@ -1583,7 +1583,7 @@ namespace Game.Entities
             return null;
         }
 
-        Player GetPlayerBeingMoved()
+        private Player GetPlayerBeingMoved()
         {
             var mover = GetUnitBeingMoved();
             if (mover)
@@ -1592,7 +1592,7 @@ namespace Game.Entities
             return null;
         }
 
-        Player GetPlayerMovingMe() { return m_playerMovingMe; }
+        private Player GetPlayerMovingMe() { return m_playerMovingMe; }
 
         public void AddUnitMovementFlag(MovementFlag f)
         {
@@ -1619,7 +1619,8 @@ namespace Game.Entities
         {
             m_movementInfo.AddMovementFlag2(f);
         }
-        void RemoveUnitMovementFlag2(MovementFlag2 f)
+
+        private void RemoveUnitMovementFlag2(MovementFlag2 f)
         {
             m_movementInfo.RemoveMovementFlag2(f);
         }
@@ -1641,7 +1642,8 @@ namespace Game.Entities
         {
             return MoveSpline.Initialized() && !MoveSpline.Finalized();
         }
-        void UpdateSplineMovement(uint diff)
+
+        private void UpdateSplineMovement(uint diff)
         {
             var positionUpdateDelay = 400;
 

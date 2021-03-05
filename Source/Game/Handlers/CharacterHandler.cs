@@ -35,7 +35,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.EnumCharacters, Status = SessionStatus.Authed)]
-        void HandleCharEnum(EnumCharacters charEnum)
+        private void HandleCharEnum(EnumCharacters charEnum)
         {
             // remove expired bans
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EXPIRED_BANS);
@@ -52,7 +52,7 @@ namespace Game
             _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
         }
 
-        void HandleCharEnum(EnumCharactersQueryHolder holder)
+        private void HandleCharEnum(EnumCharactersQueryHolder holder)
         {
             var charResult = new EnumCharactersResult();
             charResult.Success = true;
@@ -137,7 +137,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.EnumCharactersDeletedByClient, Status = SessionStatus.Authed)]
-        void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
+        private void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
         {
             // get all the data necessary for loading all undeleted characters (along with their pets) on the account
             var holder = new EnumCharactersQueryHolder();
@@ -150,7 +150,7 @@ namespace Game
             _charEnumCallback = DB.Characters.DelayQueryHolder(holder);
         }
 
-        void HandleCharUndeleteEnumCallback(SQLResult result)
+        private void HandleCharUndeleteEnumCallback(SQLResult result)
         {
             var charEnum = new EnumCharactersResult();
             charEnum.Success = true;
@@ -265,7 +265,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CreateCharacter, Status = SessionStatus.Authed)]
-        void HandleCharCreate(CreateCharacter charCreate)
+        private void HandleCharCreate(CreateCharacter charCreate)
         {
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationTeammask))
             {
@@ -573,7 +573,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CharDelete, Status = SessionStatus.Authed)]
-        void HandleCharDelete(CharDelete charDelete)
+        private void HandleCharDelete(CharDelete charDelete)
         {
             // Initiating
             var initAccountId = GetAccountId();
@@ -634,7 +634,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GenerateRandomCharacterName, Status = SessionStatus.Authed)]
-        void HandleRandomizeCharName(GenerateRandomCharacterName packet)
+        private void HandleRandomizeCharName(GenerateRandomCharacterName packet)
         {
             if (!Player.IsValidRace((Race)packet.Race))
             {
@@ -656,7 +656,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ReorderCharacters, Status = SessionStatus.Authed)]
-        void HandleReorderCharacters(ReorderCharacters reorderChars)
+        private void HandleReorderCharacters(ReorderCharacters reorderChars)
         {
             var trans = new SQLTransaction();
 
@@ -673,7 +673,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PlayerLogin, Status = SessionStatus.Authed)]
-        void HandlePlayerLogin(PlayerLogin playerLogin)
+        private void HandlePlayerLogin(PlayerLogin playerLogin)
         {
             if (PlayerLoading() || GetPlayer() != null)
             {
@@ -1042,7 +1042,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LoadingScreenNotify, Status = SessionStatus.Authed)]
-        void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
+        private void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
         {
             // TODO: Do something with this packet
         }
@@ -1087,19 +1087,19 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionAtWar)]
-        void HandleSetFactionAtWar(SetFactionAtWar packet)
+        private void HandleSetFactionAtWar(SetFactionAtWar packet)
         {
             GetPlayer().GetReputationMgr().SetAtWar(packet.FactionIndex, true);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionNotAtWar)]
-        void HandleSetFactionNotAtWar(SetFactionNotAtWar packet)
+        private void HandleSetFactionNotAtWar(SetFactionNotAtWar packet)
         {
             GetPlayer().GetReputationMgr().SetAtWar(packet.FactionIndex, false);
         }
 
         [WorldPacketHandler(ClientOpcodes.Tutorial)]
-        void HandleTutorialFlag(TutorialSetFlag packet)
+        private void HandleTutorialFlag(TutorialSetFlag packet)
         {
             switch (packet.Action)
             {
@@ -1131,19 +1131,19 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetWatchedFaction)]
-        void HandleSetWatchedFaction(SetWatchedFaction packet)
+        private void HandleSetWatchedFaction(SetWatchedFaction packet)
         {
             GetPlayer().SetWatchedFactionIndex(packet.FactionIndex);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionInactive)]
-        void HandleSetFactionInactive(SetFactionInactive packet)
+        private void HandleSetFactionInactive(SetFactionInactive packet)
         {
             GetPlayer().GetReputationMgr().SetInactive(packet.Index, packet.State);
         }
 
         [WorldPacketHandler(ClientOpcodes.CheckCharacterNameAvailability)]
-        void HandleCheckCharacterNameAvailability(CheckCharacterNameAvailability checkCharacterNameAvailability)
+        private void HandleCheckCharacterNameAvailability(CheckCharacterNameAvailability checkCharacterNameAvailability)
         {
             // prevent character rename to invalid name
             if (!ObjectManager.NormalizePlayerName(ref checkCharacterNameAvailability.Name))
@@ -1177,13 +1177,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestForcedReactions)]
-        void HandleRequestForcedReactions(RequestForcedReactions requestForcedReactions)
+        private void HandleRequestForcedReactions(RequestForcedReactions requestForcedReactions)
         {
             GetPlayer().GetReputationMgr().SendForceReactions();
         }
 
         [WorldPacketHandler(ClientOpcodes.CharacterRenameRequest, Status = SessionStatus.Authed)]
-        void HandleCharRename(CharacterRenameRequest request)
+        private void HandleCharRename(CharacterRenameRequest request)
         {
             if (!_legitCharacters.Contains(request.RenameInfo.Guid))
             {
@@ -1221,7 +1221,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRenameCallBack, request.RenameInfo));
         }
 
-        void HandleCharRenameCallBack(CharacterRenameInfo renameInfo, SQLResult result)
+        private void HandleCharRenameCallBack(CharacterRenameInfo renameInfo, SQLResult result)
         {
             if (result.IsEmpty())
             {
@@ -1264,7 +1264,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetPlayerDeclinedNames, Status = SessionStatus.Authed)]
-        void HandleSetPlayerDeclinedNames(SetPlayerDeclinedNames packet)
+        private void HandleSetPlayerDeclinedNames(SetPlayerDeclinedNames packet)
         {
             // not accept declined names for unsupported languages
             string name;
@@ -1318,7 +1318,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AlterAppearance)]
-        void HandleAlterAppearance(AlterApperance packet)
+        private void HandleAlterAppearance(AlterApperance packet)
         {
             if (!ValidateAppearance(_player.GetRace(), _player.GetClass(), (Gender)packet.NewSex, packet.Customizations))
                 return;
@@ -1365,7 +1365,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CharCustomize, Status = SessionStatus.Authed)]
-        void HandleCharCustomize(CharCustomize packet)
+        private void HandleCharCustomize(CharCustomize packet)
         {
             if (!_legitCharacters.Contains(packet.CustomizeInfo.CharGUID))
             {
@@ -1381,7 +1381,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharCustomizeCallback, packet.CustomizeInfo));
         }
 
-        void HandleCharCustomizeCallback(CharCustomizeInfo customizeInfo, SQLResult result)
+        private void HandleCharCustomizeCallback(CharCustomizeInfo customizeInfo, SQLResult result)
         {
             if (result.IsEmpty())
             {
@@ -1481,7 +1481,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SaveEquipmentSet)]
-        void HandleEquipmentSetSave(SaveEquipmentSet saveEquipmentSet)
+        private void HandleEquipmentSetSave(SaveEquipmentSet saveEquipmentSet)
         {
             if (saveEquipmentSet.Set.SetID >= ItemConst.MaxEquipmentSetIndex) // client set slots amount
                 return;
@@ -1574,13 +1574,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DeleteEquipmentSet)]
-        void HandleDeleteEquipmentSet(DeleteEquipmentSet packet)
+        private void HandleDeleteEquipmentSet(DeleteEquipmentSet packet)
         {
             GetPlayer().DeleteEquipmentSet(packet.ID);
         }
 
         [WorldPacketHandler(ClientOpcodes.UseEquipmentSet)]
-        void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
+        private void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
             var ignoredItemGuid = new ObjectGuid(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
@@ -1636,7 +1636,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CharRaceOrFactionChange, Status = SessionStatus.Authed)]
-        void HandleCharRaceOrFactionChange(CharRaceOrFactionChange packet)
+        private void HandleCharRaceOrFactionChange(CharRaceOrFactionChange packet)
         {
             if (!_legitCharacters.Contains(packet.RaceOrFactionChangeInfo.Guid))
             {
@@ -1652,7 +1652,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(HandleCharRaceOrFactionChangeCallback, packet.RaceOrFactionChangeInfo));
         }
 
-        void HandleCharRaceOrFactionChangeCallback(CharRaceOrFactionChangeInfo factionChangeInfo, SQLResult result)
+        private void HandleCharRaceOrFactionChangeCallback(CharRaceOrFactionChangeInfo factionChangeInfo, SQLResult result)
         {
             if (result.IsEmpty())
             {
@@ -2165,7 +2165,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.OpeningCinematic)]
-        void HandleOpeningCinematic(OpeningCinematic packet)
+        private void HandleOpeningCinematic(OpeningCinematic packet)
         {
             // Only players that has not yet gained any experience can use this
             if (GetPlayer().m_activePlayerData.XP != 0)
@@ -2183,7 +2183,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GetUndeleteCharacterCooldownStatus, Status = SessionStatus.Authed)]
-        void HandleGetUndeleteCooldownStatus(GetUndeleteCharacterCooldownStatus getCooldown)
+        private void HandleGetUndeleteCooldownStatus(GetUndeleteCharacterCooldownStatus getCooldown)
         {
             var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LAST_CHAR_UNDELETE);
             stmt.AddValue(0, GetBattlenetAccountId());
@@ -2191,7 +2191,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleUndeleteCooldownStatusCallback));
         }
 
-        void HandleUndeleteCooldownStatusCallback(SQLResult result)
+        private void HandleUndeleteCooldownStatusCallback(SQLResult result)
         {
             uint cooldown = 0;
             var maxCooldown = WorldConfig.GetUIntValue(WorldCfg.FeatureSystemCharacterUndeleteCooldown);
@@ -2207,7 +2207,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.UndeleteCharacter, Status = SessionStatus.Authed)]
-        void HandleCharUndelete(UndeleteCharacter undeleteCharacter)
+        private void HandleCharUndelete(UndeleteCharacter undeleteCharacter)
         {
             if (!WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled))
             {
@@ -2299,7 +2299,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RepopRequest)]
-        void HandleRepopRequest(RepopRequest packet)
+        private void HandleRepopRequest(RepopRequest packet)
         {
             if (GetPlayer().IsAlive() || GetPlayer().HasPlayerFlag(PlayerFlags.Ghost))
                 return;
@@ -2326,7 +2326,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ClientPortGraveyard)]
-        void HandlePortGraveyard(PortGraveyard packet)
+        private void HandlePortGraveyard(PortGraveyard packet)
         {
             if (GetPlayer().IsAlive() || !GetPlayer().HasPlayerFlag(PlayerFlags.Ghost))
                 return;
@@ -2334,7 +2334,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestCemeteryList, Processing = PacketProcessing.Inplace)]
-        void HandleRequestCemeteryList(RequestCemeteryList requestCemeteryList)
+        private void HandleRequestCemeteryList(RequestCemeteryList requestCemeteryList)
         {
             var zoneId = GetPlayer().GetZoneId();
             var team = (uint)GetPlayer().GetTeam();
@@ -2366,7 +2366,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ReclaimCorpse)]
-        void HandleReclaimCorpse(ReclaimCorpse packet)
+        private void HandleReclaimCorpse(ReclaimCorpse packet)
         {
             if (GetPlayer().IsAlive())
                 return;
@@ -2398,7 +2398,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ResurrectResponse)]
-        void HandleResurrectResponse(ResurrectResponse packet)
+        private void HandleResurrectResponse(ResurrectResponse packet)
         {
             if (GetPlayer().IsAlive())
                 return;
@@ -2432,12 +2432,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.StandStateChange)]
-        void HandleStandStateChange(StandStateChange packet)
+        private void HandleStandStateChange(StandStateChange packet)
         {
             GetPlayer().SetStandState(packet.StandState);
         }
 
-        void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)
+        private void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)
         {
             var response = new CreateChar();
             response.Code = result;
@@ -2446,7 +2446,7 @@ namespace Game
             SendPacket(response);
         }
 
-        void SendCharDelete(ResponseCodes result)
+        private void SendCharDelete(ResponseCodes result)
         {
             var response = new DeleteChar();
             response.Code = result;
@@ -2454,7 +2454,7 @@ namespace Game
             SendPacket(response);
         }
 
-        void SendCharRename(ResponseCodes result, CharacterRenameInfo renameInfo)
+        private void SendCharRename(ResponseCodes result, CharacterRenameInfo renameInfo)
         {
             var packet = new CharacterRenameResult();
             packet.Result = result;
@@ -2465,7 +2465,7 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendCharCustomize(ResponseCodes result, CharCustomizeInfo customizeInfo)
+        private void SendCharCustomize(ResponseCodes result, CharCustomizeInfo customizeInfo)
         {
             if (result == ResponseCodes.Success)
             {
@@ -2481,7 +2481,7 @@ namespace Game
             }
         }
 
-        void SendCharFactionChange(ResponseCodes result, CharRaceOrFactionChangeInfo factionChangeInfo)
+        private void SendCharFactionChange(ResponseCodes result, CharRaceOrFactionChangeInfo factionChangeInfo)
         {
             var packet = new CharFactionChangeResult();
             packet.Result = result;
@@ -2499,7 +2499,7 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendSetPlayerDeclinedNamesResult(DeclinedNameResult result, ObjectGuid guid)
+        private void SendSetPlayerDeclinedNamesResult(DeclinedNameResult result, ObjectGuid guid)
         {
             var packet = new SetPlayerDeclinedNamesResult();
             packet.ResultCode = result;
@@ -2508,7 +2508,7 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendUndeleteCooldownStatusResponse(uint currentCooldown, uint maxCooldown)
+        private void SendUndeleteCooldownStatusResponse(uint currentCooldown, uint maxCooldown)
         {
             var response = new UndeleteCooldownStatusResponse();
             response.OnCooldown = (currentCooldown > 0);
@@ -2518,7 +2518,7 @@ namespace Game
             SendPacket(response);
         }
 
-        void SendUndeleteCharacterResponse(CharacterUndeleteResult result, CharacterUndeleteInfo undeleteInfo)
+        private void SendUndeleteCharacterResponse(CharacterUndeleteResult result, CharacterUndeleteInfo undeleteInfo)
         {
             var response = new UndeleteCharacterResponse();
             response.UndeleteInfo = undeleteInfo;
@@ -2767,13 +2767,13 @@ namespace Game
 
         public ObjectGuid GetGuid() { return m_guid; }
 
-        uint GetAccountId() { return m_accountId; }
+        private uint GetAccountId() { return m_accountId; }
 
-        uint m_accountId;
-        ObjectGuid m_guid;
+        private uint m_accountId;
+        private ObjectGuid m_guid;
     }
 
-    class EnumCharactersQueryHolder : SQLQueryHolder<EnumCharacterQueryLoad>
+    internal class EnumCharactersQueryHolder : SQLQueryHolder<EnumCharacterQueryLoad>
     {
         public bool Initialize(uint accountId, bool withDeclinedNames, bool isDeletedCharacters)
         {
@@ -2800,7 +2800,7 @@ namespace Game
 
         public bool IsDeletedCharacters() { return _isDeletedCharacters; }
 
-        bool _isDeletedCharacters = false;
+        private bool _isDeletedCharacters = false;
     }
 
     // used at player loading query list preparing, and later result selection
@@ -2864,7 +2864,7 @@ namespace Game
         Max
     }
 
-    enum EnumCharacterQueryLoad
+    internal enum EnumCharacterQueryLoad
     {
         Characters,
         Customizations

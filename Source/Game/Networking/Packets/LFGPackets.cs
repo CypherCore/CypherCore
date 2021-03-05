@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class DFJoin : ClientPacket
+    internal class DFJoin : ClientPacket
     {
         public DFJoin(WorldPacket packet) : base(packet) { }
 
@@ -40,13 +40,13 @@ namespace Game.Networking.Packets
         }
 
         public bool QueueAsGroup;
-        bool Unknown;       // Always false in 7.2.5
+        private bool Unknown;       // Always false in 7.2.5
         public byte PartyIndex;
         public LfgRoles Roles;
         public List<uint> Slots = new List<uint>();
     }
 
-    class DFLeave : ClientPacket
+    internal class DFLeave : ClientPacket
     {
         public DFLeave(WorldPacket packet) : base(packet) { }
 
@@ -58,7 +58,7 @@ namespace Game.Networking.Packets
         public RideTicket Ticket = new RideTicket();
     }
 
-    class DFProposalResponse : ClientPacket
+    internal class DFProposalResponse : ClientPacket
     {
         public DFProposalResponse(WorldPacket packet) : base(packet) { }
 
@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         public bool Accepted;
     }
 
-    class DFSetRoles : ClientPacket
+    internal class DFSetRoles : ClientPacket
     {
         public DFSetRoles(WorldPacket packet) : base(packet) { }
 
@@ -90,7 +90,7 @@ namespace Game.Networking.Packets
         public byte PartyIndex;
     }
 
-    class DFBootPlayerVote : ClientPacket
+    internal class DFBootPlayerVote : ClientPacket
     {
         public DFBootPlayerVote(WorldPacket packet) : base(packet) { }
 
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
         public bool Vote;
     }
 
-    class DFTeleport : ClientPacket
+    internal class DFTeleport : ClientPacket
     {
         public DFTeleport(WorldPacket packet) : base(packet) { }
 
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
         public bool TeleportOut;
     }
 
-    class DFGetSystemInfo : ClientPacket
+    internal class DFGetSystemInfo : ClientPacket
     {
         public DFGetSystemInfo(WorldPacket packet) : base(packet) { }
 
@@ -128,14 +128,14 @@ namespace Game.Networking.Packets
         public bool Player;
     }
 
-    class DFGetJoinStatus : ClientPacket
+    internal class DFGetJoinStatus : ClientPacket
     {
         public DFGetJoinStatus(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class LfgPlayerInfo : ServerPacket
+    internal class LfgPlayerInfo : ServerPacket
     {
         public LfgPlayerInfo() : base(ServerOpcodes.LfgPlayerInfo, ConnectionType.Instance) { }
 
@@ -152,7 +152,7 @@ namespace Game.Networking.Packets
         public List<LfgPlayerDungeonInfo> Dungeons = new List<LfgPlayerDungeonInfo>();
     }
 
-    class LfgPartyInfo : ServerPacket
+    internal class LfgPartyInfo : ServerPacket
     {
         public LfgPartyInfo() : base(ServerOpcodes.LfgPartyInfo, ConnectionType.Instance) { }
 
@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
         public List<LFGBlackList> Player = new List<LFGBlackList>();
     }
 
-    class LFGUpdateStatus : ServerPacket
+    internal class LFGUpdateStatus : ServerPacket
     {
         public LFGUpdateStatus() : base(ServerOpcodes.LfgUpdateStatus) { }
 
@@ -211,7 +211,7 @@ namespace Game.Networking.Packets
         public bool Unused;
     }
 
-    class RoleChosen : ServerPacket
+    internal class RoleChosen : ServerPacket
     {
         public RoleChosen() : base(ServerOpcodes.RoleChosen) { }
 
@@ -228,7 +228,7 @@ namespace Game.Networking.Packets
         public bool Accepted;
     }
 
-    class LFGRoleCheckUpdate : ServerPacket
+    internal class LFGRoleCheckUpdate : ServerPacket
     {
         public LFGRoleCheckUpdate() : base(ServerOpcodes.LfgRoleCheckUpdate) { }
 
@@ -265,7 +265,7 @@ namespace Game.Networking.Packets
         public bool IsRequeue;
     }
 
-    class LFGJoinResult : ServerPacket
+    internal class LFGJoinResult : ServerPacket
     {
         public LFGJoinResult() : base(ServerOpcodes.LfgJoinResult) { }
 
@@ -296,7 +296,7 @@ namespace Game.Networking.Packets
         public List<string> BlackListNames = new List<string>();
     }
 
-    class LFGQueueStatus : ServerPacket
+    internal class LFGQueueStatus : ServerPacket
     {
         public LFGQueueStatus() : base(ServerOpcodes.LfgQueueStatus) { }
 
@@ -326,7 +326,7 @@ namespace Game.Networking.Packets
         public uint QueuedTime;
     }
 
-    class LFGPlayerReward : ServerPacket
+    internal class LFGPlayerReward : ServerPacket
     {
         public LFGPlayerReward() : base(ServerOpcodes.LfgPlayerReward) { }
 
@@ -349,7 +349,7 @@ namespace Game.Networking.Packets
         public List<LFGPlayerRewards> Rewards = new List<LFGPlayerRewards>();
     }
 
-    class LfgBootPlayer : ServerPacket
+    internal class LfgBootPlayer : ServerPacket
     {
         public LfgBootPlayer() : base(ServerOpcodes.LfgBootPlayer, ConnectionType.Instance) { }
 
@@ -361,7 +361,7 @@ namespace Game.Networking.Packets
         public LfgBootInfo Info = new LfgBootInfo();
     }
 
-    class LFGProposalUpdate : ServerPacket
+    internal class LFGProposalUpdate : ServerPacket
     {
         public LFGProposalUpdate() : base(ServerOpcodes.LfgProposalUpdate) { }
 
@@ -400,14 +400,14 @@ namespace Game.Networking.Packets
         public List<LFGProposalUpdatePlayer> Players = new List<LFGProposalUpdatePlayer>();
     }
 
-    class LfgDisabled : ServerPacket
+    internal class LfgDisabled : ServerPacket
     {
         public LfgDisabled() : base(ServerOpcodes.LfgDisabled, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
 
-    class LfgOfferContinue : ServerPacket
+    internal class LfgOfferContinue : ServerPacket
     {
         public LfgOfferContinue(uint slot) : base(ServerOpcodes.LfgOfferContinue, ConnectionType.Instance)
         {
@@ -422,7 +422,7 @@ namespace Game.Networking.Packets
         public uint Slot;
     }
 
-    class LfgTeleportDenied : ServerPacket
+    internal class LfgTeleportDenied : ServerPacket
     {
         public LfgTeleportDenied(LfgTeleportResult reason) : base(ServerOpcodes.LfgTeleportDenied, ConnectionType.Instance)
         {

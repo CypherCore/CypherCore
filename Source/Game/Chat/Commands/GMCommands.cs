@@ -23,10 +23,10 @@ using Game.Entities;
 namespace Game.Chat
 {
     [CommandGroup("gm", RBACPermissions.CommandGm)]
-    class GMCommands
+    internal class GMCommands
     {
         [Command("", RBACPermissions.CommandGm)]
-        static bool HandleGMCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMCommand(StringArguments args, CommandHandler handler)
         {
             var _player = handler.GetSession().GetPlayer();
 
@@ -57,7 +57,7 @@ namespace Game.Chat
         }
 
         [Command("chat", RBACPermissions.CommandGmChat)]
-        static bool HandleGMChatCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMChatCommand(StringArguments args, CommandHandler handler)
         {
             var session = handler.GetSession();
             if (session != null)
@@ -93,7 +93,7 @@ namespace Game.Chat
         }
 
         [Command("fly", RBACPermissions.CommandGmFly)]
-        static bool HandleGMFlyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMFlyCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("ingame", RBACPermissions.CommandGmIngame, true)]
-        static bool HandleGMListIngameCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMListIngameCommand(StringArguments args, CommandHandler handler)
         {
             var first = true;
             var footer = false;
@@ -165,7 +165,7 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGmList, true)]
-        static bool HandleGMListFullCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMListFullCommand(StringArguments args, CommandHandler handler)
         {
             // Get the accounts with GM Level >0
             var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
@@ -200,7 +200,7 @@ namespace Game.Chat
         }
 
         [Command("visible", RBACPermissions.CommandGmVisible)]
-        static bool HandleGMVisibleCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMVisibleCommand(StringArguments args, CommandHandler handler)
         {
             var _player = handler.GetSession().GetPlayer();
 

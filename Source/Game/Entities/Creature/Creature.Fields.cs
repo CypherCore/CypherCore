@@ -24,79 +24,79 @@ namespace Game.Entities
 {
     public partial class Creature
     {
-        CreatureTemplate m_creatureInfo;
-        CreatureData m_creatureData;
+        private CreatureTemplate m_creatureInfo;
+        private CreatureData m_creatureData;
 
-        Spell _focusSpell;   // Locks the target during spell cast for proper facing
-        uint _focusDelay;
-        bool m_shouldReacquireTarget;
-        ObjectGuid m_suppressedTarget; // Stores the creature's "real" target while casting
-        float m_suppressedOrientation; // Stores the creature's "real" orientation while casting
+        private Spell _focusSpell;   // Locks the target during spell cast for proper facing
+        private uint _focusDelay;
+        private bool m_shouldReacquireTarget;
+        private ObjectGuid m_suppressedTarget; // Stores the creature's "real" target while casting
+        private float m_suppressedOrientation; // Stores the creature's "real" orientation while casting
 
-        long _lastDamagedTime; // Part of Evade mechanics
-        MultiMap<byte, byte> m_textRepeat = new MultiMap<byte, byte>();
+        private long _lastDamagedTime; // Part of Evade mechanics
+        private MultiMap<byte, byte> m_textRepeat = new MultiMap<byte, byte>();
 
         // Regenerate health
-        bool _regenerateHealth; // Set on creation
-        bool _regenerateHealthLock; // Dynamically set
+        private bool _regenerateHealth; // Set on creation
+        private bool _regenerateHealthLock; // Dynamically set
 
         public ulong m_PlayerDamageReq;
         public float m_SightDistance;
         public float m_CombatDistance;
         public bool m_isTempWorldObject; //true when possessed
 
-        ReactStates reactState;                           // for AI, not charmInfo
+        private ReactStates reactState;                           // for AI, not charmInfo
         public MovementGeneratorType DefaultMovementType { get; set; }
         public ulong m_spawnId;
-        byte m_equipmentId;
-        sbyte m_originalEquipmentId; // can be -1
+        private byte m_equipmentId;
+        private sbyte m_originalEquipmentId; // can be -1
 
-        bool m_AlreadyCallAssistance;
-        bool m_AlreadySearchedAssistance;
-        bool m_cannotReachTarget;
-        uint m_cannotReachTimer;
-        bool m_AI_locked;
+        private bool m_AlreadyCallAssistance;
+        private bool m_AlreadySearchedAssistance;
+        private bool m_cannotReachTarget;
+        private uint m_cannotReachTimer;
+        private bool m_AI_locked;
 
-        SpellSchoolMask m_meleeDamageSchoolMask;
+        private SpellSchoolMask m_meleeDamageSchoolMask;
         public uint m_originalEntry;
 
-        Position m_homePosition;
-        Position m_transportHomePosition = new Position();
+        private Position m_homePosition;
+        private Position m_transportHomePosition = new Position();
 
-        bool DisableReputationGain;
+        private bool DisableReputationGain;
 
-        LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
+        private LootModes m_LootMode;                                  // Bitmask (default: LOOT_MODE_DEFAULT) that determines what loot will be lootable
 
         // Waypoint path
-        uint _waypointPathId;
-        (uint nodeId, uint pathId) _currentWaypointNodeInfo;
+        private uint _waypointPathId;
+        private (uint nodeId, uint pathId) _currentWaypointNodeInfo;
 
         //Formation var
-        CreatureGroup m_formation;
-        bool triggerJustAppeared;
-        bool m_respawnCompatibilityMode;
+        private CreatureGroup m_formation;
+        private bool triggerJustAppeared;
+        private bool m_respawnCompatibilityMode;
 
         public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
 
         // Timers
-        long _pickpocketLootRestore;
+        private long _pickpocketLootRestore;
         public long m_corpseRemoveTime;                          // (msecs)timer for death or corpse disappearance
-        long m_respawnTime;                               // (secs) time of next respawn
-        uint m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
-        uint m_corpseDelay;                               // (secs) delay between death and corpse disappearance
-        float m_respawnradius;
-        uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
-        uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
-        uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
+        private long m_respawnTime;                               // (secs) time of next respawn
+        private uint m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
+        private uint m_corpseDelay;                               // (secs) delay between death and corpse disappearance
+        private float m_respawnradius;
+        private uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
+        private uint m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
+        private uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
 
         // vendor items
-        List<VendorItemCount> m_vendorItemCounts = new List<VendorItemCount>();
+        private List<VendorItemCount> m_vendorItemCounts = new List<VendorItemCount>();
 
         public Loot loot = new Loot();
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting corpse
-        ObjectGuid m_lootRecipient;
-        ObjectGuid m_lootRecipientGroup;
+        private ObjectGuid m_lootRecipient;
+        private ObjectGuid m_lootRecipientGroup;
     }
 
     public enum ObjectCellMoveState

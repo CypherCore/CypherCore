@@ -23,7 +23,7 @@ using Game.Scripting;
 
 namespace Game.PvP
 {
-    class HellfirePeninsulaPvP : OutdoorPvP
+    internal class HellfirePeninsulaPvP : OutdoorPvP
     {
         public HellfirePeninsulaPvP()
         {
@@ -156,11 +156,11 @@ namespace Game.PvP
         }
 
         // how many towers are controlled
-        uint m_AllianceTowersControlled;
-        uint m_HordeTowersControlled;
+        private uint m_AllianceTowersControlled;
+        private uint m_HordeTowersControlled;
     }
 
-    class HellfirePeninsulaCapturePoint : OPvPCapturePoint
+    internal class HellfirePeninsulaCapturePoint : OPvPCapturePoint
     {
         public HellfirePeninsulaCapturePoint(OutdoorPvP pvp, OutdoorPvPHPTowerType type) : base(pvp)
         {
@@ -302,11 +302,11 @@ namespace Game.PvP
             }
         }
 
-        uint m_TowerType;
+        private uint m_TowerType;
     }
 
     [Script]
-    class OutdoorPvP_hellfire_peninsula : OutdoorPvPScript
+    internal class OutdoorPvP_hellfire_peninsula : OutdoorPvPScript
     {
         public OutdoorPvP_hellfire_peninsula() : base("outdoorpvp_hp") { }
 
@@ -316,7 +316,7 @@ namespace Game.PvP
         }
     }
 
-    struct HPConst
+    internal struct HPConst
     {
         public static uint[] LangCapture_A = { DefenseMessages.BrokenHillTakenAlliance, DefenseMessages.OverlookTakenAlliance, DefenseMessages.StadiumTakenAlliance };
 
@@ -358,7 +358,7 @@ namespace Game.PvP
         };
     }
 
-    struct DefenseMessages
+    internal struct DefenseMessages
     {
         public const uint OverlookTakenAlliance = 14841; // '|cffffff00The Overlook has been taken by the Alliance!|r'
         public const uint OverlookTakenHorde = 14842; // '|cffffff00The Overlook has been taken by the Horde!|r'
@@ -368,7 +368,7 @@ namespace Game.PvP
         public const uint BrokenHillTakenHorde = 14846; // '|cffffff00Broken Hill has been taken by the Horde!|r'
     }
 
-    struct OutdoorPvPHPSpells
+    internal struct OutdoorPvPHPSpells
     {
         public const uint AlliancePlayerKillReward = 32155;
         public const uint HordePlayerKillReward = 32158;
@@ -376,7 +376,7 @@ namespace Game.PvP
         public const uint HordeBuff = 32049;
     }
 
-    enum OutdoorPvPHPTowerType
+    internal enum OutdoorPvPHPTowerType
     {
         BrokenHill = 0,
         Overlook = 1,
@@ -384,7 +384,7 @@ namespace Game.PvP
         Num = 3
     }
 
-    struct OutdoorPvPHPWorldStates
+    internal struct OutdoorPvPHPWorldStates
     {
         public const uint Display_A = 0x9ba;
         public const uint Display_H = 0x9b9;

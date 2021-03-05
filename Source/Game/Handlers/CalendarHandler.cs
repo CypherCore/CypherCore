@@ -31,7 +31,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.CalendarGet)]
-        void HandleCalendarGetCalendar(CalendarGetCalendar calendarGetCalendar)
+        private void HandleCalendarGetCalendar(CalendarGetCalendar calendarGetCalendar)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -99,7 +99,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarGetEvent)]
-        void HandleCalendarGetEvent(CalendarGetEvent calendarGetEvent)
+        private void HandleCalendarGetEvent(CalendarGetEvent calendarGetEvent)
         {
             var calendarEvent = Global.CalendarMgr.GetEvent(calendarGetEvent.EventID);
             if (calendarEvent != null)
@@ -109,7 +109,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarCommunityInvite)]
-        void HandleCalendarCommunityInvite(CalendarCommunityInviteRequest calendarCommunityInvite)
+        private void HandleCalendarCommunityInvite(CalendarCommunityInviteRequest calendarCommunityInvite)
         {
             var guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
             if (guild)
@@ -117,7 +117,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarAddEvent)]
-        void HandleCalendarAddEvent(CalendarAddEvent calendarAddEvent)
+        private void HandleCalendarAddEvent(CalendarAddEvent calendarAddEvent)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -165,7 +165,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarUpdateEvent)]
-        void HandleCalendarUpdateEvent(CalendarUpdateEvent calendarUpdateEvent)
+        private void HandleCalendarUpdateEvent(CalendarUpdateEvent calendarUpdateEvent)
         {
             var guid = GetPlayer().GetGUID();
             long oldEventTime;
@@ -195,14 +195,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarRemoveEvent)]
-        void HandleCalendarRemoveEvent(CalendarRemoveEvent calendarRemoveEvent)
+        private void HandleCalendarRemoveEvent(CalendarRemoveEvent calendarRemoveEvent)
         {
             var guid = GetPlayer().GetGUID();
             Global.CalendarMgr.RemoveEvent(calendarRemoveEvent.EventID, guid);
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarCopyEvent)]
-        void HandleCalendarCopyEvent(CalendarCopyEvent calendarCopyEvent)
+        private void HandleCalendarCopyEvent(CalendarCopyEvent calendarCopyEvent)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -235,7 +235,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarInvite)]
-        void HandleCalendarInvite(CalendarInvitePkt calendarInvite)
+        private void HandleCalendarInvite(CalendarInvitePkt calendarInvite)
         {
             var playerGuid = GetPlayer().GetGUID();
 
@@ -325,7 +325,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarEventSignUp)]
-        void HandleCalendarEventSignup(CalendarEventSignUp calendarEventSignUp)
+        private void HandleCalendarEventSignup(CalendarEventSignUp calendarEventSignUp)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -348,7 +348,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarRsvp)]
-        void HandleCalendarRsvp(HandleCalendarRsvp calendarRSVP)
+        private void HandleCalendarRsvp(HandleCalendarRsvp calendarRSVP)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -380,7 +380,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarRemoveInvite)]
-        void HandleCalendarEventRemoveInvite(CalendarRemoveInvite calendarRemoveInvite)
+        private void HandleCalendarEventRemoveInvite(CalendarRemoveInvite calendarRemoveInvite)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -400,7 +400,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarStatus)]
-        void HandleCalendarStatus(CalendarStatus calendarStatus)
+        private void HandleCalendarStatus(CalendarStatus calendarStatus)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -424,7 +424,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarModeratorStatus)]
-        void HandleCalendarModeratorStatus(CalendarModeratorStatusQuery calendarModeratorStatus)
+        private void HandleCalendarModeratorStatus(CalendarModeratorStatusQuery calendarModeratorStatus)
         {
             var guid = GetPlayer().GetGUID();
 
@@ -446,13 +446,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarComplain)]
-        void HandleCalendarComplain(CalendarComplain calendarComplain)
+        private void HandleCalendarComplain(CalendarComplain calendarComplain)
         {
             // what to do with complains?
         }
 
         [WorldPacketHandler(ClientOpcodes.CalendarGetNumPending)]
-        void HandleCalendarGetNumPending(CalendarGetNumPending calendarGetNumPending)
+        private void HandleCalendarGetNumPending(CalendarGetNumPending calendarGetNumPending)
         {
             var guid = GetPlayer().GetGUID();
             var pending = Global.CalendarMgr.GetPlayerNumPending(guid);
@@ -461,7 +461,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetSavedInstanceExtend)]
-        void HandleSetSavedInstanceExtend(SetSavedInstanceExtend setSavedInstanceExtend)
+        private void HandleSetSavedInstanceExtend(SetSavedInstanceExtend setSavedInstanceExtend)
         {
             var player = GetPlayer();
             if (player)

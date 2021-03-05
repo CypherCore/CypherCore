@@ -104,7 +104,7 @@ namespace Game.Entities
             SendPacket(raidGroupOnly);
         }
 
-        void UpdateArea(uint newArea)
+        private void UpdateArea(uint newArea)
         {
             // FFA_PVP flags are area and not zone id dependent
             // so apply them accordingly
@@ -585,7 +585,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool IsInstanceLoginGameMasterException()
+        private bool IsInstanceLoginGameMasterException()
         {
             if (!CanBeGameMaster())
                 return false;

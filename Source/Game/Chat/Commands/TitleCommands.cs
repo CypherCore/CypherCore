@@ -25,10 +25,10 @@ using System;
 namespace Game.Chat.Commands
 {
     [CommandGroup("titles", RBACPermissions.CommandTitles)]
-    class TitleCommands
+    internal class TitleCommands
     {
         [Command("current", RBACPermissions.CommandTitlesCurrent)]
-        static bool HandleTitlesCurrentCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTitlesCurrentCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             var id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -69,7 +69,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("add", RBACPermissions.CommandTitlesAdd)]
-        static bool HandleTitlesAddCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTitlesAddCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             var id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -111,7 +111,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("remove", RBACPermissions.CommandTitlesRemove)]
-        static bool HandleTitlesRemoveCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleTitlesRemoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
             var id_p = handler.ExtractKeyFromLink(args, "Htitle");
@@ -160,11 +160,11 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("set", RBACPermissions.CommandTitlesSet)]
-        class TitleSetCommands
+        private class TitleSetCommands
         {
             //Edit Player KnownTitles
             [Command("mask", RBACPermissions.CommandTitlesSetMask)]
-            static bool HandleTitlesSetMaskCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleTitlesSetMaskCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;

@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace Game.Garrisons
 {
-    class GarrisonMap : Map
+    internal class GarrisonMap : Map
     {
         public GarrisonMap(uint id, long expiry, uint instanceId, Map parent, ObjectGuid owner)
             : base(id, expiry, instanceId, Difficulty.Normal, parent)
@@ -71,11 +71,11 @@ namespace Game.Garrisons
             return result;
         }
 
-        ObjectGuid _owner;
-        Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
+        private ObjectGuid _owner;
+        private Player _loadingPlayer; // @workaround Player is not registered in ObjectAccessor during login
     }
 
-    class GarrisonGridLoader : Notifier
+    internal class GarrisonGridLoader : Notifier
     {
         public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
         {
@@ -133,11 +133,11 @@ namespace Game.Garrisons
 
         public override void Visit(IList<Creature> objs) { }
 
-        Cell i_cell;
-        Grid i_grid;
-        GarrisonMap i_map;
-        Garrison i_garrison;
-        uint i_gameObjects;
-        uint i_creatures;
+        private Cell i_cell;
+        private Grid i_grid;
+        private GarrisonMap i_map;
+        private Garrison i_garrison;
+        private uint i_gameObjects;
+        private uint i_creatures;
     }
 }

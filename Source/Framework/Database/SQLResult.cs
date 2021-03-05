@@ -22,7 +22,7 @@ namespace Framework.Database
 {
     public class SQLResult
     {
-        MySqlDataReader _reader;
+        private MySqlDataReader _reader;
 
         public SQLResult() { }
 
@@ -96,7 +96,7 @@ namespace Framework.Database
 
     public class SQLFields
     {
-        object[] _currentRow;
+        private object[] _currentRow;
 
         public SQLFields(object[] row) { _currentRow = row; }
 

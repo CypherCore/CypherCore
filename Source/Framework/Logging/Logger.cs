@@ -17,7 +17,7 @@
 
 using System.Collections.Generic;
 
-class Logger
+internal class Logger
 {
     public Logger(string _name, LogLevel _level)
     {
@@ -59,7 +59,7 @@ class Logger
             appender.Write(message);
     }
 
-    string name;
-    LogLevel level;
-    Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
+    private string name;
+    private LogLevel level;
+    private Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
 }

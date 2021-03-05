@@ -228,19 +228,19 @@ namespace Game.Entities
             UpdateItemSetAuras(false);
         }
 
-        bool HasTalent(uint talentId, byte group)
+        private bool HasTalent(uint talentId, byte group)
         {
             return GetTalentMap(group).ContainsKey(talentId) && GetTalentMap(group)[talentId] != PlayerSpellState.Removed;
         }
 
-        uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
-        void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
-        long GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
-        void SetTalentResetTime(long time_) { _specializationInfo.ResetTalentsTime = time_; }
+        private uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
+        private void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
+        private long GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
+        private void SetTalentResetTime(long time_) { _specializationInfo.ResetTalentsTime = time_; }
         public uint GetPrimarySpecialization() { return m_playerData.CurrentSpecID; }
-        void SetPrimarySpecialization(uint spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), spec); }
+        private void SetPrimarySpecialization(uint spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), spec); }
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
-        void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
+        private void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
 
         // Loot Spec
         public void SetLootSpecId(uint id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }

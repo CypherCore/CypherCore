@@ -675,7 +675,7 @@ namespace Game.Entities
             ModifyPower(power, (int)addvalue);
         }
 
-        void RegenerateHealth()
+        private void RegenerateHealth()
         {
             if (!CanRegenerateHealth())
                 return;
@@ -731,7 +731,7 @@ namespace Game.Entities
             }
         }
 
-        bool AIDestory()
+        private bool AIDestory()
         {
             if (m_AI_locked)
             {
@@ -771,7 +771,7 @@ namespace Game.Entities
             return true;
         }
 
-        void InitializeMovementAI()
+        private void InitializeMovementAI()
         {
             if (m_formation == null)
                 GetMotionMaster().Initialize();
@@ -906,7 +906,7 @@ namespace Game.Entities
             return true;
         }
 
-        void InitializeReactState()
+        private void InitializeReactState()
         {
             if (IsTotem() || IsTrigger() || IsCritter() || IsSpiritService())
                 SetReactState(ReactStates.Passive);
@@ -1244,7 +1244,7 @@ namespace Game.Entities
             UpdateLevelDependantStats();
         }
 
-        void UpdateLevelDependantStats()
+        private void UpdateLevelDependantStats()
         {
             var cInfo = GetCreatureTemplate();
             var rank = IsPet() ? 0 : cInfo.Rank;
@@ -1300,7 +1300,7 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
-        float _GetHealthMod(CreatureEliteType Rank)
+        private float _GetHealthMod(CreatureEliteType Rank)
         {
             switch (Rank)                                           // define rates for each elite rank
             {
@@ -1368,7 +1368,7 @@ namespace Game.Entities
             }
         }
 
-        bool CreateFromProto(ulong guidlow, uint entry, CreatureData data = null, uint vehId = 0)
+        private bool CreateFromProto(ulong guidlow, uint entry, CreatureData data = null, uint vehId = 0)
         {
             SetZoneScript();
             if (m_zoneScript != null && data != null)
@@ -2174,7 +2174,7 @@ namespace Game.Entities
             }
         }
 
-        CreatureAddon GetCreatureAddon()
+        private CreatureAddon GetCreatureAddon()
         {
             if (m_spawnId != 0)
             {
@@ -2347,7 +2347,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
+        private bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
 
         public void AllLootRemovedFromCorpse()
         {
@@ -2378,7 +2378,7 @@ namespace Game.Entities
             return (scaling.MinLevel != 0 && scaling.MaxLevel != 0);
         }
 
-        ulong GetMaxHealthByLevel(uint level)
+        private ulong GetMaxHealthByLevel(uint level)
         {
             var cInfo = GetCreatureTemplate();
             var scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
@@ -2399,7 +2399,7 @@ namespace Game.Entities
             return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
         }
 
-        float GetBaseDamageForLevel(uint level)
+        private float GetBaseDamageForLevel(uint level)
         {
             var cInfo = GetCreatureTemplate();
             var scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
@@ -2416,7 +2416,7 @@ namespace Game.Entities
             return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(GetLevel());
         }
 
-        float GetBaseArmorForLevel(uint level)
+        private float GetBaseArmorForLevel(uint level)
         {
             var cInfo = GetCreatureTemplate();
             var scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
@@ -2634,7 +2634,8 @@ namespace Game.Entities
             m_cannotReachTarget = cannotReach;
             m_cannotReachTimer = 0;
         }
-        bool CanNotReachTarget() { return m_cannotReachTarget; }
+
+        private bool CanNotReachTarget() { return m_cannotReachTarget; }
 
         public float GetAggroRange(Unit target)
         {
@@ -3060,7 +3061,7 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
 
-        MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
+        private MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 
         public long GetRespawnTime() { return m_respawnTime; }
@@ -3073,7 +3074,7 @@ namespace Game.Entities
         public void SetRespawnRadius(float dist) { m_respawnradius = dist; }
 
         public void DoImmediateBoundaryCheck() { m_boundaryCheckTime = 0; }
-        uint GetCombatPulseDelay() { return m_combatPulseDelay; }
+        private uint GetCombatPulseDelay() { return m_combatPulseDelay; }
         public void SetCombatPulseDelay(uint delay) // (secs) interval at which the creature pulses the entire zone into combat (only works in dungeons)
         {
             m_combatPulseDelay = delay;
@@ -3115,12 +3116,12 @@ namespace Game.Entities
         public CreatureGroup GetFormation() { return m_formation; }
         public void SetFormation(CreatureGroup formation) { m_formation = formation; }
 
-        void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
+        private void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
         public bool IsReputationGainDisabled() { return DisableReputationGain; }
         public bool IsDamageEnoughForLootingAndReward() { return m_creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoPlayerDamageReq) || m_PlayerDamageReq == 0; }
 
         // Part of Evade mechanics
-        long GetLastDamagedTime() { return _lastDamagedTime; }
+        private long GetLastDamagedTime() { return _lastDamagedTime; }
         public void SetLastDamagedTime(long val) { _lastDamagedTime = val; }
 
         public void ResetPlayerDamageReq() { m_PlayerDamageReq = (uint)(GetHealth() / 2); }
@@ -3129,13 +3130,14 @@ namespace Game.Entities
         {
             return m_originalEntry;
         }
-        void SetOriginalEntry(uint entry)
+
+        private void SetOriginalEntry(uint entry)
         {
             m_originalEntry = entry;
         }
 
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
-        void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
+        private void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
         public Unit SelectVictim()
@@ -3275,7 +3277,7 @@ namespace Game.Entities
 
     public class AssistDelayEvent : BasicEvent
     {
-        AssistDelayEvent() { }
+        private AssistDelayEvent() { }
         public AssistDelayEvent(ObjectGuid victim, Unit owner)
         {
             m_victim = victim;
@@ -3304,9 +3306,9 @@ namespace Game.Entities
         public void AddAssistant(ObjectGuid guid) { m_assistants.Add(guid); }
 
 
-        ObjectGuid m_victim;
-        List<ObjectGuid> m_assistants = new List<ObjectGuid>();
-        Unit m_owner;
+        private ObjectGuid m_victim;
+        private List<ObjectGuid> m_assistants = new List<ObjectGuid>();
+        private Unit m_owner;
     }
 
     public class ForcedDespawnDelayEvent : BasicEvent
@@ -3322,7 +3324,7 @@ namespace Game.Entities
             return true;
         }
 
-        Creature m_owner;
-        TimeSpan m_respawnTimer;
+        private Creature m_owner;
+        private TimeSpan m_respawnTimer;
     }
 }

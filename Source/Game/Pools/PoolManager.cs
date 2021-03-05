@@ -27,7 +27,7 @@ namespace Game
 {
     public class PoolManager : Singleton<PoolManager>
     {
-        PoolManager() { }
+        private PoolManager() { }
 
         public void Initialize()
         {
@@ -446,7 +446,7 @@ namespace Game
             SaveQuestsToDB();
         }
 
-        void SpawnPool<T>(uint pool_id, ulong db_guid)
+        private void SpawnPool<T>(uint pool_id, ulong db_guid)
         {
             switch (typeof(T).Name)
             {
@@ -562,18 +562,18 @@ namespace Game
         public MultiMap<uint, uint> mQuestCreatureRelation = new MultiMap<uint, uint>();
         public MultiMap<uint, uint> mQuestGORelation = new MultiMap<uint, uint>();
 
-        Dictionary<uint, PoolTemplateData> mPoolTemplate = new Dictionary<uint, PoolTemplateData>();
-        Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new Dictionary<uint, PoolGroup<Creature>>();
-        Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new Dictionary<uint, PoolGroup<GameObject>>();
-        Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new Dictionary<uint, PoolGroup<Pool>>();
-        Dictionary<uint, PoolGroup<Quest>> mPoolQuestGroups = new Dictionary<uint, PoolGroup<Quest>>();
-        Dictionary<ulong, uint> mCreatureSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mGameobjectSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mPoolSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mQuestSearchMap = new Dictionary<ulong, uint>();
+        private Dictionary<uint, PoolTemplateData> mPoolTemplate = new Dictionary<uint, PoolTemplateData>();
+        private Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new Dictionary<uint, PoolGroup<Creature>>();
+        private Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new Dictionary<uint, PoolGroup<GameObject>>();
+        private Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new Dictionary<uint, PoolGroup<Pool>>();
+        private Dictionary<uint, PoolGroup<Quest>> mPoolQuestGroups = new Dictionary<uint, PoolGroup<Quest>>();
+        private Dictionary<ulong, uint> mCreatureSearchMap = new Dictionary<ulong, uint>();
+        private Dictionary<ulong, uint> mGameobjectSearchMap = new Dictionary<ulong, uint>();
+        private Dictionary<ulong, uint> mPoolSearchMap = new Dictionary<ulong, uint>();
+        private Dictionary<ulong, uint> mQuestSearchMap = new Dictionary<ulong, uint>();
 
         // dynamic data
-        ActivePoolData mSpawnedData = new ActivePoolData();
+        private ActivePoolData mSpawnedData = new ActivePoolData();
     }
 
     public class PoolGroup<T>
@@ -633,7 +633,7 @@ namespace Game
             }
         }
 
-        void Despawn1Object(ulong guid)
+        private void Despawn1Object(ulong guid)
         {
             switch (typeof(T).Name)
             {
@@ -822,7 +822,7 @@ namespace Game
                 DespawnObject(spawns, triggerFrom);
         }
 
-        void SpawnQuestObject(ActivePoolData spawns, uint limit, ulong triggerFrom)
+        private void SpawnQuestObject(ActivePoolData spawns, uint limit, ulong triggerFrom)
         {
             Log.outDebug(LogFilter.Pool, "PoolGroup<Quest>: Spawning pool {0}", poolId);
             // load state from db
@@ -887,7 +887,7 @@ namespace Game
                 Global.PoolMgr.SaveQuestsToDB();
         }
 
-        void Spawn1Object(PoolObject obj)
+        private void Spawn1Object(PoolObject obj)
         {
             switch (typeof(T).Name)
             {
@@ -953,7 +953,7 @@ namespace Game
             }
         }
 
-        void ReSpawn1Object(PoolObject obj)
+        private void ReSpawn1Object(PoolObject obj)
         {
             // GameObject/Creature is still on map, nothing to do
         }
@@ -970,9 +970,9 @@ namespace Game
         }
         public uint GetPoolId() { return poolId; }
 
-        uint poolId;
-        List<PoolObject> ExplicitlyChanced = new List<PoolObject>();
-        List<PoolObject> EqualChanced = new List<PoolObject>();
+        private uint poolId;
+        private List<PoolObject> ExplicitlyChanced = new List<PoolObject>();
+        private List<PoolObject> EqualChanced = new List<PoolObject>();
     }
 
     public class ActivePoolData
@@ -1051,10 +1051,10 @@ namespace Game
 
         public List<ulong> GetActiveQuests() { return mActiveQuests; } // a copy of the set
 
-        List<ulong> mSpawnedCreatures = new List<ulong>();
-        List<ulong> mSpawnedGameobjects = new List<ulong>();
-        List<ulong> mActiveQuests = new List<ulong>();
-        Dictionary<ulong, uint> mSpawnedPools = new Dictionary<ulong, uint>();
+        private List<ulong> mSpawnedCreatures = new List<ulong>();
+        private List<ulong> mSpawnedGameobjects = new List<ulong>();
+        private List<ulong> mActiveQuests = new List<ulong>();
+        private Dictionary<ulong, uint> mSpawnedPools = new Dictionary<ulong, uint>();
     }
 
     public class PoolObject

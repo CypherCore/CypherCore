@@ -87,7 +87,7 @@ namespace Game.AI
         }
 
         //Cast spell by spell info
-        void DoCastSpell(Unit target, SpellInfo spellInfo, bool triggered = false)
+        private void DoCastSpell(Unit target, SpellInfo spellInfo, bool triggered = false)
         {
             if (target == null || me.IsNonMeleeSpellCast(false))
                 return;
@@ -268,7 +268,7 @@ namespace Game.AI
             me.MonsterMoveWithSpeed(x, y, z, speed);
         }
 
-        void DoTeleportTo(float[] position)
+        private void DoTeleportTo(float[] position)
         {
             me.NearTeleportTo(position[0], position[1], position[2], position[3]);
         }
@@ -286,7 +286,7 @@ namespace Game.AI
                     me.GetGUID(), me.GetEntry(), unit.GetTypeId(), unit.GetGUID(), x, y, z, o);
         }
 
-        void DoTeleportAll(float x, float y, float z, float o)
+        private void DoTeleportAll(float x, float y, float z, float o)
         {
             var map = me.GetMap();
             if (!map.IsDungeon())
@@ -310,7 +310,7 @@ namespace Game.AI
         }
 
         //Returns a list of friendly CC'd units within range
-        List<Creature> DoFindFriendlyCC(float range)
+        private List<Creature> DoFindFriendlyCC(float range)
         {
             var list = new List<Creature>();
             var u_check = new FriendlyCCedInRange(me, range);
@@ -332,7 +332,7 @@ namespace Game.AI
         }
 
         //Return a player with at least minimumRange from me
-        Player GetPlayerAtMinimumRange(float minimumRange)
+        private Player GetPlayerAtMinimumRange(float minimumRange)
         {
             var check = new PlayerAtMinimumRangeAway(me, minimumRange);
             var searcher = new PlayerSearcher(me, check);
@@ -466,9 +466,9 @@ namespace Game.AI
             }
         }
 
-        Difficulty _difficulty;
-        bool _isCombatMovementAllowed;
-        bool _isHeroic;
+        private Difficulty _difficulty;
+        private bool _isCombatMovementAllowed;
+        private bool _isHeroic;
     }
 
     public class BossAI : ScriptedAI
@@ -618,7 +618,7 @@ namespace Game.AI
 
         public InstanceScript instance;
         public SummonList summons;
-        uint _bossId;
+        private uint _bossId;
     }
 
     public class WorldBossAI : ScriptedAI
@@ -628,7 +628,7 @@ namespace Game.AI
             summons = new SummonList(creature);
         }
 
-        void _Reset()
+        private void _Reset()
         {
             if (!me.IsAlive())
                 return;
@@ -637,13 +637,13 @@ namespace Game.AI
             summons.DespawnAll();
         }
 
-        void _JustDied()
+        private void _JustDied()
         {
             _events.Reset();
             summons.DespawnAll();
         }
 
-        void _EnterCombat()
+        private void _EnterCombat()
         {
             var target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
             if (target)
@@ -696,7 +696,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer) { _JustDied(); }
 
-        SummonList summons;
+        private SummonList summons;
     }
 
     public class SummonList : List<ObjectGuid>
@@ -795,7 +795,7 @@ namespace Game.AI
             return false;
         }
 
-        void DoActionImpl(int action, List<ObjectGuid> summons)
+        private void DoActionImpl(int action, List<ObjectGuid> summons)
         {
             foreach (var guid in summons)
             {
@@ -805,7 +805,7 @@ namespace Game.AI
             }
         }
 
-        Creature me;
+        private Creature me;
     }
 
     public class EntryCheckPredicate : ICheck<ObjectGuid>
@@ -817,6 +817,6 @@ namespace Game.AI
 
         public bool Invoke(ObjectGuid guid) { return guid.GetEntry() == _entry; }
 
-        uint _entry;
+        private uint _entry;
     }
 }

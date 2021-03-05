@@ -52,12 +52,12 @@ namespace Game.AI
                 me.GetMotionMaster().MoveChase(victim, dist);
         }
 
-        ThreatManager GetThreatManager()
+        private ThreatManager GetThreatManager()
         {
             return me.GetThreatManager();
         }
 
-        void SortByDistance(List<Unit> targets, bool ascending)
+        private void SortByDistance(List<Unit> targets, bool ascending)
         {
             targets.Sort(new ObjectDistanceOrderPred(me, true));
         }
@@ -561,11 +561,11 @@ namespace Game.AI
     // default predicate function to select target based on distance, player and/or aura criteria
     public class DefaultTargetSelector : ICheck<Unit>
     {
-        Unit me;
-        float m_dist;
-        bool m_playerOnly;
-        Unit except;
-        int m_aura;
+        private Unit me;
+        private float m_dist;
+        private bool m_playerOnly;
+        private Unit except;
+        private int m_aura;
 
         /// <param name="unit">the reference unit</param>
         /// <param name="dist">if 0: ignored, if > 0: maximum distance to the reference unit, if < 0: minimum distance to the reference unit</param>
@@ -695,8 +695,8 @@ namespace Game.AI
             return true;
         }
 
-        Unit _caster;
-        SpellInfo _spellInfo;
+        private Unit _caster;
+        private SpellInfo _spellInfo;
     }
 
     // Very simple target selector, will just skip main target
@@ -725,12 +725,12 @@ namespace Game.AI
             return target != _source.GetVictim();
         }
 
-        Unit _source;
-        bool _playerOnly;
+        private Unit _source;
+        private bool _playerOnly;
     }
 
     // Simple selector for units using mana
-    class PowerUsersSelector : ICheck<Unit>
+    internal class PowerUsersSelector : ICheck<Unit>
     {
         public PowerUsersSelector(Unit unit, PowerType power, float dist, bool playerOnly)
         {
@@ -760,13 +760,13 @@ namespace Game.AI
             return true;
         }
 
-        Unit _me;
-        PowerType _power;
-        float _dist;
-        bool _playerOnly;
+        private Unit _me;
+        private PowerType _power;
+        private float _dist;
+        private bool _playerOnly;
     }
 
-    class FarthestTargetSelector : ICheck<Unit>
+    internal class FarthestTargetSelector : ICheck<Unit>
     {
         public FarthestTargetSelector(Unit unit, float dist, bool playerOnly, bool inLos)
         {
@@ -793,9 +793,9 @@ namespace Game.AI
             return true;
         }
 
-        Unit _me;
-        float _dist;
-        bool _playerOnly;
-        bool _inLos;
+        private Unit _me;
+        private float _dist;
+        private bool _playerOnly;
+        private bool _inLos;
     }
 }

@@ -37,7 +37,7 @@ namespace Game.Entities
             return m_charmInfo;
         }
 
-        void DeleteCharmInfo()
+        private void DeleteCharmInfo()
         {
             if (m_charmInfo == null)
                 return;
@@ -771,7 +771,7 @@ namespace Game.Entities
             return pet;
         }
 
-        bool InitTamedPet(Pet pet, uint level, uint spell_id)
+        private bool InitTamedPet(Pet pet, uint level, uint spell_id)
         {
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());

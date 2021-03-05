@@ -30,7 +30,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.TabardVendorActivate)]
-        void HandleTabardVendorActivate(Hello packet)
+        private void HandleTabardVendorActivate(Hello packet)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
             if (!unit)
@@ -54,7 +54,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerList)]
-        void HandleTrainerList(Hello packet)
+        private void HandleTrainerList(Hello packet)
         {
             var npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
             if (!npc)
@@ -90,7 +90,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell)]
-        void HandleTrainerBuySpell(TrainerBuySpell packet)
+        private void HandleTrainerBuySpell(TrainerBuySpell packet)
         {
             var npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
             if (npc == null)
@@ -117,7 +117,7 @@ namespace Game
             trainer.TeachSpell(npc, _player, packet.SpellID);
         }
 
-        void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
+        private void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
         {
             var trainerBuyFailed = new TrainerBuyFailed();
             trainerBuyFailed.TrainerGUID = trainerGUID;
@@ -127,7 +127,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.TalkToGossip)]
-        void HandleGossipHello(Hello packet)
+        private void HandleGossipHello(Hello packet)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Gossip, NPCFlags2.None);
             if (unit == null)
@@ -168,7 +168,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.GossipSelectOption)]
-        void HandleGossipSelectOption(GossipSelectOption packet)
+        private void HandleGossipSelectOption(GossipSelectOption packet)
         {
             if (GetPlayer().PlayerTalkClass.GetGossipMenu().GetItem(packet.GossipIndex) == null)
                 return;
@@ -247,7 +247,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SpiritHealerActivate)]
-        void HandleSpiritHealerActivate(SpiritHealerActivate packet)
+        private void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
             if (!unit)
@@ -263,7 +263,7 @@ namespace Game
             SendSpiritResurrect();
         }
 
-        void SendSpiritResurrect()
+        private void SendSpiritResurrect()
         {
             GetPlayer().ResurrectPlayer(0.5f, true);
 
@@ -291,7 +291,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BinderActivate)]
-        void HandleBinderActivate(Hello packet)
+        private void HandleBinderActivate(Hello packet)
         {
             if (!GetPlayer().IsInWorld || !GetPlayer().IsAlive())
                 return;
@@ -310,7 +310,7 @@ namespace Game
             SendBindPoint(unit);
         }
 
-        void SendBindPoint(Creature npc)
+        private void SendBindPoint(Creature npc)
         {
             // prevent set homebind to instances in any case
             if (GetPlayer().GetMap().Instanceable())
@@ -325,7 +325,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestStabledPets)]
-        void HandleRequestStabledPets(RequestStabledPets packet)
+        private void HandleRequestStabledPets(RequestStabledPets packet)
         {
             if (!CheckStableMaster(packet.StableMaster))
                 return;
@@ -351,7 +351,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(SendStablePetCallback, guid));
         }
 
-        void SendStablePetCallback(ObjectGuid guid, SQLResult result)
+        private void SendStablePetCallback(ObjectGuid guid, SQLResult result)
         {
             if (!GetPlayer())
                 return;
@@ -401,7 +401,7 @@ namespace Game
             SendPacket(packet);
         }
 
-        void SendPetStableResult(StableResult result)
+        private void SendPetStableResult(StableResult result)
         {
             var petStableResult = new PetStableResult();
             petStableResult.Result = result;
@@ -409,7 +409,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RepairItem)]
-        void HandleRepairItem(RepairItem packet)
+        private void HandleRepairItem(RepairItem packet)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
             if (!unit)
@@ -441,7 +441,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ListInventory)]
-        void HandleListInventory(Hello packet)
+        private void HandleListInventory(Hello packet)
         {
             if (!GetPlayer().IsAlive())
                 return;

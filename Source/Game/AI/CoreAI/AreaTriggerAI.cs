@@ -53,7 +53,7 @@ namespace Game.AI
         protected AreaTrigger at;
     }
 
-    class NullAreaTriggerAI : AreaTriggerAI
+    internal class NullAreaTriggerAI : AreaTriggerAI
     {
         public NullAreaTriggerAI(AreaTrigger areaTrigger) : base(areaTrigger) { }
     }

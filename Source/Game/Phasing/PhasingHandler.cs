@@ -56,8 +56,8 @@ namespace Game
         {
             AddPhase(obj, phaseId, obj.GetGUID(), updateVisibility);
         }
-        
-        static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility)
+
+        private static void AddPhase(WorldObject obj, uint phaseId, ObjectGuid personalGuid, bool updateVisibility)
         {
             var changed = obj.GetPhaseShift().AddPhase(phaseId, GetPhaseFlags(phaseId), null);
 
@@ -100,8 +100,8 @@ namespace Game
         {
             AddPhaseGroup(obj, phaseGroupId, obj.GetGUID(), updateVisibility);
         }
-        
-        static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, ObjectGuid personalGuid, bool updateVisibility)
+
+        private static void AddPhaseGroup(WorldObject obj, uint phaseGroupId, ObjectGuid personalGuid, bool updateVisibility)
         {
             var phasesInGroup = Global.DB2Mgr.GetPhasesForGroup(phaseGroupId);
             if (phasesInGroup.Empty())
@@ -579,7 +579,7 @@ namespace Game
             return phases.ToString();
         }
 
-        static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)
+        private static void UpdateVisibilityIfNeeded(WorldObject obj, bool updateVisibility, bool changed)
         {
             if (changed && obj.IsInWorld)
             {

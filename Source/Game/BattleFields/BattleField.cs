@@ -189,7 +189,7 @@ namespace Game.BattleFields
             return objective_changed;
         }
 
-        void InvitePlayersInZoneToQueue()
+        private void InvitePlayersInZoneToQueue()
         {
             for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
             {
@@ -202,7 +202,7 @@ namespace Game.BattleFields
             }
         }
 
-        void InvitePlayerToQueue(Player player)
+        private void InvitePlayerToQueue(Player player)
         {
             if (m_PlayersInQueue[player.GetTeamId()].Contains(player.GetGUID()))
                 return;
@@ -211,7 +211,7 @@ namespace Game.BattleFields
                 player.GetSession().SendBfInvitePlayerToQueue(GetQueueId(), GetState());
         }
 
-        void InvitePlayersInQueueToWar()
+        private void InvitePlayersInQueueToWar()
         {
             for (byte team = 0; team < 2; ++team)
             {
@@ -232,7 +232,7 @@ namespace Game.BattleFields
             }
         }
 
-        void InvitePlayersInZoneToWar()
+        private void InvitePlayersInZoneToWar()
         {
             for (byte team = 0; team < 2; ++team)
             {
@@ -252,7 +252,7 @@ namespace Game.BattleFields
             }
         }
 
-        void InvitePlayerToWar(Player player)
+        private void InvitePlayerToWar(Player player)
         {
             if (!player)
                 return;
@@ -293,7 +293,7 @@ namespace Game.BattleFields
                 Log.outError(LogFilter.Battlefield, "Battlefield.InitStalker: could not spawn Stalker (Creature entry {0}), zone messeges will be un-available", entry);
         }
 
-        void KickAfkPlayers()
+        private void KickAfkPlayers()
         {
             for (byte team = 0; team < 2; ++team)
             {
@@ -354,7 +354,7 @@ namespace Game.BattleFields
             SendInitWorldStatesToAll();
         }
 
-        void DoPlaySoundToAll(uint soundID)
+        private void DoPlaySoundToAll(uint soundID)
         {
             BroadcastPacketToWar(new PlaySound(ObjectGuid.Empty, soundID, 0));
         }
@@ -485,7 +485,7 @@ namespace Game.BattleFields
             m_capturePoints[cp.GetCapturePointEntry()] = cp;
         }
 
-        BfCapturePoint GetCapturePoint(uint entry)
+        private BfCapturePoint GetCapturePoint(uint entry)
         {
             return m_capturePoints.LookupByKey(entry);
         }
@@ -522,7 +522,7 @@ namespace Game.BattleFields
         // ****************************************************
         // ******************* Group System *******************
         // ****************************************************
-        Group GetFreeBfRaid(int teamIndex)
+        private Group GetFreeBfRaid(int teamIndex)
         {
             foreach (var guid in m_Groups[teamIndex])
             {
@@ -535,7 +535,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        Group GetGroupPlayer(ObjectGuid plguid, int teamIndex)
+        private Group GetGroupPlayer(ObjectGuid plguid, int teamIndex)
         {
             foreach (var guid in m_Groups[teamIndex])
             {
@@ -548,7 +548,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        bool AddOrSetPlayerToCorrectBfGroup(Player player)
+        private bool AddOrSetPlayerToCorrectBfGroup(Player player)
         {
             if (!player.IsInWorld)
                 return false;
@@ -735,7 +735,7 @@ namespace Game.BattleFields
         // Return true if battle is start, false if battle is not started
         public bool IsWarTime() { return m_isActive; }
 
-        BattlefieldState GetState() { return m_isActive ? BattlefieldState.InProgress : (m_Timer <= m_StartGroupingTimer ? BattlefieldState.Warnup : BattlefieldState.Inactive); }
+        private BattlefieldState GetState() { return m_isActive ? BattlefieldState.InProgress : (m_Timer <= m_StartGroupingTimer ? BattlefieldState.Warnup : BattlefieldState.Inactive); }
 
         // Enable or Disable battlefield
         public void ToggleBattlefield(bool enable) { m_IsEnabled = enable; }
@@ -762,7 +762,7 @@ namespace Game.BattleFields
         public uint GetDefenderTeam() { return m_DefenderTeam; }
         public uint GetAttackerTeam() { return 1 - m_DefenderTeam; }
         public int GetOtherTeam(int teamIndex) { return (teamIndex == TeamId.Horde ? TeamId.Alliance : TeamId.Horde); }
-        void SetDefenderTeam(uint team) { m_DefenderTeam = team; }
+        private void SetDefenderTeam(uint team) { m_DefenderTeam = team; }
 
         // Called on start
         public virtual void OnBattleStart() { }
@@ -791,7 +791,7 @@ namespace Game.BattleFields
         // Return if we can use mount in battlefield
         public bool CanFlyIn() { return !m_isActive; }
 
-        List<BfGraveyard> GetGraveyardVector() { return m_GraveyardList; }
+        private List<BfGraveyard> GetGraveyardVector() { return m_GraveyardList; }
 
         public uint GetTimer() { return m_Timer; }
         public void SetTimer(uint timer) { m_Timer = timer; }
@@ -806,7 +806,7 @@ namespace Game.BattleFields
         protected uint m_DefenderTeam;
 
         // Map of the objectives belonging to this OutdoorPvP
-        Dictionary<uint, BfCapturePoint> m_capturePoints = new Dictionary<uint, BfCapturePoint>();
+        private Dictionary<uint, BfCapturePoint> m_capturePoints = new Dictionary<uint, BfCapturePoint>();
 
         // Players info maps
         protected List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];                      // Players in zone
@@ -831,18 +831,18 @@ namespace Game.BattleFields
         protected uint m_uiKickDontAcceptTimer;
         protected WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
-        uint m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war
+        private uint m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war
 
         // Graveyard variables
         protected List<BfGraveyard> m_GraveyardList = new List<BfGraveyard>();                          // Vector witch contain the different GY of the battle
-        uint m_LastResurectTimer;                             // Timer for resurect player every 30 sec
+        private uint m_LastResurectTimer;                             // Timer for resurect player every 30 sec
 
         protected uint m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
         protected bool m_StartGrouping;                                   // bool for know if all players in area has been invited
 
-        List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];                       // Contain different raid group
+        private List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];                       // Contain different raid group
 
-        Dictionary<int, ulong> m_Data64 = new Dictionary<int, ulong>();
+        private Dictionary<int, ulong> m_Data64 = new Dictionary<int, ulong>();
         protected Dictionary<int, uint> m_Data32 = new Dictionary<int, uint>();
     }
 
@@ -948,7 +948,7 @@ namespace Game.BattleFields
             RelocateDeadPlayers();
         }
 
-        void RelocateDeadPlayers()
+        private void RelocateDeadPlayers()
         {
             WorldSafeLocsEntry closestGrave = null;
             foreach (var guid in m_ResurrectQueue)
@@ -988,10 +988,10 @@ namespace Game.BattleFields
 
         public uint GetControlTeamId() { return m_ControlTeam; }
 
-        uint m_ControlTeam;
-        uint m_GraveyardId;
-        ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.BGTeamsCount];
-        List<ObjectGuid> m_ResurrectQueue = new List<ObjectGuid>();
+        private uint m_ControlTeam;
+        private uint m_GraveyardId;
+        private ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.BGTeamsCount];
+        private List<ObjectGuid> m_ResurrectQueue = new List<ObjectGuid>();
         protected BattleField m_Bf;
     }
 
@@ -1097,12 +1097,12 @@ namespace Game.BattleFields
             return true;
         }
 
-        GameObject GetCapturePointGo()
+        private GameObject GetCapturePointGo()
         {
             return m_Bf.GetGameObject(m_capturePointGUID);
         }
 
-        bool DelCapturePoint()
+        private bool DelCapturePoint()
         {
             if (!m_capturePointGUID.IsEmpty())
             {
@@ -1242,7 +1242,7 @@ namespace Game.BattleFields
             return false;
         }
 
-        void SendUpdateWorldState(uint field, uint value)
+        private void SendUpdateWorldState(uint field, uint value)
         {
             for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
             {
@@ -1255,7 +1255,7 @@ namespace Game.BattleFields
             }
         }
 
-        void SendObjectiveComplete(uint id, ObjectGuid guid)
+        private void SendObjectiveComplete(uint id, ObjectGuid guid)
         {
             uint team;
             switch (m_State)
@@ -1279,7 +1279,7 @@ namespace Game.BattleFields
             }
         }
 
-        bool IsInsideObjective(Player player)
+        private bool IsInsideObjective(Player player)
         {
             return m_activePlayers[player.GetTeamId()].Contains(player.GetGUID());
         }
@@ -1287,36 +1287,36 @@ namespace Game.BattleFields
         public virtual void ChangeTeam(uint oldTeam) { }
 
         public uint GetCapturePointEntry() { return m_capturePointEntry; }
-        uint GetTeamId() { return m_team; }
+        private uint GetTeamId() { return m_team; }
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
-        HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.BGTeamsCount];
+        private HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.BGTeamsCount];
 
         // Total shift needed to capture the objective
-        float m_maxValue;
-        float m_minValue;
+        private float m_maxValue;
+        private float m_minValue;
 
         // Maximum speed of capture
-        float m_maxSpeed;
+        private float m_maxSpeed;
 
         // The status of the objective
-        float m_value;
+        private float m_value;
         protected uint m_team;
 
         // Objective states
-        BattleFieldObjectiveStates m_OldState;
-        BattleFieldObjectiveStates m_State;
+        private BattleFieldObjectiveStates m_OldState;
+        private BattleFieldObjectiveStates m_State;
 
         // Neutral value on capture bar
-        uint m_neutralValuePct;
+        private uint m_neutralValuePct;
 
         // Battlefield this objective belongs to
         protected BattleField m_Bf;
 
         // Capture point entry
-        uint m_capturePointEntry;
+        private uint m_capturePointEntry;
 
         // Gameobject related to that capture point
-        ObjectGuid m_capturePointGUID;
+        private ObjectGuid m_capturePointGUID;
     }
 }

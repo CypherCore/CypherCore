@@ -21,7 +21,7 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class TaxiNodeStatusQuery : ClientPacket
+    internal class TaxiNodeStatusQuery : ClientPacket
     {
         public TaxiNodeStatusQuery(WorldPacket packet) : base(packet) { }
 
@@ -33,7 +33,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UnitGUID;
     }
 
-    class TaxiNodeStatusPkt : ServerPacket
+    internal class TaxiNodeStatusPkt : ServerPacket
     {
         public TaxiNodeStatusPkt() : base(ServerOpcodes.TaxiNodeStatus) { }
 
@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
         public byte[] CanUseNodes = null; // Nodes available for use - this can temporarily disable a known node
     }
 
-    class EnableTaxiNode : ClientPacket
+    internal class EnableTaxiNode : ClientPacket
     {
         public EnableTaxiNode(WorldPacket packet) : base(packet) { }
 
@@ -90,7 +90,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Unit;
     }
 
-    class TaxiQueryAvailableNodes : ClientPacket
+    internal class TaxiQueryAvailableNodes : ClientPacket
     {
         public TaxiQueryAvailableNodes(WorldPacket packet) : base(packet) { }
 
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Unit;
     }
 
-    class ActivateTaxi : ClientPacket
+    internal class ActivateTaxi : ClientPacket
     {
         public ActivateTaxi(WorldPacket packet) : base(packet) { }
 
@@ -120,14 +120,14 @@ namespace Game.Networking.Packets
         public uint FlyingMountID;
     }
 
-    class NewTaxiPath : ServerPacket
+    internal class NewTaxiPath : ServerPacket
     {
         public NewTaxiPath() : base(ServerOpcodes.NewTaxiPath) { }
 
         public override void Write() { }
     }
 
-    class ActivateTaxiReplyPkt : ServerPacket
+    internal class ActivateTaxiReplyPkt : ServerPacket
     {
         public ActivateTaxiReplyPkt() : base(ServerOpcodes.ActivateTaxiReply) { }
 
@@ -140,7 +140,7 @@ namespace Game.Networking.Packets
         public ActivateTaxiReply Reply;
     }
 
-    class TaxiRequestEarlyLanding : ClientPacket
+    internal class TaxiRequestEarlyLanding : ClientPacket
     {
         public TaxiRequestEarlyLanding(WorldPacket packet) : base(packet) { }
 

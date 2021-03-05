@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class DismissCritter : ClientPacket
+    internal class DismissCritter : ClientPacket
     {
         public DismissCritter(WorldPacket packet) : base(packet) { }
 
@@ -35,14 +35,14 @@ namespace Game.Networking.Packets
         public ObjectGuid CritterGUID;
     }
 
-    class RequestPetInfo : ClientPacket
+    internal class RequestPetInfo : ClientPacket
     {
         public RequestPetInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class PetAbandon : ClientPacket
+    internal class PetAbandon : ClientPacket
     {
         public PetAbandon(WorldPacket packet) : base(packet) { }
 
@@ -54,7 +54,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Pet;
     }
 
-    class PetStopAttack : ClientPacket
+    internal class PetStopAttack : ClientPacket
     {
         public PetStopAttack(WorldPacket packet) : base(packet) { }
 
@@ -66,7 +66,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PetGUID;
     }
 
-    class PetSpellAutocast : ClientPacket
+    internal class PetSpellAutocast : ClientPacket
     {
         public PetSpellAutocast(WorldPacket packet) : base(packet) { }
 
@@ -138,7 +138,7 @@ namespace Game.Networking.Packets
         public List<PetSpellHistory> SpellHistory = new List<PetSpellHistory>();
     }
 
-    class PetStableList : ServerPacket
+    internal class PetStableList : ServerPacket
     {
         public PetStableList() : base(ServerOpcodes.PetStableList, ConnectionType.Instance) { }
 
@@ -164,7 +164,7 @@ namespace Game.Networking.Packets
         public List<PetStableInfo> Pets = new List<PetStableInfo>();
     }
 
-    class PetStableResult : ServerPacket
+    internal class PetStableResult : ServerPacket
     {
         public PetStableResult() : base(ServerOpcodes.PetStableResult, ConnectionType.Instance) { }
 
@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
         public StableResult Result;
     }
 
-    class PetLearnedSpells : ServerPacket
+    internal class PetLearnedSpells : ServerPacket
     {
         public PetLearnedSpells() : base(ServerOpcodes.PetLearnedSpells, ConnectionType.Instance) { }
 
@@ -190,7 +190,7 @@ namespace Game.Networking.Packets
         public List<uint> Spells = new List<uint>();
     }
 
-    class PetUnlearnedSpells : ServerPacket
+    internal class PetUnlearnedSpells : ServerPacket
     {
         public PetUnlearnedSpells() : base(ServerOpcodes.PetUnlearnedSpells, ConnectionType.Instance) { }
 
@@ -204,7 +204,7 @@ namespace Game.Networking.Packets
         public List<uint> Spells = new List<uint>();
     }
 
-    class PetNameInvalid : ServerPacket
+    internal class PetNameInvalid : ServerPacket
     {
         public PetNameInvalid() : base(ServerOpcodes.PetNameInvalid) { }
 
@@ -234,7 +234,7 @@ namespace Game.Networking.Packets
         public PetNameInvalidReason Result;
     }
 
-    class PetRename : ClientPacket
+    internal class PetRename : ClientPacket
     {
         public PetRename(WorldPacket packet) : base(packet) { }
 
@@ -263,7 +263,7 @@ namespace Game.Networking.Packets
         public PetRenameData RenameData;
     }
 
-    class PetAction : ClientPacket
+    internal class PetAction : ClientPacket
     {
         public PetAction(WorldPacket packet) : base(packet) { }
 
@@ -283,7 +283,7 @@ namespace Game.Networking.Packets
         public Vector3 ActionPosition;
     }
 
-    class PetSetAction : ClientPacket
+    internal class PetSetAction : ClientPacket
     {
         public PetSetAction(WorldPacket packet) : base(packet) { }
 
@@ -300,7 +300,7 @@ namespace Game.Networking.Packets
         public uint Action;
     }
 
-    class PetCancelAura : ClientPacket
+    internal class PetCancelAura : ClientPacket
     {
         public PetCancelAura(WorldPacket packet) : base(packet) { }
 
@@ -314,7 +314,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class SetPetSpecialization : ServerPacket
+    internal class SetPetSpecialization : ServerPacket
     {
         public SetPetSpecialization() : base(ServerOpcodes.SetPetSpecialization) { }
 
@@ -326,7 +326,7 @@ namespace Game.Networking.Packets
         public ushort SpecID;
     }
 
-    class PetActionFeedbackPacket : ServerPacket
+    internal class PetActionFeedbackPacket : ServerPacket
     {
         public PetActionFeedbackPacket() : base(ServerOpcodes.PetStableResult) { }
 
@@ -340,7 +340,7 @@ namespace Game.Networking.Packets
         public PetActionFeedback Response;
     }
 
-    class PetActionSound : ServerPacket
+    internal class PetActionSound : ServerPacket
     {
         public PetActionSound() : base(ServerOpcodes.PetStableResult) { }
 
@@ -372,7 +372,7 @@ namespace Game.Networking.Packets
         public sbyte ConsumedCharges;
     }
 
-    struct PetStableInfo
+    internal struct PetStableInfo
     {
         public uint PetSlot;
         public uint PetNumber;
@@ -383,7 +383,7 @@ namespace Game.Networking.Packets
         public string PetName;
     }
 
-    struct PetRenameData
+    internal struct PetRenameData
     {
         public ObjectGuid PetGUID;
         public int PetNumber;

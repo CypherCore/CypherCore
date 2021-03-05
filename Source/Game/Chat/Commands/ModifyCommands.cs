@@ -26,10 +26,10 @@ using System.Collections.Generic;
 namespace Game.Chat
 {
     [CommandGroup("modify", RBACPermissions.CommandModify)]
-    class ModifyCommand
+    internal class ModifyCommand
     {
         [Command("hp", RBACPermissions.CommandModifyHp)]
-        static bool HandleModifyHPCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyHPCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedPlayerOrSelf();
             if (CheckModifyResources(args, handler, target, out var hp, out var hpmax))
@@ -43,7 +43,7 @@ namespace Game.Chat
         }
 
         [Command("mana", RBACPermissions.CommandModifyMana)]
-        static bool HandleModifyManaCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyManaCommand(StringArguments args, CommandHandler handler)
         {
             int mana, manamax;
             var target = handler.GetSelectedPlayerOrSelf();
@@ -60,7 +60,7 @@ namespace Game.Chat
         }
 
         [Command("energy", RBACPermissions.CommandModifyEnergy)]
-        static bool HandleModifyEnergyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyEnergyCommand(StringArguments args, CommandHandler handler)
         {
             int energy, energymax;
             var target = handler.GetSelectedPlayerOrSelf();
@@ -76,7 +76,7 @@ namespace Game.Chat
         }
 
         [Command("rage", RBACPermissions.CommandModifyRage)]
-        static bool HandleModifyRageCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyRageCommand(StringArguments args, CommandHandler handler)
         {
             int rage, ragemax;
             var target = handler.GetSelectedPlayerOrSelf();
@@ -92,7 +92,7 @@ namespace Game.Chat
         }
 
         [Command("runicpower", RBACPermissions.CommandModifyRunicpower)]
-        static bool HandleModifyRunicPowerCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyRunicPowerCommand(StringArguments args, CommandHandler handler)
         {
             int rune, runemax;
             var target = handler.GetSelectedPlayerOrSelf();
@@ -108,7 +108,7 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandModifyFaction)]
-        static bool HandleModifyFactionCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyFactionCommand(StringArguments args, CommandHandler handler)
         {
             var pfactionid = handler.ExtractKeyFromLink(args, "Hfaction");
 
@@ -156,7 +156,7 @@ namespace Game.Chat
         }
 
         [Command("spell", RBACPermissions.CommandModifySpell)]
-        static bool HandleModifySpellCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifySpellCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -205,10 +205,10 @@ namespace Game.Chat
         }
 
         [Command("talentpoints", RBACPermissions.CommandModifyTalentpoints)]
-        static bool HandleModifyTalentCommand(StringArguments args, CommandHandler handler) { return false; }
+        private static bool HandleModifyTalentCommand(StringArguments args, CommandHandler handler) { return false; }
 
         [Command("scale", RBACPermissions.CommandModifyScale)]
-        static bool HandleModifyScaleCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyScaleCommand(StringArguments args, CommandHandler handler)
         {
             float Scale;
             var target = handler.GetSelectedUnit();
@@ -226,7 +226,7 @@ namespace Game.Chat
         }
 
         [Command("mount", RBACPermissions.CommandModifyMount)]
-        static bool HandleModifyMountCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyMountCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -263,7 +263,7 @@ namespace Game.Chat
         }
 
         [Command("money", RBACPermissions.CommandModifyMoney)]
-        static bool HandleModifyMoneyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyMoneyCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
@@ -323,7 +323,7 @@ namespace Game.Chat
         }
 
         [Command("honor", RBACPermissions.CommandModifyHonor)]
-        static bool HandleModifyHonorCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyHonorCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -349,7 +349,7 @@ namespace Game.Chat
         }
 
         [Command("drunk", RBACPermissions.CommandModifyDrunk)]
-        static bool HandleModifyDrunkCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyDrunkCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -366,7 +366,7 @@ namespace Game.Chat
         }
 
         [Command("reputation", RBACPermissions.CommandModifyReputation)]
-        static bool HandleModifyRepCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyRepCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -449,7 +449,7 @@ namespace Game.Chat
         }
 
         [Command("phase", RBACPermissions.CommandModifyPhase)]
-        static bool HandleModifyPhaseCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyPhaseCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -492,7 +492,7 @@ namespace Game.Chat
         }
 
         [Command("power", RBACPermissions.CommandModifyPower)]
-        static bool HandleModifyPowerCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyPowerCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -539,7 +539,7 @@ namespace Game.Chat
         }
 
         [Command("standstate", RBACPermissions.CommandModifyStandstate)]
-        static bool HandleModifyStandStateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyStandStateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -551,7 +551,7 @@ namespace Game.Chat
         }
 
         [Command("gender", RBACPermissions.CommandModifyGender)]
-        static bool HandleModifyGenderCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyGenderCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -639,7 +639,7 @@ namespace Game.Chat
         }
 
         [Command("currency", RBACPermissions.CommandModifyCurrency)]
-        static bool HandleModifyCurrencyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyCurrencyCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -666,7 +666,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("morph", RBACPermissions.CommandMorph)]
-        static bool HandleModifyMorphCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyMorphCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -687,7 +687,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("demorph", RBACPermissions.CommandDemorph)]
-        static bool HandleDeMorphCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleDeMorphCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedUnit();
             if (!target)
@@ -703,7 +703,7 @@ namespace Game.Chat
         }
 
         [Command("xp", RBACPermissions.CommandModifyXp)]
-        static bool HandleModifyXPCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleModifyXPCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -732,16 +732,16 @@ namespace Game.Chat
         }
 
         [CommandGroup("speed", RBACPermissions.CommandModifySpeed)]
-        class ModifySpeed
+        private class ModifySpeed
         {
             [Command("", RBACPermissions.CommandModifySpeed)]
-            static bool HandleModifySpeedCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifySpeedCommand(StringArguments args, CommandHandler handler)
             {
                 return HandleModifyASpeedCommand(args, handler);
             }
 
             [Command("all", RBACPermissions.CommandModifySpeedAll)]
-            static bool HandleModifyASpeedCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifyASpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float allSpeed;
                 var target = handler.GetSelectedPlayerOrSelf();
@@ -758,7 +758,7 @@ namespace Game.Chat
             }
 
             [Command("swim", RBACPermissions.CommandModifySpeedSwim)]
-            static bool HandleModifySwimCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifySwimCommand(StringArguments args, CommandHandler handler)
             {
                 float swimSpeed;
                 var target = handler.GetSelectedPlayerOrSelf();
@@ -772,7 +772,7 @@ namespace Game.Chat
             }
 
             [Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
-            static bool HandleModifyBWalkCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifyBWalkCommand(StringArguments args, CommandHandler handler)
             {
                 float backSpeed;
                 var target = handler.GetSelectedPlayerOrSelf();
@@ -786,7 +786,7 @@ namespace Game.Chat
             }
 
             [Command("fly", RBACPermissions.CommandModifySpeedFly)]
-            static bool HandleModifyFlyCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifyFlyCommand(StringArguments args, CommandHandler handler)
             {
                 float flySpeed;
                 var target = handler.GetSelectedPlayerOrSelf();
@@ -800,7 +800,7 @@ namespace Game.Chat
             }
 
             [Command("walk", RBACPermissions.CommandModifySpeedWalk)]
-            static bool HandleModifyWalkSpeedCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleModifyWalkSpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float Speed;
                 var target = handler.GetSelectedPlayerOrSelf();
@@ -814,7 +814,7 @@ namespace Game.Chat
             }
         }
 
-        static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
+        private static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
         {
             var player = target.ToPlayer();
             if (player)
@@ -825,7 +825,7 @@ namespace Game.Chat
             }
         }
 
-        static bool CheckModifyResources(StringArguments args, CommandHandler handler, Player target, out int res, out int resmax, byte multiplier = 1)
+        private static bool CheckModifyResources(StringArguments args, CommandHandler handler, Player target, out int res, out int resmax, byte multiplier = 1)
         {
             res = 0;
             resmax = 0;
@@ -857,7 +857,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool CheckModifySpeed(StringArguments args, CommandHandler handler, Unit target, out float speed, float minimumBound, float maximumBound, bool checkInFlight = true)
+        private static bool CheckModifySpeed(StringArguments args, CommandHandler handler, Unit target, out float speed, float minimumBound, float maximumBound, bool checkInFlight = true)
         {
             speed = 0f;
             if (args.Empty())

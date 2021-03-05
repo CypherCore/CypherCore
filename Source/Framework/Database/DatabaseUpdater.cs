@@ -244,12 +244,12 @@ namespace Framework.Database
             return true;
         }
 
-        string GetSourceDirectory()
+        private string GetSourceDirectory()
         {
             return ConfigMgr.GetDefaultValue("Updates.SourcePath", "../../../");
         }
 
-        uint ApplyTimedFile(string path)
+        private uint ApplyTimedFile(string path)
         {
             // Benchmark query speed
             var oldMSTime = Time.GetMSTime();
@@ -262,7 +262,7 @@ namespace Framework.Database
             return Time.GetMSTimeDiffToNow(oldMSTime);
         }
 
-        void UpdateEntry(AppliedFileEntry entry, uint speed)
+        private void UpdateEntry(AppliedFileEntry entry, uint speed)
         {
             var update = $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {speed})";
 
@@ -270,7 +270,7 @@ namespace Framework.Database
             _database.Execute(update);
         }
 
-        void RenameEntry(string from, string to)
+        private void RenameEntry(string from, string to)
         {
             // Delete target if it exists
             {
@@ -289,7 +289,7 @@ namespace Framework.Database
             }
         }
 
-        void CleanUp(Dictionary<string, AppliedFileEntry> storage)
+        private void CleanUp(Dictionary<string, AppliedFileEntry> storage)
         {
             if (storage.Empty())
                 return;
@@ -310,7 +310,7 @@ namespace Framework.Database
             _database.Execute(update);
         }
 
-        void UpdateState(string name, State state)
+        private void UpdateState(string name, State state)
         {
             var update = $"UPDATE `updates` SET `state`=\'{state}\' WHERE `name`=\"{name}\"";
 
@@ -318,7 +318,7 @@ namespace Framework.Database
             _database.Execute(update);
         }
 
-        List<FileEntry> GetFileList()
+        private List<FileEntry> GetFileList()
         {
             var fileList = new List<FileEntry>();
 
@@ -348,7 +348,7 @@ namespace Framework.Database
             return fileList;
         }
 
-        Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
+        private Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
         {
             var map = new Dictionary<string, AppliedFileEntry>();
 
@@ -366,7 +366,7 @@ namespace Framework.Database
             return map;
         }
 
-        IEnumerable<FileEntry> GetFilesFromDirectory(string directory, State state)
+        private IEnumerable<FileEntry> GetFilesFromDirectory(string directory, State state)
         {
             var queue = new Queue<string>();
             queue.Enqueue(directory);
@@ -393,7 +393,7 @@ namespace Framework.Database
             }
         }
 
-        string CalculateHash(string fileName)
+        private string CalculateHash(string fileName)
         {
             using (SHA1 sha1 = new SHA1Managed())
             {
@@ -402,7 +402,7 @@ namespace Framework.Database
             }
         }
 
-        MySqlBase<T> _database;
+        private MySqlBase<T> _database;
     }
 
     public class AppliedFileEntry
@@ -438,7 +438,7 @@ namespace Framework.Database
         public State state;
     }
 
-    struct UpdateResult
+    internal struct UpdateResult
     {
         public int updated;
         public int recent;
@@ -451,7 +451,7 @@ namespace Framework.Database
         ARCHIVED
     }
 
-    enum UpdateMode
+    internal enum UpdateMode
     {
         Apply,
         Rehash

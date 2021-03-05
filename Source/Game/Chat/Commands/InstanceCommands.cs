@@ -25,10 +25,10 @@ using Game.DataStorage;
 namespace Game.Chat
 {
     [CommandGroup("instance", RBACPermissions.CommandInstance, true)]
-    class InstanceCommands
+    internal class InstanceCommands
     {
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
-        static bool HandleInstanceListBinds(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceListBinds(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)
@@ -72,7 +72,7 @@ namespace Game.Chat
         }
 
         [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleInstanceUnbind(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceUnbind(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -116,7 +116,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandInstanceStats, true)]
-        static bool HandleInstanceStats(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceStats(StringArguments args, CommandHandler handler)
         {
             handler.SendSysMessage("instances loaded: {0}", Global.MapMgr.GetNumInstances());
             handler.SendSysMessage("players in instances: {0}", Global.MapMgr.GetNumPlayersInInstances());
@@ -128,7 +128,7 @@ namespace Game.Chat
         }
 
         [Command("savedata", RBACPermissions.CommandInstanceSavedata)]
-        static bool HandleInstanceSaveData(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceSaveData(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var map = player.GetMap().ToInstanceMap();
@@ -150,7 +150,7 @@ namespace Game.Chat
         }
 
         [Command("setbossstate", RBACPermissions.CommandInstanceSetBossState)]
-        static bool HandleInstanceSetBossState(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceSetBossState(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -214,7 +214,7 @@ namespace Game.Chat
         }
 
         [Command("getbossstate", RBACPermissions.CommandInstanceGetBossState)]
-        static bool HandleInstanceGetBossState(StringArguments args, CommandHandler handler)
+        private static bool HandleInstanceGetBossState(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

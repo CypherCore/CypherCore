@@ -38,7 +38,7 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
+        private void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
         {
             var additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
             ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
@@ -210,8 +210,8 @@ namespace Game.Entities
             // Apply all azerite item mods, azerite empowered item mods will get applied through its spell script
             ApplyAllAzeriteItemMods(true);
         }
-        
-        Item _LoadItem(SQLTransaction trans, uint zoneId, uint timeDiff, SQLFields fields)
+
+        private Item _LoadItem(SQLTransaction trans, uint zoneId, uint timeDiff, SQLFields fields)
         {
             var itemGuid = fields.Read<ulong>(0);
             var itemEntry = fields.Read<uint>(1);
@@ -346,8 +346,8 @@ namespace Game.Entities
             
             return null;
         }
-        
-        void _LoadSkills(SQLResult result)
+
+        private void _LoadSkills(SQLResult result)
         {
             var count = 0u;
             var loadedSkillValues = new Dictionary<uint, uint>();
@@ -455,8 +455,8 @@ namespace Game.Entities
             if (HasSkill(SkillType.FistWeapons))
                 SetSkill(SkillType.FistWeapons, 0, GetSkillValue(SkillType.Unarmed), GetMaxSkillValueForLevel());
         }
-        
-        void _LoadSpells(SQLResult result)
+
+        private void _LoadSpells(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -468,7 +468,7 @@ namespace Game.Entities
             }
         }
 
-        void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
+        private void _LoadAuras(SQLResult auraResult, SQLResult effectResult, uint timediff)
         {
             Log.outDebug(LogFilter.Player, "Loading auras for player {0}", GetGUID().ToString());
 
@@ -566,8 +566,8 @@ namespace Game.Entities
                 while (auraResult.NextRow());
             }
         }
-        
-        bool _LoadHomeBind(SQLResult result)
+
+        private bool _LoadHomeBind(SQLResult result)
         {
             var info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
             if (info == null)
@@ -621,8 +621,8 @@ namespace Game.Entities
 
             return true;
         }
-        
-        void _LoadCurrency(SQLResult result)
+
+        private void _LoadCurrency(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -644,15 +644,15 @@ namespace Game.Entities
                 _currencyStorage.Add(currencyID, cur);
             } while (result.NextRow());
         }
-        
-        void LoadActions(SQLResult result)
+
+        private void LoadActions(SQLResult result)
         {
             _LoadActions(result);
 
             SendActionButtons(1);
         }
-        
-        void _LoadActions(SQLResult result)
+
+        private void _LoadActions(SQLResult result)
         {
             m_actionButtons.Clear();
             if (!result.IsEmpty())
@@ -677,8 +677,8 @@ namespace Game.Entities
                 } while (result.NextRow());
             }
         }
-        
-        void _LoadQuestStatus(SQLResult result)
+
+        private void _LoadQuestStatus(SQLResult result)
         {
             ushort slot = 0;
             if (!result.IsEmpty())
@@ -749,8 +749,8 @@ namespace Game.Entities
             for (var i = slot; i < SharedConst.MaxQuestLogSize; ++i)
                 SetQuestSlot(i, 0);
         }
-        
-        void _LoadQuestStatusObjectives(SQLResult result)
+
+        private void _LoadQuestStatusObjectives(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -785,8 +785,8 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
-        
-        void _LoadQuestStatusRewarded(SQLResult result)
+
+        private void _LoadQuestStatusRewarded(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -843,8 +843,8 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
-        
-        void _LoadDailyQuestStatus(SQLResult result)
+
+        private void _LoadDailyQuestStatus(SQLResult result)
         {
             m_DFQuests.Clear();
 
@@ -884,8 +884,8 @@ namespace Game.Entities
 
             m_DailyQuestChanged = false;
         }
-        
-        void _LoadWeeklyQuestStatus(SQLResult result)
+
+        private void _LoadWeeklyQuestStatus(SQLResult result)
         {
             m_weeklyquests.Clear();
 
@@ -910,8 +910,8 @@ namespace Game.Entities
 
             m_WeeklyQuestChanged = false;
         }
-        
-        void _LoadSeasonalQuestStatus(SQLResult result)
+
+        private void _LoadSeasonalQuestStatus(SQLResult result)
         {
             m_seasonalquests.Clear();
 
@@ -937,8 +937,8 @@ namespace Game.Entities
 
             m_SeasonalQuestChanged = false;
         }
-        
-        void _LoadMonthlyQuestStatus()
+
+        private void _LoadMonthlyQuestStatus()
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_MONTHLY);
             stmt.AddValue(0, GetGUID().GetCounter());
@@ -967,8 +967,8 @@ namespace Game.Entities
 
             m_MonthlyQuestChanged = false;
         }
-        
-        void _LoadTalents(SQLResult result)
+
+        private void _LoadTalents(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -981,8 +981,8 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
-        
-        void _LoadPvpTalents(SQLResult result)
+
+        private void _LoadPvpTalents(SQLResult result)
         {
             // "SELECT talentID0, talentID1, talentID2, talentID3, talentGroup FROM character_pvp_talent WHERE guid = ?"
             if (!result.IsEmpty())
@@ -999,8 +999,8 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
-        
-        void _LoadGlyphs(SQLResult result)
+
+        private void _LoadGlyphs(SQLResult result)
         {
             // SELECT talentGroup, glyphId from character_glyphs WHERE guid = ?
             if (result.IsEmpty())
@@ -1020,8 +1020,8 @@ namespace Game.Entities
 
             } while (result.NextRow());
         }
-        
-        void _LoadGlyphAuras()
+
+        private void _LoadGlyphAuras()
         {
             foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
@@ -1048,8 +1048,8 @@ namespace Game.Entities
 
             RemoveAtLoginFlag(AtLoginFlags.Resurrect);
         }
-        
-        void _LoadBoundInstances(SQLResult result)
+
+        private void _LoadBoundInstances(SQLResult result)
         {
             m_boundInstances.Clear();
 
@@ -1120,8 +1120,8 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
-        
-        void _LoadVoidStorage(SQLResult result)
+
+        private void _LoadVoidStorage(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1171,8 +1171,8 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
-        
-        void _LoadMailInit(SQLResult resultUnread, SQLResult resultDelivery)
+
+        private void _LoadMailInit(SQLResult resultUnread, SQLResult resultDelivery)
         {
             if (!resultUnread.IsEmpty())
                 unReadMails = (byte)resultUnread.Read<ulong>(0);
@@ -1266,7 +1266,7 @@ namespace Game.Entities
             m_mailsLoaded = true;
         }
 
-        static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
+        private static Item _LoadMailedItem(ObjectGuid playerGuid, Player player, uint mailId, Mail mail, SQLFields fields, ItemAdditionalLoadInfo addionalData)
         {
             var itemGuid = fields.Read<ulong>(0);
             var itemEntry = fields.Read<uint>(1);
@@ -1335,8 +1335,8 @@ namespace Game.Entities
 
             return item;
         }
-        
-        void _LoadDeclinedNames(SQLResult result)
+
+        private void _LoadDeclinedNames(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1345,8 +1345,8 @@ namespace Game.Entities
             for (var i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 _declinedname.name[i] = result.Read<string>(i);
         }
-        
-        void _LoadArenaTeamInfo(SQLResult result)
+
+        private void _LoadArenaTeamInfo(SQLResult result)
         {
             // arenateamid, played_week, played_season, personal_rating
             ushort[] personalRatingCache = { 0, 0, 0 };
@@ -1383,8 +1383,8 @@ namespace Game.Entities
                 SetArenaTeamInfoField(slot, ArenaTeamInfoType.PersonalRating, personalRatingCache[slot]);
             }
         }
-        
-        void _LoadGroup(SQLResult result)
+
+        private void _LoadGroup(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -1409,8 +1409,8 @@ namespace Game.Entities
             if (!GetGroup() || !GetGroup().IsLeader(GetGUID()))
                 RemovePlayerFlag(PlayerFlags.GroupLeader);
         }
-        
-        void _LoadInstanceTimeRestrictions(SQLResult result)
+
+        private void _LoadInstanceTimeRestrictions(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1420,8 +1420,8 @@ namespace Game.Entities
                 _instanceResetTimes.Add(result.Read<uint>(0), result.Read<long>(1));
             } while (result.NextRow());
         }
-        
-        void _LoadEquipmentSets(SQLResult result)
+
+        private void _LoadEquipmentSets(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1460,8 +1460,8 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
-        
-        void _LoadTransmogOutfits(SQLResult result)
+
+        private void _LoadTransmogOutfits(SQLResult result)
         {
             //             0         1     2         3            4            5            6            7            8            9
             //SELECT setguid, setindex, name, iconname, ignore_mask, appearance0, appearance1, appearance2, appearance3, appearance4,
@@ -1502,8 +1502,8 @@ namespace Game.Entities
                 _equipmentSets[eqSet.Data.Guid] = eqSet;
             } while (result.NextRow());
         }
-        
-        void _LoadCUFProfiles(SQLResult result)
+
+        private void _LoadCUFProfiles(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1534,14 +1534,14 @@ namespace Game.Entities
             }
             while (result.NextRow());
         }
-        
-        void _LoadRandomBGStatus(SQLResult result)
+
+        private void _LoadRandomBGStatus(SQLResult result)
         {
             if (!result.IsEmpty())
                 m_IsBGRandomWinner = true;
         }
-        
-        void _LoadBGData(SQLResult result)
+
+        private void _LoadBGData(SQLResult result)
         {
             if (result.IsEmpty())
                 return;
@@ -1557,7 +1557,7 @@ namespace Game.Entities
             m_bgData.mountSpell = result.Read<uint>(9);
         }
 
-        void _SaveInventory(SQLTransaction trans)
+        private void _SaveInventory(SQLTransaction trans)
         {
             // force items in buyback slots to new state
             // and remove those that aren't already
@@ -1685,8 +1685,8 @@ namespace Game.Entities
             }
             ItemUpdateQueue.Clear();
         }
-        
-        void _SaveSkills(SQLTransaction trans)
+
+        private void _SaveSkills(SQLTransaction trans)
         {
             var skillInfoField = (SkillInfo)m_activePlayerData.Skill;
             foreach (var pair in mSkillStatus.ToList())
@@ -1728,8 +1728,8 @@ namespace Game.Entities
                 pair.Value.State = SkillState.Unchanged;
             }
         }
-        
-        void _SaveSpells(SQLTransaction trans)
+
+        private void _SaveSpells(SQLTransaction trans)
         {
             foreach (var spell in m_spells.ToList())
             {
@@ -1763,8 +1763,8 @@ namespace Game.Entities
                     spell.Value.State = PlayerSpellState.Unchanged;
             }
         }
-        
-        void _SaveAuras(SQLTransaction trans)
+
+        private void _SaveAuras(SQLTransaction trans)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_EFFECT);
             stmt.AddValue(0, GetGUID().GetCounter());
@@ -1818,7 +1818,8 @@ namespace Game.Entities
                 }
             }
         }
-        void _SaveGlyphs(SQLTransaction trans)
+
+        private void _SaveGlyphs(SQLTransaction trans)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GLYPHS);
             stmt.AddValue(0, GetGUID().GetCounter());
@@ -1838,7 +1839,8 @@ namespace Game.Entities
                 }
             }
         }
-        void _SaveCurrency(SQLTransaction trans)
+
+        private void _SaveCurrency(SQLTransaction trans)
         {
             foreach (var pair in _currencyStorage)
             {
@@ -1898,7 +1900,7 @@ namespace Game.Entities
             SavePlayerCustomizations(trans, guid, customizations);
         }
 
-        void _SaveCustomizations(SQLTransaction trans)
+        private void _SaveCustomizations(SQLTransaction trans)
         {
             if (!m_customizationsChanged)
                 return;
@@ -1908,7 +1910,7 @@ namespace Game.Entities
             SavePlayerCustomizations(trans, GetGUID().GetCounter(), m_playerData.Customizations);
         }
 
-        void _SaveActions(SQLTransaction trans)
+        private void _SaveActions(SQLTransaction trans)
         {
             foreach (var pair in m_actionButtons.ToList())
             {
@@ -1951,8 +1953,8 @@ namespace Game.Entities
                 }
             }
         }
-        
-        void _SaveQuestStatus(SQLTransaction trans)
+
+        private void _SaveQuestStatus(SQLTransaction trans)
         {
             var isTransaction = trans != null;
             if (!isTransaction)
@@ -2027,8 +2029,8 @@ namespace Game.Entities
             if (!isTransaction)
                 DB.Characters.CommitTransaction(trans);
         }
-        
-        void _SaveDailyQuestStatus(SQLTransaction trans)
+
+        private void _SaveDailyQuestStatus(SQLTransaction trans)
         {
             if (!m_DailyQuestChanged)
                 return;
@@ -2063,8 +2065,8 @@ namespace Game.Entities
                 }
             }
         }
-        
-        void _SaveWeeklyQuestStatus(SQLTransaction trans)
+
+        private void _SaveWeeklyQuestStatus(SQLTransaction trans)
         {
             if (!m_WeeklyQuestChanged || m_weeklyquests.Empty())
                 return;
@@ -2084,8 +2086,8 @@ namespace Game.Entities
 
             m_WeeklyQuestChanged = false;
         }
-        
-        void _SaveSeasonalQuestStatus(SQLTransaction trans)
+
+        private void _SaveSeasonalQuestStatus(SQLTransaction trans)
         {
             if (!m_SeasonalQuestChanged)
                 return;
@@ -2109,8 +2111,8 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
-        
-        void _SaveMonthlyQuestStatus(SQLTransaction trans)
+
+        private void _SaveMonthlyQuestStatus(SQLTransaction trans)
         {
             if (!m_MonthlyQuestChanged || m_monthlyquests.Empty())
                 return;
@@ -2130,8 +2132,8 @@ namespace Game.Entities
 
             m_MonthlyQuestChanged = false;
         }
-        
-        void _SaveTalents(SQLTransaction trans)
+
+        private void _SaveTalents(SQLTransaction trans)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TALENT);
             stmt.AddValue(0, GetGUID().GetCounter());
@@ -2237,8 +2239,8 @@ namespace Game.Entities
 
             m_mailsUpdated = false;
         }
-        
-        void _SaveStats(SQLTransaction trans)
+
+        private void _SaveStats(SQLTransaction trans)
         {
             // check if stat saving is enabled and if char level is high enough
             if (WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave) == 0 || GetLevel() < WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave))
@@ -2290,8 +2292,8 @@ namespace Game.Entities
             _SaveCurrency(trans);
             SaveGoldToDB(trans);
         }
-        
-        void _SaveEquipmentSets(SQLTransaction trans)
+
+        private void _SaveEquipmentSets(SQLTransaction trans)
         {
             foreach (var pair in _equipmentSets)
             {
@@ -2383,8 +2385,8 @@ namespace Game.Entities
                 }
             }
         }
-        
-        void _SaveVoidStorage(SQLTransaction trans)
+
+        private void _SaveVoidStorage(SQLTransaction trans)
         {
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
             {
@@ -2420,8 +2422,8 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
-        
-        void _SaveCUFProfiles(SQLTransaction trans)
+
+        private void _SaveCUFProfiles(SQLTransaction trans)
         {
             var lowGuid = GetGUID().GetCounter();
             for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
@@ -2457,8 +2459,8 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
-        
-        void _SaveInstanceTimeRestrictions(SQLTransaction trans)
+
+        private void _SaveInstanceTimeRestrictions(SQLTransaction trans)
         {
             if (_instanceResetTimes.Empty())
                 return;
@@ -2476,8 +2478,8 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
-        
-        void _SaveBGData(SQLTransaction trans)
+
+        private void _SaveBGData(SQLTransaction trans)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_BGDATA);
             stmt.AddValue(0, GetGUID().GetCounter());
@@ -3668,7 +3670,8 @@ namespace Game.Entities
             if (pet)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
-        void DeleteSpellFromAllPlayers(uint spellId)
+
+        private void DeleteSpellFromAllPlayers(uint spellId)
         {
             var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_SPELL_SPELLS);
             stmt.AddValue(0, spellId);

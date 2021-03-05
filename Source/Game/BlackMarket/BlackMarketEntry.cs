@@ -101,7 +101,7 @@ namespace Game.BlackMarket
             return (uint)(_secondsRemaining - (Time.UnixTime - Global.BlackMarketMgr.GetLastUpdate()));
         }
 
-        long GetExpirationTime()
+        private long GetExpirationTime()
         {
             return Time.UnixTime + GetSecondsRemaining();
         }
@@ -215,24 +215,24 @@ namespace Game.BlackMarket
         public uint GetMarketId() { return _marketId; }
 
         public ulong GetCurrentBid() { return _currentBid; }
-        void SetCurrentBid(ulong bid) { _currentBid = bid; }
+        private void SetCurrentBid(ulong bid) { _currentBid = bid; }
 
         public uint GetNumBids() { return _numBids; }
-        void SetNumBids(uint numBids) { _numBids = numBids; }
+        private void SetNumBids(uint numBids) { _numBids = numBids; }
 
         public ulong GetBidder() { return _bidder; }
-        void SetBidder(ulong bidder) { _bidder = bidder; }
+        private void SetBidder(ulong bidder) { _bidder = bidder; }
 
         public ulong GetMinIncrement() { return (_currentBid / 20) - ((_currentBid / 20) % MoneyConstants.Gold); } //5% increase every bid (has to be round gold value)
 
         public void MailSent() { _mailSent = true; } // Set when mail has been sent
         public bool GetMailSent() { return _mailSent; }
 
-        uint _marketId;
-        ulong _currentBid;
-        uint _numBids;
-        ulong _bidder;
-        uint _secondsRemaining;
-        bool _mailSent;
+        private uint _marketId;
+        private ulong _currentBid;
+        private uint _numBids;
+        private ulong _bidder;
+        private uint _secondsRemaining;
+        private bool _mailSent;
     }
 }

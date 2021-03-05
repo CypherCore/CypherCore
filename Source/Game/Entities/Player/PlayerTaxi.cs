@@ -28,8 +28,8 @@ namespace Game.Entities
     public class PlayerTaxi
     {
         public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
-        List<uint> m_TaxiDestinations = new List<uint>();
-        uint m_flightMasterFactionId;
+        private List<uint> m_TaxiDestinations = new List<uint>();
+        private uint m_flightMasterFactionId;
 
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
         {
@@ -248,7 +248,8 @@ namespace Game.Entities
 
         public void ClearTaxiDestinations() { m_TaxiDestinations.Clear(); }
         public void AddTaxiDestination(uint dest) { m_TaxiDestinations.Add(dest); }
-        void SetTaxiDestination(List<uint> nodes)
+
+        private void SetTaxiDestination(List<uint> nodes)
         {
             m_TaxiDestinations.Clear();
             m_TaxiDestinations.AddRange(nodes);

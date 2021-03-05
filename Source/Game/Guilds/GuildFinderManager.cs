@@ -27,7 +27,7 @@ namespace Game.Guilds
 {
     public class GuildFinderManager : Singleton<GuildFinderManager>
     {
-        GuildFinderManager() { }
+        private GuildFinderManager() { }
 
         public void LoadFromDB()
         {
@@ -35,7 +35,7 @@ namespace Game.Guilds
             LoadMembershipRequests();
         }
 
-        void LoadGuildSettings()
+        private void LoadGuildSettings()
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading guild finder guild-related settings...");
             //                                                           0                1             2                  3             4           5             6         7
@@ -75,7 +75,7 @@ namespace Game.Guilds
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} guild finder guild-related settings in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        void LoadMembershipRequests()
+        private void LoadMembershipRequests()
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading guild finder membership requests...");
             //                                                      0         1           2            3           4         5         6
@@ -339,7 +339,7 @@ namespace Game.Guilds
                 SendApplicantListUpdate(guild);
         }
 
-        void SendApplicantListUpdate(Guild guild)
+        private void SendApplicantListUpdate(Guild guild)
         {
             var applicantListChanged = new LFGuildApplicantListChanged();
 
@@ -350,7 +350,7 @@ namespace Game.Guilds
                 player.SendPacket(applicantListChanged);
         }
 
-        void SendMembershipRequestListUpdate(Player player)
+        private void SendMembershipRequestListUpdate(Player player)
         {
             player.SendPacket(new LFGuildApplicationsListChanged());
         }
@@ -359,9 +359,9 @@ namespace Game.Guilds
 
         public LFGuildSettings GetGuildSettings(ObjectGuid guildGuid) { return _guildSettings.LookupByKey(guildGuid); }
 
-        Dictionary<ObjectGuid, LFGuildSettings> _guildSettings = new Dictionary<ObjectGuid, LFGuildSettings>();
-        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByGuild = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
-        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByPlayer = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
+        private Dictionary<ObjectGuid, LFGuildSettings> _guildSettings = new Dictionary<ObjectGuid, LFGuildSettings>();
+        private Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByGuild = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
+        private Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByPlayer = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
     }
 
     public class MembershipRequest
@@ -403,16 +403,16 @@ namespace Game.Guilds
         public long GetExpiryTime() { return _time + 30 * 24 * 3600; } // Adding 30 days
         public string GetComment() { return _comment; }
 
-        string _comment = "";
+        private string _comment = "";
 
-        ObjectGuid _guildId;
-        ObjectGuid _playerGUID;
+        private ObjectGuid _guildId;
+        private ObjectGuid _playerGUID;
 
-        byte _availability;
-        byte _classRoles;
-        byte _interests;
+        private byte _availability;
+        private byte _classRoles;
+        private byte _interests;
 
-        long _time;
+        private long _time;
     }
 
     public class LFGuildPlayer
@@ -463,12 +463,12 @@ namespace Game.Guilds
         public byte GetLevel() { return _level; }
         public string GetComment() { return _comment; }
 
-        string _comment = "";
-        ObjectGuid _guid;
-        byte _roles;
-        byte _availability;
-        byte _interests;
-        byte _level;
+        private string _comment = "";
+        private ObjectGuid _guid;
+        private byte _roles;
+        private byte _availability;
+        private byte _interests;
+        private byte _level;
     }
 
     public class LFGuildSettings : LFGuildPlayer
@@ -507,11 +507,11 @@ namespace Game.Guilds
         }
 
         public bool IsListed() { return _listed; }
-        void SetListed(bool state) { _listed = state; }
+        private void SetListed(bool state) { _listed = state; }
 
         public uint GetTeam() { return _team; }
 
-        bool _listed;
-        uint _team;
+        private bool _listed;
+        private uint _team;
     }
 }

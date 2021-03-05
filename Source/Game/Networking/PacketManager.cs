@@ -95,7 +95,7 @@ namespace Game.Networking
             return _clientPacketTable.ContainsKey(opcode);
         }
 
-        static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new ConcurrentDictionary<ClientOpcodes, PacketHandler>();
+        private static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new ConcurrentDictionary<ClientOpcodes, PacketHandler>();
 
         public static bool IsInstanceOnlyOpcode(ServerOpcodes opcode)
         {
@@ -141,7 +141,7 @@ namespace Game.Networking
             }
         }
 
-        static Action<WorldSession, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
+        private static Action<WorldSession, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
         {
             // create first delegate. It is not fine because its 
             // signature contains unknown types T and P1
@@ -151,8 +151,8 @@ namespace Game.Networking
             return delegate (WorldSession target, ClientPacket p) { d(target, (P1)p); };
         }
 
-        Action<WorldSession, ClientPacket> methodCaller;
-        Type packetType;
+        private Action<WorldSession, ClientPacket> methodCaller;
+        private Type packetType;
         public PacketProcessing ProcessingPlace { get; private set; }
         public SessionStatus sessionStatus { get; private set; }
     }

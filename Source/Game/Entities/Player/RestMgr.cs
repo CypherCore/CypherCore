@@ -4,11 +4,11 @@ namespace Game.Entities
 {
     public class RestMgr
     {
-        Player _player;
-        long _restTime;
-        uint _innAreaTriggerId;
-        float[] _restBonus = new float[(int)RestTypes.Max];
-        RestFlag _restFlagMask;
+        private Player _player;
+        private long _restTime;
+        private uint _innAreaTriggerId;
+        private float[] _restBonus = new float[(int)RestTypes.Max];
+        private RestFlag _restFlagMask;
 
         public RestMgr(Player player)
         {

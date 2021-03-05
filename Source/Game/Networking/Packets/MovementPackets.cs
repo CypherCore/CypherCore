@@ -704,7 +704,7 @@ namespace Game.Networking.Packets
         public Optional<float> PitchRate;
     }
 
-    class MoveApplyMovementForce : ServerPacket
+    internal class MoveApplyMovementForce : ServerPacket
     {
         public MoveApplyMovementForce() : base(ServerOpcodes.MoveApplyMovementForce, ConnectionType.Instance) { }
 
@@ -720,7 +720,7 @@ namespace Game.Networking.Packets
         public MovementForce Force;
     }
 
-    class MoveApplyMovementForceAck : ClientPacket
+    internal class MoveApplyMovementForceAck : ClientPacket
     {
         public MoveApplyMovementForceAck(WorldPacket packet) : base(packet) { }
 
@@ -734,7 +734,7 @@ namespace Game.Networking.Packets
         public MovementForce Force = new MovementForce();
     }
 
-    class MoveRemoveMovementForce : ServerPacket
+    internal class MoveRemoveMovementForce : ServerPacket
     {
         public MoveRemoveMovementForce() : base(ServerOpcodes.MoveRemoveMovementForce, ConnectionType.Instance) { }
 
@@ -750,7 +750,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ID;
     }
 
-    class MoveRemoveMovementForceAck : ClientPacket
+    internal class MoveRemoveMovementForceAck : ClientPacket
     {
         public MoveRemoveMovementForceAck(WorldPacket packet) : base(packet) { }
 
@@ -764,7 +764,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ID;
     }
 
-    class MoveUpdateApplyMovementForce : ServerPacket
+    internal class MoveUpdateApplyMovementForce : ServerPacket
     {
         public MoveUpdateApplyMovementForce() : base(ServerOpcodes.MoveUpdateApplyMovementForce) { }
 
@@ -778,7 +778,7 @@ namespace Game.Networking.Packets
         public MovementForce Force = new MovementForce();
     }
 
-    class MoveUpdateRemoveMovementForce : ServerPacket
+    internal class MoveUpdateRemoveMovementForce : ServerPacket
     {
         public MoveUpdateRemoveMovementForce() : base(ServerOpcodes.MoveUpdateRemoveMovementForce) { }
 
@@ -792,7 +792,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TriggerGUID;
     }
 
-    class MoveTeleportAck : ClientPacket
+    internal class MoveTeleportAck : ClientPacket
     {
         public MoveTeleportAck(WorldPacket packet) : base(packet) { }
 
@@ -804,8 +804,8 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        int AckIndex;
-        int MoveTime;
+        private int AckIndex;
+        private int MoveTime;
     }
 
     public class MovementAckMessage : ClientPacket
@@ -858,7 +858,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class MoveKnockBack : ServerPacket
+    internal class MoveKnockBack : ServerPacket
     {
         public MoveKnockBack() : base(ServerOpcodes.MoveKnockBack, ConnectionType.Instance) { }
 
@@ -888,7 +888,7 @@ namespace Game.Networking.Packets
         public MovementInfo Status;
     }
 
-    class MoveKnockBackAck : ClientPacket
+    internal class MoveKnockBackAck : ClientPacket
     {
         public MoveKnockBackAck(WorldPacket packet) : base(packet) { }
 
@@ -906,7 +906,7 @@ namespace Game.Networking.Packets
         public Optional<MoveKnockBackSpeeds> Speeds;
     }
 
-    class MoveSetCollisionHeight : ServerPacket
+    internal class MoveSetCollisionHeight : ServerPacket
     {
         public MoveSetCollisionHeight() : base(ServerOpcodes.MoveSetCollisionHeight) { }
 
@@ -964,7 +964,7 @@ namespace Game.Networking.Packets
         public float Height = 1.0f;
     }
 
-    class MoveTimeSkipped : ClientPacket
+    internal class MoveTimeSkipped : ClientPacket
     {
         public MoveTimeSkipped(WorldPacket packet) : base(packet) { }
 
@@ -978,7 +978,7 @@ namespace Game.Networking.Packets
         public uint TimeSkipped;
     }
 
-    class SummonResponse : ClientPacket
+    internal class SummonResponse : ClientPacket
     {
         public SummonResponse(WorldPacket packet) : base(packet) { }
 
@@ -1007,7 +1007,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class MoveSplineDone : ClientPacket
+    internal class MoveSplineDone : ClientPacket
     {
         public MoveSplineDone(WorldPacket packet) : base(packet) { }
 
@@ -1021,7 +1021,7 @@ namespace Game.Networking.Packets
         public int SplineID;
     }
 
-    class SummonRequest : ServerPacket
+    internal class SummonRequest : ServerPacket
     {
         public SummonRequest() : base(ServerOpcodes.SummonRequest, ConnectionType.Instance) { }
 
@@ -1048,7 +1048,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class SuspendToken : ServerPacket
+    internal class SuspendToken : ServerPacket
     {
         public SuspendToken() : base(ServerOpcodes.SuspendToken, ConnectionType.Instance) { }
 
@@ -1063,7 +1063,7 @@ namespace Game.Networking.Packets
         public uint Reason = 1;
     }
 
-    class SuspendTokenResponse : ClientPacket
+    internal class SuspendTokenResponse : ClientPacket
     {
         public SuspendTokenResponse(WorldPacket packet) : base(packet) { }
 
@@ -1075,7 +1075,7 @@ namespace Game.Networking.Packets
         public uint SequenceIndex;
     }
 
-    class ResumeToken : ServerPacket
+    internal class ResumeToken : ServerPacket
     {
         public ResumeToken() : base(ServerOpcodes.ResumeToken, ConnectionType.Instance) { }
 
@@ -1090,7 +1090,7 @@ namespace Game.Networking.Packets
         public uint Reason = 1;
     }
 
-    class MoveSetCompoundState : ServerPacket
+    internal class MoveSetCompoundState : ServerPacket
     {
         public MoveSetCompoundState() : base(ServerOpcodes.MoveSetCompoundState, ConnectionType.Instance) { }
 

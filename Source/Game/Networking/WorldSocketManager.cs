@@ -76,8 +76,8 @@ namespace Game.Networking
             base.OnSocketOpen(sock);
         }
 
-        AsyncAcceptor _instanceAcceptor;
-        int _socketSendBufferSize;
-        bool _tcpNoDelay;
+        private AsyncAcceptor _instanceAcceptor;
+        private int _socketSendBufferSize;
+        private bool _tcpNoDelay;
     }
 }

@@ -25,7 +25,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LogoutRequest)]
-        void HandleLogoutRequest(LogoutRequest packet)
+        private void HandleLogoutRequest(LogoutRequest packet)
         {
             var pl = GetPlayer();
             if (!GetPlayer().GetLootGUID().IsEmpty())
@@ -75,7 +75,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LogoutCancel)]
-        void HandleLogoutCancel(LogoutCancel packet)
+        private void HandleLogoutCancel(LogoutCancel packet)
         {
             // Player have already logged out serverside, too late to cancel
             if (!GetPlayer())

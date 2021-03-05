@@ -25,10 +25,10 @@ using System.Linq;
 namespace Game.Chat
 {
     [CommandGroup("quest", RBACPermissions.CommandQuest)]
-    class QuestCommands
+    internal class QuestCommands
     {
         [Command("add", RBACPermissions.CommandQuestAdd)]
-        static bool Add(StringArguments args, CommandHandler handler)
+        private static bool Add(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)
@@ -68,7 +68,7 @@ namespace Game.Chat
         }
 
         [Command("complete", RBACPermissions.CommandQuestComplete)]
-        static bool Complete(StringArguments args, CommandHandler handler)
+        private static bool Complete(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)
@@ -160,7 +160,7 @@ namespace Game.Chat
         }
 
         [Command("remove", RBACPermissions.CommandQuestRemove)]
-        static bool Remove(StringArguments args, CommandHandler handler)
+        private static bool Remove(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)
@@ -214,7 +214,7 @@ namespace Game.Chat
         }
 
         [Command("reward", RBACPermissions.CommandQuestReward)]
-        static bool Reward(StringArguments args, CommandHandler handler)
+        private static bool Reward(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSelectedPlayer();
             if (!player)

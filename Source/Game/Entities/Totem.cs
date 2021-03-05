@@ -186,8 +186,8 @@ namespace Game.Entities
         public override void UpdateAttackPowerAndDamage(bool ranged = false) { }
         public override void UpdateDamagePhysical(WeaponAttackType attType) { }
 
-        TotemType m_type;
-        uint m_duration;
+        private TotemType m_type;
+        private uint m_duration;
     }
 
     public enum TotemType

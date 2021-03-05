@@ -25,10 +25,10 @@ using System;
 
 namespace Game.Chat
 {
-    class MessageCommands
+    internal class MessageCommands
     {
         [CommandNonGroup("nameannounce", RBACPermissions.CommandNameannounce, true)]
-        static bool HandleNameAnnounceCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNameAnnounceCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -43,7 +43,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnameannounce", RBACPermissions.CommandGmnameannounce, true)]
-        static bool HandleGMNameAnnounceCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMNameAnnounceCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -58,7 +58,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("announce", RBACPermissions.CommandAnnounce, true)]
-        static bool HandleAnnounceCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAnnounceCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -69,7 +69,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmannounce", RBACPermissions.CommandGmannounce, true)]
-        static bool HandleGMAnnounceCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMAnnounceCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -79,7 +79,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("notify", RBACPermissions.CommandNotify, true)]
-        static bool HandleNotifyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleNotifyCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -93,7 +93,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("gmnotify", RBACPermissions.CommandGmnotify, true)]
-        static bool HandleGMNotifyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGMNotifyCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -107,7 +107,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
-        static bool HandleWhispersCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWhispersCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -159,13 +159,13 @@ namespace Game.Chat
     }
 
     [CommandGroup("channel", RBACPermissions.CommandChannel, true)]
-    class ChannelCommands
+    internal class ChannelCommands
     {
         [CommandGroup("set", RBACPermissions.CommandChannelSet, true)]
-        class ChannelSetCommands
+        private class ChannelSetCommands
         {
             [Command("ownership", RBACPermissions.CommandChannelSetOwnership)]
-            static bool HandleChannelSetOwnership(StringArguments args, CommandHandler handler)
+            private static bool HandleChannelSetOwnership(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;

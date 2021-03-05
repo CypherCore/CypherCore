@@ -31,13 +31,13 @@ using Game.Movement;
 
 namespace Scripts.World.NpcSpecial
 {
-    enum SpawnType
+    internal enum SpawnType
     {
         TripwireRooftop,                             // no warning, summon Creature at smaller range
         AlarmBot,                                     // cast guards mark and summon npc - if player shows up with that buff duration < 5 seconds attack
     }
 
-    class SpawnAssociation
+    internal class SpawnAssociation
     {
         public SpawnAssociation(uint _thisCreatureEntry, uint _spawnedCreatureEntry, SpawnType _spawnType)
         {
@@ -51,7 +51,7 @@ namespace Scripts.World.NpcSpecial
         public SpawnType spawnType;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         //Torchtossingtarget
         public const uint TorchTossingTargetBunny = 25535;
@@ -114,7 +114,7 @@ namespace Scripts.World.NpcSpecial
         public const uint ThePieChair = 34822;
     }
 
-    struct GameobjectIds
+    internal struct GameobjectIds
     {
         //Fireworks
         public const uint FireworkLauncher1 = 180771;
@@ -132,7 +132,7 @@ namespace Scripts.World.NpcSpecial
         public const uint RibbonPole = 181605;
     }
 
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint GuardsMark = 38067;
 
@@ -244,7 +244,7 @@ namespace Scripts.World.NpcSpecial
         };
     }
 
-    struct QuestConst
+    internal struct QuestConst
     {
         //Lunaclawspirit
         public const uint BodyHeartA = 6001;
@@ -261,7 +261,7 @@ namespace Scripts.World.NpcSpecial
         public const uint Darkness = 5650;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         //Lunaclawspirit
         public const uint TextIdDefault = 4714;
@@ -288,7 +288,7 @@ namespace Scripts.World.NpcSpecial
         public const uint XpOnOff = 14736;
     }
 
-    struct GossipMenus
+    internal struct GossipMenus
     {
         //Sayge
         public const int OptionIdAnswer1 = 0;
@@ -344,7 +344,7 @@ namespace Scripts.World.NpcSpecial
         public const uint OptionIdStormwindThunderbluffPennant = 7;
     }
 
-    enum SeatIds
+    internal enum SeatIds
     {
         //BountifulTable
         TurkeyChair = 0,
@@ -356,7 +356,7 @@ namespace Scripts.World.NpcSpecial
         PlateHolder = 6
     }
 
-    struct Misc
+    internal struct Misc
     {
         public static SpawnAssociation[] spawnAssociations =
         {
@@ -461,7 +461,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_air_force_bots : ScriptedAI
+    internal class npc_air_force_bots : ScriptedAI
     {
         public npc_air_force_bots(Creature creature) : base(creature)
         {
@@ -492,12 +492,12 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        SpawnAssociation SpawnAssoc;
-        ObjectGuid SpawnedGUID;
+        private SpawnAssociation SpawnAssoc;
+        private ObjectGuid SpawnedGUID;
 
         public override void Reset() { }
 
-        Creature SummonGuard()
+        private Creature SummonGuard()
         {
             Creature summoned = me.SummonCreature(SpawnAssoc.spawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOutOfCombat, 300000);
 
@@ -512,7 +512,7 @@ namespace Scripts.World.NpcSpecial
             return summoned;
         }
 
-        Creature GetSummonedGuard()
+        private Creature GetSummonedGuard()
         {
             var creature = ObjectAccessor.GetCreature(me, SpawnedGUID);
             if (creature && creature.IsAlive())
@@ -598,19 +598,19 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_chicken_cluck : ScriptedAI
+    internal class npc_chicken_cluck : ScriptedAI
     {
         public npc_chicken_cluck(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             ResetFlagTimer = 120000;
         }
 
-        uint ResetFlagTimer;
+        private uint ResetFlagTimer;
 
         public override void Reset()
         {
@@ -676,21 +676,21 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_dancing_flames : ScriptedAI
+    internal class npc_dancing_flames : ScriptedAI
     {
         public npc_dancing_flames(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             Active = true;
             CanIteract = 3500;
         }
 
-        bool Active;
-        uint CanIteract;
+        private bool Active;
+        private uint CanIteract;
 
         public override void Reset()
         {
@@ -752,14 +752,14 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_torch_tossing_target_bunny_controller : ScriptedAI
+    internal class npc_torch_tossing_target_bunny_controller : ScriptedAI
     {
         public npc_torch_tossing_target_bunny_controller(Creature creature) : base(creature)
         {
             _targetTimer = 3000;
         }
 
-        ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
+        private ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
         {
             var targets = new List<Creature>();
             me.GetCreatureListWithEntryInGrid(targets, CreatureIds.TorchTossingTargetBunny, 60.0f);
@@ -788,19 +788,19 @@ namespace Scripts.World.NpcSpecial
                 _targetTimer -= diff;
         }
 
-        uint _targetTimer;
-        ObjectGuid _lastTargetGUID;
+        private uint _targetTimer;
+        private ObjectGuid _lastTargetGUID;
     }
 
     [Script]
-    class npc_midsummer_bunny_pole : ScriptedAI
+    internal class npc_midsummer_bunny_pole : ScriptedAI
     {
         public npc_midsummer_bunny_pole(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _scheduler.CancelAll();
             running = false;
@@ -851,7 +851,7 @@ namespace Scripts.World.NpcSpecial
             //events.ScheduleEvent(EVENT_CAST_RED_FIRE_RING, 1);
         }
 
-        bool checkNearbyPlayers()
+        private bool checkNearbyPlayers()
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
             var players = new List<Unit>();
@@ -870,18 +870,18 @@ namespace Scripts.World.NpcSpecial
             _scheduler.Update(diff);
         }
 
-        bool running;
+        private bool running;
     }
 
     [Script]
-    class npc_doctor : ScriptedAI
+    internal class npc_doctor : ScriptedAI
     {
         public npc_doctor(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             PlayerGUID.Clear();
 
@@ -1046,17 +1046,17 @@ namespace Scripts.World.NpcSpecial
                 BeginEvent(player);
         }
 
-        ObjectGuid PlayerGUID;
+        private ObjectGuid PlayerGUID;
 
-        uint SummonPatientTimer;
-        uint SummonPatientCount;
-        uint PatientDiedCount;
-        uint PatientSavedCount;
+        private uint SummonPatientTimer;
+        private uint SummonPatientCount;
+        private uint PatientDiedCount;
+        private uint PatientSavedCount;
 
-        bool Event;
+        private bool Event;
 
-        List<ObjectGuid> Patients = new List<ObjectGuid>();
-        List<Position> Coordinates = new List<Position>();
+        private List<ObjectGuid> Patients = new List<ObjectGuid>();
+        private List<Position> Coordinates = new List<Position>();
     }
 
     [Script]
@@ -1067,7 +1067,7 @@ namespace Scripts.World.NpcSpecial
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             DoctorGUID.Clear();
             Coord = null;
@@ -1179,7 +1179,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_garments_of_quests : EscortAI
+    internal class npc_garments_of_quests : EscortAI
     {
         public npc_garments_of_quests(Creature creature) : base(creature)
         {
@@ -1208,13 +1208,13 @@ namespace Scripts.World.NpcSpecial
             Reset();
         }
 
-        ObjectGuid CasterGUID;
+        private ObjectGuid CasterGUID;
 
-        bool IsHealed;
-        bool CanRun;
+        private bool IsHealed;
+        private bool CanRun;
 
-        uint RunAwayTimer;
-        uint quest;
+        private uint RunAwayTimer;
+        private uint quest;
 
         public override void Reset()
         {
@@ -1310,7 +1310,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_guardian : ScriptedAI
+    internal class npc_guardian : ScriptedAI
     {
         public npc_guardian(Creature creature) : base(creature) { }
 
@@ -1337,7 +1337,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_sayge : ScriptedAI
+    internal class npc_sayge : ScriptedAI
     {
         public npc_sayge(Creature creature) : base(creature) { }
 
@@ -1364,7 +1364,7 @@ namespace Scripts.World.NpcSpecial
             return true;
         }
 
-        void SendAction(Player player, uint action)
+        private void SendAction(Player player, uint action)
         {
             switch (action)
             {
@@ -1458,7 +1458,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_steam_tonk : ScriptedAI
+    internal class npc_steam_tonk : ScriptedAI
     {
         public npc_steam_tonk(Creature creature) : base(creature) { }
 
@@ -1481,7 +1481,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_tonk_mine : ScriptedAI
+    internal class npc_tonk_mine : ScriptedAI
     {
         public npc_tonk_mine(Creature creature) : base(creature)
         {
@@ -1489,12 +1489,12 @@ namespace Scripts.World.NpcSpecial
             me.SetReactState(ReactStates.Passive);
         }
 
-        void Initialize()
+        private void Initialize()
         {
             ExplosionTimer = 3000;
         }
 
-        uint ExplosionTimer;
+        private uint ExplosionTimer;
 
         public override void Reset()
         {
@@ -1518,7 +1518,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_brewfest_reveler : ScriptedAI
+    internal class npc_brewfest_reveler : ScriptedAI
     {
         public npc_brewfest_reveler(Creature creature) : base(creature) { }
 
@@ -1533,7 +1533,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_training_dummy : ScriptedAI
+    internal class npc_training_dummy : ScriptedAI
     {
         public npc_training_dummy(Creature creature) : base(creature)
         {
@@ -1599,21 +1599,21 @@ namespace Scripts.World.NpcSpecial
 
         public override void MoveInLineOfSight(Unit who) { }
 
-        Dictionary<ObjectGuid, long> _damageTimes = new Dictionary<ObjectGuid, long>();
+        private Dictionary<ObjectGuid, long> _damageTimes = new Dictionary<ObjectGuid, long>();
 
-        const uint AdvancedTargetDummy = 2674;
-        const uint TargetDummy = 2673;
+        private const uint AdvancedTargetDummy = 2674;
+        private const uint TargetDummy = 2673;
     }
 
     [Script]
-    class npc_wormhole : PassiveAI
+    internal class npc_wormhole : PassiveAI
     {
         public npc_wormhole(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _showUnderground = RandomHelper.URand(0, 100) == 0; // Guessed value, it is really rare though
         }
@@ -1681,11 +1681,11 @@ namespace Scripts.World.NpcSpecial
             return true;
         }
 
-        bool _showUnderground;
+        private bool _showUnderground;
     }
 
     [Script]
-    class npc_experience : ScriptedAI
+    internal class npc_experience : ScriptedAI
     {
         public npc_experience(Creature creature) : base(creature) { }
 
@@ -1725,11 +1725,11 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_firework : ScriptedAI
+    internal class npc_firework : ScriptedAI
     {
         public npc_firework(Creature creature) : base(creature) { }
 
-        bool isCluster()
+        private bool isCluster()
         {
             switch (me.GetEntry())
             {
@@ -1764,7 +1764,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        GameObject FindNearestLauncher()
+        private GameObject FindNearestLauncher()
         {
             GameObject launcher = null;
 
@@ -1801,7 +1801,7 @@ namespace Scripts.World.NpcSpecial
             return launcher;
         }
 
-        uint GetFireworkSpell(uint entry)
+        private uint GetFireworkSpell(uint entry)
         {
             switch (entry)
             {
@@ -1834,7 +1834,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        uint GetFireworkGameObjectId()
+        private uint GetFireworkGameObjectId()
         {
             uint spellId = 0;
 
@@ -1936,14 +1936,14 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_spring_rabbit : ScriptedAI
+    internal class npc_spring_rabbit : ScriptedAI
     {
         public npc_spring_rabbit(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             inLove = false;
             rabbitGUID.Clear();
@@ -1952,11 +1952,11 @@ namespace Scripts.World.NpcSpecial
             searchTimer = RandomHelper.URand(5000, 10000);
         }
 
-        bool inLove;
-        uint jumpTimer;
-        uint bunnyTimer;
-        uint searchTimer;
-        ObjectGuid rabbitGUID;
+        private bool inLove;
+        private uint jumpTimer;
+        private uint bunnyTimer;
+        private uint searchTimer;
+        private ObjectGuid rabbitGUID;
 
         public override void Reset()
         {
@@ -2021,7 +2021,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_imp_in_a_ball : ScriptedAI
+    internal class npc_imp_in_a_ball : ScriptedAI
     {
         public npc_imp_in_a_ball(Creature creature) : base(creature)
         {
@@ -2048,10 +2048,10 @@ namespace Scripts.World.NpcSpecial
             _scheduler.Update(diff);
         }
 
-        ObjectGuid summonerGUID;
+        private ObjectGuid summonerGUID;
     }
 
-    struct TrainWrecker
+    internal struct TrainWrecker
     {
         public const int ActionWrecked = 1;
         public const int EventDoJump = 1;
@@ -2063,7 +2063,7 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_train_wrecker : NullCreatureAI
+    internal class npc_train_wrecker : NullCreatureAI
     {
         public npc_train_wrecker(Creature creature) : base(creature)
         {
@@ -2072,7 +2072,7 @@ namespace Scripts.World.NpcSpecial
             _timer = 1 * Time.InMilliseconds;
         }
 
-        GameObject VerifyTarget()
+        private GameObject VerifyTarget()
         {
             var target = ObjectAccessor.GetGameObject(me, _target);
             if (target)
@@ -2174,14 +2174,14 @@ namespace Scripts.World.NpcSpecial
                 _nextAction = TrainWrecker.EventDoFacing;
         }
 
-        bool _isSearching;
-        byte _nextAction;
-        uint _timer;
-        ObjectGuid _target;
+        private bool _isSearching;
+        private byte _nextAction;
+        private uint _timer;
+        private ObjectGuid _target;
     }
 
     [Script]
-    class npc_argent_squire_gruntling : ScriptedAI
+    internal class npc_argent_squire_gruntling : ScriptedAI
     {
         public npc_argent_squire_gruntling(Creature creature) : base(creature)
         {
@@ -2267,11 +2267,11 @@ namespace Scripts.World.NpcSpecial
             _scheduler.Update(diff);
         }
 
-        bool IsArgentSquire() { return me.GetEntry() == CreatureIds.ArgentSquire; }
+        private bool IsArgentSquire() { return me.GetEntry() == CreatureIds.ArgentSquire; }
     }
 
     [Script]
-    class npc_bountiful_tableAI : PassiveAI
+    internal class npc_bountiful_tableAI : PassiveAI
     {
         public npc_bountiful_tableAI(Creature creature) : base(creature) { }
 
@@ -2329,10 +2329,10 @@ namespace Scripts.World.NpcSpecial
         }
     }
 
-    class CastFoodSpell : BasicEvent
+    internal class CastFoodSpell : BasicEvent
     {
-        Unit _owner;
-        uint _spellId;
+        private Unit _owner;
+        private uint _spellId;
 
         public CastFoodSpell(Unit owner, uint spellId)
         {

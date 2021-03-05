@@ -28,7 +28,7 @@ namespace Game
     public partial class WorldSession
     {
         [Service(OriginalHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
+        private BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
             Bgs.Protocol.Attribute command = null;
             var Params = new Dictionary<string, Bgs.Protocol.Variant>();
@@ -56,7 +56,7 @@ namespace Game
         }
 
         [Service(OriginalHash.GameUtilitiesService, 10)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
+        private BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
             if (request.AttributeKey == "Command_RealmListRequest_v1_b9")
             {
@@ -67,7 +67,7 @@ namespace Game
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode HandleRealmListRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode HandleRealmListRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
         {
             var subRegionId = "";
             var subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
@@ -102,7 +102,7 @@ namespace Game
             return BattlenetRpcErrorCode.Ok;
         }
 
-        BattlenetRpcErrorCode HandleRealmJoinRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode HandleRealmJoinRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
         {
             var realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)

@@ -4,15 +4,15 @@ namespace Game
 {
     public class UpdateTime
     {
-        uint[] _updateTimeDataTable = new uint[500];
-        uint _averageUpdateTime;
-        uint _totalUpdateTime;
-        uint _updateTimeTableIndex;
-        uint _maxUpdateTime;
-        uint _maxUpdateTimeOfLastTable;
-        uint _maxUpdateTimeOfCurrentTable;
+        private uint[] _updateTimeDataTable = new uint[500];
+        private uint _averageUpdateTime;
+        private uint _totalUpdateTime;
+        private uint _updateTimeTableIndex;
+        private uint _maxUpdateTime;
+        private uint _maxUpdateTimeOfLastTable;
+        private uint _maxUpdateTimeOfCurrentTable;
 
-        uint _recordedTime;
+        private uint _recordedTime;
 
         public uint GetAverageUpdateTime()
         {
@@ -88,9 +88,9 @@ namespace Game
 
     public class WorldUpdateTime : UpdateTime
     {
-        uint _recordUpdateTimeInverval;
-        uint _recordUpdateTimeMin;
-        uint _lastRecordTime;
+        private uint _recordUpdateTimeInverval;
+        private uint _recordUpdateTimeMin;
+        private uint _lastRecordTime;
 
         public void LoadFromConfig()
         {

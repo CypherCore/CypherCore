@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace Game.Maps
 {
-    class ObjectGridLoader : Notifier
+    internal class ObjectGridLoader : Notifier
     {
         public ObjectGridLoader(Grid grid, Map map, Cell cell)
         {
@@ -86,7 +86,7 @@ namespace Game.Maps
             LoadHelper<AreaTrigger>(areaTriggers, cellCoord, ref i_areaTriggers, i_map);
         }
 
-        void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map) where T : WorldObject, new()
+        private void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map) where T : WorldObject, new()
         {
             foreach (var guid in guid_set)
             {
@@ -147,7 +147,7 @@ namespace Game.Maps
             }
         }
 
-        void AddObjectHelper<T>(CellCoord cellCoord, ref uint count, Map map, T obj) where T : WorldObject
+        private void AddObjectHelper<T>(CellCoord cellCoord, ref uint count, Map map, T obj) where T : WorldObject
         {
             var cell = new Cell(cellCoord);
             map.AddToGrid(obj, cell);
@@ -163,13 +163,13 @@ namespace Game.Maps
         public Cell i_cell;
         public Grid i_grid;
         public Map i_map;
-        uint i_gameObjects;
-        uint i_creatures;
+        private uint i_gameObjects;
+        private uint i_creatures;
         public uint i_corpses;
-        uint i_areaTriggers;
+        private uint i_areaTriggers;
     }
 
-    class ObjectWorldLoader : Notifier
+    internal class ObjectWorldLoader : Notifier
     {
         public ObjectWorldLoader(ObjectGridLoader gloader)
         {
@@ -202,15 +202,15 @@ namespace Game.Maps
             }
         }
 
-        Cell i_cell;
-        Map i_map;
-        Grid i_grid;
+        private Cell i_cell;
+        private Map i_map;
+        private Grid i_grid;
 
         public uint i_corpses;
     }
 
     //Stop the creatures before unloading the NGrid
-    class ObjectGridStoper : Notifier
+    internal class ObjectGridStoper : Notifier
     {
         public override void Visit(IList<Creature> objs)
         {
@@ -233,7 +233,7 @@ namespace Game.Maps
     }
 
     //Move the foreign creatures back to respawn positions before unloading the NGrid
-    class ObjectGridEvacuator : Notifier
+    internal class ObjectGridEvacuator : Notifier
     {
         public override void Visit(IList<Creature> objs)
         {
@@ -261,7 +261,7 @@ namespace Game.Maps
     }
 
     //Clean up and remove from world
-    class ObjectGridCleaner : Notifier
+    internal class ObjectGridCleaner : Notifier
     {
         public override void Visit(IList<WorldObject> objs)
         {
@@ -278,7 +278,7 @@ namespace Game.Maps
     }
 
     //Delete objects before deleting NGrid
-    class ObjectGridUnloader : Notifier
+    internal class ObjectGridUnloader : Notifier
     {
         public override void Visit(IList<WorldObject> objs)
         {

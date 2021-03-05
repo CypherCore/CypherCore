@@ -67,7 +67,7 @@ namespace Game.SupportSystem
         }
 
         public bool IsClosed() { return !_closedBy.IsEmpty(); }
-        bool IsFromPlayer(ObjectGuid guid) { return guid == _playerGuid; }
+        private bool IsFromPlayer(ObjectGuid guid) { return guid == _playerGuid; }
         public bool IsAssigned() { return !_assignedTo.IsEmpty(); }
         public bool IsAssignedTo(ObjectGuid guid) { return guid == _assignedTo; }
         public bool IsAssignedNotTo(ObjectGuid guid) { return IsAssigned() && !IsAssignedTo(guid); }
@@ -94,7 +94,8 @@ namespace Game.SupportSystem
 
             return "";
         }
-        string GetComment() { return _comment; }
+
+        private string GetComment() { return _comment; }
 
         public virtual void SetAssignedTo(ObjectGuid guid, bool IsAdmin = false) { _assignedTo = guid; }
         public virtual void SetUnassigned() { _assignedTo.Clear(); }
@@ -113,8 +114,8 @@ namespace Game.SupportSystem
 
     public class BugTicket : Ticket
     {
-        float _facing;
-        string _note;
+        private float _facing;
+        private string _note;
 
 
         public BugTicket()
@@ -203,7 +204,7 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        string GetNote() { return _note; }
+        private string GetNote() { return _note; }
 
         public void SetFacing(float facing) { _facing = facing; }
         public void SetNote(string note) { _note = note; }
@@ -211,11 +212,11 @@ namespace Game.SupportSystem
 
     public class ComplaintTicket : Ticket
     {
-        float _facing;
-        ObjectGuid _targetCharacterGuid;
-        GMSupportComplaintType _complaintType;
-        SupportTicketSubmitComplaint.SupportTicketChatLog _chatLog;
-        string _note;
+        private float _facing;
+        private ObjectGuid _targetCharacterGuid;
+        private GMSupportComplaintType _complaintType;
+        private SupportTicketSubmitComplaint.SupportTicketChatLog _chatLog;
+        private string _note;
 
         public ComplaintTicket()
         {
@@ -340,9 +341,9 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        ObjectGuid GetTargetCharacterGuid() { return _targetCharacterGuid; }
-        GMSupportComplaintType GetComplaintType() { return _complaintType; }
-        string GetNote() { return _note; }
+        private ObjectGuid GetTargetCharacterGuid() { return _targetCharacterGuid; }
+        private GMSupportComplaintType GetComplaintType() { return _complaintType; }
+        private string GetNote() { return _note; }
 
         public void SetFacing(float facing) { _facing = facing; }
         public void SetTargetCharacterGuid(ObjectGuid targetCharacterGuid)
@@ -356,8 +357,8 @@ namespace Game.SupportSystem
 
     public class SuggestionTicket : Ticket
     {
-        float _facing;
-        string _note;
+        private float _facing;
+        private string _note;
 
         public SuggestionTicket()
         {
@@ -445,7 +446,7 @@ namespace Game.SupportSystem
             return ss.ToString();
         }
 
-        string GetNote() { return _note; }
+        private string GetNote() { return _note; }
         public void SetNote(string note) { _note = note; }
 
         public void SetFacing(float facing) { _facing = facing; }

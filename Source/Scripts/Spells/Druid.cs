@@ -25,7 +25,7 @@ using System.Linq;
 
 namespace Scripts.Spells.Druid
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint BalanceT10Bonus = 70718;
         public const uint BalanceT10BonusProc = 70721;
@@ -74,7 +74,7 @@ namespace Scripts.Spells.Druid
     [Script] // 1850 - Dash
     public class spell_dru_dash : AuraScript
     {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             // do not set speed if not in cat form
             if (GetUnitOwner().GetShapeshiftForm() != ShapeShiftForm.CatForm)
@@ -88,9 +88,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 22568 - Ferocious Bite
-    class spell_dru_ferocious_bite : SpellScript
+    internal class spell_dru_ferocious_bite : SpellScript
     {
-        float _damageMultiplier = 0.0f;
+        private float _damageMultiplier = 0.0f;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -98,19 +98,19 @@ namespace Scripts.Spells.Druid
             && Global.SpellMgr.GetSpellInfo(SpellIds.IncarnationKingOfTheJungle, Difficulty.None).GetEffect(1) != null;
         }
 
-        void HandleHitTargetBurn(uint effIndex)
+        private void HandleHitTargetBurn(uint effIndex)
         {
             var newValue = (int)((float)GetEffectValue() * _damageMultiplier);
             SetEffectValue(newValue);
         }
 
-        void HandleHitTargetDmg(uint effIndex)
+        private void HandleHitTargetDmg(uint effIndex)
         {
             var newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
             SetHitDamage(newValue);
         }
 
-        void HandleLaunchTarget(uint effIndex)
+        private void HandleLaunchTarget(uint effIndex)
         {
             var caster = GetCaster();
 
@@ -136,9 +136,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 33943 - Flight Form
-    class spell_dru_flight_form : SpellScript
+    internal class spell_dru_flight_form : SpellScript
     {
-        SpellCastResult CheckCast()
+        private SpellCastResult CheckCast()
         {
             var caster = GetCaster();
             if (caster.IsInDisallowedMountForm())
@@ -154,14 +154,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 37336 - Druid Forms Trinket
-    class spell_dru_forms_trinket : AuraScript
+    internal class spell_dru_forms_trinket : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FormsTrinketBear, SpellIds.FormsTrinketCat, SpellIds.FormsTrinketMoonkin, SpellIds.FormsTrinketNone, SpellIds.FormsTrinketTree);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             var target = eventInfo.GetActor();
 
@@ -181,7 +181,7 @@ namespace Scripts.Spells.Druid
             return false;
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var target = eventInfo.GetActor();
@@ -220,19 +220,19 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 210706 - Gore
-    class spell_dru_gore : AuraScript
+    internal class spell_dru_gore : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.GoreProc, SpellIds.Mangle);
         }
 
-        bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             return RandomHelper.randChance(aurEff.GetAmount());
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             var owner = GetTarget();
             owner.CastSpell(owner, SpellIds.GoreProc);
@@ -248,9 +248,9 @@ namespace Scripts.Spells.Druid
 
     // 34246 - Idol of the Emerald Queen
     [Script] // 60779 - Idol of Lush Moss
-    class spell_dru_idol_lifebloom : AuraScript
+    internal class spell_dru_idol_lifebloom : AuraScript
     {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
+        private void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
         {
             if (spellMod == null)
             {
@@ -270,9 +270,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 29166 - Innervate
-    class spell_dru_innervate : AuraScript
+    internal class spell_dru_innervate : AuraScript
     {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             var caster = GetCaster();
             if (caster)
@@ -288,14 +288,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 40442 - Druid Tier 6 Trinket
-    class spell_dru_item_t6_trinket : AuraScript
+    internal class spell_dru_item_t6_trinket : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessingOfRemulos, SpellIds.BlessingOfElune, SpellIds.BlessingOfCenarius);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var spellInfo = eventInfo.GetSpellInfo();
@@ -337,14 +337,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 33763 - Lifebloom
-    class spell_dru_lifebloom : AuraScript
+    internal class spell_dru_lifebloom : AuraScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.LifebloomFinalHeal, SpellIds.LifebloomEnergize);
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Final heal only on duration end
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
@@ -375,7 +375,7 @@ namespace Scripts.Spells.Druid
             GetTarget().CastCustomSpell(GetTarget(), SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, aurEff, GetCasterGUID());
         }
 
-        void HandleDispel(DispelInfo dispelInfo)
+        private void HandleDispel(DispelInfo dispelInfo)
         {
             var target = GetUnitOwner();
             if (target != null)
@@ -416,14 +416,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 48496 - Living Seed
-    class spell_dru_living_seed : AuraScript
+    internal class spell_dru_living_seed : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingSeedProc);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var amount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
@@ -437,14 +437,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 48504 - Living Seed (Proc)
-    class spell_dru_living_seed_proc : AuraScript
+    internal class spell_dru_living_seed_proc : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingSeedHeal);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             GetTarget().CastCustomSpell(SpellIds.LivingSeedHeal, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);
@@ -457,9 +457,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] //  8921 - Moonfire
-    class spell_dru_moonfire : SpellScript
+    internal class spell_dru_moonfire : SpellScript
     {
-        void HandleOnHit(uint effIndex)
+        private void HandleOnHit(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.MoonfireDamage, true);
         }
@@ -471,14 +471,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 16864 - Omen of Clarity
-    class spell_dru_omen_of_clarity : AuraScript
+    internal class spell_dru_omen_of_clarity : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BalanceT10Bonus, SpellIds.BalanceT10BonusProc);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             var target = GetTarget();
             if (target.HasAura(SpellIds.BalanceT10Bonus))
@@ -492,9 +492,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 16972 - Predatory Strikes
-    class spell_dru_predatory_strikes : AuraScript
+    internal class spell_dru_predatory_strikes : AuraScript
     {
-        void UpdateAmount(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void UpdateAmount(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget().ToPlayer();
             if (target != null)
@@ -509,14 +509,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 5215 - Prowl
-    class spell_dru_prowl : SpellScript
+    internal class spell_dru_prowl : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.CatForm);
         }
 
-        void HandleOnCast()
+        private void HandleOnCast()
         {
             // Change into cat form
             if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
@@ -530,7 +530,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 1079 - Rip
-    class spell_dru_rip : AuraScript
+    internal class spell_dru_rip : AuraScript
     {
         public override bool Load()
         {
@@ -538,7 +538,7 @@ namespace Scripts.Spells.Druid
             return caster != null && caster.IsTypeId(TypeId.Player);
         }
 
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
 
@@ -567,9 +567,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 52610 - Savage Roar
-    class spell_dru_savage_roar : SpellScript
+    internal class spell_dru_savage_roar : SpellScript
     {
-        SpellCastResult CheckCast()
+        private SpellCastResult CheckCast()
         {
             var caster = GetCaster();
             if (caster.GetShapeshiftForm() != ShapeShiftForm.CatForm)
@@ -585,20 +585,20 @@ namespace Scripts.Spells.Druid
     }
 
     [Script]
-    class spell_dru_savage_roar_AuraScript : AuraScript
+    internal class spell_dru_savage_roar_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SavageRoar);
         }
 
-        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             target.CastSpell(target, SpellIds.SavageRoar, true, null, aurEff, GetCasterGUID());
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.SavageRoar);
         }
@@ -611,14 +611,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 106839 - Skull Bash
-    class spell_dru_skull_bash : SpellScript
+    internal class spell_dru_skull_bash : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SkullBashCharge, SpellIds.SkullBashInterrupt);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashCharge, true);
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SkullBashInterrupt, true);
@@ -631,14 +631,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 78892 - Stampede
-    class spell_dru_stampede : AuraScript
+    internal class spell_dru_stampede : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.StampedeBearRank1, SpellIds.StampedeCatRank1, SpellIds.StampedeCatState, SpellIds.FeralChargeCat, SpellIds.FeralChargeBear);
         }
 
-        void HandleEffectCatProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectCatProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.CatForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeCat)
@@ -648,7 +648,7 @@ namespace Scripts.Spells.Druid
             GetTarget().CastSpell(GetTarget(), SpellIds.StampedeCatState, true, null, aurEff);
         }
 
-        void HandleEffectBearProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleEffectBearProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.BearForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeBear)
@@ -665,14 +665,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 50286 - Starfall (Dummy)
-    class spell_dru_starfall_dummy : SpellScript
+    internal class spell_dru_starfall_dummy : SpellScript
     {
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.Resize(2);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster();
             // Shapeshifting into an animal form or mounting cancels the effect
@@ -699,9 +699,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] //  93402 - Sunfire
-    class spell_dru_sunfire : SpellScript
+    internal class spell_dru_sunfire : SpellScript
     {
-        void HandleOnHit(uint effIndex)
+        private void HandleOnHit(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.SunfireDamage, true);
         }
@@ -713,9 +713,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 61336 - Survival Instincts
-    class spell_dru_survival_instincts : SpellScript
+    internal class spell_dru_survival_instincts : SpellScript
     {
-        SpellCastResult CheckCast()
+        private SpellCastResult CheckCast()
         {
             var caster = GetCaster();
             if (!caster.IsInFeralForm())
@@ -731,14 +731,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script]
-    class spell_dru_survival_instincts_AuraScript : AuraScript
+    internal class spell_dru_survival_instincts_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.SurvivalInstincts);
         }
 
-        void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var target = GetTarget();
             target.CastSpell(target, SpellIds.SurvivalInstincts, true);
@@ -751,14 +751,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 40121 - Swift Flight Form (Passive)
-    class spell_dru_swift_flight_passive : AuraScript
+    internal class spell_dru_swift_flight_passive : AuraScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             var caster = GetCaster().ToPlayer();
             if (caster != null)
@@ -773,14 +773,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 28744 - Regrowth
-    class spell_dru_t3_6p_bonus : AuraScript
+    internal class spell_dru_t3_6p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlessingOfTheClaw);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, true, null, aurEff);
@@ -793,14 +793,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 28719 - Healing Touch
-    class spell_dru_t3_8p_bonus : AuraScript
+    internal class spell_dru_t3_8p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Exhilarate);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var spell = eventInfo.GetProcSpell();
@@ -825,14 +825,14 @@ namespace Scripts.Spells.Druid
 
     // 37288 - Mana Restore
     [Script] // 37295 - Mana Restore
-    class spell_dru_t4_2p_bonus : AuraScript
+    internal class spell_dru_t4_2p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Infusion);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.Infusion, true, null, aurEff);
@@ -845,14 +845,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 70723 - Item - Druid T10 Balance 4P Bonus
-    class spell_dru_t10_balance_4p_bonus : AuraScript
+    internal class spell_dru_t10_balance_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Languish);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -879,14 +879,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 70691 - Item T10 Restoration 4P Bonus
-    class spell_dru_t10_restoration_4p_bonus : SpellScript
+    internal class spell_dru_t10_restoration_4p_bonus : SpellScript
     {
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             if (!GetCaster().ToPlayer().GetGroup())
             {
@@ -921,14 +921,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 70664 - Druid T10 Restoration 4P Bonus (Rejuvenation)
-    class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
+    internal class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RejuvenationT10Proc);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null || spellInfo.Id == SpellIds.RejuvenationT10Proc)
@@ -945,7 +945,7 @@ namespace Scripts.Spells.Druid
             return caster.GetGroup() || caster != eventInfo.GetProcTarget();
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -961,9 +961,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 783 - Travel Form (dummy)
-    class spell_dru_travel_form_dummy : SpellScript
+    internal class spell_dru_travel_form_dummy : SpellScript
     {
-        SpellCastResult CheckCast()
+        private SpellCastResult CheckCast()
         {
             var player = GetCaster().ToPlayer();
             if (!player)
@@ -983,7 +983,7 @@ namespace Scripts.Spells.Druid
     }
 
     [Script]
-    class spell_dru_travel_form_dummy_AuraScript : AuraScript
+    internal class spell_dru_travel_form_dummy_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -995,7 +995,7 @@ namespace Scripts.Spells.Druid
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var player = GetTarget().ToPlayer();
 
@@ -1005,7 +1005,7 @@ namespace Scripts.Spells.Druid
             player.AddAura(triggeredSpellId, player);
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // No need to check Remove mode, it's safe for auras to Remove each other in AfterRemove hook.
             GetTarget().RemoveAura(SpellIds.FormStag);
@@ -1020,7 +1020,7 @@ namespace Scripts.Spells.Druid
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
 
-        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
+        private static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
         {
             var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, difficulty);
 
@@ -1050,9 +1050,9 @@ namespace Scripts.Spells.Druid
     // 33943 - Flight Form
     // 40120 - Swift Flight Form
     [Script] // 165961 - Stag Form
-    class spell_dru_travel_form_AuraScript : AuraScript
+    internal class spell_dru_travel_form_AuraScript : AuraScript
     {
-        uint triggeredSpellId;
+        private uint triggeredSpellId;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1064,7 +1064,7 @@ namespace Scripts.Spells.Druid
             return GetCaster().GetTypeId() == TypeId.Player;
         }
 
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // If it stays 0, it Removes Travel Form dummy in AfterRemove.
             triggeredSpellId = 0;
@@ -1081,7 +1081,7 @@ namespace Scripts.Spells.Druid
                 PreventDefaultAction();
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (triggeredSpellId == m_scriptSpellId)
                 return;
@@ -1102,9 +1102,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 48438 - Wild Growth
-    class spell_dru_wild_growth : SpellScript
+    internal class spell_dru_wild_growth : SpellScript
     {
-        List<WorldObject> _targets;
+        private List<WorldObject> _targets;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -1114,7 +1114,7 @@ namespace Scripts.Spells.Druid
             return true;
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
             {
@@ -1136,7 +1136,7 @@ namespace Scripts.Spells.Druid
             _targets = targets;
         }
 
-        void SetTargets(List<WorldObject> targets)
+        private void SetTargets(List<WorldObject> targets)
         {
             targets.Clear();
             targets.AddRange(_targets);
@@ -1150,14 +1150,14 @@ namespace Scripts.Spells.Druid
     }
 
     [Script]
-    class spell_dru_wild_growth_AuraScript : AuraScript
+    internal class spell_dru_wild_growth_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RestorationT102PBonus);
         }
 
-        void HandleTickUpdate(AuraEffect aurEff)
+        private void HandleTickUpdate(AuraEffect aurEff)
         {
             var caster = GetCaster();
             if (!caster)

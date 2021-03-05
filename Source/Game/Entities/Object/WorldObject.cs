@@ -247,7 +247,7 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer);
         }
 
-        void BuildDestroyUpdateBlock(UpdateData data)
+        private void BuildDestroyUpdateBlock(UpdateData data)
         {
             data.AddDestroyObject(GetGUID());
         }
@@ -1000,7 +1000,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsVisibilityOverridden() { return m_visibilityDistanceOverride.HasValue; }
+        private bool IsVisibilityOverridden() { return m_visibilityDistanceOverride.HasValue; }
 
         public void SetVisibilityDistanceOverride(VisibilityDistanceType type)
         {
@@ -1205,14 +1205,14 @@ namespace Game.Entities
             return true;
         }
 
-        bool CanNeverSee(WorldObject obj)
+        private bool CanNeverSee(WorldObject obj)
         {
             return GetMap() != obj.GetMap() || !IsInPhase(obj);
         }
 
         public virtual bool CanAlwaysSee(WorldObject obj) { return false; }
 
-        bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
+        private bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
         {
             var seer = this;
 
@@ -1237,7 +1237,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool CanDetectInvisibilityOf(WorldObject obj)
+        private bool CanDetectInvisibilityOf(WorldObject obj)
         {
             var mask = obj.m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
 
@@ -1261,7 +1261,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool CanDetectStealthOf(WorldObject obj, bool checkAlert = false)
+        private bool CanDetectStealthOf(WorldObject obj, bool checkAlert = false)
         {
             // Combat reach is the minimal distance (both in front and behind),
             //   and it is also used in the range calculation.
@@ -1748,7 +1748,7 @@ namespace Game.Entities
 
         public void AddToNotify(NotifyFlags f) { m_notifyflags |= f; }
         public bool IsNeedNotify(NotifyFlags f) { return Convert.ToBoolean(m_notifyflags & f); }
-        NotifyFlags GetNotifyFlags() { return m_notifyflags; }
+        private NotifyFlags GetNotifyFlags() { return m_notifyflags; }
         public void ResetAllNotifies() { m_notifyflags = 0; }
 
         public bool IsActiveObject() { return m_isActive; }
@@ -1759,7 +1759,7 @@ namespace Game.Entities
         public float GetTransOffsetY() { return m_movementInfo.transport.pos.GetPositionY(); }
         public float GetTransOffsetZ() { return m_movementInfo.transport.pos.GetPositionZ(); }
         public float GetTransOffsetO() { return m_movementInfo.transport.pos.GetOrientation(); }
-        Position GetTransOffset() { return m_movementInfo.transport.pos; }
+        private Position GetTransOffset() { return m_movementInfo.transport.pos; }
         public uint GetTransTime() { return m_movementInfo.transport.time; }
         public sbyte GetTransSeat() { return m_movementInfo.transport.seat; }
         public virtual ObjectGuid GetTransGUID()
@@ -1921,7 +1921,7 @@ namespace Game.Entities
             return IsWithinLOS(x, y, z, checks, ignoreFlags);
         }
 
-        Position GetHitSpherePointFor(Position dest)
+        private Position GetHitSpherePointFor(Position dest)
         {
             var vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ());
             var vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
@@ -1930,7 +1930,7 @@ namespace Game.Entities
             return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAngle(contactPoint.X, contactPoint.Y));
         }
 
-        void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
+        private void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
         {
             var pos = GetHitSpherePointFor(dest);
             x = pos.GetPositionX();
@@ -1990,7 +1990,8 @@ namespace Game.Entities
         {
             return obj1 && obj2 && IsInBetween(obj1.GetPosition(), obj2.GetPosition(), size);
         }
-        bool IsInBetween(Position pos1, Position pos2, float size)
+
+        private bool IsInBetween(Position pos1, Position pos2, float size)
         {
             var dist = GetExactDist2d(pos1);
 
@@ -2242,7 +2243,7 @@ namespace Game.Entities
             pos.SetOrientation(GetOrientation());
         }
 
-        float NormalizeZforCollision(WorldObject obj, float x, float y, float z)
+        private float NormalizeZforCollision(WorldObject obj, float x, float y, float z)
         {
             var ground = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, MapConst.MaxHeight, true);
             var floor = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, z + 2.0f, true);
@@ -2342,35 +2343,35 @@ namespace Game.Entities
         public TypeMask ObjectTypeMask { get; set; }
         protected TypeId ObjectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
-        ObjectGuid m_guid;
+        private ObjectGuid m_guid;
 
         public UpdateFieldHolder m_values;
         public ObjectFieldData m_objectData;
 
         public uint LastUsedScriptID;
 
-        bool m_objectUpdated;
+        private bool m_objectUpdated;
 
-        uint m_zoneId;
-        uint m_areaId;
-        float m_staticFloorZ;
+        private uint m_zoneId;
+        private uint m_areaId;
+        private float m_staticFloorZ;
 
         public MovementInfo m_movementInfo;
-        string _name;
+        private string _name;
         protected bool m_isActive;
-        Optional<float> m_visibilityDistanceOverride;
-        bool m_isWorldObject;
+        private Optional<float> m_visibilityDistanceOverride;
+        private bool m_isWorldObject;
         public ZoneScript m_zoneScript;
 
-        Transport m_transport;
-        Map _currMap;
-        uint instanceId;
-        PhaseShift _phaseShift= new PhaseShift();
-        PhaseShift _suppressedPhaseShift = new PhaseShift();                   // contains phases for current area but not applied due to conditions
-        int _dbPhase;
+        private Transport m_transport;
+        private Map _currMap;
+        private uint instanceId;
+        private PhaseShift _phaseShift= new PhaseShift();
+        private PhaseShift _suppressedPhaseShift = new PhaseShift();                   // contains phases for current area but not applied due to conditions
+        private int _dbPhase;
         public bool IsInWorld { get; set; }
 
-        NotifyFlags m_notifyflags;
+        private NotifyFlags m_notifyflags;
 
         public FlaggedArray<StealthType> m_stealth = new FlaggedArray<StealthType>(2);
         public FlaggedArray<StealthType> m_stealthDetect = new FlaggedArray<StealthType>(2);
@@ -2391,8 +2392,8 @@ namespace Game.Entities
     public class MovementInfo
     {
         public ObjectGuid Guid { get; set; }
-        MovementFlag flags;
-        MovementFlag2 flags2;
+        private MovementFlag flags;
+        private MovementFlag2 flags2;
         public Position Pos { get; set; }
         public uint Time { get; set; }
         public TransportInfo transport;
@@ -2502,8 +2503,8 @@ namespace Game.Entities
 
     public class MovementForces
     {
-        List<MovementForce> _forces = new List<MovementForce>();
-        float _modMagnitude = 1.0f;
+        private List<MovementForce> _forces = new List<MovementForce>();
+        private float _modMagnitude = 1.0f;
 
         public List<MovementForce> GetForces() { return _forces; }
 
@@ -2536,7 +2537,7 @@ namespace Game.Entities
 
         public bool IsEmpty() { return _forces.Empty() && _modMagnitude == 1.0f; }
 
-        MovementForce FindMovementForce(ObjectGuid id)
+        private MovementForce FindMovementForce(ObjectGuid id)
         {
             return _forces.Find(force => force.ID == id);
         }

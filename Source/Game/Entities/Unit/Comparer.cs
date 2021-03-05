@@ -38,8 +38,8 @@ namespace Game.Entities
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 
-        PowerType m_power;
-        bool m_ascending;
+        private PowerType m_power;
+        private bool m_ascending;
     }
 
     public class HealthPctOrderPred : IComparer<WorldObject>
@@ -58,7 +58,7 @@ namespace Game.Entities
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 
-        bool m_ascending;
+        private bool m_ascending;
     }
 
     public class ObjectDistanceOrderPred : IComparer<WorldObject>
@@ -74,7 +74,7 @@ namespace Game.Entities
             return (m_ascending ? m_refObj.GetDistanceOrder(pLeft, pRight) : !m_refObj.GetDistanceOrder(pLeft, pRight)) ? 1 : 0;
         }
 
-        WorldObject m_refObj;
-        bool m_ascending;
+        private WorldObject m_refObj;
+        private bool m_ascending;
     }
 }

@@ -40,7 +40,7 @@ namespace Game.Movement
             args.flags.SetUnsetFlag(SplineFlag.Steering, unit.HasNpcFlag2(NPCFlags2.Steering));
         }
 
-        UnitMoveType SelectSpeedType(MovementFlag moveFlags)
+        private UnitMoveType SelectSpeedType(MovementFlag moveFlags)
         {
             if (moveFlags.HasAnyFlag(MovementFlag.Flying))
             {
@@ -252,7 +252,7 @@ namespace Game.Movement
 
         public void SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
 
-        void SetBackward() { args.flags.SetUnsetFlag(SplineFlag.Backward); }
+        private void SetBackward() { args.flags.SetUnsetFlag(SplineFlag.Backward); }
 
         public void SetTransportEnter() { args.flags.EnableTransportEnter(); }
 
@@ -308,7 +308,7 @@ namespace Game.Movement
         public Vector3[] Path() { return args.path; }
 
         public MoveSplineInitArgs args = new MoveSplineInitArgs();
-        Unit unit;
+        private Unit unit;
     }
 
     // Transforms coordinates from global to transport offsets
@@ -336,7 +336,7 @@ namespace Game.Movement
             return new Vector3(x, y, z);
         }
 
-        Unit _owner;
-        bool _transformForTransport;
+        private Unit _owner;
+        private bool _transformForTransport;
     }
 }

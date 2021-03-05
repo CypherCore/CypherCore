@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Scripts.World.GameObjects
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         //CatFigurine
         public const uint SummonGhostSaber = 5968;
@@ -87,7 +87,7 @@ namespace Scripts.World.GameObjects
         public const uint ToyTrainPulse = 61551;
     }
 
-    struct CreatureIds
+    internal struct CreatureIds
     {
         //GildedBrazier
         public const uint Stillblade = 17716;
@@ -154,7 +154,7 @@ namespace Scripts.World.GameObjects
         public const uint PoleRibbonBunny = 17066;
     }
 
-    struct GameObjectIds
+    internal struct GameObjectIds
     {
         //Shrineofthebirds
         public const uint ShrineHawk = 185551;
@@ -167,7 +167,7 @@ namespace Scripts.World.GameObjects
         public const uint KharazhanBell = 182064;
     }
 
-    struct ItemIds
+    internal struct ItemIds
     {
         //Matrixpunchograph
         public const uint WhitePunchCard = 9279;
@@ -187,7 +187,7 @@ namespace Scripts.World.GameObjects
         public const uint AnderholsSliderCider = 37247;
     }
 
-    struct QuestIds
+    internal struct QuestIds
     {
         //GildedBrazier
         public const uint TheFirstTrial = 9678;
@@ -222,13 +222,13 @@ namespace Scripts.World.GameObjects
         public const uint TheCleansingAlliance = 11322;
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         //Missingfriends
         public const uint SayFree0 = 0;
     }
 
-    struct GossipConst
+    internal struct GossipConst
     {
         //Dalarancrystal
         public const string GoTeleToDalaranCrystalFailed = "This Teleport Crystal Cannot Be Used Until The Teleport Crystal In Dalaran Has Been Used At Least Once.";
@@ -258,7 +258,7 @@ namespace Scripts.World.GameObjects
         public const string AnderholsSliderCiderNotFound = "Quest Item Anderhol'S Slider Cider Not Found.";
     }
 
-    struct SoundIds
+    internal struct SoundIds
     {
         //BrewfestMusic
         public const uint EventBrewfestdwarf01 = 11810; // 1.35 Min
@@ -282,7 +282,7 @@ namespace Scripts.World.GameObjects
         public const uint BellTollKharazhan = 9154; // Kharazhan
     }
 
-    struct AreaIds
+    internal struct AreaIds
     {
         public const uint Silvermoon = 3430; // Horde
         public const uint Undercity = 1497;
@@ -299,7 +299,7 @@ namespace Scripts.World.GameObjects
         public const uint KharazhanMapid = 532;
     }
 
-    struct Misc
+    internal struct Misc
     {
         // These Are In Seconds
         //Brewfestmusictime
@@ -316,7 +316,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_cat_figurine : GameObjectAI
+    internal class go_cat_figurine : GameObjectAI
     {
         public go_cat_figurine(GameObject go) : base(go) { }
 
@@ -328,7 +328,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_barov_journal : GameObjectAI
+    internal class go_barov_journal : GameObjectAI
     {
         public go_barov_journal(GameObject go) : base(go) { }
 
@@ -342,7 +342,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_gilded_brazier : GameObjectAI
+    internal class go_gilded_brazier : GameObjectAI
     {
         public go_gilded_brazier(GameObject go) : base(go) { }
 
@@ -362,7 +362,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_orb_of_command : GameObjectAI
+    internal class go_orb_of_command : GameObjectAI
     {
         public go_orb_of_command(GameObject go) : base(go) { }
 
@@ -376,7 +376,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_tablet_of_madness : GameObjectAI
+    internal class go_tablet_of_madness : GameObjectAI
     {
         public go_tablet_of_madness(GameObject go) : base(go) { }
 
@@ -390,7 +390,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_tablet_of_the_seven : GameObjectAI
+    internal class go_tablet_of_the_seven : GameObjectAI
     {
         public go_tablet_of_the_seven(GameObject go) : base(go) { }
 
@@ -408,7 +408,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_jump_a_tron : GameObjectAI
+    internal class go_jump_a_tron : GameObjectAI
     {
         public go_jump_a_tron(GameObject go) : base(go) { }
 
@@ -422,7 +422,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_ethereum_prison : GameObjectAI
+    internal class go_ethereum_prison : GameObjectAI
     {
         public go_ethereum_prison(GameObject go) : base(go) { }
 
@@ -476,7 +476,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_ethereum_stasis : GameObjectAI
+    internal class go_ethereum_stasis : GameObjectAI
     {
         public go_ethereum_stasis(GameObject go) : base(go) { }
 
@@ -492,7 +492,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_resonite_cask : GameObjectAI
+    internal class go_resonite_cask : GameObjectAI
     {
         public go_resonite_cask(GameObject go) : base(go) { }
 
@@ -506,7 +506,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_sacred_fire_of_life : GameObjectAI
+    internal class go_sacred_fire_of_life : GameObjectAI
     {
         public go_sacred_fire_of_life(GameObject go) : base(go) { }
 
@@ -520,7 +520,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_shrine_of_the_birds : GameObjectAI
+    internal class go_shrine_of_the_birds : GameObjectAI
     {
         public go_shrine_of_the_birds(GameObject go) : base(go) { }
 
@@ -551,7 +551,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_southfury_moonstone : GameObjectAI
+    internal class go_southfury_moonstone : GameObjectAI
     {
         public go_southfury_moonstone(GameObject go) : base(go) { }
 
@@ -569,7 +569,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_tele_to_dalaran_crystal : GameObjectAI
+    internal class go_tele_to_dalaran_crystal : GameObjectAI
     {
         public go_tele_to_dalaran_crystal(GameObject go) : base(go) { }
 
@@ -584,7 +584,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_tele_to_violet_stand : GameObjectAI
+    internal class go_tele_to_violet_stand : GameObjectAI
     {
         public go_tele_to_violet_stand(GameObject go) : base(go) { }
 
@@ -598,7 +598,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_fel_crystalforge : GameObjectAI
+    internal class go_fel_crystalforge : GameObjectAI
     {
         public go_fel_crystalforge(GameObject go) : base(go) { }
 
@@ -642,7 +642,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_bashir_crystalforge : GameObjectAI
+    internal class go_bashir_crystalforge : GameObjectAI
     {
         public go_bashir_crystalforge(GameObject go) : base(go) { }
 
@@ -686,7 +686,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_matrix_punchograph : GameObjectAI
+    internal class go_matrix_punchograph : GameObjectAI
     {
         public go_matrix_punchograph(GameObject go) : base(go) { }
 
@@ -730,7 +730,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_scourge_cage : GameObjectAI
+    internal class go_scourge_cage : GameObjectAI
     {
         public go_scourge_cage(GameObject go) : base(go) { }
 
@@ -749,7 +749,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_arcane_prison : GameObjectAI
+    internal class go_arcane_prison : GameObjectAI
     {
         public go_arcane_prison(GameObject go) : base(go) { }
 
@@ -766,7 +766,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_blood_filled_orb : GameObjectAI
+    internal class go_blood_filled_orb : GameObjectAI
     {
         public go_blood_filled_orb(GameObject go) : base(go) { }
 
@@ -780,7 +780,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_jotunheim_cage : GameObjectAI
+    internal class go_jotunheim_cage : GameObjectAI
     {
         public go_jotunheim_cage(GameObject go) : base(go) { }
 
@@ -823,7 +823,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_table_theka : GameObjectAI
+    internal class go_table_theka : GameObjectAI
     {
         public go_table_theka(GameObject go) : base(go) { }
 
@@ -838,7 +838,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_inconspicuous_landmark : GameObjectAI
+    internal class go_inconspicuous_landmark : GameObjectAI
     {
         public go_inconspicuous_landmark(GameObject go) : base(go) { }
 
@@ -853,7 +853,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_soulwell : GameObjectAI
+    internal class go_soulwell : GameObjectAI
     {
         public go_soulwell(GameObject go) : base(go) { }
 
@@ -867,7 +867,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_dragonflayer_cage : GameObjectAI
+    internal class go_dragonflayer_cage : GameObjectAI
     {
         public go_dragonflayer_cage(GameObject go) : base(go) { }
 
@@ -900,7 +900,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_amberpine_outhouse : GameObjectAI
+    internal class go_amberpine_outhouse : GameObjectAI
     {
         public go_amberpine_outhouse(GameObject go) : base(go) { }
 
@@ -946,7 +946,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_hive_pod : GameObjectAI
+    internal class go_hive_pod : GameObjectAI
     {
         public go_hive_pod(GameObject go) : base(go) { }
 
@@ -960,7 +960,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_massive_seaforium_charge : GameObjectAI
+    internal class go_massive_seaforium_charge : GameObjectAI
     {
         public go_massive_seaforium_charge(GameObject go) : base(go) { }
 
@@ -972,7 +972,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_veil_skith_cage : GameObjectAI
+    internal class go_veil_skith_cage : GameObjectAI
     {
         public go_veil_skith_cage(GameObject go) : base(go) { }
 
@@ -997,7 +997,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_frostblade_shrine : GameObjectAI
+    internal class go_frostblade_shrine : GameObjectAI
     {
         public go_frostblade_shrine(GameObject go) : base(go) { }
 
@@ -1017,7 +1017,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_midsummer_bonfire : GameObjectAI
+    internal class go_midsummer_bonfire : GameObjectAI
     {
         public go_midsummer_bonfire(GameObject go) : base(go) { }
 
@@ -1030,7 +1030,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_midsummer_ribbon_pole : GameObjectAI
+    internal class go_midsummer_ribbon_pole : GameObjectAI
     {
         public go_midsummer_ribbon_pole(GameObject go) : base(go) { }
 
@@ -1047,9 +1047,9 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_toy_train_set : GameObjectAI
+    internal class go_toy_train_set : GameObjectAI
     {
-        uint _pulseTimer;
+        private uint _pulseTimer;
 
         public go_toy_train_set(GameObject go) : base(go)
         {
@@ -1075,10 +1075,10 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_brewfest_music : GameObjectAI
+    internal class go_brewfest_music : GameObjectAI
     {
-        uint rnd = 0;
-        uint musicTime = 1000;
+        private uint rnd = 0;
+        private uint musicTime = 1000;
 
         public go_brewfest_music(GameObject go) : base(go)
         {
@@ -1193,7 +1193,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_midsummer_music : GameObjectAI
+    internal class go_midsummer_music : GameObjectAI
     {
         public go_midsummer_music(GameObject go) : base(go)
         {
@@ -1222,7 +1222,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_darkmoon_faire_music : GameObjectAI
+    internal class go_darkmoon_faire_music : GameObjectAI
     {
         public go_darkmoon_faire_music(GameObject go) : base(go)
         {
@@ -1243,7 +1243,7 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_pirate_day_music : GameObjectAI
+    internal class go_pirate_day_music : GameObjectAI
     {
         public go_pirate_day_music(GameObject go) : base(go)
         {
@@ -1263,9 +1263,9 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_bells : GameObjectAI
-    {   
-        uint _soundId;
+    internal class go_bells : GameObjectAI
+    {
+        private uint _soundId;
 
         public go_bells(GameObject go) : base(go) { }
 

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class PartyCommandResult : ServerPacket
+    internal class PartyCommandResult : ServerPacket
     {
         public PartyCommandResult() : base(ServerOpcodes.PartyCommandResult) { }
 
@@ -47,7 +47,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ResultGUID;
     }
 
-    class PartyInviteClient : ClientPacket
+    internal class PartyInviteClient : ClientPacket
     {
         public PartyInviteClient(WorldPacket packet) : base(packet) { }
 
@@ -71,7 +71,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
     }
 
-    class PartyInvite : ServerPacket
+    internal class PartyInvite : ServerPacket
     {
         public PartyInvite() : base(ServerOpcodes.PartyInvite) { }
 
@@ -137,7 +137,7 @@ namespace Game.Networking.Packets
         public List<int> LfgSlots = new List<int>();
     }
 
-    class PartyInviteResponse : ClientPacket
+    internal class PartyInviteResponse : ClientPacket
     {
         public PartyInviteResponse(WorldPacket packet) : base(packet) { }
 
@@ -157,7 +157,7 @@ namespace Game.Networking.Packets
         public Optional<uint> RolesDesired;
     }
 
-    class PartyUninvite : ClientPacket
+    internal class PartyUninvite : ClientPacket
     {
         public PartyUninvite(WorldPacket packet) : base(packet) { }
 
@@ -175,7 +175,7 @@ namespace Game.Networking.Packets
         public string Reason;
     }
 
-    class GroupDecline : ServerPacket
+    internal class GroupDecline : ServerPacket
     {
         public GroupDecline(string name) : base(ServerOpcodes.GroupDecline)
         {
@@ -192,14 +192,14 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class GroupUninvite : ServerPacket
+    internal class GroupUninvite : ServerPacket
     {
         public GroupUninvite() : base(ServerOpcodes.GroupUninvite) { }
 
         public override void Write() { }
     }
 
-    class RequestPartyMemberStats : ClientPacket
+    internal class RequestPartyMemberStats : ClientPacket
     {
         public RequestPartyMemberStats(WorldPacket packet) : base(packet) { }
 
@@ -213,7 +213,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
     }
 
-    class PartyMemberFullState : ServerPacket
+    internal class PartyMemberFullState : ServerPacket
     {
         public PartyMemberFullState() : base(ServerOpcodes.PartyMemberFullState) { }
 
@@ -358,7 +358,7 @@ namespace Game.Networking.Packets
         public PartyMemberStats MemberStats = new PartyMemberStats();
     }
 
-    class SetPartyLeader : ClientPacket
+    internal class SetPartyLeader : ClientPacket
     {
         public SetPartyLeader(WorldPacket packet) : base(packet) { }
 
@@ -372,7 +372,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
     }
 
-    class SetRole : ClientPacket
+    internal class SetRole : ClientPacket
     {
         public SetRole(WorldPacket packet) : base(packet) { }
 
@@ -388,7 +388,7 @@ namespace Game.Networking.Packets
         public int Role;
     }
 
-    class RoleChangedInform : ServerPacket
+    internal class RoleChangedInform : ServerPacket
     {
         public RoleChangedInform() : base(ServerOpcodes.RoleChangedInform) { }
 
@@ -408,7 +408,7 @@ namespace Game.Networking.Packets
         public int NewRole;
     }
 
-    class LeaveGroup : ClientPacket
+    internal class LeaveGroup : ClientPacket
     {
         public LeaveGroup(WorldPacket packet) : base(packet) { }
 
@@ -420,14 +420,14 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
     }
 
-    class GroupDestroyed : ServerPacket
+    internal class GroupDestroyed : ServerPacket
     {
         public GroupDestroyed() : base(ServerOpcodes.GroupDestroyed) { }
 
         public override void Write() { }
     }
 
-    class SetLootMethod : ClientPacket
+    internal class SetLootMethod : ClientPacket
     {
         public SetLootMethod(WorldPacket packet) : base(packet) { }
 
@@ -445,7 +445,7 @@ namespace Game.Networking.Packets
         public ItemQuality LootThreshold;
     }
 
-    class MinimapPingClient : ClientPacket
+    internal class MinimapPingClient : ClientPacket
     {
         public MinimapPingClient(WorldPacket packet) : base(packet) { }
 
@@ -461,7 +461,7 @@ namespace Game.Networking.Packets
         public float PositionY;
     }
 
-    class MinimapPing : ServerPacket
+    internal class MinimapPing : ServerPacket
     {
         public MinimapPing() : base(ServerOpcodes.MinimapPing) { }
 
@@ -477,7 +477,7 @@ namespace Game.Networking.Packets
         public float PositionY;
     }
 
-    class UpdateRaidTarget : ClientPacket
+    internal class UpdateRaidTarget : ClientPacket
     {
         public UpdateRaidTarget(WorldPacket packet) : base(packet) { }
 
@@ -493,7 +493,7 @@ namespace Game.Networking.Packets
         public sbyte Symbol;
     }
 
-    class SendRaidTargetUpdateSingle : ServerPacket
+    internal class SendRaidTargetUpdateSingle : ServerPacket
     {
         public SendRaidTargetUpdateSingle() : base(ServerOpcodes.SendRaidTargetUpdateSingle) { }
 
@@ -511,7 +511,7 @@ namespace Game.Networking.Packets
         public sbyte Symbol;
     }
 
-    class SendRaidTargetUpdateAll : ServerPacket
+    internal class SendRaidTargetUpdateAll : ServerPacket
     {
         public SendRaidTargetUpdateAll() : base(ServerOpcodes.SendRaidTargetUpdateAll) { }
 
@@ -532,7 +532,7 @@ namespace Game.Networking.Packets
         public Dictionary<byte, ObjectGuid> TargetIcons = new Dictionary<byte, ObjectGuid>();
     }
 
-    class ConvertRaid : ClientPacket
+    internal class ConvertRaid : ClientPacket
     {
         public ConvertRaid(WorldPacket packet) : base(packet) { }
 
@@ -544,7 +544,7 @@ namespace Game.Networking.Packets
         public bool Raid;
     }
 
-    class RequestPartyJoinUpdates : ClientPacket
+    internal class RequestPartyJoinUpdates : ClientPacket
     {
         public RequestPartyJoinUpdates(WorldPacket packet) : base(packet) { }
 
@@ -556,7 +556,7 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
     }
 
-    class SetAssistantLeader : ClientPacket
+    internal class SetAssistantLeader : ClientPacket
     {
         public SetAssistantLeader(WorldPacket packet) : base(packet) { }
 
@@ -572,7 +572,7 @@ namespace Game.Networking.Packets
         public bool Apply;
     }
 
-    class SetPartyAssignment : ClientPacket
+    internal class SetPartyAssignment : ClientPacket
     {
         public SetPartyAssignment(WorldPacket packet) : base(packet) { }
 
@@ -590,7 +590,7 @@ namespace Game.Networking.Packets
         public bool Set;
     }
 
-    class DoReadyCheck : ClientPacket
+    internal class DoReadyCheck : ClientPacket
     {
         public DoReadyCheck(WorldPacket packet) : base(packet) { }
 
@@ -602,7 +602,7 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
     }
 
-    class ReadyCheckStarted : ServerPacket
+    internal class ReadyCheckStarted : ServerPacket
     {
         public ReadyCheckStarted() : base(ServerOpcodes.ReadyCheckStarted) { }
 
@@ -620,7 +620,7 @@ namespace Game.Networking.Packets
         public uint Duration;
     }
 
-    class ReadyCheckResponseClient : ClientPacket
+    internal class ReadyCheckResponseClient : ClientPacket
     {
         public ReadyCheckResponseClient(WorldPacket packet) : base(packet) { }
 
@@ -634,7 +634,7 @@ namespace Game.Networking.Packets
         public bool IsReady;
     }
 
-    class ReadyCheckResponse : ServerPacket
+    internal class ReadyCheckResponse : ServerPacket
     {
         public ReadyCheckResponse() : base(ServerOpcodes.ReadyCheckResponse) { }
 
@@ -652,7 +652,7 @@ namespace Game.Networking.Packets
         public bool IsReady;
     }
 
-    class ReadyCheckCompleted : ServerPacket
+    internal class ReadyCheckCompleted : ServerPacket
     {
         public ReadyCheckCompleted() : base(ServerOpcodes.ReadyCheckCompleted) { }
 
@@ -666,14 +666,14 @@ namespace Game.Networking.Packets
         public ObjectGuid PartyGUID;
     }
 
-    class RequestRaidInfo : ClientPacket
+    internal class RequestRaidInfo : ClientPacket
     {
         public RequestRaidInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class OptOutOfLoot : ClientPacket
+    internal class OptOutOfLoot : ClientPacket
     {
         public OptOutOfLoot(WorldPacket packet) : base(packet) { }
 
@@ -685,7 +685,7 @@ namespace Game.Networking.Packets
         public bool PassOnLoot;
     }
 
-    class InitiateRolePoll : ClientPacket
+    internal class InitiateRolePoll : ClientPacket
     {
         public InitiateRolePoll(WorldPacket packet) : base(packet) { }
 
@@ -697,7 +697,7 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
     }
 
-    class RolePollInform : ServerPacket
+    internal class RolePollInform : ServerPacket
     {
         public RolePollInform() : base(ServerOpcodes.RolePollInform) { }
 
@@ -711,7 +711,7 @@ namespace Game.Networking.Packets
         public ObjectGuid From;
     }
 
-    class GroupNewLeader : ServerPacket
+    internal class GroupNewLeader : ServerPacket
     {
         public GroupNewLeader() : base(ServerOpcodes.GroupNewLeader) { }
 
@@ -726,7 +726,7 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class PartyUpdate : ServerPacket
+    internal class PartyUpdate : ServerPacket
     {
         public PartyUpdate() : base(ServerOpcodes.PartyUpdate) { }
 
@@ -775,7 +775,7 @@ namespace Game.Networking.Packets
         public Optional<PartyDifficultySettings> DifficultySettings;
     }
 
-    class SetEveryoneIsAssistant : ClientPacket
+    internal class SetEveryoneIsAssistant : ClientPacket
     {
         public SetEveryoneIsAssistant(WorldPacket packet) : base(packet) { }
 
@@ -789,7 +789,7 @@ namespace Game.Networking.Packets
         public bool EveryoneIsAssistant;
     }
 
-    class ChangeSubGroup : ClientPacket
+    internal class ChangeSubGroup : ClientPacket
     {
         public ChangeSubGroup(WorldPacket packet) : base(packet) { }
 
@@ -805,7 +805,7 @@ namespace Game.Networking.Packets
         public byte NewSubGroup;
     }
 
-    class SwapSubGroups : ClientPacket
+    internal class SwapSubGroups : ClientPacket
     {
         public SwapSubGroups(WorldPacket packet) : base(packet) { }
 
@@ -821,7 +821,7 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
     }
 
-    class ClearRaidMarker : ClientPacket
+    internal class ClearRaidMarker : ClientPacket
     {
         public ClearRaidMarker(WorldPacket packet) : base(packet) { }
 
@@ -833,7 +833,7 @@ namespace Game.Networking.Packets
         public byte MarkerId;
     }
 
-    class RaidMarkersChanged : ServerPacket
+    internal class RaidMarkersChanged : ServerPacket
     {
         public RaidMarkersChanged() : base(ServerOpcodes.RaidMarkersChanged) { }
 
@@ -859,7 +859,7 @@ namespace Game.Networking.Packets
         public List<RaidMarker> RaidMarkers = new List<RaidMarker>();
     }
 
-    class PartyKillLog : ServerPacket
+    internal class PartyKillLog : ServerPacket
     {
         public PartyKillLog() : base(ServerOpcodes.PartyKillLog) { }
 
@@ -909,7 +909,7 @@ namespace Game.Networking.Packets
         public List<PartyMemberPhase> List = new List<PartyMemberPhase>();
     }
 
-    class PartyMemberAuraStates
+    internal class PartyMemberAuraStates
     {      
         public int SpellID;
         public ushort Flags;
@@ -927,7 +927,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class PartyMemberPetStats
+    internal class PartyMemberPetStats
     {
         public void Write(WorldPacket data)
         {
@@ -967,7 +967,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class PartyMemberStats
+    internal class PartyMemberStats
     {
         public void Write(WorldPacket data)
         {
@@ -1034,7 +1034,7 @@ namespace Game.Networking.Packets
         public CTROptions ChromieTime;
     }
 
-    struct PartyPlayerInfo
+    internal struct PartyPlayerInfo
     {
         public void Write(WorldPacket data)
         {
@@ -1065,7 +1065,7 @@ namespace Game.Networking.Packets
         public bool VoiceChatSilenced;
     }
 
-    struct PartyLFGInfo
+    internal struct PartyLFGInfo
     {
         public void Write(WorldPacket data)
         {
@@ -1094,7 +1094,7 @@ namespace Game.Networking.Packets
         public bool MyFirstReward;
     }
 
-    struct PartyLootSettings
+    internal struct PartyLootSettings
     {
         public void Write(WorldPacket data)
         {
@@ -1108,7 +1108,7 @@ namespace Game.Networking.Packets
         public byte Threshold;
     }
 
-    struct PartyDifficultySettings
+    internal struct PartyDifficultySettings
     {
         public void Write(WorldPacket data)
         {

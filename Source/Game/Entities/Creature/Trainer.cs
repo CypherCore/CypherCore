@@ -87,12 +87,12 @@ namespace Game.Entities
                 player.LearnSpell(trainerSpell.SpellId, false);
         }
 
-        TrainerSpell GetSpell(uint spellId)
+        private TrainerSpell GetSpell(uint spellId)
         {
             return _spells.Find(trainerSpell => trainerSpell.SpellId == spellId);
         }
 
-        bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
+        private bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
         {
             var state = GetSpellState(player, trainerSpell);
             if (state != TrainerSpellState.Available)
@@ -105,7 +105,7 @@ namespace Game.Entities
             return true;
         }
 
-        TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
+        private TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
         {
             if (player.HasSpell(trainerSpell.SpellId))
                 return TrainerSpellState.Known;
@@ -145,7 +145,7 @@ namespace Game.Entities
             return TrainerSpellState.Available;
         }
 
-        void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
+        private void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
         {
             var trainerBuyFailed = new TrainerBuyFailed();
             trainerBuyFailed.TrainerGUID = npc.GetGUID();
@@ -154,7 +154,7 @@ namespace Game.Entities
             player.SendPacket(trainerBuyFailed);
         }
 
-        string GetGreeting(Locale locale)
+        private string GetGreeting(Locale locale)
         {
             if (_greeting[(int)locale].IsEmpty())
                 return _greeting[(int)Locale.enUS];
@@ -167,9 +167,9 @@ namespace Game.Entities
             _greeting[(int)locale] = greeting;
         }
 
-        uint _id;
-        TrainerType _type;
-        List<TrainerSpell> _spells;
-        Array<string> _greeting = new Array<string>((int)Locale.Total);
+        private uint _id;
+        private TrainerType _type;
+        private List<TrainerSpell> _spells;
+        private Array<string> _greeting = new Array<string>((int)Locale.Total);
     }
 }

@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Game.BattleFields
 {
-    class BattlefieldWG : BattleField
+    internal class BattlefieldWG : BattleField
     {
         public override bool SetupBattlefield()
         {
@@ -425,7 +425,7 @@ namespace Game.BattleFields
             SendWarning(WintergraspText.StartGrouping);
         }
 
-        uint GetSpiritGraveyardId(uint areaId)
+        private uint GetSpiritGraveyardId(uint areaId)
         {
             switch (areaId)
             {
@@ -576,7 +576,7 @@ namespace Game.BattleFields
             // @todo Recent PvP activity worldstate
         }
 
-        bool FindAndRemoveVehicleFromList(Unit vehicle)
+        private bool FindAndRemoveVehicleFromList(Unit vehicle)
         {
             for (byte i = 0; i < SharedConst.BGTeamsCount; ++i)
             {
@@ -601,7 +601,7 @@ namespace Game.BattleFields
                         UpdateVehicleCountWG();
         }
 
-        void HandlePromotion(Player playerKiller, Unit unitKilled)
+        private void HandlePromotion(Player playerKiller, Unit unitKilled)
         {
             var teamId = playerKiller.GetTeamId();
 
@@ -615,7 +615,7 @@ namespace Game.BattleFields
         }
 
         // Update rank for player
-        void PromotePlayer(Player killer)
+        private void PromotePlayer(Player killer)
         {
             if (!m_isActive)
                 return;
@@ -649,7 +649,7 @@ namespace Game.BattleFields
             }
         }
 
-        void RemoveAurasFromPlayer(Player player)
+        private void RemoveAurasFromPlayer(Player player)
         {
             player.RemoveAurasDueToSpell(WGSpells.Recruit);
             player.RemoveAurasDueToSpell(WGSpells.Corporal);
@@ -780,7 +780,7 @@ namespace Game.BattleFields
                 workshop.FillInitialWorldStates(packet);
         }
 
-        void SendInitWorldStatesTo(Player player)
+        private void SendInitWorldStatesTo(Player player)
         {
             var packet = new InitWorldStates();
             packet.AreaID = m_ZoneId;
@@ -916,7 +916,7 @@ namespace Game.BattleFields
         }
 
         // Update vehicle count WorldState to player
-        void UpdateVehicleCountWG()
+        private void UpdateVehicleCountWG()
         {
             SendUpdateWorldState(WGWorldStates.VehicleH, GetData(WGData.VehicleH));
             SendUpdateWorldState(WGWorldStates.MaxVehicleH, GetData(WGData.MaxVehicleH));
@@ -924,7 +924,7 @@ namespace Game.BattleFields
             SendUpdateWorldState(WGWorldStates.MaxVehicleA, GetData(WGData.MaxVehicleA));
         }
 
-        void UpdateTenacity()
+        private void UpdateTenacity()
         {
             var alliancePlayers = m_PlayersInWar[TeamId.Alliance].Count;
             var hordePlayers = m_PlayersInWar[TeamId.Horde].Count;
@@ -1017,33 +1017,33 @@ namespace Game.BattleFields
         public GameObject GetRelic() { return GetGameObject(m_titansRelicGUID); }
 
         // Define relic object
-        void SetRelic(ObjectGuid relicGUID) { m_titansRelicGUID = relicGUID; }
+        private void SetRelic(ObjectGuid relicGUID) { m_titansRelicGUID = relicGUID; }
 
         // Check if players can interact with the relic (Only if the last door has been broken)
-        bool CanInteractWithRelic() { return m_isRelicInteractible; }
+        private bool CanInteractWithRelic() { return m_isRelicInteractible; }
 
         // Define if player can interact with the relic
         public void SetRelicInteractible(bool allow) { m_isRelicInteractible = allow; }
 
 
-        bool m_isRelicInteractible;
+        private bool m_isRelicInteractible;
 
-        List<WGWorkshop> Workshops = new List<WGWorkshop>();
+        private List<WGWorkshop> Workshops = new List<WGWorkshop>();
 
-        List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<BfWGGameObjectBuilding> BuildingsInZone = new List<BfWGGameObjectBuilding>();
+        private List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        private List<BfWGGameObjectBuilding> BuildingsInZone = new List<BfWGGameObjectBuilding>();
 
-        List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid> CanonList = new List<ObjectGuid>();
+        private List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        private List<ObjectGuid> CanonList = new List<ObjectGuid>();
 
-        int m_tenacityTeam;
-        uint m_tenacityStack;
-        uint m_saveTimer;
+        private int m_tenacityTeam;
+        private uint m_tenacityStack;
+        private uint m_saveTimer;
 
-        ObjectGuid m_titansRelicGUID;
+        private ObjectGuid m_titansRelicGUID;
     }
 
-    class BfWGGameObjectBuilding
+    internal class BfWGGameObjectBuilding
     {
         public BfWGGameObjectBuilding(BattlefieldWG WG, WGGameObjectBuildingType type, uint worldState)
         {
@@ -1324,7 +1324,7 @@ namespace Game.BattleFields
             }
         }
 
-        void UpdateCreatureAndGo()
+        private void UpdateCreatureAndGo()
         {
             foreach (var guid in m_CreatureTopList[_wg.GetDefenderTeam()])
             {
@@ -1455,32 +1455,32 @@ namespace Game.BattleFields
         public ObjectGuid GetGUID() { return _buildGUID; }
 
         // WG object
-        BattlefieldWG _wg;
+        private BattlefieldWG _wg;
 
         // Linked gameobject
-        ObjectGuid _buildGUID;
+        private ObjectGuid _buildGUID;
 
         // the team that controls this point
-        uint _teamControl;
+        private uint _teamControl;
 
-        WGGameObjectBuildingType _type;
-        uint _worldState;
+        private WGGameObjectBuildingType _type;
+        private uint _worldState;
 
-        WGGameObjectState _state;
+        private WGGameObjectState _state;
 
-        StaticWintergraspTowerInfo _staticTowerInfo;
+        private StaticWintergraspTowerInfo _staticTowerInfo;
 
         // GameObject associations
-        List<ObjectGuid>[] m_GameObjectList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        private List<ObjectGuid>[] m_GameObjectList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
 
         // Creature associations
-        List<ObjectGuid>[] m_CreatureBottomList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid>[] m_CreatureTopList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid> m_TowerCannonBottomList = new List<ObjectGuid>();
-        List<ObjectGuid> m_TurretTopList = new List<ObjectGuid>();
+        private List<ObjectGuid>[] m_CreatureBottomList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        private List<ObjectGuid>[] m_CreatureTopList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        private List<ObjectGuid> m_TowerCannonBottomList = new List<ObjectGuid>();
+        private List<ObjectGuid> m_TurretTopList = new List<ObjectGuid>();
     }
 
-    class WGWorkshop
+    internal class WGWorkshop
     {
         public WGWorkshop(BattlefieldWG wg, byte type)
         {
@@ -1573,15 +1573,15 @@ namespace Game.BattleFields
 
         public uint GetTeamControl()  { return _teamControl; }
 
-        BattlefieldWG _wg;                             // Pointer to wintergrasp
+        private BattlefieldWG _wg;                             // Pointer to wintergrasp
         //ObjectGuid _buildGUID;
-        WGGameObjectState _state;              // For worldstate
-        uint _teamControl;                            // Team witch control the workshop
+        private WGGameObjectState _state;              // For worldstate
+        private uint _teamControl;                            // Team witch control the workshop
 
-        StaticWintergraspWorkshopInfo _staticInfo;
+        private StaticWintergraspWorkshopInfo _staticInfo;
     }
 
-    class WintergraspCapturePoint : BfCapturePoint
+    internal class WintergraspCapturePoint : BfCapturePoint
     {
         public WintergraspCapturePoint(BattlefieldWG battlefield, uint teamInControl)
             : base(battlefield)
@@ -1597,12 +1597,13 @@ namespace Game.BattleFields
             Cypher.Assert(m_Workshop != null);
             m_Workshop.GiveControlTo(m_team, false);
         }
-        uint GetTeam() { return m_team; }
+
+        private uint GetTeam() { return m_team; }
 
         protected WGWorkshop m_Workshop;
     }
 
-    class BfGraveyardWG : BfGraveyard
+    internal class BfGraveyardWG : BfGraveyard
     {
         public BfGraveyardWG(BattlefieldWG battlefield)
             : base(battlefield)
@@ -1612,7 +1613,7 @@ namespace Game.BattleFields
         }
 
         public void SetTextId(int textid) { m_GossipTextId = textid; }
-        int GetTextId() { return m_GossipTextId; }
+        private int GetTextId() { return m_GossipTextId; }
 
         protected int m_GossipTextId;
     }

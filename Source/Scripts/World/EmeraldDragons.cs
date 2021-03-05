@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace Scripts.World.EmeraldDragons
 {
-    struct CreatureIds
+    internal struct CreatureIds
     {
         public const uint DragonYsondre = 14887;
         public const uint DragonLethon = 14888;
@@ -40,7 +40,7 @@ namespace Scripts.World.EmeraldDragons
         public const uint SpiritShade = 15261;
     }
 
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint TailSweep = 15847;    // Tail Sweep - Slap Everything Behind Dragon (2 Seconds Interval)
         public const uint SummonPlayer = 24776;    // Teleport Highest Threat Player In Front Of Dragon If Wandering Off
@@ -75,7 +75,7 @@ namespace Scripts.World.EmeraldDragons
         public static uint[] TaerarShadeSpells = new uint[] { 24841, 24842, 24843 };
     }
 
-    struct TextIds
+    internal struct TextIds
     {
         //Ysondre
         public const uint SayYsondreAggro = 0;
@@ -94,7 +94,7 @@ namespace Scripts.World.EmeraldDragons
         public const uint SayTaerarSummonShades = 1;
     }
 
-    class emerald_dragonAI : WorldBossAI
+    internal class emerald_dragonAI : WorldBossAI
     {
         public emerald_dragonAI(Creature creature) : base(creature) { }
 
@@ -155,16 +155,16 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class npc_dream_fog : ScriptedAI
+    internal class npc_dream_fog : ScriptedAI
     {
-        uint _roamTimer;
+        private uint _roamTimer;
 
         public npc_dream_fog(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _roamTimer = 0;
         }
@@ -205,16 +205,16 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class boss_ysondre : emerald_dragonAI
+    internal class boss_ysondre : emerald_dragonAI
     {
-        byte _stage;
+        private byte _stage;
 
         public boss_ysondre(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _stage = 1;
         }
@@ -252,16 +252,16 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class boss_lethon : emerald_dragonAI
+    internal class boss_lethon : emerald_dragonAI
     {
-        byte _stage;
+        private byte _stage;
 
         public boss_lethon(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _stage = 1;
         }
@@ -305,9 +305,9 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class npc_spirit_shade : PassiveAI
+    internal class npc_spirit_shade : PassiveAI
     {
-        ObjectGuid _summonerGuid;
+        private ObjectGuid _summonerGuid;
 
         public npc_spirit_shade(Creature creature) : base(creature) { }
 
@@ -328,16 +328,16 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class boss_emeriss : emerald_dragonAI
+    internal class boss_emeriss : emerald_dragonAI
     {
-        byte _stage;
+        private byte _stage;
 
         public boss_emeriss(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _stage = 1;
         }
@@ -379,19 +379,19 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class boss_taerar : emerald_dragonAI
+    internal class boss_taerar : emerald_dragonAI
     {
-        bool _banished;                              // used for shades activation testing
-        uint _banishedTimer;                         // counter for banishment timeout
-        byte _shades;                                // keep track of how many shades are dead
-        byte _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
+        private bool _banished;                              // used for shades activation testing
+        private uint _banishedTimer;                         // counter for banishment timeout
+        private byte _shades;                                // keep track of how many shades are dead
+        private byte _stage;                                 // check which "shade phase" we're at (75-50-25 percentage counters)
 
         public boss_taerar(Creature creature) : base(creature)
         {
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             _stage = 1;
             _shades = 0;
@@ -487,9 +487,9 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class spell_dream_fog_sleep_SpellScript : SpellScript
+    internal class spell_dream_fog_sleep_SpellScript : SpellScript
     {
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
             {
@@ -507,14 +507,14 @@ namespace Scripts.World.EmeraldDragons
     }
 
     [Script]
-    class spell_mark_of_nature_SpellScript : SpellScript
+    internal class spell_mark_of_nature_SpellScript : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.MarkOfNature, SpellIds.AuraOfNature);
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(obj =>
             {
@@ -527,7 +527,7 @@ namespace Scripts.World.EmeraldDragons
             });
         }
 
-        void HandleEffect(uint effIndex)
+        private void HandleEffect(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetHitUnit().CastSpell(GetHitUnit(), SpellIds.AuraOfNature, true);

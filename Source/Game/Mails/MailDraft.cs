@@ -49,7 +49,7 @@ namespace Game.Mails
             return this;
         }
 
-        void PrepareItems(Player receiver, SQLTransaction trans)
+        private void PrepareItems(Player receiver, SQLTransaction trans)
         {
             if (m_mailTemplateId == 0 || !m_mailTemplateItemsNeed)
                 return;
@@ -77,7 +77,7 @@ namespace Game.Mails
             }
         }
 
-        void DeleteIncludedItems(SQLTransaction trans, bool inDB = false)
+        private void DeleteIncludedItems(SQLTransaction trans, bool inDB = false)
         {
             foreach (var item in m_items.Values)
             {
@@ -231,11 +231,11 @@ namespace Game.Mails
                 DeleteIncludedItems(null);
         }
 
-        uint GetMailTemplateId() { return m_mailTemplateId; }
-        string GetSubject() { return m_subject; }
-        ulong GetMoney() { return m_money; }
-        ulong GetCOD() { return m_COD; }
-        string GetBody() { return m_body; }
+        private uint GetMailTemplateId() { return m_mailTemplateId; }
+        private string GetSubject() { return m_subject; }
+        private ulong GetMoney() { return m_money; }
+        private ulong GetCOD() { return m_COD; }
+        private string GetBody() { return m_body; }
 
         public MailDraft AddMoney(ulong money)
         {
@@ -248,14 +248,14 @@ namespace Game.Mails
             return this;
         }
 
-        uint m_mailTemplateId;
-        bool m_mailTemplateItemsNeed;
-        string m_subject;
-        string m_body;
+        private uint m_mailTemplateId;
+        private bool m_mailTemplateItemsNeed;
+        private string m_subject;
+        private string m_body;
 
-        Dictionary<ulong, Item> m_items = new Dictionary<ulong, Item>();
+        private Dictionary<ulong, Item> m_items = new Dictionary<ulong, Item>();
 
-        ulong m_money;
-        ulong m_COD;
+        private ulong m_money;
+        private ulong m_COD;
     }
 }

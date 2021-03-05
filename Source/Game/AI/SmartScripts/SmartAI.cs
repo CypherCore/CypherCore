@@ -28,8 +28,8 @@ namespace Game.AI
 {
     public class SmartAI : CreatureAI
     {
-        const int SMART_ESCORT_MAX_PLAYER_DIST = 60;
-        const int SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2;
+        private const int SMART_ESCORT_MAX_PLAYER_DIST = 60;
+        private const int SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2;
 
         public SmartAI(Creature creature) : base(creature)
         {
@@ -41,7 +41,7 @@ namespace Game.AI
             mHasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
         }
 
-        bool IsAIControlled()
+        private bool IsAIControlled()
         {
             return !mIsCharmed;
         }
@@ -85,7 +85,7 @@ namespace Game.AI
             me.GetMotionMaster().MovePath(_path, _repeatWaypointPath);
         }
 
-        bool LoadPath(uint entry)
+        private bool LoadPath(uint entry)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 return false;
@@ -273,7 +273,7 @@ namespace Game.AI
             me.ResumeMovement();
         }
 
-        void ReturnToLastOOCPos()
+        private void ReturnToLastOOCPos()
         {
             if (!IsAIControlled())
                 return;
@@ -302,7 +302,7 @@ namespace Game.AI
                 DoMeleeAttackIfReady();
         }
 
-        bool IsEscortInvokerInRange()
+        private bool IsEscortInvokerInRange()
         {
             var targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
             if (targets != null)
@@ -481,7 +481,7 @@ namespace Game.AI
             return !me.HasReactState(ReactStates.Passive);
         }
 
-        bool AssistPlayerInCombatAgainst(Unit who)
+        private bool AssistPlayerInCombatAgainst(Unit who)
         {
             if (me.HasReactState(ReactStates.Passive) || !IsAIControlled())
                 return false;
@@ -870,7 +870,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellclick, clicker);
         }
 
-        void CheckConditions(uint diff)
+        private void CheckConditions(uint diff)
         {
             if (!mHasConditions)
                 return;
@@ -904,7 +904,7 @@ namespace Game.AI
                 mConditionsTimer -= diff;
         }
 
-        void UpdatePath(uint diff)
+        private void UpdatePath(uint diff)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
                 return;
@@ -955,7 +955,7 @@ namespace Game.AI
             }
         }
 
-        void UpdateFollow(uint diff)
+        private void UpdateFollow(uint diff)
         {
             if (mFollowGuid.IsEmpty())
             {
@@ -974,7 +974,7 @@ namespace Game.AI
             }
         }
 
-        void UpdateDespawn(uint diff)
+        private void UpdateDespawn(uint diff)
         {
             if (mDespawnState <= 1 || mDespawnState > 3)
                 return;
@@ -1027,45 +1027,45 @@ namespace Game.AI
 
         public uint mEscortQuestID;
 
-        SmartScript mScript = new SmartScript();
+        private SmartScript mScript = new SmartScript();
 
-        bool mIsCharmed;
-        uint mFollowCreditType;
-        uint mFollowArrivedTimer;
-        uint mFollowCredit;
-        uint mFollowArrivedEntry;
-        ObjectGuid mFollowGuid;
-        float mFollowDist;
-        float mFollowAngle;
+        private bool mIsCharmed;
+        private uint mFollowCreditType;
+        private uint mFollowArrivedTimer;
+        private uint mFollowCredit;
+        private uint mFollowArrivedEntry;
+        private ObjectGuid mFollowGuid;
+        private float mFollowDist;
+        private float mFollowAngle;
 
-        SmartEscortState _escortState;
-        uint _escortNPCFlags;
-        uint _escortInvokerCheckTimer;
-        WaypointPath _path;
-        uint _currentWaypointNode;
-        bool _waypointReached;
-        uint _waypointPauseTimer;
-        bool _waypointPauseForced;
-        bool _repeatWaypointPath;
-        bool _OOCReached;
-        bool _waypointPathEnded;
+        private SmartEscortState _escortState;
+        private uint _escortNPCFlags;
+        private uint _escortInvokerCheckTimer;
+        private WaypointPath _path;
+        private uint _currentWaypointNode;
+        private bool _waypointReached;
+        private uint _waypointPauseTimer;
+        private bool _waypointPauseForced;
+        private bool _repeatWaypointPath;
+        private bool _OOCReached;
+        private bool _waypointPathEnded;
 
-        bool mRun;
-        bool mEvadeDisabled;
-        bool mCanAutoAttack;
-        bool mCanCombatMove;
-        uint mInvincibilityHpLevel;
+        private bool mRun;
+        private bool mEvadeDisabled;
+        private bool mCanAutoAttack;
+        private bool mCanCombatMove;
+        private uint mInvincibilityHpLevel;
 
-        uint mDespawnTime;
-        uint mRespawnTime;
-        uint mDespawnState;
+        private uint mDespawnTime;
+        private uint mRespawnTime;
+        private uint mDespawnState;
 
         // Vehicle conditions
-        bool mHasConditions;
-        uint mConditionsTimer;
+        private bool mHasConditions;
+        private uint mConditionsTimer;
 
         // Gossip
-        bool _gossipReturn;
+        private bool _gossipReturn;
     }
 
     public class SmartGameObjectAI : GameObjectAI
@@ -1170,10 +1170,10 @@ namespace Game.AI
 
         public SmartScript GetScript() { return mScript; }
 
-        SmartScript mScript;
+        private SmartScript mScript;
 
         // Gossip
-        bool _gossipReturn;
+        private bool _gossipReturn;
     }
 
     public class SmartAreaTriggerAI : AreaTriggerAI
@@ -1202,9 +1202,9 @@ namespace Game.AI
             GetScript().SetScript9(e, entry);
         }
 
-        SmartScript GetScript() { return mScript; }
+        private SmartScript GetScript() { return mScript; }
 
-        SmartScript mScript;
+        private SmartScript mScript;
     }
 
     public enum SmartEscortState

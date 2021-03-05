@@ -27,7 +27,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.Inspect)]
-        void HandleInspect(Inspect inspect)
+        private void HandleInspect(Inspect inspect)
         {
             var player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
             if (!player)
@@ -86,7 +86,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryInspectAchievements)]
-        void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
+        private void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
         {
             var player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
             if (!player)

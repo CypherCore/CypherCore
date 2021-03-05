@@ -148,7 +148,7 @@ namespace Game.Collision
             return false;
         }
 
-        DynTreeImpl impl;
+        private DynTreeImpl impl;
     }
 
     public class DynTreeImpl : RegularGrid2D<GameObjectModel, BIHWrap<GameObjectModel>>
@@ -191,7 +191,7 @@ namespace Game.Collision
             }
         }
 
-        TimeTrackerSmall rebalance_timer;
-        int unbalanced_times;
+        private TimeTrackerSmall rebalance_timer;
+        private int unbalanced_times;
     }
 }

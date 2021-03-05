@@ -25,10 +25,10 @@ using System.Collections.Generic;
 namespace Game.Chat
 {
     [CommandGroup("mmap", RBACPermissions.CommandMmap, true)]
-    class MMapsCommands
+    internal class MMapsCommands
     {
         [Command("path", RBACPermissions.CommandMmapPath)]
-        static bool PathCommand(StringArguments args, CommandHandler handler)
+        private static bool PathCommand(StringArguments args, CommandHandler handler)
         {
             if (Global.MMapMgr.GetNavMesh(handler.GetPlayer().GetMapId()) == null)
             {
@@ -89,7 +89,7 @@ namespace Game.Chat
         }
 
         [Command("loc", RBACPermissions.CommandMmapLoc)]
-        static bool LocCommand(StringArguments args, CommandHandler handler)
+        private static bool LocCommand(StringArguments args, CommandHandler handler)
         {
             handler.SendSysMessage("mmap tileloc:");
 
@@ -155,7 +155,7 @@ namespace Game.Chat
         }
 
         [Command("loadedtiles", RBACPermissions.CommandMmapLoadedtiles)]
-        static bool LoadedTilesCommand(StringArguments args, CommandHandler handler)
+        private static bool LoadedTilesCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -181,7 +181,7 @@ namespace Game.Chat
         }
 
         [Command("stats", RBACPermissions.CommandMmapStats)]
-        static bool HandleMmapStatsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleMmapStatsCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
             var terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
@@ -225,7 +225,7 @@ namespace Game.Chat
         }
 
         [Command("testarea", RBACPermissions.CommandMmapTestarea)]
-        static bool TestArea(StringArguments args, CommandHandler handler)
+        private static bool TestArea(StringArguments args, CommandHandler handler)
         {
             var radius = 40.0f;
             WorldObject obj = handler.GetPlayer();

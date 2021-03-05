@@ -61,7 +61,7 @@ namespace System
             return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
-        static uint LeftRotate(this uint value, int shiftCount)
+        private static uint LeftRotate(this uint value, int shiftCount)
         {
             return (value << shiftCount) | (value >> (0x20 - shiftCount));
         }

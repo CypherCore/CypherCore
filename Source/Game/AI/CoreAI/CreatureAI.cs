@@ -126,7 +126,7 @@ namespace Game.AI
                 me.EngageWithTarget(who);
         }
 
-        void _OnOwnerCombatInteraction(Unit target)
+        private void _OnOwnerCombatInteraction(Unit target)
         {
             if (target == null || !me.IsAlive())
                 return;
@@ -190,7 +190,7 @@ namespace Game.AI
                 me.GetVehicleKit().Reset(true);
         }
 
-        void SetGazeOn(Unit target)
+        private void SetGazeOn(Unit target)
         {
             if (me.IsValidAttackTarget(target) && target != me.GetVictim())
             {
@@ -482,13 +482,13 @@ namespace Game.AI
         /// <param name="onlyIfActive"></param>
         /// <returns></returns>
         public virtual bool IsEscortNPC(bool onlyIfActive)  { return false;    }
-        
-        List<AreaBoundary> GetBoundary() { return _boundary; }
 
-        bool MoveInLineOfSight_locked;
+        private List<AreaBoundary> GetBoundary() { return _boundary; }
+
+        private bool MoveInLineOfSight_locked;
         protected new Creature me;
-        List<AreaBoundary> _boundary = new List<AreaBoundary>();
-        bool _negateBoundary;
+        private List<AreaBoundary> _boundary = new List<AreaBoundary>();
+        private bool _negateBoundary;
 
         protected EventMap _events = new EventMap();
         protected TaskScheduler _scheduler = new TaskScheduler();

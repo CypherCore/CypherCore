@@ -78,7 +78,7 @@ namespace Game.Arenas
             packet.AddState(ArenaWorldStates.AlivePlayersGold, (int)GetAlivePlayersCountByTeam(Team.Alliance));
         }
 
-        void UpdateArenaWorldState()
+        private void UpdateArenaWorldState()
         {
             UpdateWorldState(ArenaWorldStates.AlivePlayersGreen, GetAlivePlayersCountByTeam(Team.Horde));
             UpdateWorldState(ArenaWorldStates.AlivePlayersGold, GetAlivePlayersCountByTeam(Team.Alliance));
@@ -303,7 +303,7 @@ namespace Game.Arenas
         public ArenaTeamScore[] _arenaTeamScores = new ArenaTeamScore[SharedConst.BGTeamsCount];
     }
 
-    struct ArenaWorldStates
+    internal struct ArenaWorldStates
     {
         public const uint AlivePlayersGreen = 3600;
         public const uint AlivePlayersGold = 3601;

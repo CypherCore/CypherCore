@@ -96,8 +96,8 @@ namespace Game.Networking
 
         public ConnectionType GetConnection() { return connectionType; }
 
-        byte[] buffer;
-        ConnectionType connectionType;
+        private byte[] buffer;
+        private ConnectionType connectionType;
         protected WorldPacket _worldPacket;
     }
 
@@ -171,7 +171,7 @@ namespace Game.Networking
             WriteBytes(packed, packedSize);
         }
 
-        uint PackUInt64(ulong value, out byte mask, out byte[] result)
+        private uint PackUInt64(ulong value, out byte mask, out byte[] result)
         {
             uint resultSize = 0;
             mask = 0;
@@ -220,7 +220,7 @@ namespace Game.Networking
 
         public uint GetOpcode() { return opcode; }
 
-        uint opcode;
+        private uint opcode;
     }
 
     public class PacketHeader

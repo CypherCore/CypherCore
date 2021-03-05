@@ -30,7 +30,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.Who, Processing = PacketProcessing.ThreadSafe)]
-        void HandleWho(WhoRequestPkt whoRequest)
+        private void HandleWho(WhoRequestPkt whoRequest)
         {
             var request = whoRequest.Request;
 
@@ -162,7 +162,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.WhoIs)]
-        void HandleWhoIs(WhoIsRequest packet)
+        private void HandleWhoIs(WhoIsRequest packet)
         {
             if (!HasPermission(RBACPermissions.OpcodeWhois))
             {
@@ -211,13 +211,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SendContactList)]
-        void HandleContactList(SendContactList packet)
+        private void HandleContactList(SendContactList packet)
         {
             GetPlayer().GetSocial().SendSocialList(GetPlayer(), packet.Flags);
         }
 
         [WorldPacketHandler(ClientOpcodes.AddFriend)]
-        void HandleAddFriend(AddFriend packet)
+        private void HandleAddFriend(AddFriend packet)
         {
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
@@ -261,7 +261,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DelFriend)]
-        void HandleDelFriend(DelFriend packet)
+        private void HandleDelFriend(DelFriend packet)
         {
             // @todo: handle VirtualRealmAddress
             GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Friend);
@@ -270,7 +270,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AddIgnore)]
-        void HandleAddIgnore(AddIgnore packet)
+        private void HandleAddIgnore(AddIgnore packet)
         {
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
@@ -297,7 +297,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.DelIgnore)]
-        void HandleDelIgnore(DelIgnore packet)
+        private void HandleDelIgnore(DelIgnore packet)
         {
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleDelIgnoreOpcode: {0}", packet.Player.Guid.ToString());
@@ -308,7 +308,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetContactNotes)]
-        void HandleSetContactNotes(SetContactNotes packet)
+        private void HandleSetContactNotes(SetContactNotes packet)
         {
             // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleSetContactNotesOpcode: Contact: {0}, Notes: {1}", packet.Player.Guid.ToString(), packet.Notes);

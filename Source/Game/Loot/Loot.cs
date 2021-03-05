@@ -238,7 +238,7 @@ namespace Game.Loots
             return true;
         }
 
-        void FillNotNormalLootFor(Player player, bool presentAtLooting)
+        private void FillNotNormalLootFor(Player player, bool presentAtLooting)
         {
             var plguid = player.GetGUID();
 
@@ -279,7 +279,7 @@ namespace Game.Loots
             }
         }
 
-        List<NotNormalLootItem> FillFFALoot(Player player)
+        private List<NotNormalLootItem> FillFFALoot(Player player)
         {
             var ql = new List<NotNormalLootItem>();
 
@@ -300,7 +300,7 @@ namespace Game.Loots
             return ql;
         }
 
-        List<NotNormalLootItem> FillQuestLoot(Player player)
+        private List<NotNormalLootItem> FillQuestLoot(Player player)
         {
             if (items.Count == SharedConst.MaxNRLootItems)
                 return null;
@@ -336,7 +336,7 @@ namespace Game.Loots
             return ql;
         }
 
-        List<NotNormalLootItem> FillNonQuestNonFFAConditionalLoot(Player player, bool presentAtLooting)
+        private List<NotNormalLootItem> FillNonQuestNonFFAConditionalLoot(Player player, bool presentAtLooting)
         {
             var ql = new List<NotNormalLootItem>();
 
@@ -821,17 +821,17 @@ namespace Game.Loots
 
         public ObjectGuid containerID;
 
-        List<ObjectGuid> PlayersLooting = new List<ObjectGuid>();
-        MultiMap<ObjectGuid, NotNormalLootItem> PlayerQuestItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
-        MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
-        MultiMap<ObjectGuid, NotNormalLootItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
+        private List<ObjectGuid> PlayersLooting = new List<ObjectGuid>();
+        private MultiMap<ObjectGuid, NotNormalLootItem> PlayerQuestItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
+        private MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
+        private MultiMap<ObjectGuid, NotNormalLootItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
-        LootValidatorRefManager i_LootValidatorRefManager = new LootValidatorRefManager();
+        private LootValidatorRefManager i_LootValidatorRefManager = new LootValidatorRefManager();
 
         // Loot GUID
-        ObjectGuid _GUID;
-        ItemContext _itemContext;
+        private ObjectGuid _GUID;
+        private ItemContext _itemContext;
     }
 
     public class AELootResult
@@ -860,8 +860,8 @@ namespace Game.Loots
             return _byOrder;
         }
 
-        List<ResultValue> _byOrder = new List<ResultValue>();
-        Dictionary<Item, int> _byItem = new Dictionary<Item, int>();
+        private List<ResultValue> _byOrder = new List<ResultValue>();
+        private Dictionary<Item, int> _byItem = new Dictionary<Item, int>();
 
         public struct ResultValue
         {

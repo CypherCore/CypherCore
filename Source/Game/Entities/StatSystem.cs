@@ -116,7 +116,7 @@ namespace Game.Entities
             return m_auraPctModifiersGroup[(int)unitMod][(int)modifierType];
         }
 
-        void UpdateUnitMod(UnitMods unitMod)
+        private void UpdateUnitMod(UnitMods unitMod)
         {
             if (!CanModifyStats())
                 return;
@@ -184,7 +184,7 @@ namespace Game.Entities
             }
         }
 
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
+        private int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
 
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal)
@@ -221,7 +221,7 @@ namespace Game.Entities
             return gain;
         }
 
-        Stats GetStatByAuraGroup(UnitMods unitMod)
+        private Stats GetStatByAuraGroup(UnitMods unitMod)
         {
             var stat = Stats.Strength;
 
@@ -311,7 +311,7 @@ namespace Game.Entities
             UpdateStatBuffModForClient(stat);
         }
 
-        void UpdateStatBuffModForClient(Stats stat)
+        private void UpdateStatBuffModForClient(Stats stat)
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatPosBuff, (int)stat), (int)m_floatStatPosBuff[(int)stat]);
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatNegBuff, (int)stat), (int)m_floatStatNegBuff[(int)stat]);
@@ -680,9 +680,9 @@ namespace Game.Entities
             damage -= target.GetDamageReduction(damage);
         }
         // player or player's pet resilience (-1%)
-        uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
+        private uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
 
-        float GetCombatRatingReduction(CombatRating cr)
+        private float GetCombatRatingReduction(CombatRating cr)
         {
             var player = ToPlayer();
             if (player)
@@ -698,7 +698,7 @@ namespace Game.Entities
             return 0.0f;
         }
 
-        uint GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint damage)
+        private uint GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint damage)
         {
             var percent = Math.Min(GetCombatRatingReduction(cr) * rate, cap);
             return MathFunctions.CalculatePct(damage, percent);
@@ -717,7 +717,7 @@ namespace Game.Entities
         public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
-        float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
+        private float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
             //calculate miss chance
             var missChance = victim.GetUnitMissChance(attType);
@@ -747,7 +747,7 @@ namespace Game.Entities
             return missChance;
         }
 
-        float GetUnitCriticalChance(WeaponAttackType attackType, Unit victim)
+        private float GetUnitCriticalChance(WeaponAttackType attackType, Unit victim)
         {
             var chance = 0.0f;
             var thisPlayer = ToPlayer();
@@ -794,7 +794,8 @@ namespace Game.Entities
 
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
             var levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
@@ -830,7 +831,8 @@ namespace Game.Entities
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitParryChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitParryChance(WeaponAttackType attType, Unit victim)
         {
             var levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
@@ -870,7 +872,8 @@ namespace Game.Entities
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitMissChance(WeaponAttackType attType)
+
+        private float GetUnitMissChance(WeaponAttackType attType)
         {
             var miss_chance = 5.0f;
 
@@ -881,7 +884,8 @@ namespace Game.Entities
 
             return miss_chance;
         }
-        float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
+
+        private float GetUnitBlockChance(WeaponAttackType attType, Unit victim)
         {
             var levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
 
@@ -1270,7 +1274,7 @@ namespace Game.Entities
             UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
         }
 
-        void _ApplyAllStatBonuses()
+        private void _ApplyAllStatBonuses()
         {
             SetCanModifyStats(false);
 
@@ -1282,7 +1286,8 @@ namespace Game.Entities
 
             UpdateAllStats();
         }
-        void _RemoveAllStatBonuses()
+
+        private void _RemoveAllStatBonuses()
         {
             SetCanModifyStats(false);
 
@@ -1295,7 +1300,7 @@ namespace Game.Entities
             UpdateAllStats();
         }
 
-        void UpdateAllRatings()
+        private void UpdateAllRatings()
         {
             for (CombatRating cr = 0; cr < CombatRating.Max; ++cr)
                 UpdateRating(cr);
@@ -1485,7 +1490,7 @@ namespace Game.Entities
                 SetUpdateFieldStatValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModHealingDonePercent, i), value);
         }
 
-        void UpdateCorruption()
+        private void UpdateCorruption()
         {
             var effectiveCorruption = GetRatingBonusValue(CombatRating.Corruption) - GetRatingBonusValue(CombatRating.CorruptionResistance);
             foreach (var corruptionEffect in CliDB.CorruptionEffectsStorage.Values)
@@ -1513,13 +1518,13 @@ namespace Game.Entities
             }
         }
 
-        void UpdateArmorPenetration(int amount)
+        private void UpdateArmorPenetration(int amount)
         {
             // Store Rating Value
             SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CombatRatings, (int)CombatRating.ArmorPenetration), (uint)amount);
         }
 
-        float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
+        private float CalculateDiminishingReturns(float[] capArray, Class playerClass, float nonDiminishValue, float diminishValue)
         {
             float[] m_diminishing_k =
             {
@@ -1557,7 +1562,7 @@ namespace Game.Entities
             return result;
         }
 
-        float[] parry_cap =
+        private float[] parry_cap =
         {
             65.631440f,     // Warrior
             65.631440f,     // Paladin
@@ -1594,8 +1599,8 @@ namespace Game.Entities
             }
             SetUpdateFieldStatValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ParryPercentage), value);
         }
-        
-        float[] dodge_cap =
+
+        private float[] dodge_cap =
         {
             65.631440f,     // Warrior            
             65.631440f,     // Paladin
@@ -1700,7 +1705,7 @@ namespace Game.Entities
             }
         }
 
-        float GetGameTableColumnForCombatRating(GtCombatRatingsRecord row, CombatRating rating)
+        private float GetGameTableColumnForCombatRating(GtCombatRatingsRecord row, CombatRating rating)
         {
             switch (rating)
             {
@@ -1817,7 +1822,8 @@ namespace Game.Entities
 
             SetMaxHealth((uint)value);
         }
-        float GetHealthBonusFromStamina()
+
+        private float GetHealthBonusFromStamina()
         {
             // Taken from PaperDollFrame.lua - 6.0.3.19085
             var ratio = 10.0f;
@@ -1855,18 +1861,18 @@ namespace Game.Entities
             m_spellPenetrationItemMod += apply ? amount : -amount;
         }
 
-        void ApplyManaRegenBonus(int amount, bool apply)
+        private void ApplyManaRegenBonus(int amount, bool apply)
         {
             _ModifyUInt32(apply, ref m_baseManaRegen, ref amount);
             UpdateManaRegen();
         }
 
-        void ApplyHealthRegenBonus(int amount, bool apply)
+        private void ApplyHealthRegenBonus(int amount, bool apply)
         {
             _ModifyUInt32(apply, ref m_baseHealthRegen, ref amount);
         }
 
-        void ApplySpellPowerBonus(int amount, bool apply)
+        private void ApplySpellPowerBonus(int amount, bool apply)
         {
             if (HasAuraType(AuraType.OverrideSpellPowerByApPct))
                 return;

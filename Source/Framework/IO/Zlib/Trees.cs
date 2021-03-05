@@ -222,7 +222,7 @@ namespace Framework.IO
 		};
 		#endregion
 
-		class static_tree_desc
+		private class static_tree_desc
 		{
 			public readonly ct_data[] static_tree;	// static tree or NULL
 			public readonly int[] extra_bits;		// extra bits for each code or NULL
@@ -250,7 +250,7 @@ namespace Framework.IO
 
 		// Send a code of the given tree. c and tree must not have side effects
 		//#define send_code(s, c, tree) send_bits(s, tree[c].Code, tree[c].Len)
-		static void send_code(deflate_state s, int c, ct_data[] tree)
+		private static void send_code(deflate_state s, int c, ct_data[] tree)
 		{
 			var value=tree[c].Code;
 			var len=tree[c].Len;
@@ -298,7 +298,7 @@ namespace Framework.IO
 		//		} \
 		//	}
 
-		static void send_bits(deflate_state s, int value, int length)
+		private static void send_bits(deflate_state s, int value, int length)
 		{
 			var len=length;
 			if(s.bi_valid>(int)Buf_size-len)
@@ -322,7 +322,7 @@ namespace Framework.IO
 
 		// ===========================================================================
 		// Initialize the tree data structures for a new zlib stream.
-		static void _tr_init(deflate_state s)
+		private static void _tr_init(deflate_state s)
 		{
 			s.l_desc.dyn_tree=s.dyn_ltree;
 			s.l_desc.stat_desc=static_l_desc;
@@ -343,7 +343,7 @@ namespace Framework.IO
 
 		// ===========================================================================
 		// Initialize a new block.
-		static void init_block(deflate_state s)
+		private static void init_block(deflate_state s)
 		{
 			// Initialize the trees.
 			for(var n=0; n<L_CODES; n++) s.dyn_ltree[n].Freq=0;
@@ -381,7 +381,7 @@ namespace Framework.IO
 
 		// tree:	the tree to restore
 		// k:		node to move down
-		static void pqdownheap(deflate_state s, ct_data[] tree, int k)
+		private static void pqdownheap(deflate_state s, ct_data[] tree, int k)
 		{
 			var v=s.heap[k];
 			var j=k<<1;  // left son of k
@@ -417,7 +417,7 @@ namespace Framework.IO
 		//     not null.
 
 		// desc:	the tree descriptor
-		static void gen_bitlen(deflate_state s, ref tree_desc desc)
+		private static void gen_bitlen(deflate_state s, ref tree_desc desc)
 		{
 			var tree=desc.dyn_tree;
 			var max_code=desc.max_code;
@@ -506,7 +506,7 @@ namespace Framework.IO
 		// tree:		the tree to decorate
 		// max_code:	largest code with non zero frequency
 		// bl_count:	number of codes at each bit length
-		static void gen_codes(ct_data[] tree, int max_code, ushort[] bl_count)
+		private static void gen_codes(ct_data[] tree, int max_code, ushort[] bl_count)
 		{
 			var next_code=new ushort[MAX_BITS+1];	// next code value for each bit length
 			ushort code=0;	// running code value
@@ -542,7 +542,7 @@ namespace Framework.IO
 		//     also updated if stree is not null. The field max_code is set.
 
 		// desc:	the tree descriptor
-		static void build_tree(deflate_state s, ref tree_desc desc)
+		private static void build_tree(deflate_state s, ref tree_desc desc)
 		{
 			var tree=desc.dyn_tree;
 			var stree=desc.stat_desc.static_tree;
@@ -627,7 +627,7 @@ namespace Framework.IO
 
 		// tree:		the tree to be scanned
 		// max_code:	and its largest code of non zero frequency
-		static void scan_tree(deflate_state s, ct_data[] tree, int max_code)
+		private static void scan_tree(deflate_state s, ct_data[] tree, int max_code)
 		{
 			int n;						// iterates over all tree elements
 			var prevlen=-1;				// last emitted length
@@ -666,7 +666,7 @@ namespace Framework.IO
 
 		// tree:		the tree to be scanned
 		// max_code:	and its largest code of non zero frequency
-		static void send_tree(deflate_state s, ct_data[] tree, int max_code)
+		private static void send_tree(deflate_state s, ct_data[] tree, int max_code)
 		{
 			int n;						// iterates over all tree elements
 			var prevlen=-1;				// last emitted length
@@ -709,7 +709,7 @@ namespace Framework.IO
 		// ===========================================================================
 		// Construct the Huffman tree for the bit lengths and return the index in
 		// bl_order of the last bit length code to send.
-		static int build_bl_tree(deflate_state s)
+		private static int build_bl_tree(deflate_state s)
 		{
 			int max_blindex;  // index of last bit length code of non zero freq
 
@@ -742,7 +742,7 @@ namespace Framework.IO
 		// IN assertion: lcodes >= 257, dcodes >= 1, blcodes >= 4.
 
 		// lcodes, dcodes, blcodes: number of codes for each tree
-		static void send_all_trees(deflate_state s, int lcodes, int dcodes, int blcodes)
+		private static void send_all_trees(deflate_state s, int lcodes, int dcodes, int blcodes)
 		{
 			int rank;						// index in bl_order
 
@@ -772,13 +772,13 @@ namespace Framework.IO
 		// buf:			input block
 		// stored_len:	length of input block
 		// last:		one if this is the last block for a file
-		static void _tr_stored_block(deflate_state s, byte[] buf, uint stored_len, int last)
+		private static void _tr_stored_block(deflate_state s, byte[] buf, uint stored_len, int last)
 		{
 			send_bits(s, (STORED_BLOCK<<1)+last, 3);	// send block type
 			copy_block(s, buf, 0, stored_len, 1);		// with header
 		}
 
-		static void _tr_stored_block(deflate_state s, byte[] buf, int buf_ind, uint stored_len, int last)
+		private static void _tr_stored_block(deflate_state s, byte[] buf, int buf_ind, uint stored_len, int last)
 		{
 			send_bits(s, (STORED_BLOCK<<1)+last, 3);	// send block type
 			copy_block(s, buf, buf_ind, stored_len, 1);	// with header
@@ -794,7 +794,7 @@ namespace Framework.IO
 		// of one. (There are no problems if the previous block is stored or fixed.)
 		// To simplify the code, we assume the worst case of last real code encoded
 		// on one bit only.
-		static void _tr_align(deflate_state s)
+		private static void _tr_align(deflate_state s)
 		{
 			send_bits(s, STATIC_TREES<<1, 3);
 			send_code(s, END_BLOCK, static_ltree);
@@ -821,7 +821,7 @@ namespace Framework.IO
 		// buf:			input block, or NULL if too old
 		// stored_len:	length of input block
 		// last:		one if this is the last block for a file
-		static void _tr_flush_block(deflate_state s, byte[] buf, int buf_ind, uint stored_len, int last)
+		private static void _tr_flush_block(deflate_state s, byte[] buf, int buf_ind, uint stored_len, int last)
 		{
 			uint opt_lenb, static_lenb;	// opt_len and static_len in bytes
 			var max_blindex=0;			// index of last bit length code of non zero freq
@@ -892,7 +892,7 @@ namespace Framework.IO
 
 		// dist:	distance of matched string
 		// lc:		match length-MIN_MATCH or unmatched char (if dist==0)
-		static bool _tr_tally(deflate_state s, uint dist, uint lc)
+		private static bool _tr_tally(deflate_state s, uint dist, uint lc)
 		{
 			s.d_buf[s.last_lit]=(ushort)dist;
 			s.l_buf[s.last_lit++]=(byte)lc;
@@ -926,7 +926,7 @@ namespace Framework.IO
 
 		// ltree:	literal tree
 		// dtree:	distance tree
-		static void compress_block(deflate_state s, ct_data[] ltree, ct_data[] dtree)
+		private static void compress_block(deflate_state s, ct_data[] ltree, ct_data[] dtree)
 		{
 			uint dist;	// distance of matched string
 			int lc;		// match length or unmatched char (if dist == 0)
@@ -981,7 +981,7 @@ namespace Framework.IO
 
 		// code:	the value to invert
 		// len:		its bit length
-		static ushort bi_reverse(ushort code, int len)
+		private static ushort bi_reverse(ushort code, int len)
 		{
 			ushort res=0;
 			do
@@ -995,7 +995,7 @@ namespace Framework.IO
 
 		// ===========================================================================
 		// Flush the bit buffer, keeping at most 7 bits in it.
-		static void bi_flush(deflate_state s)
+		private static void bi_flush(deflate_state s)
 		{
 			if(s.bi_valid==16)
 			{
@@ -1018,7 +1018,7 @@ namespace Framework.IO
 
 		// ===========================================================================
 		// Flush the bit buffer and align the output on a byte boundary
-		static void bi_windup(deflate_state s)
+		private static void bi_windup(deflate_state s)
 		{
 			if(s.bi_valid>8)
 			{
@@ -1042,7 +1042,7 @@ namespace Framework.IO
 		// buf:		the input data
 		// len:		its length
 		// header:	true if block header must be written
-		static void copy_block(deflate_state s, byte[] buf, int buf_ind, uint len, int header)
+		private static void copy_block(deflate_state s, byte[] buf, int buf_ind, uint len, int header)
 		{
 			bi_windup(s);		// align on byte boundary
 			s.last_eob_len=8;	// enough lookahead for inflate

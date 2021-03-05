@@ -31,7 +31,7 @@ namespace Game
 {
     public sealed class ConditionManager : Singleton<ConditionManager>
     {
-        ConditionManager() { }
+        private ConditionManager() { }
 
         public GridMapTypeMask GetSearcherTypeMaskForConditionList(List<Condition> conditions)
         {
@@ -526,7 +526,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        bool AddToLootTemplate(Condition cond, LootTemplate loot)
+        private bool AddToLootTemplate(Condition cond, LootTemplate loot)
         {
             if (loot == null)
             {
@@ -541,7 +541,7 @@ namespace Game
             return false;
         }
 
-        bool AddToGossipMenus(Condition cond)
+        private bool AddToGossipMenus(Condition cond)
         {
             var pMenuBounds = Global.ObjectMgr.GetGossipMenusMapBounds(cond.SourceGroup);
 
@@ -558,7 +558,7 @@ namespace Game
             return false;
         }
 
-        bool AddToGossipMenuItems(Condition cond)
+        private bool AddToGossipMenuItems(Condition cond)
         {
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var menuItems in pMenuItemBounds)
@@ -574,7 +574,7 @@ namespace Game
             return false;
         }
 
-        bool AddToSpellImplicitTargetConditions(Condition cond)
+        private bool AddToSpellImplicitTargetConditions(Condition cond)
         {
             Global.SpellMgr.ForEachSpellInfoDifficulty((uint)cond.SourceEntry, spellInfo =>
             {
@@ -676,7 +676,7 @@ namespace Game
             return true;
         }
 
-        bool AddToPhases(Condition cond)
+        private bool AddToPhases(Condition cond)
         {
             if (cond.SourceEntry == 0)
             {
@@ -721,7 +721,7 @@ namespace Game
             return false;
         }
 
-        bool IsSourceTypeValid(Condition cond)
+        private bool IsSourceTypeValid(Condition cond)
         {
             switch (cond.SourceType)
             {
@@ -1089,7 +1089,7 @@ namespace Game
             return true;
         }
 
-        bool IsConditionTypeValid(Condition cond)
+        private bool IsConditionTypeValid(Condition cond)
         {
             switch (cond.ConditionType)
             {
@@ -1603,12 +1603,12 @@ namespace Game
             return true;
         }
 
-        void LogUselessConditionValue(Condition cond, byte index, uint value)
+        private void LogUselessConditionValue(Condition cond, byte index, uint value)
         {
             Log.outError(LogFilter.Sql, "{0} has useless data in ConditionValue{1} ({2})!", cond.ToString(true), index, value);
         }
 
-        void Clean()
+        private void Clean()
         {
             ConditionReferenceStore.Clear();
 
@@ -1625,7 +1625,7 @@ namespace Game
             NpcVendorConditionContainerStore.Clear();
         }
 
-        static bool PlayerConditionCompare(int comparisonType, int value1, int value2)
+        private static bool PlayerConditionCompare(int comparisonType, int value1, int value2)
         {
             switch (comparisonType)
             {
@@ -1647,7 +1647,7 @@ namespace Game
             return false;
         }
 
-        static bool PlayerConditionLogic(uint logic, bool[] results)
+        private static bool PlayerConditionLogic(uint logic, bool[] results)
         {
             Cypher.Assert(results.Length < 16, "Logic array size must be equal to or less than 16");
 
@@ -2206,7 +2206,7 @@ namespace Game
             return finalResult;
         }
 
-        static int EvalSingleValue(ByteBuffer buffer, Player player)
+        private static int EvalSingleValue(ByteBuffer buffer, Player player)
         {
             var valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();
             var value = 0;
@@ -2243,7 +2243,7 @@ namespace Game
             return value;
         }
 
-        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Player player, int arg1, int arg2)
+        private static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Player player, int arg1, int arg2)
         {
             switch (functionType)
             {
@@ -2327,7 +2327,7 @@ namespace Game
             }
         }
 
-        static int EvalValue(ByteBuffer buffer, Player player)
+        private static int EvalValue(ByteBuffer buffer, Player player)
         {
             var leftValue = EvalSingleValue(buffer, player);
 
@@ -2356,7 +2356,7 @@ namespace Game
             return leftValue;
         }
 
-        static bool EvalRelOp(ByteBuffer buffer, Player player)
+        private static bool EvalRelOp(ByteBuffer buffer, Player player)
         {
             var leftValue = EvalValue(buffer, player);
 
@@ -2387,12 +2387,12 @@ namespace Game
             return false;
         }
 
-        Dictionary<ConditionSourceType, MultiMap<uint, Condition>> ConditionStore = new Dictionary<ConditionSourceType, MultiMap<uint, Condition>>();
-        MultiMap<uint, Condition> ConditionReferenceStore = new MultiMap<uint, Condition>();
-        Dictionary<uint, MultiMap<uint, Condition>> VehicleSpellConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<uint, MultiMap<uint, Condition>> SpellClickEventConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<uint, MultiMap<uint, Condition>> NpcVendorConditionContainerStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> SmartEventConditionStore = new Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>>();
+        private Dictionary<ConditionSourceType, MultiMap<uint, Condition>> ConditionStore = new Dictionary<ConditionSourceType, MultiMap<uint, Condition>>();
+        private MultiMap<uint, Condition> ConditionReferenceStore = new MultiMap<uint, Condition>();
+        private Dictionary<uint, MultiMap<uint, Condition>> VehicleSpellConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
+        private Dictionary<uint, MultiMap<uint, Condition>> SpellClickEventConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
+        private Dictionary<uint, MultiMap<uint, Condition>> NpcVendorConditionContainerStore = new Dictionary<uint, MultiMap<uint, Condition>>();
+        private Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> SmartEventConditionStore = new Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>>();
 
         public string[] StaticSourceTypeData =
         {

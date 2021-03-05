@@ -103,10 +103,10 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new Dictionary<uint,SkillExtraItemEntry>();
+        private static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new Dictionary<uint,SkillExtraItemEntry>();
     }
 
-    class SkillExtraItemEntry
+    internal class SkillExtraItemEntry
     {
         public SkillExtraItemEntry(uint rS = 0, float aCC = 0f, byte aMN = 0)
         {
@@ -199,12 +199,12 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillPerfectItemEntry> SkillPerfectItemStorage = new Dictionary<uint, SkillPerfectItemEntry>();
+        private static Dictionary<uint, SkillPerfectItemEntry> SkillPerfectItemStorage = new Dictionary<uint, SkillPerfectItemEntry>();
     }
 
     // struct to store information about perfection procs
     // one entry per spell
-    class SkillPerfectItemEntry
+    internal class SkillPerfectItemEntry
     {
         public SkillPerfectItemEntry(uint rS = 0, float pCC = 0f, uint pIT = 0)
         {

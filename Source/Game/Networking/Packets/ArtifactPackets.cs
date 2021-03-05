@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class ArtifactAddPower : ClientPacket
+    internal class ArtifactAddPower : ClientPacket
     {
         public ArtifactAddPower(WorldPacket packet) : base(packet) { }
 
@@ -51,7 +51,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class ArtifactSetAppearance : ClientPacket
+    internal class ArtifactSetAppearance : ClientPacket
     {
         public ArtifactSetAppearance(WorldPacket packet) : base(packet) { }
 
@@ -67,7 +67,7 @@ namespace Game.Networking.Packets
         public int ArtifactAppearanceID;
     }
 
-    class ConfirmArtifactRespec : ClientPacket
+    internal class ConfirmArtifactRespec : ClientPacket
     {
         public ConfirmArtifactRespec(WorldPacket packet) : base(packet) { }
 
@@ -81,7 +81,7 @@ namespace Game.Networking.Packets
         public ObjectGuid NpcGUID;
     }
 
-    class OpenArtifactForge : ServerPacket
+    internal class OpenArtifactForge : ServerPacket
     {
         public OpenArtifactForge() : base(ServerOpcodes.OpenArtifactForge) { }
 
@@ -95,7 +95,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ForgeGUID;
     }
 
-    class ArtifactRespecPrompt : ServerPacket
+    internal class ArtifactRespecPrompt : ServerPacket
     {
         public ArtifactRespecPrompt() : base(ServerOpcodes.ArtifactRespecPrompt) { }
 
@@ -109,7 +109,7 @@ namespace Game.Networking.Packets
         public ObjectGuid NpcGUID;
     }
 
-    class ArtifactXpGain : ServerPacket
+    internal class ArtifactXpGain : ServerPacket
     {
         public ArtifactXpGain() : base(ServerOpcodes.ArtifactXpGain) { }
 

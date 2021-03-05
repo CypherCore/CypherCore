@@ -29,7 +29,7 @@ namespace Game.Movement
     {
         public const double gravity = 19.29110527038574;
         public const float SPEED_CHARGE  =  42.0f;
-        IdleMovementGenerator staticIdleMovement = new IdleMovementGenerator();
+        private IdleMovementGenerator staticIdleMovement = new IdleMovementGenerator();
 
         public MotionMaster(Unit me)
         {
@@ -460,7 +460,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
+        private void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
             var init = new MoveSplineInit(_owner);
             if (fly)
@@ -499,12 +499,12 @@ namespace Game.Movement
             MoveAlongSplineChain(pointId, chain, walk);
         }
 
-        void MoveAlongSplineChain(uint pointId, List<SplineChainLink> chain, bool walk)
+        private void MoveAlongSplineChain(uint pointId, List<SplineChainLink> chain, bool walk)
         {
             StartMovement(new SplineChainMovementGenerator(pointId, chain, walk), MovementSlot.Active);
         }
 
-        void ResumeSplineChain(SplineChainResumeInfo info)
+        private void ResumeSplineChain(SplineChainResumeInfo info)
         {
             if (info.Empty())
             {
@@ -622,7 +622,7 @@ namespace Game.Movement
                 StartMovement(new FormationMovementGenerator(id, destination, moveType, forceRun, forceOrientation), MovementSlot.Active);
         }
 
-        void Pop()
+        private void Pop()
         {
             if (Empty())
                 return;
@@ -632,7 +632,7 @@ namespace Game.Movement
                 --_top;
         }
 
-        bool NeedInitTop()
+        private bool NeedInitTop()
         {
             if (Empty())
                 return false;
@@ -640,13 +640,13 @@ namespace Game.Movement
             return _initialize[_top];
         }
 
-        void InitTop()
+        private void InitTop()
         {
             Top().Initialize(_owner);
             _initialize[_top] = false;
         }
 
-        void StartMovement(IMovementGenerator m, MovementSlot slot)
+        private void StartMovement(IMovementGenerator m, MovementSlot slot)
         {
             var curr = _slot[(int)slot];
             if (curr != null)
@@ -672,7 +672,7 @@ namespace Game.Movement
             }
         }
 
-        void DirectClean(bool reset)
+        private void DirectClean(bool reset)
         {
             while (Size() > 1)
             {
@@ -691,7 +691,7 @@ namespace Game.Movement
                 Top().Reset(_owner);
         }
 
-        void DirectClean(MovementSlot slot)
+        private void DirectClean(MovementSlot slot)
         {
             var motion = GetMotionSlot(slot);
             if (motion != null)
@@ -709,7 +709,7 @@ namespace Game.Movement
                 InitTop();
         }
 
-        void DelayedClean()
+        private void DelayedClean()
         {
             while (Size() > 1)
             {
@@ -720,7 +720,7 @@ namespace Game.Movement
             }
         }
 
-        void DelayedClean(MovementSlot slot)
+        private void DelayedClean(MovementSlot slot)
         {
             var motion = GetMotionSlot(slot);
             if (motion != null)
@@ -733,7 +733,7 @@ namespace Game.Movement
                 --_top;
         }
 
-        void DirectExpire(bool reset)
+        private void DirectExpire(bool reset)
         {
             if (Size() > 1)
             {
@@ -753,7 +753,7 @@ namespace Game.Movement
                 Top().Reset(_owner);
         }
 
-        void DelayedExpire()
+        private void DelayedExpire()
         {
             if (Size() > 1)
             {
@@ -766,14 +766,14 @@ namespace Game.Movement
                 --_top;
         }
 
-        void DirectDelete(IMovementGenerator curr)
+        private void DirectDelete(IMovementGenerator curr)
         {
             if (IsStatic(curr))
                 return;
             curr.Finalize(_owner);
         }
 
-        void DelayedDelete(IMovementGenerator curr)
+        private void DelayedDelete(IMovementGenerator curr)
         {
             if (IsStatic(curr))
                 return;
@@ -781,7 +781,7 @@ namespace Game.Movement
             _expireList.Add(curr);
         }
 
-        void ClearExpireList()
+        private void ClearExpireList()
         {
             for (var i = 0; i < _expireList.Count; ++i)
                 DirectDelete(_expireList[i]);
@@ -800,7 +800,7 @@ namespace Game.Movement
 
         public bool Empty() { return (_top < 0); }
 
-        int Size() { return _top + 1; }
+        private int Size() { return _top + 1; }
 
         public IMovementGenerator Top()
         {
@@ -813,19 +813,19 @@ namespace Game.Movement
             get { return splineId++; }
         }
 
-        bool IsStatic(IMovementGenerator movement)
+        private bool IsStatic(IMovementGenerator movement)
         {
             return (movement == staticIdleMovement);
         }
 
-        static uint splineId;
+        private static uint splineId;
 
-        Unit _owner { get; }
-        IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
-        MMCleanFlag _cleanFlag;
-        bool[] _initialize = new bool[(int)MovementSlot.Max];
-        int _top;
-        List<IMovementGenerator> _expireList = new List<IMovementGenerator>();
+        private Unit _owner { get; }
+        private IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
+        private MMCleanFlag _cleanFlag;
+        private bool[] _initialize = new bool[(int)MovementSlot.Max];
+        private int _top;
+        private List<IMovementGenerator> _expireList = new List<IMovementGenerator>();
     }
 
     public class JumpArrivalCastArgs
@@ -834,7 +834,7 @@ namespace Game.Movement
         public ObjectGuid Target;
     }
 
-    enum MMCleanFlag
+    internal enum MMCleanFlag
     {
         None = 0,
         Update = 1, // Clear or Expire called from update

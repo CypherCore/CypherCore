@@ -64,6 +64,6 @@ namespace Framework.Collections
 
         public int Length => _str != null ? _str.Length : 0;
 
-        string[] _str;
+        private string[] _str;
     }
 }

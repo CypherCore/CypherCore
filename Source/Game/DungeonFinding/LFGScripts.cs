@@ -23,7 +23,7 @@ using Game.Scripting;
 
 namespace Game.DungeonFinding
 {
-    class LFGPlayerScript : PlayerScript
+    internal class LFGPlayerScript : PlayerScript
     {
         public LFGPlayerScript() : base("LFGPlayerScript") { }
 
@@ -110,7 +110,7 @@ namespace Game.DungeonFinding
         }
     }
 
-    class LFGGroupScript : GroupScript
+    internal class LFGGroupScript : GroupScript
     {
         public LFGGroupScript() : base("LFGGroupScript") { }
 

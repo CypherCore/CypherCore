@@ -32,7 +32,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        bool CanOpenMailBox(ObjectGuid guid)
+        private bool CanOpenMailBox(ObjectGuid guid)
         {
             if (guid == GetPlayer().GetGUID())
             {
@@ -59,7 +59,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SendMail)]
-        void HandleSendMail(SendMail packet)
+        private void HandleSendMail(SendMail packet)
         {
             if (packet.Info.Attachments.Count > SharedConst.MaxClientMailItems)                      // client limit
             {
@@ -332,7 +332,7 @@ namespace Game
 
         //called when mail is read
         [WorldPacketHandler(ClientOpcodes.MailMarkAsRead)]
-        void HandleMailMarkAsRead(MailMarkAsRead packet)
+        private void HandleMailMarkAsRead(MailMarkAsRead packet)
         {
             if (!CanOpenMailBox(packet.Mailbox))
                 return;
@@ -351,7 +351,7 @@ namespace Game
 
         //called when client deletes mail
         [WorldPacketHandler(ClientOpcodes.MailDelete)]
-        void HandleMailDelete(MailDelete packet)
+        private void HandleMailDelete(MailDelete packet)
         {
             var m = GetPlayer().GetMail(packet.MailID);
             var player = GetPlayer();
@@ -371,7 +371,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MailReturnToSender)]
-        void HandleMailReturnToSender(MailReturnToSender packet)
+        private void HandleMailReturnToSender(MailReturnToSender packet)
         {
             if (!CanOpenMailBox(_player.PlayerTalkClass.GetInteractionData().SourceGuid))
                 return;
@@ -423,7 +423,7 @@ namespace Game
 
         //called when player takes item attached in mail
         [WorldPacketHandler(ClientOpcodes.MailTakeItem)]
-        void HandleMailTakeItem(MailTakeItem packet)
+        private void HandleMailTakeItem(MailTakeItem packet)
         {
             var AttachID = packet.AttachID;
 
@@ -522,7 +522,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MailTakeMoney)]
-        void HandleMailTakeMoney(MailTakeMoney packet)
+        private void HandleMailTakeMoney(MailTakeMoney packet)
         {
             if (!CanOpenMailBox(packet.Mailbox))
                 return;
@@ -558,7 +558,7 @@ namespace Game
 
         //called when player lists his received mails
         [WorldPacketHandler(ClientOpcodes.MailGetList)]
-        void HandleGetMailList(MailGetList packet)
+        private void HandleGetMailList(MailGetList packet)
         {
             if (!CanOpenMailBox(packet.Mailbox))
                 return;
@@ -595,7 +595,7 @@ namespace Game
 
         //used when player copies mail body to his inventory
         [WorldPacketHandler(ClientOpcodes.MailCreateTextItem)]
-        void HandleMailCreateTextItem(MailCreateTextItem packet)
+        private void HandleMailCreateTextItem(MailCreateTextItem packet)
         {
             if (!CanOpenMailBox(packet.Mailbox))
                 return;
@@ -651,7 +651,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryNextMailTime)]
-        void HandleQueryNextMailTime(MailQueryNextMailTime packet)
+        private void HandleQueryNextMailTime(MailQueryNextMailTime packet)
         {
             var result = new MailQueryNextTimeResult();
 

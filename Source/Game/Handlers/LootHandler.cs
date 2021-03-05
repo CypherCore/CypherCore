@@ -31,7 +31,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LootItem)]
-        void HandleAutostoreLootItem(LootItemPkt packet)
+        private void HandleAutostoreLootItem(LootItemPkt packet)
         {
             var player = GetPlayer();
             AELootResult aeResult = player.GetAELootView().Count > 1 ? new AELootResult() : null;
@@ -112,7 +112,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LootMoney)]
-        void HandleLootMoney(LootMoney lootMoney)
+        private void HandleLootMoney(LootMoney lootMoney)
         {
             var player = GetPlayer();
 
@@ -237,7 +237,7 @@ namespace Game
             }
         }
 
-        class AELootCreatureCheck : ICheck<Creature>
+        private class AELootCreatureCheck : ICheck<Creature>
         {
             public static float LootDistance = 30.0f;
 
@@ -261,12 +261,12 @@ namespace Game
                 return _looter.IsAllowedToLoot(creature);
             }
 
-            Player _looter;
-            ObjectGuid _mainLootTarget;
+            private Player _looter;
+            private ObjectGuid _mainLootTarget;
         }
 
         [WorldPacketHandler(ClientOpcodes.LootUnit)]
-        void HandleLoot(LootUnit packet)
+        private void HandleLoot(LootUnit packet)
         {
             // Check possible cheat
             if (!GetPlayer().IsAlive() || !packet.Unit.IsCreatureOrVehicle())
@@ -300,7 +300,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LootRelease)]
-        void HandleLootRelease(LootRelease packet)
+        private void HandleLootRelease(LootRelease packet)
         {
             // cheaters can modify lguid to prevent correct apply loot release code and re-loot
             // use internal stored guid
@@ -449,7 +449,7 @@ namespace Game
             player.RemoveAELootedObject(loot.GetGUID());
         }
 
-        void DoLootReleaseAll()
+        private void DoLootReleaseAll()
         {
             Dictionary<ObjectGuid, ObjectGuid> lootView = _player.GetAELootView();
             foreach (var lootPair in lootView)
@@ -457,7 +457,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MasterLootItem)]
-        void HandleLootMasterGive(MasterLootItem masterLootItem)
+        private void HandleLootMasterGive(MasterLootItem masterLootItem)
         {
             var aeResult = new AELootResult();
 
@@ -555,7 +555,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetLootSpecialization)]
-        void HandleSetLootSpecialization(SetLootSpecialization packet)
+        private void HandleSetLootSpecialization(SetLootSpecialization packet)
         {
             if (packet.SpecID != 0)
             {

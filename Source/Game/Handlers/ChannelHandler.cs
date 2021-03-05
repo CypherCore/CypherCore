@@ -28,7 +28,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.ChatJoinChannel)]
-        void HandleJoinChannel(JoinChannel packet)
+        private void HandleJoinChannel(JoinChannel packet)
         {
             var zone = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetZoneId());
             if (packet.ChatChannelId != 0)
@@ -57,7 +57,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatLeaveChannel)]
-        void HandleLeaveChannel(LeaveChannel packet)
+        private void HandleLeaveChannel(LeaveChannel packet)
         {
             if (string.IsNullOrEmpty(packet.ChannelName) && packet.ZoneChannelID == 0)
                 return;
@@ -92,7 +92,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatChannelDisplayList)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelList)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelOwner)]
-        void HandleChannelCommand(ChannelCommand packet)
+        private void HandleChannelCommand(ChannelCommand packet)
         {
             var channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
             if (channel == null)
@@ -125,7 +125,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnban)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnmoderator)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnsilenceAll)]
-        void HandleChannelPlayerCommand(ChannelPlayerCommand packet)
+        private void HandleChannelPlayerCommand(ChannelPlayerCommand packet)
         {
             if (packet.Name.Length >= 49)
             {
@@ -173,7 +173,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatChannelPassword)]
-        void HandleChannelPassword(ChannelPassword packet)
+        private void HandleChannelPassword(ChannelPassword packet)
         {
             if (packet.Password.Length > 31)
             {

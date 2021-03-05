@@ -435,7 +435,7 @@ namespace Game.Networking.Packets
         public List<QuestPOIData> QuestPOIDataStats = new List<QuestPOIData>();
     }
 
-    class QueryQuestCompletionNPCs : ClientPacket
+    internal class QueryQuestCompletionNPCs : ClientPacket
     {
         public QueryQuestCompletionNPCs(WorldPacket packet) : base(packet) { }
 
@@ -451,7 +451,7 @@ namespace Game.Networking.Packets
         public uint[] QuestCompletionNPCs;
     }
 
-    class QuestCompletionNPCResponse : ServerPacket
+    internal class QuestCompletionNPCResponse : ServerPacket
     {
         public QuestCompletionNPCResponse() : base(ServerOpcodes.QuestCompletionNpcResponse, ConnectionType.Instance) { }
 
@@ -471,7 +471,7 @@ namespace Game.Networking.Packets
         public List<QuestCompletionNPC> QuestCompletionNPCs = new List<QuestCompletionNPC>();
     }
 
-    class QueryPetName : ClientPacket
+    internal class QueryPetName : ClientPacket
     {
         public QueryPetName(WorldPacket packet) : base(packet) { }
 
@@ -483,7 +483,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UnitGUID;
     }
 
-    class QueryPetNameResponse : ServerPacket
+    internal class QueryPetNameResponse : ServerPacket
     {
         public QueryPetNameResponse() : base(ServerOpcodes.QueryPetNameResponse, ConnectionType.Instance) { }
 
@@ -519,7 +519,7 @@ namespace Game.Networking.Packets
         public string Name = "";
     }
 
-    class ItemTextQuery : ClientPacket
+    internal class ItemTextQuery : ClientPacket
     {
         public ItemTextQuery(WorldPacket packet) : base(packet) { }
 
@@ -531,7 +531,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Id;
     }
 
-    class QueryItemTextResponse : ServerPacket
+    internal class QueryItemTextResponse : ServerPacket
     {
         public QueryItemTextResponse() : base(ServerOpcodes.QueryItemTextResponse) { }
 
@@ -550,7 +550,7 @@ namespace Game.Networking.Packets
         public string Text;
     }
 
-    class QueryRealmName : ClientPacket
+    internal class QueryRealmName : ClientPacket
     {
         public QueryRealmName(WorldPacket packet) : base(packet) { }
 
@@ -562,7 +562,7 @@ namespace Game.Networking.Packets
         public uint VirtualRealmAddress;
     }
 
-    class RealmQueryResponse : ServerPacket
+    internal class RealmQueryResponse : ServerPacket
     {
         public RealmQueryResponse() : base(ServerOpcodes.RealmQueryResponse) { }
 
@@ -747,7 +747,7 @@ namespace Game.Networking.Packets
         public uint ContentTuningId;
     }
 
-    class QuestCompletionNPC
+    internal class QuestCompletionNPC
     {
         public uint QuestID;
         public List<uint> NPCs = new List<uint>();

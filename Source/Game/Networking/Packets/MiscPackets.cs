@@ -54,8 +54,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(AreaID);
         }
 
-        ObjectGuid BinderID;
-        uint AreaID;
+        private ObjectGuid BinderID;
+        private uint AreaID;
     }
 
     public class BinderConfirm : ServerPacket
@@ -70,7 +70,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Unit);
         }
 
-        ObjectGuid Unit;
+        private ObjectGuid Unit;
     }
 
     public class InvalidatePlayer : ServerPacket
@@ -250,7 +250,7 @@ namespace Game.Networking.Packets
             violenceLevel = _worldPacket.ReadInt8();
         }
 
-        sbyte violenceLevel = -1; // 0 - no combat effects, 1 - display some combat effects, 2 - blood, 3 - bloody, 4 - bloodier, 5 - bloodiest
+        private sbyte violenceLevel = -1; // 0 - no combat effects, 1 - display some combat effects, 2 - blood, 3 - bloody, 4 - bloodier, 5 - bloodiest
     }
 
     public class TimeSyncRequest : ServerPacket
@@ -569,9 +569,9 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        bool Abrupt;
-        float Intensity;
-        WeatherState WeatherID;
+        private bool Abrupt;
+        private float Intensity;
+        private WeatherState WeatherID;
     }
 
     public class StandStateChange : ClientPacket
@@ -600,8 +600,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)State);
         }
 
-        uint AnimKitID;
-        UnitStandStateType State;
+        private uint AnimKitID;
+        private UnitStandStateType State;
     }
 
     public class SetAnimTier : ServerPacket
@@ -741,7 +741,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SoundKitID);
         }
 
-        uint SoundKitID;
+        private uint SoundKitID;
     }
 
     public class RandomRollClient : ClientPacket
@@ -787,7 +787,7 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
-    class PhaseShiftChange : ServerPacket
+    internal class PhaseShiftChange : ServerPacket
     {
         public PhaseShiftChange() : base(ServerOpcodes.PhaseShiftChange) { }
 
@@ -827,7 +827,7 @@ namespace Game.Networking.Packets
         public int AreaID;
     }
 
-    class DurabilityDamageDeath : ServerPacket
+    internal class DurabilityDamageDeath : ServerPacket
     {
         public DurabilityDamageDeath() : base(ServerOpcodes.DurabilityDamageDeath) { }
 
@@ -839,7 +839,7 @@ namespace Game.Networking.Packets
         public uint Percent;
     }
 
-    class ObjectUpdateFailed : ClientPacket
+    internal class ObjectUpdateFailed : ClientPacket
     {
         public ObjectUpdateFailed(WorldPacket packet) : base(packet) { }
 
@@ -851,7 +851,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ObjectGUID;
     }
 
-    class ObjectUpdateRescued : ClientPacket
+    internal class ObjectUpdateRescued : ClientPacket
     {
         public ObjectUpdateRescued(WorldPacket packet) : base(packet) { }
 
@@ -863,7 +863,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ObjectGUID;
     }
 
-    class PlayObjectSound : ServerPacket
+    internal class PlayObjectSound : ServerPacket
     {
         public PlayObjectSound() : base(ServerOpcodes.PlayObjectSound) { }
 
@@ -883,7 +883,7 @@ namespace Game.Networking.Packets
         public int BroadcastTextID;
     }
 
-    class PlaySound : ServerPacket
+    internal class PlaySound : ServerPacket
     {
         public PlaySound(ObjectGuid sourceObjectGuid, uint soundKitID, uint broadcastTextId) : base(ServerOpcodes.PlaySound)
         {
@@ -904,7 +904,7 @@ namespace Game.Networking.Packets
         public uint BroadcastTextID;
     }
 
-    class PlaySpeakerBoxSound : ServerPacket
+    internal class PlaySpeakerBoxSound : ServerPacket
     {
         public PlaySpeakerBoxSound(ObjectGuid sourceObjectGuid, uint soundKitID) : base(ServerOpcodes.PlaySpeakerbotSound)
         {
@@ -922,35 +922,35 @@ namespace Game.Networking.Packets
         public uint SoundKitID;
     }
 
-    class OpeningCinematic : ClientPacket
+    internal class OpeningCinematic : ClientPacket
     {
         public OpeningCinematic(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class CompleteCinematic : ClientPacket
+    internal class CompleteCinematic : ClientPacket
     {
         public CompleteCinematic(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class NextCinematicCamera : ClientPacket
+    internal class NextCinematicCamera : ClientPacket
     {
         public NextCinematicCamera(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class CompleteMovie : ClientPacket
+    internal class CompleteMovie : ClientPacket
     {
         public CompleteMovie(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class FarSight : ClientPacket
+    internal class FarSight : ClientPacket
     {
         public FarSight(WorldPacket packet) : base(packet) { }
 
@@ -962,7 +962,7 @@ namespace Game.Networking.Packets
         public bool Enable;
     }
 
-    class SaveCUFProfiles : ClientPacket
+    internal class SaveCUFProfiles : ClientPacket
     {
         public SaveCUFProfiles(WorldPacket packet) : base(packet) { }
 
@@ -1003,7 +1003,7 @@ namespace Game.Networking.Packets
         public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
     }
 
-    class LoadCUFProfiles : ServerPacket
+    internal class LoadCUFProfiles : ServerPacket
     {
         public LoadCUFProfiles() : base(ServerOpcodes.LoadCufProfiles, ConnectionType.Instance) { }
 
@@ -1041,7 +1041,7 @@ namespace Game.Networking.Packets
         public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
     }
 
-    class PlayOneShotAnimKit : ServerPacket
+    internal class PlayOneShotAnimKit : ServerPacket
     {
         public PlayOneShotAnimKit() : base(ServerOpcodes.PlayOneShotAnimKit) { }
 
@@ -1055,7 +1055,7 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
-    class SetAIAnimKit : ServerPacket
+    internal class SetAIAnimKit : ServerPacket
     {
         public SetAIAnimKit() : base(ServerOpcodes.SetAiAnimKit, ConnectionType.Instance) { }
 
@@ -1069,7 +1069,7 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
-    class SetMeleeAnimKit : ServerPacket
+    internal class SetMeleeAnimKit : ServerPacket
     {
         public SetMeleeAnimKit() : base(ServerOpcodes.SetMeleeAnimKit, ConnectionType.Instance) { }
 
@@ -1083,7 +1083,7 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
-    class SetMovementAnimKit : ServerPacket
+    internal class SetMovementAnimKit : ServerPacket
     {
         public SetMovementAnimKit() : base(ServerOpcodes.SetMovementAnimKit, ConnectionType.Instance) { }
 
@@ -1097,7 +1097,7 @@ namespace Game.Networking.Packets
         public ushort AnimKitID;
     }
 
-    class SetPlayHoverAnim : ServerPacket
+    internal class SetPlayHoverAnim : ServerPacket
     {
         public SetPlayHoverAnim() : base(ServerOpcodes.SetPlayHoverAnim, ConnectionType.Instance) { }
 
@@ -1112,14 +1112,14 @@ namespace Game.Networking.Packets
         public bool PlayHoverAnim;
     }
 
-    class TogglePvP : ClientPacket
+    internal class TogglePvP : ClientPacket
     {
         public TogglePvP(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class SetPvP : ClientPacket
+    internal class SetPvP : ClientPacket
     {
         public SetPvP(WorldPacket packet) : base(packet) { }
 
@@ -1131,7 +1131,7 @@ namespace Game.Networking.Packets
         public bool EnablePVP;
     }
 
-    class AccountHeirloomUpdate : ServerPacket
+    internal class AccountHeirloomUpdate : ServerPacket
     {
         public AccountHeirloomUpdate() : base(ServerOpcodes.AccountHeirloomUpdate, ConnectionType.Instance) { }
 
@@ -1155,17 +1155,17 @@ namespace Game.Networking.Packets
 
         public bool IsFullUpdate;
         public Dictionary<uint, HeirloomData> Heirlooms = new Dictionary<uint, HeirloomData>();
-        int Unk;
+        private int Unk;
     }
 
-    class MountSpecial : ClientPacket
+    internal class MountSpecial : ClientPacket
     {
         public MountSpecial(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class SpecialMountAnim : ServerPacket
+    internal class SpecialMountAnim : ServerPacket
     {
         public SpecialMountAnim() : base(ServerOpcodes.SpecialMountAnim, ConnectionType.Instance) { }
 
@@ -1177,7 +1177,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UnitGUID;
     }
 
-    class CrossedInebriationThreshold : ServerPacket
+    internal class CrossedInebriationThreshold : ServerPacket
     {
         public CrossedInebriationThreshold() : base(ServerOpcodes.CrossedInebriationThreshold) { }
 
@@ -1193,7 +1193,7 @@ namespace Game.Networking.Packets
         public uint Threshold;
     }
 
-    class SetTaxiBenchmarkMode : ClientPacket
+    internal class SetTaxiBenchmarkMode : ClientPacket
     {
         public SetTaxiBenchmarkMode(WorldPacket packet) : base(packet) { }
 
@@ -1205,7 +1205,7 @@ namespace Game.Networking.Packets
         public bool Enable;
     }
 
-    class OverrideLight : ServerPacket
+    internal class OverrideLight : ServerPacket
     {
         public OverrideLight() : base(ServerOpcodes.OverrideLight) { }
 
@@ -1237,7 +1237,7 @@ namespace Game.Networking.Packets
         public TimerType Type;
     }
 
-    class DisplayGameError : ServerPacket
+    internal class DisplayGameError : ServerPacket
     {
         public DisplayGameError(GameError error) : base(ServerOpcodes.DisplayGameError)
         {
@@ -1268,12 +1268,12 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Arg2.Value);
         }
 
-        GameError Error;
-        Optional<int> Arg;
-        Optional<int> Arg2;
+        private GameError Error;
+        private Optional<int> Arg;
+        private Optional<int> Arg2;
     }
 
-    class AccountMountUpdate : ServerPacket
+    internal class AccountMountUpdate : ServerPacket
     {
         public AccountMountUpdate() : base(ServerOpcodes.AccountMountUpdate, ConnectionType.Instance) { }
 
@@ -1295,7 +1295,7 @@ namespace Game.Networking.Packets
         public Dictionary<uint, MountStatusFlags> Mounts = new Dictionary<uint, MountStatusFlags>();
     }
 
-    class MountSetFavorite : ClientPacket
+    internal class MountSetFavorite : ClientPacket
     {
         public MountSetFavorite(WorldPacket packet) : base(packet) { }
 
@@ -1309,7 +1309,7 @@ namespace Game.Networking.Packets
         public bool IsFavorite;
     }
 
-    class CloseInteraction : ClientPacket
+    internal class CloseInteraction : ClientPacket
     {
         public CloseInteraction(WorldPacket packet) : base(packet) { }
 
@@ -1321,7 +1321,7 @@ namespace Game.Networking.Packets
         public ObjectGuid SourceGuid;
     }
 
-    class AdventureJournalOpenQuest : ClientPacket
+    internal class AdventureJournalOpenQuest : ClientPacket
     {
         public AdventureJournalOpenQuest(WorldPacket packet) : base(packet) { }
 
@@ -1333,7 +1333,7 @@ namespace Game.Networking.Packets
         public uint AdventureJournalID;
     }
 
-    class AdventureJournalStartQuest : ClientPacket
+    internal class AdventureJournalStartQuest : ClientPacket
     {
         public AdventureJournalStartQuest(WorldPacket packet) : base(packet) { }
 
@@ -1345,7 +1345,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
     }
 
-    class AdventureJournalUpdateSuggestions : ClientPacket
+    internal class AdventureJournalUpdateSuggestions : ClientPacket
     {
         public AdventureJournalUpdateSuggestions(WorldPacket packet) : base(packet) { }
 
@@ -1357,7 +1357,7 @@ namespace Game.Networking.Packets
         public bool OnLevelUp;
     }
 
-    class AdventureJournalDataResponse : ServerPacket
+    internal class AdventureJournalDataResponse : ServerPacket
     {
         public AdventureJournalDataResponse() : base(ServerOpcodes.AdventureJournalDataResponse) { }
 
@@ -1378,7 +1378,7 @@ namespace Game.Networking.Packets
     }
     
     //Structs
-    struct PhaseShiftDataPhase
+    internal struct PhaseShiftDataPhase
     {
         public PhaseShiftDataPhase(uint phaseFlags, uint id)
         {
@@ -1396,7 +1396,7 @@ namespace Game.Networking.Packets
         public ushort Id;
     }
 
-    class PhaseShiftData
+    internal class PhaseShiftData
     {
         public void Write(WorldPacket data)
         {
@@ -1412,7 +1412,7 @@ namespace Game.Networking.Packets
         public ObjectGuid PersonalGUID;
     }
 
-    struct AdventureJournalData
+    internal struct AdventureJournalData
     {
         public int AdventureJournalID;
         public int Priority;

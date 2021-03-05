@@ -23,12 +23,12 @@ using Game.DataStorage;
 namespace Game.Chat.Commands
 {
     [CommandGroup("disable", RBACPermissions.CommandDisable)]
-    class DisableCommands
+    internal class DisableCommands
     {
         [CommandGroup("add", RBACPermissions.CommandDisableAdd, true)]
-        class DisableAddCommands
+        private class DisableAddCommands
         {
-            static bool HandleAddDisables(StringArguments args, CommandHandler handler, DisableType disableType)
+            private static bool HandleAddDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
                 var entry = args.NextUInt32();
                 if (entry == 0)
@@ -149,7 +149,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableAddSpell, true)]
-            static bool HandleAddDisableSpellCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableSpellCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -158,7 +158,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("quest", RBACPermissions.CommandDisableAddQuest, true)]
-            static bool HandleAddDisableQuestCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableQuestCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -167,7 +167,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("map", RBACPermissions.CommandDisableAddMap, true)]
-            static bool HandleAddDisableMapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableMapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -176,7 +176,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableAddBattleground, true)]
-            static bool HandleAddDisableBattlegroundCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableBattlegroundCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -185,7 +185,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("criteria", RBACPermissions.CommandDisableAddCriteria, true)]
-            static bool HandleAddDisableCriteriaCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableCriteriaCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -194,7 +194,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableAddOutdoorpvp, true)]
-            static bool HandleAddDisableOutdoorPvPCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableOutdoorPvPCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -204,7 +204,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("vmap", RBACPermissions.CommandDisableAddVmap, true)]
-            static bool HandleAddDisableVmapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableVmapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -213,7 +213,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("mmap", RBACPermissions.CommandDisableAddMmap, true)]
-            static bool HandleAddDisableMMapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleAddDisableMMapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -223,9 +223,9 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("remove", RBACPermissions.CommandDisableRemove, true)]
-        class DisableRemoveCommands
+        private class DisableRemoveCommands
         {
-            static bool HandleRemoveDisables(StringArguments args, CommandHandler handler, DisableType disableType)
+            private static bool HandleRemoveDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
                 if (!uint.TryParse(args.NextString(), out var entry) || entry == 0)
                     return false;
@@ -279,7 +279,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableRemoveSpell, true)]
-            static bool HandleRemoveDisableSpellCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableSpellCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -288,7 +288,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("quest", RBACPermissions.CommandDisableRemoveQuest, true)]
-            static bool HandleRemoveDisableQuestCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableQuestCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -297,7 +297,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("map", RBACPermissions.CommandDisableRemoveMap, true)]
-            static bool HandleRemoveDisableMapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableMapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -306,7 +306,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("Battleground", RBACPermissions.CommandDisableRemoveBattleground, true)]
-            static bool HandleRemoveDisableBattlegroundCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableBattlegroundCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -315,7 +315,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("criteria", RBACPermissions.CommandDisableRemoveCriteria, true)]
-            static bool HandleRemoveDisableCriteriaCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableCriteriaCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -324,7 +324,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("outdoorpvp", RBACPermissions.CommandDisableRemoveOutdoorpvp, true)]
-            static bool HandleRemoveDisableOutdoorPvPCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableOutdoorPvPCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -333,7 +333,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("vmap", RBACPermissions.CommandDisableRemoveVmap, true)]
-            static bool HandleRemoveDisableVmapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableVmapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -342,7 +342,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("mmap", RBACPermissions.CommandDisableRemoveMmap, true)]
-            static bool HandleRemoveDisableMMapCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleRemoveDisableMMapCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;

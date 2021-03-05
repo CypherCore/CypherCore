@@ -92,6 +92,6 @@ namespace Game.DataStorage
 
         public void SetData(List<T> data) { _data = data; }
 
-        List<T> _data = new List<T>();
+        private List<T> _data = new List<T>();
     }
 }

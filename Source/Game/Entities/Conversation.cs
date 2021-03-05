@@ -77,7 +77,7 @@ namespace Game.Entities
             base.Update(diff);
         }
 
-        void Remove()
+        private void Remove()
         {
             if (IsInWorld)
             {
@@ -100,7 +100,7 @@ namespace Game.Entities
             return conversation;
         }
 
-        bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
+        private bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
         {
             var conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             //ASSERT(conversationTemplate);
@@ -193,14 +193,14 @@ namespace Game.Entities
             return true;
         }
 
-        void AddActor(ObjectGuid actorGuid, ushort actorIdx)
+        private void AddActor(ObjectGuid actorGuid, ushort actorIdx)
         {
             ConversationActor actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
         }
 
-        void AddParticipant(ObjectGuid participantGuid)
+        private void AddParticipant(ObjectGuid participantGuid)
         {
             _participants.Add(participantGuid);
         }
@@ -239,7 +239,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
         {
             var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
@@ -272,7 +272,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        uint GetDuration() { return _duration; }
+        private uint GetDuration() { return _duration; }
         public uint GetTextureKitId() { return _textureKitId; }
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
@@ -281,14 +281,14 @@ namespace Game.Entities
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
         public override float GetStationaryZ() { return _stationaryPosition.GetPositionZ(); }
         public override float GetStationaryO() { return _stationaryPosition.GetOrientation(); }
-        void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
+        private void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
-        ConversationData m_conversationData;
+        private ConversationData m_conversationData;
 
-        Position _stationaryPosition = new Position();
-        ObjectGuid _creatorGuid;
-        uint _duration;
-        uint _textureKitId;
-        List<ObjectGuid> _participants = new List<ObjectGuid>();
+        private Position _stationaryPosition = new Position();
+        private ObjectGuid _creatorGuid;
+        private uint _duration;
+        private uint _textureKitId;
+        private List<ObjectGuid> _participants = new List<ObjectGuid>();
     }
 }

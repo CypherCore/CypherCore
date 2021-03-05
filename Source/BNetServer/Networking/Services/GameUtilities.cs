@@ -16,7 +16,7 @@ namespace BNetServer.Networking
     public partial class Session
     {
         [Service(OriginalHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
+        private BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
@@ -49,7 +49,7 @@ namespace BNetServer.Networking
         }
 
         [Service(OriginalHash.GameUtilitiesService, 10)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
+        private BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
@@ -63,7 +63,7 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        BattlenetRpcErrorCode GetRealmListTicket(Dictionary<string, Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode GetRealmListTicket(Dictionary<string, Variant> Params, ClientResponse response)
         {
             var identity = Params.LookupByKey("Param_Identity");
             if (identity != null)
@@ -113,7 +113,7 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
         {
             var subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1_b9");
             if (subRegion != null)
@@ -156,7 +156,7 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.UtilServerUnknownRealm;
         }
 
-        BattlenetRpcErrorCode GetRealmList(Dictionary<string, Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode GetRealmList(Dictionary<string, Variant> Params, ClientResponse response)
         {
             if (gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UserServerBadWowAccount;
@@ -195,7 +195,7 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        BattlenetRpcErrorCode JoinRealm(Dictionary<string, Variant> Params, ClientResponse response)
+        private BattlenetRpcErrorCode JoinRealm(Dictionary<string, Variant> Params, ClientResponse response)
         {
             var realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)

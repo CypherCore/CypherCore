@@ -23,14 +23,14 @@ using Game.Cache;
 
 namespace Game.Chat
 {
-    interface IChannelAppender
+    internal interface IChannelAppender
     {
         void Append(ChannelNotify data);
         ChatNotify GetNotificationType();
     }
 
     // initial packet data (notify type and channel name)
-    class ChannelNameBuilder : MessageBuilder
+    internal class ChannelNameBuilder : MessageBuilder
     {
         public ChannelNameBuilder(Channel source, IChannelAppender modifier)
         {
@@ -50,11 +50,11 @@ namespace Game.Chat
             return data;
         }
 
-        Channel _source;
-        IChannelAppender _modifier;
+        private Channel _source;
+        private IChannelAppender _modifier;
     }
 
-    class ChannelNotifyJoinedBuilder : MessageBuilder
+    internal class ChannelNotifyJoinedBuilder : MessageBuilder
     {
         public ChannelNotifyJoinedBuilder(Channel source)
         {
@@ -75,10 +75,10 @@ namespace Game.Chat
             return notify;
         }
 
-        Channel _source;
+        private Channel _source;
     }
 
-    class ChannelNotifyLeftBuilder : MessageBuilder
+    internal class ChannelNotifyLeftBuilder : MessageBuilder
     {
         public ChannelNotifyLeftBuilder(Channel source, bool suspend)
         {
@@ -97,11 +97,11 @@ namespace Game.Chat
             return notify;
         }
 
-        Channel _source;
-        bool _suspended;
+        private Channel _source;
+        private bool _suspended;
     }
 
-    class ChannelSayBuilder : MessageBuilder
+    internal class ChannelSayBuilder : MessageBuilder
     {
         public ChannelSayBuilder(Channel source, Language lang, string what, ObjectGuid guid)
         {
@@ -128,14 +128,14 @@ namespace Game.Chat
 
             return packet;
         }
-        
-        Channel _source;
-        Language _lang;
-        string _what;
-        ObjectGuid _guid;
+
+        private Channel _source;
+        private Language _lang;
+        private string _what;
+        private ObjectGuid _guid;
     }
 
-    class ChannelWhisperBuilder : MessageBuilder
+    internal class ChannelWhisperBuilder : MessageBuilder
     {
         public ChannelWhisperBuilder(Channel source, Language lang, string what, string prefix, ObjectGuid guid)
         {
@@ -164,14 +164,14 @@ namespace Game.Chat
             return packet;
         }
 
-        Channel _source;
-        Language _lang;
-        string _what;
-        string _prefix;
-        ObjectGuid _guid;
+        private Channel _source;
+        private Language _lang;
+        private string _what;
+        private string _prefix;
+        private ObjectGuid _guid;
     }
 
-    class ChannelUserlistAddBuilder : MessageBuilder
+    internal class ChannelUserlistAddBuilder : MessageBuilder
     {
         public ChannelUserlistAddBuilder(Channel source, ObjectGuid guid)
         {
@@ -192,11 +192,11 @@ namespace Game.Chat
             return userlistAdd;
         }
 
-        Channel _source;
-        ObjectGuid _guid;
+        private Channel _source;
+        private ObjectGuid _guid;
     }
 
-    class ChannelUserlistUpdateBuilder : MessageBuilder
+    internal class ChannelUserlistUpdateBuilder : MessageBuilder
     {
         public ChannelUserlistUpdateBuilder(Channel source, ObjectGuid guid)
         {
@@ -217,11 +217,11 @@ namespace Game.Chat
             return userlistUpdate;
         }
 
-        Channel _source;
-        ObjectGuid _guid;
+        private Channel _source;
+        private ObjectGuid _guid;
     }
 
-    class ChannelUserlistRemoveBuilder : MessageBuilder
+    internal class ChannelUserlistRemoveBuilder : MessageBuilder
     {
         public ChannelUserlistRemoveBuilder(Channel source, ObjectGuid guid)
         {
@@ -241,12 +241,12 @@ namespace Game.Chat
             return userlistRemove;
         }
 
-        Channel _source;
-        ObjectGuid _guid;
+        private Channel _source;
+        private ObjectGuid _guid;
     }
 
     //Appenders
-    struct JoinedAppend : IChannelAppender
+    internal struct JoinedAppend : IChannelAppender
     {
         public JoinedAppend(ObjectGuid guid)
         {
@@ -260,10 +260,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct LeftAppend : IChannelAppender
+    internal struct LeftAppend : IChannelAppender
     {
         public LeftAppend(ObjectGuid guid)
         {
@@ -277,10 +277,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct YouJoinedAppend : IChannelAppender
+    internal struct YouJoinedAppend : IChannelAppender
     {
         public YouJoinedAppend(Channel channel)
         {
@@ -294,10 +294,10 @@ namespace Game.Chat
             data.ChatChannelID = (int)_channel.GetChannelId();
         }
 
-        Channel _channel;
+        private Channel _channel;
     }
 
-    struct YouLeftAppend : IChannelAppender
+    internal struct YouLeftAppend : IChannelAppender
     {
         public YouLeftAppend(Channel channel)
         {
@@ -311,31 +311,31 @@ namespace Game.Chat
             data.ChatChannelID = (int)_channel.GetChannelId();
         }
 
-        Channel _channel;
+        private Channel _channel;
     }
 
-    struct WrongPasswordAppend : IChannelAppender
+    internal struct WrongPasswordAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.WrongPasswordNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct NotMemberAppend : IChannelAppender
+    internal struct NotMemberAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotMemberNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct NotModeratorAppend : IChannelAppender
+    internal struct NotModeratorAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotModeratorNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct PasswordChangedAppend : IChannelAppender
+    internal struct PasswordChangedAppend : IChannelAppender
     {
         public PasswordChangedAppend(ObjectGuid guid)
         {
@@ -349,10 +349,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct OwnerChangedAppend : IChannelAppender
+    internal struct OwnerChangedAppend : IChannelAppender
     {
         public OwnerChangedAppend(ObjectGuid guid)
         {
@@ -366,10 +366,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct PlayerNotFoundAppend : IChannelAppender
+    internal struct PlayerNotFoundAppend : IChannelAppender
     {
         public PlayerNotFoundAppend(string playerName)
         {
@@ -383,17 +383,17 @@ namespace Game.Chat
             data.Sender = _playerName;
         }
 
-        string _playerName;
+        private string _playerName;
     }
 
-    struct NotOwnerAppend : IChannelAppender
+    internal struct NotOwnerAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotOwnerNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct ChannelOwnerAppend : IChannelAppender
+    internal struct ChannelOwnerAppend : IChannelAppender
     {
         public ChannelOwnerAppend(Channel channel, ObjectGuid ownerGuid)
         {
@@ -413,13 +413,13 @@ namespace Game.Chat
             data.Sender = ((_channel.IsConstant() || _ownerGuid.IsEmpty()) ? "Nobody" : _ownerName);
         }
 
-        Channel _channel;
-        ObjectGuid _ownerGuid;
+        private Channel _channel;
+        private ObjectGuid _ownerGuid;
 
-        string _ownerName;
+        private string _ownerName;
     }
 
-    struct ModeChangeAppend : IChannelAppender
+    internal struct ModeChangeAppend : IChannelAppender
     {
         public ModeChangeAppend(ObjectGuid guid, ChannelMemberFlags oldFlags, ChannelMemberFlags newFlags)
         {
@@ -437,12 +437,12 @@ namespace Game.Chat
             data.NewFlags = _newFlags;
         }
 
-        ObjectGuid _guid;
-        ChannelMemberFlags _oldFlags;
-        ChannelMemberFlags _newFlags;
+        private ObjectGuid _guid;
+        private ChannelMemberFlags _oldFlags;
+        private ChannelMemberFlags _newFlags;
     }
 
-    struct AnnouncementsOnAppend : IChannelAppender
+    internal struct AnnouncementsOnAppend : IChannelAppender
     {
         public AnnouncementsOnAppend(ObjectGuid guid)
         {
@@ -456,10 +456,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct AnnouncementsOffAppend : IChannelAppender
+    internal struct AnnouncementsOffAppend : IChannelAppender
     {
         public AnnouncementsOffAppend(ObjectGuid guid)
         {
@@ -473,17 +473,17 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct MutedAppend : IChannelAppender
+    internal struct MutedAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.MutedNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct PlayerKickedAppend : IChannelAppender
+    internal struct PlayerKickedAppend : IChannelAppender
     {
         public PlayerKickedAppend(ObjectGuid kicker, ObjectGuid kickee)
         {
@@ -499,18 +499,18 @@ namespace Game.Chat
             data.TargetGuid = _kickee;
         }
 
-        ObjectGuid _kicker;
-        ObjectGuid _kickee;
+        private ObjectGuid _kicker;
+        private ObjectGuid _kickee;
     }
 
-    struct BannedAppend : IChannelAppender
+    internal struct BannedAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.BannedNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct PlayerBannedAppend : IChannelAppender
+    internal struct PlayerBannedAppend : IChannelAppender
     {
         public PlayerBannedAppend(ObjectGuid moderator, ObjectGuid banned)
         {
@@ -526,11 +526,11 @@ namespace Game.Chat
             data.TargetGuid = _banned;
         }
 
-        ObjectGuid _moderator;
-        ObjectGuid _banned;
+        private ObjectGuid _moderator;
+        private ObjectGuid _banned;
     }
 
-    struct PlayerUnbannedAppend : IChannelAppender
+    internal struct PlayerUnbannedAppend : IChannelAppender
     {
         public PlayerUnbannedAppend(ObjectGuid moderator, ObjectGuid unbanned)
         {
@@ -546,11 +546,11 @@ namespace Game.Chat
             data.TargetGuid = _unbanned;
         }
 
-        ObjectGuid _moderator;
-        ObjectGuid _unbanned;
+        private ObjectGuid _moderator;
+        private ObjectGuid _unbanned;
     }
 
-    struct PlayerNotBannedAppend : IChannelAppender
+    internal struct PlayerNotBannedAppend : IChannelAppender
     {
         public PlayerNotBannedAppend(string playerName)
         {
@@ -564,10 +564,10 @@ namespace Game.Chat
             data.Sender = _playerName;
         }
 
-        string _playerName;
+        private string _playerName;
     }
 
-    struct PlayerAlreadyMemberAppend : IChannelAppender
+    internal struct PlayerAlreadyMemberAppend : IChannelAppender
     {
         public PlayerAlreadyMemberAppend(ObjectGuid guid)
         {
@@ -581,10 +581,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct InviteAppend : IChannelAppender
+    internal struct InviteAppend : IChannelAppender
     {
         public InviteAppend(ObjectGuid guid)
         {
@@ -598,38 +598,38 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct InviteWrongFactionAppend : IChannelAppender
+    internal struct InviteWrongFactionAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.InviteWrongFactionNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct WrongFactionAppend : IChannelAppender
+    internal struct WrongFactionAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.WrongFactionNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct InvalidNameAppend : IChannelAppender
+    internal struct InvalidNameAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.InvalidNameNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct NotModeratedAppend : IChannelAppender
+    internal struct NotModeratedAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotModeratedNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct PlayerInvitedAppend : IChannelAppender
+    internal struct PlayerInvitedAppend : IChannelAppender
     {
         public PlayerInvitedAppend(string playerName)
         {
@@ -643,10 +643,10 @@ namespace Game.Chat
             data.Sender = _playerName;
         }
 
-        string _playerName;
+        private string _playerName;
     }
 
-    struct PlayerInviteBannedAppend : IChannelAppender
+    internal struct PlayerInviteBannedAppend : IChannelAppender
     {
         public PlayerInviteBannedAppend(string playerName)
         {
@@ -660,31 +660,31 @@ namespace Game.Chat
             data.Sender = _playerName;
         }
 
-        string _playerName;
+        private string _playerName;
     }
 
-    struct ThrottledAppend : IChannelAppender
+    internal struct ThrottledAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.ThrottledNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct NotInAreaAppend : IChannelAppender
+    internal struct NotInAreaAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotInAreaNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct NotInLFGAppend : IChannelAppender
+    internal struct NotInLFGAppend : IChannelAppender
     {
         public ChatNotify GetNotificationType() => ChatNotify.NotInLfgNotice;
 
         public void Append(ChannelNotify data) { }
     }
 
-    struct VoiceOnAppend : IChannelAppender
+    internal struct VoiceOnAppend : IChannelAppender
     {
         public VoiceOnAppend(ObjectGuid guid)
         {
@@ -698,10 +698,10 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 
-    struct VoiceOffAppend : IChannelAppender
+    internal struct VoiceOffAppend : IChannelAppender
     {
         public VoiceOffAppend(ObjectGuid guid)
         {
@@ -715,6 +715,6 @@ namespace Game.Chat
             data.SenderGuid = _guid;
         }
 
-        ObjectGuid _guid;
+        private ObjectGuid _guid;
     }
 }

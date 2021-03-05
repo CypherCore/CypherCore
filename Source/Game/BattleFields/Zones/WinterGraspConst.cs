@@ -21,7 +21,7 @@ using Game.Entities;
 
 namespace Game.BattleFields
 {
-    static class WGConst
+    internal static class WGConst
     {
         public const uint ZoneId = 4197;             // Wintergrasp
         public const uint MapId = 571;               // Northrend
@@ -360,7 +360,7 @@ namespace Game.BattleFields
         #endregion
     }
 
-    struct WGData
+    internal struct WGData
     {
         public const int DamagedTowerDef = 0;
         public const int BrokenTowerDef = 1;
@@ -377,7 +377,7 @@ namespace Game.BattleFields
         public const int Max = 12;
     }
 
-    struct WGAchievements
+    internal struct WGAchievements
     {
         public const uint WinWg = 1717;
         public const uint WinWg100 = 1718; // @Todo: Has To Be Implemented
@@ -397,7 +397,7 @@ namespace Game.BattleFields
         public const uint WgMasterH = 2776;  // @Todo: Has To Be Implemented
     }
 
-    struct WGSpells
+    internal struct WGSpells
     {
         // Wartime Auras
         public const uint Recruit = 37795;
@@ -441,7 +441,7 @@ namespace Game.BattleFields
         public const uint AllianceControlPhaseShift = 55774;  // Adds Phase 128
     }
 
-    struct WGNpcs
+    internal struct WGNpcs
     {
         public const uint GuardH = 30739;
         public const uint GuardA = 30740;
@@ -457,7 +457,7 @@ namespace Game.BattleFields
         public const uint TowerCannon = 28366;
     }
 
-    struct WGGameObjects
+    internal struct WGGameObjects
     {
         public const uint FactoryBannerNe = 190475;
         public const uint FactoryBannerNw = 190487;
@@ -481,7 +481,7 @@ namespace Game.BattleFields
         public const uint KeepCollisionWall = 194323;
     }
 
-    struct WintergraspTowerIds
+    internal struct WintergraspTowerIds
     {
         public const byte FortressNW = 0;
         public const byte FortressSW = 1;
@@ -492,7 +492,7 @@ namespace Game.BattleFields
         public const byte Flamewatch = 6;
     }
 
-    struct WGWorkshopIds
+    internal struct WGWorkshopIds
     {
         public const byte Se = 0;
         public const byte Sw = 1;
@@ -502,7 +502,7 @@ namespace Game.BattleFields
         public const byte KeepEast = 5;
     }
 
-    struct WGWorldStates
+    internal struct WGWorldStates
     {
         public const uint NE = 3701;
         public const uint NW = 3700;
@@ -525,7 +525,7 @@ namespace Game.BattleFields
         public const uint DefendedA = 4025;
     }
 
-    struct WGGossipText
+    internal struct WGGossipText
     {
         public const int GYNE = 20071;
         public const int GYNW = 20072;
@@ -536,7 +536,7 @@ namespace Game.BattleFields
         public const int GYAlliance = 20076;
     }
 
-    struct WGGraveyardId
+    internal struct WGGraveyardId
     {
         public const uint WorkshopNE = 0;
         public const uint WorkshopNW = 1;
@@ -559,7 +559,7 @@ namespace Game.BattleFields
         public const uint TheChilledQuagmire = 4589;
     }
 
-    struct WintergraspQuests
+    internal struct WintergraspQuests
     {
         public const uint VictoryAlliance = 13181;
         public const uint VictoryHorde = 13183;
@@ -567,7 +567,7 @@ namespace Game.BattleFields
         public const uint CreditDefendSiege = 31284;
     }
 
-    struct WintergraspText
+    internal struct WintergraspText
     {
         // Invisible Stalker
         public const byte SouthernTowerDamage = 1;
@@ -613,7 +613,7 @@ namespace Game.BattleFields
         public const byte RankFirstLieutenant = 38;
     }
 
-    enum WGGameObjectState
+    internal enum WGGameObjectState
     {
         None,
         NeutralIntact,
@@ -627,7 +627,7 @@ namespace Game.BattleFields
         AllianceDestroy
     }
 
-    enum WGGameObjectBuildingType
+    internal enum WGGameObjectBuildingType
     {
         Door,
         Titanrelic,
@@ -638,7 +638,7 @@ namespace Game.BattleFields
     }
 
     //Data Structs
-    struct BfWGCoordGY
+    internal struct BfWGCoordGY
     {
         public BfWGCoordGY(float x, float y, float z, float o, uint graveyardId, int textId, uint startControl)
         {
@@ -654,7 +654,7 @@ namespace Game.BattleFields
         public uint StartControl;
     }
 
-    struct WintergraspBuildingSpawnData
+    internal struct WintergraspBuildingSpawnData
     {
         public WintergraspBuildingSpawnData(uint entry, uint worldstate, float x, float y, float z, float o, float rX, float rY, float rZ, float rW, WGGameObjectBuildingType type)
         {
@@ -672,7 +672,7 @@ namespace Game.BattleFields
         public WGGameObjectBuildingType BuildingType;
     }
 
-    struct WintergraspGameObjectData
+    internal struct WintergraspGameObjectData
     {
         public WintergraspGameObjectData(float x, float y, float z, float o, float rX, float rY, float rZ, float rW, uint hordeEntry, uint allianceEntry)
         {
@@ -688,7 +688,7 @@ namespace Game.BattleFields
         public uint AllianceEntry;
     }
 
-    class WintergraspTowerData
+    internal class WintergraspTowerData
     {
         public uint towerEntry;                  // Gameobject id of tower
         public WintergraspGameObjectData[] GameObject = new WintergraspGameObjectData[6];   // Gameobject position and entry (Horde/Alliance)
@@ -697,7 +697,7 @@ namespace Game.BattleFields
         public WintergraspObjectPositionData[] CreatureBottom = new WintergraspObjectPositionData[9];
     }
 
-    struct WintergraspObjectPositionData
+    internal struct WintergraspObjectPositionData
     {
         public WintergraspObjectPositionData(float x, float y, float z, float o, uint hordeEntry, uint allianceEntry)
         {
@@ -711,7 +711,7 @@ namespace Game.BattleFields
         public uint AllianceEntry;
     }
 
-    class WintergraspTowerCannonData
+    internal class WintergraspTowerCannonData
     {
         public WintergraspTowerCannonData()
         {
@@ -724,7 +724,7 @@ namespace Game.BattleFields
         public Position[] TurretTop;
     }
 
-    class StaticWintergraspWorkshopInfo
+    internal class StaticWintergraspWorkshopInfo
     {
         public byte WorkshopId;
         public uint WorldStateId;
@@ -734,7 +734,7 @@ namespace Game.BattleFields
         public byte HordeAttackTextId;
     }
 
-    class StaticWintergraspTowerInfo
+    internal class StaticWintergraspTowerInfo
     {
         public StaticWintergraspTowerInfo(byte towerId, byte damagedTextId, byte destroyedTextId)
         {

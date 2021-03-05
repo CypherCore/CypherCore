@@ -28,7 +28,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.ArtifactAddPower)]
-        void HandleArtifactAddPower(ArtifactAddPower artifactAddPower)
+        private void HandleArtifactAddPower(ArtifactAddPower artifactAddPower)
         {
             if (!_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ItemForge))
                 return;
@@ -158,7 +158,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance)]
-        void HandleArtifactSetAppearance(ArtifactSetAppearance artifactSetAppearance)
+        private void HandleArtifactSetAppearance(ArtifactSetAppearance artifactSetAppearance)
         {
             if (!_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ItemForge))
                 return;
@@ -204,7 +204,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ConfirmArtifactRespec)]
-        void HandleConfirmArtifactRespec(ConfirmArtifactRespec confirmArtifactRespec)
+        private void HandleConfirmArtifactRespec(ConfirmArtifactRespec confirmArtifactRespec)
         {
             if (!_player.GetNPCIfCanInteractWith(confirmArtifactRespec.NpcGUID, NPCFlags.ArtifactPowerRespec, NPCFlags2.None))
                 return;

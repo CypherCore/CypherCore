@@ -205,7 +205,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedContainerMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedContainerMask, Player target)
         {
             var flags = GetUpdateFieldFlagsFor(target);
             var valuesMask = new UpdateMask((int)TypeId.Max);
@@ -300,7 +300,7 @@ namespace Game.Entities
             return count;
         }
 
-        byte GetSlotByItemGUID(ObjectGuid guid)
+        private byte GetSlotByItemGUID(ObjectGuid guid)
         {
             for (byte i = 0; i < GetBagSize(); ++i)
                 if (m_bagslot[i] != null)
@@ -319,11 +319,11 @@ namespace Game.Entities
         }
 
         public uint GetBagSize() { return m_containerData.NumSlots; }
-        void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
+        private void SetBagSize(uint numSlots) { SetUpdateFieldValue(m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.NumSlots), numSlots); }
 
-        void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
+        private void SetSlot(int slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_containerData).ModifyValue(m_containerData.Slots, slot), guid); }
 
-        ContainerData m_containerData;
-        Item[] m_bagslot = new Item[36];
+        private ContainerData m_containerData;
+        private Item[] m_bagslot = new Item[36];
     }
 }

@@ -23,7 +23,7 @@ using Game.DataStorage;
 
 namespace Game.BattleGrounds.Zones
 {
-    class BgEyeofStorm : Battleground
+    internal class BgEyeofStorm : Battleground
     {
         public BgEyeofStorm(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
@@ -134,7 +134,7 @@ namespace Game.BattleGrounds.Zones
             StartCriteriaTimer(CriteriaTimedTypes.Event, EotSMisc.EventStartBattle);
         }
 
-        void AddPoints(Team Team, uint Points)
+        private void AddPoints(Team Team, uint Points)
         {
             var team_index = GetTeamIndexByTeamId(Team);
             m_TeamScores[team_index] += Points;
@@ -147,7 +147,7 @@ namespace Game.BattleGrounds.Zones
             UpdateTeamScore(team_index);
         }
 
-        BattlegroundPointCaptureStatus GetPointCaptureStatus(uint point)
+        private BattlegroundPointCaptureStatus GetPointCaptureStatus(uint point)
         {
             if (m_PointBarStatus[point] >= EotSProgressBarConsts.ProgressBarAliControlled)
                 return BattlegroundPointCaptureStatus.AllianceControlled;
@@ -162,8 +162,8 @@ namespace Game.BattleGrounds.Zones
                 ? BattlegroundPointCaptureStatus.AllianceCapturing
                 : BattlegroundPointCaptureStatus.HordeCapturing;
         }
-        
-        void CheckSomeoneJoinedPoint()
+
+        private void CheckSomeoneJoinedPoint()
         {
             GameObject obj;
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
@@ -200,7 +200,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void CheckSomeoneLeftPo()
+        private void CheckSomeoneLeftPo()
         {
             //reset current point counts
             for (byte i = 0; i < 2 * EotSPoints.PointsMax; ++i)
@@ -242,7 +242,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void UpdatePointStatuses()
+        private void UpdatePointStatuses()
         {
             for (byte point = 0; point < EotSPoints.PointsMax; ++point)
             {
@@ -306,7 +306,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void UpdateTeamScore(int team)
+        private void UpdateTeamScore(int team)
         {
             var score = GetTeamScore(team);
             if (score >= EotSScoreIds.MaxTeamScore)
@@ -338,7 +338,7 @@ namespace Game.BattleGrounds.Zones
             base.EndBattleground(winner);
         }
 
-        void UpdatePointsCount(Team team)
+        private void UpdatePointsCount(Team team)
         {
             if (team == Team.Alliance)
                 UpdateWorldState(EotSWorldStateIds.AllianceBase, m_TeamPointsCount[TeamId.Alliance]);
@@ -346,7 +346,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateWorldState(EotSWorldStateIds.HordeBase, m_TeamPointsCount[TeamId.Horde]);
         }
 
-        void UpdatePointsIcons(Team team, int Point)
+        private void UpdatePointsIcons(Team team, int Point)
         {
             //we MUST firstly send 0, after that we can send 1!!!
             if (m_PointState[Point] == EotSPointState.UnderControl)
@@ -571,7 +571,7 @@ namespace Game.BattleGrounds.Zones
             m_PlayersNearPoint[EotSPoints.PlayersOutOfPoints].Clear();
         }
 
-        void RespawnFlag(bool send_message)
+        private void RespawnFlag(bool send_message)
         {
             if (m_FlagCapturedBgObjectType > 0)
                 SpawnBGObject((int)m_FlagCapturedBgObjectType, BattlegroundConst.RespawnOneDay);
@@ -589,7 +589,7 @@ namespace Game.BattleGrounds.Zones
             UpdateWorldState(EotSWorldStateIds.NetherstormFlag, 1);
         }
 
-        void RespawnFlagAfterDrop()
+        private void RespawnFlagAfterDrop()
         {
             RespawnFlag(true);
 
@@ -679,7 +679,7 @@ namespace Game.BattleGrounds.Zones
                 SendBroadcastText(EotSBroadcastTexts.TakenFlag, ChatMsg.BgSystemHorde, player);
         }
 
-        void EventTeamLostPoint(Player player, int Point)
+        private void EventTeamLostPoint(Player player, int Point)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -727,7 +727,7 @@ namespace Game.BattleGrounds.Zones
                 DelCreature(Point + 6);//null checks are in DelCreature! 0-5 spirit guides
         }
 
-        void EventTeamCapturedPoint(Player player, int Point)
+        private void EventTeamCapturedPoint(Player player, int Point)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -793,7 +793,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        void EventPlayerCapturedFlag(Player player, uint BgObjectType)
+        private void EventPlayerCapturedFlag(Player player, uint BgObjectType)
         {
             if (GetStatus() != BattlegroundStatus.InProgress || GetFlagPickerGUID() != player.GetGUID())
                 return;
@@ -971,36 +971,36 @@ namespace Game.BattleGrounds.Zones
         }
 
         public override ObjectGuid GetFlagPickerGUID(int team = -1) { return m_FlagKeeper; }
-        void SetFlagPicker(ObjectGuid guid) { m_FlagKeeper = guid; }
-        bool IsFlagPickedup() { return !m_FlagKeeper.IsEmpty(); }
+        private void SetFlagPicker(ObjectGuid guid) { m_FlagKeeper = guid; }
+        private bool IsFlagPickedup() { return !m_FlagKeeper.IsEmpty(); }
 
         public override void SetDroppedFlagGUID(ObjectGuid guid, int TeamID = -1) { m_DroppedFlagGUID = guid; }
-        ObjectGuid GetDroppedFlagGUID() { return m_DroppedFlagGUID; }
+        private ObjectGuid GetDroppedFlagGUID() { return m_DroppedFlagGUID; }
 
-        uint[] m_HonorScoreTics = new uint[2];
-        uint[] m_TeamPointsCount = new uint[2];
+        private uint[] m_HonorScoreTics = new uint[2];
+        private uint[] m_TeamPointsCount = new uint[2];
 
-        uint[] m_Points_Trigger = new uint[EotSPoints.PointsMax];
+        private uint[] m_Points_Trigger = new uint[EotSPoints.PointsMax];
 
-        ObjectGuid m_FlagKeeper;                                // keepers guid
-        ObjectGuid m_DroppedFlagGUID;
-        uint m_FlagCapturedBgObjectType;                  // type that should be despawned when flag is captured
-        EotSFlagState m_FlagState;                                  // for checking flag state
-        int m_FlagsTimer;
-        int m_TowerCapCheckTimer;
+        private ObjectGuid m_FlagKeeper;                                // keepers guid
+        private ObjectGuid m_DroppedFlagGUID;
+        private uint m_FlagCapturedBgObjectType;                  // type that should be despawned when flag is captured
+        private EotSFlagState m_FlagState;                                  // for checking flag state
+        private int m_FlagsTimer;
+        private int m_TowerCapCheckTimer;
 
-        Team[] m_PointOwnedByTeam = new Team[EotSPoints.PointsMax];
-        EotSPointState[] m_PointState = new EotSPointState[EotSPoints.PointsMax];
-        EotSProgressBarConsts[] m_PointBarStatus = new EotSProgressBarConsts[EotSPoints.PointsMax];
-        BattlegroundPointCaptureStatus[] m_LastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.PointsMax];
-        List<ObjectGuid>[] m_PlayersNearPoint = new List<ObjectGuid>[EotSPoints.PointsMax + 1];
-        byte[] m_CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
+        private Team[] m_PointOwnedByTeam = new Team[EotSPoints.PointsMax];
+        private EotSPointState[] m_PointState = new EotSPointState[EotSPoints.PointsMax];
+        private EotSProgressBarConsts[] m_PointBarStatus = new EotSProgressBarConsts[EotSPoints.PointsMax];
+        private BattlegroundPointCaptureStatus[] m_LastPointCaptureStatus = new BattlegroundPointCaptureStatus[EotSPoints.PointsMax];
+        private List<ObjectGuid>[] m_PlayersNearPoint = new List<ObjectGuid>[EotSPoints.PointsMax + 1];
+        private byte[] m_CurrentPointPlayersCount = new byte[2 * EotSPoints.PointsMax];
 
-        int m_PointAddingTimer;
-        uint m_HonorTics;
+        private int m_PointAddingTimer;
+        private uint m_HonorTics;
     }
 
-    class BgEyeOfStormScore : BattlegroundScore
+    internal class BgEyeOfStormScore : BattlegroundScore
     {
         public BgEyeOfStormScore(ObjectGuid playerGuid, Team team) : base(playerGuid, team) { }
 
@@ -1026,10 +1026,10 @@ namespace Game.BattleGrounds.Zones
 
         public override uint GetAttr1() { return FlagCaptures; }
 
-        uint FlagCaptures;
+        private uint FlagCaptures;
     }
 
-    struct BattlegroundEYPointIconsStruct
+    internal struct BattlegroundEYPointIconsStruct
     {
         public BattlegroundEYPointIconsStruct(uint worldStateControlIndex, uint worldStateAllianceControlledIndex, uint worldStateHordeControlledIndex, uint worldStateAllianceStatusBarIcon, uint worldStateHordeStatusBarIcon)
         {
@@ -1047,7 +1047,7 @@ namespace Game.BattleGrounds.Zones
         public uint WorldStateHordeStatusBarIcon;
     }
 
-    struct BattlegroundEYLosingPointStruct
+    internal struct BattlegroundEYLosingPointStruct
     {
         public BattlegroundEYLosingPointStruct(int _SpawnNeutralObjectType, int _DespawnObjectTypeAlliance, uint _MessageIdAlliance, int _DespawnObjectTypeHorde, uint _MessageIdHorde)
         {
@@ -1065,7 +1065,7 @@ namespace Game.BattleGrounds.Zones
         public uint MessageIdHorde;
     }
 
-    struct BattlegroundEYCapturingPointStruct
+    internal struct BattlegroundEYCapturingPointStruct
     {
         public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveYardId)
         {
@@ -1085,7 +1085,7 @@ namespace Game.BattleGrounds.Zones
         public uint GraveYardId;
     }
 
-    struct EotSMisc
+    internal struct EotSMisc
     {
         public const uint EventStartBattle = 13180; // Achievement: Flurry
         public const int FlagRespawnTime = (8 * Time.InMilliseconds);
@@ -1136,7 +1136,7 @@ namespace Game.BattleGrounds.Zones
         };
     }
 
-    struct EotSBroadcastTexts
+    internal struct EotSBroadcastTexts
     {
         public const uint AllianceTakenFelReaverRuins = 17828;
         public const uint HordeTakenFelReaverRuins = 17829;
@@ -1165,7 +1165,7 @@ namespace Game.BattleGrounds.Zones
         public const uint HordeCapturedFlag = 18384;
     }
 
-    struct EotSWorldStateIds
+    internal struct EotSWorldStateIds
     {
         public const uint AllianceResources = 1776;
         public const uint HordeResources = 1777;
@@ -1202,7 +1202,7 @@ namespace Game.BattleGrounds.Zones
         public const uint BloodElfAllianceControlState = 17365;
     }
 
-    enum EotSProgressBarConsts
+    internal enum EotSProgressBarConsts
     {
         PointMaxCapturersCount = 5,
         PointRadius = 70,
@@ -1216,7 +1216,7 @@ namespace Game.BattleGrounds.Zones
         ProgressBarAliControlled = 100
     }
 
-    struct EotSSoundIds
+    internal struct EotSSoundIds
     {
         //strange ids, but sure about them
         public const uint FlagPickedUpAlliance = 8212;
@@ -1226,7 +1226,7 @@ namespace Game.BattleGrounds.Zones
         public const uint FlagReset = 8192;
     }
 
-    struct EotSObjectIds
+    internal struct EotSObjectIds
     {
         public const uint ADoor = 184719;           //Alliance Door
         public const uint HDoor = 184720;          //Horde Door
@@ -1242,7 +1242,7 @@ namespace Game.BattleGrounds.Zones
         public const uint DrTowerCap = 184083;            //Draenei Tower Cap Pt
     }
 
-    struct EotSPointsTrigger
+    internal struct EotSPointsTrigger
     {
         public const uint BloodElfPoint = 4476;
         public const uint FelReaverPoint = 4514;
@@ -1254,7 +1254,7 @@ namespace Game.BattleGrounds.Zones
         public const uint DraeneiRuinsBuff = 4571;
     }
 
-    struct EotSGaveyardIds
+    internal struct EotSGaveyardIds
     {
         public const int MainAlliance = 1103;
         public const uint MainHorde = 1104;
@@ -1264,7 +1264,7 @@ namespace Game.BattleGrounds.Zones
         public const uint MageTower = 1108;
     }
 
-    struct EotSPoints
+    internal struct EotSPoints
     {
         public const int FelReaver = 0;
         public const int BloodElf = 1;
@@ -1275,7 +1275,7 @@ namespace Game.BattleGrounds.Zones
         public const int PointsMax = 4;
     }
 
-    struct EotSCreaturesTypes
+    internal struct EotSCreaturesTypes
     {
         public const uint SpiritFelReaver = 0;
         public const uint SpiritBloodElf = 1;
@@ -1292,7 +1292,7 @@ namespace Game.BattleGrounds.Zones
        public const uint Max = 10;
     }
 
-    struct EotSObjectTypes
+    internal struct EotSObjectTypes
     {
         public const int DoorA = 0;
         public const int DoorH = 1;
@@ -1357,13 +1357,13 @@ namespace Game.BattleGrounds.Zones
         public const int Max = 59;
     }
 
-    struct EotSScoreIds
+    internal struct EotSScoreIds
     {
         public const uint WarningNearVictoryScore = 1400;
         public const uint MaxTeamScore = 1600;
     }
 
-    enum EotSFlagState
+    internal enum EotSFlagState
     {
         OnBase = 0,
         WaitRespawn = 1,
@@ -1371,7 +1371,7 @@ namespace Game.BattleGrounds.Zones
         OnGround = 3
     }
 
-    enum EotSPointState
+    internal enum EotSPointState
     {
         NoOwner = 0,
         Uncontrolled = 0,

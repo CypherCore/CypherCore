@@ -26,10 +26,10 @@ using System.Collections.Generic;
 namespace Game.Chat.Commands
 {
     [CommandGroup("wp", RBACPermissions.CommandWp)]
-    class WPCommands
+    internal class WPCommands
     {
         [Command("add", RBACPermissions.CommandWpAdd)]
-        static bool HandleWpAddCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpAddCommand(StringArguments args, CommandHandler handler)
         {
             // optional
             string path_number = null;
@@ -95,7 +95,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("event", RBACPermissions.CommandWpEvent)]
-        static bool HandleWpEventCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpEventCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -356,7 +356,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("load", RBACPermissions.CommandWpLoad)]
-        static bool HandleWpLoadCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpLoadCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -425,7 +425,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("modify", RBACPermissions.CommandWpModify)]
-        static bool HandleWpModifyCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpModifyCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -595,7 +595,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("reload", RBACPermissions.CommandWpReload)]
-        static bool HandleWpReloadCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpReloadCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -611,7 +611,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("show", RBACPermissions.CommandWpShow)]
-        static bool HandleWpShowCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpShowCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -971,7 +971,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("unload", RBACPermissions.CommandWpUnload)]
-        static bool HandleWpUnLoadCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleWpUnLoadCommand(StringArguments args, CommandHandler handler)
         {
             var target = handler.GetSelectedCreature();
             if (!target)

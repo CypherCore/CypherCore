@@ -25,10 +25,10 @@ using System;
 namespace Scripts.World.DuelReset
 {
     [Script]
-    class DuelResetScript : PlayerScript
+    internal class DuelResetScript : PlayerScript
     {
-        bool _resetCooldowns;
-        bool _resetHealthMana;
+        private bool _resetCooldowns;
+        private bool _resetHealthMana;
 
         public DuelResetScript() : base("DuelResetScript")
         {
@@ -95,7 +95,7 @@ namespace Scripts.World.DuelReset
             }
         }
 
-        static void ResetSpellCooldowns(Player player, bool onStartDuel)
+        private static void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
             // remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
             player.GetSpellHistory().ResetCooldowns(pair =>

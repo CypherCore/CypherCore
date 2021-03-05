@@ -76,6 +76,6 @@ namespace Game.AI
                 i_victimGuid.Clear();
         }
 
-        ObjectGuid i_victimGuid;
+        private ObjectGuid i_victimGuid;
     }
 }

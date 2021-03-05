@@ -23,23 +23,23 @@ using System;
 namespace Game.Chat
 {
     [CommandGroup("server", RBACPermissions.CommandServer, true)]
-    class ServerCommands
+    internal class ServerCommands
     {
         [Command("corpses", RBACPermissions.CommandServerCorpses, true)]
-        static bool HandleServerCorpsesCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerCorpsesCommand(StringArguments args, CommandHandler handler)
         {
             Global.WorldMgr.RemoveOldCorpses();
             return true;
         }
 
         [Command("debug", RBACPermissions.CommandServerCorpses, true)]
-        static bool HandleServerDebugCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerDebugCommand(StringArguments args, CommandHandler handler)
         {
             return false;//todo fix me
         }
 
         [Command("exit", RBACPermissions.CommandServerExit, true)]
-        static bool HandleServerExitCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerExitCommand(StringArguments args, CommandHandler handler)
         {
             handler.SendSysMessage(CypherStrings.CommandExit);
             Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
@@ -47,7 +47,7 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandServerInfo, true)]
-        static bool HandleServerInfoCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerInfoCommand(StringArguments args, CommandHandler handler)
         {
             var playersNum = Global.WorldMgr.GetPlayerCount();
             var maxPlayersNum = Global.WorldMgr.GetMaxPlayerCount();
@@ -70,7 +70,7 @@ namespace Game.Chat
         }
 
         [Command("motd", RBACPermissions.CommandServerMotd, true)]
-        static bool HandleServerMotdCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerMotdCommand(StringArguments args, CommandHandler handler)
         {
             var motd = "";
             foreach (var line in Global.WorldMgr.GetMotd())
@@ -81,7 +81,7 @@ namespace Game.Chat
         }
 
         [Command("plimit", RBACPermissions.CommandServerPlimit, true)]
-        static bool HandleServerPLimitCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleServerPLimitCommand(StringArguments args, CommandHandler handler)
         {
             if (!args.Empty())
             {
@@ -145,7 +145,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool IsOnlyUser(WorldSession mySession)
+        private static bool IsOnlyUser(WorldSession mySession)
         {
             // check if there is any session connected from a different address
             var myAddr = mySession ? mySession.GetRemoteAddress() : "";
@@ -156,7 +156,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool ParseExitCode(string exitCodeStr, out int exitCode)
+        private static bool ParseExitCode(string exitCodeStr, out int exitCode)
         {
             if (!int.TryParse(exitCodeStr, out exitCode))
                 return false;
@@ -174,7 +174,7 @@ namespace Game.Chat
             return true;
         }
 
-        static bool ShutdownServer(StringArguments args,CommandHandler handler, ShutdownMask shutdownMask, ShutdownExitCode defaultExitCode)
+        private static bool ShutdownServer(StringArguments args,CommandHandler handler, ShutdownMask shutdownMask, ShutdownExitCode defaultExitCode)
         {
             if (args.Empty())
                 return false;
@@ -231,16 +231,16 @@ namespace Game.Chat
         }
 
         [CommandGroup("idleRestart", RBACPermissions.CommandServerIdlerestart, true)]
-        class IdleRestartCommands
+        private class IdleRestartCommands
         {
             [Command("", RBACPermissions.CommandServerIdlerestart, true)]
-            static bool HandleServerIdleRestartCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerIdleRestartCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, ShutdownMask.Restart | ShutdownMask.Idle, ShutdownExitCode.Restart);
             }
 
             [Command("cancel", RBACPermissions.CommandServerIdlerestartCancel, true)]
-            static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
                 var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
@@ -250,16 +250,16 @@ namespace Game.Chat
         }
 
         [CommandGroup("idleshutdown", RBACPermissions.CommandServerIdleshutdown, true)]
-        class IdleshutdownCommands
+        private class IdleshutdownCommands
         {
             [Command("", RBACPermissions.CommandServerIdleshutdown, true)]
-            static bool HandleServerIdleShutDownCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerIdleShutDownCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, ShutdownMask.Idle, ShutdownExitCode.Shutdown);
             }
 
             [Command("cancel", RBACPermissions.CommandServerIdleshutdownCancel, true)]
-            static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
                 var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
@@ -270,16 +270,16 @@ namespace Game.Chat
         }
 
         [CommandGroup("restart", RBACPermissions.CommandServerInfo, true)]
-        class RestartCommands
+        private class RestartCommands
         {
             [Command("", RBACPermissions.CommandServerRestart, true)]
-            static bool HandleServerRestartCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerRestartCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, ShutdownMask.Restart, ShutdownExitCode.Restart);
             }
 
             [Command("cancel", RBACPermissions.CommandServerRestartCancel, true)]
-            static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
                 var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
@@ -289,23 +289,23 @@ namespace Game.Chat
             }
 
             [Command("force", RBACPermissions.CommandServerRestartCancel, true)]
-            static bool HandleServerForceRestartCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerForceRestartCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, ShutdownMask.Force | ShutdownMask.Restart, ShutdownExitCode.Restart);
             }
         }
 
         [CommandGroup("shutdown", RBACPermissions.CommandServerMotd, true)]
-        class ShutdownCommands
+        private class ShutdownCommands
         {
             [Command("", RBACPermissions.CommandServerShutdown, true)]
-            static bool HandleServerShutDownCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerShutDownCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, 0, ShutdownExitCode.Shutdown);
             }
 
             [Command("cancel", RBACPermissions.CommandServerShutdownCancel, true)]
-            static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
                 var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
@@ -315,17 +315,17 @@ namespace Game.Chat
             }
 
             [Command("force", RBACPermissions.CommandServerShutdownCancel, true)]
-            static bool HandleServerForceShutDownCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerForceShutDownCommand(StringArguments args, CommandHandler handler)
             {
                 return ShutdownServer(args, handler, ShutdownMask.Force, ShutdownExitCode.Shutdown);
             }
         }
 
         [CommandGroup("set", RBACPermissions.CommandServerSet, true)]
-        class SetCommands
+        private class SetCommands
         {
             [Command("difftime", RBACPermissions.CommandServerSetDifftime, true)]
-            static bool HandleServerSetDiffTimeCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerSetDiffTimeCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -344,7 +344,7 @@ namespace Game.Chat
             }
 
             [Command("loglevel", RBACPermissions.CommandServerSetLoglevel, true)]
-            static bool HandleServerSetLogLevelCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleServerSetLogLevelCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                     return false;
@@ -360,7 +360,7 @@ namespace Game.Chat
             }
 
             [Command("motd", RBACPermissions.CommandServerSetMotd, true)]
-            static bool SetMotd(StringArguments args, CommandHandler handler)
+            private static bool SetMotd(StringArguments args, CommandHandler handler)
             {
                 Global.WorldMgr.SetMotd(args.NextString(""));
                 handler.SendSysMessage(CypherStrings.MotdNew, args.GetString());
@@ -368,7 +368,7 @@ namespace Game.Chat
             }
 
             [Command("closed", RBACPermissions.CommandServerSetClosed, true)]
-            static bool SetClosed(StringArguments args, CommandHandler handler)
+            private static bool SetClosed(StringArguments args, CommandHandler handler)
             {
                 var arg1 = args.NextString();
                 if (arg1.Equals("on"))

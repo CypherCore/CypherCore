@@ -65,7 +65,7 @@ namespace Game.BattlePets
             LoadDefaultPetQualities();
         }
 
-        static void LoadAvailablePetBreeds()
+        private static void LoadAvailablePetBreeds()
         {
             var result = DB.World.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
             if (result.IsEmpty())
@@ -95,7 +95,7 @@ namespace Game.BattlePets
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} battle pet breeds.", count);
         }
 
-        static void LoadDefaultPetQualities()
+        private static void LoadDefaultPetQualities()
         {
             var result = DB.World.Query("SELECT speciesId, quality FROM battle_pet_quality");
             if (result.IsEmpty())
@@ -436,7 +436,7 @@ namespace Game.BattlePets
             _owner.SendPacket(battlePetJournal);
         }
 
-        void SendUpdates(List<BattlePet> pets, bool petAdded)
+        private void SendUpdates(List<BattlePet> pets, bool petAdded)
         {
             var updates = new BattlePetUpdates();
             foreach (var pet in pets)
@@ -455,20 +455,20 @@ namespace Game.BattlePets
         }
 
         public BattlePetSlot GetSlot(byte slot) { return slot < _slots.Count ? _slots[slot] : null; }
-        WorldSession GetOwner() { return _owner; }
+        private WorldSession GetOwner() { return _owner; }
 
         public ushort GetTrapLevel() { return _trapLevel; }
         public List<BattlePetSlot> GetSlots() { return _slots; }
 
-        WorldSession _owner;
-        ushort _trapLevel;
-        Dictionary<ulong, BattlePet> _pets = new Dictionary<ulong, BattlePet>();
-        List<BattlePetSlot> _slots = new List<BattlePetSlot>();
+        private WorldSession _owner;
+        private ushort _trapLevel;
+        private Dictionary<ulong, BattlePet> _pets = new Dictionary<ulong, BattlePet>();
+        private List<BattlePetSlot> _slots = new List<BattlePetSlot>();
 
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
-        static MultiMap<uint, byte> _availableBreedsPerSpecies = new MultiMap<uint, byte>();
-        static Dictionary<uint, byte> _defaultQualityPerSpecies = new Dictionary<uint, byte>();
+        private static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
+        private static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
+        private static MultiMap<uint, byte> _availableBreedsPerSpecies = new MultiMap<uint, byte>();
+        private static Dictionary<uint, byte> _defaultQualityPerSpecies = new Dictionary<uint, byte>();
 
         public class BattlePet
         {

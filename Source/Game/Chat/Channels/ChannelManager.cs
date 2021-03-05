@@ -141,7 +141,7 @@ namespace Game.Chat
             player.SendPacket(notify);
         }
 
-        ObjectGuid CreateCustomChannelGuid()
+        private ObjectGuid CreateCustomChannelGuid()
         {
             ulong high = 0;
             high |= (ulong)HighGuid.ChatChannel << 58;
@@ -153,7 +153,7 @@ namespace Game.Chat
             return channelGuid;
         }
 
-        ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
+        private ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
         {
 
             var channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
@@ -176,12 +176,12 @@ namespace Game.Chat
             return channelGuid;
         }
 
-        Dictionary<string, Channel> _customChannels = new Dictionary<string, Channel>();
-        Dictionary<ObjectGuid, Channel> _channels = new Dictionary<ObjectGuid, Channel>();
-        Team _team;
-        ObjectGuidGenerator _guidGenerator;
+        private Dictionary<string, Channel> _customChannels = new Dictionary<string, Channel>();
+        private Dictionary<ObjectGuid, Channel> _channels = new Dictionary<ObjectGuid, Channel>();
+        private Team _team;
+        private ObjectGuidGenerator _guidGenerator;
 
-        static ChannelManager allianceChannelMgr = new ChannelManager(Team.Alliance);
-        static ChannelManager hordeChannelMgr = new ChannelManager(Team.Horde);
+        private static ChannelManager allianceChannelMgr = new ChannelManager(Team.Alliance);
+        private static ChannelManager hordeChannelMgr = new ChannelManager(Team.Horde);
     }
 }

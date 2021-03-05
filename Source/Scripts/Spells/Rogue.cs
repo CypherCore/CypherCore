@@ -36,15 +36,15 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 51690 - Killing Spree
-    class spell_rog_killing_spree : SpellScript
+    internal class spell_rog_killing_spree : SpellScript
     {
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             if (targets.Empty() || GetCaster().GetVehicleBase())
                 FinishCast(SpellCastResult.OutOfRange);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var aura = GetCaster().GetAura(SpellIds.KillingSpree);
             if (aura != null)
@@ -70,12 +70,12 @@ namespace Scripts.Spells.Rogue
             return ValidateSpellInfo(SpellIds.KillingSpreeTeleport, SpellIds.KillingSpreeWeaponDmg, SpellIds.KillingSpreeDmgBuff);
         }
 
-        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().CastSpell(GetTarget(), SpellIds.KillingSpreeDmgBuff, true);
         }
 
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             while (!_targets.Empty())
             {
@@ -92,7 +92,7 @@ namespace Scripts.Spells.Rogue
             }
         }
 
-        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.KillingSpreeDmgBuff);
         }
@@ -109,13 +109,13 @@ namespace Scripts.Spells.Rogue
             _targets.Add(target.GetGUID());
         }
 
-        List<ObjectGuid> _targets = new List<ObjectGuid>();
+        private List<ObjectGuid> _targets = new List<ObjectGuid>();
     }
 
     [Script] // 2098 - Eviscerate
-    class spell_rog_eviscerate : SpellScript
+    internal class spell_rog_eviscerate : SpellScript
     {
-        void CalculateDamage(uint effIndex)
+        private void CalculateDamage(uint effIndex)
         {
             var damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.559f);
             var t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
@@ -132,9 +132,9 @@ namespace Scripts.Spells.Rogue
     }
 
     [Script] // 32645 - Envenom
-    class spell_rog_envenom : SpellScript
+    internal class spell_rog_envenom : SpellScript
     {
-        void CalculateDamage(uint effIndex)
+        private void CalculateDamage(uint effIndex)
         {
             var damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.417f);
             var t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);

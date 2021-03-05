@@ -29,11 +29,11 @@ using System.Collections.Generic;
 namespace Game.Chat
 {
     [CommandGroup("group", RBACPermissions.CommandGroup)]
-    class GroupCommands
+    internal class GroupCommands
     {
         // Summon group of player
         [Command("summon", RBACPermissions.CommandGroupSummon)]
-        static bool HandleGroupSummonCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupSummonCommand(StringArguments args, CommandHandler handler)
         {
             Player target;
             if (!handler.ExtractPlayerTarget(args, out target))
@@ -127,7 +127,7 @@ namespace Game.Chat
         }
 
         [Command("leader", RBACPermissions.CommandGroupLeader)]
-        static bool HandleGroupLeaderCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupLeaderCommand(StringArguments args, CommandHandler handler)
         {
             Player player;
             Group group;
@@ -152,7 +152,7 @@ namespace Game.Chat
         }
 
         [Command("disband", RBACPermissions.CommandGroupDisband)]
-        static bool HandleGroupDisbandCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupDisbandCommand(StringArguments args, CommandHandler handler)
         {
             Player player;
             Group group;
@@ -172,7 +172,7 @@ namespace Game.Chat
         }
 
         [Command("remove", RBACPermissions.CommandGroupRemove)]
-        static bool HandleGroupRemoveCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupRemoveCommand(StringArguments args, CommandHandler handler)
         {
             Player player;
             Group group;
@@ -193,7 +193,7 @@ namespace Game.Chat
         }
 
         [Command("join", RBACPermissions.CommandGroupJoin)]
-        static bool HandleGroupJoinCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupJoinCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -236,7 +236,7 @@ namespace Game.Chat
         }
 
         [Command("list", RBACPermissions.CommandGroupList)]
-        static bool HandleGroupListCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGroupListCommand(StringArguments args, CommandHandler handler)
         {
             // Get ALL the variables!
             Player playerTarget;
@@ -348,33 +348,33 @@ namespace Game.Chat
         }
 
         [CommandGroup("set", RBACPermissions.CommandGroupSet)]
-        class GroupSetCommands
+        private class GroupSetCommands
         {
             [Command("assistant", RBACPermissions.CommandGroupAssistant)]
-            static bool HandleGroupSetAssistantCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGroupSetAssistantCommand(StringArguments args, CommandHandler handler)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.Assistant, "Assistant");
             }
 
             [Command("leader", RBACPermissions.CommandGroupLeader)]
-            static bool HandleGroupSetLeaderCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGroupSetLeaderCommand(StringArguments args, CommandHandler handler)
             {
                 return HandleGroupLeaderCommand(args, handler);
             }
 
             [Command("mainassist", RBACPermissions.CommandGroupMainassist)]
-            static bool HandleGroupSetMainAssistCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGroupSetMainAssistCommand(StringArguments args, CommandHandler handler)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.MainAssist, "Main Assist");
             }
 
             [Command("maintank", RBACPermissions.CommandGroupMaintank)]
-            static bool HandleGroupSetMainTankCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleGroupSetMainTankCommand(StringArguments args, CommandHandler handler)
             {
                 return GroupFlagCommand(args, handler, GroupMemberFlags.MainTank, "Main Tank");
             }
 
-            static bool GroupFlagCommand(StringArguments args, CommandHandler handler, GroupMemberFlags flag, string what)
+            private static bool GroupFlagCommand(StringArguments args, CommandHandler handler, GroupMemberFlags flag, string what)
             {
                 Player player;
                 Group group;

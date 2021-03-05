@@ -41,7 +41,7 @@ namespace Game.Collision
 
     public class GameObjectModel : IModel
     {
-        bool Initialize(GameObjectModelOwnerBase modelOwner)
+        private bool Initialize(GameObjectModelOwnerBase modelOwner)
         {
             var modelData = StaticModelList.models.LookupByKey(modelOwner.GetDisplayId());
             if (modelData == null)
@@ -176,7 +176,7 @@ namespace Game.Collision
         public override AxisAlignedBox GetBounds() { return iBound; }
 
         public void EnableCollision(bool enable) { _collisionEnabled = enable; }
-        bool IsCollisionEnabled() { return _collisionEnabled; }
+        private bool IsCollisionEnabled() { return _collisionEnabled; }
         public bool IsMapObject() { return isWmo; }
 
         public static void LoadGameObjectModelList()
@@ -224,16 +224,16 @@ namespace Game.Collision
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        string name;
-        bool _collisionEnabled;
-        AxisAlignedBox iBound;
-        Matrix3 iInvRot;
-        Vector3 iPos;
-        float iInvScale;
-        float iScale;
-        WorldModel iModel;
-        GameObjectModelOwnerBase owner;
-        bool isWmo;
+        private string name;
+        private bool _collisionEnabled;
+        private AxisAlignedBox iBound;
+        private Matrix3 iInvRot;
+        private Vector3 iPos;
+        private float iInvScale;
+        private float iScale;
+        private WorldModel iModel;
+        private GameObjectModelOwnerBase owner;
+        private bool isWmo;
     }
     public class GameobjectModelData
     {

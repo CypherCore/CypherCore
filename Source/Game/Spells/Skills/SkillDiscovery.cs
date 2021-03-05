@@ -226,7 +226,7 @@ namespace Game.Spells
             return 0;
         }
 
-        static MultiMap<int, SkillDiscoveryEntry> SkillDiscoveryStorage = new MultiMap<int, SkillDiscoveryEntry>();
+        private static MultiMap<int, SkillDiscoveryEntry> SkillDiscoveryStorage = new MultiMap<int, SkillDiscoveryEntry>();
     }
 
     public class SkillDiscoveryEntry

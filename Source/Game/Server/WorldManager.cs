@@ -39,7 +39,7 @@ namespace Game
 {
     public class WorldManager : Singleton<WorldManager>
     {
-        WorldManager()
+        private WorldManager()
         {
             foreach (WorldTimers timer in Enum.GetValues(typeof(WorldTimers)))
                 m_timers[timer] = new IntervalTimer();
@@ -124,7 +124,7 @@ namespace Game
             }
         }
 
-        void DoGuidWarningRestart()
+        private void DoGuidWarningRestart()
         {
             if (m_ShutdownTimer != 0)
                 return;
@@ -133,7 +133,7 @@ namespace Game
             _warnShutdownTime += Time.Hour;
         }
 
-        void DoGuidAlertRestart()
+        private void DoGuidAlertRestart()
         {
             if (m_ShutdownTimer != 0)
                 return;
@@ -141,7 +141,7 @@ namespace Game
             ShutdownServ(300, ShutdownMask.Restart, ShutdownExitCode.Restart, _alertRestartReason);
         }
 
-        void SendGuidWarning()
+        private void SendGuidWarning()
         {
             if (m_ShutdownTimer == 0 && _guidWarn && WorldConfig.GetIntValue(WorldCfg.RespawnGuidWarningFrequency) > 0)
                 SendServerMessage(ServerMessageType.String, _guidWarningMsg);
@@ -153,7 +153,7 @@ namespace Game
             return m_sessions.LookupByKey(id);
         }
 
-        bool RemoveSession(uint id)
+        private bool RemoveSession(uint id)
         {
             // Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
             var session = m_sessions.LookupByKey(id);
@@ -179,7 +179,7 @@ namespace Game
             _linkSocketQueue.Enqueue(Tuple.Create(sock, connectToKey));
         }
 
-        void AddSession_(WorldSession s)
+        private void AddSession_(WorldSession s)
         {
             Cypher.Assert(s != null);
 
@@ -241,7 +241,7 @@ namespace Game
             }
         }
 
-        void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
+        private void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
         {
             if (!linkInfo.Item1.IsOpen())
                 return;
@@ -262,7 +262,7 @@ namespace Game
             session.HandleContinuePlayerLogin();
         }
 
-        bool HasRecentlyDisconnected(WorldSession session)
+        private bool HasRecentlyDisconnected(WorldSession session)
         {
             if (session == null)
                 return false;
@@ -283,7 +283,7 @@ namespace Game
             return false;
         }
 
-        uint GetQueuePos(WorldSession sess)
+        private uint GetQueuePos(WorldSession sess)
         {
             uint position = 1;
 
@@ -297,7 +297,7 @@ namespace Game
             return 0;
         }
 
-        void AddQueuedPlayer(WorldSession sess)
+        private void AddQueuedPlayer(WorldSession sess)
         {
             sess.SetInQueue(true);
             m_QueuedPlayer.Add(sess);
@@ -306,7 +306,7 @@ namespace Game
             sess.SendAuthResponse(BattlenetRpcErrorCode.Ok, true, GetQueuePos(sess));
         }
 
-        bool RemoveQueuedPlayer(WorldSession sess)
+        private bool RemoveQueuedPlayer(WorldSession sess)
         {
             // sessions count including queued to remove (if removed_session set)
             var sessions = GetActiveSessionCount();
@@ -1530,7 +1530,7 @@ namespace Game
                 session.KickPlayer();
         }
 
-        void KickAllLess(AccountTypes sec)
+        private void KickAllLess(AccountTypes sec)
         {
             // session not removed at kick and will removed in next update tick
             foreach (var session in m_sessions.Values)
@@ -1719,7 +1719,7 @@ namespace Game
             return true;
         }
 
-        void _UpdateGameTime()
+        private void _UpdateGameTime()
         {
             // update the time
             var lastGameTime = GameTime.GetGameTime();
@@ -1861,7 +1861,7 @@ namespace Game
             }
         }
 
-        void SendAutoBroadcast()
+        private void SendAutoBroadcast()
         {
             if (m_Autobroadcasts.Empty())
                 return;
@@ -1890,7 +1890,7 @@ namespace Game
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(_UpdateRealmCharCount));
         }
 
-        void _UpdateRealmCharCount(SQLResult result)
+        private void _UpdateRealmCharCount(SQLResult result)
         { 
             if (!result.IsEmpty())
             {
@@ -1914,14 +1914,14 @@ namespace Game
             }
         }
 
-        void InitWeeklyQuestResetTime()
+        private void InitWeeklyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.WeeklyQuestResetTime);
             var curtime = Time.UnixTime;
             m_NextWeeklyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
-        void InitDailyQuestResetTime(bool loading = true)
+        private void InitDailyQuestResetTime(bool loading = true)
         {
             long mostRecentQuestTime = 0;
 
@@ -1951,14 +1951,14 @@ namespace Game
                 m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + Time.Day : curDayResetTime;
         }
 
-        void InitMonthlyQuestResetTime()
+        private void InitMonthlyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.MonthlyQuestResetTime);
             var curtime = Time.UnixTime;
             m_NextMonthlyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
-        void InitRandomBGResetTime()
+        private void InitRandomBGResetTime()
         {
             long bgtime = GetWorldState(WorldStates.BGDailyResetTime);
             if (bgtime == 0)
@@ -1981,7 +1981,7 @@ namespace Game
                 SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
-        void InitGuildResetTime()
+        private void InitGuildResetTime()
         {
             long gtime = GetWorldState(WorldStates.GuildDailyResetTime);
             if (gtime == 0)
@@ -2000,7 +2000,7 @@ namespace Game
                 SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
         }
 
-        void InitCurrencyResetTime()
+        private void InitCurrencyResetTime()
         {
             long currencytime = GetWorldState(WorldStates.CurrencyResetTime);
             if (currencytime == 0)
@@ -2022,7 +2022,7 @@ namespace Game
                 SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
-        void DailyReset()
+        private void DailyReset()
         {
             Log.outInfo(LogFilter.Server, "Daily quests reset for all characters.");
 
@@ -2041,7 +2041,7 @@ namespace Game
             Global.PoolMgr.ChangeDailyQuests();
         }
 
-        void ResetCurrencyWeekCap()
+        private void ResetCurrencyWeekCap()
         {
             DB.Characters.Execute("UPDATE `character_currency` SET `WeeklyQuantity` = 0");
 
@@ -2072,7 +2072,7 @@ namespace Game
                 KickAllLess(m_allowedSecurityLevel);
         }
 
-        void ResetWeeklyQuests()
+        private void ResetWeeklyQuests()
         {
             Log.outInfo(LogFilter.Server, "Weekly quests reset for all characters.");
 
@@ -2090,7 +2090,7 @@ namespace Game
             Global.PoolMgr.ChangeWeeklyQuests();
         }
 
-        void ResetMonthlyQuests()
+        private void ResetMonthlyQuests()
         {
             Log.outInfo(LogFilter.Server, "Monthly quests reset for all characters.");
 
@@ -2126,7 +2126,7 @@ namespace Game
                     session.GetPlayer().ResetSeasonalQuestStatus(event_id);
         }
 
-        void ResetRandomBG()
+        private void ResetRandomBG()
         {
             Log.outInfo(LogFilter.Server, "Random BG status reset for all characters.");
 
@@ -2141,7 +2141,7 @@ namespace Game
             SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
-        void ResetGuildCap()
+        private void ResetGuildCap()
         {
             m_NextGuildReset = (m_NextGuildReset + Time.Day);
             SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
@@ -2153,7 +2153,7 @@ namespace Game
             Global.GuildMgr.ResetTimes(week == 1);
         }
 
-        void UpdateMaxSessionCounters()
+        private void UpdateMaxSessionCounters()
         {
             m_maxActiveSessionCount = Math.Max(m_maxActiveSessionCount, (uint)(m_sessions.Count - m_QueuedPlayer.Count));
             m_maxQueuedSessionCount = Math.Max(m_maxQueuedSessionCount, (uint)m_QueuedPlayer.Count);
@@ -2174,7 +2174,7 @@ namespace Game
             return DBVersion;
         }
 
-        void UpdateAreaDependentAuras()
+        private void UpdateAreaDependentAuras()
         {
             foreach (var session in m_sessions.Values)
             {
@@ -2186,7 +2186,7 @@ namespace Game
             }
         }
 
-        void LoadWorldStates()
+        private void LoadWorldStates()
         {
             var oldMSTime = Time.GetMSTime();
 
@@ -2248,7 +2248,7 @@ namespace Game
             return m_worldstates.LookupByKey(index);
         }
 
-        void ProcessQueryCallbacks()
+        private void ProcessQueryCallbacks()
         {
             _queryProcessor.ProcessReadyCallbacks();
         }
@@ -2295,7 +2295,7 @@ namespace Game
 
         public long GetNextDailyQuestsResetTime() { return m_NextDailyQuestReset; }
         public long GetNextWeeklyQuestsResetTime() { return m_NextWeeklyQuestReset; }
-        long GetNextRandomBGResetTime() { return m_NextRandomBGReset; }
+        private long GetNextRandomBGResetTime() { return m_NextRandomBGReset; }
 
         public uint GetConfigMaxSkillValue()
         {
@@ -2382,74 +2382,75 @@ namespace Game
         public WorldUpdateTime GetWorldUpdateTime() { return _worldUpdateTime; }
 
         #region Fields
-        uint m_ShutdownTimer;
-        ShutdownMask m_ShutdownMask;
-        ShutdownExitCode m_ExitCode;
+
+        private uint m_ShutdownTimer;
+        private ShutdownMask m_ShutdownMask;
+        private ShutdownExitCode m_ExitCode;
         public bool IsStopped;
 
-        Dictionary<byte, Autobroadcast> m_Autobroadcasts = new Dictionary<byte, Autobroadcast>();
+        private Dictionary<byte, Autobroadcast> m_Autobroadcasts = new Dictionary<byte, Autobroadcast>();
 
-        CleaningFlags m_CleaningFlags;
+        private CleaningFlags m_CleaningFlags;
 
-        float m_MaxVisibleDistanceOnContinents = SharedConst.DefaultVisibilityDistance;
-        float m_MaxVisibleDistanceInInstances = SharedConst.DefaultVisibilityInstance;
-        float m_MaxVisibleDistanceInBGArenas = SharedConst.DefaultVisibilityBGAreans;
+        private float m_MaxVisibleDistanceOnContinents = SharedConst.DefaultVisibilityDistance;
+        private float m_MaxVisibleDistanceInInstances = SharedConst.DefaultVisibilityInstance;
+        private float m_MaxVisibleDistanceInBGArenas = SharedConst.DefaultVisibilityBGAreans;
 
-        int m_visibility_notify_periodOnContinents = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInInstances = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInBGArenas = SharedConst.DefaultVisibilityNotifyPeriod;
+        private int m_visibility_notify_periodOnContinents = SharedConst.DefaultVisibilityNotifyPeriod;
+        private int m_visibility_notify_periodInInstances = SharedConst.DefaultVisibilityNotifyPeriod;
+        private int m_visibility_notify_periodInBGArenas = SharedConst.DefaultVisibilityNotifyPeriod;
 
-        bool m_isClosed;
+        private bool m_isClosed;
 
-        Dictionary<WorldTimers, IntervalTimer> m_timers = new Dictionary<WorldTimers, IntervalTimer>();
-        long mail_timer;
-        long mail_timer_expires;
-        long blackmarket_timer;
+        private Dictionary<WorldTimers, IntervalTimer> m_timers = new Dictionary<WorldTimers, IntervalTimer>();
+        private long mail_timer;
+        private long mail_timer_expires;
+        private long blackmarket_timer;
 
-        ConcurrentDictionary<uint, WorldSession> m_sessions = new ConcurrentDictionary<uint, WorldSession>();
-        Dictionary<uint, long> m_disconnects = new Dictionary<uint, long>();
-        uint m_maxActiveSessionCount;
-        uint m_maxQueuedSessionCount;
-        uint m_PlayerCount;
-        uint m_MaxPlayerCount;
+        private ConcurrentDictionary<uint, WorldSession> m_sessions = new ConcurrentDictionary<uint, WorldSession>();
+        private Dictionary<uint, long> m_disconnects = new Dictionary<uint, long>();
+        private uint m_maxActiveSessionCount;
+        private uint m_maxQueuedSessionCount;
+        private uint m_PlayerCount;
+        private uint m_MaxPlayerCount;
 
-        Dictionary<uint, uint> m_worldstates = new Dictionary<uint, uint>();
-        uint m_playerLimit;
-        AccountTypes m_allowedSecurityLevel;
-        Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
-        BitSet m_availableDbcLocaleMask;                       // by loaded DBC
-        List<string> m_motd = new List<string>();
+        private Dictionary<uint, uint> m_worldstates = new Dictionary<uint, uint>();
+        private uint m_playerLimit;
+        private AccountTypes m_allowedSecurityLevel;
+        private Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
+        private BitSet m_availableDbcLocaleMask;                       // by loaded DBC
+        private List<string> m_motd = new List<string>();
 
         // scheduled reset times
-        long m_NextDailyQuestReset;
-        long m_NextWeeklyQuestReset;
-        long m_NextMonthlyQuestReset;
-        long m_NextRandomBGReset;
-        long m_NextGuildReset;
-        long m_NextCurrencyReset;
+        private long m_NextDailyQuestReset;
+        private long m_NextWeeklyQuestReset;
+        private long m_NextMonthlyQuestReset;
+        private long m_NextRandomBGReset;
+        private long m_NextGuildReset;
+        private long m_NextCurrencyReset;
 
-        List<WorldSession> m_QueuedPlayer = new List<WorldSession>();
-        ConcurrentQueue<WorldSession> addSessQueue = new ConcurrentQueue<WorldSession>();
+        private List<WorldSession> m_QueuedPlayer = new List<WorldSession>();
+        private ConcurrentQueue<WorldSession> addSessQueue = new ConcurrentQueue<WorldSession>();
 
-        ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new ConcurrentQueue<Tuple<WorldSocket, ulong>>();
+        private ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new ConcurrentQueue<Tuple<WorldSocket, ulong>>();
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        private AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
 
-        Realm _realm;
+        private Realm _realm;
 
-        string _dataPath;
+        private string _dataPath;
 
-        WorldUpdateTime _worldUpdateTime;
+        private WorldUpdateTime _worldUpdateTime;
 
-        string _guidWarningMsg;
-        string _alertRestartReason;
+        private string _guidWarningMsg;
+        private string _alertRestartReason;
 
-        object _guidAlertLock = new object();
+        private object _guidAlertLock = new object();
 
-        bool _guidWarn;
-        bool _guidAlert;
-        uint _warnDiff;
-        long _warnShutdownTime;
+        private bool _guidWarn;
+        private bool _guidAlert;
+        private uint _warnDiff;
+        private long _warnShutdownTime;
         #endregion
     }
 
@@ -2530,11 +2531,11 @@ namespace Game
             }
         }
 
-        uint i_textId;
-        object[] i_args;
+        private uint i_textId;
+        private object[] i_args;
     }
 
-    struct Autobroadcast
+    internal struct Autobroadcast
     {
         public Autobroadcast(string message, byte weight)
         {

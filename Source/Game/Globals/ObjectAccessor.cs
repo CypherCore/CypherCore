@@ -24,12 +24,12 @@ using System.Collections.Generic;
 
 public class ObjectAccessor : Singleton<ObjectAccessor>
 {
-    object _lockObject = new object();
+    private object _lockObject = new object();
 
-    Dictionary<ObjectGuid, Player> _players = new Dictionary<ObjectGuid, Player>();
-    Dictionary<ObjectGuid, Transport> _transports = new Dictionary<ObjectGuid, Transport>();
+    private Dictionary<ObjectGuid, Player> _players = new Dictionary<ObjectGuid, Player>();
+    private Dictionary<ObjectGuid, Transport> _transports = new Dictionary<ObjectGuid, Transport>();
 
-    ObjectAccessor() { }
+    private ObjectAccessor() { }
 
     public WorldObject GetWorldObject(WorldObject p, ObjectGuid guid)
     {
@@ -113,27 +113,27 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetGameObject(guid);
     }
 
-    static Transport GetTransportOnMap(WorldObject u, ObjectGuid guid)
+    private static Transport GetTransportOnMap(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetTransport(guid);
     }
 
-    Transport GetTransport(ObjectGuid guid)
+    private Transport GetTransport(ObjectGuid guid)
     {
         return _transports.LookupByKey(guid);
     }
 
-    static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
+    private static DynamicObject GetDynamicObject(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetDynamicObject(guid);
     }
 
-    static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
+    private static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetAreaTrigger(guid);
     }
 
-    static Conversation GetConversation(WorldObject u, ObjectGuid guid)
+    private static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);
     }
@@ -266,7 +266,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     }
 }
 
-class PlayerNameMapHolder
+internal class PlayerNameMapHolder
 {
     public static void Insert(Player p)
     {
@@ -286,5 +286,5 @@ class PlayerNameMapHolder
         return _playerNameMap.LookupByKey(name);
     }
 
-    static Dictionary<string, Player> _playerNameMap = new Dictionary<string, Player>();
+    private static Dictionary<string, Player> _playerNameMap = new Dictionary<string, Player>();
 }

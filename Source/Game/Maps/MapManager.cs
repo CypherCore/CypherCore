@@ -28,7 +28,7 @@ namespace Game.Entities
 {
     public class MapManager : Singleton<MapManager>
     {
-        MapManager()
+        private MapManager()
         {
             i_gridCleanUpDelay = WorldConfig.GetUIntValue(WorldCfg.IntervalGridclean);
             i_timer.SetInterval(WorldConfig.GetIntValue(WorldCfg.IntervalMapupdate));
@@ -77,7 +77,7 @@ namespace Game.Entities
             return map;
         }
 
-        Map CreateBaseMap_i(MapRecord mapEntry)
+        private Map CreateBaseMap_i(MapRecord mapEntry)
         {
             Map map;
             if (mapEntry.Instanceable())
@@ -407,12 +407,12 @@ namespace Game.Entities
 
         public void SetNextInstanceId(uint nextInstanceId) { _nextInstanceId = nextInstanceId; }
 
-        Map FindBaseMap(uint mapId)
+        private Map FindBaseMap(uint mapId)
         {
             return i_maps.LookupByKey(mapId);
         }
 
-        uint GetAreaId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
+        private uint GetAreaId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
             var m = CreateBaseMap(mapid);
             return m.GetAreaId(phaseShift, x, y, z);
@@ -484,16 +484,16 @@ namespace Game.Entities
         public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
         public bool IsScriptScheduled() { return _scheduledScripts > 0; }
 
-        Dictionary<uint, Map> i_maps = new Dictionary<uint, Map>();
-        IntervalTimer i_timer = new IntervalTimer();
-        object _mapsLock= new object();
-        uint i_gridCleanUpDelay;
-        BitSet _freeInstanceIds;
-        uint _nextInstanceId;
-        MapUpdater m_updater;
-        uint _scheduledScripts;
+        private Dictionary<uint, Map> i_maps = new Dictionary<uint, Map>();
+        private IntervalTimer i_timer = new IntervalTimer();
+        private object _mapsLock= new object();
+        private uint i_gridCleanUpDelay;
+        private BitSet _freeInstanceIds;
+        private uint _nextInstanceId;
+        private MapUpdater m_updater;
+        private uint _scheduledScripts;
 
         // parent map links
-        MultiMap<uint, uint> _parentMapData;
+        private MultiMap<uint, uint> _parentMapData;
     }
 }

@@ -22,13 +22,13 @@ using Framework.Constants;
 
 namespace Scripts.World.NpcInnkeeper
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint TrickOrTreated = 24755;
         public const uint Treat = 24715;
     }
 
-    struct Gossip
+    internal struct Gossip
     {
         public const string LocaleTrickOrTreat0 = "Trick or Treat!";
         public const string LocaleTrickOrTreat2 = "Des bonbons ou des blagues!";
@@ -47,7 +47,7 @@ namespace Scripts.World.NpcInnkeeper
     }
 
     [Script]
-    class npc_innkeeper : ScriptedAI
+    internal class npc_innkeeper : ScriptedAI
     {
         public npc_innkeeper(Creature creature) : base(creature) { }
 

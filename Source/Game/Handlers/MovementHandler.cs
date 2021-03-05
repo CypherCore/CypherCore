@@ -59,12 +59,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveStopStrafe, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveStopSwim, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveStopTurn, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMovement(ClientPlayerMovement packet)
+        private void HandleMovement(ClientPlayerMovement packet)
         {
             HandleMovementOpcode(packet.GetOpcode(), packet.Status);
         }
 
-        void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
+        private void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
             var mover = GetPlayer().m_unitMovedByMe;
             var plrMover = mover.ToPlayer();
@@ -213,12 +213,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.WorldPortResponse, Status = SessionStatus.Transfer)]
-        void HandleMoveWorldportAck(WorldPortResponse packet)
+        private void HandleMoveWorldportAck(WorldPortResponse packet)
         {
             HandleMoveWorldportAck();
         }
 
-        void HandleMoveWorldportAck()
+        private void HandleMoveWorldportAck()
         {
             // ignore unexpected far teleports
             if (!GetPlayer().IsBeingTeleportedFar())
@@ -407,7 +407,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SuspendTokenResponse, Status = SessionStatus.Transfer)]
-        void HandleSuspendTokenResponse(SuspendTokenResponse suspendTokenResponse)
+        private void HandleSuspendTokenResponse(SuspendTokenResponse suspendTokenResponse)
         {
             if (!_player.IsBeingTeleportedFar())
                 return;
@@ -432,7 +432,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveTeleportAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveTeleportAck(MoveTeleportAck packet)
+        private void HandleMoveTeleportAck(MoveTeleportAck packet)
         {
             var plMover = GetPlayer().m_unitMovedByMe.ToPlayer();
 
@@ -483,7 +483,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveForceSwimSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveForceTurnRateChangeAck, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveForceWalkSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleForceSpeedChangeAck(MovementSpeedAck packet)
+        private void HandleForceSpeedChangeAck(MovementSpeedAck packet)
         {
             GetPlayer().ValidateMovementInfo(packet.Ack.Status);
 
@@ -558,7 +558,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SetActiveMover)]
-        void HandleSetActiveMover(SetActiveMover packet)
+        private void HandleSetActiveMover(SetActiveMover packet)
         {
             if (GetPlayer().IsInWorld)
             {
@@ -568,7 +568,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
+        private void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
         {
             GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
 
@@ -594,13 +594,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetCanTurnWhileFallingAck, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveSetIgnoreMovementForcesAck, Processing = PacketProcessing.ThreadSafe)]
         [WorldPacketHandler(ClientOpcodes.MoveWaterWalkAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMovementAckMessage(MovementAckMessage movementAck)
+        private void HandleMovementAckMessage(MovementAckMessage movementAck)
         {
             GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SummonResponse)]
-        void HandleSummonResponseOpcode(SummonResponse packet)
+        private void HandleSummonResponseOpcode(SummonResponse packet)
         {
             if (!GetPlayer().IsAlive() || GetPlayer().IsInCombat())
                 return;
@@ -609,13 +609,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSetCollisionHeightAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
+        private void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
         {
             GetPlayer().ValidateMovementInfo(packet.Data.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
+        private void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
             var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);
@@ -637,7 +637,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
+        private void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
             var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);
@@ -659,7 +659,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
+        private void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
             var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);                      // there must always be a mover
@@ -701,12 +701,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
-        void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
+        private void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
         {
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
+        private void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
             var movementInfo = moveSplineDone.Status;
             _player.ValidateMovementInfo(movementInfo);

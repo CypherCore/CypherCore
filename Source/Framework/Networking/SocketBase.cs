@@ -31,11 +31,11 @@ namespace Framework.Networking
 
     public abstract class SocketBase : ISocket, IDisposable
     {
-        Socket _socket;
-        IPEndPoint _remoteIPEndPoint;
+        private Socket _socket;
+        private IPEndPoint _remoteIPEndPoint;
 
-        SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
-        SocketAsyncEventArgs receiveSocketAsyncEventArgs;
+        private SocketAsyncEventArgs receiveSocketAsyncEventArgsWithCallback;
+        private SocketAsyncEventArgs receiveSocketAsyncEventArgs;
 
         public delegate void SocketReadCallback(SocketAsyncEventArgs args);
 
@@ -90,7 +90,7 @@ namespace Framework.Networking
                 ProcessReadAsync(receiveSocketAsyncEventArgs);
         }
 
-        void ProcessReadAsync(SocketAsyncEventArgs args)
+        private void ProcessReadAsync(SocketAsyncEventArgs args)
         {
             if (args.SocketError != SocketError.Success)
             {

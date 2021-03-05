@@ -239,7 +239,8 @@ public class TimeTrackerSmall
     {
         return i_expiryTime;
     }
-    int i_expiryTime;
+
+    private int i_expiryTime;
 }
 
 public class TimeTracker
@@ -269,7 +270,7 @@ public class TimeTracker
         return i_expiryTime;
     }
 
-    long i_expiryTime;
+    private long i_expiryTime;
 }
 
 public class IntervalTimer
@@ -312,8 +313,8 @@ public class IntervalTimer
         return _current;
     }
 
-    long _interval;
-    long _current;
+    private long _interval;
+    private long _current;
 }
 
 public class PeriodicTimer
@@ -344,6 +345,6 @@ public class PeriodicTimer
     public bool TPassed() { return i_expireTime <= 0; }
     public void TReset(int diff, int period) { i_expireTime += period > diff ? period : diff; }
 
-    int i_period;
-    int i_expireTime;
+    private int i_period;
+    private int i_expireTime;
 }

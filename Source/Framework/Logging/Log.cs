@@ -70,7 +70,7 @@ public class Log
         outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
     }
 
-    static bool ShouldLog(LogFilter type, LogLevel level)
+    private static bool ShouldLog(LogFilter type, LogLevel level)
     {
         // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
         if (level < lowestLogLevel)
@@ -153,18 +153,18 @@ public class Log
         logger.write(msg);
     }
 
-    static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
+    private static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
     {
         var logger = GetLoggerByType(type);
         logger.write(new LogMessage(level, type, string.Format(text, args)));
     }
 
-    static byte NextAppenderId()
+    private static byte NextAppenderId()
     {
         return AppenderId++;
     }
 
-    static void CreateAppenderFromConfig(string appenderName)
+    private static void CreateAppenderFromConfig(string appenderName)
     {
         if (string.IsNullOrEmpty(appenderName))
             return;
@@ -231,7 +231,7 @@ public class Log
         }
     }
 
-    static void CreateLoggerFromConfig(string appenderName)
+    private static void CreateLoggerFromConfig(string appenderName)
     {
         if (string.IsNullOrEmpty(appenderName))
             return;
@@ -280,12 +280,12 @@ public class Log
         loggers[type] = logger;
     }
 
-    static Appender GetAppenderByName(string name)
+    private static Appender GetAppenderByName(string name)
     {
         return appenders.First(p => p.Value.getName() == name).Value;
     }
 
-    static Logger GetLoggerByType(LogFilter type)
+    private static Logger GetLoggerByType(LogFilter type)
     {
         if (loggers.ContainsKey(type))
             return loggers[type];
@@ -348,15 +348,15 @@ public class Log
             appender.setRealmId(id);
     }
 
-    static Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
-    static Dictionary<LogFilter, Logger> loggers = new Dictionary<LogFilter, Logger>();
-    static string m_logsDir;
-    static byte AppenderId;
+    private static Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
+    private static Dictionary<LogFilter, Logger> loggers = new Dictionary<LogFilter, Logger>();
+    private static string m_logsDir;
+    private static byte AppenderId;
 
-    static LogLevel lowestLogLevel;
+    private static LogLevel lowestLogLevel;
 }
 
-enum AppenderType
+internal enum AppenderType
 {
     None,
     Console,
@@ -365,7 +365,7 @@ enum AppenderType
 }
 
 [Flags]
-enum AppenderFlags
+internal enum AppenderFlags
 {
     None = 0x00,
     PrefixTimestamp = 0x01,
@@ -373,7 +373,7 @@ enum AppenderFlags
     PrefixLogFilterType = 0x04,
 }
 
-enum LogLevel
+internal enum LogLevel
 {
     Disabled = 0,
     Trace = 1,

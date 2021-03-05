@@ -198,7 +198,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Vendor;
     }
 
-    class GossipPOI : ServerPacket
+    internal class GossipPOI : ServerPacket
     {
         public GossipPOI() : base(ServerOpcodes.GossipPoi) { }
 
@@ -223,7 +223,7 @@ namespace Game.Networking.Packets
         public string Name;
     }
 
-    class SpiritHealerActivate : ClientPacket
+    internal class SpiritHealerActivate : ClientPacket
     {
         public SpiritHealerActivate(WorldPacket packet) : base(packet) { }
 
@@ -247,7 +247,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Unit;
     }
 
-    class TrainerBuySpell : ClientPacket
+    internal class TrainerBuySpell : ClientPacket
     {
         public TrainerBuySpell(WorldPacket packet) : base(packet) { }
 
@@ -263,7 +263,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class TrainerBuyFailed : ServerPacket
+    internal class TrainerBuyFailed : ServerPacket
     {
         public TrainerBuyFailed() : base(ServerOpcodes.TrainerBuyFailed) { }
 
@@ -279,7 +279,7 @@ namespace Game.Networking.Packets
         public TrainerFailReason TrainerFailedReason;
     }
 
-    class RequestStabledPets : ClientPacket
+    internal class RequestStabledPets : ClientPacket
     {
         public RequestStabledPets(WorldPacket packet) : base(packet) { }
 

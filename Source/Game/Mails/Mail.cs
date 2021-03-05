@@ -104,8 +104,8 @@ namespace Game.Mails
         public Player GetPlayer() { return m_receiver; }
         public ulong GetPlayerGUIDLow() { return m_receiver_lowguid; }
 
-        Player m_receiver;
-        ulong m_receiver_lowguid;
+        private Player m_receiver;
+        private ulong m_receiver_lowguid;
     }
 
     public class MailSender
@@ -181,8 +181,8 @@ namespace Game.Mails
         public ulong GetSenderId() { return m_senderId; }
         public MailStationery GetStationery() { return m_stationery; }
 
-        MailMessageType m_messageType;
-        ulong m_senderId;                                  // player low guid or other object entry
-        MailStationery m_stationery;
+        private MailMessageType m_messageType;
+        private ulong m_senderId;                                  // player low guid or other object entry
+        private MailStationery m_stationery;
     }
 }

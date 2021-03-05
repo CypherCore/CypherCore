@@ -46,7 +46,7 @@ using dtStatus = System.UInt32;
 
 public static partial class Detour
 {
-    const float H_SCALE = 0.999f; // Search heuristic scale.
+    private const float H_SCALE = 0.999f; // Search heuristic scale.
 
     /// Defines polygon filtering and traversal costs for navigation mesh query operations.
     // @ingroup detour
@@ -1290,7 +1290,7 @@ public static partial class Detour
             return status;
         }
 
-        dtStatus getPathToNode(dtNode endNode, dtPolyRef[] path, ref uint pathCount, int maxPath)
+        private dtStatus getPathToNode(dtNode endNode, dtPolyRef[] path, ref uint pathCount, int maxPath)
         {
             // Find the length of the entire path.
             var curNode = endNode;
@@ -1850,7 +1850,7 @@ public static partial class Detour
         }
 
         // Appends vertex to a straight path
-        dtStatus appendVertex(float[] pos, byte flags, dtPolyRef polyRef, float[] straightPath, byte[] straightPathFlags, dtPolyRef[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
+        private dtStatus appendVertex(float[] pos, byte flags, dtPolyRef polyRef, float[] straightPath, byte[] straightPathFlags, dtPolyRef[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
         {
             if (straightPathCount > 0 && dtVequal(straightPath, (straightPathCount - 1) * 3, pos, 0))
             {
@@ -1886,7 +1886,7 @@ public static partial class Detour
         }
 
         // Appends intermediate portal points to a straight path.
-        dtStatus appendPortals(int startIdx, int endIdx, float[] endPos, dtPolyRef[] path, float[] straightPath, byte[] straightPathFlags, dtPolyRef[] straightPathRefs, ref int straightPathCount, int maxStraightPath, int options)
+        private dtStatus appendPortals(int startIdx, int endIdx, float[] endPos, dtPolyRef[] path, float[] straightPath, byte[] straightPathFlags, dtPolyRef[] straightPathRefs, ref int straightPathCount, int maxStraightPath, int options)
         {
             //float* startPos = &straightPath[(*straightPathCount-1)*3];
             var startPosStart = (straightPathCount - 1) * 3;
@@ -2421,7 +2421,7 @@ public static partial class Detour
         }
 
         /// Returns portal points between two polygons.
-        dtStatus getPortalPoints(dtPolyRef from, dtPolyRef to, float[] left, float[] right, ref byte fromType, ref byte toType)
+        private dtStatus getPortalPoints(dtPolyRef from, dtPolyRef to, float[] left, float[] right, ref byte fromType, ref byte toType)
         {
             Debug.Assert(m_nav != null);
 
@@ -2441,7 +2441,7 @@ public static partial class Detour
         }
 
         // Returns portal points between two polygons.
-        dtStatus getPortalPoints(dtPolyRef from, dtPoly fromPoly, dtMeshTile fromTile, dtPolyRef to, dtPoly toPoly, dtMeshTile toTile, float[] left, float[] right)
+        private dtStatus getPortalPoints(dtPolyRef from, dtPoly fromPoly, dtMeshTile fromTile, dtPolyRef to, dtPoly toPoly, dtMeshTile toTile, float[] left, float[] right)
         {
             // Find the link that points to the 'to' polygon.
             dtLink link = null;
@@ -2513,7 +2513,7 @@ public static partial class Detour
         }
 
         // Returns edge mid point between two polygons.
-        dtStatus getEdgeMidPoint(dtPolyRef from, dtPolyRef to, float[] mid)
+        private dtStatus getEdgeMidPoint(dtPolyRef from, dtPolyRef to, float[] mid)
         {
             var left = new float[3];//, right[3];
             var right = new float[3];
@@ -2526,7 +2526,7 @@ public static partial class Detour
             return DT_SUCCESS;
         }
 
-        dtStatus getEdgeMidPoint(dtPolyRef from, dtPoly fromPoly, dtMeshTile fromTile, dtPolyRef to, dtPoly toPoly, dtMeshTile toTile, float[] mid)
+        private dtStatus getEdgeMidPoint(dtPolyRef from, dtPoly fromPoly, dtMeshTile fromTile, dtPolyRef to, dtPoly toPoly, dtMeshTile toTile, float[] mid)
         {
             var left = new float[3];//, right[3];
             var right = new float[3];
@@ -2916,7 +2916,7 @@ public static partial class Detour
         /// If the result arrays are to small to hold the entire result set, they will be 
         /// filled to capacity.
         /// 
-        dtStatus findPolysAroundCircle(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, float[] resultCost, ref int resultCount, int maxResult)
+        private dtStatus findPolysAroundCircle(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, float[] resultCost, ref int resultCount, int maxResult)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
@@ -3105,7 +3105,7 @@ public static partial class Detour
         /// If the result arrays are is too small to hold the entire result set, they will 
         /// be filled to capacity.
         ///
-        dtStatus findPolysAroundShape(dtPolyRef startRef, float[] verts, int nverts, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, float[] resultCost, ref int resultCount, int maxResult)
+        private dtStatus findPolysAroundShape(dtPolyRef startRef, float[] verts, int nverts, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, float[] resultCost, ref int resultCount, int maxResult)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
@@ -3298,7 +3298,7 @@ public static partial class Detour
         /// If the result arrays are is too small to hold the entire result set, they will 
         /// be filled to capacity.
         /// 
-        dtStatus findLocalNeighbourhood(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, ref int resultCount, int maxResult)
+        private dtStatus findLocalNeighbourhood(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, dtPolyRef[] resultRef, dtPolyRef[] resultParent, ref int resultCount, int maxResult)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_tinyNodePool != null);
@@ -3477,14 +3477,14 @@ public static partial class Detour
             return status;
         }
 
-        class dtSegInterval
+        private class dtSegInterval
         {
             public dtPolyRef polyRef;
             public short tmin;
             public short tmax;
         };
 
-        static void insertInterval(dtSegInterval[] ints, ref int nints, int maxInts, short tmin, short tmax, dtPolyRef polyRef)
+        private static void insertInterval(dtSegInterval[] ints, ref int nints, int maxInts, short tmin, short tmax, dtPolyRef polyRef)
         {
             if (nints + 1 > maxInts)
                 return;
@@ -3532,7 +3532,7 @@ public static partial class Detour
         /// The @p segmentVerts and @p segmentRefs buffers should normally be sized for the 
         /// maximum segments per polygon of the source navigation mesh.
         /// 
-        dtStatus getPolyWallSegments(dtPolyRef polyRef, dtQueryFilter filter, float[] segmentVerts, dtPolyRef[] segmentRefs, ref int segmentCount, int maxSegments)
+        private dtStatus getPolyWallSegments(dtPolyRef polyRef, dtQueryFilter filter, float[] segmentVerts, dtPolyRef[] segmentRefs, ref int segmentCount, int maxSegments)
         {
             Debug.Assert(m_nav != null);
 
@@ -3698,7 +3698,7 @@ public static partial class Detour
         ///
         /// The normal will become unpredicable if @p hitDist is a very small number.
         ///
-        dtStatus findDistanceToWall(dtPolyRef startRef, float[] centerPos, float maxRadius, dtQueryFilter filter, ref float hitDist, float[] hitPos, float[] hitNormal)
+        private dtStatus findDistanceToWall(dtPolyRef startRef, float[] centerPos, float maxRadius, dtQueryFilter filter, ref float hitDist, float[] hitPos, float[] hitNormal)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
@@ -3894,7 +3894,7 @@ public static partial class Detour
         /// Returns true if the polygon reference is valid and passes the filter restrictions.
         ///  @param[in]		ref			The polygon reference to check.
         ///  @param[in]		filter		The filter to apply.
-        bool isValidPolyRef(dtPolyRef polyRef, dtQueryFilter filter)
+        private bool isValidPolyRef(dtPolyRef polyRef, dtQueryFilter filter)
         {
             dtMeshTile tile = null;
             dtPoly poly = null;
@@ -3916,7 +3916,7 @@ public static partial class Detour
         /// The closed list is the list of polygons that were fully evaluated during 
         /// the last navigation graph search. (A* or Dijkstra)
         /// 
-        bool isInClosedList(dtPolyRef polyRef)
+        private bool isInClosedList(dtPolyRef polyRef)
         {
             if (m_nodePool == null) return false;
             var node = m_nodePool.findNode(polyRef);
@@ -3933,11 +3933,11 @@ public static partial class Detour
 
     public class dtFindNearestPolyQuery
     {
-        dtNavMeshQuery m_query;
-        float[] m_center;
-        float m_nearestDistanceSqr;
-        dtPolyRef m_nearestRef;
-        float[] m_nearestPoint = new float[3];
+        private dtNavMeshQuery m_query;
+        private float[] m_center;
+        private float m_nearestDistanceSqr;
+        private dtPolyRef m_nearestRef;
+        private float[] m_nearestPoint = new float[3];
 
         public dtFindNearestPolyQuery(dtNavMeshQuery query, float[] center)
         {

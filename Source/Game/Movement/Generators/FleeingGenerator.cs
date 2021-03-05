@@ -85,7 +85,7 @@ namespace Game.Movement
             }
         }
 
-        void SetTargetLocation(T owner)
+        private void SetTargetLocation(T owner)
         {
             if (owner == null)
                 return;
@@ -129,7 +129,7 @@ namespace Game.Movement
             _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
         }
 
-        void GetPoint(T owner, ref Position position)
+        private void GetPoint(T owner, ref Position position)
         {
             float casterDistance, casterAngle;
             var fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
@@ -172,10 +172,10 @@ namespace Game.Movement
             return MovementGeneratorType.Fleeing;
         }
 
-        PathGenerator _path;
-        ObjectGuid _fleeTargetGUID;
-        TimeTracker _timer;
-        bool _interrupt;
+        private PathGenerator _path;
+        private ObjectGuid _fleeTargetGUID;
+        private TimeTracker _timer;
+        private bool _interrupt;
     }
 
     public class TimedFleeingGenerator : FleeingGenerator<Creature>
@@ -220,6 +220,6 @@ namespace Game.Movement
             return base.Update(owner, diff);
         }
 
-        TimeTracker _totalFleeTime;
+        private TimeTracker _totalFleeTime;
     }
 }

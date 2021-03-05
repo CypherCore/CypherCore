@@ -126,13 +126,13 @@ namespace Framework.Database
             return true;
         }
 
-        bool OpenDatabases()
+        private bool OpenDatabases()
         {
             return Process(_open);
         }
 
         // Processes the elements of the given stack until a predicate returned false.
-        bool Process(List<Func<bool>> list)
+        private bool Process(List<Func<bool>> list)
         {
             while (!list.Empty())
             {
@@ -144,27 +144,27 @@ namespace Framework.Database
             return true;
         }
 
-        bool PopulateDatabases()
+        private bool PopulateDatabases()
         {
             return Process(_populate);
         }
 
-        bool UpdateDatabases()
+        private bool UpdateDatabases()
         {
             return Process(_update);
         }
 
-        bool PrepareStatements()
+        private bool PrepareStatements()
         {
             return Process(_prepare);
         }
 
-        bool _autoSetup;
-        DatabaseTypeFlags _updateFlags;
-        List<Func<bool>> _open = new List<Func<bool>>();
-        List<Func<bool>> _populate = new List<Func<bool>>();
-        List<Func<bool>> _update = new List<Func<bool>>();
-        List<Func<bool>> _prepare = new List<Func<bool>>();
+        private bool _autoSetup;
+        private DatabaseTypeFlags _updateFlags;
+        private List<Func<bool>> _open = new List<Func<bool>>();
+        private List<Func<bool>> _populate = new List<Func<bool>>();
+        private List<Func<bool>> _update = new List<Func<bool>>();
+        private List<Func<bool>> _prepare = new List<Func<bool>>();
     }
 
     public enum DatabaseTypeFlags

@@ -131,7 +131,7 @@ namespace Game.Entities
             Update(true);
         }
 
-        void Update(bool forTarget = true)
+        private void Update(bool forTarget = true)
         {
             if (forTarget)
                 m_trader.GetSession().SendUpdateTrade(true);      // player state for trader
@@ -172,15 +172,15 @@ namespace Game.Entities
         public uint GetServerStateIndex() { return m_serverStateIndex; }
         public void UpdateServerStateIndex() { m_serverStateIndex = RandomHelper.Rand32(); }
 
-        Player m_player;
-        Player m_trader;
-        bool m_accepted;
-        bool m_acceptProccess;
-        ulong m_money;
-        uint m_spell;
-        ObjectGuid m_spellCastItem;
-        ObjectGuid[] m_items = new ObjectGuid[(int)TradeSlots.Count];
-        uint m_clientStateIndex;
-        uint m_serverStateIndex;
+        private Player m_player;
+        private Player m_trader;
+        private bool m_accepted;
+        private bool m_acceptProccess;
+        private ulong m_money;
+        private uint m_spell;
+        private ObjectGuid m_spellCastItem;
+        private ObjectGuid[] m_items = new ObjectGuid[(int)TradeSlots.Count];
+        private uint m_clientStateIndex;
+        private uint m_serverStateIndex;
     }
 }

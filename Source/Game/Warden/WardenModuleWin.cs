@@ -17,7 +17,7 @@
 
 namespace Game
 {
-    struct WardenModuleWin
+    internal struct WardenModuleWin
     {
         public static byte[] Module =
         {

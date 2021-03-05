@@ -192,7 +192,8 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().UpdateMotion(diff);
         }
-        void _UpdateSpells(uint diff)
+
+        private void _UpdateSpells(uint diff)
         {
             if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                 _UpdateAutoRepeatSpell();
@@ -549,7 +550,7 @@ namespace Game.Entities
             return GetDynObjects(spellId).FirstOrDefault();
         }
 
-        List<DynamicObject> GetDynObjects(uint spellId)
+        private List<DynamicObject> GetDynObjects(uint spellId)
         {
             var dynamicobjects = new List<DynamicObject>();
             foreach (var obj in m_dynObj)
@@ -580,7 +581,7 @@ namespace Game.Entities
             return GetGameObjects(spellId).FirstOrDefault();
         }
 
-        List<GameObject> GetGameObjects(uint spellId)
+        private List<GameObject> GetGameObjects(uint spellId)
         {
             var gameobjects = new List<GameObject>();
             foreach (var obj in m_gameObj)
@@ -701,7 +702,7 @@ namespace Game.Entities
                 ToCreature().GetAI().JustUnregisteredAreaTrigger(areaTrigger);
         }
 
-        AreaTrigger GetAreaTrigger(uint spellId)
+        private AreaTrigger GetAreaTrigger(uint spellId)
         {
             var areaTriggers = GetAreaTriggers(spellId);
             return areaTriggers.Empty() ? null : areaTriggers[0];
@@ -982,14 +983,14 @@ namespace Game.Entities
             }
         }
 
-        void SendCancelOrphanSpellVisual(uint id)
+        private void SendCancelOrphanSpellVisual(uint id)
         {
             var cancelOrphanSpellVisual = new CancelOrphanSpellVisual();
             cancelOrphanSpellVisual.SpellVisualID = id;
             SendMessageToSet(cancelOrphanSpellVisual, true);
         }
 
-        void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        private void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             var playOrphanSpellVisual = new PlayOrphanSpellVisual();
             playOrphanSpellVisual.SourceLocation = GetPosition();
@@ -1003,7 +1004,7 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendPlayOrphanSpellVisual(Vector3 targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        private void SendPlayOrphanSpellVisual(Vector3 targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             var playOrphanSpellVisual = new PlayOrphanSpellVisual();
             playOrphanSpellVisual.SourceLocation = GetPosition();
@@ -1017,7 +1018,7 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendCancelSpellVisual(uint id)
+        private void SendCancelSpellVisual(uint id)
         {
             var cancelSpellVisual = new CancelSpellVisual();
             cancelSpellVisual.Source = GetGUID();
@@ -1052,7 +1053,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        void SendCancelSpellVisualKit(uint id)
+        private void SendCancelSpellVisualKit(uint id)
         {
             var cancelSpellVisualKit = new CancelSpellVisualKit();
             cancelSpellVisualKit.Source = GetGUID();
@@ -1070,7 +1071,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisualKit, true);
         }
 
-        void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
+        private void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
             var hasMissile = false;
             foreach (var pair in m_Events.GetEvents())
@@ -1538,7 +1539,7 @@ namespace Game.Entities
                 m_interruptMask[i] |= mask[i];
         }
 
-        void _UpdateAutoRepeatSpell()
+        private void _UpdateAutoRepeatSpell()
         {
             var autoRepeatSpellInfo = m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo;
 
@@ -2196,7 +2197,8 @@ namespace Game.Entities
             // do checks dependant only on our faction
             return GetFactionReactionTo(GetFactionTemplateEntry(), target);
         }
-        ReputationRank GetFactionReactionTo(FactionTemplateRecord factionTemplateEntry, Unit target)
+
+        private ReputationRank GetFactionReactionTo(FactionTemplateRecord factionTemplateEntry, Unit target)
         {
             // always neutral when no template entry found
             if (factionTemplateEntry == null)

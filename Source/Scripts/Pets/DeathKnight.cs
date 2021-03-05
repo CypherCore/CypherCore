@@ -28,7 +28,7 @@ namespace Scripts.Pets
 {
     namespace DeathKnight
     {
-        struct SpellIds
+        internal struct SpellIds
         {
             public const uint SummonGargoyle1 = 49206;
             public const uint SummonGargoyle2 = 50514;
@@ -37,7 +37,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_dk_ebon_gargoyle : CasterAI
+        internal class npc_pet_dk_ebon_gargoyle : CasterAI
         {
             public npc_pet_dk_ebon_gargoyle(Creature creature) : base(creature) { }
 
@@ -107,7 +107,7 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_dk_guardian : AggressorAI
+        internal class npc_pet_dk_guardian : AggressorAI
         {
             public npc_pet_dk_guardian(Creature creature) : base(creature) { }
 

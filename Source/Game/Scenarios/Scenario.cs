@@ -103,7 +103,7 @@ namespace Game.Scenarios
             SendPacket(new ScenarioCompleted(_data.Entry.Id));
         }
 
-        void SetStep(ScenarioStepRecord step)
+        private void SetStep(ScenarioStepRecord step)
         {
             _currentstep = step;
             if (step != null)
@@ -126,7 +126,7 @@ namespace Game.Scenarios
             SendBootPlayer(player);
         }
 
-        bool IsComplete()
+        private bool IsComplete()
         {
             foreach (var step in _data.Steps.Values)
             {
@@ -145,7 +145,7 @@ namespace Game.Scenarios
             return _data.Entry;
         }
 
-        ScenarioStepState GetStepState(ScenarioStepRecord step)
+        private ScenarioStepState GetStepState(ScenarioStepRecord step)
         {
             if (!_stepStates.ContainsKey(step))
                 return ScenarioStepState.Invalid;
@@ -232,7 +232,7 @@ namespace Game.Scenarios
             }
         }
 
-        void BuildScenarioState(ScenarioState scenarioState)
+        private void BuildScenarioState(ScenarioState scenarioState)
         {
             scenarioState.ScenarioID = (int)_data.Entry.Id;
             var step = GetStep();
@@ -261,7 +261,7 @@ namespace Game.Scenarios
             scenarioState.ScenarioComplete = IsComplete();
         }
 
-        ScenarioStepRecord GetFirstStep()
+        private ScenarioStepRecord GetFirstStep()
         {
             // Do it like this because we don't know what order they're in inside the container.
             ScenarioStepRecord firstStep = null;
@@ -284,7 +284,7 @@ namespace Game.Scenarios
             player.SendPacket(scenarioState);
         }
 
-        List<BonusObjectiveData> GetBonusObjectivesData()
+        private List<BonusObjectiveData> GetBonusObjectivesData()
         {
             var bonusObjectivesData = new List<BonusObjectiveData>();
             foreach (var step in _data.Steps.Values)
@@ -304,7 +304,7 @@ namespace Game.Scenarios
             return bonusObjectivesData;
         }
 
-        List<CriteriaProgressPkt> GetCriteriasProgress()
+        private List<CriteriaProgressPkt> GetCriteriasProgress()
         {
             var criteriasProgress = new List<CriteriaProgressPkt>();
 
@@ -329,7 +329,7 @@ namespace Game.Scenarios
             return Global.CriteriaMgr.GetScenarioCriteriaByType(type);
         }
 
-        void SendBootPlayer(Player player)
+        private void SendBootPlayer(Player player)
         {
             var scenarioBoot = new ScenarioVacate();
             scenarioBoot.ScenarioID = (int)_data.Entry.Id;
@@ -348,10 +348,10 @@ namespace Game.Scenarios
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 
-        List<ObjectGuid> _players = new List<ObjectGuid>();
-        ScenarioData _data;
-        ScenarioStepRecord _currentstep;
-        Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new Dictionary<ScenarioStepRecord, ScenarioStepState>();
+        private List<ObjectGuid> _players = new List<ObjectGuid>();
+        private ScenarioData _data;
+        private ScenarioStepRecord _currentstep;
+        private Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new Dictionary<ScenarioStepRecord, ScenarioStepState>();
     }
 
     public enum ScenarioStepState
@@ -362,7 +362,7 @@ namespace Game.Scenarios
         Done = 3
     }
 
-    enum ScenarioType
+    internal enum ScenarioType
     {
         Scenario = 0,
         ChallengeMode = 1,

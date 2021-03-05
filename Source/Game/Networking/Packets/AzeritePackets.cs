@@ -20,7 +20,7 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class PlayerAzeriteItemGains : ServerPacket
+    internal class PlayerAzeriteItemGains : ServerPacket
     {
         public PlayerAzeriteItemGains() : base(ServerOpcodes.PlayerAzeriteItemGains) { }
 
@@ -34,7 +34,7 @@ namespace Game.Networking.Packets
         public ulong XP;
     }
 
-    class OpenHeartForge : ServerPacket
+    internal class OpenHeartForge : ServerPacket
     {
         public OpenHeartForge() : base(ServerOpcodes.OpenHeartForge) { }
 
@@ -46,14 +46,14 @@ namespace Game.Networking.Packets
         public ObjectGuid ForgeGUID;
     }
 
-    class CloseHeartForge : ServerPacket
+    internal class CloseHeartForge : ServerPacket
     {
         public CloseHeartForge() : base(ServerOpcodes.CloseHeartForge) { }
 
         public override void Write() { }
     }
 
-    class AzeriteEssenceUnlockMilestone : ClientPacket
+    internal class AzeriteEssenceUnlockMilestone : ClientPacket
     {
         public AzeriteEssenceUnlockMilestone(WorldPacket packet) : base(packet) { }
 
@@ -65,7 +65,7 @@ namespace Game.Networking.Packets
         public int AzeriteItemMilestonePowerID;
     }
 
-    class AzeriteEssenceActivateEssence : ClientPacket
+    internal class AzeriteEssenceActivateEssence : ClientPacket
     {
         public AzeriteEssenceActivateEssence(WorldPacket packet) : base(packet) { }
 
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class ActivateEssenceFailed : ServerPacket
+    internal class ActivateEssenceFailed : ServerPacket
     {
         public ActivateEssenceFailed() : base(ServerOpcodes.ActivateEssenceFailed) { }
 
@@ -99,7 +99,7 @@ namespace Game.Networking.Packets
         public byte? Slot;
     }
 
-    class AzeriteEmpoweredItemViewed : ClientPacket
+    internal class AzeriteEmpoweredItemViewed : ClientPacket
     {
         public AzeriteEmpoweredItemViewed(WorldPacket packet) : base(packet) { }
 
@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGUID;
     }
 
-    class AzeriteEmpoweredItemSelectPower : ClientPacket
+    internal class AzeriteEmpoweredItemSelectPower : ClientPacket
     {
         public AzeriteEmpoweredItemSelectPower(WorldPacket packet) : base(packet) { }
 
@@ -129,7 +129,7 @@ namespace Game.Networking.Packets
         public byte Slot;
     }
 
-    class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
+    internal class PlayerAzeriteItemEquippedStatusChanged : ServerPacket
     {
         public PlayerAzeriteItemEquippedStatusChanged() : base(ServerOpcodes.PlayerAzeriteItemEquippedStatusChanged) { }
 
@@ -142,7 +142,7 @@ namespace Game.Networking.Packets
         public bool IsHeartEquipped;
     }
 
-    class AzeriteRespecNPC : ServerPacket
+    internal class AzeriteRespecNPC : ServerPacket
     {
         public AzeriteRespecNPC(ObjectGuid npcGuid) : base(ServerOpcodes.AzeriteRespecNpc)
         {

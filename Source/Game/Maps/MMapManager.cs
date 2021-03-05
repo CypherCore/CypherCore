@@ -25,10 +25,10 @@ namespace Game
 {
     public class MMapManager : Singleton<MMapManager>
     {
-        MMapManager() { }
+        private MMapManager() { }
 
-        const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
-        const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
+        private const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
+        private const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
@@ -38,12 +38,12 @@ namespace Game
                 parentMapData[pair.Value] = pair.Key;
         }
 
-        MMapData GetMMapData(uint mapId)
+        private MMapData GetMMapData(uint mapId)
         {
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        bool LoadMapData(string basePath, uint mapId)
+        private bool LoadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
@@ -84,7 +84,7 @@ namespace Game
             }
         }
 
-        uint PackTileID(uint x, uint y)
+        private uint PackTileID(uint x, uint y)
         {
             return (x << 16 | y);
         }
@@ -104,7 +104,7 @@ namespace Game
             return success;
         }
 
-        bool LoadMapImpl(string basePath, uint mapId, uint x, uint y)
+        private bool LoadMapImpl(string basePath, uint mapId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
             if (!LoadMapData(basePath, mapId))
@@ -181,7 +181,7 @@ namespace Game
             return success;
         }
 
-        bool LoadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
+        private bool LoadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
         {
             if (!LoadMapData(basePath, mapId))
                 return false;
@@ -212,7 +212,7 @@ namespace Game
             return UnloadMapImpl(mapId, x, y);
         }
 
-        bool UnloadMapImpl(uint mapId, uint x, uint y)
+        private bool UnloadMapImpl(uint mapId, uint x, uint y)
         {
             // check if we have this map loaded
             var mmap = GetMMapData(mapId);
@@ -330,11 +330,11 @@ namespace Game
         public uint GetLoadedTilesCount() { return loadedTiles; }
         public int GetLoadedMapsCount() { return loadedMMaps.Count; }
 
-        Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
-        uint loadedTiles;
+        private Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
+        private uint loadedTiles;
 
-        MultiMap<uint, uint> childMapData = new MultiMap<uint, uint>();
-        Dictionary<uint, uint> parentMapData = new Dictionary<uint, uint>();
+        private MultiMap<uint, uint> childMapData = new MultiMap<uint, uint>();
+        private Dictionary<uint, uint> parentMapData = new Dictionary<uint, uint>();
     }
 
     public class MMapData

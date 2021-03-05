@@ -77,7 +77,7 @@ namespace Game.Movement
             owner.SetWalk(false);
         }
 
-        void SetRandomLocation(Creature owner)
+        private void SetRandomLocation(Creature owner)
         {
             if (owner == null)
                 return;
@@ -124,10 +124,10 @@ namespace Game.Movement
             return MovementGeneratorType.Random;
         }
 
-        PathGenerator _path;
-        TimeTracker _timer;
-        Position _reference;
-        float _wanderDistance;
-        bool _interrupt;
+        private PathGenerator _path;
+        private TimeTracker _timer;
+        private Position _reference;
+        private float _wanderDistance;
+        private bool _interrupt;
     }
 }

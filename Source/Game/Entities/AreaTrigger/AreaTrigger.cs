@@ -78,7 +78,7 @@ namespace Game.Entities
             }
         }
 
-        bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId, AuraEffect aurEff)
+        private bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId, AuraEffect aurEff)
         {
             _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -225,7 +225,7 @@ namespace Game.Entities
             return CreateServer(map, areaTriggerTemplate, position);
         }
 
-        bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
+        private bool CreateServer(Map map, AreaTriggerTemplate areaTriggerTemplate, AreaTriggerSpawn position)
         {
             SetMap(map);
             Relocate(position.Location);
@@ -308,7 +308,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Duration), (uint)Math.Max(newDuration, 0));
         }
 
-        void _UpdateDuration(int newDuration)
+        private void _UpdateDuration(int newDuration)
         {
             _duration = newDuration;
 
@@ -320,12 +320,12 @@ namespace Game.Entities
             });
         }
 
-        float GetProgress()
+        private float GetProgress()
         {
             return GetTimeSinceCreated() < GetTimeToTargetScale() ? (float)GetTimeSinceCreated() / GetTimeToTargetScale() : 1.0f;
         }
 
-        void UpdateTargetList()
+        private void UpdateTargetList()
         {
             var targetList = new List<Unit>();
 
@@ -350,7 +350,7 @@ namespace Game.Entities
             HandleUnitEnterExit(targetList);
         }
 
-        void SearchUnits(List<Unit> targetList, float radius, bool check3D)
+        private void SearchUnits(List<Unit> targetList, float radius, bool check3D)
         {
             var check = new AnyUnitInObjectRangeCheck(this, radius, check3D);
             if (IsServerSide())
@@ -365,7 +365,7 @@ namespace Game.Entities
             }
         }
 
-        void SearchUnitInSphere(List<Unit> targetList)
+        private void SearchUnitInSphere(List<Unit> targetList)
         {
             var radius = GetTemplate().SphereDatas.Radius;
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasDynamicShape))
@@ -379,7 +379,7 @@ namespace Game.Entities
             SearchUnits(targetList, radius, true);
         }
 
-        void SearchUnitInBox(List<Unit> targetList)
+        private void SearchUnitInBox(List<Unit> targetList)
         {
             float extentsX, extentsY, extentsZ;
 
@@ -410,7 +410,7 @@ namespace Game.Entities
             targetList.RemoveAll(unit => !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ())));
         }
 
-        void SearchUnitInPolygon(List<Unit> targetList)
+        private void SearchUnitInPolygon(List<Unit> targetList)
         {
             SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
@@ -421,7 +421,7 @@ namespace Game.Entities
             targetList.RemoveAll(unit => !CheckIsInPolygon2D(unit) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
-        void SearchUnitInCylinder(List<Unit> targetList)
+        private void SearchUnitInCylinder(List<Unit> targetList)
         {
             SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
@@ -432,7 +432,7 @@ namespace Game.Entities
             targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
-        void HandleUnitEnterExit(List<Unit> newTargetList)
+        private void HandleUnitEnterExit(List<Unit> newTargetList)
         {
             var exitUnits = _insideUnits;
             _insideUnits.Clear();
@@ -492,12 +492,12 @@ namespace Game.Entities
             return Global.ObjAccessor.GetUnit(this, GetCasterGuid());
         }
 
-        Unit GetTarget()
+        private Unit GetTarget()
         {
             return Global.ObjAccessor.GetUnit(this, _targetGuid);
         }
 
-        void UpdatePolygonOrientation()
+        private void UpdatePolygonOrientation()
         {
             var newOrientation = GetOrientation();
 
@@ -522,7 +522,7 @@ namespace Game.Entities
             _previousCheckOrientation = newOrientation;
         }
 
-        bool CheckIsInPolygon2D(Position pos)
+        private bool CheckIsInPolygon2D(Position pos)
         {
             var testX = pos.GetPositionX();
             var testY = pos.GetPositionY();
@@ -597,7 +597,7 @@ namespace Game.Entities
                 UpdatePolygonOrientation();
         }
 
-        bool UnitFitToActionRequirement(Unit unit, Unit caster, AreaTriggerAction action)
+        private bool UnitFitToActionRequirement(Unit unit, Unit caster, AreaTriggerAction action)
         {
             switch (action.TargetType)
             {
@@ -619,7 +619,7 @@ namespace Game.Entities
             return true;
         }
 
-        void DoActions(Unit unit)
+        private void DoActions(Unit unit)
         {
             var caster = IsServerSide() ? unit : GetCaster();
             if (caster)
@@ -653,7 +653,7 @@ namespace Game.Entities
             }
         }
 
-        void UndoActions(Unit unit)
+        private void UndoActions(Unit unit)
         {
             foreach (var action in GetTemplate().Actions)
             {
@@ -662,7 +662,7 @@ namespace Game.Entities
             }
         }
 
-        void InitSplineOffsets(List<Vector3> offsets, uint timeToTarget)
+        private void InitSplineOffsets(List<Vector3> offsets, uint timeToTarget)
         {
             var angleSin = (float)Math.Sin(GetOrientation());
             var angleCos = (float)Math.Cos(GetOrientation());
@@ -694,7 +694,7 @@ namespace Game.Entities
             InitSplines(rotatedPoints, timeToTarget);
         }
 
-        void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
+        private void InitSplines(List<Vector3> splinePoints, uint timeToTarget)
         {
             if (splinePoints.Count < 2)
                 return;
@@ -732,7 +732,7 @@ namespace Game.Entities
             _reachedDestination = false;
         }
 
-        void InitOrbit(AreaTriggerOrbitInfo cmi, uint timeToTarget)
+        private void InitOrbit(AreaTriggerOrbitInfo cmi, uint timeToTarget)
         {
             // Circular movement requires either a center position or an attached unit
             Cypher.Assert(cmi.Center.HasValue || cmi.PathTarget.HasValue);
@@ -764,7 +764,7 @@ namespace Game.Entities
             return _orbitInfo.HasValue;
         }
 
-        Position GetOrbitCenterPosition()
+        private Position GetOrbitCenterPosition()
         {
             if (!_orbitInfo.HasValue)
                 return null;
@@ -782,7 +782,7 @@ namespace Game.Entities
             return null;
         }
 
-        Position CalculateOrbitPosition()
+        private Position CalculateOrbitPosition()
         {
             var centerPos = GetOrbitCenterPosition();
             if (centerPos == null)
@@ -819,7 +819,7 @@ namespace Game.Entities
             return new Position(x, y, z, angle);
         }
 
-        void UpdateOrbitPosition(uint diff)
+        private void UpdateOrbitPosition(uint diff)
         {
             if (_orbitInfo.Value.StartDelay > GetElapsedTimeForMovement())
                 return;
@@ -833,7 +833,7 @@ namespace Game.Entities
             DebugVisualizePosition();
         }
 
-        void UpdateSplinePosition(uint diff)
+        private void UpdateSplinePosition(uint diff)
         {
             if (_reachedDestination)
                 return;
@@ -900,7 +900,7 @@ namespace Game.Entities
             }
         }
 
-        void AI_Initialize()
+        private void AI_Initialize()
         {
             AI_Destroy();
             var ai = Global.ScriptMgr.GetAreaTriggerAI(this);
@@ -911,7 +911,7 @@ namespace Game.Entities
             _ai.OnInitialize();
         }
 
-        void AI_Destroy()
+        private void AI_Destroy()
         {
             _ai = null;
         }
@@ -945,7 +945,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
         {
             var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
@@ -991,7 +991,7 @@ namespace Game.Entities
         }
         
         [System.Diagnostics.Conditional("DEBUG")]
-        void DebugVisualizePosition()
+        private void DebugVisualizePosition()
         {
             var caster = GetCaster();
             if (caster)
@@ -1029,33 +1029,33 @@ namespace Game.Entities
 
         public Optional<AreaTriggerOrbitInfo> GetCircularMovementInfo() { return _orbitInfo; }
 
-        AreaTriggerFieldData m_areaTriggerData;
+        private AreaTriggerFieldData m_areaTriggerData;
 
-        ObjectGuid _targetGuid;
+        private ObjectGuid _targetGuid;
 
-        AuraEffect _aurEff;
+        private AuraEffect _aurEff;
 
-        int _duration;
-        int _totalDuration;
-        uint _timeSinceCreated;
-        float _previousCheckOrientation;
-        bool _isRemoved;
+        private int _duration;
+        private int _totalDuration;
+        private uint _timeSinceCreated;
+        private float _previousCheckOrientation;
+        private bool _isRemoved;
 
-        Vector3 _rollPitchYaw;
-        Vector3 _targetRollPitchYaw;
-        List<Vector2> _polygonVertices;
-        Spline _spline;
+        private Vector3 _rollPitchYaw;
+        private Vector3 _targetRollPitchYaw;
+        private List<Vector2> _polygonVertices;
+        private Spline _spline;
 
-        bool _reachedDestination;
-        int _lastSplineIndex;
-        uint _movementTime;
+        private bool _reachedDestination;
+        private int _lastSplineIndex;
+        private uint _movementTime;
 
-        Optional<AreaTriggerOrbitInfo> _orbitInfo;
+        private Optional<AreaTriggerOrbitInfo> _orbitInfo;
 
-        AreaTriggerMiscTemplate _areaTriggerMiscTemplate;
-        AreaTriggerTemplate _areaTriggerTemplate;
-        List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
+        private AreaTriggerMiscTemplate _areaTriggerMiscTemplate;
+        private AreaTriggerTemplate _areaTriggerTemplate;
+        private List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
 
-        AreaTriggerAI _ai;
+        private AreaTriggerAI _ai;
     }
 }

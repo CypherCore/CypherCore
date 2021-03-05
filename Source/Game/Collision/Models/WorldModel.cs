@@ -155,15 +155,15 @@ namespace Game.Collision
         }
 
         public uint GetLiquidType() { return iType; }
-        float[] GetHeightStorage() { return iHeight; }
-        byte[] GetFlagsStorage() { return iFlags; }
+        private float[] GetHeightStorage() { return iHeight; }
+        private byte[] GetFlagsStorage() { return iFlags; }
 
-        uint iTilesX;
-        uint iTilesY;
-        Vector3 iCorner;
-        uint iType;
-        float[] iHeight;
-        byte[] iFlags;
+        private uint iTilesX;
+        private uint iTilesY;
+        private Vector3 iCorner;
+        private uint iType;
+        private float[] iHeight;
+        private byte[] iFlags;
     }
 
     public class GroupModel : IModel
@@ -193,7 +193,7 @@ namespace Game.Collision
             iLiquid = null;
         }
 
-        void SetLiquidData(WmoLiquid liquid)
+        private void SetLiquidData(WmoLiquid liquid)
         {
             iLiquid = liquid;
         }
@@ -295,13 +295,13 @@ namespace Game.Collision
 
         public uint GetWmoID() { return iGroupWMOID; }
 
-        AxisAlignedBox iBound;
-        uint iMogpFlags;
-        uint iGroupWMOID;
-        List<Vector3> vertices = new List<Vector3>();
-        List<MeshTriangle> triangles = new List<MeshTriangle>();
-        BIH meshTree = new BIH();
-        WmoLiquid iLiquid;
+        private AxisAlignedBox iBound;
+        private uint iMogpFlags;
+        private uint iGroupWMOID;
+        private List<Vector3> vertices = new List<Vector3>();
+        private List<MeshTriangle> triangles = new List<MeshTriangle>();
+        private BIH meshTree = new BIH();
+        private WmoLiquid iLiquid;
     }
 
     public class WorldModel : IModel
@@ -409,9 +409,9 @@ namespace Game.Collision
             }
         }
 
-        List<GroupModel> groupModels = new List<GroupModel>();
-        BIH groupTree = new BIH();
-        uint RootWMOID;
+        private List<GroupModel> groupModels = new List<GroupModel>();
+        private BIH groupTree = new BIH();
+        private uint RootWMOID;
         public uint Flags;
     }
 }

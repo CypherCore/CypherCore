@@ -27,11 +27,11 @@ namespace Game.Entities
 {
     public class TaxiPathGraph : Singleton<TaxiPathGraph>
     {
-        EdgeWeightedDigraph m_graph;
-        List<TaxiNodesRecord> m_nodesByVertex = new List<TaxiNodesRecord>();
-        Dictionary<uint, uint> m_verticesByNode = new Dictionary<uint, uint>();
+        private EdgeWeightedDigraph m_graph;
+        private List<TaxiNodesRecord> m_nodesByVertex = new List<TaxiNodesRecord>();
+        private Dictionary<uint, uint> m_verticesByNode = new Dictionary<uint, uint>();
 
-        TaxiPathGraph() { }
+        private TaxiPathGraph() { }
 
         public void Initialize()
         {
@@ -58,7 +58,7 @@ namespace Game.Entities
             }
         }
 
-        uint GetNodeIDFromVertexID(uint vertexID)
+        private uint GetNodeIDFromVertexID(uint vertexID)
         {
             if (vertexID < m_nodesByVertex.Count)
                 return m_nodesByVertex[(int)vertexID].Id;
@@ -66,18 +66,18 @@ namespace Game.Entities
             return uint.MaxValue;
         }
 
-        uint GetVertexIDFromNodeID(TaxiNodesRecord node)
+        private uint GetVertexIDFromNodeID(TaxiNodesRecord node)
         {
             return m_verticesByNode.ContainsKey(node.Id) ? m_verticesByNode[node.Id] : uint.MaxValue;
         }
 
-        void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
+        private void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
         {
             if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
                 Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
         }
 
-        void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
+        private void AddVerticeAndEdgeFromNodeInfo(TaxiNodesRecord from, TaxiNodesRecord to, uint pathId, List<Tuple<Tuple<uint, uint>, uint>> edges)
         {
             if (from.Id != to.Id)
             {
@@ -183,7 +183,7 @@ namespace Game.Entities
             });
         }
 
-        uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
+        private uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
         {
             if (!m_verticesByNode.ContainsKey(node.Id))
             {

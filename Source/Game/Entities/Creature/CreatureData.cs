@@ -411,7 +411,7 @@ namespace Game.Entities
 
     public class VendorItemData
     {
-        List<VendorItem> m_items = new List<VendorItem>();
+        private List<VendorItem> m_items = new List<VendorItem>();
 
         public VendorItem GetItem(uint slot)
         {

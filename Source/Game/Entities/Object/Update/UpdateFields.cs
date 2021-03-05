@@ -76,7 +76,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentDynamicFlags(uint dynamicFlags, WorldObject obj, Player receiver)
+        private uint GetViewerDependentDynamicFlags(uint dynamicFlags, WorldObject obj, Player receiver)
         {
             var unitDynFlags = (UnitDynFlags)dynamicFlags;
 
@@ -2199,7 +2199,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentDisplayId(uint displayId, Unit unit, Player receiver)
+        private uint GetViewerDependentDisplayId(uint displayId, Unit unit, Player receiver)
         {
             if (unit.IsCreature())
             {
@@ -2230,14 +2230,16 @@ namespace Game.Entities
 
             return displayId;
         }
-        uint GetViewerDependentNpcFlags(uint npcFlag, int i, Unit unit, Player receiver)
+
+        private uint GetViewerDependentNpcFlags(uint npcFlag, int i, Unit unit, Player receiver)
         {
             if (i == 0 && unit.IsCreature() && !receiver.CanSeeSpellClickOn(unit.ToCreature()))
                 npcFlag &= ~(uint)NPCFlags.SpellClick;
 
             return npcFlag;
         }
-        uint GetViewerDependentFactionTemplate(uint factionTemplate, Unit unit, Player receiver)
+
+        private uint GetViewerDependentFactionTemplate(uint factionTemplate, Unit unit, Player receiver)
         {
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
             {
@@ -2250,7 +2252,8 @@ namespace Game.Entities
 
             return factionTemplate;
         }
-        uint GetViewerDependentFlags(uint flags, Unit unit, Player receiver)
+
+        private uint GetViewerDependentFlags(uint flags, Unit unit, Player receiver)
         {
             // Gamemasters should be always able to select units - remove not selectable flag
             if (receiver.IsGameMaster())
@@ -2258,12 +2261,14 @@ namespace Game.Entities
 
             return flags;
         }
-        uint GetViewerDependentAuraState(uint auraState, Unit unit, Player receiver)
+
+        private uint GetViewerDependentAuraState(uint auraState, Unit unit, Player receiver)
         {
             // Check per caster aura states to not enable using a spell in client if specified aura is not by target
             return unit.BuildAuraStateUpdateForTarget(receiver);
         }
-        uint GetViewerDependentPvpFlags(uint pvpFlags, Unit unit, Player receiver)
+
+        private uint GetViewerDependentPvpFlags(uint pvpFlags, Unit unit, Player receiver)
         {
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
             {
@@ -2877,7 +2882,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
+        private bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
     }
 
     public class SkillInfo : BaseUpdateData<Player>
@@ -5085,7 +5090,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerGameObjectFlags(uint flags, GameObject gameObject, Player receiver)
+        private uint GetViewerGameObjectFlags(uint flags, GameObject gameObject, Player receiver)
         {
             if (gameObject.GetGoType() == GameObjectTypes.Chest)
                 if (gameObject.GetGoInfo().Chest.usegrouplootrules != 0 && !gameObject.IsLootAllowedFor(receiver))
@@ -5094,13 +5099,13 @@ namespace Game.Entities
             return (uint)flags;
         }
 
-        uint GetViewerGameObjectLevel(uint level, GameObject gameObject, Player receiver)
+        private uint GetViewerGameObjectLevel(uint level, GameObject gameObject, Player receiver)
         {
             bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
             return isStoppableTransport ? gameObject.GetGoValue().Transport.PathProgress : level;
         }
 
-        sbyte GetViewerGameObjectState(sbyte state, GameObject gameObject, Player receiver)
+        private sbyte GetViewerGameObjectState(sbyte state, GameObject gameObject, Player receiver)
         {
             bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
             if (isStoppableTransport && gameObject.GetGoState() == GameObjectState.TransportActive)
@@ -5554,7 +5559,7 @@ namespace Game.Entities
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        private void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
         {
             data.WriteBits(_changesMask.GetBlock(0), 5);
 

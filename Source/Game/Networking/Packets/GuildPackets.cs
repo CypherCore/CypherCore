@@ -1264,7 +1264,7 @@ namespace Game.Networking.Packets
         public bool Sticky;
     }
 
-    class GuildReplaceGuildMaster : ClientPacket
+    internal class GuildReplaceGuildMaster : ClientPacket
     {
         public GuildReplaceGuildMaster(WorldPacket packet) : base(packet) { }
 
@@ -1350,7 +1350,7 @@ namespace Game.Networking.Packets
         public GuildEmblemError Error;
     }
 
-    class GuildSetAchievementTracking : ClientPacket
+    internal class GuildSetAchievementTracking : ClientPacket
     {
         public GuildSetAchievementTracking(WorldPacket packet) : base(packet) { }
 
@@ -1365,7 +1365,7 @@ namespace Game.Networking.Packets
         public List<uint> AchievementIDs = new List<uint>();
     }
 
-    class GuildNameChanged : ServerPacket
+    internal class GuildNameChanged : ServerPacket
     {
         public GuildNameChanged() : base(ServerOpcodes.GuildNameChanged) { }
 

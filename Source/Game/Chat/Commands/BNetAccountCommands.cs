@@ -23,10 +23,10 @@ using System;
 namespace Game.Chat.Commands
 {
     [CommandGroup("bnetaccount", RBACPermissions.CommandBnetAccount, true)]
-    class BNetAccountCommands
+    internal class BNetAccountCommands
     {
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
-        static bool HandleAccountCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountCreateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -79,7 +79,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("gameaccountcreate", RBACPermissions.CommandBnetAccountCreateGame, true)]
-        static bool HandleGameAccountCreateCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGameAccountCreateCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -132,7 +132,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("link", RBACPermissions.CommandBnetAccountLink, true)]
-        static bool HandleAccountLinkCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountLinkCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -162,7 +162,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("listgameaccounts", RBACPermissions.CommandBnetAccountListGameAccounts, true)]
-        static bool HandleListGameAccountsCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleListGameAccountsCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -199,7 +199,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("password", RBACPermissions.CommandBnetAccountPassword, true)]
-        static bool HandleAccountPasswordCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountPasswordCommand(StringArguments args, CommandHandler handler)
         {
             // If no args are given at all, we can return false right away.
             if (args.Empty())
@@ -258,7 +258,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("unlink", RBACPermissions.CommandBnetAccountUnlink, true)]
-        static bool HandleAccountUnlinkCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleAccountUnlinkCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
             {
@@ -286,10 +286,10 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("lock", RBACPermissions.CommandBnetAccount, true)]
-        class LockCommands
+        private class LockCommands
         {
             [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
-            static bool HandleLockCountryCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleLockCountryCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -338,7 +338,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("ip", RBACPermissions.CommandBnetAccountLockIp, true)]
-            static bool HandleLockIpCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleLockIpCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {
@@ -373,10 +373,10 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("set", RBACPermissions.CommandBnetAccountSet, true)]
-        class SetCommands
+        private class SetCommands
         {
             [Command("password", RBACPermissions.CommandBnetAccountSetPassword, true)]
-            static bool HandleSetPasswordCommand(StringArguments args, CommandHandler handler)
+            private static bool HandleSetPasswordCommand(StringArguments args, CommandHandler handler)
             {
                 if (args.Empty())
                 {

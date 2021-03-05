@@ -44,7 +44,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class GameObjectDespawn : ServerPacket
+    internal class GameObjectDespawn : ServerPacket
     {
         public GameObjectDespawn() : base(ServerOpcodes.GameObjectDespawn) { }
 
@@ -56,7 +56,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ObjectGUID;
     }
 
-    class PageTextPkt : ServerPacket
+    internal class PageTextPkt : ServerPacket
     {
         public PageTextPkt() : base(ServerOpcodes.PageText) { }
 
@@ -68,7 +68,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GameObjectGUID;
     }
 
-    class GameObjectActivateAnimKit : ServerPacket
+    internal class GameObjectActivateAnimKit : ServerPacket
     {
         public GameObjectActivateAnimKit() : base(ServerOpcodes.GameObjectActivateAnimKit, ConnectionType.Instance) { }
 
@@ -85,7 +85,7 @@ namespace Game.Networking.Packets
         public bool Maintain;
     }
 
-    class DestructibleBuildingDamage : ServerPacket
+    internal class DestructibleBuildingDamage : ServerPacket
     {
         public DestructibleBuildingDamage() : base(ServerOpcodes.DestructibleBuildingDamage, ConnectionType.Instance) { }
 
@@ -105,21 +105,21 @@ namespace Game.Networking.Packets
         public uint SpellID;
     }
 
-    class FishNotHooked : ServerPacket
+    internal class FishNotHooked : ServerPacket
     {
         public FishNotHooked() : base(ServerOpcodes.FishNotHooked) { }
 
         public override void Write() { }
     }
 
-    class FishEscaped : ServerPacket
+    internal class FishEscaped : ServerPacket
     {
         public FishEscaped() : base(ServerOpcodes.FishEscaped) { }
 
         public override void Write() { }
     }
 
-    class GameObjectCustomAnim : ServerPacket
+    internal class GameObjectCustomAnim : ServerPacket
     {
         public GameObjectCustomAnim() : base(ServerOpcodes.GameObjectCustomAnim, ConnectionType.Instance) { }
 
@@ -136,7 +136,7 @@ namespace Game.Networking.Packets
         public bool PlayAsDespawn;
     }
 
-    class GameObjectUILink : ServerPacket
+    internal class GameObjectUILink : ServerPacket
     {
         public GameObjectUILink() : base(ServerOpcodes.GameObjectUILink, ConnectionType.Instance) { }
 

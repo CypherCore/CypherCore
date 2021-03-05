@@ -714,10 +714,10 @@ namespace Game
         public List<uint> DependentPreviousQuests = new List<uint>();
         public QueryQuestInfoResponse QueryData;
 
-        uint _rewChoiceItemsCount;
-        uint _rewItemsCount;
-        uint _rewCurrencyCount;
-        ushort _eventIdForQuest;
+        private uint _rewChoiceItemsCount;
+        private uint _rewItemsCount;
+        private uint _rewCurrencyCount;
+        private ushort _eventIdForQuest;
         #endregion
     }
 

@@ -74,10 +74,10 @@ namespace Game.Scripting
         public static void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
         public static void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
 
-        string _name;
+        private string _name;
     }
 
-    class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
+    internal class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
     {
         public GenericSpellScriptLoader(string name, object[] args) : base(name)
         {
@@ -86,10 +86,10 @@ namespace Game.Scripting
 
         public override SpellScript GetSpellScript() { return (S)Activator.CreateInstance(typeof(S), _args); }
 
-        object[] _args;
+        private object[] _args;
     }
 
-    class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
+    internal class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
     {
         public GenericAuraScriptLoader(string name, object[] args) : base(name)
         {
@@ -98,7 +98,7 @@ namespace Game.Scripting
 
         public override AuraScript GetAuraScript() { return (A)Activator.CreateInstance(typeof(A), _args); }
 
-        object[] _args;
+        private object[] _args;
     }
 
     public class SpellScriptLoader : ScriptObject
@@ -218,7 +218,7 @@ namespace Game.Scripting
 
         public virtual void OnUpdate(T obj, uint diff) { }
 
-        MapRecord _mapEntry;
+        private MapRecord _mapEntry;
     }
 
     public class WorldMapScript : MapScript<Map>
@@ -321,7 +321,7 @@ namespace Game.Scripting
                 return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
         }
 
-        object[] _args;
+        private object[] _args;
     }
 
     public class CreatureScript : UnitScript
@@ -355,7 +355,7 @@ namespace Game.Scripting
                 return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
         }
 
-        object[] _args;
+        private object[] _args;
     }
 
     public class GameObjectScript : ScriptObject
@@ -402,12 +402,12 @@ namespace Game.Scripting
             return _OnTrigger(player, trigger, entered);
         }
 
-        void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
+        private void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
         {
             script.ResetAreaTriggerDone(triggerId);
         }
 
-        void ResetAreaTriggerDone(Player player, AreaTriggerRecord trigger)
+        private void ResetAreaTriggerDone(Player player, AreaTriggerRecord trigger)
         {
             var instance = player.GetInstanceScript();
             if (instance != null)
@@ -745,7 +745,7 @@ namespace Game.Scripting
         public virtual AreaTriggerAI GetAI(AreaTrigger at) { return null; }
     }
 
-    class ConversationScript : ScriptObject
+    internal class ConversationScript : ScriptObject
     {
         public ConversationScript(string name) : base(name)
         {
@@ -780,7 +780,7 @@ namespace Game.Scripting
         public virtual void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
     }
 
-    class QuestScript : ScriptObject
+    internal class QuestScript : ScriptObject
     {
         public QuestScript(string name) : base(name)
         {

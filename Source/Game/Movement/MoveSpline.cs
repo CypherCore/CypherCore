@@ -76,7 +76,7 @@ namespace Game.Movement
             }
         }
 
-        void InitSpline(MoveSplineInitArgs args)
+        private void InitSpline(MoveSplineInitArgs args)
         {
             var modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
             if (args.flags.HasFlag(SplineFlag.Cyclic))
@@ -124,7 +124,8 @@ namespace Game.Movement
         public int CurrentSplineIdx() { return point_Idx; }
         public uint GetId() { return m_Id; }
         public bool Finalized() { return splineflags.HasFlag(SplineFlag.Done); }
-        void _Finalize()
+
+        private void _Finalize()
         {
             splineflags.SetUnsetFlag(SplineFlag.Done);
             point_Idx = spline.Last() - 1;
@@ -236,7 +237,7 @@ namespace Game.Movement
             return result;
         }
 
-        float MSToSec(uint ms)
+        private float MSToSec(uint ms)
         {
             return ms / 1000.0f;
         }
@@ -249,7 +250,8 @@ namespace Game.Movement
                 UpdateState(ref difftime);
             } while (difftime > 0);
         }
-        UpdateResult UpdateState(ref int ms_time_diff)
+
+        private UpdateResult UpdateState(ref int ms_time_diff)
         {
             if (Finalized())
             {
@@ -288,8 +290,9 @@ namespace Game.Movement
 
             return result;
         }
-        int NextTimestamp() { return spline.Length(point_Idx + 1); }
-        int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
+
+        private int NextTimestamp() { return spline.Length(point_Idx + 1); }
+        private int SegmentTimeElapsed() { return NextTimestamp() - time_passed; }
         public bool IsCyclic() { return splineflags.HasFlag(SplineFlag.Cyclic); }
         public bool IsFalling() { return splineflags.HasFlag(SplineFlag.Falling); }
         public bool Initialized() { return !spline.Empty(); }
@@ -334,13 +337,14 @@ namespace Game.Movement
             {
                 startElevation = startelevation;
             }
-            float startElevation;
+
+            private float startElevation;
             public int SetGetTime(Spline s, int i)
             {
                 return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
             }
 
-            float ComputeFallTime(float path_length, bool isSafeFall)
+            private float ComputeFallTime(float path_length, bool isSafeFall)
             {
                 if (path_length < 0.0f)
                     return 0.0f;

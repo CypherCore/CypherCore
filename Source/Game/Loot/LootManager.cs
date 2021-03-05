@@ -31,7 +31,7 @@ namespace Game.Loots
 
     public class LootManager : LootStorage
     {
-        static void Initialize()
+        private static void Initialize()
         {
             Creature = new LootStore("creature_loot_template", "creature entry");
             Disenchant = new LootStore("disenchant_loot_template", "item disenchant id");
@@ -549,7 +549,7 @@ namespace Game.Loots
             m_ratesAllowed = ratesAllowed;
         }
 
-        void Verify()
+        private void Verify()
         {
             foreach (var i in m_LootTemplates)
                 i.Value.Verify(this, i.Key);
@@ -629,10 +629,10 @@ namespace Game.Loots
         }
 
         public string GetName() { return m_name; }
-        string GetEntryName() { return m_entryName; }
+        private string GetEntryName() { return m_entryName; }
         public bool IsRatesAllowed() { return m_ratesAllowed; }
 
-        uint LoadLootTable()
+        private uint LoadLootTable()
         {
             // Clearing store (for reloading case)
             Clear();
@@ -681,15 +681,16 @@ namespace Game.Loots
 
             return count;
         }
-        void Clear()
+
+        private void Clear()
         {
             m_LootTemplates.Clear();
         }
 
-        LootTemplateMap m_LootTemplates = new LootTemplateMap();
-        string m_name;
-        string m_entryName;
-        bool m_ratesAllowed;
+        private LootTemplateMap m_LootTemplates = new LootTemplateMap();
+        private string m_name;
+        private string m_entryName;
+        private bool m_ratesAllowed;
     }
 
     public class LootTemplate
@@ -932,8 +933,8 @@ namespace Game.Loots
             return false;//not found or not reference
         }
 
-        LootStoreItemList Entries = new LootStoreItemList();                          // not grouped only
-        Dictionary<int, LootGroup> Groups = new Dictionary<int,LootGroup>();                           // groups have own (optimised) processing, grouped entries go there
+        private LootStoreItemList Entries = new LootStoreItemList();                          // not grouped only
+        private Dictionary<int, LootGroup> Groups = new Dictionary<int,LootGroup>();                           // groups have own (optimised) processing, grouped entries go there
 
         public class LootGroup                               // A set of loot definitions for items (refs are not allowed)
         {
@@ -977,7 +978,8 @@ namespace Game.Loots
                 if (item != null)
                     loot.AddItem(item);
             }
-            float RawTotalChance()
+
+            private float RawTotalChance()
             {
                 float result = 0;
 
@@ -987,7 +989,8 @@ namespace Game.Loots
 
                 return result;
             }
-            float TotalChance()
+
+            private float TotalChance()
             {
                 var result = RawTotalChance();
 
@@ -1042,10 +1045,10 @@ namespace Game.Loots
                     i.conditions.Clear();
             }
 
-            LootStoreItemList ExplicitlyChanced = new LootStoreItemList();                // Entries with chances defined in DB
-            LootStoreItemList EqualChanced = new LootStoreItemList();                     // Zero chances - every entry takes the same chance
+            private LootStoreItemList ExplicitlyChanced = new LootStoreItemList();                // Entries with chances defined in DB
+            private LootStoreItemList EqualChanced = new LootStoreItemList();                     // Zero chances - every entry takes the same chance
 
-            LootStoreItem Roll(Loot loot, ushort lootMode)
+            private LootStoreItem Roll(Loot loot, ushort lootMode)
             {
                 var possibleLoot = ExplicitlyChanced;
                 possibleLoot.RemoveAll(new LootGroupInvalidSelector(loot, lootMode).Check);
@@ -1097,7 +1100,7 @@ namespace Game.Loots
             return false;
         }
 
-        Loot _loot;
-        ushort _lootMode;
+        private Loot _loot;
+        private ushort _lootMode;
     }
 }

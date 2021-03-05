@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class LFGuildAddRecruit : ClientPacket
+    internal class LFGuildAddRecruit : ClientPacket
     {
         public LFGuildAddRecruit(WorldPacket packet) : base(packet) { }
 
@@ -43,21 +43,21 @@ namespace Game.Networking.Packets
         public string Comment;
     }
 
-    class LFGuildApplicationsListChanged : ServerPacket
+    internal class LFGuildApplicationsListChanged : ServerPacket
     {
         public LFGuildApplicationsListChanged() : base(ServerOpcodes.LfGuildApplicationsListChanged) { }
 
         public override void Write() { }
     }
 
-    class LFGuildApplicantListChanged : ServerPacket
+    internal class LFGuildApplicantListChanged : ServerPacket
     {
         public LFGuildApplicantListChanged() : base(ServerOpcodes.LfGuildApplicantListChanged) { }
 
         public override void Write() { }
     }
 
-    class LFGuildBrowse : ClientPacket
+    internal class LFGuildBrowse : ClientPacket
     {
         public LFGuildBrowse(WorldPacket packet) : base(packet) { }
 
@@ -75,7 +75,7 @@ namespace Game.Networking.Packets
         public uint PlayStyle;
     }
 
-    class LFGuildBrowseResult : ServerPacket
+    internal class LFGuildBrowseResult : ServerPacket
     {
         public LFGuildBrowseResult() : base(ServerOpcodes.LfGuildBrowse) { }
 
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
         public List<LFGuildBrowseData> Post = new List<LFGuildBrowseData>();
     }
 
-    class LFGuildDeclineRecruit : ClientPacket
+    internal class LFGuildDeclineRecruit : ClientPacket
     {
         public LFGuildDeclineRecruit(WorldPacket packet) : base(packet) { }
 
@@ -101,14 +101,14 @@ namespace Game.Networking.Packets
         public ObjectGuid RecruitGUID;
     }
 
-    class LFGuildGetApplications : ClientPacket
+    internal class LFGuildGetApplications : ClientPacket
     {
         public LFGuildGetApplications(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class LFGuildApplications : ServerPacket
+    internal class LFGuildApplications : ServerPacket
     {
         public LFGuildApplications() : base(ServerOpcodes.LfGuildApplications) { }
 
@@ -124,14 +124,14 @@ namespace Game.Networking.Packets
         public int NumRemaining;
     }
 
-    class LFGuildGetGuildPost : ClientPacket
+    internal class LFGuildGetGuildPost : ClientPacket
     {
         public LFGuildGetGuildPost(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class LFGuildPost : ServerPacket
+    internal class LFGuildPost : ServerPacket
     {
         public LFGuildPost() : base(ServerOpcodes.LfGuildPost) { }
 
@@ -146,7 +146,7 @@ namespace Game.Networking.Packets
         public Optional<GuildPostData> Post;
     }
 
-    class LFGuildGetRecruits : ClientPacket
+    internal class LFGuildGetRecruits : ClientPacket
     {
         public LFGuildGetRecruits(WorldPacket packet) : base(packet) { }
 
@@ -158,7 +158,7 @@ namespace Game.Networking.Packets
         public uint LastUpdate;
     }
 
-    class LFGuildRecruits : ServerPacket
+    internal class LFGuildRecruits : ServerPacket
     {
         public LFGuildRecruits() : base(ServerOpcodes.LfGuildRecruits) { }
 
@@ -174,7 +174,7 @@ namespace Game.Networking.Packets
         public long UpdateTime;
     }
 
-    class LFGuildRemoveRecruit : ClientPacket
+    internal class LFGuildRemoveRecruit : ClientPacket
     {
         public LFGuildRemoveRecruit(WorldPacket packet) : base(packet) { }
 
@@ -186,7 +186,7 @@ namespace Game.Networking.Packets
         public ObjectGuid GuildGUID;
     }
 
-    class LFGuildSetGuildPost : ClientPacket
+    internal class LFGuildSetGuildPost : ClientPacket
     {
         public LFGuildSetGuildPost(WorldPacket packet) : base(packet) { }
 
@@ -210,7 +210,7 @@ namespace Game.Networking.Packets
 
     //Structs
 
-    class LFGuildBrowseData
+    internal class LFGuildBrowseData
     {
         public void Write(WorldPacket data)
         {
@@ -254,7 +254,7 @@ namespace Game.Networking.Packets
         public sbyte MembershipRequested;
     }
 
-    class LFGuildApplicationData
+    internal class LFGuildApplicationData
     {
         public void Write(WorldPacket data)
         {
@@ -283,7 +283,7 @@ namespace Game.Networking.Packets
         public string Comment = "";
     }
 
-    class GuildPostData
+    internal class GuildPostData
     {
         public void Write(WorldPacket data)
         {
@@ -306,7 +306,7 @@ namespace Game.Networking.Packets
         public string Comment = "";
     }
 
-    class LFGuildRecruitData
+    internal class LFGuildRecruitData
     {
         public void Write(WorldPacket data)
         {

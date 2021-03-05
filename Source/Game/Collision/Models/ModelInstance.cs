@@ -194,8 +194,8 @@ namespace Game.Collision
 
         public void SetUnloaded() { iModel = null; }
 
-        Matrix3 iInvRot;
-        float iInvScale;
-        WorldModel iModel;
+        private Matrix3 iInvRot;
+        private float iInvScale;
+        private WorldModel iModel;
     }
 }

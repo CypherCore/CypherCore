@@ -27,7 +27,7 @@ namespace Game
 {
     public class DisableManager : Singleton<DisableManager>
     {
-        DisableManager() { }
+        private DisableManager() { }
 
         public class DisableData
         {
@@ -36,7 +36,7 @@ namespace Game
             public List<uint> param1 = new List<uint>();
         }
 
-        Dictionary<DisableType, Dictionary<uint, DisableData>> m_DisableMap = new Dictionary<DisableType, Dictionary<uint, DisableData>>();
+        private Dictionary<DisableType, Dictionary<uint, DisableData>> m_DisableMap = new Dictionary<DisableType, Dictionary<uint, DisableData>>();
 
         public void LoadDisables()
         {

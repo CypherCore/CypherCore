@@ -20,7 +20,7 @@ using Game.Entities;
 
 namespace Game.Networking.Packets
 {
-    class PlayScene : ServerPacket
+    internal class PlayScene : ServerPacket
     {
         public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance) { }
 
@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
         public bool Encrypted;
     }
 
-    class CancelScene : ServerPacket
+    internal class CancelScene : ServerPacket
     {
         public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance) { }
 
@@ -57,7 +57,7 @@ namespace Game.Networking.Packets
         public uint SceneInstanceID;
     }
 
-    class SceneTriggerEvent : ClientPacket
+    internal class SceneTriggerEvent : ClientPacket
     {
         public SceneTriggerEvent(WorldPacket packet) : base(packet) { }
 
@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
         public string _Event;
     }
 
-    class ScenePlaybackComplete : ClientPacket
+    internal class ScenePlaybackComplete : ClientPacket
     {
         public ScenePlaybackComplete(WorldPacket packet) : base(packet) { }
 
@@ -84,7 +84,7 @@ namespace Game.Networking.Packets
         public uint SceneInstanceID;
     }
 
-    class ScenePlaybackCanceled : ClientPacket
+    internal class ScenePlaybackCanceled : ClientPacket
     {
         public ScenePlaybackCanceled(WorldPacket packet) : base(packet) { }
 

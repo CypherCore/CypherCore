@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class VoidTransferResult : ServerPacket
+    internal class VoidTransferResult : ServerPacket
     {
         public VoidTransferResult(VoidTransferError result) : base(ServerOpcodes.VoidTransferResult, ConnectionType.Instance)
         {
@@ -36,7 +36,7 @@ namespace Game.Networking.Packets
         public VoidTransferError Result;
     }
 
-    class UnlockVoidStorage : ClientPacket
+    internal class UnlockVoidStorage : ClientPacket
     {
         public UnlockVoidStorage(WorldPacket packet) : base(packet) { }
 
@@ -48,7 +48,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Npc;
     }
 
-    class QueryVoidStorage : ClientPacket
+    internal class QueryVoidStorage : ClientPacket
     {
         public QueryVoidStorage(WorldPacket packet) : base(packet) { }
 
@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Npc;
     }
 
-    class VoidStorageFailed : ServerPacket
+    internal class VoidStorageFailed : ServerPacket
     {
         public VoidStorageFailed() : base(ServerOpcodes.VoidStorageFailed, ConnectionType.Instance) { }
 
@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
         public byte Reason = 0;
     }
 
-    class VoidStorageContents : ServerPacket
+    internal class VoidStorageContents : ServerPacket
     {
         public VoidStorageContents() : base(ServerOpcodes.VoidStorageContents, ConnectionType.Instance) { }
 
@@ -88,7 +88,7 @@ namespace Game.Networking.Packets
         public List<VoidItem> Items = new List<VoidItem>();
     }
 
-    class VoidStorageTransfer : ClientPacket
+    internal class VoidStorageTransfer : ClientPacket
     {
         public VoidStorageTransfer(WorldPacket packet) : base(packet) { }
 
@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Npc;
     }
 
-    class VoidStorageTransferChanges : ServerPacket
+    internal class VoidStorageTransferChanges : ServerPacket
     {
         public VoidStorageTransferChanges() : base(ServerOpcodes.VoidStorageTransferChanges, ConnectionType.Instance) { }
 
@@ -131,7 +131,7 @@ namespace Game.Networking.Packets
         public List<VoidItem> AddedItems = new List<VoidItem>();
     }
 
-    class SwapVoidItem : ClientPacket
+    internal class SwapVoidItem : ClientPacket
     {
         public SwapVoidItem(WorldPacket packet) : base(packet) { }
 
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
         public uint DstSlot;
     }
 
-    class VoidItemSwapResponse : ServerPacket
+    internal class VoidItemSwapResponse : ServerPacket
     {
         public VoidItemSwapResponse() : base(ServerOpcodes.VoidItemSwapResponse, ConnectionType.Instance) { }
 
@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
         public uint VoidItemSlotB;
     }
 
-    struct VoidItem
+    internal struct VoidItem
     {
         public void Write(WorldPacket data)
         {

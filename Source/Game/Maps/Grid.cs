@@ -84,11 +84,11 @@ namespace Game.Maps
             return vis_Update;
         }
 
-        TimeTracker i_timer;
-        PeriodicTimer vis_Update;
+        private TimeTracker i_timer;
+        private PeriodicTimer vis_Update;
 
-        ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
-        bool i_unloadExplicitLock; // explicit manual lock or config setting
+        private ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
+        private bool i_unloadExplicitLock; // explicit manual lock or config setting
     }
 
     public class Grid
@@ -265,13 +265,13 @@ namespace Game.Maps
             return count;
         }
 
-        uint gridId;
-        uint gridX;
-        uint gridY;
-        GridInfo gridInfo;
-        GridState gridState;
-        bool gridObjectDataLoaded;
-        GridCell[][] i_cells = new GridCell[MapConst.MaxCells][];
+        private uint gridId;
+        private uint gridX;
+        private uint gridY;
+        private GridInfo gridInfo;
+        private GridState gridState;
+        private bool gridObjectDataLoaded;
+        private GridCell[][] i_cells = new GridCell[MapConst.MaxCells][];
     }
 
     public class GridCell
@@ -346,12 +346,12 @@ namespace Game.Maps
         /// <summary>
         /// Holds all World objects - Player, Pets, Corpse(resurrectable), DynamicObject(farsight)
         /// </summary>
-        MultiTypeContainer _objects;
+        private MultiTypeContainer _objects;
 
         /// <summary>
         /// Holds all Grid objects - GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger, Conversation
         /// </summary>
-        MultiTypeContainer _container;
+        private MultiTypeContainer _container;
     }
 
     public class MultiTypeContainer

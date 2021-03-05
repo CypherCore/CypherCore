@@ -60,7 +60,7 @@ namespace Game.AI
         }
 
         //see followerAI
-        bool AssistPlayerInCombatAgainst(Unit who)
+        private bool AssistPlayerInCombatAgainst(Unit who)
         {
             if (!who || !who.GetVictim())
                 return false;
@@ -141,7 +141,7 @@ namespace Game.AI
             Reset();
         }
 
-        void ReturnToLastPoint()
+        private void ReturnToLastPoint()
         {
             me.GetMotionMaster().MovePoint(0xFFFFFF, me.GetHomePosition());
         }
@@ -168,7 +168,7 @@ namespace Game.AI
             }
         }
 
-        bool IsPlayerOrGroupInRange()
+        private bool IsPlayerOrGroupInRange()
         {
             var player = GetPlayerForEscort();
             if (player)
@@ -353,7 +353,7 @@ namespace Game.AI
             _manualPath = true;
         }
 
-        void FillPointMovementListForCreature()
+        private void FillPointMovementListForCreature()
         {
             var path = Global.WaypointMgr.GetPath(me.GetEntry());
             if (path == null)
@@ -485,13 +485,13 @@ namespace Game.AI
             return false;
         }
 
-        void SetPauseTimer(uint Timer) { _pauseTimer = Timer; }
+        private void SetPauseTimer(uint Timer) { _pauseTimer = Timer; }
 
         public bool HasEscortState(EscortState escortState) { return (_escortState & escortState) != 0; }
         public override bool IsEscorted() { return _escortState.HasAnyFlag(EscortState.Escorting); }
 
-        void SetMaxPlayerDistance(float newMax) { _maxPlayerDistance = newMax; }
-        float GetMaxPlayerDistance() { return _maxPlayerDistance; }
+        private void SetMaxPlayerDistance(float newMax) { _maxPlayerDistance = newMax; }
+        private float GetMaxPlayerDistance() { return _maxPlayerDistance; }
 
         public void SetDespawnAtEnd(bool despawn) { _despawnAtEnd = despawn; }
         public void SetDespawnAtFar(bool despawn) { _despawnAtFar = despawn; }
@@ -499,32 +499,32 @@ namespace Game.AI
         public bool IsActiveAttacker() { return _activeAttacker; } // used in EnterEvadeMode override
         public void SetActiveAttacker(bool attack) { _activeAttacker = attack; }
 
-        ObjectGuid GetEventStarterGUID() { return _playerGUID; }
+        private ObjectGuid GetEventStarterGUID() { return _playerGUID; }
 
-        void AddEscortState(EscortState escortState) { _escortState |= escortState; }
-        void RemoveEscortState(EscortState escortState) { _escortState &= ~escortState; }
+        private void AddEscortState(EscortState escortState) { _escortState |= escortState; }
+        private void RemoveEscortState(EscortState escortState) { _escortState &= ~escortState; }
 
-        ObjectGuid _playerGUID;
-        uint _pauseTimer;
-        uint _playerCheckTimer;
-        EscortState _escortState;
-        float _maxPlayerDistance;
+        private ObjectGuid _playerGUID;
+        private uint _pauseTimer;
+        private uint _playerCheckTimer;
+        private EscortState _escortState;
+        private float _maxPlayerDistance;
 
-        Quest _escortQuest; //generally passed in Start() when regular escort script.
+        private Quest _escortQuest; //generally passed in Start() when regular escort script.
 
-        WaypointPath _path;
+        private WaypointPath _path;
 
-        bool _activeAttacker;      // obsolete, determined by faction.
-        bool _running;             // all creatures are walking by default (has flag MOVEMENTFLAG_WALK)
-        bool _instantRespawn;      // if creature should respawn instantly after escort over (if not, database respawntime are used)
-        bool _returnToStart;       // if creature can walk same path (loop) without despawn. Not for regular escort quests.
-        bool _despawnAtEnd;
-        bool _despawnAtFar;
-        bool _manualPath;
-        bool _hasImmuneToNPCFlags;
-        bool _started;
-        bool _ended;
-        bool _resume;
+        private bool _activeAttacker;      // obsolete, determined by faction.
+        private bool _running;             // all creatures are walking by default (has flag MOVEMENTFLAG_WALK)
+        private bool _instantRespawn;      // if creature should respawn instantly after escort over (if not, database respawntime are used)
+        private bool _returnToStart;       // if creature can walk same path (loop) without despawn. Not for regular escort quests.
+        private bool _despawnAtEnd;
+        private bool _despawnAtFar;
+        private bool _manualPath;
+        private bool _hasImmuneToNPCFlags;
+        private bool _started;
+        private bool _ended;
+        private bool _resume;
     }
 
     public enum EscortState
@@ -535,7 +535,7 @@ namespace Game.AI
         Paused = 0x04                         //will not proceed with waypoints before state is removed
     }
 
-    struct EscortPointIds
+    internal struct EscortPointIds
     {
         public const uint LastPoint = 0xFFFFFF;
         public const uint Home = 0xFFFFFE;

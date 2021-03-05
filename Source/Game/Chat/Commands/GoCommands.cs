@@ -28,10 +28,10 @@ using System.Collections.Generic;
 namespace Game.Chat.Commands
 {
     [CommandGroup("go", RBACPermissions.CommandGo)]
-    class GoCommands
+    internal class GoCommands
     {
         [Command("creature", RBACPermissions.CommandGoCreature)]
-        static bool HandleGoCreatureCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoCreatureCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -111,7 +111,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("graveyard", RBACPermissions.CommandGoGraveyard)]
-        static bool HandleGoGraveyardCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoGraveyardCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
 
@@ -151,7 +151,7 @@ namespace Game.Chat.Commands
 
         //teleport to grid
         [Command("grid", RBACPermissions.CommandGoGrid)]
-        static bool HandleGoGridCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoGridCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -196,7 +196,7 @@ namespace Game.Chat.Commands
 
         //teleport to gameobject
         [Command("object", RBACPermissions.CommandGoObject)]
-        static bool HandleGoObjectCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoObjectCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -240,7 +240,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("quest", RBACPermissions.CommandGoQuest)]
-        static bool HandleGoQuestCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoQuestCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -303,7 +303,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("taxinode", RBACPermissions.CommandGoTaxinode)]
-        static bool HandleGoTaxinodeCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoTaxinodeCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
 
@@ -346,7 +346,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("trigger", RBACPermissions.CommandGoTrigger)]
-        static bool HandleGoTriggerCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoTriggerCommand(StringArguments args, CommandHandler handler)
         {
             var player = handler.GetSession().GetPlayer();
 
@@ -386,7 +386,7 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates
         [Command("zonexy", RBACPermissions.CommandGoZonexy)]
-        static bool HandleGoZoneXYCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoZoneXYCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -455,7 +455,7 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates, including Z and orientation
         [Command("xyz", RBACPermissions.CommandGoXyz)]
-        static bool HandleGoXYZCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoXYZCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -514,24 +514,24 @@ namespace Game.Chat.Commands
         }
 
         [Command("bugticket", RBACPermissions.CommandGoBugTicket)]
-        static bool HandleGoBugTicketCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoBugTicketCommand(StringArguments args, CommandHandler handler)
         {
             return HandleGoTicketCommand<BugTicket>(args, handler);
         }
 
         [Command("complaintticket", RBACPermissions.CommandGoComplaintTicket)]
-        static bool HandleGoComplaintTicketCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoComplaintTicketCommand(StringArguments args, CommandHandler handler)
         {
             return HandleGoTicketCommand<ComplaintTicket>(args, handler);
         }
 
         [Command("suggestionticket", RBACPermissions.CommandGoSuggestionTicket)]
-        static bool HandleGoSuggestionTicketCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoSuggestionTicketCommand(StringArguments args, CommandHandler handler)
         {
             return HandleGoTicketCommand<SuggestionTicket>(args, handler);
         }
 
-        static bool HandleGoTicketCommand<T>(StringArguments args, CommandHandler handler)where T : Ticket
+        private static bool HandleGoTicketCommand<T>(StringArguments args, CommandHandler handler)where T : Ticket
         {
             if (args.Empty())
                 return false;
@@ -561,7 +561,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("offset", RBACPermissions.CommandGoOffset)]
-        static bool HandleGoOffsetCommand(StringArguments args, CommandHandler handler)
+        private static bool HandleGoOffsetCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;

@@ -43,7 +43,7 @@ namespace Framework.Dynamic
         /// Clears the validator which is asked if tasks are allowed to be executed.
         /// </summary>
         /// <returns></returns>
-        TaskScheduler ClearValidator()
+        private TaskScheduler ClearValidator()
         {
             _predicate = EmptyValidator;
             return this;
@@ -91,7 +91,7 @@ namespace Framework.Dynamic
         /// <param name="difftime"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        TaskScheduler Update(TimeSpan difftime, success_t callback = null)
+        private TaskScheduler Update(TimeSpan difftime, success_t callback = null)
         {
             _now += difftime;
             Dispatch(callback);
@@ -337,7 +337,7 @@ namespace Framework.Dynamic
             return TimeSpan.FromMilliseconds(RandomHelper.URand(milli_min, milli_max));
         }
 
-        void Dispatch(success_t callback = null)
+        private void Dispatch(success_t callback = null)
         {
             // If the validation failed abort the dispatching here.
             if (!_predicate())
@@ -375,18 +375,18 @@ namespace Framework.Dynamic
         }
 
         // The current time point (now)
-        DateTime _now;
+        private DateTime _now;
 
         // The Task Queue which contains all task objects.
-        TaskQueue _task_holder;
+        private TaskQueue _task_holder;
 
         // Contains all asynchronous tasks which will be invoked at
         // the next update tick.
-        List<Action> _asyncHolder;
+        private List<Action> _asyncHolder;
 
-        predicate_t _predicate;
+        private predicate_t _predicate;
 
-        static bool EmptyValidator()
+        private static bool EmptyValidator()
         {
             return true;
         }
@@ -437,7 +437,7 @@ namespace Framework.Dynamic
         internal Action<TaskContext> _task;
     }
 
-    class TaskQueue
+    internal class TaskQueue
     {
         /// <summary>
         /// Pushes the task in the container
@@ -498,7 +498,7 @@ namespace Framework.Dynamic
             return container.Empty();
         }
 
-        SortedSet<Task> container = new SortedSet<Task>();
+        private SortedSet<Task> container = new SortedSet<Task>();
     }
 
     public class TaskContext
@@ -515,21 +515,21 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="apply"></param>
         /// <returns></returns>
-        TaskContext Dispatch(Action apply)
+        private TaskContext Dispatch(Action apply)
         {
             apply();
 
             return this;
         }
 
-        TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
+        private TaskContext Dispatch(Func<TaskScheduler, TaskScheduler> apply)
         {
             apply(_owner);
 
             return this;
         }
 
-        bool IsExpired()
+        private bool IsExpired()
         {
             return _owner == null;
         }
@@ -539,7 +539,7 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="group"></param>
         /// <returns></returns>
-        bool IsInGroup(uint group)
+        private bool IsInGroup(uint group)
         {
             return _task.IsInGroup(group);
         }
@@ -549,7 +549,7 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="group"></param>
         /// <returns></returns>
-        TaskContext SetGroup(uint group)
+        private TaskContext SetGroup(uint group)
         {
             _task._group.Set(group);
             return this;
@@ -559,7 +559,7 @@ namespace Framework.Dynamic
         /// Removes the group from the event
         /// </summary>
         /// <returns></returns>
-        TaskContext ClearGroup()
+        private TaskContext ClearGroup()
         {
             _task._group.HasValue = false;
             return this;
@@ -580,7 +580,7 @@ namespace Framework.Dynamic
         /// </summary>
         /// <param name="callable"></param>
         /// <returns></returns>
-        TaskContext Async(Action callable)
+        private TaskContext Async(Action callable)
         {
             return Dispatch(() => _owner.Async(callable));
         }
@@ -617,7 +617,7 @@ namespace Framework.Dynamic
         /// <summary>
         /// Asserts if the task was consumed already.
         /// </summary>
-        void AssertOnConsumed()
+        private void AssertOnConsumed()
         {
             // This was adapted to TC to prevent static analysis tools from complaining.
             // If you encounter this assertion check if you repeat a TaskContext more then 1 time!
@@ -830,12 +830,12 @@ namespace Framework.Dynamic
         }
 
         // Associated task
-        Task _task;
+        private Task _task;
 
         // Owner
-        TaskScheduler _owner;
+        private TaskScheduler _owner;
 
         // Marks the task as consumed
-        bool _consumed = true;
+        private bool _consumed = true;
     }
 }

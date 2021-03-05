@@ -23,7 +23,7 @@ using Game.Scripting;
 
 namespace Scripts.World.Achievements
 {
-    struct AreaIds
+    internal struct AreaIds
     {
         //Tilted
         public const uint AreaArgentTournamentFields = 4658;
@@ -34,7 +34,7 @@ namespace Scripts.World.Achievements
         public const uint AreaRingOfChampions = 4669;
     }
 
-    struct AuraIds
+    internal struct AuraIds
     {
         //Flirt With Disaster
         public const uint AuraPerfumeForever = 70235;
@@ -42,14 +42,14 @@ namespace Scripts.World.Achievements
         public const uint AuraPerfumeVictory = 70233;
     }
 
-    struct VehicleIds
+    internal struct VehicleIds
     { 
         //BgSA Artillery
         public const uint AntiPersonnalCannon = 27894;
     }
 
     [Script]
-    class achievement_resilient_victory : AchievementCriteriaScript
+    internal class achievement_resilient_victory : AchievementCriteriaScript
     {
         public achievement_resilient_victory() : base("achievement_resilient_victory") { }
 
@@ -64,7 +64,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_control_all_nodes : AchievementCriteriaScript
+    internal class achievement_bg_control_all_nodes : AchievementCriteriaScript
     {
         public achievement_bg_control_all_nodes() : base("achievement_bg_control_all_nodes") { }
 
@@ -79,7 +79,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_save_the_day : AchievementCriteriaScript
+    internal class achievement_save_the_day : AchievementCriteriaScript
     {
         public achievement_save_the_day() : base("achievement_save_the_day") { }
 
@@ -94,7 +94,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_ic_resource_glut : AchievementCriteriaScript
+    internal class achievement_bg_ic_resource_glut : AchievementCriteriaScript
     {
         public achievement_bg_ic_resource_glut() : base("achievement_bg_ic_resource_glut") { }
 
@@ -108,7 +108,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_ic_glaive_grave : AchievementCriteriaScript
+    internal class achievement_bg_ic_glaive_grave : AchievementCriteriaScript
     {
         public achievement_bg_ic_glaive_grave() : base("achievement_bg_ic_glaive_grave") { }
 
@@ -126,7 +126,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_ic_mowed_down : AchievementCriteriaScript
+    internal class achievement_bg_ic_mowed_down : AchievementCriteriaScript
     {
         public achievement_bg_ic_mowed_down() : base("achievement_bg_ic_mowed_down") { }
 
@@ -144,7 +144,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_sa_artillery : AchievementCriteriaScript
+    internal class achievement_bg_sa_artillery : AchievementCriteriaScript
     {
         public achievement_bg_sa_artillery() : base("achievement_bg_sa_artillery") { }
 
@@ -164,9 +164,9 @@ namespace Scripts.World.Achievements
     [Script("achievement_arena_2v2_kills", ArenaTypes.Team2v2)]
     [Script("achievement_arena_3v3_kills", ArenaTypes.Team3v3)]
     [Script("achievement_arena_5v5_kills", ArenaTypes.Team5v5)]
-    class achievement_arena_kills : AchievementCriteriaScript
+    internal class achievement_arena_kills : AchievementCriteriaScript
     {
-        ArenaTypes _arenaType;
+        private ArenaTypes _arenaType;
 
         public achievement_arena_kills(string name, ArenaTypes arenaType) : base(name)
         {
@@ -184,7 +184,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_sickly_gazelle : AchievementCriteriaScript
+    internal class achievement_sickly_gazelle : AchievementCriteriaScript
     {
         public achievement_sickly_gazelle() : base("achievement_sickly_gazelle") { }
 
@@ -203,7 +203,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_everything_counts : AchievementCriteriaScript
+    internal class achievement_everything_counts : AchievementCriteriaScript
     {
         public achievement_everything_counts() : base("achievement_everything_counts") { }
 
@@ -218,7 +218,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_av_perfection : AchievementCriteriaScript
+    internal class achievement_bg_av_perfection : AchievementCriteriaScript
     {
         public achievement_bg_av_perfection() : base("achievement_bg_av_perfection") { }
 
@@ -233,7 +233,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_bg_sa_defense_of_ancients : AchievementCriteriaScript
+    internal class achievement_bg_sa_defense_of_ancients : AchievementCriteriaScript
     {
         public achievement_bg_sa_defense_of_ancients() : base("achievement_bg_sa_defense_of_ancients") { }
 
@@ -248,7 +248,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_tilted : AchievementCriteriaScript
+    internal class achievement_tilted : AchievementCriteriaScript
     {
         public achievement_tilted() : base("achievement_tilted") { }
 
@@ -269,7 +269,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_not_even_a_scratch : AchievementCriteriaScript
+    internal class achievement_not_even_a_scratch : AchievementCriteriaScript
     {
         public achievement_not_even_a_scratch() : base("achievement_not_even_a_scratch") { }
 
@@ -284,7 +284,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_flirt_with_disaster_perf_check : AchievementCriteriaScript
+    internal class achievement_flirt_with_disaster_perf_check : AchievementCriteriaScript
     {
         public achievement_flirt_with_disaster_perf_check() : base("achievement_flirt_with_disaster_perf_check") { }
 
@@ -301,7 +301,7 @@ namespace Scripts.World.Achievements
     }
 
     [Script]
-    class achievement_killed_exp_or_honor_target : AchievementCriteriaScript
+    internal class achievement_killed_exp_or_honor_target : AchievementCriteriaScript
     {
         public achievement_killed_exp_or_honor_target() : base("achievement_killed_exp_or_honor_target") { }
 

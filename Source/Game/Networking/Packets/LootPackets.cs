@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class LootUnit : ClientPacket
+    internal class LootUnit : ClientPacket
     {
         public LootUnit(WorldPacket packet) : base(packet) { }
 
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
         public bool AELooting;
     }
 
-    class LootItemPkt : ClientPacket
+    internal class LootItemPkt : ClientPacket
     {
         public LootItemPkt(WorldPacket packet) : base(packet) { }
 
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
         public List<LootRequest> Loot = new List<LootRequest>();
     }
 
-    class MasterLootItem : ClientPacket
+    internal class MasterLootItem : ClientPacket
     {
         public MasterLootItem(WorldPacket packet) : base(packet) { }
 
@@ -123,8 +123,8 @@ namespace Game.Networking.Packets
         public Array<LootRequest> Loot = new Array<LootRequest>(1000);
         public ObjectGuid Target;
     }
-    
-    class LootRemoved : ServerPacket
+
+    internal class LootRemoved : ServerPacket
     {
         public LootRemoved() : base(ServerOpcodes.LootRemoved, ConnectionType.Instance) { }
 
@@ -140,7 +140,7 @@ namespace Game.Networking.Packets
         public byte LootListID;
     }
 
-    class LootRelease : ClientPacket
+    internal class LootRelease : ClientPacket
     {
         public LootRelease(WorldPacket packet) : base(packet) { }
 
@@ -152,14 +152,14 @@ namespace Game.Networking.Packets
         public ObjectGuid Unit;
     }
 
-    class LootMoney : ClientPacket
+    internal class LootMoney : ClientPacket
     {
         public LootMoney(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class LootMoneyNotify : ServerPacket
+    internal class LootMoneyNotify : ServerPacket
     {
         public LootMoneyNotify() : base(ServerOpcodes.LootMoneyNotify) { }
 
@@ -176,7 +176,7 @@ namespace Game.Networking.Packets
         public bool SoleLooter;
     }
 
-    class CoinRemoved : ServerPacket
+    internal class CoinRemoved : ServerPacket
     {
         public CoinRemoved() : base(ServerOpcodes.CoinRemoved) { }
 
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
         public ObjectGuid LootObj;
     }
 
-    class LootRoll : ClientPacket
+    internal class LootRoll : ClientPacket
     {
         public LootRoll(WorldPacket packet) : base(packet) { }
 
@@ -204,7 +204,7 @@ namespace Game.Networking.Packets
         public RollType RollType;
     }
 
-    class LootReleaseResponse : ServerPacket
+    internal class LootReleaseResponse : ServerPacket
     {
         public LootReleaseResponse() : base(ServerOpcodes.LootRelease) { }
 
@@ -218,14 +218,14 @@ namespace Game.Networking.Packets
         public ObjectGuid Owner;
     }
 
-    class LootReleaseAll : ServerPacket
+    internal class LootReleaseAll : ServerPacket
     {
         public LootReleaseAll() : base(ServerOpcodes.LootReleaseAll, ConnectionType.Instance) { }
 
         public override void Write() { }
     }
 
-    class LootList : ServerPacket
+    internal class LootList : ServerPacket
     {
         public LootList() : base(ServerOpcodes.LootList, ConnectionType.Instance) { }
 
@@ -251,7 +251,7 @@ namespace Game.Networking.Packets
         public Optional<ObjectGuid> RoundRobinWinner;
     }
 
-    class SetLootSpecialization : ClientPacket
+    internal class SetLootSpecialization : ClientPacket
     {
         public SetLootSpecialization(WorldPacket packet) : base(packet) { }
 
@@ -263,7 +263,7 @@ namespace Game.Networking.Packets
         public uint SpecID;
     }
 
-    class StartLootRoll : ServerPacket
+    internal class StartLootRoll : ServerPacket
     {
         public StartLootRoll() : base(ServerOpcodes.StartLootRoll) { }
 
@@ -285,7 +285,7 @@ namespace Game.Networking.Packets
         public LootItemData Item = new LootItemData();
     }
 
-    class LootRollBroadcast : ServerPacket
+    internal class LootRollBroadcast : ServerPacket
     {
         public LootRollBroadcast() : base(ServerOpcodes.LootRoll) { }
 
@@ -308,7 +308,7 @@ namespace Game.Networking.Packets
         public bool Autopassed;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
     }
 
-    class LootRollWon : ServerPacket
+    internal class LootRollWon : ServerPacket
     {
         public LootRollWon() : base(ServerOpcodes.LootRollWon) { }
 
@@ -331,7 +331,7 @@ namespace Game.Networking.Packets
         public bool MainSpec;
     }
 
-    class LootAllPassed : ServerPacket
+    internal class LootAllPassed : ServerPacket
     {
         public LootAllPassed() : base(ServerOpcodes.LootAllPassed) { }
 
@@ -345,7 +345,7 @@ namespace Game.Networking.Packets
         public LootItemData Item = new LootItemData();
     }
 
-    class LootRollsComplete : ServerPacket
+    internal class LootRollsComplete : ServerPacket
     {
         public LootRollsComplete() : base(ServerOpcodes.LootRollsComplete) { }
 
@@ -359,7 +359,7 @@ namespace Game.Networking.Packets
         public byte LootListID;
     }
 
-    class MasterLootCandidateList : ServerPacket
+    internal class MasterLootCandidateList : ServerPacket
     {
         public MasterLootCandidateList() : base(ServerOpcodes.MasterLootCandidateList, ConnectionType.Instance) { }
 
@@ -374,7 +374,7 @@ namespace Game.Networking.Packets
         public ObjectGuid LootObj;
     }
 
-    class AELootTargets : ServerPacket
+    internal class AELootTargets : ServerPacket
     {
         public AELootTargets(uint count) : base(ServerOpcodes.AeLootTargets, ConnectionType.Instance)
         {
@@ -386,10 +386,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Count);
         }
 
-        uint Count;
+        private uint Count;
     }
 
-    class AELootTargetsAck : ServerPacket
+    internal class AELootTargetsAck : ServerPacket
     {
         public AELootTargetsAck() : base(ServerOpcodes.AeLootTargetAck, ConnectionType.Instance) { }
 

@@ -26,7 +26,7 @@ using System.Numerics;
 
 namespace Game
 {
-    class WardenWin : Warden
+    internal class WardenWin : Warden
     {
         public override void Init(WorldSession session, BigInteger k)
         {
@@ -447,9 +447,9 @@ namespace Game
             _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
         }
 
-        uint _serverTicks;
-        List<ushort> _otherChecksTodo = new List<ushort>();
-        List<ushort> _memChecksTodo = new List<ushort>();
-        List<ushort> _currentChecks = new List<ushort>();
+        private uint _serverTicks;
+        private List<ushort> _otherChecksTodo = new List<ushort>();
+        private List<ushort> _memChecksTodo = new List<ushort>();
+        private List<ushort> _currentChecks = new List<ushort>();
     }
 }

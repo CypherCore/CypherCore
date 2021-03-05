@@ -430,9 +430,9 @@ namespace Framework.IO
             writeStream = new BinaryWriter(new MemoryStream());
         }
 
-        byte _bitPosition = 8;
-        byte BitValue;
-        BinaryWriter writeStream;
-        BinaryReader readStream;
+        private byte _bitPosition = 8;
+        private byte BitValue;
+        private BinaryWriter writeStream;
+        private BinaryReader readStream;
     }
 }

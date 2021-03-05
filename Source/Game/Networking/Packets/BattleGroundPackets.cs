@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class PVPLogDataRequest : ClientPacket
+    internal class PVPLogDataRequest : ClientPacket
     {
         public PVPLogDataRequest(WorldPacket packet) : base(packet) { }
 
@@ -191,7 +191,7 @@ namespace Game.Networking.Packets
         public RideTicket Ticket = new RideTicket();
     }
 
-    class BattlemasterJoin : ClientPacket
+    internal class BattlemasterJoin : ClientPacket
     {
         public BattlemasterJoin(WorldPacket packet) : base(packet) { }
 
@@ -211,7 +211,7 @@ namespace Game.Networking.Packets
         public int[] BlacklistMap = new int[2];
     }
 
-    class BattlemasterJoinArena : ClientPacket
+    internal class BattlemasterJoinArena : ClientPacket
     {
         public BattlemasterJoinArena(WorldPacket packet) : base(packet) { }
 
@@ -225,14 +225,14 @@ namespace Game.Networking.Packets
         public byte Roles;
     }
 
-    class BattlefieldLeave : ClientPacket
+    internal class BattlefieldLeave : ClientPacket
     {
         public BattlefieldLeave(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class BattlefieldPort : ClientPacket
+    internal class BattlefieldPort : ClientPacket
     {
         public BattlefieldPort(WorldPacket packet) : base(packet) { }
 
@@ -246,7 +246,7 @@ namespace Game.Networking.Packets
         public bool AcceptedInvite;
     }
 
-    class BattlefieldListRequest : ClientPacket
+    internal class BattlefieldListRequest : ClientPacket
     {
         public BattlefieldListRequest(WorldPacket packet) : base(packet) { }
 
@@ -258,7 +258,7 @@ namespace Game.Networking.Packets
         public int ListID;
     }
 
-    class BattlefieldList : ServerPacket
+    internal class BattlefieldList : ServerPacket
     {
         public BattlefieldList() : base(ServerOpcodes.BattlefieldList) { }
 
@@ -287,14 +287,14 @@ namespace Game.Networking.Packets
         public bool HasRandomWinToday;
     }
 
-    class GetPVPOptionsEnabled : ClientPacket
+    internal class GetPVPOptionsEnabled : ClientPacket
     {
         public GetPVPOptionsEnabled(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class PVPOptionsEnabled : ServerPacket
+    internal class PVPOptionsEnabled : ServerPacket
     {
         public PVPOptionsEnabled() : base(ServerOpcodes.PvpOptionsEnabled) { }
 
@@ -317,14 +317,14 @@ namespace Game.Networking.Packets
         public bool RatedBattlegrounds;
     }
 
-    class RequestBattlefieldStatus : ClientPacket
+    internal class RequestBattlefieldStatus : ClientPacket
     {
         public RequestBattlefieldStatus(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class ReportPvPPlayerAFK : ClientPacket
+    internal class ReportPvPPlayerAFK : ClientPacket
     {
         public ReportPvPPlayerAFK(WorldPacket packet) : base(packet) { }
 
@@ -336,7 +336,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Offender;
     }
 
-    class ReportPvPPlayerAFKResult : ServerPacket
+    internal class ReportPvPPlayerAFKResult : ServerPacket
     {
         public ReportPvPPlayerAFKResult() : base(ServerOpcodes.ReportPvpPlayerAfkResult, ConnectionType.Instance) { }
 
@@ -362,7 +362,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class BattlegroundPlayerPositions : ServerPacket
+    internal class BattlegroundPlayerPositions : ServerPacket
     {
         public BattlegroundPlayerPositions() : base(ServerOpcodes.BattlegroundPlayerPositions, ConnectionType.Instance) { }
 
@@ -376,7 +376,7 @@ namespace Game.Networking.Packets
         public List<BattlegroundPlayerPosition> FlagCarriers = new List<BattlegroundPlayerPosition>();
     }
 
-    class BattlegroundPlayerJoined : ServerPacket
+    internal class BattlegroundPlayerJoined : ServerPacket
     {
         public BattlegroundPlayerJoined() : base(ServerOpcodes.BattlegroundPlayerJoined, ConnectionType.Instance) { }
 
@@ -388,7 +388,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class BattlegroundPlayerLeft : ServerPacket
+    internal class BattlegroundPlayerLeft : ServerPacket
     {
         public BattlegroundPlayerLeft() : base(ServerOpcodes.BattlegroundPlayerLeft, ConnectionType.Instance) { }
 
@@ -400,7 +400,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class DestroyArenaUnit : ServerPacket
+    internal class DestroyArenaUnit : ServerPacket
     {
         public DestroyArenaUnit() : base(ServerOpcodes.DestroyArenaUnit) { }
 
@@ -412,7 +412,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class RequestPVPRewards : ClientPacket
+    internal class RequestPVPRewards : ClientPacket
     {
         public RequestPVPRewards(WorldPacket packet) : base(packet) { }
 
@@ -440,14 +440,14 @@ namespace Game.Networking.Packets
         public uint RandomMaxRewardPointsThisWeek;
     }
 
-    class RequestRatedPvpInfo : ClientPacket
+    internal class RequestRatedPvpInfo : ClientPacket
     {
         public RequestRatedPvpInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class RatedPvpInfo : ServerPacket
+    internal class RatedPvpInfo : ServerPacket
     {
         public RatedPvpInfo() : base(ServerOpcodes.RatedPvpInfo) { }
 
@@ -457,10 +457,10 @@ namespace Game.Networking.Packets
                 bracket.Write(_worldPacket);
         }
 
-        BracketInfo[] Bracket = new BracketInfo[6];
+        private BracketInfo[] Bracket = new BracketInfo[6];
     }
-    
-    class PVPMatchInitialize : ServerPacket
+
+    internal class PVPMatchInitialize : ServerPacket
     {
         public PVPMatchInitialize() : base(ServerOpcodes.PvpMatchInitialize, ConnectionType.Instance) { }
 
@@ -494,7 +494,7 @@ namespace Game.Networking.Packets
         public bool AffectsRating;
     }
 
-    class PVPMatchComplete : ServerPacket
+    internal class PVPMatchComplete : ServerPacket
     {
         public PVPMatchComplete() : base(ServerOpcodes.PvpMatchComplete, ConnectionType.Instance) { }
 
@@ -515,7 +515,7 @@ namespace Game.Networking.Packets
     }
 
     //Structs
-    struct BracketInfo
+    internal struct BracketInfo
     {
         public int PersonalRating;
         public int Ranking;

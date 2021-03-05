@@ -29,7 +29,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.LfGuildAddRecruit)]
-        void HandleGuildFinderAddRecruit(LFGuildAddRecruit lfGuildAddRecruit)
+        private void HandleGuildFinderAddRecruit(LFGuildAddRecruit lfGuildAddRecruit)
         {
             if (Global.GuildFinderMgr.GetAllMembershipRequestsForPlayer(GetPlayer().GetGUID()).Count >= 10)
                 return;
@@ -49,7 +49,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LfGuildBrowse)]
-        void HandleGuildFinderBrowse(LFGuildBrowse lfGuildBrowse)
+        private void HandleGuildFinderBrowse(LFGuildBrowse lfGuildBrowse)
         {
             if (!lfGuildBrowse.ClassRoles.HasAnyFlag((uint)GuildFinderOptionsRoles.All) || lfGuildBrowse.ClassRoles > (uint)GuildFinderOptionsRoles.All)
                 return;
@@ -97,7 +97,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LfGuildDeclineRecruit)]
-        void HandleGuildFinderDeclineRecruit(LFGuildDeclineRecruit lfGuildDeclineRecruit)
+        private void HandleGuildFinderDeclineRecruit(LFGuildDeclineRecruit lfGuildDeclineRecruit)
         {
             if (!GetPlayer().GetGuild())
                 return;
@@ -109,7 +109,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LfGuildGetApplications)]
-        void HandleGuildFinderGetApplications(LFGuildGetApplications lfGuildGetApplications)
+        private void HandleGuildFinderGetApplications(LFGuildGetApplications lfGuildGetApplications)
         {
             List<MembershipRequest> applicatedGuilds = Global.GuildFinderMgr.GetAllMembershipRequestsForPlayer(GetPlayer().GetGUID());
             var lfGuildApplications = new LFGuildApplications();
@@ -140,7 +140,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LfGuildGetGuildPost)]
-        void HandleGuildFinderGetGuildPost(LFGuildGetGuildPost lfGuildGetGuildPost)
+        private void HandleGuildFinderGetGuildPost(LFGuildGetGuildPost lfGuildGetGuildPost)
         {
             var player = GetPlayer();
 
@@ -169,7 +169,7 @@ namespace Game
 
         // Lists all recruits for a guild - Misses times
         [WorldPacketHandler(ClientOpcodes.LfGuildGetRecruits)]
-        void HandleGuildFinderGetRecruits(LFGuildGetRecruits lfGuildGetRecruits)
+        private void HandleGuildFinderGetRecruits(LFGuildGetRecruits lfGuildGetRecruits)
         {
             var player = GetPlayer();
             var guild = player.GetGuild();
@@ -211,7 +211,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.LfGuildRemoveRecruit)]
-        void HandleGuildFinderRemoveRecruit(LFGuildRemoveRecruit lfGuildRemoveRecruit)
+        private void HandleGuildFinderRemoveRecruit(LFGuildRemoveRecruit lfGuildRemoveRecruit)
         {
             if (!lfGuildRemoveRecruit.GuildGUID.IsGuild())
                 return;
@@ -221,7 +221,7 @@ namespace Game
 
         // Sent any time a guild master sets an option in the interface and when listing / unlisting his guild
         [WorldPacketHandler(ClientOpcodes.LfGuildSetGuildPost)]
-        void HandleGuildFinderSetGuildPost(LFGuildSetGuildPost lfGuildSetGuildPost)
+        private void HandleGuildFinderSetGuildPost(LFGuildSetGuildPost lfGuildSetGuildPost)
         {
             // Level sent is zero if untouched, force to any (from interface). Idk why
             if (lfGuildSetGuildPost.LevelRange == 0)

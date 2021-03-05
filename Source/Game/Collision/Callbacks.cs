@@ -48,7 +48,7 @@ namespace Game.Collision
             value = new AxisAlignedBox(lo, hi);
         }
 
-        List<Vector3> vertices;
+        private List<Vector3> vertices;
     }
 
     public class WModelAreaCallback : WorkerCallback
@@ -61,10 +61,10 @@ namespace Game.Collision
             zVec = down;
         }
 
-        List<GroupModel> prims;
+        private List<GroupModel> prims;
         public GroupModel hit;
         public float zDist;
-        Vector3 zVec;
+        private Vector3 zVec;
         public override void Invoke(Vector3 point, uint entry)
         {
             float group_Z;
@@ -92,7 +92,8 @@ namespace Game.Collision
             if (result) hit = true;
             return hit;
         }
-        List<GroupModel> models;
+
+        private List<GroupModel> models;
         public bool hit;
     }
 
@@ -113,7 +114,7 @@ namespace Game.Collision
             return hit;
         }
 
-        bool IntersectTriangle(MeshTriangle tri, List<Vector3> points, Ray ray, ref float distance)
+        private bool IntersectTriangle(MeshTriangle tri, List<Vector3> points, Ray ray, ref float distance)
         {
             const float EPS = 1e-5f;
 
@@ -161,8 +162,8 @@ namespace Game.Collision
             return false;
         }
 
-        List<Vector3> vertices;
-        List<MeshTriangle> triangles;
+        private List<Vector3> vertices;
+        private List<MeshTriangle> triangles;
         public bool hit;
     }
 
@@ -185,9 +186,9 @@ namespace Game.Collision
         }
         public bool DidHit() { return hit; }
 
-        ModelInstance[] prims;
-        bool hit;
-        ModelIgnoreFlags flags;
+        private ModelInstance[] prims;
+        private bool hit;
+        private ModelIgnoreFlags flags;
     }
 
     public class AreaInfoCallback : WorkerCallback
@@ -204,7 +205,7 @@ namespace Game.Collision
             prims[entry].IntersectPoint(point, aInfo);
         }
 
-        ModelInstance[] prims;
+        private ModelInstance[] prims;
         public AreaInfo aInfo = new AreaInfo();
     }
 
@@ -223,8 +224,8 @@ namespace Game.Collision
                 result = true;
         }
 
-        ModelInstance[] prims;
-        LocationInfo locInfo;
+        private ModelInstance[] prims;
+        private LocationInfo locInfo;
         public bool result;
     }
 
@@ -244,8 +245,8 @@ namespace Game.Collision
 
         public bool DidHit() { return _didHit; }
 
-        bool _didHit;
-        PhaseShift _phaseShift;
+        private bool _didHit;
+        private PhaseShift _phaseShift;
     }
 
     public class DynamicTreeAreaInfoCallback : WorkerCallback
@@ -263,7 +264,7 @@ namespace Game.Collision
 
         public AreaInfo GetAreaInfo() { return _areaInfo; }
 
-        PhaseShift _phaseShift;
-        AreaInfo _areaInfo;
+        private PhaseShift _phaseShift;
+        private AreaInfo _areaInfo;
     }
 }

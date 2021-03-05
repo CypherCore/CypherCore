@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Networking.Packets
 {
-    class AddToy : ClientPacket
+    internal class AddToy : ClientPacket
     {
         public AddToy(WorldPacket packet) : base(packet) { }
 
@@ -34,7 +34,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    class UseToy : ClientPacket
+    internal class UseToy : ClientPacket
     {
         public UseToy(WorldPacket packet) : base(packet) { }
 
@@ -46,7 +46,7 @@ namespace Game.Networking.Packets
         public SpellCastRequest Cast = new SpellCastRequest();
     }
 
-    class AccountToyUpdate : ServerPacket
+    internal class AccountToyUpdate : ServerPacket
     {
         public AccountToyUpdate() : base(ServerOpcodes.AccountToyUpdate, ConnectionType.Instance) { }
 
@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         public Dictionary<uint, ToyFlags> Toys = new Dictionary<uint, ToyFlags>();
     }
 
-    class ToyClearFanfare : ClientPacket
+    internal class ToyClearFanfare : ClientPacket
     {
         public ToyClearFanfare(WorldPacket packet) : base(packet) { }
 

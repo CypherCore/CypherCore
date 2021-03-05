@@ -81,7 +81,7 @@ namespace Game.Movement
             return true;
         }
 
-        ulong GetPathPolyByPosition(ulong[] polyPath, uint polyPathSize, float[] point, ref float distance)
+        private ulong GetPathPolyByPosition(ulong[] polyPath, uint polyPathSize, float[] point, ref float distance)
         {
             if (polyPath == null || polyPathSize == 0)
                 return 0;
@@ -114,7 +114,7 @@ namespace Game.Movement
             return (minDist2d < 3.0f) ? nearestPoly : 0u;
         }
 
-        ulong GetPolyByLocation(float[] point, ref float distance)
+        private ulong GetPolyByLocation(float[] point, ref float distance)
         {
             // first we check the current path
             // if the current path doesn't contain the current poly,
@@ -147,7 +147,7 @@ namespace Game.Movement
             return 0;
         }
 
-        void BuildPolyPath(Vector3 startPos, Vector3 endPos)
+        private void BuildPolyPath(Vector3 startPos, Vector3 endPos)
         {
             // *** getting start/end poly logic ***
 
@@ -464,7 +464,7 @@ namespace Game.Movement
             BuildPointPath(startPoint, endPoint);
         }
 
-        void BuildPointPath(float[] startPoint, float[] endPoint)
+        private void BuildPointPath(float[] startPoint, float[] endPoint)
         {
             var pathPoints = new float[74 * 3];
             var pointCount = 0;
@@ -569,7 +569,7 @@ namespace Game.Movement
             Log.outDebug(LogFilter.Maps, "PathGenerator.BuildPointPath path type {0} size {1} poly-size {2}\n", pathType, pointCount, _polyLength);
         }
 
-        uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)
+        private uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)
         {
             var furthestPath = -1;
             var furthestVisited = -1;
@@ -614,7 +614,7 @@ namespace Game.Movement
             return req + size;
         }
 
-        bool GetSteerTarget(float[] startPos, float[] endPos, float minTargetDist, ulong[] path, uint pathSize, out float[] steerPos, out Detour.dtStraightPathFlags steerPosFlag, out ulong steerPosRef)
+        private bool GetSteerTarget(float[] startPos, float[] endPos, float minTargetDist, ulong[] path, uint pathSize, out float[] steerPos, out Detour.dtStraightPathFlags steerPosFlag, out ulong steerPosRef)
         {
             steerPosRef = 0;
             steerPos = new float[3];
@@ -652,7 +652,7 @@ namespace Game.Movement
             return true;
         }
 
-        uint FindSmoothPath(float[] startPos, float[] endPos, ulong[] polyPath, uint polyPathSize, out float[] smoothPath, out int smoothPathSize, uint maxSmoothPathSize)
+        private uint FindSmoothPath(float[] startPos, float[] endPos, ulong[] polyPath, uint polyPathSize, out float[] smoothPath, out int smoothPathSize, uint maxSmoothPathSize)
         {
             smoothPathSize = 0;
             var nsmoothPath = 0;
@@ -775,13 +775,13 @@ namespace Game.Movement
             return nsmoothPath < 74 ? Detour.DT_SUCCESS : Detour.DT_FAILURE;
         }
 
-        void NormalizePath()
+        private void NormalizePath()
         {
             for (uint i = 0; i < _pathPoints.Length; ++i)
                 _sourceUnit.UpdateAllowedPositionZ(_pathPoints[i].X, _pathPoints[i].Y, ref _pathPoints[i].Z);
         }
 
-        void BuildShortcut()
+        private void BuildShortcut()
         {
             Log.outDebug(LogFilter.Maps, "BuildShortcut : making shortcut\n");
 
@@ -799,7 +799,7 @@ namespace Game.Movement
             pathType = PathType.Shortcut;
         }
 
-        void CreateFilter()
+        private void CreateFilter()
         {
             NavTerrainFlag includeFlags = 0;
             NavTerrainFlag excludeFlags = 0;
@@ -823,7 +823,7 @@ namespace Game.Movement
             UpdateFilter();
         }
 
-        void UpdateFilter()
+        private void UpdateFilter()
         {
             // allow creatures to cheat and use different movement types if they are moved
             // forcefully into terrain they can't normally move in
@@ -836,7 +836,7 @@ namespace Game.Movement
             }
         }
 
-        NavTerrainFlag GetNavTerrain(float x, float y, float z)
+        private NavTerrainFlag GetNavTerrain(float x, float y, float z)
         {
             LiquidData data;
             var liquidStatus = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data);
@@ -857,13 +857,13 @@ namespace Game.Movement
             }
         }
 
-        bool InRange(Vector3 p1, Vector3 p2, float r, float h)
+        private bool InRange(Vector3 p1, Vector3 p2, float r, float h)
         {
             var d = p1 - p2;
             return (d.X * d.X + d.Y * d.Y) < r * r && Math.Abs(d.Z) < h;
         }
 
-        float Dist3DSqr(Vector3 p1, Vector3 p2)
+        private float Dist3DSqr(Vector3 p1, Vector3 p2)
         {
             return (p1 - p2).GetLengthSquared();
         }
@@ -912,13 +912,13 @@ namespace Game.Movement
             return (target.GetPositionZ() - GetActualEndPosition().Z) > 5.0f;
         }
 
-        void Clear()
+        private void Clear()
         {
             _polyLength = 0;
             _pathPoints = null;
         }
 
-        bool HaveTile(Vector3 p)
+        private bool HaveTile(Vector3 p)
         {
             int tx = -1, ty = -1;
             float[] point = { p.Y, p.Z, p.X };
@@ -934,7 +934,7 @@ namespace Game.Movement
             return (_navMesh.getTileAt(tx, ty, 0) != null);
         }
 
-        bool InRangeYZX(float[] v1, float[] v2, float r, float h)
+        private bool InRangeYZX(float[] v1, float[] v2, float r, float h)
         {
             var dx = v2[0] - v1[0];
             var dy = v2[1] - v1[1]; // elevation
@@ -953,32 +953,32 @@ namespace Game.Movement
 
         public PathType GetPathType() { return pathType; }
 
-        void SetStartPosition(Vector3 point) { _startPosition = point; }
-        void SetEndPosition(Vector3 point) { _actualEndPosition = point; _endPosition = point; }
-        void SetActualEndPosition(Vector3 point) { _actualEndPosition = point; }
+        private void SetStartPosition(Vector3 point) { _startPosition = point; }
+        private void SetEndPosition(Vector3 point) { _actualEndPosition = point; _endPosition = point; }
+        private void SetActualEndPosition(Vector3 point) { _actualEndPosition = point; }
 
         public void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; }
 
         public void SetPathLengthLimit(float distance) { _pointPathLimit = Math.Min((uint)(distance / 4.0f), 74); }
 
-        ulong[] _pathPolyRefs = new ulong[74];
+        private ulong[] _pathPolyRefs = new ulong[74];
 
-        uint _polyLength;
-        uint _pointPathLimit;
-        bool _straightLine;     // use raycast if true for a straight line path
-        Unit _sourceUnit;
-        bool _forceDestination;
-        bool _useStraightPath;
-        Vector3[] _pathPoints;
+        private uint _polyLength;
+        private uint _pointPathLimit;
+        private bool _straightLine;     // use raycast if true for a straight line path
+        private Unit _sourceUnit;
+        private bool _forceDestination;
+        private bool _useStraightPath;
+        private Vector3[] _pathPoints;
 
-        Vector3 _actualEndPosition;
-        Vector3 _startPosition;
-        Vector3 _endPosition;
-        PathType pathType;
+        private Vector3 _actualEndPosition;
+        private Vector3 _startPosition;
+        private Vector3 _endPosition;
+        private PathType pathType;
 
-        Detour.dtQueryFilter _filter = new Detour.dtQueryFilter();
-        Detour.dtNavMeshQuery _navMeshQuery;
-        Detour.dtNavMesh _navMesh;
+        private Detour.dtQueryFilter _filter = new Detour.dtQueryFilter();
+        private Detour.dtNavMeshQuery _navMeshQuery;
+        private Detour.dtNavMesh _navMesh;
     }
 
     public enum PathType

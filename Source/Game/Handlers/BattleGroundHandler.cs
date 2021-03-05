@@ -32,7 +32,7 @@ namespace Game
     public partial class WorldSession
     {
         [WorldPacketHandler(ClientOpcodes.BattlemasterHello)]
-        void HandleBattlemasterHello(Hello hello)
+        private void HandleBattlemasterHello(Hello hello)
         {
             var unit = GetPlayer().GetNPCIfCanInteractWith(hello.Unit, NPCFlags.BattleMaster, NPCFlags2.None);
             if (!unit)
@@ -55,7 +55,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlemasterJoin)]
-        void HandleBattlemasterJoin(BattlemasterJoin battlemasterJoin)
+        private void HandleBattlemasterJoin(BattlemasterJoin battlemasterJoin)
         {
             var isPremade = false;
 
@@ -211,7 +211,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PvpLogData)]
-        void HandlePVPLogData(PVPLogDataRequest packet)
+        private void HandlePVPLogData(PVPLogDataRequest packet)
         {
             Battleground bg = GetPlayer().GetBattleground();
             if (!bg)
@@ -227,7 +227,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlefieldList)]
-        void HandleBattlefieldList(BattlefieldListRequest battlefieldList)
+        private void HandleBattlefieldList(BattlefieldListRequest battlefieldList)
         {
             var bl = CliDB.BattlemasterListStorage.LookupByKey(battlefieldList.ListID);
             if (bl == null)
@@ -240,7 +240,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlefieldPort)]
-        void HandleBattleFieldPort(BattlefieldPort battlefieldPort)
+        private void HandleBattleFieldPort(BattlefieldPort battlefieldPort)
         {
             if (!GetPlayer().InBattlegroundQueue())
             {
@@ -399,7 +399,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlefieldLeave)]
-        void HandleBattlefieldLeave(BattlefieldLeave packet)
+        private void HandleBattlefieldLeave(BattlefieldLeave packet)
         {
             // not allow leave Battlegroundin combat
             if (GetPlayer().IsInCombat())
@@ -414,7 +414,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestBattlefieldStatus)]
-        void HandleRequestBattlefieldStatus(RequestBattlefieldStatus packet)
+        private void HandleRequestBattlefieldStatus(RequestBattlefieldStatus packet)
         {
             // we must update all queues here
             Battleground bg = null;
@@ -473,7 +473,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlemasterJoinArena)]
-        void HandleBattlemasterJoinArena(BattlemasterJoinArena packet)
+        private void HandleBattlemasterJoinArena(BattlemasterJoinArena packet)
         {
             // ignore if we already in BG or BG queue
             if (GetPlayer().InBattleground())
@@ -564,7 +564,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ReportPvpPlayerAfk)]
-        void HandleReportPvPAFK(ReportPvPPlayerAFK reportPvPPlayerAFK)
+        private void HandleReportPvPAFK(ReportPvPPlayerAFK reportPvPPlayerAFK)
         {
             var reportedPlayer = Global.ObjAccessor.FindPlayer(reportPvPPlayerAFK.Offender);
             if (!reportedPlayer)
@@ -579,14 +579,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestRatedPvpInfo)]
-        void HandleRequestRatedPvpInfo(RequestRatedPvpInfo packet)
+        private void HandleRequestRatedPvpInfo(RequestRatedPvpInfo packet)
         {
             var ratedPvpInfo = new RatedPvpInfo();
             SendPacket(ratedPvpInfo);
         }
 
         [WorldPacketHandler(ClientOpcodes.GetPvpOptionsEnabled, Processing = PacketProcessing.Inplace)]
-        void HandleGetPVPOptionsEnabled(GetPVPOptionsEnabled packet)
+        private void HandleGetPVPOptionsEnabled(GetPVPOptionsEnabled packet)
         {
             // This packet is completely irrelevant, it triggers PVP_TYPES_ENABLED lua event but that is not handled in interface code as of 6.1.2
             var pvpOptionsEnabled = new PVPOptionsEnabled();
@@ -595,13 +595,13 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestPvpRewards)]
-        void HandleRequestPvpReward(RequestPVPRewards packet)
+        private void HandleRequestPvpReward(RequestPVPRewards packet)
         {
             GetPlayer().SendPvpRewards();
         }
 
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQuery)]
-        void HandleAreaSpiritHealerQuery(AreaSpiritHealerQuery areaSpiritHealerQuery)
+        private void HandleAreaSpiritHealerQuery(AreaSpiritHealerQuery areaSpiritHealerQuery)
         {
             var unit = ObjectAccessor.GetCreature(GetPlayer(), areaSpiritHealerQuery.HealerGuid);
             if (!unit)
@@ -620,7 +620,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.AreaSpiritHealerQueue)]
-        void HandleAreaSpiritHealerQueue(AreaSpiritHealerQueue areaSpiritHealerQueue)
+        private void HandleAreaSpiritHealerQueue(AreaSpiritHealerQueue areaSpiritHealerQueue)
         {
             var unit = ObjectAccessor.GetCreature(GetPlayer(), areaSpiritHealerQueue.HealerGuid);
             if (!unit)
@@ -639,7 +639,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.HearthAndResurrect)]
-        void HandleHearthAndResurrect(HearthAndResurrect packet)
+        private void HandleHearthAndResurrect(HearthAndResurrect packet)
         {
             if (GetPlayer().IsInFlight())
                 return;

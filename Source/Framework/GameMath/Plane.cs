@@ -214,7 +214,7 @@ namespace Framework.GameMath
             d = (float)_d;
         }
 
-        void getEquation(ref Vector3 n, out double d)
+        private void getEquation(ref Vector3 n, out double d)
         {
             n = _normal;
             d = -_const;

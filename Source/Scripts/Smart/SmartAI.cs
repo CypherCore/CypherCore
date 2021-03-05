@@ -25,7 +25,7 @@ using Game.DataStorage;
 namespace Scripts.Smart
 {
     [Script]
-    class SmartTrigger : AreaTriggerScript
+    internal class SmartTrigger : AreaTriggerScript
     {
         public SmartTrigger() : base("SmartTrigger") { }
 
@@ -43,7 +43,7 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartAreaTriggerEntityScript : AreaTriggerEntityScript
+    internal class SmartAreaTriggerEntityScript : AreaTriggerEntityScript
     {
         public SmartAreaTriggerEntityScript() : base("SmartAreaTriggerAI") { }
 
@@ -54,7 +54,7 @@ namespace Scripts.Smart
     }
 
     [Script]
-    class SmartScene : SceneScript
+    internal class SmartScene : SceneScript
     {
         public SmartScene() : base("SmartScene") { }
 

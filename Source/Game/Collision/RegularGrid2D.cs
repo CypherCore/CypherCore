@@ -98,7 +98,7 @@ namespace Game.Collision
             public bool IsValid() { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER; }
         }
 
-        Node GetGrid(int x, int y)
+        private Node GetGrid(int x, int y)
         {
             Cypher.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
             if (nodes[x][y] == null)
@@ -206,7 +206,7 @@ namespace Game.Collision
                 node.IntersectRay(ray, intersectCallback, ref max_dist);
         }
 
-        MultiMap<T, Node> memberTable = new MultiMap<T, Node>();
-        Node[][] nodes = new Node[CELL_NUMBER][];
+        private MultiMap<T, Node> memberTable = new MultiMap<T, Node>();
+        private Node[][] nodes = new Node[CELL_NUMBER][];
     }
 }

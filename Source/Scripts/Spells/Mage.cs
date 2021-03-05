@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 namespace Scripts.Spells.Mage
 {
-    struct SpellIds
+    internal struct SpellIds
     {
         public const uint BlazingBarrierTrigger = 235314;
         public const uint Cauterized = 87024;
@@ -70,14 +70,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235313 - Blazing Barrier
-    class spell_mage_blazing_barrier : AuraScript
+    internal class spell_mage_blazing_barrier : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.BlazingBarrierTrigger);
         }
 
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
             var caster = GetCaster();
@@ -85,7 +85,7 @@ namespace Scripts.Spells.Mage
                 amount = (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             var caster = eventInfo.GetDamageInfo().GetVictim();
@@ -103,9 +103,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 198063 - Burning Determination
-    class spell_mage_burning_determination : AuraScript
+    internal class spell_mage_burning_determination : AuraScript
     {
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo != null)
@@ -122,9 +122,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 86949 - Cauterize
-    class spell_mage_cauterize : SpellScript
+    internal class spell_mage_cauterize : SpellScript
     {
-        void SuppressSpeedBuff(uint effIndex)
+        private void SuppressSpeedBuff(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
         }
@@ -136,14 +136,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script]
-    class spell_mage_cauterize_AuraScript : AuraScript
+    internal class spell_mage_cauterize_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.GetEffect(2) != null && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
         }
 
-        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        private void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             var effectInfo = GetEffect(1);
             if (effectInfo == null || !GetTargetApplication().HasEffect(1) ||
@@ -168,14 +168,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235219 - Cold Snap
-    class spell_mage_cold_snap : SpellScript
+    internal class spell_mage_cold_snap : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConeOfCold, SpellIds.FrostNova, SpellIds.IceBarrier, SpellIds.IceBlock);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             GetCaster().GetSpellHistory().ResetCooldowns(p =>
             {
@@ -200,14 +200,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 120 - Cone of Cold
-    class spell_mage_cone_of_cold : SpellScript
+    internal class spell_mage_cone_of_cold : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConeOfColdSlow);
         }
 
-        void HandleSlow(uint effIndex)
+        private void HandleSlow(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.ConeOfColdSlow, true);
         }
@@ -219,14 +219,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 190336 - Conjure Refreshment
-    class spell_mage_conjure_refreshment : SpellScript
+    internal class spell_mage_conjure_refreshment : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ConjureRefreshment, SpellIds.ConjureRefreshmentTable);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             var caster = GetCaster().ToPlayer();
             if (caster)
@@ -246,14 +246,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44544 - Fingers of Frost
-    class spell_mage_fingers_of_frost : AuraScript
+    internal class spell_mage_fingers_of_frost : AuraScript
     {
-        void SuppressWarning(AuraEffect aurEff, ProcEventInfo procInfo)
+        private void SuppressWarning(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             PreventDefaultAction();
         }
 
-        void DropFingersOfFrost(ProcEventInfo eventInfo)
+        private void DropFingersOfFrost(ProcEventInfo eventInfo)
         {
             GetAura().ModStackAmount(-1);
         }
@@ -266,14 +266,14 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] // 11426 - Ice Barrier
-    class spell_mage_ice_barrier : AuraScript
+    internal class spell_mage_ice_barrier : AuraScript
     {
         public override bool Validate(SpellInfo spellEntry)
         {
             return ValidateSpellInfo(SpellIds.Chilled);
         }
 
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
             var caster = GetCaster();
@@ -281,7 +281,7 @@ namespace Scripts.Spells.Mage
                 amount += (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 10.0f);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             var caster = eventInfo.GetDamageInfo().GetVictim();
             var target = eventInfo.GetDamageInfo().GetAttacker();
@@ -298,21 +298,21 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // Ice Lance - 30455
-    class spell_mage_ice_lance : SpellScript
+    internal class spell_mage_ice_lance : SpellScript
     {
-        List<ObjectGuid> _orderedTargets = new List<ObjectGuid>();
+        private List<ObjectGuid> _orderedTargets = new List<ObjectGuid>();
 
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.IceLanceTrigger, SpellIds.ThermalVoid, SpellIds.IcyVeins, SpellIds.ChainReactionDummy, SpellIds.ChainReaction, SpellIds.FingersOfFrost);
         }
 
-        void IndexTarget(uint effIndex)
+        private void IndexTarget(uint effIndex)
         {
             _orderedTargets.Add(GetHitUnit().GetGUID());
         }
 
-        void HandleOnHit(uint effIndex)
+        private void HandleOnHit(uint effIndex)
         {
             var caster = GetCaster();
             var target = GetHitUnit();
@@ -352,9 +352,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 228598 - Ice Lance
-    class spell_mage_ice_lance_damage : SpellScript
+    internal class spell_mage_ice_lance_damage : SpellScript
     {
-        void ApplyDamageMultiplier(uint effIndex)
+        private void ApplyDamageMultiplier(uint effIndex)
         {
             var spellValue = GetSpellValue();
             if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
@@ -373,19 +373,19 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] // 11119 - Ignite
-    class spell_mage_ignite : AuraScript
+    internal class spell_mage_ignite : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Ignite);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        private bool CheckProc(ProcEventInfo eventInfo)
         {
             return eventInfo.GetProcTarget();
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
@@ -406,14 +406,14 @@ namespace Scripts.Spells.Mage
 
     // 37447 - Improved Mana Gems
     [Script] // 61062 - Improved Mana Gems
-    class spell_mage_imp_mana_gems : AuraScript
+    internal class spell_mage_imp_mana_gems : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ManaSurge);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.ManaSurge, true);
@@ -426,14 +426,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44457 - Living Bomb
-    class spell_mage_living_bomb : SpellScript
+    internal class spell_mage_living_bomb : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingBombPeriodic);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
             GetCaster().CastCustomSpell(SpellIds.LivingBombPeriodic, SpellValueMod.BasePoint2, 1, GetHitUnit(), TriggerCastFlags.FullMask);
@@ -446,19 +446,19 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 44461 - Living Bomb
-    class spell_mage_living_bomb_explosion : SpellScript
+    internal class spell_mage_living_bomb_explosion : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return spellInfo.NeedsExplicitUnitTarget() && ValidateSpellInfo(SpellIds.LivingBombPeriodic);
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             targets.Remove(GetExplTargetWorldObject());
         }
 
-        void HandleSpread(uint effIndex)
+        private void HandleSpread(uint effIndex)
         {
             if (GetSpellValue().EffectBasePoints[0] > 0)
                 GetCaster().CastCustomSpell(SpellIds.LivingBombPeriodic, SpellValueMod.BasePoint2, 0, GetHitUnit(), TriggerCastFlags.FullMask);
@@ -472,14 +472,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 217694 - Living Bomb
-    class spell_mage_living_bomb_periodic : AuraScript
+    internal class spell_mage_living_bomb_periodic : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LivingBombExplosion);
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
@@ -497,14 +497,14 @@ namespace Scripts.Spells.Mage
 
     // @todo move out of here and rename - not a mage spell
     [Script] // 32826 - Polymorph (Visual)
-    class spell_mage_polymorph_visual : SpellScript
+    internal class spell_mage_polymorph_visual : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(PolymorhForms);
         }
 
-        void HandleDummy(uint effIndex)
+        private void HandleDummy(uint effIndex)
         {
             Unit target = GetCaster().FindNearestCreature(NPC_AUROSALIA, 30.0f);
             if (target)
@@ -518,8 +518,9 @@ namespace Scripts.Spells.Mage
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
 
-        const uint NPC_AUROSALIA = 18744;
-        uint[] PolymorhForms =
+        private const uint NPC_AUROSALIA = 18744;
+
+        private uint[] PolymorhForms =
         {
                 SpellIds.SquirrelForm,
                 SpellIds.GiraffeForm,
@@ -531,9 +532,9 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 235450 - Prismatic Barrier
-    class spell_mage_prismatic_barrier : AuraScript
+    internal class spell_mage_prismatic_barrier : AuraScript
     {
-        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        private void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
             var caster = GetCaster();
@@ -548,21 +549,21 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 136511 - Ring of Frost
-    class spell_mage_ring_of_frost : AuraScript
+    internal class spell_mage_ring_of_frost : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze);
         }
 
-        void HandleEffectPeriodic(AuraEffect aurEff)
+        private void HandleEffectPeriodic(AuraEffect aurEff)
         {
             var ringOfFrost = GetRingOfFrostMinion();
             if (ringOfFrost)
                 GetTarget().CastSpell(ringOfFrost.GetPositionX(), ringOfFrost.GetPositionY(), ringOfFrost.GetPositionZ(), SpellIds.RingOfFrostFreeze, true);
         }
 
-        void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var minions = new List<TempSummon>();
             GetTarget().GetAllMinionsByEntry(minions, (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
@@ -592,7 +593,7 @@ namespace Scripts.Spells.Mage
             OnEffectApply.Add(new EffectApplyHandler(Apply, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.RealOrReapplyMask));
         }
 
-        TempSummon GetRingOfFrostMinion()
+        private TempSummon GetRingOfFrostMinion()
         {
             var creature = ObjectAccessor.GetCreature(GetOwner(), _ringOfFrostGUID);
             if (creature)
@@ -600,18 +601,18 @@ namespace Scripts.Spells.Mage
             return null;
         }
 
-        ObjectGuid _ringOfFrostGUID;
+        private ObjectGuid _ringOfFrostGUID;
     }
 
     [Script] // 82691 - Ring of Frost (freeze efect)
-    class spell_mage_ring_of_frost_freeze : SpellScript
+    internal class spell_mage_ring_of_frost_freeze : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze);
         }
 
-        void FilterTargets(List<WorldObject> targets)
+        private void FilterTargets(List<WorldObject> targets)
         {
             var dest = GetExplTargetDest();
             var outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
@@ -634,14 +635,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script]
-    class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript
+    internal class spell_mage_ring_of_frost_freeze_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.RingOfFrostDummy);
         }
 
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 if (GetCaster())
@@ -655,14 +656,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 80353 - Time Warp
-    class spell_mage_time_warp : SpellScript
+    internal class spell_mage_time_warp : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TemporalDisplacement, SpellIds.HunterInsanity, SpellIds.ShamanExhaustion, SpellIds.ShamanSated, SpellIds.PetNetherwindsFatigued);
         }
 
-        void RemoveInvalidTargets(List<WorldObject> targets)
+        private void RemoveInvalidTargets(List<WorldObject> targets)
         {
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.TemporalDisplacement));
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.HunterInsanity));
@@ -670,7 +671,7 @@ namespace Scripts.Spells.Mage
             targets.RemoveAll(new UnitAuraCheck<WorldObject>(true, SpellIds.ShamanSated));
         }
 
-        void ApplyDebuff()
+        private void ApplyDebuff()
         {
             var target = GetHitUnit();
             if (target)
@@ -685,14 +686,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 210824 - Touch of the Magi (Aura)
-    class spell_mage_touch_of_the_magi_aura : AuraScript
+    internal class spell_mage_touch_of_the_magi_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.TouchOfTheMagiExplode);
         }
 
-        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        private void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo != null)
@@ -706,7 +707,7 @@ namespace Scripts.Spells.Mage
             }
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        private void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             var amount = aurEff.GetAmount();
             if (amount == 0 || GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
@@ -725,14 +726,14 @@ namespace Scripts.Spells.Mage
     }
     
     [Script] //228597 - Frostbolt   84721  - Frozen Orb   190357 - Blizzard
-    class spell_mage_trigger_chilled : SpellScript
+    internal class spell_mage_trigger_chilled : SpellScript
     {
         public override bool Validate(SpellInfo spell)
         {
             return ValidateSpellInfo(SpellIds.Chilled);
         }
 
-        void HandleChilled()
+        private void HandleChilled()
         {
             var target = GetHitUnit();
             if (target)
@@ -746,14 +747,14 @@ namespace Scripts.Spells.Mage
     }
 
     [Script] // 33395 Water Elemental's Freeze
-    class spell_mage_water_elemental_freeze : SpellScript
+    internal class spell_mage_water_elemental_freeze : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.FingersOfFrost);
         }
 
-        void HandleImprovedFreeze()
+        private void HandleImprovedFreeze()
         {
             var owner = GetCaster().GetOwner();
             if (!owner)

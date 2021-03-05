@@ -28,37 +28,37 @@ namespace Game.Networking
 {
     public class WorldSocket : SocketBase
     {
-        static readonly string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
-        static readonly string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
+        private static readonly string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
+        private static readonly string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
 
-        static readonly byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
-        static readonly byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
-        static readonly byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
-        static readonly byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
+        private static readonly byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
+        private static readonly byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
+        private static readonly byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
+        private static readonly byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
-        static readonly int HeaderSize = 16;
+        private static readonly int HeaderSize = 16;
 
-        SocketBuffer _headerBuffer;
-        SocketBuffer _packetBuffer;
+        private SocketBuffer _headerBuffer;
+        private SocketBuffer _packetBuffer;
 
-        ConnectionType _connectType;
-        ulong _key;
+        private ConnectionType _connectType;
+        private ulong _key;
 
-        byte[] _serverChallenge;
-        WorldCrypt _worldCrypt;
-        byte[] _sessionKey;
-        byte[] _encryptKey;
+        private byte[] _serverChallenge;
+        private WorldCrypt _worldCrypt;
+        private byte[] _sessionKey;
+        private byte[] _encryptKey;
 
-        long _LastPingTime;
-        uint _OverSpeedPings;
+        private long _LastPingTime;
+        private uint _OverSpeedPings;
 
-        object _worldSessionLock = new object();
-        WorldSession _worldSession;
+        private object _worldSessionLock = new object();
+        private WorldSession _worldSession;
 
-        ZLib.z_stream _compressionStream;
+        private ZLib.z_stream _compressionStream;
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
-        string _ipCountry;
+        private AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        private string _ipCountry;
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -94,7 +94,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(CheckIpCallback));
         }
 
-        void CheckIpCallback(SQLResult result)
+        private void CheckIpCallback(SQLResult result)
         {
             if (!result.IsEmpty())
             {
@@ -126,7 +126,7 @@ namespace Game.Networking
             AsyncWrite(packet.GetData());
         }
 
-        void InitializeHandler(SocketAsyncEventArgs args)
+        private void InitializeHandler(SocketAsyncEventArgs args)
         {
             if (args.SocketError != SocketError.Success)
             {
@@ -238,7 +238,7 @@ namespace Game.Networking
             AsyncRead();
         }
 
-        bool ReadHeader()
+        private bool ReadHeader()
         {
             var header = new PacketHeader();
             header.Read(_headerBuffer.GetData());
@@ -253,7 +253,7 @@ namespace Game.Networking
             return true;
         }
 
-        ReadDataHandlerResult ReadData()
+        private ReadDataHandlerResult ReadData()
         {
             var header = new PacketHeader();
             header.Read(_headerBuffer.GetData());
@@ -449,7 +449,7 @@ namespace Game.Networking
             base.OnClose();
         }
 
-        void HandleSendAuthSession()
+        private void HandleSendAuthSession()
         {
             var challenge = new AuthChallenge();
             challenge.Challenge = _serverChallenge;
@@ -459,7 +459,7 @@ namespace Game.Networking
             SendPacket(challenge);
         }
 
-        void HandleAuthSession(AuthSession authSession)
+        private void HandleAuthSession(AuthSession authSession)
         {
             // Get the account information from the realmd database
             var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
@@ -469,7 +469,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession));
         }
 
-        void HandleAuthSessionCallback(AuthSession authSession, SQLResult result)
+        private void HandleAuthSessionCallback(AuthSession authSession, SQLResult result)
         {
             // Stop if the account is not found
             if (result.IsEmpty())
@@ -651,7 +651,7 @@ namespace Game.Networking
             AsyncRead();
         }
 
-        void LoadSessionPermissionsCallback(SQLResult result)
+        private void LoadSessionPermissionsCallback(SQLResult result)
         {
             // RBAC must be loaded before adding session to check for skip queue permission
             _worldSession.GetRBACData().LoadFromDBCallback(result);
@@ -659,7 +659,7 @@ namespace Game.Networking
             SendPacket(new EnterEncryptedMode(_encryptKey, true));
         }
 
-        void HandleAuthContinuedSession(AuthContinuedSession authSession)
+        private void HandleAuthContinuedSession(AuthContinuedSession authSession)
         {
             var key = new ConnectToKey();
             _key = key.Raw = authSession.Key;
@@ -679,7 +679,7 @@ namespace Game.Networking
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthContinuedSessionCallback, authSession));
         }
 
-        void HandleAuthContinuedSessionCallback(AuthContinuedSession authSession, SQLResult result)
+        private void HandleAuthContinuedSessionCallback(AuthContinuedSession authSession, SQLResult result)
         {
             if (result.IsEmpty())
             {
@@ -720,7 +720,7 @@ namespace Game.Networking
             AsyncRead();
         }
 
-        void HandleConnectToFailed(ConnectToFailed connectToFailed)
+        private void HandleConnectToFailed(ConnectToFailed connectToFailed)
         {
             if (_worldSession != null)
             {
@@ -759,7 +759,7 @@ namespace Game.Networking
 
         }
 
-        void HandleEnterEncryptedModeAck()
+        private void HandleEnterEncryptedModeAck()
         {
             _worldCrypt.Initialize(_encryptKey);
             if (_connectType == ConnectionType.Realm)
@@ -777,7 +777,7 @@ namespace Game.Networking
             SendPacket(response);
         }
 
-        bool HandlePing(Ping ping)
+        private bool HandlePing(Ping ping)
         {
             if (_LastPingTime == 0)
                 _LastPingTime = Time.UnixTime; // for 1st ping
@@ -827,7 +827,7 @@ namespace Game.Networking
         }
     }
 
-    class AccountInfo
+    internal class AccountInfo
     {
         public AccountInfo(SQLFields fields)
         {
@@ -887,7 +887,7 @@ namespace Game.Networking
         }
     }
 
-    enum ReadDataHandlerResult
+    internal enum ReadDataHandlerResult
     {
         Ok = 0,
         Error = 1,

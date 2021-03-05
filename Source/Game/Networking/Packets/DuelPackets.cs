@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Countdown);
         }
 
-        uint Countdown;
+        private uint Countdown;
     }
 
     public class DuelInBounds : ServerPacket

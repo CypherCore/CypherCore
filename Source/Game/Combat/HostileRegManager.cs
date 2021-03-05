@@ -24,14 +24,14 @@ namespace Game.Combat
 {
     public class HostileRefManager : RefManager<Unit, ThreatManager>
     {
-        Unit Owner;
+        private Unit Owner;
 
         public HostileRefManager(Unit owner)
         {
             Owner = owner;
         }
 
-        Unit GetOwner() { return Owner; }
+        private Unit GetOwner() { return Owner; }
 
         // send threat to all my haters for the victim
         // The victim is then hated by them as well
@@ -68,7 +68,7 @@ namespace Game.Combat
             }
         }
 
-        void AddThreatPercent(int percent)
+        private void AddThreatPercent(int percent)
         {
             var refe = GetFirst();
             while (refe != null)
@@ -220,7 +220,7 @@ namespace Game.Combat
             SetOnlineOfflineState(false);
         }
 
-        void FireStatusChanged(ThreatRefStatusChangeEvent threatRefStatusChangeEvent)
+        private void FireStatusChanged(ThreatRefStatusChangeEvent threatRefStatusChangeEvent)
         {
             if (GetSource() != null)
                 GetSource().ProcessThreatEvent(threatRefStatusChangeEvent);
@@ -305,7 +305,7 @@ namespace Game.Combat
             }
         }
 
-        void SetAccessibleState(bool isAccessible)
+        private void SetAccessibleState(bool isAccessible)
         {
             if (iAccessible != isAccessible)
             {
@@ -325,7 +325,7 @@ namespace Game.Combat
             FireStatusChanged(Event);
         }
 
-        Unit GetSourceUnit()
+        private Unit GetSourceUnit()
         {
             return GetSource().GetOwner();
         }
@@ -347,7 +347,7 @@ namespace Game.Combat
 
         // The Unit might be in water and the creature can not enter the water, but has range attack
         // in this case online = true, but accessible = false
-        bool IsAccessible()
+        private bool IsAccessible()
         {
             return iAccessible;
         }
@@ -389,10 +389,10 @@ namespace Game.Combat
 
         public new HostileReference Next() { return (HostileReference)base.Next(); }
 
-        float iThreat;
-        float iTempThreatModifier;                          // used for SPELL_AURA_MOD_TOTAL_THREAT
-        ObjectGuid iUnitGuid;
-        bool iOnline;
-        bool iAccessible;
+        private float iThreat;
+        private float iTempThreatModifier;                          // used for SPELL_AURA_MOD_TOTAL_THREAT
+        private ObjectGuid iUnitGuid;
+        private bool iOnline;
+        private bool iAccessible;
     }
 }

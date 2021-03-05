@@ -727,7 +727,7 @@ namespace Game.Entities
             }
         }
 
-        static void AddItemToUpdateQueueOf(Item item, Player player)
+        private static void AddItemToUpdateQueueOf(Item item, Player player)
         {
             if (item.IsInUpdateQueue())
                 return;
@@ -818,7 +818,7 @@ namespace Game.Entities
             }
         }
 
-        bool HasEnchantRequiredSkill(Player player)
+        private bool HasEnchantRequiredSkill(Player player)
         {
             // Check all enchants for required skill
             for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
@@ -836,7 +836,7 @@ namespace Game.Entities
             return true;
         }
 
-        uint GetEnchantRequiredLevel()
+        private uint GetEnchantRequiredLevel()
         {
             uint level = 0;
 
@@ -856,7 +856,7 @@ namespace Game.Entities
             return level;
         }
 
-        bool IsBoundByEnchant()
+        private bool IsBoundByEnchant()
         {
             // Check all enchants for soulbound
             for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
@@ -1256,7 +1256,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
+        private void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
         {
             var flags = GetUpdateFieldFlagsFor(target);
             var valuesMask = new UpdateMask((int)TypeId.Max);
@@ -1419,7 +1419,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool IsValidTransmogrificationTarget()
+        private bool IsValidTransmogrificationTarget()
         {
             var proto = GetTemplate();
             if (proto == null)
@@ -1441,7 +1441,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool HasStats()
+        private bool HasStats()
         {
             var proto = GetTemplate();
             var owner = GetOwner();
@@ -1454,7 +1454,7 @@ namespace Game.Entities
             return false;
         }
 
-        static bool HasStats(ItemInstance itemInstance, BonusData bonus)
+        private static bool HasStats(ItemInstance itemInstance, BonusData bonus)
         {
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
@@ -1465,7 +1465,7 @@ namespace Game.Entities
             return false;
         }
 
-        static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
+        private static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
         {
             if (proto.GetClass() == ItemClass.Weapon)
             {
@@ -1579,12 +1579,12 @@ namespace Game.Entities
             return true;
         }
 
-        uint GetBuyPrice(Player owner, out bool standardPrice)
+        private uint GetBuyPrice(Player owner, out bool standardPrice)
         {
             return GetBuyPrice(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner), out standardPrice);
         }
 
-        static uint GetBuyPrice(ItemTemplate proto, uint quality, uint itemLevel, out bool standardPrice)
+        private static uint GetBuyPrice(ItemTemplate proto, uint quality, uint itemLevel, out bool standardPrice)
         {
             standardPrice = true;
 
@@ -2047,7 +2047,7 @@ namespace Game.Entities
             return null;
         }
 
-        void AddArtifactPower(ArtifactPowerData artifactPower)
+        private void AddArtifactPower(ArtifactPowerData artifactPower)
         {
             var index = m_artifactPowerIdToIndex.Count;
             m_artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
@@ -2098,7 +2098,7 @@ namespace Game.Entities
             return purchasedRanks;
         }
 
-        void ApplyArtifactPowerEnchantmentBonuses(EnchantmentSlot slot, uint enchantId, bool apply, Player owner)
+        private void ApplyArtifactPowerEnchantmentBonuses(EnchantmentSlot slot, uint enchantId, bool apply, Player owner)
         {
             var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
             if (enchant != null)
@@ -2425,7 +2425,7 @@ namespace Game.Entities
         public ObjectGuid GetGiftCreator()     { return m_itemData.GiftCreator; }
         public void SetGiftCreator(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.GiftCreator), guid); }
 
-        void SetExpiration(uint expiration) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Expiration), expiration); }
+        private void SetExpiration(uint expiration) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Expiration), expiration); }
 
         public ItemBondingType GetBonding() { return _bonusData.Bonding; }
         public void SetBinding(bool val)
@@ -2473,7 +2473,7 @@ namespace Game.Entities
         public ushort GetPos() { return (ushort)(GetBagSlot() << 8 | GetSlot()); }
         public void SetContainer(Bag container) { m_container = container; }
 
-        bool IsInBag() { return m_container != null; }
+        private bool IsInBag() { return m_container != null; }
 
         public uint GetItemRandomBonusListId() { return m_randomBonusListId; }
         public uint GetEnchantmentId(EnchantmentSlot slot) { return m_itemData.Enchantment[(int)slot].ID; }
@@ -2631,21 +2631,21 @@ namespace Game.Entities
         public Loot loot;
         internal BonusData _bonusData;
 
-        ItemUpdateState uState;
-        uint m_paidExtendedCost;
-        ulong m_paidMoney;
-        ObjectGuid m_refundRecipient;
-        byte m_slot;
-        Bag m_container;
-        int uQueuePos;
-        string m_text;
-        bool mb_in_trade;
-        long m_lastPlayedTimeUpdate;
-        List<ObjectGuid> allowedGUIDs = new List<ObjectGuid>();
-        uint m_randomBonusListId;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
-        ObjectGuid m_childItem;
-        Dictionary<uint, ushort> m_artifactPowerIdToIndex = new Dictionary<uint, ushort>();
-        Array<uint> m_gemScalingLevels = new Array<uint>(ItemConst.MaxGemSockets);
+        private ItemUpdateState uState;
+        private uint m_paidExtendedCost;
+        private ulong m_paidMoney;
+        private ObjectGuid m_refundRecipient;
+        private byte m_slot;
+        private Bag m_container;
+        private int uQueuePos;
+        private string m_text;
+        private bool mb_in_trade;
+        private long m_lastPlayedTimeUpdate;
+        private List<ObjectGuid> allowedGUIDs = new List<ObjectGuid>();
+        private uint m_randomBonusListId;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
+        private ObjectGuid m_childItem;
+        private Dictionary<uint, ushort> m_artifactPowerIdToIndex = new Dictionary<uint, ushort>();
+        private Array<uint> m_gemScalingLevels = new Array<uint>(ItemConst.MaxGemSockets);
         #endregion
     }
 
@@ -2891,9 +2891,9 @@ namespace Game.Entities
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;
-        State _state;
+        private State _state;
 
-        struct State
+        private struct State
         {
             public int SuffixPriority;
             public int AppearanceModPriority;
@@ -2911,7 +2911,7 @@ namespace Game.Entities
         public byte CurrentRankWithBonus;
     }
 
-    class ArtifactData
+    internal class ArtifactData
     {
         public ulong Xp;
         public uint ArtifactAppearanceId;
@@ -2924,7 +2924,7 @@ namespace Game.Entities
         public Array<int> SelectedAzeritePowers = new Array<int>(SharedConst.MaxAzeriteEmpoweredTier);
     }
 
-    class ItemAdditionalLoadInfo
+    internal class ItemAdditionalLoadInfo
     {
         public ArtifactData Artifact;
         public AzeriteData AzeriteItem;

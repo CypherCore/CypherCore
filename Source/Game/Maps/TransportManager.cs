@@ -29,9 +29,9 @@ namespace Game.Maps
 {
     public class TransportManager : Singleton<TransportManager>
     {
-        TransportManager() { }
+        private TransportManager() { }
 
-        void Unload()
+        private void Unload()
         {
             _transportTemplates.Clear();
         }
@@ -96,7 +96,7 @@ namespace Game.Maps
                 AddPathRotationToTransport(rot.GameObjectsID, rot.TimeIndex, rot);
         }
 
-        void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
+        private void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
         {
             var pathId = goInfo.MoTransport.taxiPathID;
             var path = CliDB.TaxiPathNodesByPath[pathId];
@@ -512,9 +512,9 @@ namespace Game.Maps
             _transportAnimations[transportEntry].Rotations[timeSeg] = node;
         }
 
-        Dictionary<uint, TransportTemplate> _transportTemplates = new Dictionary<uint, TransportTemplate>();
-        MultiMap<uint, uint> _instanceTransports = new MultiMap<uint, uint>();
-        Dictionary<uint, TransportAnimation> _transportAnimations = new Dictionary<uint, TransportAnimation>();
+        private Dictionary<uint, TransportTemplate> _transportTemplates = new Dictionary<uint, TransportTemplate>();
+        private MultiMap<uint, uint> _instanceTransports = new MultiMap<uint, uint>();
+        private Dictionary<uint, TransportAnimation> _transportAnimations = new Dictionary<uint, TransportAnimation>();
     }
 
     public class SplineRawInitializer
@@ -537,7 +537,7 @@ namespace Game.Maps
             hi = points.Length - 2;
         }
 
-        List<Vector3> _points;
+        private List<Vector3> _points;
     }
 
     public class KeyFrame
@@ -599,7 +599,7 @@ namespace Game.Maps
 
     public class TransportAnimation
     {
-        TransportAnimationRecord GetAnimNode(uint time)
+        private TransportAnimationRecord GetAnimNode(uint time)
         {
             if (Path.Empty())
                 return null;
@@ -611,7 +611,7 @@ namespace Game.Maps
             return Path.First().Value;
         }
 
-        TransportRotationRecord GetAnimRotation(uint time)
+        private TransportRotationRecord GetAnimRotation(uint time)
         {
             return Rotations.LookupByKey(time);
         }

@@ -115,9 +115,9 @@ namespace Game.Movement
             return MovementGeneratorType.Confused;
         }
 
-        PathGenerator _path;
-        TimeTracker _timer;
-        Position _reference;
-        bool _interrupt;
+        private PathGenerator _path;
+        private TimeTracker _timer;
+        private Position _reference;
+        private bool _interrupt;
     }
 }

@@ -23,7 +23,7 @@ using Game.BattleGrounds;
 
 namespace Game.Arenas
 {
-    class RingofValorArena : Arena
+    internal class RingofValorArena : Arena
     {
         public RingofValorArena(BattlegroundTemplate battlegroundTemplate) : base(battlegroundTemplate)
         {
@@ -157,7 +157,7 @@ namespace Game.Arenas
             });
         }
 
-        void TogglePillarCollision(bool enable)
+        private void TogglePillarCollision(bool enable)
         {
             // Toggle visual pillars, pulley, gear, and collision based on previous state
             for (var i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.Gear2; ++i)
@@ -197,17 +197,17 @@ namespace Game.Arenas
             }
         }
 
-        EventMap _events;
+        private EventMap _events;
     }
 
-    struct RingofValorEvents
+    internal struct RingofValorEvents
     {
         public const int OpenFences = 0;
         public const int SwitchPillars = 1;
         public const int CloseFire = 2;
     }
 
-    struct RingofValorObjectTypes
+    internal struct RingofValorObjectTypes
     {
         public const int Buff1 = 1;
         public const int Buff2 = 2;
@@ -236,7 +236,7 @@ namespace Game.Arenas
         public const int Max = 21;
     }
 
-    struct RingofValorGameObjects
+    internal struct RingofValorGameObjects
     {
         public const uint Buff1 = 184663;
         public const uint Buff2 = 184664;

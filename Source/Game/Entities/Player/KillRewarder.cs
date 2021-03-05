@@ -26,18 +26,18 @@ namespace Game.Entities
 {
     public class KillRewarder
     {
-        Player _killer;
-        Unit _victim;
-        Group _group;
-        float _groupRate;
-        Player _maxNotGrayMember;
-        uint _count;
-        uint _sumLevel;
-        uint _xp;
-        bool _isFullXP;
-        byte _maxLevel;
-        bool _isBattleground;
-        bool _isPvP;
+        private Player _killer;
+        private Unit _victim;
+        private Group _group;
+        private float _groupRate;
+        private Player _maxNotGrayMember;
+        private uint _count;
+        private uint _sumLevel;
+        private uint _xp;
+        private bool _isFullXP;
+        private byte _maxLevel;
+        private bool _isBattleground;
+        private bool _isPvP;
 
         public KillRewarder(Player killer, Unit victim, bool isBattleground)
         {
@@ -107,7 +107,7 @@ namespace Game.Entities
             }
         }
 
-        void _InitGroupData()
+        private void _InitGroupData()
         {
             if (_group)
             {
@@ -143,7 +143,7 @@ namespace Game.Entities
                 _count = 1;
         }
 
-        void _InitXP(Player player)
+        private void _InitXP(Player player)
         {
             // Get initial value of XP for kill.
             // XP is given:
@@ -154,14 +154,14 @@ namespace Game.Entities
                 _xp = Formulas.XPGain(player, _victim, _isBattleground);
         }
 
-        void _RewardHonor(Player player)
+        private void _RewardHonor(Player player)
         {
             // Rewarded player must be alive.
             if (player.IsAlive())
                 player.RewardHonor(_victim, _count, -1, true);
         }
 
-        void _RewardXP(Player player, float rate)
+        private void _RewardXP(Player player, float rate)
         {
             var xp = _xp;
             if (_group)
@@ -192,14 +192,14 @@ namespace Game.Entities
             }
         }
 
-        void _RewardReputation(Player player, float rate)
+        private void _RewardReputation(Player player, float rate)
         {
             // 4.3. Give reputation (player must not be on BG).
             // Even dead players and corpses are rewarded.
             player.RewardReputation(_victim, rate);
         }
 
-        void _RewardKillCredit(Player player)
+        private void _RewardKillCredit(Player player)
         {
             // 4.4. Give kill credit (player must not be in group, or he must be alive or without corpse).
             if (!_group || player.IsAlive() || player.GetCorpse() == null)
@@ -213,7 +213,7 @@ namespace Game.Entities
             }
         }
 
-        void _RewardPlayer(Player player, bool isDungeon)
+        private void _RewardPlayer(Player player, bool isDungeon)
         {
             // 4. Reward player.
             if (!_isBattleground)
@@ -241,7 +241,7 @@ namespace Game.Entities
             }
         }
 
-        void _RewardGroup()
+        private void _RewardGroup()
         {
             if (_maxLevel != 0)
             {

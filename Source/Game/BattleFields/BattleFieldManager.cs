@@ -23,7 +23,7 @@ namespace Game.BattleFields
 {
     public class BattleFieldManager : Singleton<BattleFieldManager>
     {
-        BattleFieldManager() { }
+        private BattleFieldManager() { }
 
         public void InitBattlefield()
         {
@@ -122,7 +122,7 @@ namespace Game.BattleFields
             return null;
         }
 
-        ZoneScript GetZoneScript(uint zoneId)
+        private ZoneScript GetZoneScript(uint zoneId)
         {
             var bf = _battlefieldMap.LookupByKey(zoneId);
             if (bf != null)
@@ -145,11 +145,11 @@ namespace Game.BattleFields
 
         // contains all initiated battlefield events
         // used when initing / cleaning up
-        List<BattleField> _battlefieldSet = new List<BattleField>();
+        private List<BattleField> _battlefieldSet = new List<BattleField>();
         // maps the zone ids to an battlefield event
         // used in player event handling
-        Dictionary<uint, BattleField> _battlefieldMap = new Dictionary<uint, BattleField>();
+        private Dictionary<uint, BattleField> _battlefieldMap = new Dictionary<uint, BattleField>();
         // update interval
-        uint _updateTimer;
+        private uint _updateTimer;
     }
 }

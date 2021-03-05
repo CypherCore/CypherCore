@@ -29,10 +29,10 @@ namespace Game
 {
     public sealed class AccountManager : Singleton<AccountManager>
     {
-        const int MaxAccountLength = 16;
-        const int MaxEmailLength = 64;
+        private const int MaxAccountLength = 16;
+        private const int MaxEmailLength = 64;
 
-        AccountManager() { }
+        private AccountManager() { }
 
         public AccountOpResult CreateAccount(string username, string password, string email = "", uint bnetAccountId = 0, byte bnetIndex = 0)
         {
@@ -280,7 +280,7 @@ namespace Game
             return false;
         }
 
-        bool GetEmail(uint accountId, out string email)
+        private bool GetEmail(uint accountId, out string email)
         {
             email = "";
             var stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
@@ -340,7 +340,7 @@ namespace Game
         }
 
         [Obsolete]
-        string CalculateShaPassHash(string name, string password)
+        private string CalculateShaPassHash(string name, string password)
         {
             var sha = SHA1.Create();
             return sha.ComputeHash(Encoding.UTF8.GetBytes(name + ":" + password)).ToHexString();
@@ -507,7 +507,7 @@ namespace Game
             return hasPermission;
         }
 
-        void ClearRBAC()
+        private void ClearRBAC()
         {
             _permissions.Clear();
             _defaultPermissions.Clear();
@@ -520,8 +520,8 @@ namespace Game
 
         public Dictionary<uint, RBACPermission> GetRBACPermissionList() { return _permissions; }
 
-        Dictionary<uint, RBACPermission> _permissions = new Dictionary<uint, RBACPermission>();
-        MultiMap<byte, uint> _defaultPermissions = new MultiMap<byte, uint>();
+        private Dictionary<uint, RBACPermission> _permissions = new Dictionary<uint, RBACPermission>();
+        private MultiMap<byte, uint> _defaultPermissions = new MultiMap<byte, uint>();
     }
 
     public enum AccountOpResult

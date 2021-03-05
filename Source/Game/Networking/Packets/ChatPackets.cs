@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
         public ChatAddonMessageParams Params = new ChatAddonMessageParams();
     }
 
-    class ChatAddonMessageTargeted : ClientPacket
+    internal class ChatAddonMessageTargeted : ClientPacket
     {
         public ChatAddonMessageTargeted(WorldPacket packet) : base(packet) { }
 
@@ -175,7 +175,7 @@ namespace Game.Networking.Packets
             ChatText = message;
         }
 
-        void SetSender(WorldObject sender, Locale locale)
+        private void SetSender(WorldObject sender, Locale locale)
         {
             SenderGUID = sender.GetGUID();
 
@@ -335,7 +335,7 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class ChatPlayerNotfound : ServerPacket
+    internal class ChatPlayerNotfound : ServerPacket
     {
         public ChatPlayerNotfound(string name) : base(ServerOpcodes.ChatPlayerNotfound)
         {
@@ -348,10 +348,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Name);
         }
 
-        string Name;
+        private string Name;
     }
 
-    class ChatPlayerAmbiguous : ServerPacket
+    internal class ChatPlayerAmbiguous : ServerPacket
     {
         public ChatPlayerAmbiguous(string name) : base(ServerOpcodes.ChatPlayerAmbiguous)
         {
@@ -364,10 +364,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Name);
         }
 
-        string Name;
+        private string Name;
     }
 
-    class ChatRestricted : ServerPacket
+    internal class ChatRestricted : ServerPacket
     {
         public ChatRestricted(ChatRestrictionType reason) : base(ServerOpcodes.ChatRestricted)
         {
@@ -379,10 +379,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Reason);
         }
 
-        ChatRestrictionType Reason;
+        private ChatRestrictionType Reason;
     }
 
-    class ChatServerMessage : ServerPacket
+    internal class ChatServerMessage : ServerPacket
     {
         public ChatServerMessage() : base(ServerOpcodes.ChatServerMessage) { }
 
@@ -398,7 +398,7 @@ namespace Game.Networking.Packets
         public string StringParam = "";
     }
 
-    class ChatRegisterAddonPrefixes : ClientPacket
+    internal class ChatRegisterAddonPrefixes : ClientPacket
     {
         public ChatRegisterAddonPrefixes(WorldPacket packet) : base(packet) { }
 
@@ -413,14 +413,14 @@ namespace Game.Networking.Packets
         public string[] Prefixes = new string[64];
     }
 
-    class ChatUnregisterAllAddonPrefixes : ClientPacket
+    internal class ChatUnregisterAllAddonPrefixes : ClientPacket
     {
         public ChatUnregisterAllAddonPrefixes(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
     }
 
-    class DefenseMessage : ServerPacket
+    internal class DefenseMessage : ServerPacket
     {
         public DefenseMessage() : base(ServerOpcodes.DefenseMessage) { }
 
@@ -436,7 +436,7 @@ namespace Game.Networking.Packets
         public string MessageText = "";
     }
 
-    class ChatReportIgnored : ClientPacket
+    internal class ChatReportIgnored : ClientPacket
     {
         public ChatReportIgnored(WorldPacket packet) : base(packet) { }
 

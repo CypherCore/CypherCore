@@ -29,17 +29,18 @@ namespace Game.Combat
         {
             return iType;
         }
-        bool MatchesTypeMask(uint pMask)
+
+        private bool MatchesTypeMask(uint pMask)
         {
             return Convert.ToBoolean((uint)iType & pMask);
         }
 
-        void SetEventType(UnitEventTypes pType)
+        private void SetEventType(UnitEventTypes pType)
         {
             iType = pType;
         }
 
-        UnitEventTypes iType;
+        private UnitEventTypes iType;
     }
 
     public class ThreatRefStatusChangeEvent : UnitBaseEvent
@@ -72,12 +73,12 @@ namespace Game.Combat
             return iFValue;
         }
 
-        bool GetBValue()
+        private bool GetBValue()
         {
             return iBValue;
         }
 
-        void SetBValue(bool pValue)
+        private void SetBValue(bool pValue)
         {
             iBValue = pValue;
         }
@@ -92,15 +93,15 @@ namespace Game.Combat
             iThreatManager = pThreatManager;
         }
 
-        ThreatManager GetThreatManager()
+        private ThreatManager GetThreatManager()
         {
             return iThreatManager;
         }
 
-        float iFValue;
-        bool iBValue;
-        HostileReference iHostileReference;
-        ThreatManager iThreatManager;
+        private float iFValue;
+        private bool iBValue;
+        private HostileReference iHostileReference;
+        private ThreatManager iThreatManager;
     }
 
     public enum UnitEventTypes
