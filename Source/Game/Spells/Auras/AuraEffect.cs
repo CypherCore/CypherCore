@@ -2218,6 +2218,8 @@ namespace Game.Spells
                     return;
             }
 
+            target.SetCanTransitionBetweenSwimAndFly(apply);
+
             if (target.SetCanFly(apply))
                 if (!apply && !target.IsLevitating())
                     target.GetMotionMaster().MoveFall();
@@ -2681,6 +2683,8 @@ namespace Game.Spells
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
                 if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask) && (apply || (!target.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !target.HasAuraType(AuraType.Fly))))
                 {
+                    target.SetCanTransitionBetweenSwimAndFly(apply);
+
                     if (target.SetCanFly(apply))
                         if (!apply && !target.IsLevitating())
                             target.GetMotionMaster().MoveFall();
