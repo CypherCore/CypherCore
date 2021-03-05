@@ -3591,7 +3591,7 @@ namespace Game.Spells
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (m_powerCost.Any(cost => cost.Power == PowerType.Runes))
+            if (HasPowerTypeCost(PowerType.Runes))
                 castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
 
             SpellStart packet = new SpellStart();
@@ -3692,8 +3692,8 @@ namespace Game.Spells
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf; // should only be sent to self, but the current messaging doesn't make that possible
 
-            if ((m_caster.IsTypeId(TypeId.Player)) && (m_caster.GetClass() == Class.Deathknight) &&
-                m_powerCost.Any(cost => cost.Power == PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
+            if (m_caster.IsTypeId(TypeId.Player) && m_caster.GetClass() == Class.Deathknight &&
+                HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
             {
                 castFlags |= SpellCastFlags.NoGCD;                   // same as in SMSG_SPELL_START
                 castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
@@ -6502,6 +6502,11 @@ namespace Game.Spells
             SendChannelUpdate((uint)m_timer);
         }
 
+        bool HasPowerTypeCost(PowerType power)
+        {
+            return m_powerCost.Any(cost => cost.Power == power);
+        }
+        
         bool UpdatePointers()
         {
             if (m_originalCasterGUID == m_caster.GetGUID())
